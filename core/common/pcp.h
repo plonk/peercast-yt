@@ -102,6 +102,8 @@ static const ID4 PCP_CHAN_PKT_META	= "meta";
 
 static const ID4 PCP_CHAN_INFO			= "info";
 static const ID4 PCP_CHAN_INFO_TYPE		= "type";
+static const ID4 PCP_CHAN_INFO_STREAMTYPE		= "styp";
+static const ID4 PCP_CHAN_INFO_STREAMEXT		= "sext";
 static const ID4 PCP_CHAN_INFO_BITRATE	= "bitr";
 static const ID4 PCP_CHAN_INFO_GENRE	= "gnre";
 static const ID4 PCP_CHAN_INFO_NAME		= "name";

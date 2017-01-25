@@ -1020,7 +1020,7 @@ void ServMgr::saveSettings(const char *fn)
 				if (!c->sourceURL.isEmpty())
 					iniFile.writeStrValue("sourceURL",c->sourceURL.cstr());
 				iniFile.writeStrValue("sourceProtocol",ChanInfo::getProtocolStr(c->info.srcProtocol));
-				iniFile.writeStrValue("contentType",ChanInfo::getTypeStr(c->info.contentType));
+				iniFile.writeStrValue("contentType",c->info.getTypeStr());
 				iniFile.writeIntValue("bitrate",c->info.bitrate);
 				iniFile.writeStrValue("contactURL",c->info.url.cstr());
 				iniFile.writeStrValue("id",idstr);

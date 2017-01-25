@@ -1527,7 +1527,7 @@ void Servent::handshakeICY(Channel::SRC_TYPE type, bool isHTTP)
 	info.id = chanMgr->broadcastID;
 	info.id.encode(NULL,info.name.cstr(),loginMount.cstr(),info.bitrate);
 
-	LOG_DEBUG("Incoming source: %s : %s",info.name.cstr(),ChanInfo::getTypeStr(info.contentType));
+	LOG_DEBUG("Incoming source: %s : %s",info.name.cstr(),info.getTypeStr());
 
 
 	if (isHTTP)

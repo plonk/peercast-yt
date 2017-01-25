@@ -1072,33 +1072,13 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 			{
 				switch (chanInfo.contentType)
 				{
-					case ChanInfo::T_OGG:
-						sock->writeLineF("%s %s",HTTP_HS_CONTENT,MIME_XOGG);
-						break;
-					case ChanInfo::T_MP3:
-						sock->writeLineF("%s %s",HTTP_HS_CONTENT,MIME_MP3);
-						break;
 					case ChanInfo::T_MOV:
 						sock->writeLine("Connection: close");
 						sock->writeLine("Content-Length: 10000000");
 						sock->writeLineF("%s %s",HTTP_HS_CONTENT,MIME_MOV);
 						break;
-					case ChanInfo::T_MPG:
-						sock->writeLineF("%s %s",HTTP_HS_CONTENT,MIME_MPG);
-						break;
-					case ChanInfo::T_NSV:
-						sock->writeLineF("%s %s",HTTP_HS_CONTENT,MIME_NSV);
-						break;
-					case ChanInfo::T_ASX:
-						sock->writeLineF("%s %s",HTTP_HS_CONTENT,MIME_ASX);
-						break;
-					case ChanInfo::T_WMA:
-						sock->writeLineF("%s %s",HTTP_HS_CONTENT,MIME_WMA);
-						break;
-					case ChanInfo::T_WMV:
-						sock->writeLineF("%s %s",HTTP_HS_CONTENT,MIME_WMV);
-						break;
 				}
+				sock->writeLineF("%s %s",HTTP_HS_CONTENT,chanInfo.getMIMEType());
 			} else if (outputProtocol == ChanInfo::SP_MMS)
 			{
 				sock->writeLine("Server: Rex/9.0.0.2980");

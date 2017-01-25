@@ -148,9 +148,13 @@ public:
 	unsigned int getAge();
 	bool	isActive() {return id.isSet();}
 	bool	isPrivate() {return bcID.getFlags() & 1;}
+	const	char *getTypeStr();
+	const	char *getTypeExt();
+	const	char *getMIMEType();
 	static	const	char *getTypeStr(TYPE);
 	static	const	char *getProtocolStr(PROTOCOL);
 	static	const	char *getTypeExt(TYPE);
+	static	const	char *getMIMEType(TYPE);
 	static	TYPE		getTypeFromStr(const char *str);
 	static	PROTOCOL	getProtocolFromStr(const char *str);
 
@@ -158,6 +162,7 @@ public:
 	GnuID	id,bcID;
 	int		bitrate;
 	TYPE	contentType;
+	::String	contentTypeStr,streamType,streamExt;
 	PROTOCOL	srcProtocol;
 	unsigned int lastPlayStart,lastPlayEnd;
 	unsigned int numSkips;
