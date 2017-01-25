@@ -740,12 +740,12 @@ void LogBuffer::write(const char *str, TYPE t)
 }
 
 // -----------------------------------
-char *getCGIarg(const char *str, const char *arg)
+const char *getCGIarg(const char *str, const char *arg)
 {
 	if (!str)
 		return NULL;
 
-	char *s = strstr(str,arg);
+	const char *s = strstr(str,arg);
 
 	if (!s)
 		return NULL;

@@ -31,7 +31,6 @@
 
 #ifdef __APPLE__ 
 #include <netinet/in_systm.h> // for n_long definition
-#define MSG_NOSIGNAL 0        // doesn't seem to be defined under OS X
 #endif
 
 #include <netinet/ip.h>
@@ -39,6 +38,11 @@
 
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
+
+#ifndef MSG_NOSIGNAL
+#define MSG_NOSIGNAL 0
+#endif
+
 
 // --------------------------------------------------
 void UClientSocket::init()

@@ -440,7 +440,7 @@ int Channel::handshakeFetch()
 		if (http.isHeader(PCX_HS_POS))
 			streamPos = atoi(arg);
 		else
-			Servent::readICYHeader(http, info, NULL);
+			Servent::readICYHeader(http, info, NULL, 0);
 
 		LOG_CHANNEL("Channel fetch: %s",http.cmdLine);
 	}

@@ -176,7 +176,7 @@ public:
 	char	*getArgStr();
 	int		getArgInt();
 
-	void	getAuthUserPass(char *, char *);
+	void	getAuthUserPass(char *, char *, size_t, size_t);
 
 	char	cmdLine[8192],*arg;
 

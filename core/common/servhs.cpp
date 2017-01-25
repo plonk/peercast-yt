@@ -150,10 +150,10 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 			if (!isAllowed(ALLOW_BROADCAST))
 				throw HTTPException(HTTP_SC_UNAVAILABLE,503);
 
-			char *pwdArg = getCGIarg(fn,"pass=");
-			char *songArg = getCGIarg(fn,"song=");
-			char *mountArg = getCGIarg(fn,"mount=");
-			char *urlArg = getCGIarg(fn,"url=");
+			const char *pwdArg = getCGIarg(fn,"pass=");
+			const char *songArg = getCGIarg(fn,"song=");
+			const char *mountArg = getCGIarg(fn,"mount=");
+			const char *urlArg = getCGIarg(fn,"url=");
 
 			if (pwdArg && songArg)
 			{
@@ -560,7 +560,7 @@ bool Servent::handshakeAuth(HTTP &http,const char *args,bool local)
 	char user[64],pass[64];
 	user[0] = pass[0] = 0;
 
-	char *pwd  = getCGIarg(args, "pass=");
+	const char *pwd  = getCGIarg(args, "pass=");
 
 	if ((pwd) && strlen(servMgr->password))
 	{
@@ -587,7 +587,7 @@ bool Servent::handshakeAuth(HTTP &http,const char *args,bool local)
 		{
 			case ServMgr::AUTH_HTTPBASIC:
 				if (http.isHeader("Authorization"))
-					http.getAuthUserPass(user,pass);
+					http.getAuthUserPass(user,pass, sizeof(user), sizeof(pass));
 				break;
 			case ServMgr::AUTH_COOKIE:
 				if (http.isHeader("Cookie"))
@@ -671,7 +671,7 @@ void Servent::handshakeCMD(char *cmd)
 	{
 		if (cmpCGIarg(cmd,"cmd=","redirect"))
 		{
-			char *j = getCGIarg(cmd,"url=");
+			const char *j = getCGIarg(cmd,"url=");
 			if (j)
 			{
 				termArgs(cmd);
@@ -1079,7 +1079,7 @@ void Servent::handshakeCMD(char *cmd)
 					index++;
 				}
 
-				char *findArg = getCGIarg(cmd,"keywords=");
+				const char *findArg = getCGIarg(cmd,"keywords=");
 
 				if (hasCGIarg(cmd,"relay"))
 				{
@@ -1405,7 +1405,7 @@ void Servent::handshakeXML()
 
 }
 // -----------------------------------
-void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd)
+void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd, size_t plen)
 {
 	char *arg = http.getArgStr();
 	if (!arg) return;
@@ -1429,8 +1429,10 @@ void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd)
 		info.desc.set(arg,String::T_ASCII);
 		info.desc.convertTo(String::T_UNICODE);
 
-	}else if (http.isHeader("Authorization"))
-		http.getAuthUserPass(NULL,pwd);
+	}else if (http.isHeader("Authorization")){
+		if(pwd)
+			http.getAuthUserPass(NULL,pwd, 0, plen);
+    }
 	else if (http.isHeader(PCX_HS_CHANNELID))
 		info.id.fromStr(arg);
 	else if (http.isHeader("ice-password"))
@@ -1501,7 +1503,7 @@ void Servent::handshakeICY(Channel::SRC_TYPE type, bool isHTTP)
 	while (http.nextHeader())
 	{
 		LOG_DEBUG("ICY %s",http.cmdLine);
-		readICYHeader(http,info,loginPassword.cstr());
+		readICYHeader(http,info,loginPassword.cstr(), String::MAX_LEN);
 	}
 
 

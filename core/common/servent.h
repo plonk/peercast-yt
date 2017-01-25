@@ -206,7 +206,7 @@ public:
 	void	sendPCPChannel();
 	void	checkPCPComms(Channel *, AtomStream &);
 
-	static void	readICYHeader(HTTP &, ChanInfo &, char *);
+	static void	readICYHeader(HTTP &, ChanInfo &, char *, size_t);
 	bool	canStream(Channel *);
 
 	bool	isConnected() {return status == S_CONNECTED;}

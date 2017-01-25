@@ -171,7 +171,7 @@ int URLSource::getSourceRate()
 				LOG_CHANNEL("Fetch HTTP: %s",http.cmdLine);
 
 				ChanInfo tmpInfo = ch->info;
-				Servent::readICYHeader(http,ch->info,NULL);
+				Servent::readICYHeader(http,ch->info,NULL, 0);
 
 				if (!tmpInfo.name.isEmpty())
 					ch->info.name = tmpInfo.name;
