@@ -1,0 +1,554 @@
+<?xml version="1.0" standalone="yes"?>
+<object class="NSIBObjectData">
+  <string name="targetFramework">IBCarbonFramework</string>
+  <object name="rootObject" class="NSCustomObject" id="1">
+    <string name="customClass">NSApplication</string>
+  </object>
+  <array count="54" name="allObjects">
+    <object class="IBCarbonMenu" id="29">
+      <string name="title">main</string>
+      <array count="3" name="items">
+        <object class="IBCarbonMenuItem" id="185">
+          <string name="title">PeerCast</string>
+          <object name="submenu" class="IBCarbonMenu" id="184">
+            <string name="title">PeerCast</string>
+            <array count="1" name="items">
+              <object class="IBCarbonMenuItem" id="187">
+                <string name="title">About PeerCast</string>
+                <int name="keyEquivalentModifier">0</int>
+                <ostype name="command">abou</ostype>
+              </object>
+            </array>
+            <string name="name">_NSAppleMenu</string>
+          </object>
+        </object>
+        <object class="IBCarbonMenuItem" id="192">
+          <string name="title">Window</string>
+          <object name="submenu" class="IBCarbonMenu" id="195">
+            <string name="title">Window</string>
+            <array count="6" name="items">
+              <object class="IBCarbonMenuItem" id="197">
+                <string name="title">Zoom Window</string>
+                <ostype name="command">zoom</ostype>
+              </object>
+              <object class="IBCarbonMenuItem" id="190">
+                <boolean name="dynamic">TRUE</boolean>
+                <string name="title">Minimize Window</string>
+                <string name="keyEquivalent">m</string>
+                <ostype name="command">mini</ostype>
+              </object>
+              <object class="IBCarbonMenuItem" id="191">
+                <boolean name="dynamic">TRUE</boolean>
+                <string name="title">Minimize All Windows</string>
+                <string name="keyEquivalent">m</string>
+                <int name="keyEquivalentModifier">1572864</int>
+                <ostype name="command">mina</ostype>
+              </object>
+              <object class="IBCarbonMenuItem" id="194">
+                <boolean name="separator">TRUE</boolean>
+              </object>
+              <object class="IBCarbonMenuItem" id="196">
+                <boolean name="dynamic">TRUE</boolean>
+                <string name="title">Bring All to Front</string>
+                <ostype name="command">bfrt</ostype>
+              </object>
+              <object class="IBCarbonMenuItem" id="193">
+                <boolean name="dynamic">TRUE</boolean>
+                <string name="title">Arrange in Front</string>
+                <int name="keyEquivalentModifier">1572864</int>
+                <ostype name="command">frnt</ostype>
+              </object>
+            </array>
+            <string name="name">_NSWindowsMenu</string>
+          </object>
+        </object>
+        <object class="IBCarbonMenuItem" id="377">
+          <boolean name="updateSingleItem">TRUE</boolean>
+          <string name="title">Help</string>
+          <object name="submenu" class="IBCarbonMenu" id="375">
+            <string name="title">Help</string>
+            <array count="1" name="items">
+              <object class="IBCarbonMenuItem" id="376">
+                <boolean name="dynamic">TRUE</boolean>
+                <string name="title">Peercast Help</string>
+                <string name="keyEquivalent">?</string>
+                <ostype name="command">PHLP</ostype>
+              </object>
+            </array>
+          </object>
+        </object>
+      </array>
+      <string name="name">_NSMainMenu</string>
+    </object>
+    <object class="IBCarbonWindow" id="166">
+      <string name="windowRect">51 23 608 845 </string>
+      <string name="title">PeerCast</string>
+      <object name="rootControl" class="IBCarbonRootControl" id="167">
+        <string name="bounds">0 0 557 822 </string>
+        <string name="viewFrame">0 0 822 557 </string>
+        <array count="2" name="subviews">
+          <object class="IBCarbonRoundButton" id="214">
+            <string name="bounds">517 20 537 40 </string>
+            <string name="viewFrame">20 517 20 20 </string>
+            <int name="controlID">101</int>
+            <boolean name="enabled">FALSE</boolean>
+            <object name="layoutInfo" class="IBCarbonHILayoutInfo">
+              <int name="bindingLeftKind">1</int>
+              <int name="bindingBottomKind">2</int>
+            </object>
+          </object>
+          <object class="IBCarbonTab" id="268">
+            <string name="bounds">5 20 509 802 </string>
+            <string name="viewFrame">20 5 782 504 </string>
+            <array count="2" name="subviews">
+              <object class="IBCarbonUserPane" id="267">
+                <string name="bounds">42 20 509 802 </string>
+                <string name="viewFrame">0 37 782 467 </string>
+                <array count="5" name="subviews">
+                  <object class="IBCarbonGroupBox" id="303">
+                    <string name="bounds">48 40 206 320 </string>
+                    <string name="viewFrame">20 6 280 158 </string>
+                    <array count="10" name="subviews">
+                      <object class="IBCarbonStaticText" id="304">
+                        <string name="bounds">102 190 118 304 </string>
+                        <string name="viewFrame">150 54 114 16 </string>
+                        <ostype name="controlSignature">PCST</ostype>
+                        <int name="controlID">1003</int>
+                        <string name="title">0</string>
+                      </object>
+                      <object class="IBCarbonStaticText" id="305">
+                        <string name="bounds">126 56 142 170 </string>
+                        <string name="viewFrame">16 78 114 16 </string>
+                        <string name="title">CIN / COUT</string>
+                      </object>
+                      <object class="IBCarbonStaticText" id="306">
+                        <string name="bounds">150 56 166 170 </string>
+                        <string name="viewFrame">16 102 114 16 </string>
+                        <string name="title">PGNU</string>
+                      </object>
+                      <object class="IBCarbonStaticText" id="307">
+                        <string name="bounds">78 190 94 304 </string>
+                        <string name="viewFrame">150 30 114 16 </string>
+                        <ostype name="controlSignature">PCST</ostype>
+                        <int name="controlID">1002</int>
+                        <string name="title">0</string>
+                      </object>
+                      <object class="IBCarbonStaticText" id="308">
+                        <string name="bounds">102 56 118 170 </string>
+                        <string name="viewFrame">16 54 114 16 </string>
+                        <string name="title">Relay</string>
+                      </object>
+                      <object class="IBCarbonStaticText" id="309">
+                        <string name="bounds">78 56 94 170 </string>
+                        <string name="viewFrame">16 30 114 16 </string>
+                        <string name="title">Direct</string>
+                      </object>
+                      <object class="IBCarbonStaticText" id="310">
+                        <string name="bounds">126 190 142 304 </string>
+                        <string name="viewFrame">150 78 114 16 </string>
+                        <ostype name="controlSignature">PCST</ostype>
+                        <int name="controlID">1004</int>
+                        <string name="title">0</string>
+                      </object>
+                      <object class="IBCarbonStaticText" id="311">
+                        <string name="bounds">150 190 166 304 </string>
+                        <string name="viewFrame">150 102 114 16 </string>
+                        <ostype name="controlSignature">PCST</ostype>
+                        <int name="controlID">1005</int>
+                        <string name="title">0</string>
+                      </object>
+                      <object class="IBCarbonStaticText" id="352">
+                        <string name="bounds">174 56 190 170 </string>
+                        <string name="viewFrame">16 126 114 16 </string>
+                        <string name="title">Incoming</string>
+                      </object>
+                      <object class="IBCarbonStaticText" id="353">
+                        <string name="bounds">174 190 190 304 </string>
+                        <string name="viewFrame">150 126 114 16 </string>
+                        <ostype name="controlSignature">PCST</ostype>
+                        <int name="controlID">1006</int>
+                        <string name="title">0</string>
+                      </object>
+                    </array>
+                    <string name="title">Connections</string>
+                  </object>
+                  <object class="IBCarbonGroupBox" id="325">
+                    <string name="bounds">212 40 489 782 </string>
+                    <string name="viewFrame">20 170 742 277 </string>
+                    <array count="4" name="subviews">
+                      <object class="IBCarbonDBListView" id="326">
+                        <string name="bounds">267 60 469 762 </string>
+                        <string name="viewFrame">20 55 702 202 </string>
+                        <ostype name="controlSignature">PCRE</ostype>
+                        <int name="controlID">1000</int>
+                        <int name="selectionFlags">3</int>
+                        <boolean name="showFocusRing">FALSE</boolean>
+                        <array count="7" name="listViewColumns">
+                          <object class="IBCarbonDBListViewColumn">
+                            <ostype name="propertyID">CHAN</ostype>
+                            <int name="propertyFlags">327680</int>
+                            <int name="sortOrder">1</int>
+                            <int name="maxWidth">400</int>
+                            <string name="titleString">Channel</string>
+                          </object>
+                          <object class="IBCarbonDBListViewColumn">
+                            <ostype name="propertyID">BITR</ostype>
+                            <int name="propertyFlags">262144</int>
+                            <int name="sortOrder">1</int>
+                            <int name="maxWidth">190</int>
+                            <string name="titleString">Bitrate(kb/s)</string>
+                          </object>
+                          <object class="IBCarbonDBListViewColumn">
+                            <ostype name="propertyID">STRM</ostype>
+                            <int name="propertyFlags">262144</int>
+                            <int name="sortOrder">1</int>
+                            <string name="titleString">Stream</string>
+                          </object>
+                          <object class="IBCarbonDBListViewColumn">
+                            <ostype name="propertyID">TRLY</ostype>
+                            <int name="propertyFlags">262144</int>
+                            <int name="sortOrder">1</int>
+                            <int name="maxWidth">140</int>
+                            <string name="titleString">T. Relays</string>
+                          </object>
+                          <object class="IBCarbonDBListViewColumn">
+                            <ostype name="propertyID">LRLY</ostype>
+                            <int name="propertyFlags">262144</int>
+                            <int name="sortOrder">1</int>
+                            <int name="maxWidth">140</int>
+                            <string name="titleString">L. Relays</string>
+                          </object>
+                          <object class="IBCarbonDBListViewColumn">
+                            <ostype name="propertyID">STAT</ostype>
+                            <int name="propertyFlags">262144</int>
+                            <int name="sortOrder">1</int>
+                            <int name="maxWidth">150</int>
+                            <string name="titleString">Status</string>
+                          </object>
+                          <object class="IBCarbonDBListViewColumn">
+                            <ostype name="propertyID">KEEP</ostype>
+                            <ostype name="propertyType">chbx</ostype>
+                            <int name="propertyFlags">0</int>
+                            <int name="sortOrder">1</int>
+                            <string name="titleString">Keep</string>
+                          </object>
+                        </array>
+                      </object>
+                      <object class="IBCarbonButton" id="327">
+                        <string name="bounds">241 669 258 761 </string>
+                        <string name="viewFrame">629 29 92 17 </string>
+                        <boolean name="small">TRUE</boolean>
+                        <int name="controlSize">1</int>
+                        <string name="title">Yellow Pages</string>
+                        <ostype name="command">YPBT</ostype>
+                      </object>
+                      <object class="IBCarbonButton" id="328">
+                        <string name="bounds">241 61 258 131 </string>
+                        <string name="viewFrame">21 29 70 17 </string>
+                        <ostype name="controlSignature">RLBT</ostype>
+                        <int name="controlID">1000</int>
+                        <boolean name="enabled">FALSE</boolean>
+                        <boolean name="small">TRUE</boolean>
+                        <int name="controlSize">1</int>
+                        <string name="title">Bump</string>
+                        <ostype name="command">BUMP</ostype>
+                      </object>
+                      <object class="IBCarbonButton" id="329">
+                        <string name="bounds">241 141 258 217 </string>
+                        <string name="viewFrame">101 29 76 17 </string>
+                        <ostype name="controlSignature">RLBT</ostype>
+                        <int name="controlID">1001</int>
+                        <boolean name="enabled">FALSE</boolean>
+                        <boolean name="small">TRUE</boolean>
+                        <int name="controlSize">1</int>
+                        <string name="title">Comment</string>
+                        <ostype name="command">CMNT</ostype>
+                      </object>
+                    </array>
+                    <string name="title">Relays</string>
+                  </object>
+                  <object class="IBCarbonStaticText" id="354">
+                    <string name="bounds">190 344 206 398 </string>
+                    <string name="viewFrame">324 148 54 16 </string>
+                    <string name="title">Uptime</string>
+                  </object>
+                  <object class="IBCarbonStaticText" id="355">
+                    <string name="bounds">190 406 206 782 </string>
+                    <string name="viewFrame">386 148 376 16 </string>
+                    <ostype name="controlSignature">PCST</ostype>
+                    <int name="controlID">1001</int>
+                    <string name="title">0</string>
+                  </object>
+                  <object class="IBCarbonBevelButton" id="379">
+                    <string name="bounds">62 738 104 782 </string>
+                    <string name="viewFrame">718 20 44 42 </string>
+                    <ostype name="controlSignature">PCST</ostype>
+                    <int name="controlID">1007</int>
+                    <ostype name="command">UPDT</ostype>
+                    <string name="helpTagText">There is a new version available, please click here to upgrade your client.</string>
+                    <boolean name="rounded">TRUE</boolean>
+                  </object>
+                </array>
+                <ostype name="controlSignature">PCTB</ostype>
+                <int name="controlID">1001</int>
+                <string name="title">Channels</string>
+                <int name="featureBits">2</int>
+              </object>
+              <object class="IBCarbonUserPane" id="270">
+                <string name="bounds">42 20 509 802 </string>
+                <string name="viewFrame">0 37 782 467 </string>
+                <array count="1" name="subviews">
+                  <object class="IBCarbonGroupBox" id="349">
+                    <string name="bounds">188 236 363 587 </string>
+                    <string name="viewFrame">216 146 351 175 </string>
+                    <array count="9" name="subviews">
+                      <object class="IBCarbonStaticText" id="340">
+                        <string name="bounds">266 293 282 407 </string>
+                        <string name="viewFrame">57 78 114 16 </string>
+                        <string name="title">Password</string>
+                      </object>
+                      <object class="IBCarbonEditText" id="341">
+                        <string name="bounds">267 418 283 527 </string>
+                        <string name="viewFrame">182 79 109 16 </string>
+                        <ostype name="controlSignature">PCCG</ostype>
+                        <int name="controlID">1002</int>
+                        <boolean name="isPassword">TRUE</boolean>
+                        <boolean name="isUnicode">TRUE</boolean>
+                      </object>
+                      <object class="IBCarbonButton" id="343">
+                        <string name="bounds">332 376 352 446 </string>
+                        <string name="viewFrame">140 144 70 20 </string>
+                        <ostype name="controlSignature">PCCG</ostype>
+                        <int name="controlID">1004</int>
+                        <string name="title">Save</string>
+                        <ostype name="command">save</ostype>
+                      </object>
+                      <object class="IBCarbonStaticText" id="344">
+                        <string name="bounds">206 293 222 407 </string>
+                        <string name="viewFrame">57 18 114 16 </string>
+                        <string name="title">YP. Address</string>
+                      </object>
+                      <object class="IBCarbonEditText" id="345">
+                        <string name="bounds">207 418 223 527 </string>
+                        <string name="viewFrame">182 19 109 16 </string>
+                        <ostype name="controlSignature">PCCG</ostype>
+                        <int name="controlID">1000</int>
+                        <boolean name="isUnicode">TRUE</boolean>
+                      </object>
+                      <object class="IBCarbonStaticText" id="346">
+                        <string name="bounds">236 293 252 407 </string>
+                        <string name="viewFrame">57 48 114 16 </string>
+                        <string name="title">DJ Message</string>
+                      </object>
+                      <object class="IBCarbonEditText" id="347">
+                        <string name="bounds">237 418 253 527 </string>
+                        <string name="viewFrame">182 49 109 16 </string>
+                        <ostype name="controlSignature">PCCG</ostype>
+                        <int name="controlID">1001</int>
+                        <boolean name="isUnicode">TRUE</boolean>
+                      </object>
+                      <object class="IBCarbonStaticText" id="348">
+                        <string name="bounds">296 293 312 407 </string>
+                        <string name="viewFrame">57 108 114 16 </string>
+                        <string name="title">Max. Relays</string>
+                      </object>
+                      <object class="IBCarbonEditText" id="350">
+                        <string name="bounds">297 418 313 527 </string>
+                        <string name="viewFrame">182 109 109 16 </string>
+                        <ostype name="controlSignature">PCCG</ostype>
+                        <int name="controlID">1003</int>
+                        <boolean name="isUnicode">TRUE</boolean>
+                      </object>
+                    </array>
+                  </object>
+                </array>
+                <ostype name="controlSignature">PCTB</ostype>
+                <int name="controlID">1002</int>
+                <int name="featureBits">2</int>
+              </object>
+            </array>
+            <ostype name="controlSignature">PCTT</ostype>
+            <int name="controlID">1000</int>
+            <object name="layoutInfo" class="IBCarbonHILayoutInfo">
+              <int name="bindingTopKind">1</int>
+              <int name="bindingLeftKind">1</int>
+              <int name="bindingBottomKind">2</int>
+              <int name="bindingRightKind">2</int>
+            </object>
+            <array count="2" name="tabItems">
+              <dictionary count="4">
+                <string>contentResID</string>
+                <string>0</string>
+                <string>tabEnabled</string>
+                <string>1</string>
+                <string>tabName</string>
+                <string>Channels</string>
+                <string>userPane</string>
+                <reference idRef="267"/>
+              </dictionary>
+              <dictionary count="4">
+                <string>contentResID</string>
+                <string>0</string>
+                <string>tabEnabled</string>
+                <string>1</string>
+                <string>tabName</string>
+                <string>Settings</string>
+                <string>userPane</string>
+                <reference idRef="270"/>
+              </dictionary>
+            </array>
+          </object>
+        </array>
+      </object>
+      <boolean name="receiveUpdates">FALSE</boolean>
+      <boolean name="hasCloseBox">FALSE</boolean>
+      <boolean name="hasHorizontalZoom">FALSE</boolean>
+      <boolean name="isResizable">FALSE</boolean>
+      <boolean name="hasVerticalZoom">FALSE</boolean>
+      <boolean name="compositing">TRUE</boolean>
+    </object>
+    <reference idRef="167"/>
+    <reference idRef="184"/>
+    <reference idRef="185"/>
+    <reference idRef="187"/>
+    <reference idRef="190"/>
+    <reference idRef="191"/>
+    <reference idRef="192"/>
+    <reference idRef="193"/>
+    <reference idRef="194"/>
+    <reference idRef="195"/>
+    <reference idRef="196"/>
+    <reference idRef="197"/>
+    <reference idRef="214"/>
+    <reference idRef="267"/>
+    <reference idRef="268"/>
+    <reference idRef="270"/>
+    <reference idRef="303"/>
+    <reference idRef="304"/>
+    <reference idRef="305"/>
+    <reference idRef="306"/>
+    <reference idRef="307"/>
+    <reference idRef="308"/>
+    <reference idRef="309"/>
+    <reference idRef="310"/>
+    <reference idRef="311"/>
+    <object class="IBCarbonStaticText" id="312">
+      <string name="bounds">-7627 -10648 -7611 -10219 </string>
+      <string name="viewFrame">167 -134457 429 16 </string>
+      <ostype name="controlSignature">PCST</ostype>
+      <int name="controlID">1001</int>
+      <string name="title">Uptime</string>
+    </object>
+    <object class="IBCarbonStaticText" id="313">
+      <string name="bounds">-11322 -10766 -11306 -10656 </string>
+      <string name="viewFrame">49 -269224 110 16 </string>
+      <string name="title">Running Time</string>
+    </object>
+    <object class="IBCarbonStaticText" id="314">
+      <string name="bounds">-11322 -10648 -11306 -10219 </string>
+      <string name="viewFrame">167 -269224 429 16 </string>
+      <ostype name="controlSignature">PCST</ostype>
+      <int name="controlID">1001</int>
+      <string name="title">Uptime</string>
+    </object>
+    <object class="IBCarbonStaticText" id="315">
+      <string name="bounds">-11322 -10766 -11306 -10656 </string>
+      <string name="viewFrame">49 -269224 110 16 </string>
+      <string name="title">Running Time</string>
+    </object>
+    <reference idRef="325"/>
+    <reference idRef="326"/>
+    <reference idRef="327"/>
+    <reference idRef="328"/>
+    <reference idRef="329"/>
+    <reference idRef="340"/>
+    <reference idRef="341"/>
+    <reference idRef="343"/>
+    <reference idRef="344"/>
+    <reference idRef="345"/>
+    <reference idRef="346"/>
+    <reference idRef="347"/>
+    <reference idRef="348"/>
+    <reference idRef="349"/>
+    <reference idRef="350"/>
+    <reference idRef="352"/>
+    <reference idRef="353"/>
+    <reference idRef="354"/>
+    <reference idRef="355"/>
+    <reference idRef="375"/>
+    <reference idRef="376"/>
+    <reference idRef="377"/>
+    <reference idRef="379"/>
+  </array>
+  <array count="54" name="allParents">
+    <reference idRef="1"/>
+    <reference idRef="1"/>
+    <reference idRef="166"/>
+    <reference idRef="185"/>
+    <reference idRef="29"/>
+    <reference idRef="184"/>
+    <reference idRef="195"/>
+    <reference idRef="195"/>
+    <reference idRef="29"/>
+    <reference idRef="195"/>
+    <reference idRef="195"/>
+    <reference idRef="192"/>
+    <reference idRef="195"/>
+    <reference idRef="195"/>
+    <reference idRef="167"/>
+    <reference idRef="268"/>
+    <reference idRef="167"/>
+    <reference idRef="268"/>
+    <reference idRef="267"/>
+    <reference idRef="303"/>
+    <reference idRef="303"/>
+    <reference idRef="303"/>
+    <reference idRef="303"/>
+    <reference idRef="303"/>
+    <reference idRef="303"/>
+    <reference idRef="303"/>
+    <reference idRef="303"/>
+    <reference idRef="267"/>
+    <reference idRef="267"/>
+    <reference idRef="267"/>
+    <reference idRef="267"/>
+    <reference idRef="267"/>
+    <reference idRef="325"/>
+    <reference idRef="325"/>
+    <reference idRef="325"/>
+    <reference idRef="325"/>
+    <reference idRef="349"/>
+    <reference idRef="349"/>
+    <reference idRef="349"/>
+    <reference idRef="349"/>
+    <reference idRef="349"/>
+    <reference idRef="349"/>
+    <reference idRef="349"/>
+    <reference idRef="349"/>
+    <reference idRef="270"/>
+    <reference idRef="349"/>
+    <reference idRef="303"/>
+    <reference idRef="303"/>
+    <reference idRef="267"/>
+    <reference idRef="267"/>
+    <reference idRef="377"/>
+    <reference idRef="375"/>
+    <reference idRef="29"/>
+    <reference idRef="267"/>
+  </array>
+  <dictionary count="6" name="nameTable">
+    <string>Files Owner</string>
+    <reference idRef="1"/>
+    <string>ListView</string>
+    <reference idRef="326"/>
+    <string>MainWindow</string>
+    <reference idRef="166"/>
+    <string>MenuBar</string>
+    <reference idRef="29"/>
+    <string>NSCustomView</string>
+    <reference idRef="379"/>
+    <string>NSCustomView1</string>
+    <reference idRef="214"/>
+  </dictionary>
+  <unsigned_int name="nextObjectID">380</unsigned_int>
+</object>

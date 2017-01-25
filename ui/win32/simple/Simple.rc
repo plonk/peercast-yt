@@ -1,0 +1,314 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+// Generated Help ID header file
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "resource.hm"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "windows.h"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+#include "resource.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_SIMPLE              ICON    DISCARDABLE     "Simple.ICO"
+IDI_SMALL2              ICON    DISCARDABLE     "small1.ico"
+IDI_SMALL               ICON    DISCARDABLE     "small3.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDC_SIMPLE MENU DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "E&xit",                       IDM_EXIT
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About ...",                  IDM_ABOUT
+    END
+    POPUP "Settings"
+    BEGIN
+        MENUITEM "GUI",                         IDM_SETTINGS_GUI
+    END
+END
+
+IDR_TRAYMENU MENU DISCARDABLE 
+BEGIN
+    POPUP "popup"
+    BEGIN
+        MENUITEM "About",                       ID_POPUP_ABOUT
+        MENUITEM "Help",                        ID_POPUP_HELP
+        MENUITEM SEPARATOR
+        POPUP "Popup Messages"
+        BEGIN
+            MENUITEM "PeerCast",                    ID_POPUP_SHOWMESSAGES_PEERCAST
+
+            MENUITEM "Broadcasters",                ID_POPUP_SHOWMESSAGES_BROADCASTERS
+
+            MENUITEM "Track Info",                  ID_POPUP_SHOWMESSAGES_TRACKINFO
+
+            MENUITEM "Upgrade Alerts",              ID_POPUP_POPUPMESSAGES_UPGRADEALERTS
+            , CHECKED, GRAYED
+        END
+        POPUP "Advanced"
+        BEGIN
+            MENUITEM "Information",                 ID_POPUP_ADVANCED_INFORMATION
+
+            MENUITEM "Relayed Channels",            ID_POPUP_ADVANCED_RELAYEDCHANNELS
+
+            MENUITEM "Broadcast",                   ID_POPUP_ADVANCED_BROADCAST
+
+            MENUITEM "Connections",                 ID_POPUP_CONNECTIONS
+            MENUITEM "View Log",                    ID_POPUP_ADVANCED_VIEWLOG
+
+            MENUITEM "Settings",                    ID_POPUP_SETTINGS
+            MENUITEM SEPARATOR
+            MENUITEM "Show GUI",                    ID_POPUP_ADVANCED_SHOWGUI
+
+        END
+        MENUITEM SEPARATOR
+        POPUP "Exit"
+        BEGIN
+            MENUITEM "Yes",                         ID_POPUP_EXIT_CONFIRM
+            MENUITEM "No",                          ID_POPUP_EXIT_NO
+        END
+    END
+END
+
+IDR_VERMENU MENU DISCARDABLE 
+BEGIN
+    POPUP "popup"
+    BEGIN
+        MENUITEM "Please upgrade PeerCast. Click here to download.", 
+                                                ID_POPUP_UPGRADE
+    END
+END
+
+IDR_LTRAYMENU MENU DISCARDABLE 
+BEGIN
+    POPUP "popup"
+    BEGIN
+        MENUITEM SEPARATOR
+        MENUITEM "Yellow Pages",                ID_POPUP_YELLOWPAGES
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDC_SIMPLE ACCELERATORS MOVEABLE PURE 
+BEGIN
+    "?",            IDM_ABOUT,              ASCII,  ALT
+    "/",            IDM_ABOUT,              ASCII,  ALT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOG DISCARDABLE  22, 17, 163, 59
+STYLE DS_MODALFRAME | DS_SETFOREGROUND | DS_CENTER | WS_CAPTION | WS_SYSMENU
+CAPTION "About"
+FONT 8, "System"
+BEGIN
+    ICON            IDI_SIMPLE,IDC_MYICON,14,9,20,20
+    LTEXT           "PeerCast",IDC_ABOUTVER,43,9,103,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2007",IDC_STATIC,43,22,119,8
+    PUSHBUTTON      "OK",IDOK,134,40,24,12,WS_GROUP
+    PUSHBUTTON      "www.peercast.org",IDC_BUTTON1,42,40,66,12
+END
+
+IDD_MAINWINDOW DIALOGEX 0, 0, 298, 341
+STYLE DS_MODALFRAME | DS_CENTER | WS_CAPTION | WS_SYSMENU
+CAPTION "PeerCast"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    LISTBOX         IDC_LIST1,3,291,291,43,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "Enabled",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
+                    BS_PUSHLIKE | WS_TABSTOP,9,20,60,20,WS_EX_TRANSPARENT
+    EDITTEXT        IDC_EDIT1,120,18,47,12,ES_AUTOHSCROLL
+    LTEXT           "Port :",IDC_STATIC,100,20,18,8
+    LISTBOX         IDC_LIST2,3,224,291,53,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "Log",IDC_STATIC,3,282,13,8
+    LTEXT           "Connections",IDC_STATIC,3,214,40,8
+    GROUPBOX        "",IDC_STATIC,3,4,291,49
+    PUSHBUTTON      "Clear",IDC_BUTTON1,25,279,25,11
+    LISTBOX         IDC_LIST3,3,81,291,102,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
+                    WS_TABSTOP
+    PUSHBUTTON      "Disconnect",IDC_BUTTON5,67,65,43,13
+    GROUPBOX        "Relays",IDC_STATIC,3,54,291,132
+    EDITTEXT        IDC_EDIT3,120,34,48,12,ES_PASSWORD | ES_AUTOHSCROLL
+    LTEXT           "Password :",IDC_STATIC,82,36,36,8
+    CONTROL         "Debug",IDC_LOGDEBUG,"Button",BS_AUTOCHECKBOX | 
+                    BS_PUSHLIKE | WS_TABSTOP,127,279,32,11
+    CONTROL         "Network",IDC_LOGNETWORK,"Button",BS_AUTOCHECKBOX | 
+                    BS_PUSHLIKE | WS_TABSTOP,185,279,35,11
+    CONTROL         "Errors",IDC_LOGERRORS,"Button",BS_AUTOCHECKBOX | 
+                    BS_PUSHLIKE | WS_TABSTOP,159,279,25,11
+    CONTROL         "Pause",IDC_CHECK9,"Button",BS_AUTOCHECKBOX | 
+                    BS_PUSHLIKE | WS_TABSTOP,54,279,30,11
+    PUSHBUTTON      "Play",IDC_BUTTON8,10,65,22,13
+    CONTROL         "Channels",IDC_LOGCHANNELS,"Button",BS_AUTOCHECKBOX | 
+                    BS_PUSHLIKE | WS_TABSTOP,221,279,35,11
+    PUSHBUTTON      "Bump",IDC_BUTTON3,41,65,24,13
+    EDITTEXT        IDC_EDIT9,33,189,261,14,ES_AUTOHSCROLL
+    CONTROL         "DJ",IDC_CHECK11,"Button",BS_AUTOCHECKBOX | BS_PUSHLIKE | 
+                    WS_TABSTOP,5,190,23,12
+    LTEXT           "Max. Relays :",IDC_STATIC,181,28,44,8
+    EDITTEXT        IDC_MAXRELAYS,230,26,40,14,ES_AUTOHSCROLL | ES_NUMBER
+END
+
+IDD_CHANINFO DIALOGEX 0, 0, 184, 207
+STYLE DS_SETFOREGROUND | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Channel Information"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    LTEXT           "Name:",IDC_STATIC,7,8,24,9
+    EDITTEXT        IDC_EDIT_NAME,7,18,170,21,ES_MULTILINE | ES_READONLY | 
+                    NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
+    LTEXT           "Playing:",IDC_STATIC,7,79,93,9
+    EDITTEXT        IDC_EDIT_PLAYING,8,90,170,21,ES_MULTILINE | ES_READONLY | 
+                    NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
+    LTEXT           "DJ Message:",IDC_STATIC,7,117,41,9
+    EDITTEXT        IDC_EDIT_MESSAGE,8,128,170,21,ES_MULTILINE | ES_READONLY | 
+                    NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
+    PUSHBUTTON      "URL",IDC_CONTACT,9,185,34,15,0,0,HIDC_CONTACT
+    LTEXT           "Description:",IDC_STATIC,7,43,67,8
+    EDITTEXT        IDC_EDIT_DESC,8,53,170,21,ES_MULTILINE | ES_READONLY | 
+                    NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
+    RTEXT           "Format",IDC_FORMAT,69,80,107,8
+    LTEXT           "Genre:",IDC_STATIC,63,5,22,8
+    EDITTEXT        IDC_EDIT_GENRE,87,3,90,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
+    CONTROL         "Keep",IDC_KEEP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    144,188,33,10
+    LTEXT           "Status:",IDC_STATIC,7,153,41,9
+    EDITTEXT        IDC_EDIT_STATUS,8,163,71,12,ES_READONLY | NOT WS_BORDER | 
+                    NOT WS_TABSTOP,WS_EX_STATICEDGE
+    PUSHBUTTON      "Play",IDC_PLAY,53,185,34,15
+END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""windows.h""\r\n"
+    "#undef APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""resource.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 58
+    END
+
+    IDD_MAINWINDOW, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 294
+        TOPMARGIN, 3
+        BOTTOMMARGIN, 336
+    END
+
+    IDD_CHANINFO, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 177
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 200
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_APP_TITLE           "PeerCast"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

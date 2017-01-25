@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleDocumentTypes</key>
+	<array/>
+	<key>CFBundleExecutable</key>
+	<string>PeerCast</string>
+	<key>CFBundleIconFile</key>
+	<string>peercast_ico</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.peercast.PeerCastApp</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>peercast.org</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>PeerCast URL</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>peercast</string>
+			</array>
+			<key>LSIsAppleDefaultForScheme</key>
+			<true/>
+		</dict>
+	</array>
+	<key>CFBundleVersion</key>
+	<string>IDE v0.01 (Peercast Engine v0.1215)</string>
+	<key>CSResourcesFileMapped</key>
+	<true/>
+</dict>
+</plist>
