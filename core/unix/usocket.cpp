@@ -225,8 +225,8 @@ void UClientSocket::checkTimeout(bool r, bool w)
 			throw SockException("select failed.");
 
 	}else{
-		char str[32];
-		sprintf(str,"Closed: %s",strerror(err));
+		char str[64];
+		snprintf(str,64,"Closed: %s",strerror(err));
 		throw SockException(str);
 	}
 }
