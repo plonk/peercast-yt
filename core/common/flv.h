@@ -22,11 +22,6 @@
 #include "channel.h"
 #include "stdio.h"
 
-
-const int TAG_SCRIPTDATA = 18;
-const int TAG_AUDIO = 8;
-const int TAG_VIDEO = 9;
-
 // -----------------------------------
 class FLVFileHeader
 {
@@ -34,7 +29,6 @@ public:
 	void read(Stream &in)
 	{
 		size = 13;
-		data = (char *)malloc(size);
 		in.read(data, size);
 
 		if (data[0] == 0x46 && //F
@@ -45,7 +39,7 @@ public:
 	}
 	int version;
 	int size = 0;
-	char *data = NULL;
+	unsigned char data[13];
 };
 
 
@@ -56,9 +50,9 @@ public:
 	enum TYPE
 	{
 		T_UNKNOWN,
-		T_SCRIPT,
-		T_AUDIO,
-		T_VIDEO
+		T_SCRIPT	= 18,
+		T_AUDIO		= 8,
+		T_VIDEO		= 9
 	};
 
 	FLVTag()
@@ -69,28 +63,66 @@ public:
 		packet = NULL;
 	}
 
+	~FLVTag()
+	{
+		if (packet)
+			delete [] packet;
+	}
+
+	FLVTag& operator=(const FLVTag& other)
+	{
+		size = other.size;
+		packetSize = other.packetSize;
+		type = other.type;
+
+		if (packet)
+			delete [] packet;
+		if (other.packet) {
+			packet = new unsigned char[other.packetSize];
+			memcpy(packet, other.packet, other.packetSize);
+		} else
+			packet = NULL;
+
+		if (packet)
+			data = packet + 11;
+
+		return *this;
+	}
+
+	FLVTag(const FLVTag& other)
+	{
+		size = other.size;
+		packetSize = other.packetSize;
+		type = other.type;
+
+		if (other.packet) {
+			packet = new unsigned char[other.packetSize];
+			memcpy(packet, other.packet, other.packetSize);
+		} else
+			packet = NULL;
+
+		if (packet)
+			data = packet + 11;
+	}
+
 	void read(Stream &in)
 	{
-		if (data != NULL) free(data);
-		if (packet != NULL) free(packet);
+		if (packet != NULL)
+			delete [] packet;
 
 		unsigned char binary[11];
 		in.read(binary, 11);
 
-		type = binary[0];
+		type = static_cast<TYPE>(binary[0]);
 		size = (binary[1] << 16) | (binary[2] << 8) | (binary[3]);
 		//int timestamp = (binary[7] << 24) | (binary[4] << 16) | (binary[5] << 8) | (binary[6]);
 		//int streamID = (binary[8] << 16) | (binary[9] << 8) | (binary[10]);
-		data = (char *)malloc(size);
-		in.read(data, size);
 
-		unsigned char prevsize[4];
-		in.read(prevsize, 4);
-
-		packet = (char *)malloc(11+size+4);
+		packet = new unsigned char[11 + size + 4];
 		memcpy(packet, binary, 11);
-		memcpy(packet+11, data, size);
-		memcpy(packet+11+size, prevsize, 4);
+		in.read(packet + 11, size + 4);
+
+		data = packet + 11;
 		packetSize = 11 + size + 4;
 	}
 
@@ -98,11 +130,11 @@ public:
 	{
 		switch (type)
 		{
-		case TAG_SCRIPTDATA:
+		case T_SCRIPT:
 			return "Script";
-		case TAG_VIDEO:
+		case T_VIDEO:
 			return "Video";
-		case TAG_AUDIO:
+		case T_AUDIO:
 			return "Audio";
 		}
 		return "Unknown";
@@ -110,9 +142,9 @@ public:
 
 	int size = 0;
 	int packetSize = 0;
-	char type = T_UNKNOWN;
-	char *data = NULL;
-	char *packet = NULL;
+	TYPE type = T_UNKNOWN;
+	unsigned char *data = NULL;
+	unsigned char *packet = NULL;
 };
 
 
@@ -128,10 +160,6 @@ public:
 	FLVTag avcHeader;
 	FLVStream()
 	{
-		fileHeader = FLVFileHeader();
-		metaData = FLVTag();
-		aacHeader = FLVTag();
-		avcHeader = FLVTag();
 	}
 	virtual void readHeader(Stream &, Channel *);
 	virtual int	 readPacket(Stream &, Channel *);
@@ -172,7 +200,7 @@ public:
 			return NULL;
 		}
 		else {
-			char* data = (char *)malloc(len+1);
+			char* data = new char[len+1];
 			*(data+len) = '\0';
 			in.read(data, len);
 			return data;
@@ -181,12 +209,12 @@ public:
 
 	double readDouble(Stream &in)
 	{
-		char* data = (char *)malloc(sizeof(double));
+		double number;
+		char* data = reinterpret_cast<char*>(&number);
 		for (int i = 8; i > 0; i--) {
 			char c = in.readChar();
 			*(data + i - 1) = c;
 		}
-		double number = *reinterpret_cast<double*>(data);
 		return number;
 	};
 
@@ -210,6 +238,7 @@ public:
 					read(in);
 				}
 			}
+			delete [] key;
 		}
 		in.readChar();
 	}
@@ -223,6 +252,7 @@ public:
 				bitrate = 0;
 				read(in);
 			}
+			delete [] name;
 		}
 		return bitrate > 0;
 	}
@@ -237,7 +267,7 @@ public:
 			readBool(in);
 		}
 		else if (type == AMF_STRING) {
-			readString(in);
+			delete [] readString(in);
 		}
 		else if (type == AMF_OBJECT) {
 			readObject(in);
