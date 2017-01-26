@@ -317,7 +317,6 @@ public:
 	virtual void stream(Channel *) = 0;
 
 	virtual int getSourceRate() {return 0;}
-
 };
 // ------------------------------------------
 class PeercastSource : public ChannelSource
