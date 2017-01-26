@@ -33,22 +33,16 @@ void FLVStream::readEnd(Stream &, Channel *)
 }
 
 // ------------------------------------------
-void FLVStream::readHeader(Stream &, Channel *)
+void FLVStream::readHeader(Stream &in, Channel *ch)
 {
+	bitrate = 0;
+	fileHeader.read(in);
 }
 
 // ------------------------------------------
 int FLVStream::readPacket(Stream &in, Channel *ch)
 {
 	bool headerUpdate = false;
-
-	if (ch->streamPos == 0) {
-		bitrate = 0;
-		FLVFileHeader header;
-		header.read(in);
-		fileHeader = header;
-		headerUpdate = true;
-	}
 
 	FLVTag flvTag;
 	flvTag.read(in);
