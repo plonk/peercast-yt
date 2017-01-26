@@ -105,6 +105,11 @@ void sigProc(int sig)
 {
 	switch (sig)
 	{
+		case SIGINT:
+			if (!quit)
+				LOG_DEBUG("Received INT signal");
+			quit=true;
+			break;
 		case SIGTERM:
 			if (!quit)
 				LOG_DEBUG("Received TERM signal");
@@ -129,6 +134,7 @@ void sigProc(int sig)
 	}
 
 	/* This may be nescessary for some systems... */
+	signal(SIGINT, sigProc);
 	signal(SIGTERM, sigProc); 
 	signal(SIGHUP, sigProc); 
 }
@@ -207,6 +213,7 @@ int main(int argc, char* argv[])
 
 	peercastInst->init();
 
+	signal(SIGINT, sigProc);
 	signal(SIGTERM, sigProc); 
 	signal(SIGHUP, sigProc); 
 
