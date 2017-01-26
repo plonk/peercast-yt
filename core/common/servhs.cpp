@@ -1017,7 +1017,11 @@ void Servent::handshakeCMD(char *cmd)
 						info.bitrate = atoi(arg);
 					}else if (strcmp(curr,"type")==0)
 					{
-						info.contentType = ChanInfo::getTypeFromStr(arg);
+						ChanInfo::TYPE type = ChanInfo::getTypeFromStr(arg);
+						info.contentType = type;
+						info.contentTypeStr = ChanInfo::getTypeStr(type);
+						info.streamType = ChanInfo::getMIMEType(type);
+						info.streamExt = ChanInfo::getTypeExt(type);
 					}
 
 				}

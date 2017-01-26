@@ -3168,6 +3168,8 @@ const char *ChanInfo::getMIMEType(TYPE t)
 			return MIME_WMA;
 		case ChanInfo::T_WMV:
 			return MIME_WMV;
+	    case ChanInfo::T_FLV:
+			return MIME_FLV;
 		default:
 			return "application/octet-stream";
 	}
