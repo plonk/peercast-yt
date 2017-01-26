@@ -44,7 +44,8 @@ CORESOURCE = $(CORE)/unix/usys.cpp \
 	 $(CORE)/common/url.cpp \
 	 $(CORE)/common/icy.cpp \
 	 $(CORE)/common/pcp.cpp \
-	 $(CORE)/common/jis.cpp 
+	 $(CORE)/common/jis.cpp \
+	 $(CORE)/common/flv.cpp 
 
 
 
