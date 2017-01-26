@@ -39,6 +39,7 @@
 #include "ogg.h"
 #include "mms.h"
 #include "nsv.h"
+#include "flv.h"
 
 #include "icy.h"
 #include "url.h"
@@ -1010,6 +1011,10 @@ ChannelStream *Channel::createSource()
 			case ChanInfo::T_WMA:
 			case ChanInfo::T_WMV:
 				throw StreamException("Channel is WMA/WMV - but not MMS");
+				break;
+			case ChanInfo::T_FLV:
+				LOG_CHANNEL("Channel is FLV");
+				source = new FLVStream();
 				break;
 			case ChanInfo::T_OGG:
 			case ChanInfo::T_OGM:
@@ -3078,6 +3083,7 @@ const char *ChanInfo::getTypeStr(TYPE t)
 		case T_MPG: return "MPG";
 		case T_NSV: return "NSV";
 		case T_WMV: return "WMV";
+		case T_FLV: return "FLV";
 
 		case T_PLS: return "PLS";
 		case T_ASX: return "ASX";
@@ -3133,6 +3139,8 @@ const char *ChanInfo::getTypeExt(TYPE t)
 			return ".wmv";
 		case ChanInfo::T_WMA:
 			return ".wma";
+		case ChanInfo::T_FLV:
+			return ".flv";
 		default:
 			return "";
 	}
@@ -3181,6 +3189,8 @@ ChanInfo::TYPE ChanInfo::getTypeFromStr(const char *str)
 		return T_WMA;
 	else if (stricmp(str,"WMV")==0)
 		return T_WMV;
+	else if (stricmp(str,"FLV")==0)
+		return T_FLV;
 	else if (stricmp(str,"PLS")==0)
 		return T_PLS;
 	else if (stricmp(str,"M3U")==0)

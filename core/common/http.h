@@ -73,6 +73,7 @@ static const char *MIME_RAM			= "audio/x-pn-realaudio";
 
 static const char *MIME_WMA			= "audio/x-ms-wma";
 static const char *MIME_WMV			= "video/x-ms-wmv";
+static const char *MIME_WMV			= "video/flv";
 
 static const char *MIME_HTML		= "text/html";
 static const char *MIME_XML			= "text/xml";

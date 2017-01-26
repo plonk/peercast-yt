@@ -91,6 +91,7 @@ public:
 		T_MOV,
 		T_MPG,
 		T_NSV,
+		T_FLV,
 
 		T_WMA,
 		T_WMV,
