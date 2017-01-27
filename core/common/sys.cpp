@@ -271,7 +271,8 @@ bool String::isValidURL()
 // -----------------------------------
 void String::setFromTime(unsigned int t)
 {
-	char *p = ctime((time_t*)&t);
+    time_t t2 = t;
+	char *p = ctime(&t2);
 	if (p)
 		strcpy(data,p);
 	else
