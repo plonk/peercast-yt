@@ -192,7 +192,7 @@ int main(int argc, char* argv[])
 	
 	catch( const CAppPathInfo::EPathErr pathError )
 	{
-		printf("[APP PATH ERROR]: # %d´n", pathError );
+		printf("[APP PATH ERROR]: # %då–œ", pathError );
 	}
 	
 CantCreateWindow:
