@@ -26,10 +26,12 @@
 class FLVFileHeader
 {
 public:
+	FLVFileHeader() : size(0) {}
+
 	void read(Stream &in)
 	{
 		size = 13;
-		in.read(data, size);
+		in.read(data, 13);
 
 		if (data[0] == 0x46 && //F
 			data[1] == 0x4c && //L
@@ -37,8 +39,8 @@ public:
 			version = data[3];
 		}
 	}
+	int size;
 	int version;
-	int size = 0;
 	unsigned char data[13];
 };
 
@@ -58,6 +60,7 @@ public:
 	FLVTag()
 	{
 		size = 0;
+		packetSize = 0;
 		type = T_UNKNOWN;
 		data = NULL;
 		packet = NULL;
@@ -140,11 +143,11 @@ public:
 		return "Unknown";
 	}
 
-	int size = 0;
-	int packetSize = 0;
-	TYPE type = T_UNKNOWN;
-	unsigned char *data = NULL;
-	unsigned char *packet = NULL;
+	int size;
+	int packetSize;
+	TYPE type;
+	unsigned char *data;
+	unsigned char *packet;
 };
 
 
@@ -153,12 +156,12 @@ public:
 class FLVStream : public ChannelStream
 {
 public:
-	int bitrate = 0;
+	int bitrate;
 	FLVFileHeader fileHeader;
 	FLVTag metaData;
 	FLVTag aacHeader;
 	FLVTag avcHeader;
-	FLVStream()
+	FLVStream() : bitrate(0)
 	{
 	}
 	virtual void readHeader(Stream &, Channel *);
@@ -169,19 +172,21 @@ public:
 class AMFObject
 {
 public:
-	const int AMF_NUMBER      = 0x00;
-	const int AMF_BOOL        = 0x01;
-	const int AMF_STRING      = 0x02;
-	const int AMF_OBJECT      = 0x03;
-	const int AMF_MOVIECLIP   = 0x04;
-	const int AMF_NULL        = 0x05;
-	const int AMF_UNDEFINED   = 0x06;
-	const int AMF_REFERENCE   = 0x07;
-	const int AMF_ARRAY       = 0x08;
-	const int AMF_OBJECT_END  = 0x09;
-	const int AMF_STRICTARRAY = 0x0a;
-	const int AMF_DATE        = 0x0b;
-	const int AMF_LONG_STRING = 0x0c;
+	static const int AMF_NUMBER      = 0x00;
+	static const int AMF_BOOL        = 0x01;
+	static const int AMF_STRING      = 0x02;
+	static const int AMF_OBJECT      = 0x03;
+	static const int AMF_MOVIECLIP   = 0x04;
+	static const int AMF_NULL        = 0x05;
+	static const int AMF_UNDEFINED   = 0x06;
+	static const int AMF_REFERENCE   = 0x07;
+	static const int AMF_ARRAY       = 0x08;
+	static const int AMF_OBJECT_END  = 0x09;
+	static const int AMF_STRICTARRAY = 0x0a;
+	static const int AMF_DATE        = 0x0b;
+	static const int AMF_LONG_STRING = 0x0c;
+
+	AMFObject() : bitrate(0) {}
 
 	bool readBool(Stream &in)
 	{
@@ -288,7 +293,7 @@ public:
 			in.skip(10);
 		}
 	}
-	int bitrate = 0;
+	int bitrate;
 };
 
 
