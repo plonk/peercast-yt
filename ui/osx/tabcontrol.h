@@ -31,11 +31,11 @@ public:
 	explicit TabControl( const int signature, const int id, WindowRef windowRef );
 	const ControlID& getID    () const { return mControlID; }
 	WindowRef        getWindow() const { return mWindowRef; }
-	
-	OSStatus installHandler();	
+
+	OSStatus installHandler();
 	void updateSettings    ();
 	void saveSettings();
-	
+
 	static OSStatus handler( EventHandlerCallRef inCallRef, EventRef inEvent, void* inUserData );
 
 private:

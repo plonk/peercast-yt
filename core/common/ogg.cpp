@@ -93,11 +93,11 @@ int OGGStream::readPacket(Stream &in,Channel *ch)
 				ch->info.contentType = ChanInfo::T_OGM;
 			}
 
-			
+
 			ch->headPack.type = ChanPacket::T_HEAD;
 			ch->headPack.pos = ch->streamPos;
 
-			ch->startTime = sys->getDTime();		
+			ch->startTime = sys->getDTime();
 
 			ch->streamPos += ch->headPack.len;
 
@@ -282,7 +282,7 @@ void OggVorbisSubStream::readIdent(Stream &in, ChanInfo &info)
 	int brMax = in.readLong();
 	int brNom = in.readLong();
 	int brLow = in.readLong();
-	
+
 
 	in.readChar();	// skip blocksize 0+1
 
@@ -298,7 +298,7 @@ void OggVorbisSubStream::readIdent(Stream &in, ChanInfo &info)
 
 }
 
- 
+
 // -----------------------------------
 void OggVorbisSubStream::readSetup(Stream &in)
 {
@@ -425,7 +425,7 @@ void OggPage::read(Stream &in)
 	for(int i=0; i<numSegs; i++)
 		bodyLen += data[27+i];
 
-	if (bodyLen >= MAX_BODYLEN)		
+	if (bodyLen >= MAX_BODYLEN)
 		throw StreamException("OGG body too big");
 
 	headLen = 27+numSegs;
@@ -469,7 +469,7 @@ bool OggPage::detectTheora()
 // -----------------------------------
 void	OggPacket::addLacing(OggPage &ogg)
 {
-	
+
 	int numSegs = ogg.data[26];
 	for(int i=0; i<numSegs; i++)
 	{

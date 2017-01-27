@@ -2,7 +2,7 @@
 // File : xml.h
 // Date: 4-apr-2002
 // Author: giles
-// Desc: 
+// Desc:
 //
 // (c) 2002 peercast.org
 // ------------------------------------------------
@@ -45,7 +45,7 @@ public:
 		void	init();
 
         ~Node();
-        
+
 	    void	add(Node *);
         void	write(Stream &,int); 	// output, level
         char 	*getName() {return getAttrName(0);}

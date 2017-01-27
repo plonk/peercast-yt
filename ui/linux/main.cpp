@@ -2,9 +2,9 @@
 // File : main.cpp
 // Date: 4-apr-2002
 // Author: giles
-// Desc: 
+// Desc:
 //		see .cpp for details
-//		
+//
 // (c) 2002 peercast.org
 // ------------------------------------------------
 // This program is free software; you can redistribute it and/or modify
@@ -64,12 +64,12 @@ public:
 		return iniFileName;
 	}
 
-	virtual const char * APICALL getPath() 
+	virtual const char * APICALL getPath()
 	{
 		return htmlPath;
 	}
 
-	virtual const char *APICALL getClientTypeOS() 
+	virtual const char *APICALL getClientTypeOS()
 	{
 		return PCX_OS_LINUX;
 	}
@@ -118,7 +118,7 @@ void sigProc(int sig)
 		case SIGHUP:
 				LOG_DEBUG("Received HUP signal, reloading a new logfile");
 				// The aim of this call is to completly reload a new log file.
-				// It can be used in conjonction with logrotate, 
+				// It can be used in conjonction with logrotate,
 				// to remove the logfile after it has been copied.
 				// some data can still be lost, but this way it is reduced to minimun at lost costs..
 				if (logToFile) {
@@ -135,14 +135,14 @@ void sigProc(int sig)
 
 	/* This may be nescessary for some systems... */
 	signal(SIGINT, sigProc);
-	signal(SIGTERM, sigProc); 
-	signal(SIGHUP, sigProc); 
+	signal(SIGTERM, sigProc);
+	signal(SIGHUP, sigProc);
 }
 
 // ----------------------------------
 int main(int argc, char* argv[])
 {
-			
+
 	iniFileName.set("peercast.ini");
 	htmlPath.set("./");
 	pidFileName.set("peercast.pid");
@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
 			} else if (!strcmp(argv[i],"--daemon") || !strcmp(argv[i],"-d")) {
 					forkDaemon = true;
 			} else if (!strcmp(argv[i],"--pidfile") || !strcmp(argv[i],"-p")) {
-				if (++i < argc) 
+				if (++i < argc)
 				{
 					setPidFile = true;
 					pidFileName.setFromString(argv[i]);
@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
 	if (setPidFile) {
 		LOG_DEBUG("Peercast PID is: %i", (int) getpid() );
 		FILE *pidfileopened = fopen(pidFileName, "w");
-		if (pidfileopened != NULL) 
+		if (pidfileopened != NULL)
 			{
 				fprintf(pidfileopened, "%i\n", (int) getpid() );
 				fclose(pidfileopened);
@@ -214,8 +214,8 @@ int main(int argc, char* argv[])
 	peercastInst->init();
 
 	signal(SIGINT, sigProc);
-	signal(SIGTERM, sigProc); 
-	signal(SIGHUP, sigProc); 
+	signal(SIGTERM, sigProc);
+	signal(SIGHUP, sigProc);
 
 	while (!quit) {
 		sys->sleep(1000);
@@ -228,7 +228,7 @@ int main(int argc, char* argv[])
 	peercastInst->saveSettings();
 
 	peercastInst->quit();
-	
+
 	if (logfile != NULL) {
 		loglock.on();
 		fflush(logfile);

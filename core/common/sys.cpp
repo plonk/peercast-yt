@@ -2,9 +2,9 @@
 // File : sys.cpp
 // Date: 4-apr-2002
 // Author: giles
-// Desc: 
+// Desc:
 //		Sys is a base class for all things systemy, like starting threads, creating sockets etc..
-//		Lock is a very basic cross platform CriticalSection class		
+//		Lock is a very basic cross platform CriticalSection class
 //		SJIS-UTF8 conversion by ????
 //
 // (c) 2002 peercast.org
@@ -31,7 +31,7 @@
 // -----------------------------------
 #define isSJIS(a,b) ((a >= 0x81 && a <= 0x9f || a >= 0xe0 && a<=0xfc) && (b >= 0x40 && b <= 0x7e || b >= 0x80 && b<=0xfc))
 #define isEUC(a) (a >= 0xa1 && a <= 0xfe)
-#define isASCII(a) (a <= 0x7f) 
+#define isASCII(a) (a <= 0x7f)
 #define isPLAINASCII(a) (((a >= '0') && (a <= '9')) || ((a >= 'a') && (a <= 'z')) || ((a >= 'A') && (a <= 'Z')))
 #define isUTF8(a,b) ((a & 0xc0) == 0xc0 && (b & 0x80) == 0x80 )
 #define isESCAPE(a,b) ((a == '&') && (b == '#'))
@@ -50,7 +50,7 @@ const char *LogBuffer::logTypes[]=
 };
 
 // -----------------------------------
-// base64 encode/decode taken from ices2 source.. 
+// base64 encode/decode taken from ices2 source..
 static char base64table[64] = {
     'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P',
     'Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f',
@@ -138,7 +138,7 @@ void Sys::sleepIdle()
 // ------------------------------------------
 bool Host::isLocalhost()
 {
-	return loopbackIP() || (ip == ClientSocket::getIP(NULL)); 
+	return loopbackIP() || (ip == ClientSocket::getIP(NULL));
 }
 // ------------------------------------------
 void Host::fromStrName(const char *str, int p)
@@ -312,9 +312,9 @@ void String::setFromString(const char *str, TYPE t)
 		bool add=true;
 		if (*str == '\"')
 		{
-			if (quote) 
+			if (quote)
 				break;
-			else 
+			else
 				quote = true;
 			add = false;
 		}else if (*str == ' ')
@@ -351,7 +351,7 @@ int String::base64WordToChars(char *out,const char *input)
     vals[2] = base64chartoval(*input++);
     vals[3] = base64chartoval(*input++);
 
-    if(vals[0] < 0 || vals[1] < 0 || vals[2] < -1 || vals[3] < -1) 
+    if(vals[0] < 0 || vals[1] < 0 || vals[2] < -1 || vals[3] < -1)
 		return 0;
 
     *out++ = vals[0]<<2 | vals[1]>>4;
@@ -374,7 +374,7 @@ void String::BASE642ASCII(const char *input)
 	char *out = data;
     int len = strlen(input);
 
-    while(len >= 4) 
+    while(len >= 4)
 	{
 		out += base64WordToChars(out,input);
 		input += 4;
@@ -397,7 +397,7 @@ void String::UNKNOWN2UNICODE(const char *in,bool safe)
 	{
 		d = *in;
 
-		if (isUTF8(c,d))		// utf8 encoded 
+		if (isUTF8(c,d))		// utf8 encoded
 		{
 			int numChars=0;
 			int i;
@@ -432,7 +432,7 @@ void String::UNKNOWN2UNICODE(const char *in,bool safe)
 			in++;
 			char code[16];
 			char *cp = code;
-			while (c=*in++) 
+			while (c=*in++)
 			{
 				if (c!=';')
 					*cp++ = c;
@@ -449,7 +449,7 @@ void String::UNKNOWN2UNICODE(const char *in,bool safe)
 			utf8.writeUTF8(c);
 
 		}
-		else if (isHTMLSPECIAL(c) && safe)			
+		else if (isHTMLSPECIAL(c) && safe)
 		{
 			const char *str = NULL;
 			if (c == '&') str = "&amp;";
@@ -485,7 +485,7 @@ void String::ASCII2HTML(const char *in)
 	const char *p = in;
 	while (c = *p++)
 	{
-		
+
 		if (((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z')))
 		{
 			*op++ = c;
@@ -539,7 +539,7 @@ void String::HTML2ASCII(const char *in)
 			char code[8];
 			char *cp = code;
 			char ec = *p++;		// hex/dec
-			while (c=*p++) 
+			while (c=*p++)
 			{
 				if (c!=';')
 					*cp++ = c;
@@ -570,7 +570,7 @@ void String::HTML2UNICODE(const char *in)
 			char code[16];
 			char *cp = code;
 			char ec = *in++;		// hex/dec
-			while (c=*in++) 
+			while (c=*in++)
 			{
 				if (c!=';')
 					*cp++ = c;
@@ -794,11 +794,11 @@ void GnuID::encode(Host *h, const char *salt1, const char *salt2, unsigned char 
 	{
 		unsigned char ipb = id[i];
 
-		// encode with IP address 
+		// encode with IP address
 		if (h)
 			ipb ^= ((unsigned char *)&h->ip)[i&3];
 
-		// add a bit of salt 
+		// add a bit of salt
 		if (salt1)
 		{
 			if (salt1[s1])
@@ -946,7 +946,7 @@ void GnuIDList::clear()
 	for(int i=0; i<maxID; i++)
 		ids[i].clear();
 }
-	
+
 // ---------------------------
 void LogBuffer::dumpHTML(Stream &out)
 {

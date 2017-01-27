@@ -42,8 +42,8 @@ public:
 		out.writeShort(data3);
 		out.write(data4,8);
 	}
-	
-	
+
+
 	void toString(String &s)
 	{
 		sprintf(s.data,"%X-%X-%X-%02X%02X%02X%02X%02X%02X%02X%02X",
@@ -135,7 +135,7 @@ public:
 	{
 		dataLen = len;
 
-		if ((dataLen > sizeof(data)) || (lenHi)) 
+		if ((dataLen > sizeof(data)) || (lenHi))
 			throw StreamException("ASF object too big");
 
 		in.read(data,dataLen);
@@ -195,7 +195,7 @@ public:
 			type = T_VIDEO;
 		else if (sid == audioStreamObjID)
 			type = T_AUDIO;
-		else 
+		else
 			type = T_UNKNOWN;
 
 		in.skip(32);
@@ -265,7 +265,7 @@ public:
 		v2 = in.readShort();
 
 		dataLen = len-8;
-		if (dataLen > sizeof(data)) 
+		if (dataLen > sizeof(data))
 			throw StreamException("ASF chunk too big");
 		in.read(data,dataLen);
 	}

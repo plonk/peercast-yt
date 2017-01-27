@@ -57,7 +57,7 @@ XML::Node *HTML::startTag(const char *tag, const char *fmt,...)
 		vsprintf(tmp,fmt,ap);
 		startNode(n=new XML::Node(tag),tmp);
 
-	   	va_end(ap);	
+	   	va_end(ap);
 	}else{
 		startNode(n=new XML::Node(tag),NULL);
 	}
@@ -77,7 +77,7 @@ XML::Node *HTML::startTagEnd(const char *tag, const char *fmt,...)
 		vsprintf(tmp,fmt,ap);
 		startNode(n=new XML::Node(tag),tmp);
 
-	   	va_end(ap);	
+	   	va_end(ap);
 	}else{
 		startNode(n=new XML::Node(tag),NULL);
 	}
@@ -94,7 +94,7 @@ void HTML::startSingleTagEnd(const char *fmt,...)
 	vsprintf(tmp,fmt,ap);
 	startNode(new XML::Node(tmp));
 
-	va_end(ap);	
+	va_end(ap);
 	end();
 }
 

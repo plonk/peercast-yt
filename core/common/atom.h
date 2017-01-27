@@ -48,7 +48,7 @@ public:
 		io.writeInt(4);
 		io.writeInt(d);
 	}
-	
+
 	void writeID4(ID4 id,ID4 d)
 	{
 		io.writeID4(id);
@@ -127,28 +127,28 @@ public:
 
 	}
 
-	int		readInt() 
+	int		readInt()
 	{
 		checkData(4);
 		return io.readInt();
 	}
-	int		readID4() 
+	int		readID4()
 	{
 		checkData(4);
 		return io.readID4();
 	}
 
-	int		readShort() 
+	int		readShort()
 	{
 		checkData(2);
 		return io.readShort();
 	}
-	int		readChar() 
+	int		readChar()
 	{
 		checkData(1);
 		return io.readChar();
 	}
-	int		readBytes(void *p,int l) 
+	int		readBytes(void *p,int l)
 	{
 		checkData(l);
 		return io.read(p,l);
@@ -198,7 +198,7 @@ public:
 		return total;
 	}
 
-	bool	eof() {return io.eof();}	
+	bool	eof() {return io.eof();}
 
 
 	int	numChildren,numData;

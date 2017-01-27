@@ -2,10 +2,10 @@
 // File : lsocket.cpp
 // Date: 4-apr-2002
 // Author: giles
-// Desc: 
+// Desc:
 //		Linux version of ClientSocket. Handles the nitty gritty of actually
 //		reading and writing TCP
-//		
+//
 // (c) 2002 peercast.org
 // ------------------------------------------------
 // This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,7 @@
 #include "usocket.h"
 #include "stats.h"
 
-#ifdef __APPLE__ 
+#ifdef __APPLE__
 #include <netinet/in_systm.h> // for n_long definition
 #endif
 
@@ -104,7 +104,7 @@ void UClientSocket::setLinger(int sec)
 	linger.l_onoff = (sec>0)?1:0;
     linger.l_linger = sec;
 
-	if (setsockopt(sockNum, SOL_SOCKET, SO_LINGER, (const char *)&linger, sizeof (linger)) == -1) 
+	if (setsockopt(sockNum, SOL_SOCKET, SO_LINGER, (const char *)&linger, sizeof (linger)) == -1)
 		throw SockException("Unable to set LINGER");
 }
 
@@ -114,7 +114,7 @@ void UClientSocket::setNagle(bool on)
      int nodelay = (on==false);
      if (setsockopt(sockNum, IPPROTO_TCP, TCP_NODELAY, (void*) &nodelay,sizeof(nodelay)) < 0)
 		throw SockException("Unable to set NODELAY");
-}      
+}
 // --------------------------------------------------
 void UClientSocket::setBlocking(bool block)
 {
@@ -133,7 +133,7 @@ void UClientSocket::setReuse(bool yes)
 {
 
 	unsigned long op = yes ? 1 : 0;
-	if (setsockopt(sockNum,SOL_SOCKET,SO_REUSEADDR,(char *)&op,sizeof(op)) < 0) 
+	if (setsockopt(sockNum,SOL_SOCKET,SO_REUSEADDR,(char *)&op,sizeof(op)) < 0)
 		throw SockException("Unable to set REUSE");
 }
 
@@ -147,12 +147,12 @@ hostent *UClientSocket::resolveHost(char *hostName)
 		// if failed, try using gethostbyaddr instead
 
 		unsigned long ip = inet_addr(hostName);
-		
+
 		if (ip == INADDR_NONE)
 			return NULL;
 
 		if ((he = gethostbyaddr((char *)&ip,sizeof(ip),AF_INET)) == NULL)
-			return NULL;	
+			return NULL;
 	}
 	return he;
 }
@@ -403,7 +403,7 @@ ClientSocket *UClientSocket::accept()
 	if (conSock ==  INVALID_SOCKET)
 		return NULL;
 
-	
+
     UClientSocket *cs = new UClientSocket();
 	cs->sockNum = conSock;
 
@@ -445,7 +445,7 @@ void UClientSocket::close()
 			//char c;
 			//while (readUpto(&c,1)!=0);
 			//readUpto(&c,1);
-		}catch(StreamException &e) 
+		}catch(StreamException &e)
 		{
 			LOG_ERROR("Socket close: %s",e.msg);
 		}
@@ -473,7 +473,7 @@ bool	UClientSocket::readReady()
 }
 
 // --------------------------------------------------
-int UClientSocket::numPending() 
+int UClientSocket::numPending()
 {
 	size_t len;
 

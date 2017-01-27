@@ -39,7 +39,7 @@ int		APICALL PeercastInstance::getNotifyMask()
 {
 	if (servMgr)
 		return servMgr->notifyMask;
-	else	
+	else
 		return 0;
 }
 
@@ -176,7 +176,7 @@ void LOG(const char *fmt,...)
 	va_list ap;
   	va_start(ap, fmt);
 	ADDLOG(fmt,ap,LogBuffer::T_DEBUG);
-   	va_end(ap);	
+   	va_end(ap);
 }
 
 // --------------------------------------------------
@@ -189,7 +189,7 @@ void LOG_ERROR(const char *fmt,...)
 			va_list ap;
   			va_start(ap, fmt);
 			ADDLOG(fmt,ap,LogBuffer::T_ERROR);
-   			va_end(ap);	
+   			va_end(ap);
 		}
 	}
 }
@@ -203,7 +203,7 @@ void LOG_DEBUG(const char *fmt,...)
 			va_list ap;
   			va_start(ap, fmt);
 			ADDLOG(fmt,ap,LogBuffer::T_DEBUG);
-   			va_end(ap);	
+   			va_end(ap);
 		}
 	}
 }
@@ -217,7 +217,7 @@ void LOG_NETWORK(const char *fmt,...)
 			va_list ap;
   			va_start(ap, fmt);
 			ADDLOG(fmt,ap,LogBuffer::T_NETWORK);
-   			va_end(ap);	
+   			va_end(ap);
 		}
 	}
 }
@@ -231,7 +231,7 @@ void LOG_CHANNEL(const char *fmt,...)
 			va_list ap;
   			va_start(ap, fmt);
 			ADDLOG(fmt,ap,LogBuffer::T_CHANNEL);
-   			va_end(ap);	
+   			va_end(ap);
 		}
 	}
 }

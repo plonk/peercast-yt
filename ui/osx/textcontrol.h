@@ -24,7 +24,7 @@
 
 class TextControl
 {
-	static const int skMaxBufSize = 256; 
+	static const int skMaxBufSize = 256;
 public:
 	explicit TextControl( const int a, const int id )
 	: mID( )
@@ -33,10 +33,10 @@ public:
 		mID.signature = a;
 		mID.id		  = id;
 	}
-	
+
 	void setText( WindowRef window, const char* text );
 	void setText( WindowRef window, CFStringRef text );
-	
+
 	const char* getString( WindowRef window, CFStringEncoding encoding )
 	{
 		if( CFStringRef stringRef = getStringRef(window) )
@@ -46,21 +46,21 @@ public:
 				return mStrBuffer;
 			}
 		}
-		
-		return skNullString; 
+
+		return skNullString;
 	}
 
-protected:	
+protected:
 	CFStringRef getStringRef( WindowRef window );
-	
+
 private:
 	ControlID   mID;
 	CFStringRef mStringRef;
-	
+
 	char mStrBuffer[skMaxBufSize];
-	
+
 	static const char* const skNullString;
-	
+
 };
 
 #endif // _TEXTCONTROL_H

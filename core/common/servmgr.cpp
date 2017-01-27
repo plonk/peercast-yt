@@ -2,7 +2,7 @@
 // File : servmgr.cpp
 // Date: 4-apr-2002
 // Author: giles
-// Desc: 
+// Desc:
 //		Management class for handling multiple servent connections.
 //
 // (c) 2002 peercast.org
@@ -83,7 +83,7 @@ ServMgr::ServMgr()
 
 	serverHost.fromStrIP("127.0.0.1",DEFAULT_PORT);
 
-	firewalled = FW_UNKNOWN;		
+	firewalled = FW_UNKNOWN;
 	allowDirect = true;
 	autoConnect = true;
 	forceLookup = true;
@@ -304,7 +304,7 @@ void ServMgr::clearHostCache(ServHost::TYPE type)
 		if ((hostCache[i].type == type) || (type == ServHost::T_NONE))
 			hostCache[i].init();
 }
-	
+
 // -----------------------------------
 unsigned int ServMgr::numHosts(ServHost::TYPE type)
 {
@@ -333,7 +333,7 @@ int ServMgr::getNewestServents(Host *hl,int max,Host &rh)
 					for(int k=0; k<cnt; k++)
 						if (hl[k].isSame(hostCache[j].host))
 						{
-							found=true; 
+							found=true;
 							break;
 						}
 
@@ -354,7 +354,7 @@ int ServMgr::getNewestServents(Host *hl,int max,Host &rh)
 		if (sh)
 			hl[cnt++]=sh->host;
 	}
-	
+
 	return cnt;
 }
 // -----------------------------------
@@ -647,7 +647,7 @@ unsigned int ServMgr::numOutgoing()
 	while (s)
 	{
 //		if ((s->type == Servent::T_INCOMING) ||
-//		    (s->type == Servent::T_OUTGOING)) 
+//		    (s->type == Servent::T_OUTGOING))
 //			cnt++;
 		s=s->next;
 	}
@@ -849,7 +849,7 @@ bool ServMgr::canServeHost(Host &h)
 		Host sh = server->getHost();
 
 		if (sh.globalIP() || (sh.localIP() && h.localIP()))
-			return true;		
+			return true;
 	}
 	return false;
 }
@@ -930,7 +930,7 @@ void ServMgr::saveSettings(const char *fn)
 		iniFile.writeStrValue("broadcastMsg",chanMgr->broadcastMsg.cstr());
 		iniFile.writeIntValue("icyMetaInterval",chanMgr->icyMetaInterval);
 		chanMgr->broadcastID.toStr(idStr);
-		iniFile.writeStrValue("broadcastID",idStr);		
+		iniFile.writeStrValue("broadcastID",idStr);
 		iniFile.writeIntValue("hostUpdateInterval",chanMgr->hostUpdateInterval);
 		iniFile.writeIntValue("maxControlConnections",servMgr->maxControl);
 		iniFile.writeStrValue("rootHost",servMgr->rootHost.cstr());
@@ -951,7 +951,7 @@ void ServMgr::saveSettings(const char *fn)
 		iniFile.writeStrValue("password",servMgr->password);
 		iniFile.writeIntValue("maxUptime",chanMgr->maxUptime);
 
-		
+
 		int i;
 
 		for(i=0; i<servMgr->numFilters; i++)
@@ -1001,7 +1001,7 @@ void ServMgr::saveSettings(const char *fn)
 				iniFile.writeStrValue("url",bcid->url.cstr());
 				iniFile.writeBoolValue("valid",bcid->valid);
 				iniFile.writeLine("[End]");
-				
+
 				bcid=bcid->next;
 			}
 		}
@@ -1045,7 +1045,7 @@ void ServMgr::saveSettings(const char *fn)
 		}
 
 
-		
+
 #if 0
 		Servent *s = servents;
 		while (s)
@@ -1163,9 +1163,9 @@ void ServMgr::loadSettings(const char *fn)
 
 			else if (iniFile.isName("maxStreamsOut"))		// depreciated
 				servMgr->setMaxRelays(iniFile.getIntValue());
-			else if (iniFile.isName("maxRelays"))		
+			else if (iniFile.isName("maxRelays"))
 				servMgr->setMaxRelays(iniFile.getIntValue());
-			else if (iniFile.isName("maxDirect"))		
+			else if (iniFile.isName("maxDirect"))
 				servMgr->maxDirect = iniFile.getIntValue();
 
 			else if (iniFile.isName("maxStreamsPerChannel"))		// depreciated
@@ -1388,7 +1388,7 @@ void ServMgr::loadSettings(const char *fn)
 				}
 				servMgr->addValidBCID(bcid);
 			}
-		}	
+		}
 	}
 
 	if (!numFilters)
@@ -1447,13 +1447,13 @@ bool ServMgr::getChannel(char *str,ChanInfo &info, bool relay)
 		{
 			if (relay)
 			{
-				ch->info.lastPlayStart = 0; // force reconnect 
-				ch->info.lastPlayEnd = 0; 
+				ch->info.lastPlayStart = 0; // force reconnect
+				ch->info.lastPlayEnd = 0;
 			}else
 				return false;
 		}
-		
-		info = ch->info;	// get updated channel info 
+
+		info = ch->info;	// get updated channel info
 
 		return true;
 	}else
@@ -1463,7 +1463,7 @@ bool ServMgr::getChannel(char *str,ChanInfo &info, bool relay)
 			ch = chanMgr->findAndRelay(info);
 			if (ch)
 			{
-				info = ch->info; //get updated channel info 
+				info = ch->info; //get updated channel info
 				return true;
 			}
 		}
@@ -1533,7 +1533,7 @@ Servent *ServMgr::findConnection(Servent::TYPE t,GnuID &sid)
 	{
 		if (sv->isConnected())
 			if (sv->type == t)
-				if (sv->remoteID.isSame(sid))				
+				if (sv->remoteID.isSame(sid))
 					return sv;
 		sv=sv->next;
 	}
@@ -1581,7 +1581,7 @@ void ServMgr::procConnectArgs(char *str,ChanInfo &info)
 				h.fromStrName(arg,DEFAULT_PORT);
 				ChanHit hit;
 				hit.init();
-				hit.host = h; 
+				hit.host = h;
 				hit.rhost[0] = h;
 				hit.rhost[1].init();
 				hit.chanID = info.id;
@@ -1692,7 +1692,7 @@ int ServMgr::clientProc(ThreadInfo *thread)
 			while (s)
 			{
 
-				if (s->type == Servent::T_OUTGOING) 
+				if (s->type == Servent::T_OUTGOING)
 					s->thread.active = false;
 				s=s->next;
 			}
@@ -1794,7 +1794,7 @@ void ServMgr::broadcastRootSettings(bool getUpdate)
 int ServMgr::broadcastPacket(ChanPacket &pack,GnuID &chanID,GnuID &srcID, GnuID &destID, Servent::TYPE type)
 {
 	int cnt=0;
-	
+
 	Servent *sv = servents;
 	while (sv)
 	{
@@ -1816,7 +1816,7 @@ int ServMgr::idleProc(ThreadInfo *thread)
 
 
 	// nothing much to do for the first couple of seconds, so just hang around.
-	sys->sleep(2000);	
+	sys->sleep(2000);
 
 	unsigned int lastBWcheck=0;
 	unsigned int bytesIn=0,bytesOut=0;
@@ -1971,7 +1971,7 @@ int ServMgr::serverProc(ThreadInfo *thread)
 
 			servMgr->setFirewall(ServMgr::FW_ON);
 		}
-			
+
 		sys->sleepIdle();
 
 	}
@@ -2093,11 +2093,11 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
 	else if (var == "totalConnected")
 		sprintf(buf,"%d",totalConnected());
 	else if (var == "numServHosts")
-		sprintf(buf,"%d",numHosts(ServHost::T_SERVENT));		
+		sprintf(buf,"%d",numHosts(ServHost::T_SERVENT));
 	else if (var == "numServents")
-		sprintf(buf,"%d",numServents());		
+		sprintf(buf,"%d",numServents());
 	else if (var == "serverPort")
-		sprintf(buf,"%d",serverHost.port);		
+		sprintf(buf,"%d",serverHost.port);
 	else if (var == "serverIP")
 		serverHost.IPtoStr(buf);
 	else if (var == "ypAddress")
@@ -2210,16 +2210,16 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
 			return false;
 	}else if (var == "test")
 	{
-		out.writeUTF8(0x304b);		
-		out.writeUTF8(0x304d);		
-		out.writeUTF8(0x304f);		
-		out.writeUTF8(0x3051);		
-		out.writeUTF8(0x3053);	
+		out.writeUTF8(0x304b);
+		out.writeUTF8(0x304d);
+		out.writeUTF8(0x304f);
+		out.writeUTF8(0x3051);
+		out.writeUTF8(0x3053);
 
-		out.writeUTF8(0x0041);	
-		out.writeUTF8(0x0042);	
-		out.writeUTF8(0x0043);	
-		out.writeUTF8(0x0044);	
+		out.writeUTF8(0x0041);
+		out.writeUTF8(0x0042);
+		out.writeUTF8(0x0043);
+		out.writeUTF8(0x0044);
 
 		out.writeChar('a');
 		out.writeChar('b');

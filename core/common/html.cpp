@@ -2,7 +2,7 @@
 // File : html.cpp
 // Date: 4-apr-2002
 // Author: giles
-// Desc: 
+// Desc:
 //		HTML protocol handling
 //
 // (c) 2002 peercast.org
@@ -92,7 +92,7 @@ void HTML::writeVariable(Stream &s,const String &varName, int loop)
 			BCID *bcid = servMgr->findValidBCID(loop);
 			if (bcid)
 				r = bcid->writeVariable(s,varName+10);
-		
+
 		}else if (varName == "loop.indexEven")
 		{
 			s.writeStringF("%d",(loop&1)==0);
@@ -153,7 +153,7 @@ void HTML::writeVariable(Stream &s,const String &varName, int loop)
 			const char *a = getCGIarg(tmplArgs,v);
 			if (a)
 			{
-				s.writeString(a);		
+				s.writeString(a);
 				r=true;
 			}
 		}
@@ -183,11 +183,11 @@ bool HTML::getBoolVariable(const String &varName,int loop)
 
 	// integer
 	if ((val[0] >= '0') && (val[0] <= '9'))
-		return atoi(val.cstr()) != 0;	
+		return atoi(val.cstr()) != 0;
 
 	// string
 	if (val[0]!=0)
-		return true;	
+		return true;
 
 	return false;
 }
@@ -488,7 +488,7 @@ void HTML::startTag(const char *tag, const char *fmt,...)
 		vsprintf(tmp,fmt,ap);
 		startNode(tag,tmp);
 
-	   	va_end(ap);	
+	   	va_end(ap);
 	}else{
 		startNode(tag,NULL);
 	}
@@ -506,7 +506,7 @@ void HTML::startTagEnd(const char *tag, const char *fmt,...)
 		vsprintf(tmp,fmt,ap);
 		startNode(tag,tmp);
 
-	   	va_end(ap);	
+	   	va_end(ap);
 	}else{
 		startNode(tag,NULL);
 	}
@@ -522,7 +522,7 @@ void HTML::startSingleTagEnd(const char *fmt,...)
 	vsprintf(tmp,fmt,ap);
 	startNode(tmp);
 
-	va_end(ap);	
+	va_end(ap);
 	end();
 }
 

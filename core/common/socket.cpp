@@ -2,9 +2,9 @@
 // File : socket.cpp
 // Date: 4-apr-2002
 // Author: giles
-// Desc: 
+// Desc:
 //		ClientSocket is a generic socket interface, Non OS/HW dependant.
-//		
+//
 // (c) 2002 peercast.org
 // ------------------------------------------------
 // This program is free software; you can redistribute it and/or modify

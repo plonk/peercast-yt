@@ -2,9 +2,9 @@
 // File : main.cpp
 // Date: 4-apr-2002
 // Author: giles
-// Desc: 
+// Desc:
 //		see .cpp for details
-//		
+//
 // (c) 2002 peercast.org
 // ------------------------------------------------
 // This program is free software; you can redistribute it and/or modify
@@ -55,7 +55,7 @@ public:
 		return iniFileName;
 	}
 
-	virtual const char *APICALL getClientTypeOS() 
+	virtual const char *APICALL getClientTypeOS()
 	{
 		return PCX_OS_MACOSX;
 	}
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
 	peercastInst->init();
 
 
-	signal(SIGINT, sigProc); 
+	signal(SIGINT, sigProc);
 
 	while (!quit)
 		sys->sleep(1000);

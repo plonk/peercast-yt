@@ -28,7 +28,7 @@ enum {
 	,kListenersColumn = 'LRLY'
 	,kStatusColumn    = 'STAT'
 	,kKeepColumn      = 'KEEP'
-	
+
 	,kNumProps = 7
 };
 
@@ -64,8 +64,8 @@ static const ControlID skUpdateVersionButtonID = { 'PCST', 1007 };
 OSXPeercastApp::OSXPeercastApp( const char *appPath, const char *iniFilename, int argc, char* argv[]
 								,WindowRef window, const ControlID& dbControlID )
 : mIniFileName    ()
-,mRelayBrowser    ( window, dbControlID, 
-					static_cast<DataBrowserItemDataProcPtr>(itemDataCallback), 
+,mRelayBrowser    ( window, dbControlID,
+					static_cast<DataBrowserItemDataProcPtr>(itemDataCallback),
 					static_cast<DataBrowserItemNotificationProcPtr>(itemNotificationCallback) )
 ,mWindowRef       ( window )
 ,mUpTime		     ('PCST', 1001)
@@ -83,26 +83,26 @@ OSXPeercastApp::OSXPeercastApp( const char *appPath, const char *iniFilename, in
 ,mAppPath             ( appPath )
 {
 	mIniFileName.set(iniFilename);
-	
+
 	if (argc > 2)
 	{
 		if (strcmp(argv[1],"-inifile")==0)
 			mIniFileName.setFromString(argv[2]);
 	}
-	
+
 	DataBrowserPropertyFlags flags;
-	
+
 	mRelayBrowser.getPropertyFlags( kKeepColumn, &flags );
-	
+
 	flags |= kDataBrowserPropertyIsEditable;
-	
+
 	mRelayBrowser.setPropertyFlags( kKeepColumn, flags );
-	
+
 	installAppEventHandler();
 	mTabControl.installHandler();
-	installWindowHandler( window );	
+	installWindowHandler( window );
 	installPeercastEventHandler( window );
-	
+
 	enableNewVersionButton( false );
 }
 //------------------------------------------------------------------------
@@ -117,7 +117,7 @@ OSStatus OSXPeercastApp::installAppEventHandler()
 										   ,GetEventTypeCount( appEvents )
 										   ,appEvents
 										   ,NULL
-										   ,NULL ); 
+										   ,NULL );
 }
 //------------------------------------------------------------------------
 OSStatus OSXPeercastApp::installWindowHandler( WindowRef window )
@@ -139,7 +139,7 @@ OSStatus OSXPeercastApp::installWindowHandler( WindowRef window )
 OSStatus OSXPeercastApp::appEventHandler( EventHandlerCallRef inCallRef, EventRef inEvent, void* inUserData )
 {
 	HICommand command;
-	
+
 	OSStatus err = GetEventParameter(  inEvent
 									  ,kEventParamDirectObject
 									  ,typeHICommand
@@ -147,13 +147,13 @@ OSStatus OSXPeercastApp::appEventHandler( EventHandlerCallRef inCallRef, EventRe
 									  ,sizeof(HICommand)
 									  ,NULL
 									  ,&command );
-					  
+
 	if( err == noErr )
 	{
 		switch( command.commandID )
 		{
 			case FOUR_CHAR_CODE('PHLP'):
-				sys->getURL("http://www.peercast.org/help.php"); 
+				sys->getURL("http://www.peercast.org/help.php");
 				break;
 		}
 	}
@@ -164,7 +164,7 @@ OSStatus OSXPeercastApp::mainWindowHandler( EventHandlerCallRef inCallRef, Event
 {
 	HICommand command;
 	OSXPeercastApp *pOSXApp = static_cast<OSXPeercastApp*>( inUserData );
-	
+
 	OSStatus err = GetEventParameter(  inEvent
 									  ,kEventParamDirectObject
 									  ,typeHICommand
@@ -172,7 +172,7 @@ OSStatus OSXPeercastApp::mainWindowHandler( EventHandlerCallRef inCallRef, Event
 									  ,sizeof(HICommand)
 									  ,NULL
 									  ,&command );
-									  
+
 	if( err == noErr )
 	{
 		switch( command.commandID )
@@ -181,7 +181,7 @@ OSStatus OSXPeercastApp::mainWindowHandler( EventHandlerCallRef inCallRef, Event
 				pOSXApp->saveSettings();
 				break;
 			case FOUR_CHAR_CODE('BUMP'):
-				pOSXApp->onBumpClicked();				
+				pOSXApp->onBumpClicked();
 				break;
 			case FOUR_CHAR_CODE('CMNT'):
 				pOSXApp->onCommentClicked();
@@ -213,18 +213,18 @@ OSStatus OSXPeercastApp::installPeercastEventHandler( WindowRef theWindow )
 		,{ kEventClassPeercast, kEventUpdateChannel }
 		,{ kEventClassPeercast, kEventStopChannel }
 	};
-	
-	return InstallEventHandler(  GetApplicationEventTarget() 
+
+	return InstallEventHandler(  GetApplicationEventTarget()
 								,mPeercastEventHandler.eventHandler()
 								,GetEventTypeCount( peercastEventTypes )
 								,peercastEventTypes, this, NULL );
 }
 //------------------------------------------------------------------------
 void OSXPeercastApp::enableNewVersionButton( const Boolean visible )
-{	
+{
 	ControlRef newVerButton;
-	GetControlByID( mWindowRef, &skUpdateVersionButtonID, &newVerButton );	
-	
+	GetControlByID( mWindowRef, &skUpdateVersionButtonID, &newVerButton );
+
 	if( newVerButton != NULL )
 	{
 		SetControlVisibility( newVerButton, visible, true );
@@ -243,13 +243,13 @@ void OSXPeercastApp::addChanStatus( TChanStatusPtr& chanStatus )
 }
 //------------------------------------------------------------------------
 void OSXPeercastApp::updateChanStatus( ChanStatus& newStatus )
-{		
+{
 	TChannelList::iterator iter = findChannel( newStatus.getId() );
-	
+
 	if( iter != mChannelList.end() )
 	{
 		TChanStatusPtr& chanStatus = *iter;
-			
+
 		chanStatus->update( newStatus ); // copy new status
 
 		const DataBrowserItemID itemID = reinterpret_cast<DataBrowserItemID>(chanStatus.get());
@@ -260,14 +260,14 @@ void OSXPeercastApp::updateChanStatus( ChanStatus& newStatus )
 void OSXPeercastApp::removeChanStatus( GnuID& id )
 {
 	TChannelList::iterator iter = findChannel( id );
-	
-	if( iter != mChannelList.end() ) 
+
+	if( iter != mChannelList.end() )
 	{
 		const TChanStatusPtr& chanStatus = *iter;
 
 		const DataBrowserItemID itemID = reinterpret_cast<DataBrowserItemID>(chanStatus.get());
 		OSStatus err = mRelayBrowser.removeItems( kDataBrowserNoItem, 1, &itemID, kChannelColumn );
-		
+
 		mChannelList.erase( iter ); // remove from list
 	}
 }
@@ -279,13 +279,13 @@ OSStatus OSXPeercastApp::peercastEventHandler( EventHandlerCallRef inCallRef, Ev
 		case kEventClassPeercast:
 			{
 				OSXPeercastApp *pOSXApp = static_cast<OSXPeercastApp*>( inUserData );
-					
+
 				switch( GetEventKind( inEvent ) )
 				{
 					case kEventStartChannel:
 						{
 							TChanXferPkt xferPkt;
-							
+
 							OSStatus err = GetEventParameter( inEvent, kEventParamChanStatus,
 															  typeChanStatus, NULL,
 															  sizeof(TChanXferPkt), NULL,
@@ -295,37 +295,37 @@ OSStatus OSXPeercastApp::peercastEventHandler( EventHandlerCallRef inCallRef, Ev
 
 							if( err != noErr )
 								return err;
-								
+
 							pOSXApp->addChanStatus( chanStatus );
 						}
 						break;
-						
+
 					case kEventUpdateChannel:
 						{
 							TChanXferPkt xferPkt;
-						
+
 							OSStatus err = GetEventParameter( inEvent, kEventParamChanStatus, typeChanStatus, NULL, sizeof(TChanXferPkt), NULL, &xferPkt );
-							
+
 							TChanStatusPtr chanStatus( xferPkt.mpData );
-							
+
 							if( err != noErr )
 								return err;
-								
+
 							if( chanStatus.get() != NULL )
-							{									
+							{
 								pOSXApp->updateChanStatus( *chanStatus );
 							}
 						}
 						break;
-						
+
 					case kEventStopChannel:
 						{
 							GnuID chanId;
-							
+
 							OSStatus err = GetEventParameter( inEvent, kEventParamChanStatus, typeChanStatus, NULL, sizeof(GnuID), NULL, &chanId );
 							if( err != noErr )
 								return err;
-								
+
 							pOSXApp->removeChanStatus( chanId );
 						}
 						break;
@@ -333,7 +333,7 @@ OSStatus OSXPeercastApp::peercastEventHandler( EventHandlerCallRef inCallRef, Ev
 			}
 			break;
 	}
-	
+
 	return eventNotHandledErr;
 }
 //------------------------------------------------------------------------
@@ -352,7 +352,7 @@ void OSXPeercastApp::notifyMessage( ServMgr::NOTIFY_TYPE type, const char *messa
 				enableNewVersionButton(true);
 			}
 			break;
-			
+
 		case ServMgr::NT_PEERCAST:
 			break;
 	}
@@ -363,15 +363,15 @@ void OSXPeercastApp::channelStart(ChanInfo *pChanInfo)
 	if( Channel *pChannel = chanMgr->findChannelByID( pChanInfo->id ) )
 	{
 		CEvent peercastEvent( kEventClassPeercast,  kEventStartChannel );
-		
+
 		TChanStatusPtr chanStatus( new ChanStatus( *pChannel ) );
-		
+
 		if( chanStatus.get() != NULL )
 		{
 			chanStatus->update( *pChannel );
-			
+
 			TChanXferPkt xferPkt( chanStatus.release() );
-			
+
 			peercastEvent.setParameter( kEventParamChanStatus, typeChanStatus, sizeof(TChanXferPkt), &xferPkt );
 			peercastEvent.postToQueue( GetMainEventQueue(), kEventPriorityHigh );
 		}
@@ -383,16 +383,16 @@ void OSXPeercastApp::channelUpdate(ChanInfo *pChanInfo )
 	if( Channel *pChannel = chanMgr->findChannelByID( pChanInfo->id ) )
 	{
 		CEvent peercastEvent( kEventClassPeercast, kEventUpdateChannel );
-		
+
 		TChanStatusPtr chanStatus( new ChanStatus( *pChannel ) );
-		
+
 		//if( chanStatus.valid() )
 		if( chanStatus.get() != NULL )
 		{
 			chanStatus->update( *pChannel );
-			
+
 			TChanXferPkt xferPkt( chanStatus.release() );
-			
+
 			peercastEvent.setParameter( kEventParamChanStatus, typeChanStatus, sizeof(TChanXferPkt), &xferPkt );
 			peercastEvent.postToQueue( GetMainEventQueue(), kEventPriorityHigh );
 		}
@@ -404,7 +404,7 @@ void OSXPeercastApp::channelStop(ChanInfo *pChanInfo)
 	if( Channel *pChannel = chanMgr->findChannelByID( pChanInfo->id ) )
 	{
 		CEvent peercastEvent( kEventClassPeercast,  kEventStopChannel );
-		
+
 		peercastEvent.setParameter( kEventParamChanStatus, typeChanStatus, sizeof(GnuID), &pChanInfo->id );
 		peercastEvent.postToQueue( GetMainEventQueue(), kEventPriorityHigh );
 	}
@@ -413,30 +413,30 @@ void OSXPeercastApp::channelStop(ChanInfo *pChanInfo)
 OSStatus setItemDataText( DataBrowserItemDataRef itemData, const char* text )
 {
 	if( CFStringRef controlText = CFStringCreateWithFormat( NULL, NULL, CFSTR("%s"), text ) )
-	{	
+	{
 		OSStatus err = SetDataBrowserItemDataText( itemData, controlText );
 		CFRelease( controlText );
-	
+
 		return err;
 	}
-	
+
 	return noErr;
 }
 //------------------------------------------------------------------------
 OSStatus setItemDataInteger( DataBrowserItemDataRef itemData, const int value )
 {
 	if( CFStringRef controlText = CFStringCreateWithFormat( NULL, NULL, CFSTR("%d"), value ) )
-	{	
+	{
 		OSStatus err = SetDataBrowserItemDataText( itemData, controlText );
 		CFRelease( controlText );
-	
+
 		return err;
 	}
-	
+
 	return noErr;
 }
 //------------------------------------------------------------------------
-OSStatus OSXPeercastApp::itemDataCallback( ControlRef browser, 
+OSStatus OSXPeercastApp::itemDataCallback( ControlRef browser,
 						   DataBrowserItemID itemID,
 						   DataBrowserPropertyID property,
 						   DataBrowserItemDataRef itemData,
@@ -444,11 +444,11 @@ OSStatus OSXPeercastApp::itemDataCallback( ControlRef browser,
 {
 	char workBuffer[64];
 	OSStatus status = noErr;
-	
+
 	if( !changeValue )
 	{
 		ChanStatus *pChanStatus = reinterpret_cast<ChanStatus *>(itemID);
-			
+
 		switch( property )
 		{
 			case kChannelColumn:
@@ -456,25 +456,25 @@ OSStatus OSXPeercastApp::itemDataCallback( ControlRef browser,
 
 			case kBitRateColumn:
 				return setItemDataInteger( itemData, pChanStatus->getBitrate() );
-				
+
 			case kStreamColumn:
 				return setItemDataText( itemData, pChanStatus->getStreamType().c_str() );
-				
+
 			case kRelayColumn:
 				{
 					sprintf( workBuffer, "%d / %d", pChanStatus->totalListeners(), pChanStatus->totalRelays() );
 					return setItemDataText( itemData, workBuffer );
 				}
-				
+
 			case kListenersColumn:
 				{
 					sprintf( workBuffer, "%d / %d", pChanStatus->localListeners(), pChanStatus->localRelays() );
 					return setItemDataText( itemData, workBuffer );
 				}
-				
+
 			case kStatusColumn:
 				return setItemDataText( itemData, pChanStatus->getStatus().c_str() );
-				
+
 			case kKeepColumn:
 				return	SetDataBrowserItemDataButtonValue( itemData, pChanStatus->stayConnected() ? kThemeButtonOn : kThemeButtonOff );
 		}
@@ -489,22 +489,22 @@ OSStatus OSXPeercastApp::itemDataCallback( ControlRef browser,
 				{
 					ThemeButtonValue buttonValue;
 					status = GetDataBrowserItemDataButtonValue( itemData, &buttonValue );
-						
+
 					if( status == noErr )
 					{
 						pChanStatus->stayConnected() = (buttonValue==kThemeButtonOn);
 
 						Channel *pChannel = chanMgr->findChannelByID( pChanStatus->getId() );
-			
+
 						if( pChannel )
 						{
 							pChannel->stayConnected = pChanStatus->stayConnected();
-						}					
+						}
 					}
 					return SetDataBrowserItemDataButtonValue( itemData, buttonValue );
 				}
 				break;
-		}			
+		}
 	}
 
 	return errDataBrowserPropertyNotSupported;
@@ -513,7 +513,7 @@ OSStatus OSXPeercastApp::itemDataCallback( ControlRef browser,
 OSStatus OSXPeercastApp::redisplayInfo()
 {
 	showStationStats();
-	
+
 	return noErr;
 }
 
@@ -521,16 +521,16 @@ void OSXPeercastApp::showStationStats()
 {
 	if( !servMgr || !chanMgr )
 		return;
-		
+
 	char workBuffer[256];
 	String upTimeString;
-	
+
 	upTimeString.setFromStopwatch(servMgr->getUptime());
 	mUpTime.setText( mWindowRef, upTimeString.cstr() );
-	
+
 	mDirectConnections.setIntValue( mWindowRef, servMgr->numStreams( Servent::T_DIRECT, true ) );
 	mRelayConnections.setIntValue( mWindowRef, servMgr->numStreams( Servent::T_RELAY, true ) );
-	
+
 	sprintf( workBuffer, "%d / %d", servMgr->numConnected(Servent::T_CIN), servMgr->numConnected(Servent::T_COUT) );
 	mCinCoutConnections.setText( mWindowRef, workBuffer );
 	mPGNUConnections.setIntValue( mWindowRef, servMgr->numConnected(Servent::T_PGNU) );
@@ -542,17 +542,17 @@ void OSXPeercastApp::handleButtonEvent( TButtonCallback fButtonCallback )
 	if( Handle selectedItems = NewHandle(0) )
 	{
 		OSStatus err = mRelayBrowser.getItems( kDataBrowserNoItem, false, kDataBrowserItemIsSelected, selectedItems );
-		
+
 		if( err == noErr )
 		{
 			const UInt32 numSelectedItems = GetHandleSize(selectedItems) / sizeof(DataBrowserItemID);
-			
+
 			if( numSelectedItems > 0 )
 			{
 				(*this.*fButtonCallback)( selectedItems, numSelectedItems );
 			}
 		}
-		
+
 		DisposeHandle( selectedItems );
 	}
 }
@@ -561,13 +561,13 @@ void OSXPeercastApp::commentClicked( const Handle selectedItems, const UInt32 nu
 {
 	char strId[128];
 	char urlBuf[256];
-	
+
 	const DataBrowserItemID *pItemIDList = reinterpret_cast<const DataBrowserItemID *>(selectedItems[0]);
 
 	for(int chIndex=0; chIndex<numSelectedItems; ++chIndex)
 	{
 		ChanStatus *pChannel = reinterpret_cast<ChanStatus*>(static_cast<DataBrowserItemID>(pItemIDList[chIndex]));
-		
+
 		if( pChannel )
 		{
 			String channelName;
@@ -575,7 +575,7 @@ void OSXPeercastApp::commentClicked( const Handle selectedItems, const UInt32 nu
 			channelName.convertTo( String::T_ESC );
 
 			pChannel->getId().toStr( strId );
-			
+
 			sprintf( urlBuf, "%schat.php?cid=%s&cn=%s", skYPString, strId, channelName.cstr() );
 
 			sys->getURL( urlBuf );
@@ -590,12 +590,12 @@ void OSXPeercastApp::bumpClicked( const Handle selectedItems, const UInt32 numSe
 	for(int chIndex=0; chIndex<numSelectedItems; ++chIndex)
 	{
 		ChanStatus *pChanStatus = reinterpret_cast<ChanStatus*>(static_cast<DataBrowserItemID>(pItemIDList[chIndex]));
-		
+
 		if( pChanStatus )
 		{
 			mLock.on();
 			Channel *pChannel = chanMgr->findChannelByID( pChanStatus->getId() );
-			
+
 			if( pChannel )
 			{
 				pChannel->bump = true;
@@ -610,49 +610,49 @@ void OSXPeercastApp::itemNotificationCallback( ControlRef browser,
 												  DataBrowserItemNotification message )
 {
 	OSStatus status = noErr;
-	
+
 	WindowRef window = GetControlOwner( browser );
-	
+
 	switch( message )
 	{
 		case kDataBrowserItemSelected:
 			{
 				ControlRef bumpButton;
 				ControlRef commentButton;
-				
+
 				GetControlByID( window, &skBumpButtonID, &bumpButton );
 				GetControlByID( window, &skCommentButtonID, &commentButton );
-				
+
 				if( bumpButton )
-				{				
+				{
 					EnableControl( bumpButton );
 				}
-				
+
 				if( commentButton )
 				{
 					EnableControl( commentButton );
 				}
 			}
 			break;
-			
+
 		case kDataBrowserItemDeselected:
 			{
 				UInt32 numSelected;
 				GetDataBrowserItemCount( browser, kDataBrowserNoItem, false, kDataBrowserItemIsSelected, &numSelected );
-				
+
 				if( numSelected == 0 )
 				{
 					ControlRef bumpButton;
 					ControlRef commentButton;
-				
+
 					GetControlByID( window, &skBumpButtonID, &bumpButton );
 					GetControlByID( window, &skCommentButtonID, &commentButton );
-				
+
 					if( bumpButton )
-					{				
+					{
 						DisableControl( bumpButton );
 					}
-				
+
 					if( commentButton )
 					{
 						DisableControl( commentButton );

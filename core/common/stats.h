@@ -2,7 +2,7 @@
 // File : stats.h
 // Date: 4-apr-2002
 // Author: giles
-// Desc: 
+// Desc:
 //
 // (c) 2002 peercast.org
 // ------------------------------------------------
@@ -53,8 +53,8 @@ public:
 		NUMDEAD,
 		PACKETDATAIN,
 		PACKETDATAOUT,
-		PACKETSEND,		
-		
+		PACKETSEND,
+
 
 		BYTESIN,
 		BYTESOUT,

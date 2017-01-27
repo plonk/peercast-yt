@@ -2,7 +2,7 @@
 // File : inifile.h
 // Date: 4-apr-2002
 // Author: giles
-// Desc: 
+// Desc:
 //
 // (c) 2002 peercast.org
 // ------------------------------------------------
@@ -23,7 +23,7 @@
 #include "stream.h"
 
 // -----------------------------------------
-class IniFile 
+class IniFile
 {
 public:
 	bool	openReadOnly(const char *);

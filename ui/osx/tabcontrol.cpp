@@ -34,21 +34,21 @@ TabControl::TabControl( const int signature, const int id, WindowRef windowRef )
 {
 	mControlID.signature = signature;
 	mControlID.id        = id;
-	
+
 	setInitialTab( windowRef );
 }
 
 OSStatus TabControl::installHandler()
 {
 	ControlRef tabControlRef;
-	
+
 	static const EventTypeSpec tabControlEvents[] =
 	{
 		 { kEventClassControl, kEventControlHit }
 		,{ kEventClassWindow,  kEventWindowActivated }
 	};
-	
-	GetControlByID( getWindow(), &getID(), &tabControlRef );	
+
+	GetControlByID( getWindow(), &getID(), &tabControlRef );
 
 	return InstallControlEventHandler(  tabControlRef
 								       ,mEventHandler.eventHandler()
@@ -62,7 +62,7 @@ void TabControl::updateSettings()
 {
 	if( !servMgr || !chanMgr )
 		return;
-		
+
 	mLock.on();
 	mYPAddress.setText( mWindowRef, servMgr->rootHost );
 	mDJMessage.setText( mWindowRef, chanMgr->broadcastMsg );
@@ -87,10 +87,10 @@ void TabControl::saveSettings()
 void TabControl::setInitialTab(WindowRef window)
 {
 	ControlID controlID = skTabItemID;
-	
+
 	for(short i=1; i<tabList[0]+1; ++i)
 	{
-		controlID.id = tabList[i];	
+		controlID.id = tabList[i];
 		SetControlVisibility( getControlRef( window, controlID ), false, true );
 	}
 
@@ -105,7 +105,7 @@ ControlRef TabControl::getControlRef( WindowRef window, const ControlID& control
 {
 	ControlRef controlRef = NULL;
 	GetControlByID( window, &controlID, &controlRef );
-	
+
 	return controlRef;
 }
 
@@ -121,11 +121,11 @@ OSStatus TabControl::handler( EventHandlerCallRef inCallRef, EventRef inEvent, v
 				ControlRef  tabControl = getControlRef( window, tControl.getID() );
 
 				const short controlValue = GetControlValue( tabControl );
-	
+
 				if( controlValue != tControl.mLastTabIndex )
 				{
 					tControl.updateSettings();
-					
+
 					switchItem( window, tabControl, controlValue );
 					tControl.mLastTabIndex = controlValue;
 					return noErr;
@@ -133,7 +133,7 @@ OSStatus TabControl::handler( EventHandlerCallRef inCallRef, EventRef inEvent, v
 			}
 			break;
 	}
-	
+
 	return eventNotHandledErr;
 }
 
@@ -141,12 +141,12 @@ void TabControl::switchItem( WindowRef window, ControlRef tabControl, const shor
 {
 	ControlRef selectedPaneControl = NULL;
 	ControlID  controlID           = skTabItemID;
-	
+
 	for(short i=1; i<tabList[0]+1; ++i)
 	{
 		controlID.id = tabList[i];
 		ControlRef userPaneControl = getControlRef( window, controlID );
-		
+
 		if( i == currentTabIndex )
 		{
 			selectedPaneControl = userPaneControl;
@@ -156,12 +156,12 @@ void TabControl::switchItem( WindowRef window, ControlRef tabControl, const shor
 			SetControlVisibility( userPaneControl, false, true );
 		}
 	}
-	
+
 	if( selectedPaneControl != NULL )
 	{
 		(void)ClearKeyboardFocus( window );
 		SetControlVisibility( selectedPaneControl, true, true );
 	}
-	
+
 	Draw1Control( tabControl );
 }

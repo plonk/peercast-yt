@@ -10,7 +10,7 @@ class HTML : public XML
 public:
 	HTML(const char *);
 
-	
+
 	void	startNode(XML::Node *, const char * = NULL);
 	void	addLink(const char *, const char *);
 	void	addArgLink(const char *, const char *);

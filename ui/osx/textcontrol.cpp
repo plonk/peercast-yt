@@ -32,15 +32,15 @@ void TextControl::setText( WindowRef window, const char* text )
 void TextControl::setText( WindowRef window, CFStringRef text )
 {
 	ControlRef controlRef = NULL;
-	
+
 	OSStatus err = GetControlByID( window, &mID, &controlRef );
-	
+
 	err = SetControlData(   controlRef
 						   ,0
 						   ,kControlEditTextCFStringTag
 						   ,sizeof(CFStringRef)
 						   ,&text );
-								   
+
 	DrawOneControl( controlRef );
 }
 
@@ -49,7 +49,7 @@ CFStringRef TextControl::getStringRef( WindowRef window )
 	if( mStringRef == NULL )
 	{
 		ControlRef controlRef=NULL;
-		
+
 		OSStatus err = GetControlByID( window, &mID, &controlRef );
 		err = GetControlData( controlRef
 							 ,0
@@ -58,6 +58,6 @@ CFStringRef TextControl::getStringRef( WindowRef window )
 							 ,&mStringRef
 							 ,NULL );
 	}
-	
-	return mStringRef;	
+
+	return mStringRef;
 }

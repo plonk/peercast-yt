@@ -2,8 +2,8 @@
 // File : xml.cpp
 // Date: 4-apr-2002
 // Author: giles
-// Desc: 
-//		Basic XML parsing/creation 
+// Desc:
+//		Basic XML parsing/creation
 //
 // (c) 2002 peercast.org
 // ------------------------------------------------
@@ -210,7 +210,7 @@ XML::Node::Node(const char *fmt,...)
 	vsprintf(tmp,fmt,ap);
 	setAttributes(tmp);
 
-   	va_end(ap);	
+   	va_end(ap);
 	init();
 }
 
@@ -220,7 +220,7 @@ void XML::Node::init()
     parent = sibling = child = NULL;
     contData = NULL;
     userPtr = NULL;
-}	
+}
 // ----------------------------------
 int XML::Node::findAttrInt(const char *name)
 {

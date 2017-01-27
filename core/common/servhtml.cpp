@@ -2,7 +2,7 @@
 // File : servhtml.cpp
 // Date: 4-apr-2002
 // Author: giles
-// Desc: 
+// Desc:
 //		HTML support for servents, TODO: should be in its own class
 //
 // (c) 2002 peercast.org
@@ -75,7 +75,7 @@ void Servent::addHeader(HTML &html, int sel)
 	html.startTag("table width=\"100%%\"");
 
 		html.startTag("tr bgcolor=\"#CCCCCC\"");
-			
+
 			if (sel >= 0)
 			{
 				html.startTag("td");
@@ -150,7 +150,7 @@ void Servent::addFooter(HTML &html)
 	html.startTag("table width=\"100%%\"");
 
 		html.startTag("tr bgcolor=\"#CCCCCC\"");
-			
+
 			html.startTag("td");
 				html.startTagEnd("div align=\"center\"","&copy; <a target=\"_blank\" href=/admin?cmd=redirect&url=www.peercast.org>peercast.org</a> 2004");
 			html.end();
@@ -212,12 +212,12 @@ void Servent::addLoginPage(HTML &html)
 	html.startTag("table border=\"0\" align=\"center\"");
 
 		html.startTag("tr bgcolor=\"#cccccc\" align=\"center\"");
-			html.startTagEnd("td colspan=\"2\" ","<b>Login</b>"); 
+			html.startTagEnd("td colspan=\"2\" ","<b>Login</b>");
 		html.end();
 
 		html.startTag("form method=\"get\" action=\"/admin?\"");
 
-		html.startSingleTagEnd("input name=\"cmd\" type=\"hidden\" value=\"login\"");					
+		html.startSingleTagEnd("input name=\"cmd\" type=\"hidden\" value=\"login\"");
 
 		int row=0;
 		// password
@@ -232,7 +232,7 @@ void Servent::addLoginPage(HTML &html)
 		html.startTableRow(row++);
 			html.startTagEnd("td","");
 			html.startTag("td");
-				html.startTagEnd("input name=\"submit\" type=\"submit\" id=\"submit\" value=\"Login\"");					
+				html.startTagEnd("input name=\"submit\" type=\"submit\" id=\"submit\" value=\"Login\"");
 			html.end();
 		html.end();
 	html.end();
@@ -251,20 +251,20 @@ void Servent::addLogoutPage(HTML &html)
 
 				html.startTag("tr align=\"center\"");
 					html.startTag("td");
-					if ((servMgr->authType != ServMgr::AUTH_HTTPBASIC) 
+					if ((servMgr->authType != ServMgr::AUTH_HTTPBASIC)
 					     && !sock->host.isLocalhost()
 						)
 					{
 						html.startTag("form method=\"get\" action=\"/admin\"");
-							html.startTagEnd("input name=\"logout\" type=\"submit\" value=\"Logout\"");					
-							html.startSingleTagEnd("input name=\"cmd\" type=\"hidden\" value=\"logout\"");					
+							html.startTagEnd("input name=\"logout\" type=\"submit\" value=\"Logout\"");
+							html.startSingleTagEnd("input name=\"cmd\" type=\"hidden\" value=\"logout\"");
 						html.end();
 					}
 					html.end();
 					html.startTag("td");
 						html.startTag("form method=\"get\" action=\"/admin\"");
-							html.startTagEnd("input name=\"logout\" type=\"submit\" value=\"Shutdown\"");					
-							html.startSingleTagEnd("input name=\"page\" type=\"hidden\" value=\"shutdown\"");					
+							html.startTagEnd("input name=\"logout\" type=\"submit\" value=\"Shutdown\"");
+							html.startSingleTagEnd("input name=\"page\" type=\"hidden\" value=\"shutdown\"");
 						html.end();
 					html.end();
 
@@ -278,7 +278,7 @@ void Servent::addLogoutPage(HTML &html)
 
 	html.end(); // table
 
-	
+
 	addFooter(html);
 }
 // -----------------------------------
@@ -297,7 +297,7 @@ void addChannelSourceTag(HTML &html, Channel *c)
 	const char *ptype = ChanInfo::getProtocolStr(c->info.srcProtocol);
 
 	if (!c->sourceURL.isEmpty())
-		html.startTagEnd("td","%s-%s:<br>%s",stype,ptype,c->sourceURL.cstr()); 
+		html.startTagEnd("td","%s-%s:<br>%s",stype,ptype,c->sourceURL.cstr());
 	else
 	{
 		char ipStr[64];
@@ -308,7 +308,7 @@ void addChannelSourceTag(HTML &html, Channel *c)
 			strcpy(ipStr,"Unknown");
 		}
 
-		html.startTagEnd("td","%s-%s:<br>%s",stype,ptype,ipStr); 
+		html.startTagEnd("td","%s-%s:<br>%s",stype,ptype,ipStr);
 	}
 }
 
@@ -338,7 +338,7 @@ void	Servent::addChanInfo(HTML &html, ChanInfo *info, Channel *ch)
 
 	html.startTag("table border=\"0\" align=\"center\"");
 		html.startTag("tr bgcolor=\"#cccccc\" align=\"center\"");
-			html.startTagEnd("td colspan=\"2\"","<b>Channel Information</b>"); 
+			html.startTagEnd("td colspan=\"2\"","<b>Channel Information</b>");
 		html.end();
 
 		html.startTableRow(row++);
@@ -413,7 +413,7 @@ void	Servent::addChanInfo(HTML &html, ChanInfo *info, Channel *ch)
 					html.startTagEnd("td","Skips");
 					html.startTagEnd("td","%d",info->numSkips);
 			html.end();
-		
+
 			html.startTableRow(row++);
 				html.startTagEnd("td","Status");
 				html.startTagEnd("td",ch->getStatusStr());
@@ -475,24 +475,24 @@ static int compareHits(ChanHit **c2, ChanHit **c1)
 void	Servent::addChanHits(HTML &html, ChanHitList *chl, ChanHit *source, ChanInfo &info)
 {
 
-	
+
 	html.startTagEnd("br");
 
 	html.startTag("table border=\"0\" align=\"center\"");
 
 		html.startTag("tr bgcolor=\"#cccccc\" align=\"center\"");
-			html.startTagEnd("td"," "); 
-			html.startTagEnd("td","<b>IP:Port</b>"); 
-			html.startTagEnd("td","<b>Hops</b>"); 
-			html.startTagEnd("td","<b>Listeners</b>"); 
-			html.startTagEnd("td","<b>Relays</b>"); 
-			html.startTagEnd("td","<b>Uptime</b>"); 
-			html.startTagEnd("td","<b>Skips</b>"); 
-			html.startTagEnd("td","<b>Push</b>"); 
-			html.startTagEnd("td","<b>Busy</b>"); 
-			html.startTagEnd("td","<b>Tracker</b>"); 
-			html.startTagEnd("td","<b>Agent</b>"); 
-			html.startTagEnd("td","<b>Update</b>"); 
+			html.startTagEnd("td"," ");
+			html.startTagEnd("td","<b>IP:Port</b>");
+			html.startTagEnd("td","<b>Hops</b>");
+			html.startTagEnd("td","<b>Listeners</b>");
+			html.startTagEnd("td","<b>Relays</b>");
+			html.startTagEnd("td","<b>Uptime</b>");
+			html.startTagEnd("td","<b>Skips</b>");
+			html.startTagEnd("td","<b>Push</b>");
+			html.startTagEnd("td","<b>Busy</b>");
+			html.startTagEnd("td","<b>Tracker</b>");
+			html.startTagEnd("td","<b>Agent</b>");
+			html.startTagEnd("td","<b>Update</b>");
 		html.end();
 
 		int i;
@@ -506,7 +506,7 @@ void	Servent::addChanHits(HTML &html, ChanHitList *chl, ChanHit *source, ChanInf
 				hits[numHits++] = &chl->hits[i];
 
 		qsort(hits,numHits,sizeof(ChanHit*),(COMPARE_FUNC)compareHits);
-				
+
 		for(i=0; i<numHits; i++)
 		{
 			ChanHit *ch = hits[i];
@@ -573,7 +573,7 @@ void	Servent::addChanHits(HTML &html, ChanHitList *chl, ChanHit *source, ChanInf
 
 	html.end();
 }
-	
+
 // -----------------------------------
 void Servent::addSettingsPage(HTML &html)
 {
@@ -583,7 +583,7 @@ void Servent::addSettingsPage(HTML &html)
 
 		html.startTag("form method=\"get\" action=\"/admin\"");
 
-			html.startTagEnd("input name=\"cmd\" type=\"hidden\" value=\"apply\"");					
+			html.startTagEnd("input name=\"cmd\" type=\"hidden\" value=\"apply\"");
 
 			html.startTag("tr align=\"center\"");
 				html.startTag("td valign=\"top\"");
@@ -630,7 +630,7 @@ void Servent::addSettingsPage(HTML &html)
 
 			html.startTag("tr align=\"center\"");
 				html.startTag("td colspan=\"2\"");
-					html.startTagEnd("input name=\"submit\" type=\"submit\" value=\"Save Settings\"");					
+					html.startTagEnd("input name=\"submit\" type=\"submit\" value=\"Save Settings\"");
 				html.end();
 			html.end();
 
@@ -639,7 +639,7 @@ void Servent::addSettingsPage(HTML &html)
 	html.end(); // table
 
 	addFooter(html);
-}	
+}
 
 // -----------------------------------
 void Servent::addWinampSettingsPage(HTML &html)
@@ -647,8 +647,8 @@ void Servent::addWinampSettingsPage(HTML &html)
 	addBasicHeader(html);
 
 	html.startTag("form method=\"get\" action=\"/admin\"");
-		html.startTagEnd("input name=\"submit\" type=\"submit\" value=\"Save Settings\"");					
-		html.startTagEnd("input name=\"cmd\" type=\"hidden\" value=\"apply\"");					
+		html.startTagEnd("input name=\"submit\" type=\"submit\" value=\"Save Settings\"");
+		html.startTagEnd("input name=\"cmd\" type=\"hidden\" value=\"apply\"");
 
 		addServerOptions(html);
 		//addClientOptions(html);
@@ -665,13 +665,13 @@ void Servent::addWinampSettingsPage(HTML &html)
 	html.end(); // form
 
 	addFooter(html);
-}	
+}
 
 // -----------------------------------
 static int addStat(HTML &html,int row, int totIn,int totOut, const char *name, Stats::STAT in, Stats::STAT out)
 {
 	html.startTableRow(row++);
-		html.startTagEnd("td",name); 
+		html.startTagEnd("td",name);
 		unsigned int v;
 
 		if ((in) && (totIn))
@@ -696,7 +696,7 @@ static int addStat(HTML &html,int row, int totIn,int totOut, const char *name, S
 			html.startTagEnd("td","-");
 		}
 
-		
+
 	html.end();
 	return row;
 }
@@ -709,15 +709,15 @@ void Servent::addNetStatsPage(HTML &html)
 	html.startTag("table width=\"50%%\" border=\"0\" align=\"center\"");
 		row = 0;
 		html.startTag("tr width=\"100%%\" bgcolor=\"#cccccc\" align=\"center\"");
-			html.startTagEnd("td colspan=\"5\"","<b>Packets</b>"); 
+			html.startTagEnd("td colspan=\"5\"","<b>Packets</b>");
 		html.end();
 
 		html.startTableRow(row++);
-			html.startTagEnd("td"," "); 
-			html.startTagEnd("td","<b>In</b>"); 
-			html.startTagEnd("td","<b>In %s</b>","%%"); 
-			html.startTagEnd("td","<b>Out</b>"); 
-			html.startTagEnd("td","<b>Out %s</b>","%%"); 
+			html.startTagEnd("td"," ");
+			html.startTagEnd("td","<b>In</b>");
+			html.startTagEnd("td","<b>In %s</b>","%%");
+			html.startTagEnd("td","<b>Out</b>");
+			html.startTagEnd("td","<b>Out %s</b>","%%");
 		html.end();
 
 		unsigned int totalIn = stats.getCurrent(Stats::NUMPACKETSIN);
@@ -740,7 +740,7 @@ void Servent::addNetStatsPage(HTML &html)
 		row=addStat(html,row,totalIn,totalOut,"Discarded",Stats::NUMDISCARDED,Stats::NONE);
 
 		html.startTableRow(row++);
-			html.startTagEnd("td","Avg. Size"); 
+			html.startTagEnd("td","Avg. Size");
 
 			if (totalIn)
 				html.startTagEnd("td","%d",stats.getCurrent(Stats::PACKETDATAIN)/totalIn);
@@ -769,7 +769,7 @@ void Servent::addNetStatsPage(HTML &html)
 			for(i=0; i<servMgr->numVersions; i++)
 			{
 				html.startTableRow(row++);
-					html.startTagEnd("td","v%05X",servMgr->clientVersions[i]); 
+					html.startTagEnd("td","v%05X",servMgr->clientVersions[i]);
 					html.startTagEnd("td","%d",servMgr->clientCounts[i]);
 					html.startTagEnd("td","%d",(servMgr->clientCounts[i]*100)/totalIn);
 					html.startTagEnd("td","-");
@@ -787,7 +787,7 @@ void Servent::addNetStatsPage(HTML &html)
 	html.end();
 
 	addFooter(html);
-}	
+}
 
 // -----------------------------------
 void Servent::addInformation(HTML &html)
@@ -795,7 +795,7 @@ void Servent::addInformation(HTML &html)
 	html.startTag("table width=\"100%%\" border=\"0\" align=\"center\"");
 
 		html.startTag("tr bgcolor=\"#cccccc\" align=\"center\"");
-			html.startTagEnd("td colspan=\"2\" ","<b>Information</b>"); 
+			html.startTagEnd("td colspan=\"2\" ","<b>Information</b>");
 		html.end();
 
 
@@ -830,7 +830,7 @@ void Servent::addInformation(HTML &html)
 			html.startTagEnd("td","%d / %d",chanMgr->numRelayed(),chanMgr->numChannels());
 		html.end();
 
-		// direct listeners 
+		// direct listeners
 		html.startTableRow(row++);
 			html.startTagEnd("td","Total listeners");
 			html.startTagEnd("td","%d",chanMgr->numListeners());
@@ -891,7 +891,7 @@ void printTest(const char *tag, const char *fmt,...)
 		//vsprintf(tmp,fmt,ap);
 		//startNode(tag,tmp);
 
-	   	//va_end(ap);	
+	   	//va_end(ap);
 	}else{
 		//startNode(tag,NULL);
 	}
@@ -906,39 +906,39 @@ void Servent::addStatistics(HTML &html)
 
 		row = 0;
 		html.startTag("tr bgcolor=\"#cccccc\" align=\"center\"");
-			html.startTagEnd("td colspan=\"4\"","<b>Bandwidth</b>"); 
+			html.startTagEnd("td colspan=\"4\"","<b>Bandwidth</b>");
 		html.end();
 
 		html.startTableRow(row++);
-			html.startTagEnd("td"," "); 
-			html.startTagEnd("td","<b>In</b>"); 
-			html.startTagEnd("td","<b>Out</b>"); 
-			html.startTagEnd("td","<b>Total</b>"); 
+			html.startTagEnd("td"," ");
+			html.startTagEnd("td","<b>In</b>");
+			html.startTagEnd("td","<b>Out</b>");
+			html.startTagEnd("td","<b>Total</b>");
 		html.end();
 
 		html.startTableRow(row++);
-			html.startTagEnd("td","Total (Kbit/s)"); 
+			html.startTagEnd("td","Total (Kbit/s)");
 			html.startTagEnd("td","%.1f",BYTES_TO_KBPS(stats.getPerSecond(Stats::BYTESIN)));
 			html.startTagEnd("td","%.1f",BYTES_TO_KBPS(stats.getPerSecond(Stats::BYTESOUT)));
 			html.startTagEnd("td","%.1f",BYTES_TO_KBPS(stats.getPerSecond(Stats::BYTESIN) + stats.getPerSecond(Stats::BYTESOUT)));
 		html.end();
 
 		html.startTableRow(row++);
-			html.startTagEnd("td","Internet (Kbit/s)"); 
+			html.startTagEnd("td","Internet (Kbit/s)");
 			html.startTagEnd("td","%.1f",BYTES_TO_KBPS(stats.getPerSecond(Stats::BYTESIN)-stats.getPerSecond(Stats::LOCALBYTESIN)));
 			html.startTagEnd("td","%.1f",BYTES_TO_KBPS(stats.getPerSecond(Stats::BYTESOUT)-stats.getPerSecond(Stats::LOCALBYTESOUT)));
 			html.startTagEnd("td","%.1f",BYTES_TO_KBPS(stats.getPerSecond(Stats::BYTESIN)-stats.getPerSecond(Stats::LOCALBYTESIN) + stats.getPerSecond(Stats::BYTESOUT)-stats.getPerSecond(Stats::LOCALBYTESOUT)));
 		html.end();
 
 		html.startTableRow(row++);
-			html.startTagEnd("td","Network (Kbit/s)"); 
+			html.startTagEnd("td","Network (Kbit/s)");
 			html.startTagEnd("td","%.1f",BYTES_TO_KBPS(stats.getPerSecond(Stats::PACKETDATAIN)));
 			html.startTagEnd("td","%.1f",BYTES_TO_KBPS(stats.getPerSecond(Stats::PACKETDATAOUT)));
 			html.startTagEnd("td","%.1f",BYTES_TO_KBPS(stats.getPerSecond(Stats::PACKETDATAIN)+stats.getPerSecond(Stats::PACKETDATAOUT)));
 		html.end();
 
 		html.startTableRow(row++);
-			html.startTagEnd("td","Packets/sec"); 
+			html.startTagEnd("td","Packets/sec");
 			html.startTagEnd("td","%d",stats.getPerSecond(Stats::NUMPACKETSIN));
 			html.startTagEnd("td","%d",stats.getPerSecond(Stats::NUMPACKETSOUT));
 			html.startTagEnd("td","%d",stats.getPerSecond(Stats::NUMPACKETSIN)+stats.getPerSecond(Stats::NUMPACKETSOUT));
@@ -954,7 +954,7 @@ void Servent::addServerOptions(HTML &html)
 	html.startTag("table width=\"100%%\" border=\"0\" align=\"center\"");
 
 		html.startTag("tr bgcolor=\"#cccccc\" align=\"center\"");
-			html.startTagEnd("td colspan=\"2\" ","<b>Server</b>"); 
+			html.startTagEnd("td colspan=\"2\" ","<b>Server</b>");
 		html.end();
 
 		int row=0;
@@ -1001,7 +1001,7 @@ void Servent::addServerOptions(HTML &html)
 
 		// firewall
 		html.startTableRow(row++);
-			
+
 			html.startTagEnd("td","Type");
 			{
 				switch (servMgr->getFirewall())
@@ -1061,7 +1061,7 @@ void Servent::addClientOptions(HTML &html)
 	html.startTag("table width=\"100%%\" border=\"0\" align=\"center\"");
 
 		html.startTag("tr bgcolor=\"#cccccc\" align=\"center\"");
-			html.startTagEnd("td colspan=\"2\" ","<b>Client</b>"); 
+			html.startTagEnd("td colspan=\"2\" ","<b>Client</b>");
 		html.end();
 
 		int row=0;
@@ -1099,7 +1099,7 @@ void Servent::addBroadcasterOptions(HTML &html)
 	html.startTag("table width=\"100%%\" border=\"0\" align=\"center\"");
 
 		html.startTag("tr bgcolor=\"#cccccc\" align=\"center\"");
-			html.startTagEnd("td colspan=\"2\" ","<b>Broadcasting</b>"); 
+			html.startTagEnd("td colspan=\"2\" ","<b>Broadcasting</b>");
 		html.end();
 
 		int row=0;
@@ -1135,7 +1135,7 @@ void Servent::addRelayOptions(HTML &html)
 	html.startTag("table width=\"100%%\" border=\"0\" align=\"center\"");
 
 		html.startTag("tr bgcolor=\"#cccccc\" align=\"center\"");
-			html.startTagEnd("td colspan=\"2\" ","<b>Network</b>"); 
+			html.startTagEnd("td colspan=\"2\" ","<b>Network</b>");
 		html.end();
 
 		int row=0;
@@ -1185,7 +1185,7 @@ void Servent::addFilterOptions(HTML &html)
 	html.startTag("table width=\"100%%\" border=\"0\" align=\"center\"");
 
 		html.startTag("tr bgcolor=\"#cccccc\" align=\"center\"");
-			html.startTagEnd("td colspan=\"5\" ","<b>Filters</b>"); 
+			html.startTagEnd("td colspan=\"5\" ","<b>Filters</b>");
 		html.end();
 
 		int row=0;
@@ -1240,7 +1240,7 @@ void Servent::addLogOptions(HTML &html)
 	html.startTag("table width=\"100%%\" border=\"0\" align=\"center\"");
 
 		html.startTag("tr bgcolor=\"#cccccc\" align=\"center\"");
-			html.startTagEnd("td colspan=\"2\" ","<b>Log</b>"); 
+			html.startTagEnd("td colspan=\"2\" ","<b>Log</b>");
 		html.end();
 
 		int row=0;
@@ -1287,7 +1287,7 @@ void Servent::addRootOptions(HTML &html)
 	html.startTag("table width=\"100%%\" border=\"0\" align=\"center\"");
 
 		html.startTag("tr bgcolor=\"#cccccc\" align=\"center\"");
-			html.startTagEnd("td colspan=\"2\" ","<b>Root Mode</b>"); 
+			html.startTagEnd("td colspan=\"2\" ","<b>Root Mode</b>");
 		html.end();
 
 		int row=0;
@@ -1337,7 +1337,7 @@ void Servent::addAuthOptions(HTML &html)
 	html.startTag("table width=\"100%%\" border=\"0\" align=\"center\"");
 
 		html.startTag("tr bgcolor=\"#cccccc\" align=\"center\"");
-			html.startTagEnd("td colspan=\"2\" ","<b>Authentication</b>"); 
+			html.startTagEnd("td colspan=\"2\" ","<b>Authentication</b>");
 		html.end();
 
 		int row=0;
@@ -1364,14 +1364,14 @@ void Servent::addAuthOptions(HTML &html)
 
 
 	html.end();
-}	
+}
 // -----------------------------------
 void Servent::addSecurityOptions(HTML &html)
 {
 	html.startTag("table width=\"100%%\" border=\"0\" align=\"center\"");
-		
+
 		html.startTag("tr bgcolor=\"#cccccc\" align=\"center\"");
-			html.startTagEnd("td colspan=\"3\" ","<b>Security</b>"); 
+			html.startTagEnd("td colspan=\"3\" ","<b>Security</b>");
 		html.end();
 
 		int row=0;
@@ -1444,17 +1444,17 @@ void Servent::addConnectionsPage(HTML &html)
 		html.startTag("form method=\"get\" action=\"/admin\"");
 
 			html.startTag("tr bgcolor=\"#cccccc\" align=\"center\"");
-				html.startTagEnd("td",""); 
-				html.startTagEnd("td","<b>Type<b>"); 
-				html.startTagEnd("td","<b>Status</b>"); 
-				html.startTagEnd("td","<b>Time</b>"); 
-				html.startTagEnd("td","<b>IP:Port (net)</b>"); 
-				html.startTagEnd("td","<b>In (pack/s)</b>"); 
-				html.startTagEnd("td","<b>Out (pack/s)</b>"); 
-				html.startTagEnd("td","<b>Queue<br>(nrm/pri)</b>"); 
-				html.startTagEnd("td","<b>Route</b>"); 
-				html.startTagEnd("td","<b>Agent</b>"); 
-				html.startTagEnd("td","<b>Kbits/s</b>"); 
+				html.startTagEnd("td","");
+				html.startTagEnd("td","<b>Type<b>");
+				html.startTagEnd("td","<b>Status</b>");
+				html.startTagEnd("td","<b>Time</b>");
+				html.startTagEnd("td","<b>IP:Port (net)</b>");
+				html.startTagEnd("td","<b>In (pack/s)</b>");
+				html.startTagEnd("td","<b>Out (pack/s)</b>");
+				html.startTagEnd("td","<b>Queue<br>(nrm/pri)</b>");
+				html.startTagEnd("td","<b>Route</b>");
+				html.startTagEnd("td","<b>Agent</b>");
+				html.startTagEnd("td","<b>Kbits/s</b>");
 			html.end();
 
 
@@ -1533,7 +1533,7 @@ void Servent::addConnectionsPage(HTML &html)
 
 							int nr = s->seenIDs.numUsed();
 							unsigned int tim = sys->getTime()-s->seenIDs.getOldest();
-						
+
 							String tstr;
 							tstr.setFromStopwatch(tim);
 
@@ -1608,7 +1608,7 @@ static void addChanInfoLink(HTML &html, ChanInfo &info,bool fromRelay)
 	char idstr[64];
 	info.id.toStr(idstr);
 	sprintf(tmp,"/admin?page=chaninfo&id=%s&relay=%d",idstr,fromRelay?1:0);
-	html.addLink(tmp,"Info"); 
+	html.addLink(tmp,"Info");
 }
 // -----------------------------------
 void addChannelInfo(HTML &html, ChanInfo &info, bool fromRelay, bool showPlay, bool showInfo, bool showURL, bool showRelay)
@@ -1702,7 +1702,7 @@ void addChannelInfo(HTML &html, ChanInfo &info, bool fromRelay, bool showPlay, b
 // -----------------------------------
 void Servent::addAllChannelsPage(HTML &html, SORT sort, bool dir, ChanInfo *info)
 {
-	//while (chanMgr->numFinds) 
+	//while (chanMgr->numFinds)
 	//	sys->sleepIdle();
 
 	//bool showFind = ((sys->getTime()-chanMgr->lastHit)>15) && (!chanMgr->searchActive);
@@ -1721,16 +1721,16 @@ void Servent::addAllChannelsPage(HTML &html, SORT sort, bool dir, ChanInfo *info
 
 			if (!showFind)
 			{
-				html.startTagEnd("input name=\"cmd\" type=\"hidden\" value=\"stopfind\"");					
+				html.startTagEnd("input name=\"cmd\" type=\"hidden\" value=\"stopfind\"");
 				html.startTag("tr");
 					html.startTag("td");
-						html.startTagEnd("input name=\"stop\" type=\"submit\" value=\"  Stop Search \"");					
+						html.startTagEnd("input name=\"stop\" type=\"submit\" value=\"  Stop Search \"");
 					html.end();
 				html.end();
 			}else
 			{
 
-				html.startTagEnd("input name=\"page\" type=\"hidden\" value=\"chans\"");					
+				html.startTagEnd("input name=\"page\" type=\"hidden\" value=\"chans\"");
 
 				html.startTag("tr");
 					html.startTagEnd("td");
@@ -1742,13 +1742,13 @@ void Servent::addAllChannelsPage(HTML &html, SORT sort, bool dir, ChanInfo *info
 
 				html.startTag("tr");
 					html.startTag("td");
-						html.startTagEnd("input name=\"find\" type=\"submit\" value=\"  Search  \"");					
+						html.startTagEnd("input name=\"find\" type=\"submit\" value=\"  Search  \"");
 					html.end();
 
 					String name,genre;
 					int bitrate;
 					//ChanInfo *info = &chanMgr->searchInfo;
-					
+
 					name = info->name;
 					genre = info->genre;
 					bitrate = info->bitrate;
@@ -1785,7 +1785,7 @@ void Servent::addAllChannelsPage(HTML &html, SORT sort, bool dir, ChanInfo *info
 
 				html.end();	// tr
 			}
-					
+
 			html.end();	// form
 		html.end();	// table
 
@@ -1796,23 +1796,23 @@ void Servent::addAllChannelsPage(HTML &html, SORT sort, bool dir, ChanInfo *info
 			html.startTag("form method=\"get\" action=\"/admin\"");
 
 				html.startTag("tr");
-					html.startTagEnd("input name=\"play\" type=\"submit\" value=\"Play selected\"");					
-					html.startTagEnd("input name=\"relay\" type=\"submit\" value=\"Relay selected\"");					
-					html.startTagEnd("input name=\"cmd\" type=\"hidden\" value=\"hitlist\"");					
+					html.startTagEnd("input name=\"play\" type=\"submit\" value=\"Play selected\"");
+					html.startTagEnd("input name=\"relay\" type=\"submit\" value=\"Relay selected\"");
+					html.startTagEnd("input name=\"cmd\" type=\"hidden\" value=\"hitlist\"");
 				html.end();
 #endif
 				html.startTag("tr bgcolor=\"#cccccc\" align=\"center\"");
 #if 0
-					html.startTagEnd("td width=\"1%%\"",""); 
+					html.startTagEnd("td width=\"1%%\"","");
 #endif
-					html.startTagEnd("td","<b><a href=\"/admin?page=chans&sort=name&dir=%s\">Channel</a></b>",dir?"down":"up"); 
-					html.startTagEnd("td","<b><a href=\"/admin?page=chans&sort=genre&dir=%s\">Genre</a></b>",dir?"down":"up"); 
-					html.startTagEnd("td width=\"1%%\"","<b><a href=\"/admin?page=chans&sort=bitrate&dir=%s\">Bitrate (kb/s)</a></b>",dir?"down":"up"); 
-					html.startTagEnd("td width=\"1%%\"","<b><a href=\"/admin?page=chans&sort=type&dir=%s\">Type</a></b>",dir?"down":"up"); 
-					html.startTagEnd("td width=\"2%%\"","<b><a href=\"/admin?page=chans&sort=hosts&dir=%s\">Hits</a></b>",dir?"down":"up"); 
+					html.startTagEnd("td","<b><a href=\"/admin?page=chans&sort=name&dir=%s\">Channel</a></b>",dir?"down":"up");
+					html.startTagEnd("td","<b><a href=\"/admin?page=chans&sort=genre&dir=%s\">Genre</a></b>",dir?"down":"up");
+					html.startTagEnd("td width=\"1%%\"","<b><a href=\"/admin?page=chans&sort=bitrate&dir=%s\">Bitrate (kb/s)</a></b>",dir?"down":"up");
+					html.startTagEnd("td width=\"1%%\"","<b><a href=\"/admin?page=chans&sort=type&dir=%s\">Type</a></b>",dir?"down":"up");
+					html.startTagEnd("td width=\"2%%\"","<b><a href=\"/admin?page=chans&sort=hosts&dir=%s\">Hits</a></b>",dir?"down":"up");
 				html.end();
 
-			
+
 				ChanHitList *hits[ChanMgr::MAX_HITLISTS];
 				int numHits=0;
 				int i;
@@ -1850,13 +1850,13 @@ void Servent::addAllChannelsPage(HTML &html, SORT sort, bool dir, ChanInfo *info
 
 							String genre = chl->info.genre;
 							genre.convertTo(String::T_HTML);
-							html.startTagEnd("td",genre.cstr()); 
+							html.startTagEnd("td",genre.cstr());
 
-							html.startTagEnd("td","%d",chl->info.bitrate); 
+							html.startTagEnd("td","%d",chl->info.bitrate);
 
-							html.startTagEnd("td",ChanInfo::getTypeStr(chl->info.contentType)); 
+							html.startTagEnd("td",ChanInfo::getTypeStr(chl->info.contentType));
 
-							html.startTagEnd("td","%d / %d",chl->numListeners(),chl->numHits()); 
+							html.startTagEnd("td","%d / %d",chl->numListeners(),chl->numHits());
 
 						html.end();	// tr
 					}
@@ -1913,7 +1913,7 @@ void Servent::addWinampChansPage(HTML &html, const char *wildcard, const char *t
 	if (numHits >= maxHits)
 	{
 		numHits = maxHits;
-		maxShown = true; 
+		maxShown = true;
 	}
 
 
@@ -1947,12 +1947,12 @@ void Servent::addWinampChansPage(HTML &html, const char *wildcard, const char *t
 
 	html.startTag("form method=\"get\" action=\"/admin?\"");
 
-		html.startSingleTagEnd("input name=\"page\" type=\"hidden\" value=\"winamp-chans\"");					
+		html.startSingleTagEnd("input name=\"page\" type=\"hidden\" value=\"winamp-chans\"");
 		if (!stop)
 		{
-			html.startTagEnd("input name=\"stop\" type=\"submit\" value=\"Stop Search\"");					
-			html.startSingleTagEnd("input name=\"wildcard\" type=\"hidden\" value=\"%s\"",wildcard);					
-			html.startSingleTagEnd("input name=\"type\" type=\"hidden\" value=\"%s\"",type);					
+			html.startTagEnd("input name=\"stop\" type=\"submit\" value=\"Stop Search\"");
+			html.startSingleTagEnd("input name=\"wildcard\" type=\"hidden\" value=\"%s\"",wildcard);
+			html.startSingleTagEnd("input name=\"type\" type=\"hidden\" value=\"%s\"",type);
 		}else
 		{
 			char optStr[256];
@@ -1966,11 +1966,11 @@ void Servent::addWinampChansPage(HTML &html, const char *wildcard, const char *t
 				html.startTagEnd(optStr,"BitRate");
 			html.end();
 
-			html.startSingleTagEnd("input name=\"wildcard\" type=\"text\" value=\"%s\"",wildcard);					
-			html.startTagEnd("input name=\"search\" type=\"submit\" value=\"Search\"");					
+			html.startSingleTagEnd("input name=\"wildcard\" type=\"text\" value=\"%s\"",wildcard);
+			html.startTagEnd("input name=\"search\" type=\"submit\" value=\"Search\"");
 		}
 
-		//html.startTagEnd("input name=\"search\" type=\"submit\" value=\"Stop Search\"");					
+		//html.startTagEnd("input name=\"search\" type=\"submit\" value=\"Stop Search\"");
 	html.end();
 
 
@@ -1978,12 +1978,12 @@ void Servent::addWinampChansPage(HTML &html, const char *wildcard, const char *t
 		html.startTag("table border=\"0\" width=\"100%%\" align=\"center\"");
 
 				html.startTag("tr bgcolor=\"#cccccc\" align=\"center\"");
-					html.startTagEnd("td width=\"5%%\"","<b><font size=\"-1\">Play</font></b>"); 
-					//html.startTagEnd("td width=\"20%%\"","<b><font size=\"-1\">Type</font></b>"); 
-					html.startTagEnd("td width=\"95%%\"","<b><font size=\"-1\">PeerCast Channel</font></b>"); 
+					html.startTagEnd("td width=\"5%%\"","<b><font size=\"-1\">Play</font></b>");
+					//html.startTagEnd("td width=\"20%%\"","<b><font size=\"-1\">Type</font></b>");
+					html.startTagEnd("td width=\"95%%\"","<b><font size=\"-1\">PeerCast Channel</font></b>");
 				html.end();
 
-			
+
 				if (numHits)
 				{
 
@@ -2013,11 +2013,11 @@ void Servent::addWinampChansPage(HTML &html, const char *wildcard, const char *t
 
 							//String genre = chl->info.genre;
 							//genre.convertTo(String::T_HTML);
-							//html.startTagEnd("td",genre.cstr()); 
+							//html.startTagEnd("td",genre.cstr());
 
-							//html.startTagEnd("td","%d",chl->info.bitrate); 
+							//html.startTagEnd("td","%d",chl->info.bitrate);
 
-							//html.startTagEnd("td",chl->info.getTypeStr()); 
+							//html.startTagEnd("td",chl->info.getTypeStr());
 
 						html.end();	// tr
 					}
@@ -2050,19 +2050,19 @@ void Servent::addMyChannelsPage(HTML &html)
 
 	//if (num)
 	if (1)
-	{		
+	{
 		//int totListen=0;
 
 		html.startTag("table border=\"0\" width=\"95%%\" align=\"center\"");
 
-					html.startTagEnd("td","<b>Channel</b>"); 
-					html.startTagEnd("td","<b>Genre</b>"); 
-					html.startTagEnd("td width=\"1%%\"","<b>Bitrate (kb/s)</b>"); 
-					html.startTagEnd("td width=\"1%%\"","<b>Stream</b>"); 
-					html.startTagEnd("td width=\"2%%\"","<b>Relays</b>"); 
-					html.startTagEnd("td width=\"2%%\"","<b>Listeners</b>"); 
-					html.startTagEnd("td width=\"1%%\"","<b>Status</b>"); 
-					html.startTagEnd("td width=\"1%%\"","<b>Keep</b>"); 
+					html.startTagEnd("td","<b>Channel</b>");
+					html.startTagEnd("td","<b>Genre</b>");
+					html.startTagEnd("td width=\"1%%\"","<b>Bitrate (kb/s)</b>");
+					html.startTagEnd("td width=\"1%%\"","<b>Stream</b>");
+					html.startTagEnd("td width=\"2%%\"","<b>Relays</b>");
+					html.startTagEnd("td width=\"2%%\"","<b>Listeners</b>");
+					html.startTagEnd("td width=\"1%%\"","<b>Status</b>");
+					html.startTagEnd("td width=\"1%%\"","<b>Keep</b>");
 				html.end();
 
 
@@ -2081,40 +2081,40 @@ void Servent::addMyChannelsPage(HTML &html)
 
 					addChannelInfo(html,c->info,true,true,true,true,true);
 
-					html.startTagEnd("td",genre.cstr()); 
+					html.startTagEnd("td",genre.cstr());
 
 					// bitrate
 					if (c->getBitrate())
-						html.startTagEnd("td","%d",c->getBitrate()); 
+						html.startTagEnd("td","%d",c->getBitrate());
 					else
-						html.startTagEnd("td","-"); 
+						html.startTagEnd("td","-");
 
 
 
 					// stream/type
-					html.startTag("td align=\"center\""); 
+					html.startTag("td align=\"center\"");
 					{
 						String path;
 						c->getStreamPath(path.data);
-						html.addLink(path.cstr(),ChanInfo::getTypeStr(c->info.contentType));						
+						html.addLink(path.cstr(),ChanInfo::getTypeStr(c->info.contentType));
 					}
 					html.end();
 
 
 					// relays
-					html.startTagEnd("td","%d",c->numRelays()); 
+					html.startTagEnd("td","%d",c->numRelays());
 					// listeners
-					html.startTagEnd("td","%d",c->numListeners()); 
+					html.startTagEnd("td","%d",c->numListeners());
 					// status
-					html.startTagEnd("td",c->getStatusStr()); 
+					html.startTagEnd("td",c->getStatusStr());
 					// keep
-					html.startTagEnd("td",c->stayConnected?"Yes":"No"); 
+					html.startTagEnd("td",c->stayConnected?"Yes":"No");
 
 					html.end();
 					//totListen += c->listeners;
 				}
 		html.end();	// table
-	
+
 	}else{
 		html.startTagEnd("h3","No channels available.");
 	}
@@ -2133,64 +2133,64 @@ void Servent::addBroadcastPage(HTML &html)
 
 	//if (num)
 	if (1)
-	{		
+	{
 		//int totListen=0;
 
 
 		html.startTag("table border=\"0\" align=\"center\"");
 			html.startTag("form method=\"get\" action=\"/admin\"");
-				html.startSingleTagEnd("input name=\"cmd\" type=\"hidden\" value=\"fetch\"");					
+				html.startSingleTagEnd("input name=\"cmd\" type=\"hidden\" value=\"fetch\"");
 
 				html.startTag("tr bgcolor=\"#cccccc\" align=\"center\"");
-					html.startTagEnd("td colspan=\"2\" ","<b>External Source</b>"); 
+					html.startTagEnd("td colspan=\"2\" ","<b>External Source</b>");
 				html.end();
 
 				int row=0;
 
 				html.startTableRow(row++);
-					html.startTagEnd("td","URL (Required)"); 
+					html.startTagEnd("td","URL (Required)");
 					html.startTag("td");
 						html.startSingleTagEnd("input name=\"url\" size=\"40\" type=\"text\" value=\"%s\"","");
 					html.end();
 				html.end();
 
 				html.startTableRow(row++);
-					html.startTagEnd("td","Name"); 
+					html.startTagEnd("td","Name");
 					html.startTag("td");
 						html.startSingleTagEnd("input name=\"name\" size=\"40\" type=\"text\" value=\"%s\"","");
 					html.end();
 				html.end();
 
 				html.startTableRow(row++);
-					html.startTagEnd("td","Description"); 
+					html.startTagEnd("td","Description");
 					html.startTag("td");
 						html.startSingleTagEnd("input name=\"desc\" size=\"40\" type=\"text\" value=\"%s\"","");
 					html.end();
 				html.end();
 
 				html.startTableRow(row++);
-					html.startTagEnd("td","Genre"); 
+					html.startTagEnd("td","Genre");
 					html.startTag("td");
 						html.startSingleTagEnd("input name=\"genre\" size=\"40\" type=\"text\" value=\"%s\"","");
 					html.end();
 				html.end();
 
 				html.startTableRow(row++);
-					html.startTagEnd("td","Contact"); 
+					html.startTagEnd("td","Contact");
 					html.startTag("td");
 						html.startSingleTagEnd("input name=\"contact\" size=\"40\" type=\"text\" value=\"%s\"","");
 					html.end();
 				html.end();
 
 				html.startTableRow(row++);
-					html.startTagEnd("td","Bitrate (kb/s)"); 
+					html.startTagEnd("td","Bitrate (kb/s)");
 					html.startTag("td");
 						html.startSingleTagEnd("input name=\"bitrate\" size=\"40\" type=\"text\" value=\"%s\"","");
 					html.end();
 				html.end();
 
 				html.startTableRow(row++);
-					html.startTagEnd("td","Type"); 
+					html.startTagEnd("td","Type");
 					html.startTag("td");
 						html.startTag("select name=\"type\"");
 							html.startTagEnd("option value=\"UNKNOWN\" selected","Unknown");
@@ -2207,24 +2207,24 @@ void Servent::addBroadcastPage(HTML &html)
 
 				html.startTableRow(row++);
 					html.startTag("td colspan=\"2\" align=\"center\"");
-						html.startSingleTagEnd("input name=\"stream\" type=\"submit\" value=\"Create Relay\"");					
+						html.startSingleTagEnd("input name=\"stream\" type=\"submit\" value=\"Create Relay\"");
 					html.end();
 				html.end();
 
 			html.end();
 		html.end();
 
-		html.startTagEnd("br"); 
+		html.startTagEnd("br");
 
 
 		html.startTag("table border=\"0\" width=\"95%%\" align=\"center\"");
 
 				html.startTag("tr bgcolor=\"#cccccc\" align=\"center\"");
-					html.startTagEnd("td","<b>Channel</b>"); 
-					html.startTagEnd("td","<b>Source</b>"); 
-					html.startTagEnd("td","<b>Pos</b>"); 
-					html.startTagEnd("td","<b>Bitrate (kb/s)</b>"); 
-					html.startTagEnd("td","<b>Type</b>"); 
+					html.startTagEnd("td","<b>Channel</b>");
+					html.startTagEnd("td","<b>Source</b>");
+					html.startTagEnd("td","<b>Pos</b>");
+					html.startTagEnd("td","<b>Bitrate (kb/s)</b>");
+					html.startTagEnd("td","<b>Type</b>");
 				html.end();
 
 
@@ -2257,14 +2257,14 @@ void Servent::addBroadcastPage(HTML &html)
 
 						addChannelSourceTag(html,c);
 
-						html.startTagEnd("td","%d",c->streamPos); 
-						
-						if (c->getBitrate())
-							html.startTagEnd("td","%d",c->getBitrate()); 
-						else
-							html.startTagEnd("td","-"); 
+						html.startTagEnd("td","%d",c->streamPos);
 
-						html.startTagEnd("td",ChanInfo::getTypeStr(c->info.contentType)); 
+						if (c->getBitrate())
+							html.startTagEnd("td","%d",c->getBitrate());
+						else
+							html.startTagEnd("td","-");
+
+						html.startTagEnd("td",ChanInfo::getTypeStr(c->info.contentType));
 
 						html.end();
 						//totListen += c->listeners;
@@ -2273,7 +2273,7 @@ void Servent::addBroadcastPage(HTML &html)
 		html.end();	// table
 
 
-	
+
 	}
 	addFooter(html);
 }

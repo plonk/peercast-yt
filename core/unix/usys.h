@@ -2,7 +2,7 @@
 // File : usys.h
 // Date: 4-apr-2002
 // Author: giles
-// Desc: 
+// Desc:
 //		WSys derives from Sys to provide basic win32 functions such as starting threads.
 //
 // (c) 2002 peercast.org
@@ -54,7 +54,7 @@ private:
 #ifdef __APPLE__
 	void openURL( const char* url );
 #endif
-};                               
+};
 
 
 // ------------------------------------

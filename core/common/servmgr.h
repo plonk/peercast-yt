@@ -2,7 +2,7 @@
 // File : servmgr.h
 // Date: 4-apr-2002
 // Author: giles
-// Desc: 
+// Desc:
 //
 // (c) 2002 peercast.org
 // ------------------------------------------------
@@ -84,10 +84,10 @@ public:
 	unsigned int time;
 };
 // ----------------------------------
-class ServFilter 
+class ServFilter
 {
 public:
-	enum 
+	enum
 	{
 		F_PRIVATE  = 0x01,
 		F_BAN	   = 0x02,
@@ -148,7 +148,7 @@ public:
 		MAX_VERSIONS = 16,
 
 		MAX_PREVIEWTIME	= 300,		// max. seconds preview per channel available (direct connections)
-		MAX_PREVIEWWAIT = 300,		// max. seconds wait between previews 
+		MAX_PREVIEWWAIT = 300,		// max. seconds wait between previews
 
 	};
 
@@ -158,7 +158,7 @@ public:
 		AUTH_HTTPBASIC
 	};
 
-	
+
 
 	ServMgr();
 
@@ -263,33 +263,33 @@ public:
 	unsigned int		numActiveOnPort(int);
 	unsigned int		numActive(Servent::TYPE);
 
-	bool	needConnections() 
+	bool	needConnections()
 	{
 		return numConnected(Servent::T_PGNU,60) < minGnuIncoming;
 	}
-	bool	tryFull() 
+	bool	tryFull()
 	{
 		return false;
 		//return maxTryout ? numUsed(Servent::T_OUTGOING) > maxTryout: false;
 	}
 
-	bool	pubInOver() 
+	bool	pubInOver()
 	{
 		return numConnected(Servent::T_PGNU) > maxGnuIncoming;
 //		return maxIncoming ? numConnected(Servent::T_INCOMING,false) > maxIncoming : false;
 	}
-	bool	pubInFull() 
+	bool	pubInFull()
 	{
 		return numConnected(Servent::T_PGNU) >= maxGnuIncoming;
 //		return maxIncoming ? numConnected(Servent::T_INCOMING,false) >= maxIncoming : false;
 	}
 
-	bool	outUsedFull() 
+	bool	outUsedFull()
 	{
 		return false;
 //		return maxOutgoing ? numUsed(Servent::T_OUTGOING) >= maxOutgoing: false;
 	}
-	bool	outOver() 
+	bool	outOver()
 	{
 		return false;
 //		return maxOutgoing ? numConnected(Servent::T_OUTGOING) > maxOutgoing : false;
@@ -300,22 +300,22 @@ public:
 		return numConnected(Servent::T_CIN)>=maxControl;
 	}
 
-	bool	outFull() 
+	bool	outFull()
 	{
 		return false;
 //		return maxOutgoing ? numConnected(Servent::T_OUTGOING) >= maxOutgoing : false;
 	}
 
-	bool	relaysFull() 
+	bool	relaysFull()
 	{
 		return numStreams(Servent::T_RELAY,false) >= maxRelays;
 	}
-	bool	directFull() 
+	bool	directFull()
 	{
 		return numStreams(Servent::T_DIRECT,false) >= maxDirect;
 	}
 
-	bool	bitrateFull(unsigned int br) 
+	bool	bitrateFull(unsigned int br)
 	{
 		return maxBitrateOut ? (BYTES_TO_KBPS(totalOutput(false))+br) > maxBitrateOut  : false;
 	}

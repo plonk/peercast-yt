@@ -32,68 +32,68 @@ public:
 		,kPE_NoFSRef
 		,kPE_CantGetPath
 	};
-	
+
 	explicit CAppPathInfo()
 	{
 		initDefaultPath();
-	
+
 		CFBundleRef appBundle = CFBundleGetMainBundle();
-		
+
 		if( appBundle == NULL )
 			throw kPE_NoMainBundle;
-			
+
 		CFURLRef appUrlBundle = CFBundleCopyBundleURL( appBundle );
-	
+
 		if( appUrlBundle == NULL )
 		{
-			CFRelease( appBundle );			
+			CFRelease( appBundle );
 			throw kPE_NoBundleURL;
 		}
-		
+
 		FSRef appBundleRef;
 		Boolean success = CFURLGetFSRef( appUrlBundle, &appBundleRef );
 
 		if( success != true )
 		{
 			throw kPE_NoFSRef;
-		}		
-		
+		}
+
 		OSStatus err	 = FSRefMakePath( &appBundleRef, mPathString, PATH_MAX);
 		bool     gotPath = false;
-		
+
 		if( err == noErr )
 		{
 			const int length = strlen( mPathString );
-		
+
 			if( length > 0 )
 			{
 				// remove any file name info in path string
 				char* cap = mPathString+length-1;
-			
+
 				while( cap && *cap != '/' )
 				{
 					*cap = 0;
 					--cap;
 				}
-				
+
 				gotPath = true;
 			}
 		}
-		
+
 		CFRelease( appUrlBundle );
-		//CFRelease( appBundle );	
-		
+		//CFRelease( appBundle );
+
 		if( !gotPath )
 		{
 			throw kPE_CantGetPath;
 		}
 	}
-	
+
 	const char* getPath() const { return &mPathString[0]; }
 
 private:
 	void initDefaultPath() { strcpy(mPathString, "./"); }
-	
+
 	char mPathString[PATH_MAX];
 };
 

@@ -28,9 +28,9 @@ public:
 	{
 		return str();
 	}
-	
+
 	const char *str() {return data;}
-	
+
 };
 
 
@@ -40,7 +40,7 @@ public:
 class ID4
 {
 private:
-	union 
+	union
 	{
 		int	iv;
 		char cv[4];
@@ -52,7 +52,7 @@ public:
 	: iv( 0 )
 	{
 	}
-	
+
 	ID4(int i)
 	:iv(i)
 	{
@@ -85,7 +85,7 @@ public:
 	{
 		return iv!=id.iv;
 	}
-	
+
 	bool	isSet() const {return iv!=0;}
 
 

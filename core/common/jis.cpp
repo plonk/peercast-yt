@@ -3,7 +3,7 @@
 // Date: 1-april-2004
 // Author: giles
 //
-//	ShiftJIS/EUC to Unicode conversions 
+//	ShiftJIS/EUC to Unicode conversions
 //	(modified version of program by Y. Kuno, see below)
 //
 //
@@ -704,47 +704,47 @@ unsigned short JISConverter::sjisToUnicode(unsigned short sjis)
 	unsigned short u;
 	unsigned int c = sjis>>8;
 	unsigned int c1 = sjis&0xff;
-  
+
 	c = c + c - ((c <= 0x9f) ? SJ0162 : SJ6394);
-	if(c1 < 0x9f) 
+	if(c1 < 0x9f)
 	{
-		c1 = c1 - ((c1 > 0x7f) ? 0x20 : 0x1f); 
+		c1 = c1 - ((c1 > 0x7f) ? 0x20 : 0x1f);
 	}
-	else 
-	{
-	    c1 = c1 - 0x7e; c++; 
-	}
-	c -= 33; 
-	c1 -= 33;
-	if(c < 0 || c1 < 0 || c > 93 || c1 > 93)
-		u = 0x3013; 
 	else
 	{
-		u = uniTable[c][c1]; 
-		if(!u) 
-			u = 0x3013; 
+	    c1 = c1 - 0x7e; c++;
+	}
+	c -= 33;
+	c1 -= 33;
+	if(c < 0 || c1 < 0 || c > 93 || c1 > 93)
+		u = 0x3013;
+	else
+	{
+		u = uniTable[c][c1];
+		if(!u)
+			u = 0x3013;
 	}
 
 	return u;
 }
 // ------------------------------------------------------------
 unsigned short JISConverter::eucToUnicode(unsigned short euc)
-{	
+{
 	unsigned short u;
 	unsigned int c = euc>>8;
-	unsigned int c1 = euc&0xff; 
+	unsigned int c1 = euc&0xff;
 
-	c &= 0x7f; 
-	c -= 33; 
-	c1 &= 0x7f; 
+	c &= 0x7f;
+	c -= 33;
+	c1 &= 0x7f;
 	c1 -= 33;
     if(c < 0 || c1 < 0 || c > 93 || c1 > 93)
-		u = 0x3013; 
-    else 
+		u = 0x3013;
+    else
 	{
-        u = uniTable[c][c1]; 
-		if(!u) 
-			u = 0x3013; 
+        u = uniTable[c][c1];
+		if(!u)
+			u = 0x3013;
 	}
 	return u;
 }

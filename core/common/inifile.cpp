@@ -2,7 +2,7 @@
 // File : inifile.cpp
 // Date: 4-apr-2002
 // Author: giles
-// Desc: 
+// Desc:
 //		.INI file reading/writing class
 //
 // (c) 2002 peercast.org
@@ -28,7 +28,7 @@
 // -----------------------------------------
 bool IniFile::openReadOnly(const char *fn)
 {
-	try 
+	try
 	{
 		fStream.openReadOnly(fn);
 	}catch(StreamException &)
@@ -40,7 +40,7 @@ bool IniFile::openReadOnly(const char *fn)
 // -----------------------------------------
 bool IniFile::openWriteReplace(const char *fn)
 {
-	try 
+	try
 	{
 		fStream.openWriteReplace(fn);
 #if defined(_LINUX) || defined(__APPLE__)

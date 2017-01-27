@@ -29,9 +29,9 @@ public:
 	: mHandler( NewEventHandlerUPP( userRoutine ) )
 	{
 	}
-	
+
 	EventHandlerUPP& eventHandler() { return mHandler; }
-	
+
 	~CEventHandlerUPP()
 	{
 		if( mHandler != NULL )
@@ -43,7 +43,7 @@ private:
 	// disable copy and assignment
 	CEventHandlerUPP           ( const CEventHandlerUPP& );
 	CEventHandlerUPP& operator=( const CEventHandlerUPP& );
-	
+
 	EventHandlerUPP mHandler;
 };
 
@@ -55,7 +55,7 @@ public:
 	{
 		CreateEvent( NULL, eventClass, eventKind, GetCurrentEventTime(), kEventAttributeNone, &mEventRef );
 	}
-	
+
 	~CEvent()
 	{
 		if( mEventRef != NULL )
@@ -63,27 +63,27 @@ public:
 			ReleaseEvent( mEventRef );
 		}
 	}
-	
+
 	OSStatus setParameter( EventParamName inName, EventParamType inType, UInt32 inSize, const void * inDataPtr )
 	{
 		if( mEventRef != NULL )
 		{
 			return SetEventParameter( mEventRef, inName, inType, inSize, inDataPtr );
 		}
-		
+
 		return eventInternalErr;
 	}
-	
+
 	OSStatus postToQueue( EventQueueRef inQueue, EventPriority inPriority )
 	{
 		if( mEventRef != NULL )
 		{
 			return PostEventToQueue( inQueue, mEventRef, inPriority );
 		}
-		
+
 		return eventInternalErr;
 	}
-	
+
 private:
 	// disable copy and assignment
 	CEvent           ( const CEvent& );

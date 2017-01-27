@@ -31,13 +31,13 @@ int NumericControl::getIntValue( WindowRef window )
 float NumericControl::getFloatValue( WindowRef window )
 {
 	CFStringRef stringRef = getStringRef( window );
-	
+
 	if( stringRef )
 	{
 		mValue = CFStringGetDoubleValue( stringRef );
 		return mValue;
 	}
-	
+
 	return 0.0f;
 }
 

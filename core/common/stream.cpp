@@ -3,7 +3,7 @@
 // Date: 4-apr-2002
 // Author: giles
 // Desc:
-//		Basic stream handling functions. 
+//		Basic stream handling functions.
 //
 // (c) 2002 peercast.org
 // ------------------------------------------------
@@ -26,12 +26,12 @@
 
 // --------------------------------------------------
 void MemoryStream::convertFromBase64()
-{       
+{
 	char *out = buf;
 	char *in = buf;
-	
+
 	int rl=len;
-    while(rl >= 4) 
+    while(rl >= 4)
 	{
 		out += String::base64WordToChars(out,in);
 		in += 4;
@@ -172,7 +172,7 @@ int	Stream::writeUTF8(unsigned int code)
 	{
 		writeChar(code);
 		return 1;
-	}else 
+	}else
 	if (code < 0x0800)
 	{
 		writeChar(code>>6 | 0xC0);
@@ -184,7 +184,7 @@ int	Stream::writeUTF8(unsigned int code)
 		writeChar(code>>6 & 0x3F | 0x80);
 		writeChar(code & 0x3F | 0x80);
 		return 3;
-	}else 
+	}else
 	{
 		writeChar(code>>18 | 0xF0);
 		writeChar(code>>12 & 0x3F | 0x80);
@@ -192,7 +192,7 @@ int	Stream::writeUTF8(unsigned int code)
 		writeChar(code & 0x3F | 0x80);
 		return 4;
 	}
-		
+
 }
 
 // -------------------------------------
@@ -234,8 +234,8 @@ int	Stream::readLine(char *in, int max)
 	max -= 2;
 
 	while(max--)
-    {                
-    	char c;         
+    {
+    	char c;
     	read(&c,1);
 		if (c == '\n')
 			break;
@@ -259,7 +259,7 @@ void Stream::writeStringF(const char *fmt,...)
 	va_list ap;
   	va_start(ap, fmt);
 	write(fmt,ap);
-   	va_end(ap);	
+   	va_end(ap);
 }
 // -------------------------------------
 void Stream::writeString(const char *str)
@@ -279,7 +279,7 @@ void Stream::writeLineF(const char *fmt,...)
 	else
 		write("\n",1);
 
-   	va_end(ap);	
+   	va_end(ap);
 }
 
 // -------------------------------------
@@ -322,7 +322,7 @@ int	Stream::readWord(char *in, int max)
 
 // --------------------------------------------------
 int Stream::readBase64(char *p, int max)
-{       
+{
 	char vals[4];
 
 	int cnt=0;

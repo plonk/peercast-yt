@@ -2,7 +2,7 @@
 // File : http.h
 // Date: 4-apr-2002
 // Author: giles
-// Desc: 
+// Desc:
 //
 // (c) 2002 peercast.org
 // ------------------------------------------------
@@ -47,10 +47,10 @@ static const char *HTTP_PROTO1		= "HTTP/1.";
 static const char *RTSP_PROTO1		= "RTSP/1.";
 
 static const char *HTTP_HS_SERVER		= "Server:";
-static const char *HTTP_HS_AGENT		= "User-Agent:"; 
-static const char *HTTP_HS_CONTENT		= "Content-Type:"; 
-static const char *HTTP_HS_CACHE		= "Cache-Control:"; 
-static const char *HTTP_HS_CONNECTION	= "Connection:"; 
+static const char *HTTP_HS_AGENT		= "User-Agent:";
+static const char *HTTP_HS_CONTENT		= "Content-Type:";
+static const char *HTTP_HS_CACHE		= "Cache-Control:";
+static const char *HTTP_HS_CONNECTION	= "Connection:";
 static const char *HTTP_HS_SETCOOKIE	= "Set-Cookie:";
 static const char *HTTP_HS_COOKIE		= "Cookie:";
 static const char *HTTP_HS_HOST			= "Host:";

@@ -2,7 +2,7 @@
 // File : gnutella.h
 // Date: 4-apr-2002
 // Author: giles
-// Desc: 
+// Desc:
 //
 // (c) 2002 peercast.org
 // ------------------------------------------------
@@ -45,33 +45,33 @@ static const char *GNU_OK 			= "GNUTELLA/0.6 200 OK";
 static const char *PCX_PCP_CONNECT	= "pcp";
 
 static const char *PCX_HS_OS 		= "x-peercast-os:";
-static const char *PCX_HS_DL		= "x-peercast-download:"; 
-static const char *PCX_HS_ID		= "x-peercast-id:"; 
-static const char *PCX_HS_CHANNELID	= "x-peercast-channelid:"; 
-static const char *PCX_HS_NETWORKID	= "x-peercast-networkid:"; 
-static const char *PCX_HS_MSG		= "x-peercast-msg:"; 
-static const char *PCX_HS_SUBNET	= "x-peercast-subnet:"; 
-static const char *PCX_HS_FULLHIT	= "x-peercast-fullhit:"; 
-static const char *PCX_HS_MINBCTTL	= "x-peercast-minbcttl:"; 
-static const char *PCX_HS_MAXBCTTL	= "x-peercast-maxbcttl:"; 
-static const char *PCX_HS_RELAYBC	= "x-peercast-relaybc:"; 
-static const char *PCX_HS_PRIORITY	= "x-peercast-priority:"; 
-static const char *PCX_HS_FLOWCTL	= "x-peercast-flowctl:"; 
-static const char *PCX_HS_PCP		= "x-peercast-pcp:"; 
-static const char *PCX_HS_PINGME	= "x-peercast-pingme:"; 
-static const char *PCX_HS_PORT		= "x-peercast-port:"; 
-static const char *PCX_HS_REMOTEIP	= "x-peercast-remoteip:"; 
-static const char *PCX_HS_POS		= "x-peercast-pos:"; 
-static const char *PCX_HS_SESSIONID	= "x-peercast-sessionid:"; 
+static const char *PCX_HS_DL		= "x-peercast-download:";
+static const char *PCX_HS_ID		= "x-peercast-id:";
+static const char *PCX_HS_CHANNELID	= "x-peercast-channelid:";
+static const char *PCX_HS_NETWORKID	= "x-peercast-networkid:";
+static const char *PCX_HS_MSG		= "x-peercast-msg:";
+static const char *PCX_HS_SUBNET	= "x-peercast-subnet:";
+static const char *PCX_HS_FULLHIT	= "x-peercast-fullhit:";
+static const char *PCX_HS_MINBCTTL	= "x-peercast-minbcttl:";
+static const char *PCX_HS_MAXBCTTL	= "x-peercast-maxbcttl:";
+static const char *PCX_HS_RELAYBC	= "x-peercast-relaybc:";
+static const char *PCX_HS_PRIORITY	= "x-peercast-priority:";
+static const char *PCX_HS_FLOWCTL	= "x-peercast-flowctl:";
+static const char *PCX_HS_PCP		= "x-peercast-pcp:";
+static const char *PCX_HS_PINGME	= "x-peercast-pingme:";
+static const char *PCX_HS_PORT		= "x-peercast-port:";
+static const char *PCX_HS_REMOTEIP	= "x-peercast-remoteip:";
+static const char *PCX_HS_POS		= "x-peercast-pos:";
+static const char *PCX_HS_SESSIONID	= "x-peercast-sessionid:";
 
-// official version number sent to relay to check for updates 
+// official version number sent to relay to check for updates
 static const char *PCX_OS_WIN32 	= "Win32";
 static const char *PCX_OS_LINUX 	= "Linux";
 static const char *PCX_OS_MACOSX 	= "Apple-OSX";
 static const char *PCX_OS_WINAMP2 	= "Win32-WinAmp2";
 static const char *PCX_OS_ACTIVEX 	= "Win32-ActiveX";
 
-static const char *PCX_DL_URL		= "http://www.peercast.org/download.php"; 
+static const char *PCX_DL_URL		= "http://www.peercast.org/download.php";
 
 // version number sent to other clients
 static const char *PCX_OLDAGENT 	= "PeerCast/0.119E";
@@ -154,7 +154,7 @@ public:
 class GnuPacketBuffer
 {
 public:
-	GnuPacketBuffer(int s) 
+	GnuPacketBuffer(int s)
 	:size(s)
 	,packets(new GnuPacket[size])
 	{
@@ -213,7 +213,7 @@ public:
 		return (numPending()*100) / size;
 	}
 
-	
+
 	int sizeOfPending()
 	{
 		int tot=0;
@@ -228,7 +228,7 @@ public:
 		return writePtr-readPtr;
 	}
 
-	bool	write(GnuPacket &p) 
+	bool	write(GnuPacket &p)
 	{
 		if ((writePtr-readPtr) >= size)
 			return false;
@@ -270,7 +270,7 @@ public:
 		init(NULL);
 	}
 
-	void	init(Stream *s)  
+	void	init(Stream *s)
 	{
 		IndirectStream::init(s);
 		packetsIn = packetsOut = 0;
@@ -284,7 +284,7 @@ public:
 	bool	readHit(Stream &data, ChanHit &ch,int,GnuID &);
 
 
-	
+
 	void	ping(int);
 
 	int		packetsIn,packetsOut;

@@ -46,7 +46,7 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
 
 	FLVTag flvTag;
 	flvTag.read(in);
-	
+
 	switch (flvTag.type)
 	{
 		case FLVTag::T_SCRIPT:
@@ -78,7 +78,7 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
 			}
 		}
 	}
-	
+
 	if (headerUpdate && fileHeader.size>0) {
 		int len = fileHeader.size;
 		if (metaData.type == FLVTag::T_SCRIPT) len += metaData.packetSize;
@@ -121,8 +121,8 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
 		}
 
 		mem.close();
-		
+
 	}
-	
+
 	return 0;
 }

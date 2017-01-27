@@ -2,9 +2,9 @@
 // File : stats.cpp
 // Date: 4-apr-2002
 // Author: giles
-// Desc: 
+// Desc:
 //		Statistic logging
-//		
+//
 // (c) 2002 peercast.org
 // ------------------------------------------------
 // This program is free software; you can redistribute it and/or modify
@@ -44,7 +44,7 @@ void	Stats::update()
 	unsigned int diff = ctime - lastUpdate;
 	if (diff >= 5)
 	{
-		
+
 		for(int i=0; i<Stats::MAX; i++)
 		{
 			perSec[i] = (current[i]-last[i])/diff;
@@ -53,36 +53,36 @@ void	Stats::update()
 
 		lastUpdate = ctime;
 	}
-	
+
 }
 // ------------------------------------
 bool Stats::writeVariable(Stream &out,const String &var)
 {
 	char buf[1024];
 
-	if (var == "totalInPerSec")		
+	if (var == "totalInPerSec")
 		sprintf(buf,"%.1f",BYTES_TO_KBPS(getPerSecond(Stats::BYTESIN)));
-	else if (var == "totalOutPerSec")		
+	else if (var == "totalOutPerSec")
 		sprintf(buf,"%.1f",BYTES_TO_KBPS(getPerSecond(Stats::BYTESOUT)));
-	else if (var == "totalPerSec")		
+	else if (var == "totalPerSec")
 		sprintf(buf,"%.1f",BYTES_TO_KBPS(getPerSecond(Stats::BYTESIN)+getPerSecond(Stats::BYTESOUT)));
-	else if (var == "wanInPerSec")		
+	else if (var == "wanInPerSec")
 		sprintf(buf,"%.1f",BYTES_TO_KBPS(getPerSecond(Stats::BYTESIN)-getPerSecond(Stats::LOCALBYTESIN)));
-	else if (var == "wanOutPerSec")		
+	else if (var == "wanOutPerSec")
 		sprintf(buf,"%.1f",BYTES_TO_KBPS(getPerSecond(Stats::BYTESOUT)-getPerSecond(Stats::LOCALBYTESOUT)));
-	else if (var == "wanTotalPerSec")		
+	else if (var == "wanTotalPerSec")
 		sprintf(buf,"%.1f",BYTES_TO_KBPS((getPerSecond(Stats::BYTESIN)-getPerSecond(Stats::LOCALBYTESIN))+(getPerSecond(Stats::BYTESOUT)-getPerSecond(Stats::LOCALBYTESOUT))));
-	else if (var == "netInPerSec")		
+	else if (var == "netInPerSec")
 		sprintf(buf,"%.1f",BYTES_TO_KBPS(getPerSecond(Stats::PACKETDATAIN)));
-	else if (var == "netOutPerSec")		
+	else if (var == "netOutPerSec")
 		sprintf(buf,"%.1f",BYTES_TO_KBPS(getPerSecond(Stats::PACKETDATAOUT)));
-	else if (var == "netTotalPerSec")		
+	else if (var == "netTotalPerSec")
 		sprintf(buf,"%.1f",BYTES_TO_KBPS(getPerSecond(Stats::PACKETDATAOUT)+getPerSecond(Stats::PACKETDATAIN)));
-	else if (var == "packInPerSec")		
+	else if (var == "packInPerSec")
 		sprintf(buf,"%u",getPerSecond(Stats::NUMPACKETSIN));
-	else if (var == "packOutPerSec")		
+	else if (var == "packOutPerSec")
 		sprintf(buf,"%u",getPerSecond(Stats::NUMPACKETSOUT));
-	else if (var == "packTotalPerSec")		
+	else if (var == "packTotalPerSec")
 		sprintf(buf,"%u",getPerSecond(Stats::NUMPACKETSOUT)+getPerSecond(Stats::NUMPACKETSIN));
 
 	else

@@ -2,12 +2,12 @@
 // File : channel.cpp
 // Date: 4-apr-2002
 // Author: giles
-// Desc: 
-//		Channel streaming classes. These do the actual 
-//		streaming of media between clients. 
+// Desc:
+//		Channel streaming classes. These do the actual
+//		streaming of media between clients.
 //
 // (c) 2002 peercast.org
-// 
+//
 // ------------------------------------------------
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -161,9 +161,9 @@ void Channel::setStatus(STATUS s)
 
 	}
 }
-	
+
 // -----------------------------------------------------------------------------
-// Reset channel and make it available 
+// Reset channel and make it available
 // -----------------------------------------------------------------------------
 void Channel::reset()
 {
@@ -371,7 +371,7 @@ THREAD_PROC	Channel::stream(ThreadInfo *thread)
 			{
 				if (!thread->active || peercastInst->isQuitting)
 					break;
-				sys->sleep(1000);	
+				sys->sleep(1000);
 			}
 		}
 	}
@@ -379,7 +379,7 @@ THREAD_PROC	Channel::stream(ThreadInfo *thread)
 	ch->endThread();
 
 	return 0;
-}	
+}
 
 // -----------------------------------
 bool Channel::acceptGIV(ClientSocket *givSock)
@@ -395,7 +395,7 @@ bool Channel::acceptGIV(ClientSocket *givSock)
 void Channel::connectFetch()
 {
 	sock = sys->createSocket();
-	
+
 	if (!sock)
 		throw StreamException("Can`t create socket");
 
@@ -407,7 +407,7 @@ void Channel::connectFetch()
 	}
 
 	sock->open(sourceHost.host);
-		
+
 	sock->connect();
 }
 
@@ -435,7 +435,7 @@ int Channel::handshakeFetch()
 	while (http.nextHeader())
 	{
 		char *arg = http.getArgStr();
-		if (!arg) 
+		if (!arg)
 			continue;
 
 		if (http.isHeader(PCX_HS_POS))
@@ -491,7 +491,7 @@ void PeercastSource::stream(Channel *ch)
 
 		ch->setStatus(Channel::S_SEARCHING);
 		LOG_CHANNEL("Channel searching for hit..");
-		do 
+		do
 		{
 			if (ch->pushSock)
 			{
@@ -506,14 +506,14 @@ void PeercastSource::stream(Channel *ch)
 			{
 				ChanHitSearch chs;
 
-				// find local hit 
+				// find local hit
 				chs.init();
 				chs.matchHost = servMgr->serverHost;
 				chs.waitDelay = MIN_RELAY_RETRY;
 				chs.excludeID = servMgr->sessionID;
 				if (chl->pickHits(chs))
 					ch->sourceHost = chs.best[0];
-				
+
 				// else find global hit
 				if (!ch->sourceHost.host.ip)
 				{
@@ -595,7 +595,7 @@ void PeercastSource::stream(Channel *ch)
 
 			//if (ch->sourceHost.tracker)
 			//	peercastApp->notifyMessage(ServMgr::NT_PEERCAST,"Contacting tracker, please wait...");
-			
+
 			char ipstr[64];
 			ch->sourceHost.host.toStr(ipstr);
 
@@ -608,7 +608,7 @@ void PeercastSource::stream(Channel *ch)
 			int error=-1;
 			try
 			{
-				ch->setStatus(Channel::S_CONNECTING);			
+				ch->setStatus(Channel::S_CONNECTING);
 
 				if (!ch->sock)
 				{
@@ -627,13 +627,13 @@ void PeercastSource::stream(Channel *ch)
 					throw StreamException("Stream error");
 
 				error = 0;		// no errors, closing normally.
-				ch->setStatus(Channel::S_CLOSING);			
+				ch->setStatus(Channel::S_CLOSING);
 
 				LOG_CHANNEL("Channel closed normally");
 
 			}catch(StreamException &e)
 			{
-				ch->setStatus(Channel::S_ERROR);			
+				ch->setStatus(Channel::S_ERROR);
 				LOG_ERROR("Channel to %s %s : %s",ipstr,type,e.msg);
 				if (!ch->sourceHost.tracker || ((error != 503) && ch->sourceHost.tracker))
 					chanMgr->deadHit(ch->sourceHost);
@@ -742,7 +742,7 @@ static void copyStr(char *to,char *from,int max)
 void Channel::processMp3Metadata(char *str)
 {
 	ChanInfo newInfo = info;
-	
+
 	char *cmd=str;
 	while (cmd)
 	{
@@ -776,7 +776,7 @@ XML::Node *ChanHit::createXML()
 	// IP
 	char ipStr[64];
 	host.toStr(ipStr);
-	
+
 	return new XML::Node("host ip=\"%s\" hops=\"%d\" listeners=\"%d\" relays=\"%d\" uptime=\"%d\" push=\"%d\" relay=\"%d\" direct=\"%d\" cin=\"%d\" stable=\"%d\" version=\"%d\" update=\"%d\" tracker=\"%d\"",
 		ipStr,
 		numHops,
@@ -806,7 +806,7 @@ XML::Node *ChanHitList::createXML(bool addHits)
 		closestHit(),
 		furthestHit(),
 		sys->getTime()-newestHit()
-		);		
+		);
 
 	if (addHits)
 	{
@@ -838,7 +838,7 @@ XML::Node *Channel::createRelayXML(bool showStat)
 		localRelays(),
 		(chl!=NULL)?chl->numHits():0,
 		ststr
-		);	
+		);
 }
 
 // -----------------------------------
@@ -876,7 +876,7 @@ void Channel::broadcastTrackerUpdate(GnuID &svID, bool force)
 		MemoryStream mem(pack.data,sizeof(pack));
 
 		AtomStream atom(mem);
-			
+
 		ChanHit hit;
 
 		ChanHitList *chl = chanMgr->findHitListByID(info.id);
@@ -924,10 +924,10 @@ void Channel::broadcastTrackerUpdate(GnuID &svID, bool force)
 // -----------------------------------
 bool	Channel::sendPacketUp(ChanPacket &pack,GnuID &cid,GnuID &sid,GnuID &did)
 {
-	if ( isActive() 
-		&& (!cid.isSet() || info.id.isSame(cid)) 
+	if ( isActive()
+		&& (!cid.isSet() || info.id.isSame(cid))
 		&& (!sid.isSet() || !remoteID.isSame(sid))
-		&& sourceStream 
+		&& sourceStream
 	   )
 		return sourceStream->sendPacket(pack,did);
 
@@ -1072,9 +1072,9 @@ bool ChannelStream::getStatus(Channel *ch,ChanPacket &pack)
 
 	if (
 		(
-		(numListeners != newLocalListeners) 
-		|| (numRelays != newLocalRelays) 
-		|| (ch->isPlaying() != isPlaying) 
+		(numListeners != newLocalListeners)
+		|| (numRelays != newLocalRelays)
+		|| (ch->isPlaying() != isPlaying)
 		|| (servMgr->getFirewall() != fwState)
 		|| (((ctime-lastUpdate)>chanMgr->hostUpdateInterval) && chanMgr->hostUpdateInterval)
 		)
@@ -1126,7 +1126,7 @@ bool	Channel::checkBump()
 			LOG_ERROR("Channel Auto bumped");
 			bump = true;
 		}
-	
+
 	if (bump)
 	{
 		bump = false;
@@ -1154,7 +1154,7 @@ int Channel::readStream(Stream &in,ChannelStream *source)
 	try
 	{
 		while (thread.active && !peercastInst->isQuitting)
-		{			
+		{
 			if (checkIdle())
 			{
 				LOG_DEBUG("Channel idle");
@@ -1184,7 +1184,7 @@ int Channel::readStream(Stream &in,ChannelStream *source)
 				if (rawData.writePos > 0)
 				{
 					if (isBroadcasting())
-					{					
+					{
 						if ((sys->getTime()-lastTrackerUpdate) >= chanMgr->hostUpdateInterval)
 						{
 							GnuID noID;
@@ -1200,7 +1200,7 @@ int Channel::readStream(Stream &in,ChannelStream *source)
 					source->updateStatus(this);
 				}
 			}
-			
+
 			sys->sleepIdle();
 		}
 	}catch(StreamException &e)
@@ -1269,7 +1269,7 @@ int PeercastStream::readPacket(Stream &in,Channel *ch)
 					{
 						XML xml;
 						xml.read(mem);
-						XML::Node *n = xml.findNode("channel");					
+						XML::Node *n = xml.findNode("channel");
 						if (n)
 						{
 							ChanInfo newInfo = ch->info;
@@ -1536,7 +1536,7 @@ void	ChanPacketBuffer::readPacket(ChanPacket &pack)
 
 	unsigned int tim = sys->getTime();
 
-	if (readPos < firstPos)	
+	if (readPos < firstPos)
 		throw StreamException("Read too far behind");
 
 	while (readPos >= writePos)
@@ -1679,7 +1679,7 @@ Channel *ChanMgr::findChannelByIndex(int index)
 		ch=ch->next;
 	}
 	return NULL;
-}	
+}
 // -----------------------------------
 Channel *ChanMgr::findChannelByMount(const char *str)
 {
@@ -1693,7 +1693,7 @@ Channel *ChanMgr::findChannelByMount(const char *str)
 	}
 
 	return NULL;
-}	
+}
 // -----------------------------------
 Channel *ChanMgr::findChannelByID(GnuID &id)
 {
@@ -1706,7 +1706,7 @@ Channel *ChanMgr::findChannelByID(GnuID &id)
 		ch=ch->next;
 	}
 	return NULL;
-}	
+}
 // -----------------------------------
 int ChanMgr::findChannels(ChanInfo &info, Channel **chlist, int max)
 {
@@ -1773,7 +1773,7 @@ Channel *ChanMgr::findAndRelay(ChanInfo &info)
 		c = chanMgr->createChannel(info,NULL);
 		if (c)
 		{
-			c->setStatus(Channel::S_SEARCHING);			
+			c->setStatus(Channel::S_SEARCHING);
 			c->startGet();
 		}
 	}
@@ -1789,7 +1789,7 @@ Channel *ChanMgr::findAndRelay(ChanInfo &info)
 			return NULL;
 		}
 
-		
+
 		if (c->isPlaying() && (c->info.contentType!=ChanInfo::T_UNKNOWN))
 			break;
 
@@ -1802,7 +1802,7 @@ Channel *ChanMgr::findAndRelay(ChanInfo &info)
 ChanMgr::ChanMgr()
 {
 	channel = NULL;
-	
+
 	hitlist = NULL;
 
 	currFindAndPlayChannel.clear();
@@ -1815,7 +1815,7 @@ ChanMgr::ChanMgr()
 	deadHitAge = 600;
 
 	icyIndex = 0;
-	icyMetaInterval = 8192;	
+	icyMetaInterval = 8192;
 	maxRelaysPerChannel = 0;
 
 	searchInfo.init();
@@ -1834,7 +1834,7 @@ ChanMgr::ChanMgr()
 
 	bufferTime = 5;
 
-	autoQuery = 0;	
+	autoQuery = 0;
 	lastQuery = 0;
 
 	lastYPConnect = 0;
@@ -1847,7 +1847,7 @@ bool ChanMgr::writeVariable(Stream &out, const String &var, int index)
 	char buf[1024];
 	if (var == "numHitLists")
 		sprintf(buf,"%d",numHitLists());
-	
+
 	else if (var == "numChannels")
 		sprintf(buf,"%d",numChannels());
 	else if (var == "djMessage")
@@ -2063,14 +2063,14 @@ void ChanMgr::broadcastRelays(Servent *serv, int minTTL, int maxTTL)
 						numOut++;
 					}
 
-					LOG_NETWORK("Sent channel to %d servents, TTL %d",numOut,ttl);		
+					LOG_NETWORK("Sent channel to %d servents, TTL %d",numOut,ttl);
 
 				}
 			}
 			c=c->next;
 		}
 		//if (numChans)
-		//	LOG_NETWORK("Sent %d channels to %d servents",numChans,numOut);		
+		//	LOG_NETWORK("Sent %d channels to %d servents",numChans,numOut);
 	}
 }
 // -----------------------------------
@@ -2135,7 +2135,7 @@ void ChanMgr::clearHitLists()
 	while (hitlist)
 	{
 		peercastApp->delChannel(&hitlist->info);
-	
+
 		ChanHitList *next = hitlist->next;
 
 		delete hitlist;
@@ -2260,8 +2260,8 @@ int ChanMgr::numHitLists()
 }
 // -----------------------------------
 ChanHitList *ChanMgr::addHitList(ChanInfo &info)
-{	
-	ChanHitList *chl = new ChanHitList();	
+{
+	ChanHitList *chl = new ChanHitList();
 
 
 	chl->next = hitlist;
@@ -2279,13 +2279,13 @@ ChanHitList *ChanMgr::addHitList(ChanInfo &info)
 void ChanMgr::clearDeadHits(bool clearTrackers)
 {
 	unsigned int interval;
-	
+
 	if (servMgr->isRoot)
 		interval = 1200;		// mainly for old 0.119 clients
 	else
 		interval = hostUpdateInterval+30;
 
-	
+
 	ChanHitList *chl = hitlist,*prev = NULL;
 	while (chl)
 	{
@@ -2374,7 +2374,7 @@ void ChanMgr::addHit(Host &h,GnuID &id,bool tracker)
 {
 	ChanHit hit;
 	hit.init();
-	hit.host = h; 
+	hit.host = h;
 	hit.rhost[0] = h;
 	hit.rhost[1].init();
 	hit.tracker = tracker;
@@ -2470,7 +2470,7 @@ void ChanMgr::playChannel(ChanInfo &info)
 		type = PlayList::T_ASX;
 		// WMP seems to have a bug where it doesn`t re-read asx files if they have the same name
 		// so we prepend the channel id to make it unique - NOTE: should be deleted afterwards.
-		sprintf(fname,"%s/%s.asx",peercastApp->getPath(),idStr);	
+		sprintf(fname,"%s/%s.asx",peercastApp->getPath(),idStr);
 	}else if (info.contentType == ChanInfo::T_OGM)
 	{
 		type = PlayList::T_RAM;
@@ -2590,9 +2590,9 @@ void ChanHit::initLocal(int numl,int numr,int,int uptm,bool connected,unsigned i
 // -----------------------------------
 void ChanHit::writeAtoms(AtomStream &atom,GnuID &chanID)
 {
-	bool addChan=chanID.isSet();	
+	bool addChan=chanID.isSet();
 
-	int fl1 = 0; 
+	int fl1 = 0;
 	if (recv) fl1 |= PCP_HOST_FLAGS1_RECV;
 	if (relay) fl1 |= PCP_HOST_FLAGS1_RELAY;
 	if (direct) fl1 |= PCP_HOST_FLAGS1_DIRECT;
@@ -2773,7 +2773,7 @@ ChanHit *ChanHitList::addHit(ChanHit &h)
 				if (ch->sessionID.isSame(h.sessionID))
 				{
 					ch = deleteHit(ch);
-					continue;						
+					continue;
 				}
 			ch=ch->next;
 		}
@@ -3128,7 +3128,7 @@ ChanInfo::PROTOCOL ChanInfo::getProtocolFromStr(const char *str)
 		return SP_MMS;
 	else if (stricmp(str,"PCP")==0)
 		return SP_PCP;
-	else 
+	else
 		return SP_UNKNOWN;
 }
 
@@ -3210,7 +3210,7 @@ ChanInfo::TYPE ChanInfo::getTypeFromStr(const char *str)
 		return T_PLS;
 	else if (stricmp(str,"ASX")==0)
 		return T_ASX;
-	else 
+	else
 		return T_UNKNOWN;
 }
 // -----------------------------------
@@ -3391,7 +3391,7 @@ bool ChanInfo::update(ChanInfo &info)
 		genre = info.genre;
 		changed = true;
 	}
-	
+
 	if (!url.isSame(info.url))
 	{
 		url = info.url;
@@ -3524,7 +3524,7 @@ void ChanInfo::readInfoAtoms(AtomStream &atom,int numc)
 			atom.readString(streamExt.data,sizeof(streamExt.data),d);
 		}else
 			atom.skip(c,d);
-	}	
+	}
 }
 
 // -----------------------------------
@@ -3593,7 +3593,7 @@ XML::Node *ChanInfo::createChannelXML()
 		numSkips,
 		getAge(),
 		bcID.getFlags()
-		);	
+		);
 }
 
 // -----------------------------------
@@ -3630,7 +3630,7 @@ XML::Node *ChanInfo::createQueryXML()
 		strcat(buf,idStr);
 		strcat(buf,"\"");
 	}
-		
+
 
 	return new XML::Node("channel %s",buf);
 }
@@ -3648,7 +3648,7 @@ XML::Node *ChanInfo::createRelayChannelXML()
 		getUptime(),
 		numSkips,
 		getAge()
-		);	
+		);
 }// -----------------------------------
 XML::Node *ChanInfo::createTrackXML()
 {
@@ -3666,7 +3666,7 @@ XML::Node *ChanInfo::createTrackXML()
 
 	String contactUNI = track.contact;
 	contactUNI.convertTo(String::T_UNICODESAFE);
-	
+
 
 
 	return new XML::Node("track title=\"%s\" artist=\"%s\" album=\"%s\" genre=\"%s\" contact=\"%s\"",

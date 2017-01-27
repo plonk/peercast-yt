@@ -2,9 +2,9 @@
 // File : main.cpp
 // Date: ??-apr-2004
 // Author: giles & mode7
-// Desc: 
+// Desc:
 //		see .cpp for details
-//		
+//
 // (c) 2002-2004 peercast.org
 // ------------------------------------------------
 // This program is free software; you can redistribute it and/or modify
@@ -44,7 +44,7 @@ bool quit=false;
 void relayBrowserUpdate(EventLoopTimerRef theTimer, void* userData)
 {
 	OSXPeercastApp *pOsxPeerCast = static_cast<OSXPeercastApp *>(userData);
-	
+
 	if( pOsxPeerCast )
 	{
 		pOsxPeerCast->redisplayInfo();
@@ -56,7 +56,7 @@ void handleGetURLEvent(const AppleEvent *appleEvent, AppleEvent *reply)
     AEDesc		directParam={'NULL', NULL};
 	WindowPtr	targetWindow = NULL;
 	OSErr		err;
-	
+
 	// extract the direct parameter (an object specifier)
 	err = AEGetKeyDesc(appleEvent, keyDirectObject, typeWildCard, &directParam);
 //!	ThrowIfOSErr(err);
@@ -64,7 +64,7 @@ void handleGetURLEvent(const AppleEvent *appleEvent, AppleEvent *reply)
 	// we need to look for other parameters, to do with destination etc.
 	long		dataSize = AEGetDescDataSize( &directParam );
 	char*	urlString = new char[dataSize + 1];
-	
+
 	AEGetDescData( &directParam, urlString, dataSize );
 	urlString[dataSize] = 0;
 
@@ -80,11 +80,11 @@ void handleGetURLEvent(const AppleEvent *appleEvent, AppleEvent *reply)
 OSErr gurlHan( const AppleEvent* theAppleEvent, AppleEvent* reply, SInt32 handlerRefcon )
 {
 	OSErr		err = noErr;
-	
+
 	AEEventID	eventID;
 	OSType		typeCode;
 	Size		actualSize 	= 0L;
-	
+
 	// Get the event ID
 	err = AEGetAttributePtr( theAppleEvent
 							,keyEventIDAttr
@@ -93,12 +93,12 @@ OSErr gurlHan( const AppleEvent* theAppleEvent, AppleEvent* reply, SInt32 handle
 							,(Ptr)&eventID
 							,sizeof(eventID)
 							,&actualSize);
-							
+
 	if( eventID == 'GURL' )
 	{
 		handleGetURLEvent( theAppleEvent, reply );
 	}
-	
+
 	return err;
 }
 
@@ -124,28 +124,28 @@ OSStatus runApp( int argc, char* argv[], WindowRef window )
 	CAppPathInfo appPathInfo;
 
 	std::string filePath( appPathInfo.getPath() );
-	filePath += "peercast.ini";	
-	
+	filePath += "peercast.ini";
+
 	InstallAppleEventHandlers();
 #ifndef DISABLE_PEERCAST
 	peercastInst = new OSXPeercastInst();
 	peercastApp  = new OSXPeercastApp( appPathInfo.getPath(), filePath.c_str(), argc, argv, window, dbControlID );
 	peercastInst->init();
-	
-	signal(SIGINT, sigProc); 
+
+	signal(SIGINT, sigProc);
 #endif
 	OSXPeercastApp *pOSXApp = static_cast<OSXPeercastApp *>(peercastApp);
 	pOSXApp->initAPP();
-	
+
 	//////////////////////////
-	
+
 	Timer relayBrowserTimer(  GetMainEventLoop()
 							 ,3*kEventDurationSecond
 							 ,kEventDurationSecond
 							 ,pOSXApp
 							 ,relayBrowserUpdate );
 	//////////////////////////
-   
+
 	// The window was created hidden so show it.
 	ShowWindow( window );
 
@@ -164,37 +164,37 @@ int main(int argc, char* argv[])
 {
     IBNibRef 		nibRef;
     WindowRef 		window;
-    
+
     OSStatus		err;
 
     // Create a Nib reference passing the name of the nib file (without the .nib extension)
     // CreateNibReference only searches into the application bundle.
     err = CreateNibReference(CFSTR("main"), &nibRef);
     require_noerr( err, CantGetNibRef );
-    
+
     // Once the nib reference is created, set the menu bar. "MainMenu" is the name of the menu bar
     // object. This name is set in InterfaceBuilder when the nib is created.
     err = SetMenuBarFromNib(nibRef, CFSTR("MenuBar"));
     require_noerr( err, CantSetMenuBar );
-    
-    // Then create a window. "MainWindow" is the name of the window object. This name is set in 
+
+    // Then create a window. "MainWindow" is the name of the window object. This name is set in
     // InterfaceBuilder when the nib is created.
     err = CreateWindowFromNib(nibRef, CFSTR("MainWindow"), &window);
     require_noerr( err, CantCreateWindow );
 
     // We don't need the nib reference anymore.
     DisposeNibReference(nibRef);
-	
+
 	try
 	{
 		runApp( argc, argv, window );
 	}
-	
+
 	catch( const CAppPathInfo::EPathErr pathError )
 	{
 		printf("[APP PATH ERROR]: # %d喜", pathError );
 	}
-	
+
 CantCreateWindow:
 CantSetMenuBar:
 CantGetNibRef:

@@ -6,7 +6,7 @@
 #ifdef WIN32
 #define APICALL _cdecl
 #else
-#define APICALL 
+#define APICALL
 #endif
 
 
@@ -18,11 +18,11 @@ class Sys;
 
 // ------------------------------------------------------------
 // This is the interface from the application to the core.
-class PeercastInstance 
+class PeercastInstance
 {
 public:
 	PeercastInstance()
-	:isQuitting(false) 
+	:isQuitting(false)
 	{}
 
 	virtual void	APICALL init();

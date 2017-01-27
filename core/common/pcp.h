@@ -121,30 +121,30 @@ static const ID4 PCP_MESG				= "mesg";
 static const ID4 PCP_MESG_ASCII			= "asci";		// ascii/sjis to be depreciated.. utf8/unicode is the only supported format from now.
 static const ID4 PCP_MESG_SJIS			= "sjis";
 
-static const ID4 PCP_BCST				= "bcst";	
-static const ID4 PCP_BCST_TTL			= "ttl";	
-static const ID4 PCP_BCST_HOPS			= "hops";	
-static const ID4 PCP_BCST_FROM			= "from";	
-static const ID4 PCP_BCST_DEST			= "dest";	
-static const ID4 PCP_BCST_GROUP			= "grp";	
-static const ID4 PCP_BCST_CHANID		= "cid";	
-static const ID4 PCP_BCST_VERSION		= "vers";	
+static const ID4 PCP_BCST				= "bcst";
+static const ID4 PCP_BCST_TTL			= "ttl";
+static const ID4 PCP_BCST_HOPS			= "hops";
+static const ID4 PCP_BCST_FROM			= "from";
+static const ID4 PCP_BCST_DEST			= "dest";
+static const ID4 PCP_BCST_GROUP			= "grp";
+static const ID4 PCP_BCST_CHANID		= "cid";
+static const ID4 PCP_BCST_VERSION		= "vers";
 
-static const ID4 PCP_PUSH				= "push";	
-static const ID4 PCP_PUSH_IP			= "ip";	
-static const ID4 PCP_PUSH_PORT			= "port";	
-static const ID4 PCP_PUSH_CHANID		= "cid";	
+static const ID4 PCP_PUSH				= "push";
+static const ID4 PCP_PUSH_IP			= "ip";
+static const ID4 PCP_PUSH_PORT			= "port";
+static const ID4 PCP_PUSH_CHANID		= "cid";
 
 static const ID4 PCP_SPKT				= "spkt";
 
-static const ID4 PCP_ATOM				= "atom";	
+static const ID4 PCP_ATOM				= "atom";
 
 static const ID4 PCP_SESSIONID			= "sid";
 
-static const int PCP_BCST_GROUP_ALL			= (char)0xff;	
-static const int PCP_BCST_GROUP_ROOT		= 1;	
-static const int PCP_BCST_GROUP_TRACKERS	= 2;	
-static const int PCP_BCST_GROUP_RELAYS		= 4;	
+static const int PCP_BCST_GROUP_ALL			= (char)0xff;
+static const int PCP_BCST_GROUP_ROOT		= 1;
+static const int PCP_BCST_GROUP_TRACKERS	= 2;
+static const int PCP_BCST_GROUP_RELAYS		= 4;
 
 
 static const int PCP_ERROR_QUIT			= 1000;
@@ -175,12 +175,12 @@ static const int PCP_HOST_FLAGS1_PRIVATE	= 0x40;
 
 
 // ----------------------------------------------
-class BroadcastState 
+class BroadcastState
 {
 public:
 	BroadcastState()
 	:numHops(0)
-	,forMe(false) 
+	,forMe(false)
 	,streamPos(0)
 	,group(0)
 	{
@@ -210,7 +210,7 @@ public:
 class PCPStream : public ChannelStream
 {
 public:
-	PCPStream(GnuID &rid) 
+	PCPStream(GnuID &rid)
 	:routeList(1000)
 	{
 		init(rid);
@@ -247,7 +247,7 @@ public:
 
 	ChanPacketBuffer inData,outData;
 	unsigned int lastPacketTime;
-	unsigned int nextRootPacket;	
+	unsigned int nextRootPacket;
 
 	//int	error;
 	GnuIDList	routeList;

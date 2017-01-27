@@ -28,7 +28,7 @@ class OggPage;
 class OggPacket
 {
 public:
-	enum 
+	enum
 	{
 		MAX_BODYLEN = 65536,		// probably too small
 		MAX_PACKETS = 256			// prolly too small too, but realloc?!?!?!
@@ -136,14 +136,14 @@ public:
 	void	readHeaders(Stream &,Channel *, OggPage &);
 
 	OggVorbisSubStream	vorbis;
-	OggTheoraSubStream	theora;	
+	OggTheoraSubStream	theora;
 };
 
 // ----------------------------------
 class OggPage
 {
 public:
-	enum 
+	enum
 	{
 		MAX_BODYLEN = 65536,
 		MAX_HEADERLEN = 27+256
@@ -166,4 +166,4 @@ public:
 };
 
 
-#endif 
+#endif

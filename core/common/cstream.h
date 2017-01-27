@@ -30,7 +30,7 @@ class Stream;
 class ChanPacket
 {
 public:
-	enum 
+	enum
 	{
 		MAX_DATALEN = 16384
 	};
@@ -45,7 +45,7 @@ public:
 		T_ALL		= 0xff
 	};
 
-	ChanPacket() 
+	ChanPacket()
 	{
 		init();
 	}
@@ -72,7 +72,7 @@ public:
 
 };
 // ----------------------------------
-class ChanPacketBuffer 
+class ChanPacketBuffer
 {
 public:
 	enum {
@@ -121,10 +121,10 @@ class ChannelStream
 public:
 	ChannelStream()
 	:numListeners(0)
-	,numRelays(0) 
+	,numRelays(0)
 	,isPlaying(false)
 	,fwState(0)
-	,lastUpdate(0) 
+	,lastUpdate(0)
 	{}
 
 	void updateStatus(Channel *);
@@ -147,5 +147,5 @@ public:
 
 };
 
-#endif 
+#endif
 
