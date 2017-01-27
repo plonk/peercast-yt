@@ -113,7 +113,7 @@ void Channel::endThread()
 
 	if (sourceData)
 	{
-		sourceData;
+		delete sourceData;
 		sourceData = NULL;
 	}
 
