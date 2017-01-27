@@ -756,7 +756,7 @@ const char *getCGIarg(const char *str, const char *arg)
 }
 
 // -----------------------------------
-bool cmpCGIarg(char *str, char *arg, char *value)
+bool cmpCGIarg(const char *str, const char *arg, const char *value)
 {
 	if ((!str) || (!strlen(value)))
 		return false;
@@ -771,12 +771,12 @@ bool cmpCGIarg(char *str, char *arg, char *value)
 		return false;
 }
 // -----------------------------------
-bool hasCGIarg(char *str, char *arg)
+bool hasCGIarg(const char *str, const char *arg)
 {
 	if (!str)
 		return false;
 
-	char *s = strstr(str,arg);
+	const char *s = strstr(str,arg);
 
 	if (!s)
 		return false;

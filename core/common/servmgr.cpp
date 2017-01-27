@@ -810,7 +810,7 @@ void ServMgr::setFirewall(FW_STATE state)
 {
 	if (firewalled != state)
 	{
-		char *str;
+		const char *str;
 		switch (state)
 		{
 			case FW_ON:
@@ -1196,14 +1196,14 @@ void ServMgr::loadSettings(const char *fn)
 				networkID.fromStr(iniFile.getStrValue());
 			else if (iniFile.isName("authType"))
 			{
-				char *t = iniFile.getStrValue();
+				const char *t = iniFile.getStrValue();
 				if (stricmp(t,"cookie")==0)
 					servMgr->authType = ServMgr::AUTH_COOKIE;
 				else if (stricmp(t,"http-basic")==0)
 					servMgr->authType = ServMgr::AUTH_HTTPBASIC;
 			}else if (iniFile.isName("cookiesExpire"))
 			{
-				char *t = iniFile.getStrValue();
+				const char *t = iniFile.getStrValue();
 				if (stricmp(t,"never")==0)
 					servMgr->cookieList.neverExpire = true;
 				else if (stricmp(t,"session")==0)
@@ -2030,7 +2030,7 @@ ServHost::TYPE ServHost::getTypeFromStr(const char *s)
 // --------------------------------------------------
 bool	ServFilter::writeVariable(Stream &out, const String &var)
 {
-	char buf[1024];
+	char buf[1024] = "";
 
 	if (var == "network")
 		strcpy(buf,(flags & F_NETWORK)?"1":"0");

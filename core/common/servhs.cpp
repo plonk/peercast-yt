@@ -656,7 +656,7 @@ void Servent::handshakeCMD(char *cmd)
 	char curr[MAX_CGI_LEN];
 
 	char	jumpStr[128];
-	char	*jumpArg=NULL;
+	const char	*jumpArg=NULL;
 	bool	retHTML=true;
 	strcpy(result,"OK");
 

@@ -498,7 +498,7 @@ public:
 
 	unsigned int lastIdleTime;
 	int		status;
-	static	char *statusMsgs[],*srcTypes[];
+	static const 	char *statusMsgs[],*srcTypes[];
 
 	ClientSocket	*sock;
 	ClientSocket	*pushSock;

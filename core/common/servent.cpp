@@ -39,7 +39,7 @@
 const int DIRECT_WRITE_TIMEOUT = 60;
 
 // -----------------------------------
-char *Servent::statusMsgs[]=
+const char *Servent::statusMsgs[]=
 {
         "NONE",
 		"CONNECTING",
@@ -57,7 +57,7 @@ char *Servent::statusMsgs[]=
 };
 
 // -----------------------------------
-char *Servent::typeMsgs[]=
+const char *Servent::typeMsgs[]=
 {
 		"NONE",
         "INCOMING",
