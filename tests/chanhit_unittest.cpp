@@ -38,7 +38,7 @@ TEST_F(ChanHitFixture, initialState)
     ASSERT_EQ(0, hit->numListeners);
     ASSERT_EQ(0, hit->numRelays);
     ASSERT_EQ(0, hit->numHops);
-    ASSERT_EQ(0, hit->clap_pp);
+    // ASSERT_EQ(0, hit->clap_pp);
     ASSERT_EQ(0, hit->time);
     ASSERT_EQ(0, hit->upTime);
     ASSERT_EQ(0, hit->lastContact);
@@ -48,7 +48,7 @@ TEST_F(ChanHitFixture, initialState)
     ASSERT_FALSE(hit->chanID.isSet());
 
     ASSERT_EQ(0, hit->version);
-    ASSERT_EQ(0, hit->version_vp);
+    // ASSERT_EQ(0, hit->version_vp);
 
     ASSERT_EQ(false, hit->firewalled);
     ASSERT_EQ(false, hit->stable);
@@ -59,27 +59,27 @@ TEST_F(ChanHitFixture, initialState)
     ASSERT_EQ(false, hit->direct);
     ASSERT_EQ(true, hit->relay);
     ASSERT_EQ(true, hit->cin);
-    ASSERT_EQ(false, hit->relayfull);
-    ASSERT_EQ(false, hit->chfull);
-    ASSERT_EQ(false, hit->ratefull);
+    // ASSERT_EQ(false, hit->relayfull);
+    // ASSERT_EQ(false, hit->chfull);
+    // ASSERT_EQ(false, hit->ratefull);
 
     ASSERT_EQ(NULL, hit->next);
 
-    ASSERT_EQ(0, hit->status);
-    ASSERT_EQ(0, hit->servent_id);
+    // ASSERT_EQ(0, hit->status);
+    // ASSERT_EQ(0, hit->servent_id);
     ASSERT_EQ(0, hit->oldestPos);
     ASSERT_EQ(0, hit->newestPos);
 
-    ASSERT_EQ(0, hit->uphost.ip);
-    ASSERT_EQ(0, hit->uphost.port);
+    // ASSERT_EQ(0, hit->uphost.ip);
+    // ASSERT_EQ(0, hit->uphost.port);
 
-    ASSERT_EQ(0, hit->uphostHops);
+    // ASSERT_EQ(0, hit->uphostHops);
 
-    ASSERT_EQ(' ', hit->version_ex_prefix[0]);
-    ASSERT_EQ(' ', hit->version_ex_prefix[1]);
+    // ASSERT_EQ(' ', hit->version_ex_prefix[0]);
+    // ASSERT_EQ(' ', hit->version_ex_prefix[1]);
 
-    ASSERT_EQ(0, hit->version_ex_number);
-    ASSERT_EQ(0, hit->lastSendSeq);
+    // ASSERT_EQ(0, hit->version_ex_number);
+    // ASSERT_EQ(0, hit->lastSendSeq);
 }
 
 TEST_F(ChanHitFixture, pickNearestIP)
@@ -114,25 +114,25 @@ TEST_F(ChanHitFixture, pickNearestIP)
     }    
 }
 
-TEST_F(ChanHitFixture, initLocal_pp_Stealth)
-{
-    hit->numListeners = 100;
+// TEST_F(ChanHitFixture, initLocal_pp_Stealth)
+// {
+//     hit->numListeners = 100;
 
-    hit->initLocal_pp(true, 10);
+//     hit->initLocal_pp(true, 10);
 
-    ASSERT_EQ(0, hit->numListeners);
-    ASSERT_EQ(10, hit->clap_pp);
-}
+//     ASSERT_EQ(0, hit->numListeners);
+//     ASSERT_EQ(10, hit->clap_pp);
+// }
 
-TEST_F(ChanHitFixture, initLocal_pp_NonStealth)
-{
-    hit->numListeners = 100;
+// TEST_F(ChanHitFixture, initLocal_pp_NonStealth)
+// {
+//     hit->numListeners = 100;
 
-    hit->initLocal_pp(false, 10);
+//     hit->initLocal_pp(false, 10);
 
-    ASSERT_EQ(1, hit->numListeners);
-    ASSERT_EQ(10, hit->clap_pp);
-}
+//     ASSERT_EQ(1, hit->numListeners);
+//     ASSERT_EQ(10, hit->clap_pp);
+// }
 
 TEST_F(ChanHitFixture, createXML)
 {
@@ -180,7 +180,7 @@ TEST_F(ChanHitFixture, writeVariable)
         EXPECT_STREQ(value, (name, asString(mem, buf)));    \
     } while (0)
 
-    TEST_VARIABLE("rhost0", "<font color=green>0.0.0.0:0</font>");
+    TEST_VARIABLE("rhost0", "0.0.0.0:0");
     TEST_VARIABLE("rhost1", "0.0.0.0:0");
     TEST_VARIABLE("numHops", "0");
     TEST_VARIABLE("numListeners", "0");
@@ -189,11 +189,11 @@ TEST_F(ChanHitFixture, writeVariable)
     TEST_VARIABLE("update", "-");
     TEST_VARIABLE("isFirewalled", "0");
     TEST_VARIABLE("version", "0");
-    TEST_VARIABLE("agent", "0");
-    TEST_VARIABLE("check", "<a href=\"#\" onclick=\"checkip('0.0.0.0')\">_</a>");
-    TEST_VARIABLE("uphost", "0.0.0.0:0");
-    TEST_VARIABLE("uphostHops", "0");
-    TEST_VARIABLE("canRelay", "1");
+    // TEST_VARIABLE("agent", "0");
+    // TEST_VARIABLE("check", "<a href=\"#\" onclick=\"checkip('0.0.0.0')\">_</a>");
+    // TEST_VARIABLE("uphost", "0.0.0.0:0");
+    // TEST_VARIABLE("uphostHops", "0");
+    // TEST_VARIABLE("canRelay", "1");
 }
 
 TEST_F(ChanHitFixture, writeAtom)
@@ -204,7 +204,7 @@ TEST_F(ChanHitFixture, writeAtom)
     chid.clear();
 
     hit->writeAtoms(writer, chid);
-    ASSERT_EQ(169, mem.pos);
+    ASSERT_EQ(157, mem.pos);
 }
 
 TEST_F(ChanHitFixture, initLocal)
@@ -223,14 +223,15 @@ TEST_F(ChanHitFixture, initLocal)
     unsigned int newp = 7;
 
     hit->initLocal(numl, numr, nums, uptm, connected,
-                  isFull, bitrate, ch, oldp, newp);
+                   /* isFull, bitrate, ch, */
+                   oldp, newp);
     
     ASSERT_EQ(1, hit->numListeners);
     ASSERT_EQ(2, hit->numRelays);
 
     ASSERT_EQ(4, hit->upTime);
     ASSERT_EQ(true, hit->recv);
-    ASSERT_EQ(true, hit->chfull);
+    // ASSERT_EQ(true, hit->chfull);
 
     ASSERT_EQ(6, hit->oldestPos);
     ASSERT_EQ(7, hit->newestPos);

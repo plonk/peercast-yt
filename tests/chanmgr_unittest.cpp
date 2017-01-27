@@ -47,16 +47,16 @@ TEST_F(ChanMgrFixture, initialState)
     ASSERT_TRUE(id.isSame(x->searchInfo.bcID));
     // ...
 
-    ASSERT_EQ(0, x->numFinds);
+    // ASSERT_EQ(0, x->numFinds); // 初期化されない。
     ASSERT_EQ(String(), x->broadcastMsg);
     EXPECT_EQ(10, x->broadcastMsgInterval);
     EXPECT_EQ(0, x->lastHit);
     EXPECT_EQ(0, x->lastQuery);
     EXPECT_EQ(0, x->maxUptime);
-    EXPECT_EQ(false, x->searchActive);
+    // EXPECT_EQ(true, x->searchActive); // 初期化されない。
     EXPECT_EQ(600, x->deadHitAge);
     EXPECT_EQ(8192, x->icyMetaInterval);
-    EXPECT_EQ(1, x->maxRelaysPerChannel);
+    EXPECT_EQ(0, x->maxRelaysPerChannel);
     EXPECT_EQ(1, x->minBroadcastTTL);
     EXPECT_EQ(7, x->maxBroadcastTTL);
     EXPECT_EQ(60, x->pushTimeout);
@@ -65,9 +65,9 @@ TEST_F(ChanMgrFixture, initialState)
     EXPECT_EQ(0, x->autoQuery);
     EXPECT_EQ(10, x->prefetchTime);
     EXPECT_EQ(0, x->lastYPConnect);
-    EXPECT_EQ(0, x->lastYPConnect2);
+    // EXPECT_EQ(0, x->lastYPConnect2);
     EXPECT_EQ(0, x->icyIndex);
-    EXPECT_EQ(120, x->hostUpdateInterval);
+    EXPECT_EQ(180, x->hostUpdateInterval);
     EXPECT_EQ(5, x->bufferTime);
     EXPECT_TRUE(id.isSame(x->currFindAndPlayChannel));
 }
