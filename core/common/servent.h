@@ -172,6 +172,8 @@ public:
 	void	handshakeRTSP(RTSP &);
 	void	handshakeHTTP(HTTP &,bool);
 
+	void	handshakeJRPC(HTTP &http);
+
 	void	handshakeRemoteFile(const char *);
 	void	handshakeLocalFile(const char *);
 

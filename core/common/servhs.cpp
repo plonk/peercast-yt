@@ -27,6 +27,7 @@
 #include "peercast.h"
 #include "pcp.h"
 #include "version2.h"
+#include "jrpc.h"
 
 // -----------------------------------
 static void termArgs(char *str)
@@ -88,6 +89,47 @@ bool getCGIargBOOL(char *a)
 int getCGIargINT(char *a)
 {
 	return atoi(a);
+}
+
+// -----------------------------------
+void Servent::handshakeJRPC(HTTP &http)
+{
+	int content_length = -1;
+
+	while (http.nextHeader())
+	{
+		if (http.isHeader("content-length"))
+			content_length = http.getArgInt();
+	}
+
+	if (content_length == -1)
+		throw HTTPException("HTTP/1.0 411 Length required", 411);
+
+	if (content_length == 0)
+		throw HTTPException(HTTP_SC_BADREQUEST, 400);
+
+	char *body = new char[content_length + 1];
+	try {
+		http.stream->read(body, content_length);
+		body[content_length] = '\0';
+	}catch (SockException&)
+	{
+		delete[] body;
+		// body too short
+		throw HTTPException(HTTP_SC_BADREQUEST, 400);
+	}
+
+	PeercastJrpcApi api;
+	std::string response = api.call(body);
+
+	http.writeLine(HTTP_SC_OK);
+	http.writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
+	http.writeLineF("%s %d", HTTP_HS_LENGTH, response.size());
+	http.writeLine("");
+
+	http.write(response.c_str(), response.size());
+
+	delete[] body;
 }
 
 // -----------------------------------
@@ -225,12 +267,39 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 
 			triggerChannel(fn+9,ChanInfo::SP_PCP,false);
 
+		}else if (strcmp(fn, "/api/1")==0)
+		{
+			PeercastJrpcApi api;
+			std::string response = api.getVersionInfo().dump();
+
+			while (http.nextHeader())
+				;
+			http.writeLine(HTTP_SC_OK);
+			http.writeLineF("%s %d", HTTP_HS_LENGTH, response.size());
+			http.writeLine("");
+			http.writeString(response.c_str());
 		}else
 		{
 			while (http.nextHeader());
 			http.writeLine(HTTP_SC_FOUND);
 			http.writeLineF("Location: /%s/index.html",servMgr->htmlPath);
 			http.writeLine("");
+		}
+	}else if (http.isRequest("POST /"))
+	{
+		char *fn = in + 5;
+
+		char *pt = strstr(fn,HTTP_PROTO1);
+		if (pt)
+			pt[-1] = 0;
+
+		LOG_DEBUG("is POST");
+		if (strcmp(fn, "/api/1")==0)
+		{
+			handshakeJRPC(http);
+		}else
+		{
+			throw HTTPException(HTTP_SC_BADREQUEST, 400);
 		}
 	}else if (http.isRequest("GIV"))
 	{
