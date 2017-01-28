@@ -1962,7 +1962,7 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
 	}else if (var == "contactURL")
 		sprintf(buf,"%s",info.url.cstr());
 	else if (var == "streamPos")
-		sprintf(buf,"%d",streamPos);
+		sprintf(buf,"%u",streamPos);
 	else if (var == "sourceType")
 		strcpy(buf,getSrcTypeStr());
 	else if (var == "sourceProtocol")
@@ -1975,9 +1975,9 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
 			strcpy(buf,sourceURL.cstr());
 	}
 	else if (var == "headPos")
-		sprintf(buf,"%d",headPack.pos);
+		sprintf(buf,"%u",headPack.pos);
 	else if (var == "headLen")
-		sprintf(buf,"%d",headPack.len);
+		sprintf(buf,"%u",headPack.len);
 	else if (var == "numHits")
 	{
 		ChanHitList *chl = chanMgr->findHitListByID(info.id);
