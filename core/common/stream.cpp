@@ -113,8 +113,17 @@ int FileStream::read(void *ptr, int len)
 
 	int r = (int)fread(ptr,1,len,file);
 
-	updateTotals(r, 0);
-    return r;
+    if (r > 0)
+    {
+        updateTotals(r, 0);
+        int c = fgetc(file);
+        if (c != EOF)
+        {
+            ungetc(c, file);
+        }
+        return r;
+    }else
+        throw StreamException("End of file");
 }
 
 // -------------------------------------
