@@ -72,12 +72,15 @@ public:
 
     json to_json(ChanInfo& info)
     {
+        String comment = info.comment;
+        comment.convertTo(String::T_UNICODE);  // should not be needed
+
         return {
             {"name", info.name.cstr()},
             {"url", info.url.cstr()},
             {"genre", info.genre.cstr()},
             {"desc", info.desc.cstr()},
-            {"comment", info.comment.cstr()},
+            {"comment", comment.cstr()},
             {"bitrate", info.bitrate},
             {"contentType", info.getTypeStr()}, //?
             {"mimeType", info.getMIMEType()}
