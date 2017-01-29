@@ -66,14 +66,3 @@ json JrpcApi::call_internal(const string& input)
         { "id", id }
     };
 }
-
-json PeercastJrpcApi::dispatch(const json& m, const json& p)
-{
-    try {
-        if (m == "getVersionInfo")
-            return getVersionInfo();
-    } catch (std::out_of_range& e) {
-        throw invalid_params(e.what());
-    }
-    throw method_not_found(m.get<string>());
-}
