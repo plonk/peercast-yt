@@ -1,9 +1,11 @@
 #ifndef _JRPC_H
 #define _JRPC_H
 
+#include "peercast.h"
 #include "channel.h"
 #include "version2.h"
 
+#include <stdarg.h>
 #include <string>
 #include "json.hpp"
 
@@ -47,6 +49,12 @@ public:
                 return getVersionInfo();
             if (m == "getChannels")
                 return getChannels();
+            if (m == "getSettings")
+                return getSettings();
+            if (m == "getYellowPages")
+                return getYellowPages();
+            if (m == "getYellowPageProtocols")
+                return getYellowPageProtocols();
         } catch (std::out_of_range& e) {
             throw invalid_params(e.what());
         }
@@ -159,6 +167,101 @@ public:
 
         return result;
     }
+
+    // 配信中のチャンネルとルートサーバーとの接続状態。
+    // 返り値: "Idle" | "Connecting" | "Connected" | "Error"
+    json::string_t announcingChannelStatus(Channel* c)
+    {
+        return "Connected";
+    }
+
+    json::array_t announcingChannels()
+    {
+        json::array_t result;
+
+        chanMgr->lock.on();
+
+        for (Channel *c = chanMgr->channel; c != NULL; c = c->next)
+        {
+            if (!c->isBroadcasting())
+                continue;
+
+            json j = {
+                { "channelId", to_json(c->info.id) },
+                { "status", announcingChannelStatus(c) },
+            };
+            result.push_back(j);
+        }
+
+        chanMgr->lock.off();
+
+        return result;
+    }
+
+    ::String format(const char* fmt, ...)
+    {
+        String result;
+        va_list ap;
+
+        va_start(ap, fmt);
+        vsnprintf(result.data, ::String::MAX_LEN - 1, fmt, ap);
+        va_end(ap);
+
+        return result;
+    }
+
+    json getYellowPages()
+    {
+        servMgr->lock.on();
+
+        json j;
+        const char* root = servMgr->rootHost.cstr();
+
+        j = {
+            { "yellowPageId", 0 },
+            { "name",  root },
+            { "uri", format("pcp://%s/", root).cstr() },
+            { "announceUri", format("pcp://%s/", root).cstr() },
+            { "channelsUri", nullptr },
+            { "protocol", "pcp" },
+            { "channels", announcingChannels() }
+        };
+
+        servMgr->lock.off();
+
+        return j;
+    }
+
+    json getYellowPageProtocols()
+    {
+        json pcp = {
+            { "name", "PCP" },
+            { "protocol", "pcp" }
+        };
+
+        return json::array({ pcp });
+    }
+
+    json getSettings()
+    {
+        servMgr->lock.on();
+        chanMgr->lock.on();
+        json j = {
+            { "maxRelays", servMgr->maxRelays },
+            { "maxRelaysPerChannel", chanMgr->maxRelaysPerChannel },
+            { "maxDirects", servMgr->maxDirect },
+            { "maxDirectsPerChannel", servMgr->maxDirect },
+            { "maxUpstreamRate", servMgr->maxBitrateOut },
+            { "maxUpstreamRatePerChannel", servMgr->maxBitrateOut },
+            // channelCleaner は無視。
+        };
+
+        chanMgr->lock.off();
+        servMgr->lock.off();
+
+        return j;
+    }
+
 };
 
 #endif
