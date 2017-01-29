@@ -256,7 +256,7 @@ void PCPStream::readRootAtoms(AtomStream &atom, int numc,BroadcastState &bcs)
 			{
 				unsigned int ctime = sys->getTime();
 				nextRootPacket = ctime+time;
-				LOG_DEBUG("PCP expecting next root packet in %ds",time);
+				LOG_DEBUG("PCP expecting next root packet in %us",time);
 			}else
 			{
 				nextRootPacket = 0;
@@ -332,12 +332,12 @@ void PCPStream::readPktAtoms(Channel *ch,AtomStream &atom,int numc,BroadcastStat
 
 		int diff = pack.pos - ch->streamPos;
 		if (diff)
-			LOG_DEBUG("PCP skipping %s%d (%d -> %d)",(diff>0)?"+":"",diff,ch->streamPos,pack.pos);
+			LOG_DEBUG("PCP skipping %s%d (%u -> %u)", (diff>0)?"+":"", diff, ch->streamPos, pack.pos);
 
 
 		if (pack.type == ChanPacket::T_HEAD)
 		{
-			LOG_DEBUG("New head packet at %d",pack.pos);
+			LOG_DEBUG("New head packet at %u",pack.pos);
 
 			// check for stream restart
 			if (pack.pos == 0)
@@ -513,8 +513,8 @@ void PCPStream::readChanAtoms(AtomStream &atom,int numc,BroadcastState &bcs)
 					FileStream file;
 					file.openWriteAppend(servMgr->chanLog.cstr());
 
-        				XML::Node *rn = new XML::Node("update time=\"%d\"",sys->getTime());
-       					XML::Node *n = chl->info.createChannelXML();
+        				XML::Node *rn = new XML::Node("update time=\"%u\"",sys->getTime());
+        					XML::Node *n = chl->info.createChannelXML();
         				n->add(chl->createXML(false));
         				n->add(chl->info.createTrackXML());
 					rn->add(n);

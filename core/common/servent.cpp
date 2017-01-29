@@ -529,7 +529,7 @@ void Servent::handshakeOut()
 
     while (http.nextHeader())
     {
-		LOG_DEBUG(http.cmdLine);
+		LOG_DEBUG("%s", http.cmdLine);
 
 		char *arg = http.getArgStr();
 		if (!arg)
