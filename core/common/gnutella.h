@@ -134,8 +134,8 @@ public:
 
 	void	initPing(int);
 	void	initPong(Host &, bool, GnuPacket &);
-	void	initFind(const char *, class XML *,int);
-	bool	initHit(Host &, Channel *, GnuPacket *,bool,bool,bool,bool,int);
+	void	initFind(const char *, class XML *, int);
+	bool	initHit(Host &, Channel *, GnuPacket *, bool, bool, bool, bool, int);
 	void	initPush(ChanHit &, Host &);
 
 
@@ -156,7 +156,7 @@ class GnuPacketBuffer
 public:
 	GnuPacketBuffer(int s)
 	:size(s)
-	,packets(new GnuPacket[size])
+	, packets(new GnuPacket[size])
 	{
 		reset();
 	}
@@ -242,7 +242,7 @@ public:
 
 	int	size;
 	GnuPacket *packets;
-	int	readPtr,writePtr;
+	int	readPtr, writePtr;
 };
 
 
@@ -281,13 +281,13 @@ public:
 	R_TYPE	processPacket(GnuPacket &, Servent *, GnuID &);
 
 	static const char *getRouteStr(R_TYPE);
-	bool	readHit(Stream &data, ChanHit &ch,int,GnuID &);
+	bool	readHit(Stream &data, ChanHit &ch, int, GnuID &);
 
 
 
 	void	ping(int);
 
-	int		packetsIn,packetsOut;
+	int		packetsIn, packetsOut;
 	WLock	lock;
 };
 

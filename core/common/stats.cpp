@@ -56,34 +56,34 @@ void	Stats::update()
 
 }
 // ------------------------------------
-bool Stats::writeVariable(Stream &out,const String &var)
+bool Stats::writeVariable(Stream &out, const String &var)
 {
 	char buf[1024];
 
 	if (var == "totalInPerSec")
-		sprintf(buf,"%.1f",BYTES_TO_KBPS(getPerSecond(Stats::BYTESIN)));
+		sprintf(buf, "%.1f", BYTES_TO_KBPS(getPerSecond(Stats::BYTESIN)));
 	else if (var == "totalOutPerSec")
-		sprintf(buf,"%.1f",BYTES_TO_KBPS(getPerSecond(Stats::BYTESOUT)));
+		sprintf(buf, "%.1f", BYTES_TO_KBPS(getPerSecond(Stats::BYTESOUT)));
 	else if (var == "totalPerSec")
-		sprintf(buf,"%.1f",BYTES_TO_KBPS(getPerSecond(Stats::BYTESIN)+getPerSecond(Stats::BYTESOUT)));
+		sprintf(buf, "%.1f", BYTES_TO_KBPS(getPerSecond(Stats::BYTESIN)+getPerSecond(Stats::BYTESOUT)));
 	else if (var == "wanInPerSec")
-		sprintf(buf,"%.1f",BYTES_TO_KBPS(getPerSecond(Stats::BYTESIN)-getPerSecond(Stats::LOCALBYTESIN)));
+		sprintf(buf, "%.1f", BYTES_TO_KBPS(getPerSecond(Stats::BYTESIN)-getPerSecond(Stats::LOCALBYTESIN)));
 	else if (var == "wanOutPerSec")
-		sprintf(buf,"%.1f",BYTES_TO_KBPS(getPerSecond(Stats::BYTESOUT)-getPerSecond(Stats::LOCALBYTESOUT)));
+		sprintf(buf, "%.1f", BYTES_TO_KBPS(getPerSecond(Stats::BYTESOUT)-getPerSecond(Stats::LOCALBYTESOUT)));
 	else if (var == "wanTotalPerSec")
-		sprintf(buf,"%.1f",BYTES_TO_KBPS((getPerSecond(Stats::BYTESIN)-getPerSecond(Stats::LOCALBYTESIN))+(getPerSecond(Stats::BYTESOUT)-getPerSecond(Stats::LOCALBYTESOUT))));
+		sprintf(buf, "%.1f", BYTES_TO_KBPS((getPerSecond(Stats::BYTESIN)-getPerSecond(Stats::LOCALBYTESIN))+(getPerSecond(Stats::BYTESOUT)-getPerSecond(Stats::LOCALBYTESOUT))));
 	else if (var == "netInPerSec")
-		sprintf(buf,"%.1f",BYTES_TO_KBPS(getPerSecond(Stats::PACKETDATAIN)));
+		sprintf(buf, "%.1f", BYTES_TO_KBPS(getPerSecond(Stats::PACKETDATAIN)));
 	else if (var == "netOutPerSec")
-		sprintf(buf,"%.1f",BYTES_TO_KBPS(getPerSecond(Stats::PACKETDATAOUT)));
+		sprintf(buf, "%.1f", BYTES_TO_KBPS(getPerSecond(Stats::PACKETDATAOUT)));
 	else if (var == "netTotalPerSec")
-		sprintf(buf,"%.1f",BYTES_TO_KBPS(getPerSecond(Stats::PACKETDATAOUT)+getPerSecond(Stats::PACKETDATAIN)));
+		sprintf(buf, "%.1f", BYTES_TO_KBPS(getPerSecond(Stats::PACKETDATAOUT)+getPerSecond(Stats::PACKETDATAIN)));
 	else if (var == "packInPerSec")
-		sprintf(buf,"%u",getPerSecond(Stats::NUMPACKETSIN));
+		sprintf(buf, "%u", getPerSecond(Stats::NUMPACKETSIN));
 	else if (var == "packOutPerSec")
-		sprintf(buf,"%u",getPerSecond(Stats::NUMPACKETSOUT));
+		sprintf(buf, "%u", getPerSecond(Stats::NUMPACKETSOUT));
 	else if (var == "packTotalPerSec")
-		sprintf(buf,"%u",getPerSecond(Stats::NUMPACKETSOUT)+getPerSecond(Stats::NUMPACKETSIN));
+		sprintf(buf, "%u", getPerSecond(Stats::NUMPACKETSOUT)+getPerSecond(Stats::NUMPACKETSIN));
 
 	else
 		return false;

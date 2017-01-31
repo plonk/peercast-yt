@@ -21,16 +21,16 @@
 
 
 // ------------------------------------------
-void MP3Stream::readEnd(Stream &,Channel *)
+void MP3Stream::readEnd(Stream &, Channel *)
 {
 }
 
 // ------------------------------------------
-void MP3Stream::readHeader(Stream &,Channel *)
+void MP3Stream::readHeader(Stream &, Channel *)
 {
 }
 // ------------------------------------------
-int MP3Stream::readPacket(Stream &in,Channel *ch)
+int MP3Stream::readPacket(Stream &in, Channel *ch)
 {
 	ChanPacket pack;
 
@@ -45,8 +45,8 @@ int MP3Stream::readPacket(Stream &in,Channel *ch)
 			if (rl > ChanMgr::MAX_METAINT)
 				rl = ChanMgr::MAX_METAINT;
 
-			pack.init(ChanPacket::T_DATA,pack.data,rl,ch->streamPos);
-			in.read(pack.data,pack.len);
+			pack.init(ChanPacket::T_DATA, pack.data, rl, ch->streamPos);
+			in.read(pack.data, pack.len);
 			ch->newPacket(pack);
 			ch->checkReadDelay(pack.len);
 			ch->streamPos+=pack.len;
@@ -55,19 +55,19 @@ int MP3Stream::readPacket(Stream &in,Channel *ch)
 		}
 
 		unsigned char len;
-		in.read(&len,1);
+		in.read(&len, 1);
 		if (len)
 		{
 			if (len*16 > 1024) len = 1024/16;
 			char buf[1024];
-			in.read(buf,len*16);
+			in.read(buf, len*16);
 			ch->processMp3Metadata(buf);
 		}
 
 	}else{
 
-		pack.init(ChanPacket::T_DATA,pack.data,ChanMgr::MAX_METAINT,ch->streamPos);
-		in.read(pack.data,pack.len);
+		pack.init(ChanPacket::T_DATA, pack.data, ChanMgr::MAX_METAINT, ch->streamPos);
+		in.read(pack.data, pack.len);
 		ch->newPacket(pack);
 		ch->checkReadDelay(pack.len);
 

@@ -11,7 +11,7 @@ HTML::HTML(const char *title)
 	setRoot(htmlNode);
 
 	headNode = startTag("head");
-		startTagEnd("title",title);
+		startTagEnd("title", title);
 	end();
 
 	headNode->add(new XML::Node("meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\""));
@@ -21,7 +21,7 @@ HTML::HTML(const char *title)
 void HTML::addRefresh(int sec)
 {
 	if (sec > 0)
-		headNode->add(new XML::Node("meta http-equiv=\"refresh\" content=\"%d\"",sec));
+		headNode->add(new XML::Node("meta http-equiv=\"refresh\" content=\"%d\"", sec));
 }
 // --------------------------------------
 void HTML::startNode(XML::Node *n, const char *text)
@@ -34,17 +34,17 @@ void HTML::startNode(XML::Node *n, const char *text)
 // --------------------------------------
 void HTML::addLink(const char *url, const char *text)
 {
-	startNode(new XML::Node("a href=\"%s\"",url),text);
+	startNode(new XML::Node("a href=\"%s\"", url), text);
 	end();
 }
 // --------------------------------------
 void HTML::addArgLink(const char *url, const char *text)
 {
-	startNode(new XML::Node("a href=\"%s&%s\"",url,defArgs),text);
+	startNode(new XML::Node("a href=\"%s&%s\"", url, defArgs), text);
 	end();
 }
 // --------------------------------------
-XML::Node *HTML::startTag(const char *tag, const char *fmt,...)
+XML::Node *HTML::startTag(const char *tag, const char *fmt, ...)
 {
 	XML::Node *n;
 	if (fmt)
@@ -54,17 +54,17 @@ XML::Node *HTML::startTag(const char *tag, const char *fmt,...)
   		va_start(ap, fmt);
 
 		char tmp[512];
-		vsprintf(tmp,fmt,ap);
-		startNode(n=new XML::Node(tag),tmp);
+		vsprintf(tmp, fmt, ap);
+		startNode(n=new XML::Node(tag), tmp);
 
 	   	va_end(ap);
 	}else{
-		startNode(n=new XML::Node(tag),NULL);
+		startNode(n=new XML::Node(tag), NULL);
 	}
 	return n;
 }
 // --------------------------------------
-XML::Node *HTML::startTagEnd(const char *tag, const char *fmt,...)
+XML::Node *HTML::startTagEnd(const char *tag, const char *fmt, ...)
 {
 	XML::Node *n;
 	if (fmt)
@@ -74,24 +74,24 @@ XML::Node *HTML::startTagEnd(const char *tag, const char *fmt,...)
   		va_start(ap, fmt);
 
 		char tmp[512];
-		vsprintf(tmp,fmt,ap);
-		startNode(n=new XML::Node(tag),tmp);
+		vsprintf(tmp, fmt, ap);
+		startNode(n=new XML::Node(tag), tmp);
 
 	   	va_end(ap);
 	}else{
-		startNode(n=new XML::Node(tag),NULL);
+		startNode(n=new XML::Node(tag), NULL);
 	}
 	end();
 	return n;
 }
 // --------------------------------------
-void HTML::startSingleTagEnd(const char *fmt,...)
+void HTML::startSingleTagEnd(const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
 
 	char tmp[512];
-	vsprintf(tmp,fmt,ap);
+	vsprintf(tmp, fmt, ap);
 	startNode(new XML::Node(tmp));
 
 	va_end(ap);

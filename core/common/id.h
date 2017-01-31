@@ -14,7 +14,7 @@ private:
 
 	char data[LENGTH+1];
 public:
-	IDString(const char *id,int cnt)
+	IDString(const char *id, int cnt)
 	{
 		if (cnt >= LENGTH)
 			cnt=LENGTH;
@@ -90,7 +90,7 @@ public:
 
 
 	int getValue() const {return iv;}
-	IDString getString() const {return IDString(cv,4);}
+	IDString getString() const {return IDString(cv, 4);}
 	void *getData() {return cv;}
 
 };

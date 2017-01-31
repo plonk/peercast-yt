@@ -112,20 +112,20 @@ public:
 
 	void	set(const char *i, unsigned int nip)
 	{
-		strncpy(id,i,sizeof(id)-1);
+		strncpy(id, i, sizeof(id)-1);
 		id[sizeof(id)-1]=0;
 		ip = nip;
 	}
 	bool	compare(Cookie &c)
 	{
 		if (c.ip == ip)
-			if (strcmp(c.id,id)==0)
+			if (strcmp(c.id, id)==0)
 				return true;
 
 		return false;
 	}
 
-	void	logDebug(const char *,int);
+	void	logDebug(const char *, int);
 
 	unsigned int ip;
 	char	id[64];
@@ -164,7 +164,7 @@ public:
 
 	void	initRequest(const char *r)
 	{
-		strcpy(cmdLine,r);
+		strcpy(cmdLine, r);
 	}
 	void	readRequest();
 	bool	isRequest(const char *);
@@ -179,7 +179,7 @@ public:
 
 	void	getAuthUserPass(char *, char *, size_t, size_t);
 
-	char	cmdLine[8192],*arg;
+	char	cmdLine[8192], *arg;
 
 };
 

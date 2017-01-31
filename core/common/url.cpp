@@ -34,7 +34,7 @@ void URLSource::stream(Channel *ch)
 		if (url.isEmpty())
 			url = baseurl;
 
-		url = streamURL(ch,url.cstr());
+		url = streamURL(ch, url.cstr());
 	}
 
 }
@@ -64,28 +64,28 @@ int URLSource::getSourceRate()
 	PlayList *pls=NULL;
 	ChannelStream *source=NULL;
 
-	LOG_CHANNEL("Fetch URL=%s",fileName);
+	LOG_CHANNEL("Fetch URL=%s", fileName);
 
 	try
 	{
 
 		// get the source protocol
-		if (strnicmp(fileName,"http://",7)==0)
+		if (strnicmp(fileName, "http://", 7)==0)
 		{
 			ch->info.srcProtocol = ChanInfo::SP_HTTP;
 			fileName += 7;
 		}
-		else if (strnicmp(fileName,"mms://",6)==0)
+		else if (strnicmp(fileName, "mms://", 6)==0)
 		{
 			ch->info.srcProtocol = ChanInfo::SP_MMS;
 			fileName += 6;
 		}
-		else if (strnicmp(fileName,"pcp://",6)==0)
+		else if (strnicmp(fileName, "pcp://", 6)==0)
 		{
 			ch->info.srcProtocol = ChanInfo::SP_PCP;
 			fileName += 6;
 		}
-		else if (strnicmp(fileName,"file://",7)==0)
+		else if (strnicmp(fileName, "file://", 7)==0)
 		{
 			ch->info.srcProtocol = ChanInfo::SP_FILE;
 			fileName += 7;
@@ -119,42 +119,42 @@ int URLSource::getSourceRate()
 			inputStream = inputSocket;
 
 
-			char *dir = strstr(fileName,"/");
+			char *dir = strstr(fileName, "/");
 			if (dir)
 				*dir++=0;
 
 
-			LOG_CHANNEL("Fetch Host=%s",fileName);
+			LOG_CHANNEL("Fetch Host=%s", fileName);
 			if (dir)
-				LOG_CHANNEL("Fetch Dir=%s",dir);
+				LOG_CHANNEL("Fetch Dir=%s", dir);
 
 
 			Host host;
-			host.fromStrName(fileName,80);
+			host.fromStrName(fileName, 80);
 
 			inputSocket->open(host);
 			inputSocket->connect();
 
 			HTTP http(*inputSocket);
-			http.writeLineF("GET /%s HTTP/1.0",dir?dir:"");
+			http.writeLineF("GET /%s HTTP/1.0", dir?dir:"");
 
-			http.writeLineF("%s %s",HTTP_HS_HOST,fileName);
-			http.writeLineF("%s %s",HTTP_HS_CONNECTION,"close");
-			http.writeLineF("%s %s",HTTP_HS_ACCEPT,"*/*");
+			http.writeLineF("%s %s", HTTP_HS_HOST, fileName);
+			http.writeLineF("%s %s", HTTP_HS_CONNECTION, "close");
+			http.writeLineF("%s %s", HTTP_HS_ACCEPT, "*/*");
 
 			if (ch->info.srcProtocol == ChanInfo::SP_MMS)
 			{
-				http.writeLineF("%s %s",HTTP_HS_AGENT,"NSPlayer/4.1.0.3856");
-				http.writeLine("Pragma: no-cache,rate=1.000000,request-context=1");
-				//http.writeLine("Pragma: no-cache,rate=1.000000,stream-time=0,stream-offset=4294967295:4294967295,request-context=22605256,max-duration=0");
+				http.writeLineF("%s %s", HTTP_HS_AGENT, "NSPlayer/4.1.0.3856");
+				http.writeLine("Pragma: no-cache, rate=1.000000, request-context=1");
+				//http.writeLine("Pragma: no-cache, rate=1.000000, stream-time=0, stream-offset=4294967295:4294967295, request-context=22605256, max-duration=0");
 				http.writeLine("Pragma: xPlayStrm=1");
 				http.writeLine("Pragma: xClientGUID={c77e7400-738a-11d2-9add-0020af0a3278}");
 				http.writeLine("Pragma: stream-switch-count=2");
 				http.writeLine("Pragma: stream-switch-entry=ffff:1:0 ffff:2:0");
 			}else
 			{
-				http.writeLineF("%s %s",HTTP_HS_AGENT,PCX_AGENT);
-				http.writeLineF("%s %d",PCX_HS_PCP,1);
+				http.writeLineF("%s %s", HTTP_HS_AGENT, PCX_AGENT);
+				http.writeLineF("%s %d", PCX_HS_PCP, 1);
 				http.writeLine("Icy-MetaData:1");				// fix by ravon
 			}
 
@@ -168,10 +168,10 @@ int URLSource::getSourceRate()
 			while (http.nextHeader())
 			{
 
-				LOG_CHANNEL("Fetch HTTP: %s",http.cmdLine);
+				LOG_CHANNEL("Fetch HTTP: %s", http.cmdLine);
 
 				ChanInfo tmpInfo = ch->info;
-				Servent::readICYHeader(http,ch->info,NULL, 0);
+				Servent::readICYHeader(http, ch->info, NULL, 0);
 
 				if (!tmpInfo.name.isEmpty())
 					ch->info.name = tmpInfo.name;
@@ -190,19 +190,19 @@ int URLSource::getSourceRate()
 				{
 					if (http.isHeader("content-type"))
 					{
-						if (stristr(arg,MIME_XSCPLS))
+						if (stristr(arg, MIME_XSCPLS))
 							pls = new PlayList(PlayList::T_SCPLS, 1000);
-						else if (stristr(arg,MIME_PLS))
+						else if (stristr(arg, MIME_PLS))
 							pls = new PlayList(PlayList::T_PLS, 1000);
-						else if (stristr(arg,MIME_XPLS))
+						else if (stristr(arg, MIME_XPLS))
 							pls = new PlayList(PlayList::T_PLS, 1000);
-						else if (stristr(arg,MIME_M3U))
+						else if (stristr(arg, MIME_M3U))
 							pls = new PlayList(PlayList::T_PLS, 1000);
-						else if (stristr(arg,MIME_TEXT))
+						else if (stristr(arg, MIME_TEXT))
 							pls = new PlayList(PlayList::T_PLS, 1000);
-						else if (stristr(arg,MIME_ASX))
+						else if (stristr(arg, MIME_ASX))
 							pls = new PlayList(PlayList::T_ASX, 1000);
-						else if (stristr(arg,MIME_MMS))
+						else if (stristr(arg, MIME_MMS))
 							ch->info.srcProtocol = ChanInfo::SP_MMS;
 					}
 				}
@@ -211,7 +211,7 @@ int URLSource::getSourceRate()
 
 			if ((!nextURL.isEmpty()) && (res==302))
 			{
-				LOG_CHANNEL("Channel redirect: %s",nextURL.cstr());
+				LOG_CHANNEL("Channel redirect: %s", nextURL.cstr());
 				inputSocket->close();
 				delete inputSocket;
 				inputSocket = NULL;
@@ -220,7 +220,7 @@ int URLSource::getSourceRate()
 
 			if (res!=200)
 			{
-				LOG_ERROR("HTTP response: %d",res);
+				LOG_ERROR("HTTP response: %d", res);
 				throw StreamException("Bad HTTP connect");
 			}
 
@@ -281,7 +281,7 @@ int URLSource::getSourceRate()
 			int urlNum=0;
 			String url;
 
-			LOG_CHANNEL("Playlist: %d URLs",pls->numURLs);
+			LOG_CHANNEL("Playlist: %d URLs", pls->numURLs);
 			while ((ch->thread.active) && (pls->numURLs) && (!peercastInst->isQuitting))
 			{
 				if (url.isEmpty())
@@ -291,7 +291,7 @@ int URLSource::getSourceRate()
 				}
 				try
 				{
-					url = streamURL(ch,url.cstr());
+					url = streamURL(ch, url.cstr());
 				}catch(StreamException &)
 				{}
 			}
@@ -305,7 +305,7 @@ int URLSource::getSourceRate()
 			if (!ch->info.id.isSet())
 			{
 				ch->info.id = chanMgr->broadcastID;
-				ch->info.id.encode(NULL,ch->info.name.cstr(),ch->info.genre,ch->info.bitrate);
+				ch->info.id.encode(NULL, ch->info.name.cstr(), ch->info.genre, ch->info.bitrate);
 			}
 
 			if (ch->info.contentType == ChanInfo::T_ASX)
@@ -317,7 +317,7 @@ int URLSource::getSourceRate()
 
 			source = ch->createSource();
 
-			ch->readStream(*inputStream,source);
+			ch->readStream(*inputStream, source);
 
 			inputStream->close();
 		}
@@ -325,7 +325,7 @@ int URLSource::getSourceRate()
 	}catch(StreamException &e)
 	{
 		ch->setStatus(Channel::S_ERROR);
-		LOG_ERROR("Channel error: %s",e.msg);
+		LOG_ERROR("Channel error: %s", e.msg);
 		sys->sleep(1000);
 	}
 

@@ -52,17 +52,17 @@ void UClientSocket::init()
 }
 
 // --------------------------------------------------
-bool ClientSocket::getHostname(char *str,unsigned int ip)
+bool ClientSocket::getHostname(char *str, unsigned int ip)
 {
 	hostent *he;
 
 	ip = htonl(ip);
 
-	he = gethostbyaddr((char *)&ip,sizeof(ip),AF_INET);
+	he = gethostbyaddr((char *)&ip, sizeof(ip), AF_INET);
 
 	if (he)
 	{
-		strcpy(str,he->h_name);
+		strcpy(str, he->h_name);
 		return true;
 	}else
 		return false;
@@ -112,13 +112,13 @@ void UClientSocket::setLinger(int sec)
 void UClientSocket::setNagle(bool on)
 {
      int nodelay = (on==false);
-     if (setsockopt(sockNum, IPPROTO_TCP, TCP_NODELAY, (void*) &nodelay,sizeof(nodelay)) < 0)
+     if (setsockopt(sockNum, IPPROTO_TCP, TCP_NODELAY, (void*) &nodelay, sizeof(nodelay)) < 0)
 		throw SockException("Unable to set NODELAY");
 }
 // --------------------------------------------------
 void UClientSocket::setBlocking(bool block)
 {
-	int fl = fcntl(sockNum,F_GETFL);
+	int fl = fcntl(sockNum, F_GETFL);
 
 	if (block)
 		fl &= ~O_NONBLOCK;
@@ -133,7 +133,7 @@ void UClientSocket::setReuse(bool yes)
 {
 
 	unsigned long op = yes ? 1 : 0;
-	if (setsockopt(sockNum,SOL_SOCKET,SO_REUSEADDR,(char *)&op,sizeof(op)) < 0)
+	if (setsockopt(sockNum, SOL_SOCKET, SO_REUSEADDR, (char *)&op, sizeof(op)) < 0)
 		throw SockException("Unable to set REUSE");
 }
 
@@ -151,7 +151,7 @@ hostent *UClientSocket::resolveHost(char *hostName)
 		if (ip == INADDR_NONE)
 			return NULL;
 
-		if ((he = gethostbyaddr((char *)&ip,sizeof(ip),AF_INET)) == NULL)
+		if ((he = gethostbyaddr((char *)&ip, sizeof(ip), AF_INET)) == NULL)
 			return NULL;
 	}
 	return he;
@@ -174,7 +174,7 @@ void UClientSocket::open(Host &rh)
 
 	host = rh;
 
-	memset(&remoteAddr,0,sizeof(remoteAddr));
+	memset(&remoteAddr, 0, sizeof(remoteAddr));
 
 	remoteAddr.sin_family = AF_INET;
 	remoteAddr.sin_port = htons(host.port);
@@ -187,7 +187,7 @@ void UClientSocket::checkTimeout(bool r, bool w)
     int err = errno;
     if ((err == EAGAIN) || (err == EINPROGRESS))
     {
-		//LOG("checktimeout %d %d",(int)r,(int)w);
+		//LOG("checktimeout %d %d", (int)r, (int)w);
 
 		timeval timeout;
 		fd_set read_fds;
@@ -226,7 +226,7 @@ void UClientSocket::checkTimeout(bool r, bool w)
 
 	}else{
 		char str[64];
-		snprintf(str,64,"Closed: %s",strerror(err));
+		snprintf(str, 64, "Closed: %s", strerror(err));
 		throw SockException(str);
 	}
 }
@@ -235,7 +235,7 @@ void UClientSocket::checkTimeout(bool r, bool w)
 void UClientSocket::checkTimeout2(bool r, bool w)
 {
     {
-		//LOG("checktimeout %d %d",(int)r,(int)w);
+		//LOG("checktimeout %d %d", (int)r, (int)w);
 
 		timeval timeout;
 		fd_set read_fds;
@@ -277,8 +277,8 @@ void UClientSocket::checkTimeout2(bool r, bool w)
 // --------------------------------------------------
 void UClientSocket::connect()
 {
-	if (::connect(sockNum,(struct sockaddr *)&remoteAddr,sizeof(remoteAddr)) == SOCKET_ERROR)
-		checkTimeout(false,true);
+	if (::connect(sockNum, (struct sockaddr *)&remoteAddr, sizeof(remoteAddr)) == SOCKET_ERROR)
+		checkTimeout(false, true);
 }
 // --------------------------------------------------
 int UClientSocket::read(void *p, int l)
@@ -290,17 +290,17 @@ int UClientSocket::read(void *p, int l)
 		if (r == SOCKET_ERROR)
 		{
 			// non-blocking sockets always fall through to here
-			checkTimeout(true,false);
+			checkTimeout(true, false);
 
 		}else if (r == 0)
 		{
 			throw SockException("Closed on read");
 		}else
 		{
-			stats.add(Stats::BYTESIN,r);
+			stats.add(Stats::BYTESIN, r);
 			if (host.localIP())
-				stats.add(Stats::LOCALBYTESIN,r);
-			updateTotals(r,0);
+				stats.add(Stats::LOCALBYTESIN, r);
+			updateTotals(r, 0);
 			bytesRead+=r;
 			l -= r;
 			p = (char *)p+r;
@@ -319,17 +319,17 @@ int UClientSocket::readUpto(void *p, int l)
 		if (r == SOCKET_ERROR)
 		{
 			// non-blocking sockets always fall through to here
-			checkTimeout(true,false);
+			checkTimeout(true, false);
 
 		}else if (r == 0)
 		{
 			break;
 		}else
 		{
-			stats.add(Stats::BYTESIN,r);
+			stats.add(Stats::BYTESIN, r);
 			if (host.localIP())
-				stats.add(Stats::LOCALBYTESIN,r);
-			updateTotals(r,0);
+				stats.add(Stats::LOCALBYTESIN, r);
+			updateTotals(r, 0);
 			bytesRead+=r;
 			l -= r;
 			p = (char *)p+r;
@@ -349,16 +349,16 @@ void UClientSocket::write(const void *p, int l)
 		if (r == SOCKET_ERROR)
 		{
 			// non-blocking sockets always fall through to here
-			checkTimeout(false,true);
+			checkTimeout(false, true);
 		}else if (r == 0)
 		{
 			throw SockException("Closed on write");
 		}else
 		{
-			stats.add(Stats::BYTESOUT,r);
+			stats.add(Stats::BYTESOUT, r);
 			if (host.localIP())
-				stats.add(Stats::LOCALBYTESOUT,r);
-			updateTotals(0,r);
+				stats.add(Stats::LOCALBYTESOUT, r);
+			updateTotals(0, r);
 			l -= r;
 			p = (char *)p+r;
 		}
@@ -377,7 +377,7 @@ void UClientSocket::bind(Host &h)
 	setReuse(true);
 	setBlocking(false);
 
-	memset(&localAddr,0,sizeof(localAddr));
+	memset(&localAddr, 0, sizeof(localAddr));
 	localAddr.sin_family = AF_INET;
 	localAddr.sin_port = htons(h.port);
 	localAddr.sin_addr.s_addr = INADDR_ANY;
@@ -385,7 +385,7 @@ void UClientSocket::bind(Host &h)
 	if( ::bind (sockNum, (sockaddr *)&localAddr, sizeof(localAddr)) == -1)
 		throw SockException("Can`t bind socket");
 
-	if (::listen(sockNum,3))
+	if (::listen(sockNum, 3))
 		throw SockException("Can`t listen");
 
 	host = h;
@@ -397,7 +397,7 @@ ClientSocket *UClientSocket::accept()
 	socklen_t fromSize = sizeof(sockaddr_in);
 	sockaddr_in from;
 
-	int conSock = ::accept(sockNum,(sockaddr *)&from,&fromSize);
+	int conSock = ::accept(sockNum, (sockaddr *)&from, &fromSize);
 
 
 	if (conSock ==  INVALID_SOCKET)
@@ -426,9 +426,9 @@ Host UClientSocket::getLocalHost()
 
 	socklen_t len = sizeof(localAddr);
     if (getsockname(sockNum, (sockaddr *)&localAddr, &len) == 0)
-		return Host(ntohl(localAddr.sin_addr.s_addr),0);
+		return Host(ntohl(localAddr.sin_addr.s_addr), 0);
 	else
-		return Host(0,0);
+		return Host(0, 0);
 }
 // --------------------------------------------------
 void UClientSocket::close()
@@ -436,18 +436,18 @@ void UClientSocket::close()
 	if (sockNum)
 	{
 		// signal shutdown
-		shutdown(sockNum,SHUT_WR);
+		shutdown(sockNum, SHUT_WR);
 
 		// skip remaining data and wait for 0 from recv
 		setReadTimeout(2000);
 		try
 		{
 			//char c;
-			//while (readUpto(&c,1)!=0);
-			//readUpto(&c,1);
+			//while (readUpto(&c, 1)!=0);
+			//readUpto(&c, 1);
 		}catch(StreamException &e)
 		{
-			LOG_ERROR("Socket close: %s",e.msg);
+			LOG_ERROR("Socket close: %s", e.msg);
 		}
 		// close handle
 		::close(sockNum);

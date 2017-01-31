@@ -27,7 +27,7 @@
 class AtomStream
 {
 public:
-	AtomStream(Stream &s) : io(s),numChildren(0),numData(0)
+	AtomStream(Stream &s) : io(s), numChildren(0), numData(0)
 	{}
 
 	void checkData(int d)
@@ -36,63 +36,63 @@ public:
 			throw StreamException("Bad atom data");
 	}
 
-	void writeParent(ID4 id,int nc)
+	void writeParent(ID4 id, int nc)
 	{
 		io.writeID4(id);
 		io.writeInt(nc|0x80000000);
 	}
 
-	void writeInt(ID4 id,int d)
+	void writeInt(ID4 id, int d)
 	{
 		io.writeID4(id);
 		io.writeInt(4);
 		io.writeInt(d);
 	}
 
-	void writeID4(ID4 id,ID4 d)
+	void writeID4(ID4 id, ID4 d)
 	{
 		io.writeID4(id);
 		io.writeInt(4);
 		io.writeID4(d);
 	}
 
-	void writeShort(ID4 id,short d)
+	void writeShort(ID4 id, short d)
 	{
 		io.writeID4(id);
 		io.writeInt(2);
 		io.writeShort(d);
 	}
 
-	void writeChar(ID4 id,char d)
+	void writeChar(ID4 id, char d)
 	{
 		io.writeID4(id);
 		io.writeInt(1);
 		io.writeChar(d);
 	}
 
-	void writeBytes(ID4 id,const void *p,int l)
+	void writeBytes(ID4 id, const void *p, int l)
 	{
 		io.writeID4(id);
 		io.writeInt(l);
-		io.write(p,l);
+		io.write(p, l);
 	}
 
 
-	int writeStream(ID4 id,Stream &in,int l)
+	int writeStream(ID4 id, Stream &in, int l)
 	{
 		io.writeID4(id);
 		io.writeInt(l);
-		in.writeTo(io,l);
+		in.writeTo(io, l);
 		return (sizeof(int)*2)+l;
 
 	}
 
-	void writeString(ID4 id,const char *p)
+	void writeString(ID4 id, const char *p)
 	{
-		writeBytes(id,p,strlen(p)+1);
+		writeBytes(id, p, strlen(p)+1);
 	}
 
-	ID4	read(int &numc,int &dlen)
+	ID4	read(int &numc, int &dlen)
 	{
 		ID4 id = io.readID4();
 
@@ -120,9 +120,9 @@ public:
 
 		for(int i=0; i<c; i++)
 		{
-			int numc,data;
-			read(numc,data);
-			skip(numc,data);
+			int numc, data;
+			read(numc, data);
+			skip(numc, data);
 		}
 
 	}
@@ -148,28 +148,28 @@ public:
 		checkData(1);
 		return io.readChar();
 	}
-	int		readBytes(void *p,int l)
+	int		readBytes(void *p, int l)
 	{
 		checkData(l);
-		return io.read(p,l);
+		return io.read(p, l);
 	}
 
-	void	readString(char *s,int max,int dlen)
+	void	readString(char *s, int max, int dlen)
 	{
 		checkData(dlen);
-		readBytes(s,max,dlen);
+		readBytes(s, max, dlen);
 		s[max-1] = 0;
 
 	}
 
-	void	readBytes(void *s,int max,int dlen)
+	void	readBytes(void *s, int max, int dlen)
 	{
 		checkData(dlen);
 		if (max > dlen)
-			readBytes(s,dlen);
+			readBytes(s, dlen);
 		else
 		{
-			readBytes(s,max);
+			readBytes(s, max);
 			io.skip(dlen-max);
 		}
 	}
@@ -180,19 +180,19 @@ public:
 
 		if (cnt)
 		{
-			writeParent(id,cnt);
+			writeParent(id, cnt);
 			total+=sizeof(int)*2;
 
 			for(int i=0; i<cnt; i++)
 			{
 				AtomStream ain(in);
-				int c,d;
-				ID4 cid = ain.read(c,d);
-				total += writeAtoms(cid,in,c,d);
+				int c, d;
+				ID4 cid = ain.read(c, d);
+				total += writeAtoms(cid, in, c, d);
 			}
 		}else
 		{
-			total += writeStream(id,in,data);
+			total += writeStream(id, in, data);
 		}
 
 		return total;
@@ -201,7 +201,7 @@ public:
 	bool	eof() {return io.eof();}
 
 
-	int	numChildren,numData;
+	int	numChildren, numData;
 	Stream &io;
 };
 

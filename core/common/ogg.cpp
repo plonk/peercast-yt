@@ -22,18 +22,18 @@
 
 static int test=0;
 // ------------------------------------------
-void OGGStream::readHeader(Stream &,Channel *)
+void OGGStream::readHeader(Stream &, Channel *)
 {
 	test = 0;
 }
 
 // ------------------------------------------
-void OGGStream::readEnd(Stream &,Channel *)
+void OGGStream::readEnd(Stream &, Channel *)
 {
 }
 
 // ------------------------------------------
-int OGGStream::readPacket(Stream &in,Channel *ch)
+int OGGStream::readPacket(Stream &in, Channel *ch)
 {
 	OggPage ogg;
 	ChanPacket pack;
@@ -72,9 +72,9 @@ int OGGStream::readPacket(Stream &in,Channel *ch)
 	{
 
 		if (ogg.getSerialNo() == vorbis.serialNo)
-			vorbis.readHeader(ch,ogg);
+			vorbis.readHeader(ch, ogg);
 		else if (ogg.getSerialNo() == theora.serialNo)
-			theora.readHeader(ch,ogg);
+			theora.readHeader(ch, ogg);
 		else
 			throw StreamException("Bad OGG serial no.");
 
@@ -102,14 +102,14 @@ int OGGStream::readPacket(Stream &in,Channel *ch)
 			ch->streamPos += ch->headPack.len;
 
 			ch->newPacket(ch->headPack);
-			LOG_CHANNEL("Got %d bytes of headers",ch->headPack.len);
+			LOG_CHANNEL("Got %d bytes of headers", ch->headPack.len);
 		}
 
 	}else
 	{
 
 
-		pack.init(ChanPacket::T_DATA,ogg.data,ogg.headLen+ogg.bodyLen,ch->streamPos);
+		pack.init(ChanPacket::T_DATA, ogg.data, ogg.headLen+ogg.bodyLen, ch->streamPos);
 		ch->newPacket(pack);
 
 		ch->streamPos+=pack.len;
@@ -133,7 +133,7 @@ int OGGStream::readPacket(Stream &in,Channel *ch)
 }
 
 // -----------------------------------
-void OggSubStream::readHeader(Channel *ch,OggPage &ogg)
+void OggSubStream::readHeader(Channel *ch, OggPage &ogg)
 {
 	if ((pack.bodyLen + ogg.bodyLen) >= OggPacket::MAX_BODYLEN)
 		throw StreamException("OGG packet too big");
@@ -142,11 +142,11 @@ void OggSubStream::readHeader(Channel *ch,OggPage &ogg)
 		throw StreamException("OGG packet too big for headMeta");
 
 // copy complete packet into head packet
-	memcpy(&ch->headPack.data[ch->headPack.len],ogg.data,ogg.headLen+ogg.bodyLen);
+	memcpy(&ch->headPack.data[ch->headPack.len], ogg.data, ogg.headLen+ogg.bodyLen);
 	ch->headPack.len += ogg.headLen+ogg.bodyLen;
 
 	// add body to packet
-	memcpy(&pack.body[pack.bodyLen],&ogg.data[ogg.headLen],ogg.bodyLen);
+	memcpy(&pack.body[pack.bodyLen], &ogg.data[ogg.headLen], ogg.bodyLen);
 	pack.bodyLen += ogg.bodyLen;
 
 	pack.addLacing(ogg);
@@ -162,31 +162,31 @@ void OggVorbisSubStream::procHeaders(Channel *ch)
 
 	for(int i=0; i<pack.numPackets; i++)
 	{
-		MemoryStream vin(&pack.body[packPtr],pack.packetSizes[i]);
+		MemoryStream vin(&pack.body[packPtr], pack.packetSizes[i]);
 
 		packPtr += pack.packetSizes[i];
 
 		char id[8];
 
-		vin.read(id,7);
+		vin.read(id, 7);
 		id[7]=0;
 
 		switch (id[0])
 		{
 			case 1:	// ident
-				LOG_CHANNEL("OGG Vorbis Header: Ident (%d bytes)",vin.len);
-				readIdent(vin,ch->info);
+				LOG_CHANNEL("OGG Vorbis Header: Ident (%d bytes)", vin.len);
+				readIdent(vin, ch->info);
 				break;
 			case 3: // comment
 				{
-					LOG_CHANNEL("OGG Vorbis Header: Comment (%d bytes)",vin.len);
+					LOG_CHANNEL("OGG Vorbis Header: Comment (%d bytes)", vin.len);
 					ChanInfo newInfo = ch->info;
-					readComment(vin,newInfo);
+					readComment(vin, newInfo);
 					ch->updateInfo(newInfo);
 				}
 				break;
 			case 5: // setup
-				LOG_CHANNEL("OGG Vorbis Header: Setup (%d bytes)",vin.len);
+				LOG_CHANNEL("OGG Vorbis Header: Setup (%d bytes)", vin.len);
 				//readSetup(vin);
 				break;
 			default:
@@ -229,7 +229,7 @@ void OggTheoraSubStream::readInfo(Stream &in, ChanInfo &info)
 
 	granposShift = in.readBits(5);
 
-	LOG_CHANNEL("OGG Theora Info: %dx%dx%.1ffps %dkbps %dQ %dG",encWidth,encHeight,fps,bitrate,quality,granposShift);
+	LOG_CHANNEL("OGG Theora Info: %dx%dx%.1ffps %dkbps %dQ %dG", encWidth, encHeight, fps, bitrate, quality, granposShift);
 
 
 }
@@ -240,23 +240,23 @@ void OggTheoraSubStream::procHeaders(Channel *ch)
 
 	for(int i=0; i<pack.numPackets; i++)
 	{
-		MemoryStream vin(&pack.body[packPtr],pack.packetSizes[i]);
+		MemoryStream vin(&pack.body[packPtr], pack.packetSizes[i]);
 
 		packPtr += pack.packetSizes[i];
 
 		unsigned char id[8];
 
-		vin.read(id,7);
+		vin.read(id, 7);
 		id[7]=0;
 
 		switch (id[0] & 0xff)
 		{
 			case 128:	// info
-				LOG_CHANNEL("OGG Theora Header: Info (%d bytes)",vin.len);
-				readInfo(vin,ch->info);
+				LOG_CHANNEL("OGG Theora Header: Info (%d bytes)", vin.len);
+				readInfo(vin, ch->info);
 				break;
 			default:
-				LOG_CHANNEL("OGG Theora Header: Unknown %d (%d bytes)",id[0] & 0xff,vin.len);
+				LOG_CHANNEL("OGG Theora Header: Unknown %d (%d bytes)", id[0] & 0xff, vin.len);
 				break;
 		}
 
@@ -287,7 +287,7 @@ void OggVorbisSubStream::readIdent(Stream &in, ChanInfo &info)
 	in.readChar();	// skip blocksize 0+1
 
 	LOG_CHANNEL("OGG Vorbis Ident: ver=%d, chans=%d, rate=%d, brMax=%d, brNom=%d, brLow=%d",
-		ver,chans,samplerate,brMax,brNom,brLow);
+		ver, chans, samplerate, brMax, brNom, brLow);
 
 
 	bitrate = brNom/1000;
@@ -310,7 +310,7 @@ void OggVorbisSubStream::readSetup(Stream &in)
 		in.readChar();
 	}
 
-	LOG_CHANNEL("Read %d bytes of Vorbis Setup",cnt);
+	LOG_CHANNEL("Read %d bytes of Vorbis Setup", cnt);
 }
 // -----------------------------------
 void OggVorbisSubStream::readComment(Stream &in, ChanInfo &info)
@@ -329,34 +329,34 @@ void OggVorbisSubStream::readComment(Stream &in, ChanInfo &info)
 		int l = in.readLong();
 		if (l > sizeof(argBuf))
 			throw StreamException("Comment string too long");
-		in.read(argBuf,l);
+		in.read(argBuf, l);
 		argBuf[l] = 0;
-		LOG_CHANNEL("OGG Comment: %s",argBuf);
+		LOG_CHANNEL("OGG Comment: %s", argBuf);
 
 		char *arg;
-		if ((arg=stristr(argBuf,"ARTIST=")))
+		if ((arg=stristr(argBuf, "ARTIST=")))
 		{
-			info.track.artist.set(arg+7,String::T_ASCII);
+			info.track.artist.set(arg+7, String::T_ASCII);
 			info.track.artist.convertTo(String::T_UNICODE);
 
-		}else if ((arg=stristr(argBuf,"TITLE=")))
+		}else if ((arg=stristr(argBuf, "TITLE=")))
 		{
-			info.track.title.set(arg+6,String::T_ASCII);
+			info.track.title.set(arg+6, String::T_ASCII);
 			info.track.title.convertTo(String::T_UNICODE);
 
-		}else if ((arg=stristr(argBuf,"GENRE=")))
+		}else if ((arg=stristr(argBuf, "GENRE=")))
 		{
-			info.track.genre.set(arg+6,String::T_ASCII);
+			info.track.genre.set(arg+6, String::T_ASCII);
 			info.track.genre.convertTo(String::T_UNICODE);
 
-		}else if ((arg=stristr(argBuf,"CONTACT=")))
+		}else if ((arg=stristr(argBuf, "CONTACT=")))
 		{
-			info.track.contact.set(arg+8,String::T_ASCII);
+			info.track.contact.set(arg+8, String::T_ASCII);
 			info.track.contact.convertTo(String::T_UNICODE);
 
-		}else if ((arg=stristr(argBuf,"ALBUM=")))
+		}else if ((arg=stristr(argBuf, "ALBUM=")))
 		{
-			info.track.album.set(arg+6,String::T_ASCII);
+			info.track.album.set(arg+6, String::T_ASCII);
 			info.track.album.convertTo(String::T_UNICODE);
 		}
 	}
@@ -413,15 +413,15 @@ void OggPage::read(Stream &in)
 
 
 
-	memcpy(&data[0],"OggS",4);
+	memcpy(&data[0], "OggS", 4);
 
-	in.read(&data[4],27-4);
+	in.read(&data[4], 27-4);
 
 	int numSegs = data[26];
 	bodyLen = 0;
 
 	// read segment table
-	in.read(&data[27],numSegs);
+	in.read(&data[27], numSegs);
 	for(int i=0; i<numSegs; i++)
 		bodyLen += data[27+i];
 
@@ -433,7 +433,7 @@ void OggPage::read(Stream &in)
 	if (headLen > MAX_HEADERLEN)
 		throw StreamException("OGG header too big");
 
-	in.read(&data[headLen],bodyLen);
+	in.read(&data[headLen], bodyLen);
 
 	granPos = *(unsigned int *)&data[10];
 	granPos <<= 32;
@@ -458,12 +458,12 @@ void OggPage::read(Stream &in)
 // -----------------------------------
 bool OggPage::detectVorbis()
 {
-	return memcmp(&data[headLen+1],"vorbis",6) == 0;
+	return memcmp(&data[headLen+1], "vorbis", 6) == 0;
 }
 // -----------------------------------
 bool OggPage::detectTheora()
 {
-	return memcmp(&data[headLen+1],"theora",6) == 0;
+	return memcmp(&data[headLen+1], "theora", 6) == 0;
 }
 
 // -----------------------------------

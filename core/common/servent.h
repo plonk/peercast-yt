@@ -42,19 +42,19 @@ public:
 
 	enum
 	{
-		MAX_HASH = 500,			// max. amount of packet hashes Servents can store
+		MAX_HASH = 500, 			// max. amount of packet hashes Servents can store
 		MAX_OUTPACKETS = 32		// max. output packets per queue (normal/priority)
 	};
 
     enum TYPE
     {
-		T_NONE,					// Not allocated
-        T_INCOMING,				// Unknown incoming
-        T_SERVER,				// The main server
-		T_RELAY,				// Outgoing relay
-		T_DIRECT,				// Outgoing direct connection
-		T_COUT,					// PCP out connection
-		T_CIN,					// PCP in connection
+		T_NONE, 					// Not allocated
+        T_INCOMING, 				// Unknown incoming
+        T_SERVER, 				// The main server
+		T_RELAY, 				// Outgoing relay
+		T_DIRECT, 				// Outgoing direct connection
+		T_COUT, 					// PCP out connection
+		T_CIN, 					// PCP in connection
 		T_PGNU					// old protocol connection
     };
 
@@ -107,7 +107,7 @@ public:
 
 	void	reset();
     bool	initServer(Host &);
-    void	initIncoming(ClientSocket *,unsigned int);
+    void	initIncoming(ClientSocket *, unsigned int);
     void	initOutgoing(TYPE);
 	void	initGIV(Host &, GnuID &);
 	void	initPCP(Host &);
@@ -144,7 +144,7 @@ public:
 	static	THREAD_PROC		pcpProc(ThreadInfo *);
 	static	THREAD_PROC		fetchProc(ThreadInfo *);
 
-	static bool	pingHost(Host &,GnuID &);
+	static bool	pingHost(Host &, GnuID &);
 
 	bool	getLocalURL(char *);
 
@@ -155,7 +155,7 @@ public:
 	void	handshakeHTML(char *);
 	void	handshakeXML();
 	void	handshakeCMD(char *);
-	bool	handshakeAuth(HTTP &,const char *,bool);
+	bool	handshakeAuth(HTTP &, const char *, bool);
 	void	handshakeIn();
 	void	handshakeOut();
 
@@ -166,24 +166,24 @@ public:
 	bool	handshakeStream(ChanInfo &);
 	void	handshakeGiv(GnuID &);
 
-	void	handshakeICY(Channel::SRC_TYPE,bool);
+	void	handshakeICY(Channel::SRC_TYPE, bool);
 	void	handshakeIncoming();
 	void	handshakePOST();
 	void	handshakeRTSP(RTSP &);
-	void	handshakeHTTP(HTTP &,bool);
+	void	handshakeHTTP(HTTP &, bool);
 
 	void	handshakeJRPC(HTTP &http);
 
 	void	handshakeRemoteFile(const char *);
 	void	handshakeLocalFile(const char *);
 
-	static void	handshakeOutgoingPCP(AtomStream &,Host &,GnuID &,String &,bool);
-	static void	handshakeIncomingPCP(AtomStream &,Host &,GnuID &,String &);
+	static void	handshakeOutgoingPCP(AtomStream &, Host &, GnuID &, String &, bool);
+	static void	handshakeIncomingPCP(AtomStream &, Host &, GnuID &, String &);
 
 	void	processIncomingPCP(bool);
 
 	bool	waitForChannelHeader(ChanInfo &);
-	ChanInfo	findChannel(char *str,ChanInfo &);
+	ChanInfo	findChannel(char *str, ChanInfo &);
 
 	bool	writeVariable(Stream &, const String &);
 
@@ -192,18 +192,18 @@ public:
 	void	processGnutella();
 	void	processRoot();
 	void	processServent();
-	void	processStream(bool,ChanInfo &);
-	void	processPCP(bool,bool);
+	void	processStream(bool, ChanInfo &);
+	void	processPCP(bool, bool);
 
 	bool	procAtoms(AtomStream &);
-	void	procRootAtoms(AtomStream &,int);
-	void	procHeloAtoms(AtomStream &,int,bool);
-	void	procGetAtoms(AtomStream &,int);
+	void	procRootAtoms(AtomStream &, int);
+	void	procHeloAtoms(AtomStream &, int, bool);
+	void	procGetAtoms(AtomStream &, int);
 
-	void	triggerChannel(char *,ChanInfo::PROTOCOL,bool);
+	void	triggerChannel(char *, ChanInfo::PROTOCOL, bool);
 	void	sendPeercastChannel();
-	void	sendRawChannel(bool,bool);
-//	void	sendRawMultiChannel(bool,bool);
+	void	sendRawChannel(bool, bool);
+//	void	sendRawMultiChannel(bool, bool);
 	void	sendRawMetaChannel(int);
 	void	sendPCPChannel();
 	void	checkPCPComms(Channel *, AtomStream &);
@@ -227,19 +227,19 @@ public:
 
 	Host	getHost();
 
-	bool	outputPacket(GnuPacket &,bool);
+	bool	outputPacket(GnuPacket &, bool);
 	bool	hasSeenPacket(GnuPacket &p) {return seenIDs.contains(p.id);}
 	bool	acceptGIV(ClientSocket *);
-	bool	sendPacket(ChanPacket &,GnuID &,GnuID &,GnuID &,Servent::TYPE);
+	bool	sendPacket(ChanPacket &, GnuID &, GnuID &, GnuID &, Servent::TYPE);
 
 
 	TYPE type;
 	STATUS status;
 
-	static const char *statusMsgs[],*typeMsgs[];
+	static const char *statusMsgs[], *typeMsgs[];
 	GnuStream gnuStream;
 	GnuPacket pack;
-	unsigned int	lastConnect,lastPing,lastPacket;
+	unsigned int	lastConnect, lastPing, lastPacket;
 	String	agent;
 
 	GnuIDList	seenIDs;
@@ -255,7 +255,7 @@ public:
 	ThreadInfo	thread;
 
 
-	String	loginPassword,loginMount;
+	String	loginPassword, loginMount;
 
 	bool	priorityConnect;
 	bool	addMetadata;
@@ -263,17 +263,17 @@ public:
 
 	unsigned	int allow;
 
-    ClientSocket *sock,*pushSock;
+    ClientSocket *sock, *pushSock;
 
 	WLock	lock;
 
 	bool	sendHeader;
-	unsigned int syncPos,streamPos;
+	unsigned int syncPos, streamPos;
 	int		servPort;
 
 	ChanInfo::PROTOCOL	outputProtocol;
 
-	GnuPacketBuffer	outPacketsNorm,outPacketsPri;
+	GnuPacketBuffer	outPacketsNorm, outPacketsPri;
 
 	unsigned int bytesPerSecond;
 	bool	flowControl;

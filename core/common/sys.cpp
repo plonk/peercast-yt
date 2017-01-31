@@ -29,12 +29,12 @@
 #include "jis.h"
 
 // -----------------------------------
-#define isSJIS(a,b) ((a >= 0x81 && a <= 0x9f || a >= 0xe0 && a<=0xfc) && (b >= 0x40 && b <= 0x7e || b >= 0x80 && b<=0xfc))
+#define isSJIS(a, b) ((a >= 0x81 && a <= 0x9f || a >= 0xe0 && a<=0xfc) && (b >= 0x40 && b <= 0x7e || b >= 0x80 && b<=0xfc))
 #define isEUC(a) (a >= 0xa1 && a <= 0xfe)
 #define isASCII(a) (a <= 0x7f)
 #define isPLAINASCII(a) (((a >= '0') && (a <= '9')) || ((a >= 'a') && (a <= 'z')) || ((a >= 'A') && (a <= 'Z')))
-#define isUTF8(a,b) ((a & 0xc0) == 0xc0 && (b & 0x80) == 0x80 )
-#define isESCAPE(a,b) ((a == '&') && (b == '#'))
+#define isUTF8(a, b) ((a & 0xc0) == 0xc0 && (b & 0x80) == 0x80 )
+#define isESCAPE(a, b) ((a == '&') && (b == '#'))
 #define isHTMLSPECIAL(a) ((a == '&') || (a == '\"') || (a == '\'') || (a == '<') || (a == '>'))
 
 
@@ -52,10 +52,10 @@ const char *LogBuffer::logTypes[]=
 // -----------------------------------
 // base64 encode/decode taken from ices2 source..
 static char base64table[64] = {
-    'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P',
-    'Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f',
-    'g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v',
-    'w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/'
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+    'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+    'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+    'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'
 };
 #if 0
 // -----------------------------------
@@ -125,7 +125,7 @@ static char *util_base64_decode(char *input)
 Sys::Sys()
 {
 	idleSleepTime = 10;
-	logBuf = new LogBuffer(1000,100);
+	logBuf = new LogBuffer(1000, 100);
 	numThreads=0;
 }
 
@@ -151,9 +151,9 @@ void Host::fromStrName(const char *str, int p)
 	}
 
 	char name[128];
-	strncpy(name,str,sizeof(name)-1);
+	strncpy(name, str, sizeof(name)-1);
 	port = p;
-	char *pp = strstr(name,":");
+	char *pp = strstr(name, ":");
 	if (pp)
 	{
 		port = atoi(pp+1);
@@ -176,9 +176,9 @@ void Host::fromStrIP(const char *str, int p)
 	unsigned int ipp;
 
 
-	if (strstr(str,":"))
+	if (strstr(str, ":"))
 	{
-		if (sscanf(str,"%03d.%03d.%03d.%03d:%d",&ipb[0],&ipb[1],&ipb[2],&ipb[3],&ipp) == 5)
+		if (sscanf(str, "%03d.%03d.%03d.%03d:%d", &ipb[0], &ipb[1], &ipb[2], &ipb[3], &ipp) == 5)
 		{
 			ip = ((ipb[0]&0xff) << 24) | ((ipb[1]&0xff) << 16) | ((ipb[2]&0xff) << 8) | ((ipb[3]&0xff));
 			port = ipp;
@@ -189,7 +189,7 @@ void Host::fromStrIP(const char *str, int p)
 		}
 	}else{
 		port = p;
-		if (sscanf(str,"%03d.%03d.%03d.%03d",&ipb[0],&ipb[1],&ipb[2],&ipb[3]) == 4)
+		if (sscanf(str, "%03d.%03d.%03d.%03d", &ipb[0], &ipb[1], &ipb[2], &ipb[3]) == 4)
 			ip = ((ipb[0]&0xff) << 24) | ((ipb[1]&0xff) << 16) | ((ipb[2]&0xff) << 8) | ((ipb[3]&0xff));
 		else
 			ip = 0;
@@ -272,7 +272,7 @@ char *stristr(const char *s1, const char *s2)
 // -----------------------------------
 bool String::isValidURL()
 {
-	return (strnicmp(data,"http://",7)==0) || (strnicmp(data,"mailto:",7)==0);
+	return (strnicmp(data, "http://", 7)==0) || (strnicmp(data, "mailto:", 7)==0);
 }
 
 // -----------------------------------
@@ -281,15 +281,15 @@ void String::setFromTime(unsigned int t)
     time_t t2 = t;
 	char *p = ctime(&t2);
 	if (p)
-		strcpy(data,p);
+		strcpy(data, p);
 	else
-		strcpy(data,"-");
+		strcpy(data, "-");
 	type = T_ASCII;
 }
 // -----------------------------------
 void String::setFromStopwatch(unsigned int t)
 {
-	unsigned int sec,min,hour,day;
+	unsigned int sec, min, hour, day;
 
 	sec = t%60;
 	min = (t/60)%60;
@@ -297,15 +297,15 @@ void String::setFromStopwatch(unsigned int t)
 	day = (t/86400);
 
 	if (day)
-		sprintf(data,"%d day, %d hour",day,hour);
+		sprintf(data, "%d day, %d hour", day, hour);
 	else if (hour)
-		sprintf(data,"%d hour, %d min",hour,min);
+		sprintf(data, "%d hour, %d min", hour, min);
 	else if (min)
-		sprintf(data,"%d min, %d sec",min,sec);
+		sprintf(data, "%d min, %d sec", min, sec);
 	else if (sec)
-		sprintf(data,"%d sec",sec);
+		sprintf(data, "%d sec", sec);
 	else
-		sprintf(data,"-");
+		sprintf(data, "-");
 
 	type = T_ASCII;
 }
@@ -348,7 +348,7 @@ void String::setFromString(const char *str, TYPE t)
 }
 
 // -----------------------------------
-int String::base64WordToChars(char *out,const char *input)
+int String::base64WordToChars(char *out, const char *input)
 {
 	char *start = out;
 	signed char vals[4];
@@ -383,7 +383,7 @@ void String::BASE642ASCII(const char *input)
 
     while(len >= 4)
 	{
-		out += base64WordToChars(out,input);
+		out += base64WordToChars(out, input);
 		input += 4;
         len -= 4;
     }
@@ -393,9 +393,9 @@ void String::BASE642ASCII(const char *input)
 
 
 // -----------------------------------
-void String::UNKNOWN2UNICODE(const char *in,bool safe)
+void String::UNKNOWN2UNICODE(const char *in, bool safe)
 {
-	MemoryStream utf8(data,MAX_LEN-1);
+	MemoryStream utf8(data, MAX_LEN-1);
 
 	unsigned char c;
 	unsigned char d;
@@ -404,7 +404,7 @@ void String::UNKNOWN2UNICODE(const char *in,bool safe)
 	{
 		d = *in;
 
-		if (isUTF8(c,d))		// utf8 encoded
+		if (isUTF8(c, d))		// utf8 encoded
 		{
 			int numChars=0;
 			int i;
@@ -422,7 +422,7 @@ void String::UNKNOWN2UNICODE(const char *in,bool safe)
 				utf8.writeChar(*in++);
 
 		}
-		else if(isSJIS(c,d))			// shift_jis
+		else if(isSJIS(c, d))			// shift_jis
 		{
 			utf8.writeUTF8(JISConverter::sjisToUnicode((c<<8 | d)));
 			in++;
@@ -434,7 +434,7 @@ void String::UNKNOWN2UNICODE(const char *in,bool safe)
 			in++;
 
 		}
-		else if (isESCAPE(c,d))		// html escape tags &#xx;
+		else if (isESCAPE(c, d))		// html escape tags &#xx;
 		{
 			in++;
 			char code[16];
@@ -448,7 +448,7 @@ void String::UNKNOWN2UNICODE(const char *in,bool safe)
 			}
 			*cp = 0;
 
-			utf8.writeUTF8(strtoul(code,NULL,10));
+			utf8.writeUTF8(strtoul(code, NULL, 10));
 
 		}
 		else if (isPLAINASCII(c))	// plain ascii : a-z 0-9 etc..
@@ -498,7 +498,7 @@ void String::ASCII2HTML(const char *in)
 			*op++ = c;
 		}else
 		{
-			sprintf(op,"&#x%02X;",(int)c);
+			sprintf(op, "&#x%02X;", (int)c);
 			op+=6;
 		}
 		if (op >= oe)
@@ -523,7 +523,7 @@ void String::ASCII2ESC(const char *in, bool safe)
 			if (safe)
 				*op++ = '%';
 			*op=0;
-			sprintf(op,"%02X",(int)c);
+			sprintf(op, "%02X", (int)c);
 			op+=2;
 		}
 		if (op >= oe)
@@ -554,7 +554,7 @@ void String::HTML2ASCII(const char *in)
 					break;
 			}
 			*cp = 0;
-			c = (unsigned char)strtoul(code,NULL,ec=='x'?16:10);
+			c = (unsigned char)strtoul(code, NULL, ec=='x'?16:10);
 		}
 		*o++ = c;
 		if (o >= oe)
@@ -566,7 +566,7 @@ void String::HTML2ASCII(const char *in)
 // -----------------------------------
 void String::HTML2UNICODE(const char *in)
 {
-	MemoryStream utf8(data,MAX_LEN-1);
+	MemoryStream utf8(data, MAX_LEN-1);
 
 	unsigned char c;
 	while (c = *in++)
@@ -585,7 +585,7 @@ void String::HTML2UNICODE(const char *in)
 					break;
 			}
 			*cp = 0;
-			utf8.writeUTF8(strtoul(code,NULL,ec=='x'?16:10));
+			utf8.writeUTF8(strtoul(code, NULL, ec=='x'?16:10));
 		}else
 			utf8.writeUTF8(c);
 
@@ -683,28 +683,28 @@ void String::convertTo(TYPE t)
 		{
 			case T_UNKNOWN:
 			case T_ASCII:
-				strcpy(data,tmp.data);
+				strcpy(data, tmp.data);
 				break;
 			case T_UNICODE:
-				UNKNOWN2UNICODE(tmp.data,false);
+				UNKNOWN2UNICODE(tmp.data, false);
 				break;
 			case T_UNICODESAFE:
-				UNKNOWN2UNICODE(tmp.data,true);
+				UNKNOWN2UNICODE(tmp.data, true);
 				break;
 			case T_HTML:
 				ASCII2HTML(tmp.data);
 				break;
 			case T_ESC:
-				ASCII2ESC(tmp.data,false);
+				ASCII2ESC(tmp.data, false);
 				break;
 			case T_ESCSAFE:
-				ASCII2ESC(tmp.data,true);
+				ASCII2ESC(tmp.data, true);
 				break;
 			case T_META:
-				ASCII2META(tmp.data,false);
+				ASCII2META(tmp.data, false);
 				break;
 			case T_METASAFE:
-				ASCII2META(tmp.data,true);
+				ASCII2META(tmp.data, true);
 				break;
 		}
 
@@ -726,7 +726,7 @@ void LogBuffer::write(const char *str, TYPE t)
 
 		int i = currLine % maxLines;
 		int bp = i*lineLen;
-		strncpy(&buf[bp],str,rlen);
+		strncpy(&buf[bp], str, rlen);
 		buf[bp+rlen] = 0;
 		if (cnt==0)
 		{
@@ -753,7 +753,7 @@ const char *getCGIarg(const char *str, const char *arg)
 	if (!str)
 		return NULL;
 
-	const char *s = strstr(str,arg);
+	const char *s = strstr(str, arg);
 
 	if (!s)
 		return NULL;
@@ -769,12 +769,12 @@ bool cmpCGIarg(const char *str, const char *arg, const char *value)
 	if ((!str) || (!strlen(value)))
 		return false;
 
-	if (strnicmp(str,arg,strlen(arg)) == 0)
+	if (strnicmp(str, arg, strlen(arg)) == 0)
 	{
 
 		str += strlen(arg);
 
-		return strncmp(str,value,strlen(value))==0;
+		return strncmp(str, value, strlen(value))==0;
 	}else
 		return false;
 }
@@ -784,7 +784,7 @@ bool hasCGIarg(const char *str, const char *arg)
 	if (!str)
 		return false;
 
-	const char *s = strstr(str,arg);
+	const char *s = strstr(str, arg);
 
 	if (!s)
 		return false;
@@ -796,7 +796,7 @@ bool hasCGIarg(const char *str, const char *arg)
 // ---------------------------
 void GnuID::encode(Host *h, const char *salt1, const char *salt2, unsigned char salt3)
 {
-	int s1=0,s2=0;
+	int s1=0, s2=0;
 	for(int i=0; i<16; i++)
 	{
 		unsigned char ipb = id[i];
@@ -840,8 +840,8 @@ void GnuID::toStr(char *str)
 		char tmp[8];
 		unsigned char ipb = id[i];
 
-		sprintf(tmp,"%02X",ipb);
-		strcat(str,tmp);
+		sprintf(tmp, "%02X", ipb);
+		strcat(str, tmp);
 	}
 
 }
@@ -861,7 +861,7 @@ void GnuID::fromStr(const char *str)
 	{
 		buf[0] = str[i*2];
 		buf[1] = str[i*2+1];
-		id[i] = (unsigned char)strtoul(buf,NULL,16);
+		id[i] = (unsigned char)strtoul(buf, NULL, 16);
 	}
 
 }
@@ -967,7 +967,7 @@ void LogBuffer::dumpHTML(Stream &out)
 		sp = (currLine+1)%maxLines;
 	}
 
-	String tim,str;
+	String tim, str;
 	if (nl)
 	{
 		for(unsigned int i=0; i<nl; i++)

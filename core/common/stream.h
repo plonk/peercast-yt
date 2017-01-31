@@ -35,21 +35,21 @@ class Stream
 public:
 	Stream()
 	:writeCRLF(true)
-	,totalBytesIn(0)
-	,totalBytesOut(0)
-	,lastBytesIn(0)
-	,lastBytesOut(0)
-	,bytesInPerSec(0)
-	,bytesOutPerSec(0)
-	,lastUpdate(0)
-	,bitsBuffer(0)
-	,bitsPos(0)
+	, totalBytesIn(0)
+	, totalBytesOut(0)
+	, lastBytesIn(0)
+	, lastBytesOut(0)
+	, bytesInPerSec(0)
+	, bytesOutPerSec(0)
+	, lastUpdate(0)
+	, bitsBuffer(0)
+	, bitsPos(0)
 	{
 	}
 
-	virtual int readUpto(void *,int) {return 0;}
-	virtual int read(void *,int)=0;
-	virtual void write(const void *,int) = 0;
+	virtual int readUpto(void *, int) {return 0;}
+	virtual int read(void *, int)=0;
+	virtual void write(const void *, int) = 0;
     virtual bool eof()
     {
     	throw StreamException("Stream can`t eof");
@@ -90,20 +90,20 @@ public:
     char	readChar()
     {
     	char v;
-        read(&v,1);
+        read(&v, 1);
         return v;
     }
     short	readShort()
     {
     	short v;
-        read(&v,2);
+        read(&v, 2);
 		CHECK_ENDIAN2(v);
         return v;
     }
     long	readLong()
     {
     	long v;
-        read(&v,4);
+        read(&v, 4);
 		CHECK_ENDIAN4(v);
         return v;
     }
@@ -114,13 +114,13 @@ public:
 	ID4 readID4()
 	{
 		ID4 id;
-		read(id.getData(),4);
+		read(id.getData(), 4);
 		return id;
 	}
 	int	readInt24()
 	{
 		int v=0;
-        read(&v,3);
+        read(&v, 3);
 		CHECK_ENDIAN3(v);
 	}
 
@@ -153,22 +153,22 @@ public:
 
 	void writeID4(ID4 id)
 	{
-		write(id.getData(),4);
+		write(id.getData(), 4);
 	}
 
 	void	writeChar(char v)
 	{
-		write(&v,1);
+		write(&v, 1);
 	}
 	void	writeShort(short v)
 	{
 		CHECK_ENDIAN2(v);
-		write(&v,2);
+		write(&v, 2);
 	}
 	void	writeLong(long v)
 	{
 		CHECK_ENDIAN4(v);
-		write(&v,4);
+		write(&v, 4);
 	}
 	void writeInt(int v) {writeLong(v);}
 
@@ -180,7 +180,7 @@ public:
 
 	void	writeTag(const char id[4])
 	{
-		write(id,4);
+		write(id, 4);
 	}
 
 	int	writeUTF8(unsigned int);
@@ -191,25 +191,25 @@ public:
     int		readWord(char *, int);
 	int		readBase64(char *, int);
 
-	void	write(const char *,va_list);
+	void	write(const char *, va_list);
 	void	writeLine(const char *);
-	void	writeLineF(const char *,...);
+	void	writeLineF(const char *, ...);
 	void	writeString(const char *);
-	void	writeStringF(const char *,...);
+	void	writeStringF(const char *, ...);
 
 	bool	writeCRLF;
 
 	int		readBits(int);
 
-	void	updateTotals(unsigned int,unsigned int);
+	void	updateTotals(unsigned int, unsigned int);
 
 
 	unsigned char bitsBuffer;
 	unsigned int bitsPos;
 
-	unsigned int totalBytesIn,totalBytesOut;
-	unsigned int lastBytesIn,lastBytesOut;
-	unsigned int bytesInPerSec,bytesOutPerSec;
+	unsigned int totalBytesIn, totalBytesOut;
+	unsigned int lastBytesIn, lastBytesOut;
+	unsigned int bytesInPerSec, bytesOutPerSec;
 	unsigned int lastUpdate;
 
 };
@@ -231,8 +231,8 @@ public:
 	virtual void	seekTo(int);
 	virtual int		getPosition() {return pos();}
 	virtual void	flush();
-    virtual int		read(void *,int);
-    virtual void	write(const void *,int);
+    virtual int		read(void *, int);
+    virtual void	write(const void *, int);
     virtual bool	eof();
     virtual void	rewind();
     virtual void	close();
@@ -246,22 +246,22 @@ class MemoryStream : public Stream
 public:
 	MemoryStream()
 	:buf(NULL)
-	,len(0)
-	,pos(0)
+	, len(0)
+	, pos(0)
 	{
 	}
 
 	MemoryStream(void *p, int l)
 	:buf((char *)p)
-	,len(l)
-	,pos(0)
+	, len(l)
+	, pos(0)
 	{
 	}
 
 	MemoryStream(int l)
 	:buf(new char[l])
-	,len(l)
-	,pos(0)
+	, len(l)
+	, pos(0)
 	{
 	}
 
@@ -270,7 +270,7 @@ public:
 		len = file.length();
 		buf = new char[len];
 		pos = 0;
-		file.read(buf,len);
+		file.read(buf, len);
 	}
 
 	void free()
@@ -283,25 +283,25 @@ public:
 
 	}
 
-	virtual int read(void *p,int l)
+	virtual int read(void *p, int l)
     {
 		if (pos+l <= len)
 		{
-			memcpy(p,&buf[pos],l);
+			memcpy(p, &buf[pos], l);
 			pos += l;
 			return l;
 		}else
 		{
-			memset(p,0,l);
+			memset(p, 0, l);
 			return 0;
 		}
     }
 
-	virtual void write(const void *p,int l)
+	virtual void write(const void *p, int l)
     {
 		if ((pos+l) > len)
 			throw StreamException("Stream - premature end of write()");
-		memcpy(&buf[pos],p,l);
+		memcpy(&buf[pos], p, l);
 		pos += l;
     }
 
@@ -329,7 +329,7 @@ public:
 
 
 	char *buf;
-	int len,pos;
+	int len, pos;
 };
 // --------------------------------------------------
 class IndirectStream : public Stream
@@ -341,14 +341,14 @@ public:
 		stream = s;
 	}
 
-	virtual int read(void *p,int l)
+	virtual int read(void *p, int l)
     {
-		return stream->read(p,l);
+		return stream->read(p, l);
     }
 
-	virtual void write(const void *p,int l)
+	virtual void write(const void *p, int l)
     {
-		stream->write(p,l);
+		stream->write(p, l);
     }
 
     virtual bool eof()

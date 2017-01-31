@@ -90,9 +90,9 @@ public:
 		lock.off();
 	}
 
-	int copyFrom(ChanPacketBuffer &,unsigned in);
+	int copyFrom(ChanPacketBuffer &, unsigned in);
 
-	bool	writePacket(ChanPacket &,bool = false);
+	bool	writePacket(ChanPacket &, bool = false);
 	void	readPacket(ChanPacket &);
 
 	bool	willSkip();
@@ -102,14 +102,14 @@ public:
 	unsigned int	getLatestPos();
 	unsigned int	getOldestPos();
 	unsigned int	findOldestPos(unsigned int);
-	bool	findPacket(unsigned int,ChanPacket &);
+	bool	findPacket(unsigned int, ChanPacket &);
 	unsigned int	getStreamPos(unsigned int);
 	unsigned int	getStreamPosEnd(unsigned int);
 	unsigned int	getLastSync();
 
 	ChanPacket	packets[MAX_PACKETS];
-	volatile unsigned int lastPos,firstPos,safePos;
-	volatile unsigned int readPos,writePos;
+	volatile unsigned int lastPos, firstPos, safePos;
+	volatile unsigned int readPos, writePos;
 	unsigned int accept;
 	unsigned int lastWriteTime;
 	WLock lock;
@@ -121,23 +121,23 @@ class ChannelStream
 public:
 	ChannelStream()
 	:numListeners(0)
-	,numRelays(0)
-	,isPlaying(false)
-	,fwState(0)
-	,lastUpdate(0)
+	, numRelays(0)
+	, isPlaying(false)
+	, fwState(0)
+	, lastUpdate(0)
 	{}
 
 	void updateStatus(Channel *);
-	bool getStatus(Channel *,ChanPacket &);
+	bool getStatus(Channel *, ChanPacket &);
 
 	virtual void kill() {}
-	virtual bool sendPacket(ChanPacket &,GnuID &) {return false;}
+	virtual bool sendPacket(ChanPacket &, GnuID &) {return false;}
 	virtual void flush(Stream &) {}
-	virtual void readHeader(Stream &,Channel *)=0;
-	virtual int  readPacket(Stream &,Channel *)=0;
-	virtual void readEnd(Stream &,Channel *)=0;
+	virtual void readHeader(Stream &, Channel *)=0;
+	virtual int  readPacket(Stream &, Channel *)=0;
+	virtual void readEnd(Stream &, Channel *)=0;
 
-	void	readRaw(Stream &,Channel *);
+	void	readRaw(Stream &, Channel *);
 
 	int		numRelays;
 	int		numListeners;

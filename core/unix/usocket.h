@@ -66,8 +66,8 @@ public:
 
 	static	hostent		*resolveHost(char *);
 
-	void	checkTimeout(bool,bool);
-	void	checkTimeout2(bool,bool);
+	void	checkTimeout(bool, bool);
+	void	checkTimeout2(bool, bool);
 
 
 	unsigned int sockNum;

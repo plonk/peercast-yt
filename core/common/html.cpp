@@ -46,22 +46,22 @@ HTML::HTML(const char *t, Stream &o)
 void HTML::writeOK(const char *content)
 {
 	out->writeLine(HTTP_SC_OK);
-	out->writeLineF("%s %s",HTTP_HS_SERVER,PCX_AGENT);
-	//out->writeLine("%s %s",HTTP_HS_CACHE,"no-cache");
-	out->writeLineF("%s %s",HTTP_HS_CONNECTION,"close");
-    out->writeLineF("%s %s",HTTP_HS_CONTENT,content);
+	out->writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
+	//out->writeLine("%s %s", HTTP_HS_CACHE, "no-cache");
+	out->writeLineF("%s %s", HTTP_HS_CONNECTION, "close");
+    out->writeLineF("%s %s", HTTP_HS_CONTENT, content);
 	out->writeLine("");
 }
 // --------------------------------------
-void HTML::writeVariable(Stream &s,const String &varName, int loop)
+void HTML::writeVariable(Stream &s, const String &varName, int loop)
 {
 	bool r=false;
 	if (varName.startsWith("servMgr."))
-		r=servMgr->writeVariable(s,varName+8);
+		r=servMgr->writeVariable(s, varName+8);
 	else if (varName.startsWith("chanMgr."))
-		r=chanMgr->writeVariable(s,varName+8,loop);
+		r=chanMgr->writeVariable(s, varName+8, loop);
 	else if (varName.startsWith("stats."))
-		r=stats.writeVariable(s,varName+6);
+		r=stats.writeVariable(s, varName+6);
 	else if (varName.startsWith("sys."))
 	{
 		if (varName == "sys.log.dumpHTML")
@@ -76,34 +76,34 @@ void HTML::writeVariable(Stream &s,const String &varName, int loop)
 		{
 			Channel *ch = chanMgr->findChannelByIndex(loop);
 			if (ch)
-				r = ch->writeVariable(s,varName+13,loop);
+				r = ch->writeVariable(s, varName+13, loop);
 		}else if (varName.startsWith("loop.servent."))
 		{
 			Servent *sv = servMgr->findServentByIndex(loop);
 			if (sv)
-				r = sv->writeVariable(s,varName+13);
+				r = sv->writeVariable(s, varName+13);
 		}else if (varName.startsWith("loop.filter."))
 		{
 			ServFilter *sf = &servMgr->filters[loop];
-			r = sf->writeVariable(s,varName+12);
+			r = sf->writeVariable(s, varName+12);
 
 		}else if (varName.startsWith("loop.bcid."))
 		{
 			BCID *bcid = servMgr->findValidBCID(loop);
 			if (bcid)
-				r = bcid->writeVariable(s,varName+10);
+				r = bcid->writeVariable(s, varName+10);
 
 		}else if (varName == "loop.indexEven")
 		{
-			s.writeStringF("%d",(loop&1)==0);
+			s.writeStringF("%d", (loop&1)==0);
 			r = true;
 		}else if (varName == "loop.index")
 		{
-			s.writeStringF("%d",loop);
+			s.writeStringF("%d", loop);
 			r = true;
 		}else if (varName.startsWith("loop.hit."))
 		{
-			const char *idstr = getCGIarg(tmplArgs,"id=");
+			const char *idstr = getCGIarg(tmplArgs, "id=");
 			if (idstr)
 			{
 				GnuID id;
@@ -119,7 +119,7 @@ void HTML::writeVariable(Stream &s,const String &varName, int loop)
 						{
 							if (cnt == loop)
 							{
-								r = ch->writeVariable(s,varName+9);
+								r = ch->writeVariable(s, varName+9);
 								break;
 							}
 							cnt++;
@@ -136,21 +136,21 @@ void HTML::writeVariable(Stream &s,const String &varName, int loop)
 	{
 		if (varName.startsWith("page.channel."))
 		{
-			const char *idstr = getCGIarg(tmplArgs,"id=");
+			const char *idstr = getCGIarg(tmplArgs, "id=");
 			if (idstr)
 			{
 				GnuID id;
 				id.fromStr(idstr);
 				Channel *ch = chanMgr->findChannelByID(id);
 				if (ch)
-					r = ch->writeVariable(s,varName+13,loop);
+					r = ch->writeVariable(s, varName+13, loop);
 			}
 		}else
 		{
 
 			String v = varName+5;
 			v.append('=');
-			const char *a = getCGIarg(tmplArgs,v);
+			const char *a = getCGIarg(tmplArgs, v);
 			if (a)
 			{
 				s.writeString(a);
@@ -164,22 +164,22 @@ void HTML::writeVariable(Stream &s,const String &varName, int loop)
 		s.writeString(varName);
 }
 // --------------------------------------
-int HTML::getIntVariable(const String &varName,int loop)
+int HTML::getIntVariable(const String &varName, int loop)
 {
 	String val;
-	MemoryStream mem(val.cstr(),String::MAX_LEN);
+	MemoryStream mem(val.cstr(), String::MAX_LEN);
 
-	writeVariable(mem,varName,loop);
+	writeVariable(mem, varName, loop);
 
 	return atoi(val.cstr());
 }
 // --------------------------------------
-bool HTML::getBoolVariable(const String &varName,int loop)
+bool HTML::getBoolVariable(const String &varName, int loop)
 {
 	String val;
-	MemoryStream mem(val.cstr(),String::MAX_LEN);
+	MemoryStream mem(val.cstr(), String::MAX_LEN);
 
-	writeVariable(mem,varName,loop);
+	writeVariable(mem, varName, loop);
 
 	// integer
 	if ((val[0] >= '0') && (val[0] <= '9'))
@@ -193,7 +193,7 @@ bool HTML::getBoolVariable(const String &varName,int loop)
 }
 
 // --------------------------------------
-void	HTML::readIf(Stream &in,Stream *outp,int loop)
+void	HTML::readIf(Stream &in, Stream *outp, int loop)
 {
 	String var;
 	bool varCond=true;
@@ -204,13 +204,13 @@ void	HTML::readIf(Stream &in,Stream *outp,int loop)
 
 		if (c == '}')
 		{
-			if (getBoolVariable(var,loop)==varCond)
+			if (getBoolVariable(var, loop)==varCond)
 			{
-				if (readTemplate(in,outp,loop))
-					readTemplate(in,NULL,loop);
+				if (readTemplate(in, outp, loop))
+					readTemplate(in, NULL, loop);
 			}else{
-				if (readTemplate(in,NULL,loop))
-					readTemplate(in,outp,loop);
+				if (readTemplate(in, NULL, loop))
+					readTemplate(in, outp, loop);
 			}
 			return;
 		}else if (c == '!')
@@ -225,7 +225,7 @@ void	HTML::readIf(Stream &in,Stream *outp,int loop)
 }
 
 // --------------------------------------
-void	HTML::readLoop(Stream &in,Stream *outp,int loop)
+void	HTML::readLoop(Stream &in, Stream *outp, int loop)
 {
 	String var;
 	while (!in.eof())
@@ -234,7 +234,7 @@ void	HTML::readLoop(Stream &in,Stream *outp,int loop)
 
 		if (c == '}')
 		{
-			int cnt = getIntVariable(var,loop);
+			int cnt = getIntVariable(var, loop);
 
 			if (cnt)
 			{
@@ -242,11 +242,11 @@ void	HTML::readLoop(Stream &in,Stream *outp,int loop)
 				for(int i=0; i<cnt; i++)
 				{
 					in.seekTo(spos);
-					readTemplate(in,outp,i);
+					readTemplate(in, outp, i);
 				}
 			}else
 			{
-				readTemplate(in,NULL,0);
+				readTemplate(in, NULL, 0);
 			}
 			return;
 
@@ -259,7 +259,7 @@ void	HTML::readLoop(Stream &in,Stream *outp,int loop)
 }
 
 // --------------------------------------
-int HTML::readCmd(Stream &in,Stream *outp,int loop)
+int HTML::readCmd(Stream &in, Stream *outp, int loop)
 {
 	String cmd;
 
@@ -273,11 +273,11 @@ int HTML::readCmd(Stream &in,Stream *outp,int loop)
 		{
 			if (cmd == "loop")
 			{
-				readLoop(in,outp,loop);
+				readLoop(in, outp, loop);
 				tmpl = TMPL_LOOP;
 			}else if (cmd == "if")
 			{
-				readIf(in,outp,loop);
+				readIf(in, outp, loop);
 				tmpl = TMPL_IF;
 			}else if (cmd == "end")
 			{
@@ -297,7 +297,7 @@ int HTML::readCmd(Stream &in,Stream *outp,int loop)
 }
 
 // --------------------------------------
-void	HTML::readVariable(Stream &in,Stream *outp,int loop)
+void	HTML::readVariable(Stream &in, Stream *outp, int loop)
 {
 	String var;
 	while (!in.eof())
@@ -306,7 +306,7 @@ void	HTML::readVariable(Stream &in,Stream *outp,int loop)
 		if (c == '}')
 		{
 			if (outp)
-				writeVariable(*outp,var,loop);
+				writeVariable(*outp, var, loop);
 			return;
 		}else
 		{
@@ -316,7 +316,7 @@ void	HTML::readVariable(Stream &in,Stream *outp,int loop)
 
 }
 // --------------------------------------
-bool HTML::readTemplate(Stream &in,Stream *outp,int loop)
+bool HTML::readTemplate(Stream &in, Stream *outp, int loop)
 {
 	while (!in.eof())
 	{
@@ -327,11 +327,11 @@ bool HTML::readTemplate(Stream &in,Stream *outp,int loop)
 			c = in.readChar();
 			if (c == '$')
 			{
-				readVariable(in,outp,loop);
+				readVariable(in, outp, loop);
 			}
 			else if (c == '@')
 			{
-				int t = readCmd(in,outp,loop);
+				int t = readCmd(in, outp, loop);
 				if (t == TMPL_END)
 					return false;
 				else if (t == TMPL_ELSE)
@@ -364,7 +364,7 @@ void HTML::writeTemplate(const char *fileName, const char *args)
 		file.openReadOnly(fileName);
 
 		tmplArgs = args;
-		readTemplate(file,out,0);
+		readTemplate(file, out, 0);
 
 	}catch(StreamException &e)
 	{
@@ -383,7 +383,7 @@ void HTML::writeRawFile(const char *fileName)
 	{
 		file.openReadOnly(fileName);
 
-		file.writeTo(*out,file.length());
+		file.writeTo(*out, file.length());
 
 	}catch(StreamException &)
 	{
@@ -396,7 +396,7 @@ void HTML::writeRawFile(const char *fileName)
 void HTML::locateTo(const char *url)
 {
 	out->writeLine(HTTP_SC_FOUND);
-	out->writeLineF("Location: %s",url);
+	out->writeLineF("Location: %s", url);
 	out->writeLine("");
 }
 // --------------------------------------
@@ -414,16 +414,16 @@ void HTML::addHead()
 {
 	char buf[512];
 		startNode("head");
-			startTagEnd("title",title.cstr());
+			startTagEnd("title", title.cstr());
 			startTagEnd("meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\"");
 
 			if (!refreshURL.isEmpty())
 			{
-				sprintf(buf,"meta http-equiv=\"refresh\" content=\"%d;URL=%s\"",refresh,refreshURL.cstr());
+				sprintf(buf, "meta http-equiv=\"refresh\" content=\"%d;URL=%s\"", refresh, refreshURL.cstr());
 				startTagEnd(buf);
 			}else if (refresh)
 			{
-				sprintf(buf,"meta http-equiv=\"refresh\" content=\"%d\"",refresh);
+				sprintf(buf, "meta http-equiv=\"refresh\" content=\"%d\"", refresh);
 				startTagEnd(buf);
 			}
 
@@ -478,12 +478,12 @@ void HTML::addLink(const char *url, const char *text, bool toblank)
 {
 	char buf[1024];
 
-	sprintf(buf,"a href=\"%s\" %s",url,toblank?"target=\"_blank\"":"");
-	startNode(buf,text);
+	sprintf(buf, "a href=\"%s\" %s", url, toblank?"target=\"_blank\"":"");
+	startNode(buf, text);
 	end();
 }
 // --------------------------------------
-void HTML::startTag(const char *tag, const char *fmt,...)
+void HTML::startTag(const char *tag, const char *fmt, ...)
 {
 	if (fmt)
 	{
@@ -492,16 +492,16 @@ void HTML::startTag(const char *tag, const char *fmt,...)
   		va_start(ap, fmt);
 
 		char tmp[512];
-		vsprintf(tmp,fmt,ap);
-		startNode(tag,tmp);
+		vsprintf(tmp, fmt, ap);
+		startNode(tag, tmp);
 
 	   	va_end(ap);
 	}else{
-		startNode(tag,NULL);
+		startNode(tag, NULL);
 	}
 }
 // --------------------------------------
-void HTML::startTagEnd(const char *tag, const char *fmt,...)
+void HTML::startTagEnd(const char *tag, const char *fmt, ...)
 {
 	if (fmt)
 	{
@@ -510,23 +510,23 @@ void HTML::startTagEnd(const char *tag, const char *fmt,...)
   		va_start(ap, fmt);
 
 		char tmp[512];
-		vsprintf(tmp,fmt,ap);
-		startNode(tag,tmp);
+		vsprintf(tmp, fmt, ap);
+		startNode(tag, tmp);
 
 	   	va_end(ap);
 	}else{
-		startNode(tag,NULL);
+		startNode(tag, NULL);
 	}
 	end();
 }
 // --------------------------------------
-void HTML::startSingleTagEnd(const char *fmt,...)
+void HTML::startSingleTagEnd(const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
 
 	char tmp[512];
-	vsprintf(tmp,fmt,ap);
+	vsprintf(tmp, fmt, ap);
 	startNode(tmp);
 
 	va_end(ap);

@@ -29,7 +29,7 @@ bool HTTP::checkResponse(int r)
 {
 	if (readResponse()!=r)
 	{
-		LOG_ERROR("Unexpected HTTP: %s",cmdLine);
+		LOG_ERROR("Unexpected HTTP: %s", cmdLine);
 		throw StreamException("Unexpected HTTP response");
 		return false;
 	}
@@ -39,12 +39,12 @@ bool HTTP::checkResponse(int r)
 //-----------------------------------------
 void HTTP::readRequest()
 {
-	readLine(cmdLine,sizeof(cmdLine));
+	readLine(cmdLine, sizeof(cmdLine));
 }
 //-----------------------------------------
 int HTTP::readResponse()
 {
-	readLine(cmdLine,sizeof(cmdLine));
+	readLine(cmdLine, sizeof(cmdLine));
 
 	char *cp = cmdLine;
 
@@ -62,9 +62,9 @@ int HTTP::readResponse()
 //-----------------------------------------
 bool	HTTP::nextHeader()
 {
-	if (readLine(cmdLine,sizeof(cmdLine)))
+	if (readLine(cmdLine, sizeof(cmdLine)))
 	{
-		char *ap = strstr(cmdLine,":");
+		char *ap = strstr(cmdLine, ":");
 		if (ap)
 			while (*++ap)
 				if (*ap!=' ')
@@ -81,12 +81,12 @@ bool	HTTP::nextHeader()
 //-----------------------------------------
 bool	HTTP::isHeader(const char *hs)
 {
-	return stristr(cmdLine,hs) != NULL;
+	return stristr(cmdLine, hs) != NULL;
 }
 //-----------------------------------------
 bool	HTTP::isRequest(const char *rq)
 {
-	return strncmp(cmdLine,rq,strlen(rq)) == 0;
+	return strncmp(cmdLine, rq, strlen(rq)) == 0;
 }
 //-----------------------------------------
 char *HTTP::getArgStr()
@@ -106,25 +106,25 @@ void HTTP::getAuthUserPass(char *user, char *pass, size_t ulen, size_t plen)
 {
 	if (arg)
 	{
-		char *s = stristr(arg,"Basic");
+		char *s = stristr(arg, "Basic");
 		if (s)
 		{
 			while (*s)
 				if (*s++ == ' ')
 					break;
 			String str;
-			str.set(s,String::T_BASE64);
+			str.set(s, String::T_BASE64);
 			str.convertTo(String::T_ASCII);
-			s = strstr(str.cstr(),":");
+			s = strstr(str.cstr(), ":");
 			if (s)
 			{
 				*s = 0;
 				if (user){
-					strncpy(user,str.cstr(), ulen);
+					strncpy(user, str.cstr(), ulen);
 					user[ulen - 1] = 0;
 				}
 				if (pass){
-					strncpy(pass,s+1, plen);
+					strncpy(pass, s+1, plen);
 					pass[plen - 1] = 0;
 				}
 			}
@@ -158,7 +158,7 @@ void	Cookie::logDebug(const char *str, int ind)
 	h.ip = ip;
 	h.IPtoStr(ipstr);
 
-	LOG_DEBUG("%s %d: %s - %s",str,ind,ipstr,id);
+	LOG_DEBUG("%s %d: %s - %s", str, ind, ipstr, id);
 }
 
 // -----------------------------------
@@ -177,7 +177,7 @@ bool	CookieList::add(Cookie &c)
 			oldestTime = list[i].time;
 		}
 
-	c.logDebug("Added cookie",oldestIndex);
+	c.logDebug("Added cookie", oldestIndex);
 	c.time = sys->getTime();
 	list[oldestIndex]=c;
 	return true;

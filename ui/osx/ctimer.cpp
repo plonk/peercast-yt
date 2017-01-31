@@ -17,9 +17,9 @@ Timer::Timer( EventLoopRef		 mainLoop,
 : mTimerUPP( NewEventLoopTimerUPP(userRoutine) )
 {
 	InstallEventLoopTimer( mainLoop
-						  ,inFireDelay
-						  ,inInterval
-						  ,mTimerUPP
-						  ,inTimerData
-						  ,&mTimer);
+						  , inFireDelay
+						  , inInterval
+						  , mTimerUPP
+						  , inTimerData
+						  , &mTimer);
 }

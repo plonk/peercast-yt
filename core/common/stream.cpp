@@ -33,7 +33,7 @@ void MemoryStream::convertFromBase64()
 	int rl=len;
     while(rl >= 4)
 	{
-		out += String::base64WordToChars(out,in);
+		out += String::base64WordToChars(out, in);
 		in += 4;
         rl -= 4;
     }
@@ -45,7 +45,7 @@ void FileStream::openReadOnly(const char *fn)
 {
     if (file)
         close();
-	file = fopen(fn,"rb");
+	file = fopen(fn, "rb");
 
     if (!file)
     	throw StreamException("Unable to open file");
@@ -55,7 +55,7 @@ void FileStream::openWriteReplace(const char *fn)
 {
     if (file)
         close();
-	file = fopen(fn,"wb");
+	file = fopen(fn, "wb");
 
 	if (!file)
     	throw StreamException("Unable to open file");
@@ -65,7 +65,7 @@ void FileStream::openWriteAppend(const char *fn)
 {
     if (file)
         close();
-        file = fopen(fn,"ab");
+        file = fopen(fn, "ab");
 
         if (!file)
         	throw StreamException("Unable to open file");
@@ -84,7 +84,7 @@ void FileStream::close()
 void FileStream::rewind()
 {
 	if (file)
-		fseek(file,0,SEEK_SET);
+		fseek(file, 0, SEEK_SET);
 }
 // -------------------------------------
 int FileStream::length()
@@ -93,9 +93,9 @@ int FileStream::length()
 	if (file)
 	{
 		int old = ftell(file);
-		fseek(file,0,SEEK_END);
+		fseek(file, 0, SEEK_END);
 		len = ftell(file);
-		fseek(file,old,SEEK_SET);
+		fseek(file, old, SEEK_SET);
 
 	}
 	return len;
@@ -117,7 +117,7 @@ int FileStream::read(void *ptr, int len)
 	if (feof(file))
     	throw StreamException("End of file");
 
-	int r = (int)fread(ptr,1,len,file);
+	int r = (int)fread(ptr, 1, len, file);
 
     if (r > 0)
     {
@@ -137,7 +137,7 @@ void FileStream::write(const void *ptr, int len)
 {
 	if (!file)
 		return;
-    fwrite(ptr,1,len,file);
+    fwrite(ptr, 1, len, file);
 	updateTotals(0, len);
 
 }
@@ -161,7 +161,7 @@ void FileStream::seekTo(int pos)
 {
 	if (!file)
 		return;
-	fseek(file,pos,SEEK_SET);
+	fseek(file, pos, SEEK_SET);
 }
 
 // -------------------------------------
@@ -174,8 +174,8 @@ void Stream::writeTo(Stream &out, int len)
 		if (rlen > len)
 			rlen = len;
 
-		read(tmp,rlen);
-		out.write(tmp,rlen);
+		read(tmp, rlen);
+		out.write(tmp, rlen);
 
 		len-=rlen;
 	}
@@ -219,7 +219,7 @@ void Stream::skip(int len)
 		int rlen = sizeof(tmp);
 		if (rlen > len)
 			rlen = len;
-		read(tmp,rlen);
+		read(tmp, rlen);
 		len-=rlen;
 	}
 
@@ -251,7 +251,7 @@ int	Stream::readLine(char *in, int max)
 	while(max--)
     {
     	char c;
-    	read(&c,1);
+    	read(&c, 1);
 		if (c == '\n')
 			break;
 		if (c == '\r')
@@ -262,37 +262,37 @@ int	Stream::readLine(char *in, int max)
 	return i;
 }
 // -------------------------------------
-void Stream::write(const char *fmt,va_list ap)
+void Stream::write(const char *fmt, va_list ap)
 {
 	char tmp[4096];
-	vsprintf(tmp,fmt,ap);
-    write(tmp,strlen(tmp));
+	vsprintf(tmp, fmt, ap);
+    write(tmp, strlen(tmp));
 }
 // -------------------------------------
-void Stream::writeStringF(const char *fmt,...)
+void Stream::writeStringF(const char *fmt, ...)
 {
 	va_list ap;
   	va_start(ap, fmt);
-	write(fmt,ap);
+	write(fmt, ap);
    	va_end(ap);
 }
 // -------------------------------------
 void Stream::writeString(const char *str)
 {
-	write(str,strlen(str));
+	write(str, strlen(str));
 }
 // -------------------------------------
-void Stream::writeLineF(const char *fmt,...)
+void Stream::writeLineF(const char *fmt, ...)
 {
 	va_list ap;
   	va_start(ap, fmt);
 
-	write(fmt,ap);
+	write(fmt, ap);
 
 	if (writeCRLF)
-	    write("\r\n",2);
+	    write("\r\n", 2);
 	else
-		write("\n",1);
+		write("\n", 1);
 
    	va_end(ap);
 }
@@ -303,9 +303,9 @@ void Stream::writeLine(const char *str)
 	writeString(str);
 
 	if (writeCRLF)
-	    write("\r\n",2);
+	    write("\r\n", 2);
 	else
-		write("\n",1);
+		write("\n", 1);
 }
 
 // -------------------------------------
@@ -343,8 +343,8 @@ int Stream::readBase64(char *p, int max)
 	int cnt=0;
 	while (cnt < (max-4))
 	{
-		read(vals,4);
-		int rl = String::base64WordToChars(p,vals);
+		read(vals, 4);
+		int rl = String::base64WordToChars(p, vals);
 		if (!rl)
 			break;
 

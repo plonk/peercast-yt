@@ -48,7 +48,7 @@ public:
 
 	FileStream	fStream;
 	char	currLine[256];
-	char	*nameStr,*valueStr;
+	char	*nameStr, *valueStr;
 };
 
 #endif

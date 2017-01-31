@@ -81,7 +81,7 @@ void readXMLString(String &str, XML::Node *n, const char *arg)
 	p = n->findAttr(arg);
 	if (p)
 	{
-		str.set(p,String::T_HTML);
+		str.set(p, String::T_HTML);
 		str.convertTo(String::T_ASCII);
 	}
 }
@@ -217,7 +217,7 @@ void	Channel::newPacket(ChanPacket &pack)
 {
 	if (pack.type != ChanPacket::T_PCP)
 	{
-		rawData.writePacket(pack,true);
+		rawData.writePacket(pack, true);
 	}
 }
 
@@ -236,12 +236,12 @@ bool	Channel::isFull()
 // -----------------------------------
 int Channel::localRelays()
 {
-	return servMgr->numStreams(info.id,Servent::T_RELAY,true);
+	return servMgr->numStreams(info.id, Servent::T_RELAY, true);
 }
 // -----------------------------------
 int Channel::localListeners()
 {
-	return servMgr->numStreams(info.id,Servent::T_DIRECT,true);
+	return servMgr->numStreams(info.id, Servent::T_DIRECT, true);
 }
 
 // -----------------------------------
@@ -311,7 +311,7 @@ void Channel::sleepUntil(double time)
 {
 	double sleepTime = time - (sys->getDTime()-startTime);
 
-//	LOG("sleep %g",sleepTime);
+//	LOG("sleep %g", sleepTime);
 	if (sleepTime > 0)
 	{
 		if (sleepTime > 60) sleepTime = 60;
@@ -366,7 +366,7 @@ THREAD_PROC	Channel::stream(ThreadInfo *thread)
 
 			unsigned int diff = (sys->getTime()-ch->info.lastPlayEnd) + 5;
 
-			LOG_DEBUG("Channel sleeping for %d seconds",diff);
+			LOG_DEBUG("Channel sleeping for %d seconds", diff);
 			for(unsigned int i=0; i<diff; i++)
 			{
 				if (!thread->active || peercastInst->isQuitting)
@@ -420,9 +420,9 @@ int Channel::handshakeFetch()
 	char sidStr[64];
 	servMgr->sessionID.toStr(sidStr);
 
-	sock->writeLineF("GET /channel/%s HTTP/1.0",idStr);
-	sock->writeLineF("%s %d",PCX_HS_POS,streamPos);
-	sock->writeLineF("%s %d",PCX_HS_PCP,1);
+	sock->writeLineF("GET /channel/%s HTTP/1.0", idStr);
+	sock->writeLineF("%s %d", PCX_HS_POS, streamPos);
+	sock->writeLineF("%s %d", PCX_HS_PCP, 1);
 
 	sock->writeLine("");
 
@@ -430,7 +430,7 @@ int Channel::handshakeFetch()
 
 	int r = http.readResponse();
 
-	LOG_CHANNEL("Got response: %d",r);
+	LOG_CHANNEL("Got response: %d", r);
 
 	while (http.nextHeader())
 	{
@@ -443,7 +443,7 @@ int Channel::handshakeFetch()
 		else
 			Servent::readICYHeader(http, info, NULL, 0);
 
-		LOG_CHANNEL("Channel fetch: %s",http.cmdLine);
+		LOG_CHANNEL("Channel fetch: %s", http.cmdLine);
 	}
 
 	if ((r != 200) && (r != 503))
@@ -461,7 +461,7 @@ int Channel::handshakeFetch()
 	if (info.srcProtocol == ChanInfo::SP_PCP)
 	{
 		// don`t need PCP_CONNECT here
-		Servent::handshakeOutgoingPCP(atom,rhost,remoteID,agent,sourceHost.yp|sourceHost.tracker);
+		Servent::handshakeOutgoingPCP(atom, rhost, remoteID, agent, sourceHost.yp|sourceHost.tracker);
 	}
 
 	return 0;
@@ -562,7 +562,7 @@ void PeercastSource::stream(Channel *ch)
 				unsigned int ctime=sys->getTime();
 				if ((ctime-chanMgr->lastYPConnect) > MIN_YP_RETRY)
 				{
-					ch->sourceHost.host.fromStrName(servMgr->rootHost.cstr(),DEFAULT_PORT);
+					ch->sourceHost.host.fromStrName(servMgr->rootHost.cstr(), DEFAULT_PORT);
 					ch->sourceHost.yp = true;
 					chanMgr->lastYPConnect=ctime;
 				}
@@ -581,7 +581,7 @@ void PeercastSource::stream(Channel *ch)
 		if (ch->sourceHost.yp)
 		{
 			numYPTries++;
-			LOG_CHANNEL("Channel contacting YP, try %d",numYPTries);
+			LOG_CHANNEL("Channel contacting YP, try %d", numYPTries);
 		}else
 		{
 			LOG_CHANNEL("Channel found hit");
@@ -594,7 +594,7 @@ void PeercastSource::stream(Channel *ch)
 
 
 			//if (ch->sourceHost.tracker)
-			//	peercastApp->notifyMessage(ServMgr::NT_PEERCAST,"Contacting tracker, please wait...");
+			//	peercastApp->notifyMessage(ServMgr::NT_PEERCAST, "Contacting tracker, please wait...");
 
 			char ipstr[64];
 			ch->sourceHost.host.toStr(ipstr);
@@ -612,7 +612,7 @@ void PeercastSource::stream(Channel *ch)
 
 				if (!ch->sock)
 				{
-					LOG_CHANNEL("Channel connecting to %s %s",ipstr,type);
+					LOG_CHANNEL("Channel connecting to %s %s", ipstr, type);
 					ch->connectFetch();
 				}
 
@@ -622,7 +622,7 @@ void PeercastSource::stream(Channel *ch)
 
 				ch->sourceStream = ch->createSource();
 
-				error = ch->readStream(*ch->sock,ch->sourceStream);
+				error = ch->readStream(*ch->sock, ch->sourceStream);
 				if (error)
 					throw StreamException("Stream error");
 
@@ -634,7 +634,7 @@ void PeercastSource::stream(Channel *ch)
 			}catch(StreamException &e)
 			{
 				ch->setStatus(Channel::S_ERROR);
-				LOG_ERROR("Channel to %s %s : %s",ipstr,type,e.msg);
+				LOG_ERROR("Channel to %s %s : %s", ipstr, type, e.msg);
 				if (!ch->sourceHost.tracker || ((error != 503) && ch->sourceHost.tracker))
 					chanMgr->deadHit(ch->sourceHost);
 			}
@@ -643,14 +643,14 @@ void PeercastSource::stream(Channel *ch)
 			// broadcast quit to any connected downstream servents
 			{
 				ChanPacket pack;
-				MemoryStream mem(pack.data,sizeof(pack.data));
+				MemoryStream mem(pack.data, sizeof(pack.data));
 				AtomStream atom(mem);
-				atom.writeInt(PCP_QUIT,PCP_ERROR_QUIT+PCP_ERROR_OFFAIR);
+				atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT+PCP_ERROR_OFFAIR);
 				pack.len = mem.pos;
 				pack.type = ChanPacket::T_PCP;
 				GnuID noID;
 				noID.clear();
-				servMgr->broadcastPacket(pack,ch->info.id,ch->remoteID,noID,Servent::T_RELAY);
+				servMgr->broadcastPacket(pack, ch->info.id, ch->remoteID, noID, Servent::T_RELAY);
 			}
 
 
@@ -714,7 +714,7 @@ void	Channel::startICY(ClientSocket *cs, SRC_TYPE st)
 }
 
 // -----------------------------------
-static char *nextMetaPart(char *str,char delim)
+static char *nextMetaPart(char *str, char delim)
 {
 	while (*str)
 	{
@@ -728,7 +728,7 @@ static char *nextMetaPart(char *str,char delim)
 	return NULL;
 }
 // -----------------------------------
-static void copyStr(char *to,char *from,int max)
+static void copyStr(char *to, char *from, int max)
 {
 	char c;
 	while ((c=*from++) && (--max))
@@ -746,20 +746,20 @@ void Channel::processMp3Metadata(char *str)
 	char *cmd=str;
 	while (cmd)
 	{
-		char *arg = nextMetaPart(cmd,'=');
+		char *arg = nextMetaPart(cmd, '=');
 		if (!arg)
 			break;
 
-		char *next = nextMetaPart(arg,';');
+		char *next = nextMetaPart(arg, ';');
 
-		if (strcmp(cmd,"StreamTitle")==0)
+		if (strcmp(cmd, "StreamTitle")==0)
 		{
-			newInfo.track.title.setUnquote(arg,String::T_ASCII);
+			newInfo.track.title.setUnquote(arg, String::T_ASCII);
 			newInfo.track.title.convertTo(String::T_UNICODE);
 
-		}else if (strcmp(cmd,"StreamUrl")==0)
+		}else if (strcmp(cmd, "StreamUrl")==0)
 		{
-			newInfo.track.contact.setUnquote(arg,String::T_ASCII);
+			newInfo.track.contact.setUnquote(arg, String::T_ASCII);
 			newInfo.track.contact.convertTo(String::T_UNICODE);
 		}
 
@@ -844,7 +844,7 @@ XML::Node *Channel::createRelayXML(bool showStat)
 // -----------------------------------
 void ChanMeta::fromXML(XML &xml)
 {
-	MemoryStream tout(data,MAX_DATALEN);
+	MemoryStream tout(data, MAX_DATALEN);
 	xml.write(tout);
 
 	len = tout.pos;
@@ -853,14 +853,14 @@ void ChanMeta::fromXML(XML &xml)
 void ChanMeta::fromMem(void *p, int l)
 {
 	len = l;
-	memcpy(data,p,len);
+	memcpy(data, p, len);
 }
 // -----------------------------------
 void ChanMeta::addMem(void *p, int l)
 {
 	if ((len+l) <= MAX_DATALEN)
 	{
-		memcpy(data+len,p,l);
+		memcpy(data+len, p, l);
 		len += l;
 	}
 }
@@ -873,7 +873,7 @@ void Channel::broadcastTrackerUpdate(GnuID &svID, bool force)
 	{
 		ChanPacket pack;
 
-		MemoryStream mem(pack.data,sizeof(pack));
+		MemoryStream mem(pack.data, sizeof(pack));
 
 		AtomStream atom(mem);
 
@@ -889,21 +889,21 @@ void Channel::broadcastTrackerUpdate(GnuID &svID, bool force)
 		unsigned int oldp = rawData.getOldestPos();
 		unsigned int newp = rawData.getLatestPos();
 
-		hit.initLocal(numListeners,numRelays,info.numSkips,info.getUptime(),isPlaying(),oldp,newp);
+		hit.initLocal(numListeners, numRelays, info.numSkips, info.getUptime(), isPlaying(), oldp, newp);
 		hit.tracker = true;
 
-		atom.writeParent(PCP_BCST,7);
-			atom.writeChar(PCP_BCST_GROUP,PCP_BCST_GROUP_ROOT);
-			atom.writeChar(PCP_BCST_HOPS,0);
-			atom.writeChar(PCP_BCST_TTL,7);
-			atom.writeBytes(PCP_BCST_FROM,servMgr->sessionID.id,16);
-			atom.writeInt(PCP_BCST_VERSION,PCP_CLIENT_VERSION);
-			atom.writeParent(PCP_CHAN,4);
-				atom.writeBytes(PCP_CHAN_ID,info.id.id,16);
-				atom.writeBytes(PCP_CHAN_BCID,chanMgr->broadcastID.id,16);
+		atom.writeParent(PCP_BCST, 7);
+			atom.writeChar(PCP_BCST_GROUP, PCP_BCST_GROUP_ROOT);
+			atom.writeChar(PCP_BCST_HOPS, 0);
+			atom.writeChar(PCP_BCST_TTL, 7);
+			atom.writeBytes(PCP_BCST_FROM, servMgr->sessionID.id, 16);
+			atom.writeInt(PCP_BCST_VERSION, PCP_CLIENT_VERSION);
+			atom.writeParent(PCP_CHAN, 4);
+				atom.writeBytes(PCP_CHAN_ID, info.id.id, 16);
+				atom.writeBytes(PCP_CHAN_BCID, chanMgr->broadcastID.id, 16);
 				info.writeInfoAtoms(atom);
 				info.writeTrackAtoms(atom);
-			hit.writeAtoms(atom,info.id);
+			hit.writeAtoms(atom, info.id);
 
 
 		pack.len = mem.pos;
@@ -911,25 +911,25 @@ void Channel::broadcastTrackerUpdate(GnuID &svID, bool force)
 
 		GnuID noID;
 		noID.clear();
-		int cnt = servMgr->broadcastPacket(pack,noID,servMgr->sessionID,svID,Servent::T_COUT);
+		int cnt = servMgr->broadcastPacket(pack, noID, servMgr->sessionID, svID, Servent::T_COUT);
 
 		if (cnt)
 		{
-			LOG_DEBUG("Sent tracker update for %s to %d client(s)",info.name.cstr(),cnt);
+			LOG_DEBUG("Sent tracker update for %s to %d client(s)", info.name.cstr(), cnt);
 			lastTrackerUpdate = ctime;
 		}
 	}
 }
 
 // -----------------------------------
-bool	Channel::sendPacketUp(ChanPacket &pack,GnuID &cid,GnuID &sid,GnuID &did)
+bool	Channel::sendPacketUp(ChanPacket &pack, GnuID &cid, GnuID &sid, GnuID &did)
 {
 	if ( isActive()
 		&& (!cid.isSet() || info.id.isSame(cid))
 		&& (!sid.isSet() || !remoteID.isSame(sid))
 		&& sourceStream
 	   )
-		return sourceStream->sendPacket(pack,did);
+		return sourceStream->sendPacket(pack, did);
 
 	return false;
 }
@@ -948,19 +948,19 @@ void Channel::updateInfo(ChanInfo &newInfo)
 
 				ChanPacket pack;
 
-				MemoryStream mem(pack.data,sizeof(pack));
+				MemoryStream mem(pack.data, sizeof(pack));
 
 				AtomStream atom(mem);
 
-				atom.writeParent(PCP_BCST,7);
-					atom.writeChar(PCP_BCST_HOPS,0);
-					atom.writeChar(PCP_BCST_TTL,7);
-					atom.writeChar(PCP_BCST_GROUP,PCP_BCST_GROUP_RELAYS);
-					atom.writeBytes(PCP_BCST_FROM,servMgr->sessionID.id,16);
-					atom.writeInt(PCP_BCST_VERSION,PCP_CLIENT_VERSION);
-					atom.writeBytes(PCP_BCST_CHANID,info.id.id,16);
-					atom.writeParent(PCP_CHAN,3);
-						atom.writeBytes(PCP_CHAN_ID,info.id.id,16);
+				atom.writeParent(PCP_BCST, 7);
+					atom.writeChar(PCP_BCST_HOPS, 0);
+					atom.writeChar(PCP_BCST_TTL, 7);
+					atom.writeChar(PCP_BCST_GROUP, PCP_BCST_GROUP_RELAYS);
+					atom.writeBytes(PCP_BCST_FROM, servMgr->sessionID.id, 16);
+					atom.writeInt(PCP_BCST_VERSION, PCP_CLIENT_VERSION);
+					atom.writeBytes(PCP_BCST_CHANID, info.id.id, 16);
+					atom.writeParent(PCP_CHAN, 3);
+						atom.writeBytes(PCP_CHAN_ID, info.id.id, 16);
 						info.writeInfoAtoms(atom);
 						info.writeTrackAtoms(atom);
 
@@ -968,7 +968,7 @@ void Channel::updateInfo(ChanInfo &newInfo)
 				pack.type = ChanPacket::T_PCP;
 				GnuID noID;
 				noID.clear();
-				servMgr->broadcastPacket(pack,info.id,servMgr->sessionID,noID,Servent::T_RELAY);
+				servMgr->broadcastPacket(pack, info.id, servMgr->sessionID, noID, Servent::T_RELAY);
 
 				broadcastTrackerUpdate(noID);
 			}
@@ -987,7 +987,7 @@ void Channel::updateInfo(ChanInfo &newInfo)
 ChannelStream *Channel::createSource()
 {
 //	if (servMgr->relayBroadcast)
-//		chanMgr->broadcastRelays(NULL,chanMgr->minBroadcastTTL,chanMgr->maxBroadcastTTL);
+//		chanMgr->broadcastRelays(NULL, chanMgr->minBroadcastTTL, chanMgr->maxBroadcastTTL);
 
 
 	ChannelStream *source=NULL;
@@ -1012,7 +1012,7 @@ ChannelStream *Channel::createSource()
 		switch(info.contentType)
 		{
 			case ChanInfo::T_MP3:
-				LOG_CHANNEL("Channel is MP3 - meta: %d",icyMetaInterval);
+				LOG_CHANNEL("Channel is MP3 - meta: %d", icyMetaInterval);
 				source = new MP3Stream();
 				break;
 			case ChanInfo::T_NSV:
@@ -1045,20 +1045,20 @@ ChannelStream *Channel::createSource()
 void ChannelStream::updateStatus(Channel *ch)
 {
 	ChanPacket pack;
-	if (getStatus(ch,pack))
+	if (getStatus(ch, pack))
 	{
 		if (!ch->isBroadcasting())
 		{
 			GnuID noID;
 			noID.clear();
-			int cnt = chanMgr->broadcastPacketUp(pack,ch->info.id,servMgr->sessionID,noID);
-			LOG_CHANNEL("Sent channel status update to %d clients",cnt);
+			int cnt = chanMgr->broadcastPacketUp(pack, ch->info.id, servMgr->sessionID, noID);
+			LOG_CHANNEL("Sent channel status update to %d clients", cnt);
 		}
 	}
 }
 
 // ------------------------------------------
-bool ChannelStream::getStatus(Channel *ch,ChanPacket &pack)
+bool ChannelStream::getStatus(Channel *ch, ChanPacket &pack)
 {
 	unsigned int ctime = sys->getTime();
 
@@ -1093,23 +1093,23 @@ bool ChannelStream::getStatus(Channel *ch,ChanPacket &pack)
 		unsigned int oldp = ch->rawData.getOldestPos();
 		unsigned int newp = ch->rawData.getLatestPos();
 
-		hit.initLocal(numListeners,numRelays,ch->info.numSkips,ch->info.getUptime(),isPlaying,oldp,newp);
+		hit.initLocal(numListeners, numRelays, ch->info.numSkips, ch->info.getUptime(), isPlaying, oldp, newp);
 		hit.tracker = ch->isBroadcasting();
 
-		MemoryStream pmem(pack.data,sizeof(pack.data));
+		MemoryStream pmem(pack.data, sizeof(pack.data));
 		AtomStream atom(pmem);
 
 		GnuID noID;
 		noID.clear();
 
-		atom.writeParent(PCP_BCST,7);
-			atom.writeChar(PCP_BCST_GROUP,PCP_BCST_GROUP_TRACKERS);
-			atom.writeChar(PCP_BCST_HOPS,0);
-			atom.writeChar(PCP_BCST_TTL,11);
-			atom.writeBytes(PCP_BCST_FROM,servMgr->sessionID.id,16);
-			atom.writeInt(PCP_BCST_VERSION,PCP_CLIENT_VERSION);
-			atom.writeBytes(PCP_BCST_CHANID,ch->info.id.id,16);
-			hit.writeAtoms(atom,noID);
+		atom.writeParent(PCP_BCST, 7);
+			atom.writeChar(PCP_BCST_GROUP, PCP_BCST_GROUP_TRACKERS);
+			atom.writeChar(PCP_BCST_HOPS, 0);
+			atom.writeChar(PCP_BCST_TTL, 11);
+			atom.writeBytes(PCP_BCST_FROM, servMgr->sessionID.id, 16);
+			atom.writeInt(PCP_BCST_VERSION, PCP_CLIENT_VERSION);
+			atom.writeBytes(PCP_BCST_CHANID, ch->info.id.id, 16);
+			hit.writeAtoms(atom, noID);
 
 		pack.len = pmem.pos;
 		pack.type = ChanPacket::T_PCP;
@@ -1137,13 +1137,13 @@ bool	Channel::checkBump()
 
 
 // -----------------------------------
-int Channel::readStream(Stream &in,ChannelStream *source)
+int Channel::readStream(Stream &in, ChannelStream *source)
 {
 	int error = 0;
 
 	info.numSkips = 0;
 
-	source->readHeader(in,this);
+	source->readHeader(in, this);
 
 	peercastApp->channelStart(&info);
 
@@ -1176,7 +1176,7 @@ int Channel::readStream(Stream &in,ChannelStream *source)
 
 			if (in.readReady())
 			{
-				error = source->readPacket(in,this);
+				error = source->readPacket(in, this);
 
 				if (error)
 					break;
@@ -1205,7 +1205,7 @@ int Channel::readStream(Stream &in,ChannelStream *source)
 		}
 	}catch(StreamException &e)
 	{
-		LOG_ERROR("readStream: %s",e.msg);
+		LOG_ERROR("readStream: %s", e.msg);
 		error = -1;
 	}
 
@@ -1215,30 +1215,30 @@ int Channel::readStream(Stream &in,ChannelStream *source)
 	{
 		GnuID noID;
 		noID.clear();
-		broadcastTrackerUpdate(noID,true);
+		broadcastTrackerUpdate(noID, true);
 	}
 
 	peercastApp->channelStop(&info);
 
-	source->readEnd(in,this);
+	source->readEnd(in, this);
 
 	return error;
 }
 
 // -----------------------------------
-void PeercastStream::readHeader(Stream &in,Channel *ch)
+void PeercastStream::readHeader(Stream &in, Channel *ch)
 {
 	if (in.readTag() != 'PCST')
 		throw StreamException("Not PeerCast stream");
 
 }
 // -----------------------------------
-void PeercastStream::readEnd(Stream &,Channel *)
+void PeercastStream::readEnd(Stream &, Channel *)
 {
 
 }
 // -----------------------------------
-int PeercastStream::readPacket(Stream &in,Channel *ch)
+int PeercastStream::readPacket(Stream &in, Channel *ch)
 {
 	ChanPacket pack;
 
@@ -1246,7 +1246,7 @@ int PeercastStream::readPacket(Stream &in,Channel *ch)
 
 		pack.readPeercast(in);
 
-		MemoryStream mem(pack.data,pack.len);
+		MemoryStream mem(pack.data, pack.len);
 
 		switch(pack.type)
 		{
@@ -1263,7 +1263,7 @@ int PeercastStream::readPacket(Stream &in,Channel *ch)
 				ch->streamPos+=pack.len;
 				break;
 			case ChanPacket::T_META:
-				ch->insertMeta.fromMem(pack.data,pack.len);
+				ch->insertMeta.fromMem(pack.data, pack.len);
 				{
 					if (pack.len)
 					{
@@ -1288,7 +1288,7 @@ int PeercastStream::readPacket(Stream &in,Channel *ch)
 					unsigned int s = mem.readLong();
 					if ((s-ch->syncPos) != 1)
 					{
-						LOG_CHANNEL("Ch.%d SKIP: %d to %d (%d)",ch->index,ch->syncPos,s,ch->info.numSkips);
+						LOG_CHANNEL("Ch.%d SKIP: %d to %d (%d)", ch->index, ch->syncPos, s, ch->info.numSkips);
 						if (ch->syncPos)
 						{
 							ch->info.numSkips++;
@@ -1315,8 +1315,8 @@ void ChannelStream::readRaw(Stream &in, Channel *ch)
 
 	const int readLen = 8192;
 
-	pack.init(ChanPacket::T_DATA,pack.data,readLen,ch->streamPos);
-	in.read(pack.data,pack.len);
+	pack.init(ChanPacket::T_DATA, pack.data, readLen, ch->streamPos);
+	in.read(pack.data, pack.len);
 	ch->newPacket(pack);
 	ch->checkReadDelay(pack.len);
 
@@ -1324,38 +1324,38 @@ void ChannelStream::readRaw(Stream &in, Channel *ch)
 
 }
 // ------------------------------------------
-void RawStream::readHeader(Stream &,Channel *)
+void RawStream::readHeader(Stream &, Channel *)
 {
 }
 
 // ------------------------------------------
-int RawStream::readPacket(Stream &in,Channel *ch)
+int RawStream::readPacket(Stream &in, Channel *ch)
 {
-	readRaw(in,ch);
+	readRaw(in, ch);
 	return 0;
 }
 
 // ------------------------------------------
-void RawStream::readEnd(Stream &,Channel *)
+void RawStream::readEnd(Stream &, Channel *)
 {
 }
 
 
 
 // -----------------------------------
-void ChanPacket::init(TYPE t, const void *p, unsigned int l,unsigned int _pos)
+void ChanPacket::init(TYPE t, const void *p, unsigned int l, unsigned int _pos)
 {
 	type = t;
 	if (l > MAX_DATALEN)
 		throw StreamException("Packet data too large");
 	len = l;
-	memcpy(data,p,len);
+	memcpy(data, p, len);
 	pos = _pos;
 }
 // -----------------------------------
 void ChanPacket::writeRaw(Stream &out)
 {
-	out.write(data,len);
+	out.write(data, len);
 }
 // -----------------------------------
 void ChanPacket::writePeercast(Stream &out)
@@ -1373,7 +1373,7 @@ void ChanPacket::writePeercast(Stream &out)
 		out.writeTag(tp);
 		out.writeShort(len);
 		out.writeShort(0);
-		out.write(data,len);
+		out.write(data, len);
 	}
 }
 // -----------------------------------
@@ -1392,7 +1392,7 @@ void ChanPacket::readPeercast(Stream &in)
 	in.readShort();
 	if (len > MAX_DATALEN)
 		throw StreamException("Bad ChanPacket");
-	in.read(data,len);
+	in.read(data, len);
 }
 // -----------------------------------
 int ChanPacketBuffer::copyFrom(ChanPacketBuffer &buf, unsigned int reqPos)
@@ -1566,7 +1566,7 @@ void Channel::getStreamPath(char *str)
 
 	getIDStr(idStr);
 
-	sprintf(str,"/stream/%s%s",idStr,info.getTypeExt());
+	sprintf(str, "/stream/%s%s", idStr, info.getTypeExt());
 }
 
 
@@ -1606,7 +1606,7 @@ int ChanMgr::numIdleChannels()
 void ChanMgr::closeOldestIdle()
 {
 	unsigned int idleTime = (unsigned int)-1;
-	Channel *ch = channel,*oldest=NULL;
+	Channel *ch = channel, *oldest=NULL;
 	while (ch)
 	{
 		if (ch->isActive())
@@ -1656,7 +1656,7 @@ Channel *ChanMgr::findChannelByName(const char *n)
 	while (ch)
 	{
 		if (ch->isActive())
-			if (stricmp(ch->info.name,n)==0)
+			if (stricmp(ch->info.name, n)==0)
 				return ch;
 		ch=ch->next;
 	}
@@ -1687,7 +1687,7 @@ Channel *ChanMgr::findChannelByMount(const char *str)
 	while (ch)
 	{
 		if (ch->isActive())
-			if (strcmp(ch->mount,str)==0)
+			if (strcmp(ch->mount, str)==0)
 				return ch;
 		ch=ch->next;
 	}
@@ -1746,7 +1746,7 @@ int ChanMgr::findChannelsByStatus(Channel **chlist, int max, Channel::STATUS sta
 // -----------------------------------
 Channel *ChanMgr::createRelay(ChanInfo &info, bool stayConnected)
 {
-	Channel *c = chanMgr->createChannel(info,NULL);
+	Channel *c = chanMgr->createChannel(info, NULL);
 	if (c)
 	{
 		c->stayConnected = stayConnected;
@@ -1760,8 +1760,8 @@ Channel *ChanMgr::findAndRelay(ChanInfo &info)
 {
 	char idStr[64];
 	info.id.toStr(idStr);
-	LOG_CHANNEL("Searching for: %s (%s)",idStr,info.name.cstr());
-	peercastApp->notifyMessage(ServMgr::NT_PEERCAST,"Finding channel...");
+	LOG_CHANNEL("Searching for: %s (%s)", idStr, info.name.cstr());
+	peercastApp->notifyMessage(ServMgr::NT_PEERCAST, "Finding channel...");
 
 
 	Channel *c = NULL;
@@ -1770,7 +1770,7 @@ Channel *ChanMgr::findAndRelay(ChanInfo &info)
 
 	if (!c)
 	{
-		c = chanMgr->createChannel(info,NULL);
+		c = chanMgr->createChannel(info, NULL);
 		if (c)
 		{
 			c->setStatus(Channel::S_SEARCHING);
@@ -1785,7 +1785,7 @@ Channel *ChanMgr::findAndRelay(ChanInfo &info)
 
 		if (!c)
 		{
-			peercastApp->notifyMessage(ServMgr::NT_PEERCAST,"Channel not found");
+			peercastApp->notifyMessage(ServMgr::NT_PEERCAST, "Channel not found");
 			return NULL;
 		}
 
@@ -1846,18 +1846,18 @@ bool ChanMgr::writeVariable(Stream &out, const String &var, int index)
 {
 	char buf[1024];
 	if (var == "numHitLists")
-		sprintf(buf,"%d",numHitLists());
+		sprintf(buf, "%d", numHitLists());
 
 	else if (var == "numChannels")
-		sprintf(buf,"%d",numChannels());
+		sprintf(buf, "%d", numChannels());
 	else if (var == "djMessage")
-		strcpy(buf,broadcastMsg.cstr());
+		strcpy(buf, broadcastMsg.cstr());
 	else if (var == "icyMetaInterval")
-		sprintf(buf,"%d",icyMetaInterval);
+		sprintf(buf, "%d", icyMetaInterval);
 	else if (var == "maxRelaysPerChannel")
-		sprintf(buf,"%d",maxRelaysPerChannel);
+		sprintf(buf, "%d", maxRelaysPerChannel);
 	else if (var == "hostUpdateInterval")
-		sprintf(buf,"%d",hostUpdateInterval);
+		sprintf(buf, "%d", hostUpdateInterval);
 	else if (var == "broadcastID")
 		broadcastID.toStr(buf);
 	else
@@ -1882,36 +1882,36 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
 	{
 		utf8 = info.name;
 		utf8.convertTo(String::T_UNICODESAFE);
-		strcpy(buf,utf8.cstr());
+		strcpy(buf, utf8.cstr());
 
 	}else if (var == "bitrate")
 	{
-		sprintf(buf,"%d",info.bitrate);
+		sprintf(buf, "%d", info.bitrate);
 
 	}else if (var == "srcrate")
 	{
 		if (sourceData)
 		{
 			unsigned int tot = sourceData->getSourceRate();
-			sprintf(buf,"%.1f",BYTES_TO_KBPS(tot));
+			sprintf(buf, "%.1f", BYTES_TO_KBPS(tot));
 		}else
-			strcpy(buf,"0");
+			strcpy(buf, "0");
 
 	}else if (var == "genre")
 	{
 		utf8 = info.genre;
 		utf8.convertTo(String::T_UNICODESAFE);
-		strcpy(buf,utf8.cstr());
+		strcpy(buf, utf8.cstr());
 	}else if (var == "desc")
 	{
 		utf8 = info.desc;
 		utf8.convertTo(String::T_UNICODESAFE);
-		strcpy(buf,utf8.cstr());
+		strcpy(buf, utf8.cstr());
 	}else if (var == "comment")
 	{
 		utf8 = info.comment;
 		utf8.convertTo(String::T_UNICODESAFE);
-		strcpy(buf,utf8.cstr());
+		strcpy(buf, utf8.cstr());
 	}else if (var == "uptime")
 	{
 		String uptime;
@@ -1919,27 +1919,27 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
 			uptime.setFromStopwatch(sys->getTime()-info.lastPlayStart);
 		else
 			uptime.set("-");
-		strcpy(buf,uptime.cstr());
+		strcpy(buf, uptime.cstr());
 	}
 	else if (var == "type")
-		sprintf(buf,"%s",info.getTypeStr());
+		sprintf(buf, "%s", info.getTypeStr());
 	else if (var == "ext")
-		sprintf(buf,"%s",info.getTypeExt());
+		sprintf(buf, "%s", info.getTypeExt());
 
 	else if (var == "localRelays")
-		sprintf(buf,"%d",localRelays());
+		sprintf(buf, "%d", localRelays());
 	else if (var == "localListeners")
-		sprintf(buf,"%d",localListeners());
+		sprintf(buf, "%d", localListeners());
 
 	else if (var == "totalRelays")
-		sprintf(buf,"%d",totalRelays());
+		sprintf(buf, "%d", totalRelays());
 	else if (var == "totalListeners")
-		sprintf(buf,"%d",totalListeners());
+		sprintf(buf, "%d", totalListeners());
 
 	else if (var == "status")
-		sprintf(buf,"%s",getStatusStr());
+		sprintf(buf, "%s", getStatusStr());
 	else if (var == "keep")
-		sprintf(buf,"%s",stayConnected?"Yes":"No");
+		sprintf(buf, "%s", stayConnected?"Yes":"No");
 	else if (var == "id")
 		info.id.toStr(buf);
 	else if (var.startsWith("track."))
@@ -1957,34 +1957,34 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
 			utf8 = info.track.contact;
 
 		utf8.convertTo(String::T_UNICODESAFE);
-		strcpy(buf,utf8.cstr());
+		strcpy(buf, utf8.cstr());
 
 	}else if (var == "contactURL")
-		sprintf(buf,"%s",info.url.cstr());
+		sprintf(buf, "%s", info.url.cstr());
 	else if (var == "streamPos")
-		sprintf(buf,"%u",streamPos);
+		sprintf(buf, "%u", streamPos);
 	else if (var == "sourceType")
-		strcpy(buf,getSrcTypeStr());
+		strcpy(buf, getSrcTypeStr());
 	else if (var == "sourceProtocol")
-		strcpy(buf,ChanInfo::getProtocolStr(info.srcProtocol));
+		strcpy(buf, ChanInfo::getProtocolStr(info.srcProtocol));
 	else if (var == "sourceURL")
 	{
 		if (sourceURL.isEmpty())
 			sourceHost.host.toStr(buf);
 		else
-			strcpy(buf,sourceURL.cstr());
+			strcpy(buf, sourceURL.cstr());
 	}
 	else if (var == "headPos")
-		sprintf(buf,"%u",headPack.pos);
+		sprintf(buf, "%u", headPack.pos);
 	else if (var == "headLen")
-		sprintf(buf,"%u",headPack.len);
+		sprintf(buf, "%u", headPack.len);
 	else if (var == "numHits")
 	{
 		ChanHitList *chl = chanMgr->findHitListByID(info.id);
 		int numHits = 0;
 		if (chl)
 			numHits = chl->numHits();
-		sprintf(buf,"%d",numHits);
+		sprintf(buf, "%d", numHits);
 	}else
 		return false;
 
@@ -1999,21 +1999,21 @@ void ChanMgr::broadcastTrackerUpdate(GnuID &svID, bool force)
 	while(c)
 	{
 		if ( c->isActive() && c->isBroadcasting() )
-			c->broadcastTrackerUpdate(svID,force);
+			c->broadcastTrackerUpdate(svID, force);
 		c=c->next;
 	}
 }
 
 
 // -----------------------------------
-int ChanMgr::broadcastPacketUp(ChanPacket &pack,GnuID &chanID, GnuID &srcID, GnuID &destID)
+int ChanMgr::broadcastPacketUp(ChanPacket &pack, GnuID &chanID, GnuID &srcID, GnuID &destID)
 {
 	int cnt=0;
 
 	Channel *c = channel;
 	while(c)
 	{
-		if (c->sendPacketUp(pack,chanID,srcID,destID))
+		if (c->sendPacketUp(pack, chanID, srcID, destID))
 			cnt++;
 		c=c->next;
 	}
@@ -2053,24 +2053,24 @@ void ChanMgr::broadcastRelays(Servent *serv, int minTTL, int maxTTL)
 				if (ttl > maxTTL)
 					ttl = maxTTL;
 
-				if (hit.initHit(sh,c,NULL,push,busy,stable,tracker,ttl))
+				if (hit.initHit(sh, c, NULL, push, busy, stable, tracker, ttl))
 				{
 					int numOut=0;
 					numChans++;
 					if (serv)
 					{
-						serv->outputPacket(hit,false);
+						serv->outputPacket(hit, false);
 						numOut++;
 					}
 
-					LOG_NETWORK("Sent channel to %d servents, TTL %d",numOut,ttl);
+					LOG_NETWORK("Sent channel to %d servents, TTL %d", numOut, ttl);
 
 				}
 			}
 			c=c->next;
 		}
 		//if (numChans)
-		//	LOG_NETWORK("Sent %d channels to %d servents",numChans,numOut);
+		//	LOG_NETWORK("Sent %d channels to %d servents", numChans, numOut);
 	}
 }
 // -----------------------------------
@@ -2084,13 +2084,13 @@ void ChanMgr::setUpdateInterval(unsigned int v)
 // message check
 #if 0
 				ChanPacket pack;
-				MemoryStream mem(pack.data,sizeof(pack.data));
+				MemoryStream mem(pack.data, sizeof(pack.data));
 				AtomStream atom(mem);
-				atom.writeParent(PCP_BCST,3);
-					atom.writeChar(PCP_BCST_GROUP,PCP_BCST_GROUP_ALL);
-					atom.writeBytes(PCP_BCST_FROM,servMgr->sessionID.id,16);
-					atom.writeParent(PCP_MESG,1);
-						atom.writeString(PCP_MESG_DATA,msg.cstr());
+				atom.writeParent(PCP_BCST, 3);
+					atom.writeChar(PCP_BCST_GROUP, PCP_BCST_GROUP_ALL);
+					atom.writeBytes(PCP_BCST_FROM, servMgr->sessionID.id, 16);
+					atom.writeParent(PCP_MESG, 1);
+						atom.writeString(PCP_MESG_DATA, msg.cstr());
 
 				mem.len = mem.pos;
 				mem.rewind();
@@ -2100,11 +2100,11 @@ void ChanMgr::setUpdateInterval(unsigned int v)
 				noID.clear();
 
 				BroadcastState bcs;
-				PCPStream::readAtom(atom,bcs);
-				//int cnt = servMgr->broadcastPacketUp(pack,noID,servMgr->sessionID);
-				//int cnt = servMgr->broadcastPacketDown(pack,noID,servMgr->sessionID);
-				//int cnt = chanMgr->broadcastPacketUp(pack,noID,servMgr->sessionID);
-				//LOG_DEBUG("Sent message to %d clients",cnt);
+				PCPStream::readAtom(atom, bcs);
+				//int cnt = servMgr->broadcastPacketUp(pack, noID, servMgr->sessionID);
+				//int cnt = servMgr->broadcastPacketDown(pack, noID, servMgr->sessionID);
+				//int cnt = chanMgr->broadcastPacketUp(pack, noID, servMgr->sessionID);
+				//LOG_DEBUG("Sent message to %d clients", cnt);
 #endif
 // -----------------------------------
 void ChanMgr::setBroadcastMsg(String &msg)
@@ -2148,7 +2148,7 @@ Channel *ChanMgr::deleteChannel(Channel *delchan)
 {
 	lock.on();
 
-	Channel *ch = channel,*prev=NULL,*next=NULL;
+	Channel *ch = channel, *prev=NULL, *next=NULL;
 
 	while (ch)
 	{
@@ -2286,12 +2286,12 @@ void ChanMgr::clearDeadHits(bool clearTrackers)
 		interval = hostUpdateInterval+30;
 
 
-	ChanHitList *chl = hitlist,*prev = NULL;
+	ChanHitList *chl = hitlist, *prev = NULL;
 	while (chl)
 	{
 		if (chl->isUsed())
 		{
-			if (chl->clearDeadHits(interval,clearTrackers) == 0)
+			if (chl->clearDeadHits(interval, clearTrackers) == 0)
 			{
 				if (!isBroadcasting(chl->info.id))
 				{
@@ -2370,7 +2370,7 @@ void ChanMgr::delHit(ChanHit &hit)
 }
 
 // -----------------------------------
-void ChanMgr::addHit(Host &h,GnuID &id,bool tracker)
+void ChanMgr::addHit(Host &h, GnuID &id, bool tracker)
 {
 	ChanHit hit;
 	hit.init();
@@ -2457,9 +2457,9 @@ void ChanMgr::findAndPlayChannel(ChanInfo &info, bool keep)
 void ChanMgr::playChannel(ChanInfo &info)
 {
 
-	char str[128],fname[256],idStr[128];
+	char str[128], fname[256], idStr[128];
 
-	sprintf(str,"http://localhost:%d",servMgr->serverHost.port);
+	sprintf(str, "http://localhost:%d", servMgr->serverHost.port);
 	info.id.toStr(idStr);
 
 	PlayList::TYPE type;
@@ -2470,31 +2470,31 @@ void ChanMgr::playChannel(ChanInfo &info)
 		type = PlayList::T_ASX;
 		// WMP seems to have a bug where it doesn`t re-read asx files if they have the same name
 		// so we prepend the channel id to make it unique - NOTE: should be deleted afterwards.
-		sprintf(fname,"%s/%s.asx",peercastApp->getPath(),idStr);
+		sprintf(fname, "%s/%s.asx", peercastApp->getPath(), idStr);
 	}else if (info.contentType == ChanInfo::T_OGM)
 	{
 		type = PlayList::T_RAM;
-		sprintf(fname,"%s/play.ram",peercastApp->getPath());
+		sprintf(fname, "%s/play.ram", peercastApp->getPath());
 
 	}else
 	{
 		type = PlayList::T_SCPLS;
-		sprintf(fname,"%s/play.pls",peercastApp->getPath());
+		sprintf(fname, "%s/play.pls", peercastApp->getPath());
 	}
 
 
-	PlayList *pls = new PlayList(type,1);
-	pls->addChannel(str,info);
+	PlayList *pls = new PlayList(type, 1);
+	pls->addChannel(str, info);
 
 
-	LOG_DEBUG("Writing %s",fname);
+	LOG_DEBUG("Writing %s", fname);
 	FileStream file;
 	file.openWriteReplace(fname);
 	pls->write(file);
 	file.close();
 
 
-	LOG_DEBUG("Executing: %s",fname);
+	LOG_DEBUG("Executing: %s", fname);
 	sys->executeFile(fname);
 	delete pls;
 
@@ -2557,7 +2557,7 @@ void ChanHit::init()
 }
 
 // -----------------------------------
-void ChanHit::initLocal(int numl,int numr,int,int uptm,bool connected,unsigned int oldp,unsigned int newp)
+void ChanHit::initLocal(int numl, int numr, int, int uptm, bool connected, unsigned int oldp, unsigned int newp)
 {
 	init();
 	firewalled = (servMgr->getFirewall() != ServMgr::FW_OFF);
@@ -2576,8 +2576,8 @@ void ChanHit::initLocal(int numl,int numr,int,int uptm,bool connected,unsigned i
 
 	version = PCP_CLIENT_VERSION;
 
-	rhost[0] = Host(host.ip,host.port);
-	rhost[1] = Host(ClientSocket::getIP(NULL),host.port);
+	rhost[0] = Host(host.ip, host.port);
+	rhost[1] = Host(ClientSocket::getIP(NULL), host.port);
 
 	if (firewalled)
 		rhost[0].port = 0;
@@ -2588,7 +2588,7 @@ void ChanHit::initLocal(int numl,int numr,int,int uptm,bool connected,unsigned i
 }
 
 // -----------------------------------
-void ChanHit::writeAtoms(AtomStream &atom,GnuID &chanID)
+void ChanHit::writeAtoms(AtomStream &atom, GnuID &chanID)
 {
 	bool addChan=chanID.isSet();
 
@@ -2601,21 +2601,21 @@ void ChanHit::writeAtoms(AtomStream &atom,GnuID &chanID)
 	if (firewalled) fl1 |= PCP_HOST_FLAGS1_PUSH;
 
 
-	atom.writeParent(PCP_HOST,12  + (addChan?1:0));
+	atom.writeParent(PCP_HOST, 12  + (addChan?1:0));
 		if (addChan)
-			atom.writeBytes(PCP_HOST_CHANID,chanID.id,16);
-		atom.writeBytes(PCP_HOST_ID,sessionID.id,16);
-		atom.writeInt(PCP_HOST_IP,rhost[0].ip);
-		atom.writeShort(PCP_HOST_PORT,rhost[0].port);
-		atom.writeInt(PCP_HOST_IP,rhost[1].ip);
-		atom.writeShort(PCP_HOST_PORT,rhost[1].port);
-		atom.writeInt(PCP_HOST_NUML,numListeners);
-		atom.writeInt(PCP_HOST_NUMR,numRelays);
-		atom.writeInt(PCP_HOST_UPTIME,upTime);
-		atom.writeInt(PCP_HOST_VERSION,version);
-		atom.writeChar(PCP_HOST_FLAGS1,fl1);
-		atom.writeInt(PCP_HOST_OLDPOS,oldestPos);
-		atom.writeInt(PCP_HOST_NEWPOS,newestPos);
+			atom.writeBytes(PCP_HOST_CHANID, chanID.id, 16);
+		atom.writeBytes(PCP_HOST_ID, sessionID.id, 16);
+		atom.writeInt(PCP_HOST_IP, rhost[0].ip);
+		atom.writeShort(PCP_HOST_PORT, rhost[0].port);
+		atom.writeInt(PCP_HOST_IP, rhost[1].ip);
+		atom.writeShort(PCP_HOST_PORT, rhost[1].port);
+		atom.writeInt(PCP_HOST_NUML, numListeners);
+		atom.writeInt(PCP_HOST_NUMR, numRelays);
+		atom.writeInt(PCP_HOST_UPTIME, upTime);
+		atom.writeInt(PCP_HOST_VERSION, version);
+		atom.writeChar(PCP_HOST_FLAGS1, fl1);
+		atom.writeInt(PCP_HOST_OLDPOS, oldestPos);
+		atom.writeInt(PCP_HOST_NEWPOS, newestPos);
 
 }
 // -----------------------------------
@@ -2628,16 +2628,16 @@ bool	ChanHit::writeVariable(Stream &out, const String &var)
 	else if (var == "rhost1")
 		rhost[1].toStr(buf);
 	else if (var == "numHops")
-		sprintf(buf,"%d",numHops);
+		sprintf(buf, "%d", numHops);
 	else if (var == "numListeners")
-		sprintf(buf,"%d",numListeners);
+		sprintf(buf, "%d", numListeners);
 	else if (var == "numRelays")
-		sprintf(buf,"%d",numRelays);
+		sprintf(buf, "%d", numRelays);
 	else if (var == "uptime")
 	{
 		String timeStr;
 		timeStr.setFromStopwatch(upTime);
-		strcpy(buf,timeStr.cstr());
+		strcpy(buf, timeStr.cstr());
 	}else if (var == "update")
 	{
 		String timeStr;
@@ -2645,11 +2645,11 @@ bool	ChanHit::writeVariable(Stream &out, const String &var)
 			timeStr.setFromStopwatch(sys->getTime()-time);
 		else
 			timeStr.set("-");
-		strcpy(buf,timeStr.cstr());
+		strcpy(buf, timeStr.cstr());
 	}else if (var == "isFirewalled")
-		sprintf(buf,"%d",firewalled?1:0);
+		sprintf(buf, "%d", firewalled?1:0);
 	else if (var == "version")
-		sprintf(buf,"%d",version);
+		sprintf(buf, "%d", version);
 	else
 		return false;
 
@@ -2708,7 +2708,7 @@ int ChanHitList::contactTrackers(bool connected, int numl, int nums, int uptm)
 // -----------------------------------
 ChanHit *ChanHitList::deleteHit(ChanHit *ch)
 {
-	ChanHit *c = hit,*prev=NULL;
+	ChanHit *c = hit, *prev=NULL;
 	while (c)
 	{
 		if (c == ch)
@@ -2732,10 +2732,10 @@ ChanHit *ChanHitList::deleteHit(ChanHit *ch)
 // -----------------------------------
 ChanHit *ChanHitList::addHit(ChanHit &h)
 {
-	char ip0str[64],ip1str[64];
+	char ip0str[64], ip1str[64];
 	h.rhost[0].toStr(ip0str);
 	h.rhost[1].toStr(ip1str);
-	LOG_DEBUG("Add hit: %s/%s",ip0str,ip1str);
+	LOG_DEBUG("Add hit: %s/%s", ip0str, ip1str);
 
 
 	// dont add our own hits
@@ -2821,10 +2821,10 @@ int	ChanHitList::clearDeadHits(unsigned int timeout, bool clearTrackers)
 // -----------------------------------
 void	ChanHitList::deadHit(ChanHit &h)
 {
-	char ip0str[64],ip1str[64];
+	char ip0str[64], ip1str[64];
 	h.rhost[0].toStr(ip0str);
 	h.rhost[1].toStr(ip1str);
-	LOG_DEBUG("Dead hit: %s/%s",ip0str,ip1str);
+	LOG_DEBUG("Dead hit: %s/%s", ip0str, ip1str);
 
 	ChanHit *ch = hit;
 	while (ch)
@@ -2840,10 +2840,10 @@ void	ChanHitList::deadHit(ChanHit &h)
 // -----------------------------------
 void	ChanHitList::delHit(ChanHit &h)
 {
-	char ip0str[64],ip1str[64];
+	char ip0str[64], ip1str[64];
 	h.rhost[0].toStr(ip0str);
 	h.rhost[1].toStr(ip1str);
-	LOG_DEBUG("Del hit: %s/%s",ip0str,ip1str);
+	LOG_DEBUG("Del hit: %s/%s", ip0str, ip1str);
 
 	ChanHit *ch = hit;
 	while (ch)
@@ -2974,7 +2974,7 @@ unsigned int	ChanHitList::newestHit()
 // -----------------------------------
 int ChanHitList::pickHits(ChanHitSearch &chs)
 {
-	ChanHit best,*bestP=NULL;
+	ChanHit best, *bestP=NULL;
 	best.init();
 	best.numHops = 255;
 	best.time = 0;
@@ -3118,15 +3118,15 @@ const char *ChanInfo::getProtocolStr(PROTOCOL t)
 // -----------------------------------
 ChanInfo::PROTOCOL ChanInfo::getProtocolFromStr(const char *str)
 {
-	if (stricmp(str,"PEERCAST")==0)
+	if (stricmp(str, "PEERCAST")==0)
 		return SP_PEERCAST;
-	else if (stricmp(str,"HTTP")==0)
+	else if (stricmp(str, "HTTP")==0)
 		return SP_HTTP;
-	else if (stricmp(str,"FILE")==0)
+	else if (stricmp(str, "FILE")==0)
 		return SP_FILE;
-	else if (stricmp(str,"MMS")==0)
+	else if (stricmp(str, "MMS")==0)
 		return SP_MMS;
-	else if (stricmp(str,"PCP")==0)
+	else if (stricmp(str, "PCP")==0)
 		return SP_PCP;
 	else
 		return SP_UNKNOWN;
@@ -3188,27 +3188,27 @@ const char *ChanInfo::getMIMEType(TYPE t)
 // -----------------------------------
 ChanInfo::TYPE ChanInfo::getTypeFromStr(const char *str)
 {
-	if (stricmp(str,"MP3")==0)
+	if (stricmp(str, "MP3")==0)
 		return T_MP3;
-	else if (stricmp(str,"OGG")==0)
+	else if (stricmp(str, "OGG")==0)
 		return T_OGG;
-	else if (stricmp(str,"OGM")==0)
+	else if (stricmp(str, "OGM")==0)
 		return T_OGM;
-	else if (stricmp(str,"RAW")==0)
+	else if (stricmp(str, "RAW")==0)
 		return T_RAW;
-	else if (stricmp(str,"NSV")==0)
+	else if (stricmp(str, "NSV")==0)
 		return T_NSV;
-	else if (stricmp(str,"WMA")==0)
+	else if (stricmp(str, "WMA")==0)
 		return T_WMA;
-	else if (stricmp(str,"WMV")==0)
+	else if (stricmp(str, "WMV")==0)
 		return T_WMV;
-	else if (stricmp(str,"FLV")==0)
+	else if (stricmp(str, "FLV")==0)
 		return T_FLV;
-	else if (stricmp(str,"PLS")==0)
+	else if (stricmp(str, "PLS")==0)
 		return T_PLS;
-	else if (stricmp(str,"M3U")==0)
+	else if (stricmp(str, "M3U")==0)
 		return T_PLS;
-	else if (stricmp(str,"ASX")==0)
+	else if (stricmp(str, "ASX")==0)
 		return T_ASX;
 	else
 		return T_UNKNOWN;
@@ -3439,11 +3439,11 @@ void ChanInfo::init()
 void ChanInfo::readTrackXML(XML::Node *n)
 {
 	track.clear();
-	readXMLString(track.title,n,"title");
-	readXMLString(track.contact,n,"contact");
-	readXMLString(track.artist,n,"artist");
-	readXMLString(track.album,n,"album");
-	readXMLString(track.genre,n,"genre");
+	readXMLString(track.title, n, "title");
+	readXMLString(track.contact, n, "contact");
+	readXMLString(track.artist, n, "artist");
+	readXMLString(track.album, n, "album");
+	readXMLString(track.genre, n, "genre");
 }
 // -----------------------------------
 unsigned int ChanInfo::getUptime()
@@ -3463,95 +3463,95 @@ unsigned int ChanInfo::getAge()
 }
 
 // ------------------------------------------
-void ChanInfo::readTrackAtoms(AtomStream &atom,int numc)
+void ChanInfo::readTrackAtoms(AtomStream &atom, int numc)
 {
 	for(int i=0; i<numc; i++)
 	{
-		int c,d;
-		ID4 id = atom.read(c,d);
+		int c, d;
+		ID4 id = atom.read(c, d);
 		if (id == PCP_CHAN_TRACK_TITLE)
 		{
-			atom.readString(track.title.data,sizeof(track.title.data),d);
+			atom.readString(track.title.data, sizeof(track.title.data), d);
 		}else if (id == PCP_CHAN_TRACK_CREATOR)
 		{
-			atom.readString(track.artist.data,sizeof(track.artist.data),d);
+			atom.readString(track.artist.data, sizeof(track.artist.data), d);
 		}else if (id == PCP_CHAN_TRACK_URL)
 		{
-			atom.readString(track.contact.data,sizeof(track.contact.data),d);
+			atom.readString(track.contact.data, sizeof(track.contact.data), d);
 		}else if (id == PCP_CHAN_TRACK_ALBUM)
 		{
-			atom.readString(track.album.data,sizeof(track.album.data),d);
+			atom.readString(track.album.data, sizeof(track.album.data), d);
 		}else
-			atom.skip(c,d);
+			atom.skip(c, d);
 	}
 }
 // ------------------------------------------
-void ChanInfo::readInfoAtoms(AtomStream &atom,int numc)
+void ChanInfo::readInfoAtoms(AtomStream &atom, int numc)
 {
 	for(int i=0; i<numc; i++)
 	{
-		int c,d;
-		ID4 id = atom.read(c,d);
+		int c, d;
+		ID4 id = atom.read(c, d);
 		if (id == PCP_CHAN_INFO_NAME)
 		{
-			atom.readString(name.data,sizeof(name.data),d);
+			atom.readString(name.data, sizeof(name.data), d);
 		}else if (id == PCP_CHAN_INFO_BITRATE)
 		{
 			bitrate = atom.readInt();
 		}else if (id == PCP_CHAN_INFO_GENRE)
 		{
-			atom.readString(genre.data,sizeof(genre.data),d);
+			atom.readString(genre.data, sizeof(genre.data), d);
 		}else if (id == PCP_CHAN_INFO_URL)
 		{
-			atom.readString(url.data,sizeof(url.data),d);
+			atom.readString(url.data, sizeof(url.data), d);
 		}else if (id == PCP_CHAN_INFO_DESC)
 		{
-			atom.readString(desc.data,sizeof(desc.data),d);
+			atom.readString(desc.data, sizeof(desc.data), d);
 		}else if (id == PCP_CHAN_INFO_COMMENT)
 		{
-			atom.readString(comment.data,sizeof(comment.data),d);
+			atom.readString(comment.data, sizeof(comment.data), d);
 		}else if (id == PCP_CHAN_INFO_TYPE)
 		{
 			char type[16];
-			atom.readString(type,sizeof(type),d);
+			atom.readString(type, sizeof(type), d);
 			contentType = ChanInfo::getTypeFromStr(type);
 			contentTypeStr = type;
 		}else if (id == PCP_CHAN_INFO_STREAMTYPE)
 		{
-			atom.readString(streamType.data,sizeof(streamType.data),d);
+			atom.readString(streamType.data, sizeof(streamType.data), d);
 		}else if (id == PCP_CHAN_INFO_STREAMEXT)
 		{
-			atom.readString(streamExt.data,sizeof(streamExt.data),d);
+			atom.readString(streamExt.data, sizeof(streamExt.data), d);
 		}else
-			atom.skip(c,d);
+			atom.skip(c, d);
 	}
 }
 
 // -----------------------------------
 void ChanInfo::writeInfoAtoms(AtomStream &atom)
 {
-	atom.writeParent(PCP_CHAN_INFO,7);
-		atom.writeString(PCP_CHAN_INFO_NAME,name.cstr());
-		atom.writeInt(PCP_CHAN_INFO_BITRATE,bitrate);
-		atom.writeString(PCP_CHAN_INFO_GENRE,genre.cstr());
-		atom.writeString(PCP_CHAN_INFO_URL,url.cstr());
-		atom.writeString(PCP_CHAN_INFO_DESC,desc.cstr());
-		atom.writeString(PCP_CHAN_INFO_COMMENT,comment.cstr());
-		atom.writeString(PCP_CHAN_INFO_TYPE,getTypeStr());
+	atom.writeParent(PCP_CHAN_INFO, 7);
+		atom.writeString(PCP_CHAN_INFO_NAME, name.cstr());
+		atom.writeInt(PCP_CHAN_INFO_BITRATE, bitrate);
+		atom.writeString(PCP_CHAN_INFO_GENRE, genre.cstr());
+		atom.writeString(PCP_CHAN_INFO_URL, url.cstr());
+		atom.writeString(PCP_CHAN_INFO_DESC, desc.cstr());
+		atom.writeString(PCP_CHAN_INFO_COMMENT, comment.cstr());
+		atom.writeString(PCP_CHAN_INFO_TYPE, getTypeStr());
 		if (!streamType.isEmpty())
-			atom.writeString(PCP_CHAN_INFO_STREAMTYPE,streamType.cstr());
+			atom.writeString(PCP_CHAN_INFO_STREAMTYPE, streamType.cstr());
 	if (!streamExt.isEmpty())
-			atom.writeString(PCP_CHAN_INFO_STREAMEXT,streamExt.cstr());
+			atom.writeString(PCP_CHAN_INFO_STREAMEXT, streamExt.cstr());
 
 }
 // -----------------------------------
 void ChanInfo::writeTrackAtoms(AtomStream &atom)
 {
-	atom.writeParent(PCP_CHAN_TRACK,4);
-		atom.writeString(PCP_CHAN_TRACK_TITLE,track.title.cstr());
-		atom.writeString(PCP_CHAN_TRACK_CREATOR,track.artist.cstr());
-		atom.writeString(PCP_CHAN_TRACK_URL,track.contact.cstr());
-		atom.writeString(PCP_CHAN_TRACK_ALBUM,track.album.cstr());
+	atom.writeParent(PCP_CHAN_TRACK, 4);
+		atom.writeString(PCP_CHAN_TRACK_TITLE, track.title.cstr());
+		atom.writeString(PCP_CHAN_TRACK_CREATOR, track.artist.cstr());
+		atom.writeString(PCP_CHAN_TRACK_URL, track.contact.cstr());
+		atom.writeString(PCP_CHAN_TRACK_ALBUM, track.album.cstr());
 }
 
 
@@ -3611,28 +3611,28 @@ XML::Node *ChanInfo::createQueryXML()
 	buf[0]=0;
 	if (!nameHTML.isEmpty())
 	{
-		strcat(buf," name=\"");
-		strcat(buf,nameHTML.cstr());
-		strcat(buf,"\"");
+		strcat(buf, " name=\"");
+		strcat(buf, nameHTML.cstr());
+		strcat(buf, "\"");
 	}
 
 	if (!genreHTML.isEmpty())
 	{
-		strcat(buf," genre=\"");
-		strcat(buf,genreHTML.cstr());
-		strcat(buf,"\"");
+		strcat(buf, " genre=\"");
+		strcat(buf, genreHTML.cstr());
+		strcat(buf, "\"");
 	}
 
 	if (id.isSet())
 	{
 		id.toStr(idStr);
-		strcat(buf," id=\"");
-		strcat(buf,idStr);
-		strcat(buf,"\"");
+		strcat(buf, " id=\"");
+		strcat(buf, idStr);
+		strcat(buf, "\"");
 	}
 
 
-	return new XML::Node("channel %s",buf);
+	return new XML::Node("channel %s", buf);
 }
 
 // -----------------------------------
@@ -3688,30 +3688,30 @@ void ChanInfo::init(XML::Node *n)
 // -----------------------------------
 void ChanInfo::updateFromXML(XML::Node *n)
 {
-	String typeStr,idStr;
+	String typeStr, idStr;
 
-	readXMLString(name,n,"name");
-	readXMLString(genre,n,"genre");
-	readXMLString(url,n,"url");
-	readXMLString(desc,n,"desc");
+	readXMLString(name, n, "name");
+	readXMLString(genre, n, "genre");
+	readXMLString(url, n, "url");
+	readXMLString(desc, n, "desc");
 
 
 	int br = n->findAttrInt("bitrate");
 	if (br)
 		bitrate = br;
 
-	readXMLString(typeStr,n,"type");
+	readXMLString(typeStr, n, "type");
 	if (!typeStr.isEmpty()) {
 		contentType = getTypeFromStr(typeStr.cstr());
 		contentTypeStr = typeStr;
 	}
 
 
-	readXMLString(idStr,n,"id");
+	readXMLString(idStr, n, "id");
 	if (!idStr.isEmpty())
 		id.fromStr(idStr.cstr());
 
-	readXMLString(comment,n,"comment");
+	readXMLString(comment, n, "comment");
 
 	XML::Node *tn = n->findNode("track");
 	if (tn)
@@ -3754,7 +3754,7 @@ void PlayList::readASX(Stream &in)
 		XML::Node *n = xml.root->child;
 		while (n)
 		{
-			if (stricmp("entry",n->getName())==0)
+			if (stricmp("entry", n->getName())==0)
 			{
 				XML::Node *rf = n->findNode("ref");
 				if (rf)
@@ -3762,8 +3762,8 @@ void PlayList::readASX(Stream &in)
 					char *hr = rf->findAttr("href");
 					if (hr)
 					{
-						addURL(hr,"");
-						//LOG("asx url %s",hr);
+						addURL(hr, "");
+						//LOG("asx url %s", hr);
 					}
 
 				}
@@ -3776,13 +3776,13 @@ void PlayList::readASX(Stream &in)
 void PlayList::readSCPLS(Stream &in)
 {
 	char tmp[256];
-	while (in.readLine(tmp,sizeof(tmp)))
+	while (in.readLine(tmp, sizeof(tmp)))
 	{
-		if (strnicmp(tmp,"file",4)==0)
+		if (strnicmp(tmp, "file", 4)==0)
 		{
-			char *p = strstr(tmp,"=");
+			char *p = strstr(tmp, "=");
 			if (p)
-				addURL(p+1,"");
+				addURL(p+1, "");
 		}
 	}
 }
@@ -3790,10 +3790,10 @@ void PlayList::readSCPLS(Stream &in)
 void PlayList::readPLS(Stream &in)
 {
 	char tmp[256];
-	while (in.readLine(tmp,sizeof(tmp)))
+	while (in.readLine(tmp, sizeof(tmp)))
 	{
 		if (tmp[0] != '#')
-			addURL(tmp,"");
+			addURL(tmp, "");
 	}
 }
 // -----------------------------------
@@ -3801,13 +3801,13 @@ void PlayList::writeSCPLS(Stream &out)
 {
 	out.writeLine("[playlist]");
 	out.writeLine("");
-	out.writeLineF("NumberOfEntries=%d",numURLs);
+	out.writeLineF("NumberOfEntries=%d", numURLs);
 
 	for(int i=0; i<numURLs; i++)
 	{
-		out.writeLineF("File%d=%s",i+1,urls[i].cstr());
-		out.writeLineF("Title%d=%s",i+1,titles[i].cstr());
-		out.writeLineF("Length%d=-1",i+1);
+		out.writeLineF("File%d=%s", i+1, urls[i].cstr());
+		out.writeLineF("Title%d=%s", i+1, titles[i].cstr());
+		out.writeLineF("Length%d=-1", i+1);
 	}
 	out.writeLine("Version=2");
 }
@@ -3815,13 +3815,13 @@ void PlayList::writeSCPLS(Stream &out)
 void PlayList::writePLS(Stream &out)
 {
 	for(int i=0; i<numURLs; i++)
-		out.writeLineF("%s",urls[i].cstr());
+		out.writeLineF("%s", urls[i].cstr());
 }
 // -----------------------------------
 void PlayList::writeRAM(Stream &out)
 {
 	for(int i=0; i<numURLs; i++)
-		out.writeLineF("%s",urls[i].cstr());
+		out.writeLineF("%s", urls[i].cstr());
 }
 
 // -----------------------------------
@@ -3831,7 +3831,7 @@ void PlayList::writeASX(Stream &out)
 	for(int i=0; i<numURLs; i++)
 	{
 		out.writeLine("<ENTRY>");
-		out.writeLineF("<REF href = \"%s\" />",urls[i].cstr());
+		out.writeLineF("<REF href = \"%s\" />", urls[i].cstr());
 		out.writeLine("</ENTRY>");
 	}
 	out.writeLine("</ASX>");
@@ -3848,8 +3848,8 @@ void PlayList::addChannel(const char *path, ChanInfo &info)
 	info.id.toStr(idStr);
 	char *nid = info.id.isSet()?idStr:info.name.cstr();
 
-	sprintf(url.cstr(),"%s/stream/%s%s",path,nid,info.getTypeExt());
-	addURL(url.cstr(),info.name);
+	sprintf(url.cstr(), "%s/stream/%s%s", path, nid, info.getTypeExt());
+	addURL(url.cstr(), info.name);
 }
 
 // -----------------------------------

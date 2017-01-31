@@ -71,7 +71,7 @@ public:
 
 	bool	update(TrackInfo &);
 
-	::String	contact,title,artist,album,genre;
+	::String	contact, title, artist, album, genre;
 };
 
 
@@ -142,8 +142,8 @@ public:
 	void	writeInfoAtoms(AtomStream &atom);
 	void	writeTrackAtoms(AtomStream &atom);
 
-	void	readInfoAtoms(AtomStream &,int);
-	void	readTrackAtoms(AtomStream &,int);
+	void	readInfoAtoms(AtomStream &, int);
+	void	readTrackAtoms(AtomStream &, int);
 
 	unsigned int getUptime();
 	unsigned int getAge();
@@ -160,19 +160,19 @@ public:
 	static	PROTOCOL	getProtocolFromStr(const char *str);
 
 	::String	name;
-	GnuID	id,bcID;
+	GnuID	id, bcID;
 	int		bitrate;
 	TYPE	contentType;
-	::String	contentTypeStr,streamType,streamExt;
+	::String	contentTypeStr, streamType, streamExt;
 	PROTOCOL	srcProtocol;
-	unsigned int lastPlayStart,lastPlayEnd;
+	unsigned int lastPlayStart, lastPlayEnd;
 	unsigned int numSkips;
 	unsigned int createdTime;
 
 	STATUS  status;
 
 	TrackInfo	track;
-	::String	desc,genre,url,comment;
+	::String	desc, genre, url, comment;
 
 };
 
@@ -182,24 +182,24 @@ class ChanHit
 {
 public:
 	void	init();
-	void	initLocal(int numl,int numr,int nums,int uptm,bool,unsigned int,unsigned int);
+	void	initLocal(int numl, int numr, int nums, int uptm, bool, unsigned int, unsigned int);
 	XML::Node *createXML();
 
-	void	writeAtoms(AtomStream &,GnuID &);
+	void	writeAtoms(AtomStream &, GnuID &);
 	bool	writeVariable(Stream &, const String &);
 
 	void	pickNearestIP(Host &);
 
 	Host				host;
 	Host				rhost[2];
-	unsigned int		numListeners,numRelays,numHops;
-	unsigned int		time,upTime,lastContact;
+	unsigned int		numListeners, numRelays, numHops;
+	unsigned int		time, upTime, lastContact;
 	unsigned int		hitID;
-	GnuID				sessionID,chanID;
+	GnuID				sessionID, chanID;
 	unsigned int		version;
-	unsigned int		oldestPos,newestPos;
+	unsigned int		oldestPos, newestPos;
 
-	bool	firewalled:1,stable:1,tracker:1,recv:1,yp:1,dead:1,direct:1,relay:1,cin:1;
+	bool	firewalled:1, stable:1, tracker:1, recv:1, yp:1, dead:1, direct:1, relay:1, cin:1;
 
 	ChanHit *next;
 
@@ -211,7 +211,7 @@ public:
 	ChanHitList();
 	~ChanHitList();
 
-	int		contactTrackers(bool,int,int,int);
+	int		contactTrackers(bool, int, int, int);
 
 	ChanHit	*addHit(ChanHit &);
 	void	delHit(ChanHit &);
@@ -228,7 +228,7 @@ public:
 	int			pickHits(ChanHitSearch &);
 
 	bool	isUsed() {return used;}
-	int		clearDeadHits(unsigned int,bool);
+	int		clearDeadHits(unsigned int, bool);
 	XML::Node *createXML(bool addHits = true);
 
 	ChanHit *deleteHit(ChanHit *);
@@ -262,7 +262,7 @@ public:
 	unsigned int waitDelay;
 	bool	useFirewalled;
 	bool	trackersOnly;
-	bool	useBusyRelays,useBusyControls;
+	bool	useBusyRelays, useBusyControls;
 	GnuID	excludeID;
 	int		numResults;
 };
@@ -283,10 +283,10 @@ public:
 	}
 
 	void	fromXML(XML &);
-	void	fromMem(void *,int);
-	void	addMem(void *,int);
+	void	fromMem(void *, int);
+	void	addMem(void *, int);
 
-	unsigned int len,cnt,startPos;
+	unsigned int len, cnt, startPos;
 	char	data[MAX_DATALEN];
 };
 
@@ -296,9 +296,9 @@ public:
 class RawStream : public ChannelStream
 {
 public:
-	virtual void readHeader(Stream &,Channel *);
-	virtual int readPacket(Stream &,Channel *);
-	virtual void readEnd(Stream &,Channel *);
+	virtual void readHeader(Stream &, Channel *);
+	virtual int readPacket(Stream &, Channel *);
+	virtual void readEnd(Stream &, Channel *);
 
 };
 
@@ -306,9 +306,9 @@ public:
 class PeercastStream : public ChannelStream
 {
 public:
-	virtual void readHeader(Stream &,Channel *);
-	virtual int  readPacket(Stream &,Channel *);
-	virtual void readEnd(Stream &,Channel *);
+	virtual void readHeader(Stream &, Channel *);
+	virtual int  readPacket(Stream &, Channel *);
+	virtual void readEnd(Stream &, Channel *);
 };
 
 // ------------------------------------------
@@ -378,7 +378,7 @@ public:
 
 	void	startMP3File(char *);
 	void	startGet();
-	void	startICY(ClientSocket *,SRC_TYPE);
+	void	startICY(ClientSocket *, SRC_TYPE);
 	void	startURL(const char *);
 
 
@@ -436,16 +436,16 @@ public:
 	void	getIDStr(char *s) {info.id.toStr(s);}
 	void	getStreamPath(char *);
 
-	void	broadcastTrackerUpdate(GnuID &,bool = false);
-	bool	sendPacketUp(ChanPacket &,GnuID &,GnuID &,GnuID &);
+	void	broadcastTrackerUpdate(GnuID &, bool = false);
+	bool	sendPacketUp(ChanPacket &, GnuID &, GnuID &, GnuID &);
 
-	bool	writeVariable(Stream &, const String &,int);
+	bool	writeVariable(Stream &, const String &, int);
 
 	bool	acceptGIV(ClientSocket *);
 
 	void	updateInfo(ChanInfo &);
 
-	int		readStream(Stream &,ChannelStream *);
+	int		readStream(Stream &, ChannelStream *);
 
 	void	checkReadDelay(unsigned int);
 
@@ -483,7 +483,7 @@ public:
 
 	::String  sourceURL;
 
-	bool	bump,stayConnected;
+	bool	bump, stayConnected;
 	int		icyMetaInterval;
 	unsigned int streamPos;
 	bool	readDelay;
@@ -498,7 +498,7 @@ public:
 
 	unsigned int lastIdleTime;
 	int		status;
-	static const 	char *statusMsgs[],*srcTypes[];
+	static const 	char *statusMsgs[], *srcTypes[];
 
 	ClientSocket	*sock;
 	ClientSocket	*pushSock;
@@ -506,7 +506,7 @@ public:
 	unsigned int lastTrackerUpdate;
 	unsigned int lastMetaUpdate;
 
-	double	startTime,syncTime;
+	double	startTime, syncTime;
 
 	WEvent	syncEvent;
 
@@ -518,7 +518,7 @@ class ChanMgr
 {
 public:
 	enum {
-		MAX_IDLE_CHANNELS = 8,		// max. number of channels that can be left idle
+		MAX_IDLE_CHANNELS = 8, 		// max. number of channels that can be left idle
 		MAX_METAINT = 8192			// must be at least smaller than ChanPacket data len (ie. about half)
 
 	};
@@ -528,7 +528,7 @@ public:
 
 	Channel	*deleteChannel(Channel *);
 
-	Channel	*createChannel(ChanInfo &,const char *);
+	Channel	*createChannel(ChanInfo &, const char *);
 	Channel *findChannelByName(const char *);
 	Channel *findChannelByIndex(int);
 	Channel *findChannelByMount(const char *);
@@ -538,15 +538,15 @@ public:
 
 	void	broadcastTrackerSettings();
 	void	setUpdateInterval(unsigned int v);
-	void	broadcastRelays(Servent *,int,int);
+	void	broadcastRelays(Servent *, int, int);
 
-	int		broadcastPacketUp(ChanPacket &,GnuID &,GnuID &,GnuID &);
-	void	broadcastTrackerUpdate(GnuID &,bool = false);
+	int		broadcastPacketUp(ChanPacket &, GnuID &, GnuID &, GnuID &);
+	void	broadcastTrackerUpdate(GnuID &, bool = false);
 
-	bool	writeVariable(Stream &, const String &,int);
+	bool	writeVariable(Stream &, const String &, int);
 
-	int		findChannels(ChanInfo &,Channel **,int);
-	int		findChannelsByStatus(Channel **,int,Channel::STATUS);
+	int		findChannels(ChanInfo &, Channel **, int);
+	int		findChannelsByStatus(Channel **, int, Channel::STATUS);
 
 	int		numIdleChannels();
 	int		numChannels();
@@ -555,7 +555,7 @@ public:
 	void	closeAll();
 	void	quit();
 
-	void	addHit(Host &,GnuID &,bool);
+	void	addHit(Host &, GnuID &, bool);
 	ChanHit	*addHit(ChanHit &);
 	void	delHit(ChanHit &);
 	void	deadHit(ChanHit &);
@@ -571,12 +571,12 @@ public:
 
 	void		setBroadcastMsg(::String &);
 
-	Channel		*createRelay(ChanInfo &,bool);
+	Channel		*createRelay(ChanInfo &, bool);
 	Channel		*findAndRelay(ChanInfo &);
 	void		startSearch(ChanInfo &);
 
 	void		playChannel(ChanInfo &);
-	void		findAndPlayChannel(ChanInfo &,bool);
+	void		findAndPlayChannel(ChanInfo &, bool);
 
 	bool		isBroadcasting(GnuID &);
 	bool		isBroadcasting();
@@ -595,15 +595,15 @@ public:
 	int		numFinds;
 	::String	broadcastMsg;
 	unsigned int		broadcastMsgInterval;
-	unsigned int lastHit,lastQuery;
+	unsigned int lastHit, lastQuery;
 	unsigned int maxUptime;
 	bool	searchActive;
 	unsigned int		deadHitAge;
 	int		icyMetaInterval;
 	int		maxRelaysPerChannel;
 	WLock	lock;
-	int		minBroadcastTTL,maxBroadcastTTL;
-	int		pushTimeout,pushTries,maxPushHops;
+	int		minBroadcastTTL, maxBroadcastTTL;
+	int		pushTimeout, pushTries, maxPushHops;
 	unsigned int		autoQuery;
 	unsigned int	prefetchTime;
 	unsigned int	lastYPConnect;
@@ -653,8 +653,8 @@ public:
 			numURLs++;
 		}
 	}
-	void	addChannels(const char *,Channel **,int);
-	void	addChannel(const char *,ChanInfo &);
+	void	addChannels(const char *, Channel **, int);
+	void	addChannel(const char *, ChanInfo &);
 
 	void	writeSCPLS(Stream &);
 	void	writePLS(Stream &);
@@ -690,8 +690,8 @@ public:
 	}
 
 	TYPE	type;
-	int		numURLs,maxURLs;
-	::String	*urls,*titles;
+	int		numURLs, maxURLs;
+	::String	*urls, *titles;
 };
 
 // ----------------------------------

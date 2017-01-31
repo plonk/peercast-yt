@@ -138,7 +138,7 @@ int		APICALL	PeercastInstance::getServerPort()
 void	APICALL	PeercastInstance::setServerPassword(const char *pwd)
 {
 	if (servMgr)
-		strcpy(servMgr->password,pwd);
+		strcpy(servMgr->password, pwd);
 }
 // --------------------------------------------------
 const char *APICALL	PeercastInstance::getServerPassword()
@@ -149,38 +149,38 @@ const char *APICALL	PeercastInstance::getServerPassword()
 void	APICALL PeercastInstance::callLocalURL(const char *url)
 {
 	if (sys && servMgr)
-		sys->callLocalURL(url,servMgr->serverHost.port);
+		sys->callLocalURL(url, servMgr->serverHost.port);
 }
 
 
 // --------------------------------------------------
-void ADDLOG(const char *fmt,va_list ap,LogBuffer::TYPE type)
+void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)
 {
 	if(sys)
 	{
 		const int MAX_LINELEN = 1024;
 
 		char str[MAX_LINELEN+1];
-		vsnprintf(str,MAX_LINELEN-1,fmt,ap);
+		vsnprintf(str, MAX_LINELEN-1, fmt, ap);
 		str[MAX_LINELEN-1]=0;
 
 		if (type != LogBuffer::T_NONE)
-			sys->logBuf->write(str,type);
+			sys->logBuf->write(str, type);
 
-		peercastApp->printLog(type,str);
+		peercastApp->printLog(type, str);
 	}
 }
 // --------------------------------------------------
-void LOG(const char *fmt,...)
+void LOG(const char *fmt, ...)
 {
 	va_list ap;
   	va_start(ap, fmt);
-	ADDLOG(fmt,ap,LogBuffer::T_DEBUG);
+	ADDLOG(fmt, ap, LogBuffer::T_DEBUG);
    	va_end(ap);
 }
 
 // --------------------------------------------------
-void LOG_ERROR(const char *fmt,...)
+void LOG_ERROR(const char *fmt, ...)
 {
 	if (servMgr)
 	{
@@ -188,13 +188,13 @@ void LOG_ERROR(const char *fmt,...)
 		{
 			va_list ap;
   			va_start(ap, fmt);
-			ADDLOG(fmt,ap,LogBuffer::T_ERROR);
+			ADDLOG(fmt, ap, LogBuffer::T_ERROR);
    			va_end(ap);
 		}
 	}
 }
 // --------------------------------------------------
-void LOG_DEBUG(const char *fmt,...)
+void LOG_DEBUG(const char *fmt, ...)
 {
 	if (servMgr)
 	{
@@ -202,13 +202,13 @@ void LOG_DEBUG(const char *fmt,...)
 		{
 			va_list ap;
   			va_start(ap, fmt);
-			ADDLOG(fmt,ap,LogBuffer::T_DEBUG);
+			ADDLOG(fmt, ap, LogBuffer::T_DEBUG);
    			va_end(ap);
 		}
 	}
 }
 // --------------------------------------------------
-void LOG_NETWORK(const char *fmt,...)
+void LOG_NETWORK(const char *fmt, ...)
 {
 	if (servMgr)
 	{
@@ -216,13 +216,13 @@ void LOG_NETWORK(const char *fmt,...)
 		{
 			va_list ap;
   			va_start(ap, fmt);
-			ADDLOG(fmt,ap,LogBuffer::T_NETWORK);
+			ADDLOG(fmt, ap, LogBuffer::T_NETWORK);
    			va_end(ap);
 		}
 	}
 }
 // --------------------------------------------------
-void LOG_CHANNEL(const char *fmt,...)
+void LOG_CHANNEL(const char *fmt, ...)
 {
 	if (servMgr)
 	{
@@ -230,7 +230,7 @@ void LOG_CHANNEL(const char *fmt,...)
 		{
 			va_list ap;
   			va_start(ap, fmt);
-			ADDLOG(fmt,ap,LogBuffer::T_CHANNEL);
+			ADDLOG(fmt, ap, LogBuffer::T_CHANNEL);
    			va_end(ap);
 		}
 	}

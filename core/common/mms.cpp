@@ -25,16 +25,16 @@ ASFInfo parseASFHeader(Stream &in);
 
 
 // ------------------------------------------
-void MMSStream::readEnd(Stream &,Channel *)
+void MMSStream::readEnd(Stream &, Channel *)
 {
 }
 
 // ------------------------------------------
-void MMSStream::readHeader(Stream &,Channel *)
+void MMSStream::readHeader(Stream &, Channel *)
 {
 }
 // ------------------------------------------
-int MMSStream::readPacket(Stream &in,Channel *ch)
+int MMSStream::readPacket(Stream &in, Channel *ch)
 {
 	{
 		ASFChunk chunk;
@@ -45,24 +45,24 @@ int MMSStream::readPacket(Stream &in,Channel *ch)
 		{
 			case 0x4824:		// asf header
 			{
-				MemoryStream mem(ch->headPack.data,sizeof(ch->headPack.data));
+				MemoryStream mem(ch->headPack.data, sizeof(ch->headPack.data));
 
 				chunk.write(mem);
 
 
 
 
-				MemoryStream asfm(chunk.data,chunk.dataLen);
+				MemoryStream asfm(chunk.data, chunk.dataLen);
 				ASFObject asfHead;
 				asfHead.readHead(asfm);
 
 				ASFInfo asf = parseASFHeader(asfm);
-				LOG_DEBUG("ASF Info: pnum=%d, psize=%d, br=%d",asf.numPackets,asf.packetSize,asf.bitrate);
+				LOG_DEBUG("ASF Info: pnum=%d, psize=%d, br=%d", asf.numPackets, asf.packetSize, asf.bitrate);
 				for(int i=0; i<ASFInfo::MAX_STREAMS; i++)
 				{
 					ASFStream *s = &asf.streams[i];
 					if (s->id)
-						LOG_DEBUG("ASF Stream %d : %s, br=%d",s->id,s->getTypeName(),s->bitrate);
+						LOG_DEBUG("ASF Stream %d : %s, br=%d", s->id, s->getTypeName(), s->bitrate);
 				}
 
 				ch->info.bitrate = asf.bitrate/1000;
@@ -81,7 +81,7 @@ int MMSStream::readPacket(Stream &in,Channel *ch)
 
 				ChanPacket pack;
 
-				MemoryStream mem(pack.data,sizeof(pack.data));
+				MemoryStream mem(pack.data, sizeof(pack.data));
 
 				chunk.write(mem);
 
@@ -116,17 +116,17 @@ ASFInfo parseASFHeader(Stream &in)
 		in.readChar();
 		in.readChar();
 
-		LOG_CHANNEL("ASF Headers: %d",numHeaders);
+		LOG_CHANNEL("ASF Headers: %d", numHeaders);
 		for(int i=0; i<numHeaders; i++)
 		{
 
 			ASFObject obj;
 
 			unsigned int l = obj.readHead(in);
-			obj.readData(in,l);
+			obj.readData(in, l);
 
 
-			MemoryStream data(obj.data,obj.lenLo);
+			MemoryStream data(obj.data, obj.lenLo);
 
 
 			switch (obj.type)
@@ -180,7 +180,7 @@ ASFInfo parseASFHeader(Stream &in)
 		}
 	}catch(StreamException &e)
 	{
-		LOG_ERROR("ASF: %s",e.msg);
+		LOG_ERROR("ASF: %s", e.msg);
 	}
 
 	return asf;

@@ -33,13 +33,13 @@ class BCID
 {
 public:
 	BCID()
-	:next(0),valid(true)
+	:next(0), valid(true)
 	{}
 
 	bool	writeVariable(Stream &, const String &);
 
 	GnuID	id;
-	String	name,email,url;
+	String	name, email, url;
 	bool	valid;
 	BCID	*next;
 };
@@ -133,13 +133,13 @@ public:
 	};
 	enum {
 
-		MAX_HOSTCACHE = 100,		// max. amount of hosts in cache
-		MIN_HOSTS	= 3,			// min. amount of hosts that should be kept in cache
+		MAX_HOSTCACHE = 100, 		// max. amount of hosts in cache
+		MIN_HOSTS	= 3, 			// min. amount of hosts that should be kept in cache
 
-		MAX_OUTGOING = 3,			// max. number of outgoing servents to use
-		MAX_INCOMING = 6,		    // max. number of public incoming servents to use
-		MAX_TRYOUT   = 10,			// max. number of outgoing servents to try connect
-		MIN_CONNECTED = 3,			// min. amount of connected hosts that should be kept
+		MAX_OUTGOING = 3, 			// max. number of outgoing servents to use
+		MAX_INCOMING = 6, 		    // max. number of public incoming servents to use
+		MAX_TRYOUT   = 10, 			// max. number of outgoing servents to try connect
+		MIN_CONNECTED = 3, 			// min. amount of connected hosts that should be kept
 
 		MIN_RELAYS = 2,
 
@@ -147,8 +147,8 @@ public:
 
 		MAX_VERSIONS = 16,
 
-		MAX_PREVIEWTIME	= 300,		// max. seconds preview per channel available (direct connections)
-		MAX_PREVIEWWAIT = 300,		// max. seconds wait between previews
+		MAX_PREVIEWTIME	= 300, 		// max. seconds preview per channel available (direct connections)
+		MAX_PREVIEWWAIT = 300, 		// max. seconds wait between previews
 
 	};
 
@@ -164,21 +164,21 @@ public:
 
 	bool	start();
 
-	Servent	*findServent(unsigned int,unsigned short,GnuID &);
+	Servent	*findServent(unsigned int, unsigned short, GnuID &);
 	Servent	*findServent(Servent::TYPE);
-	Servent	*findServent(Servent::TYPE,Host &,GnuID &);
-	Servent *findOldestServent(Servent::TYPE,bool);
+	Servent	*findServent(Servent::TYPE, Host &, GnuID &);
+	Servent *findOldestServent(Servent::TYPE, bool);
 	Servent *findServentByIndex(int);
 
 	bool	writeVariable(Stream &, const String &);
 	Servent	*allocServent();
 	unsigned int		numUsed(int);
-	unsigned int		numStreams(GnuID &, Servent::TYPE,bool);
-	unsigned int		numStreams(Servent::TYPE,bool);
-	unsigned int		numConnected(int,bool,unsigned int);
-	unsigned int		numConnected(int t,int tim = 0)
+	unsigned int		numStreams(GnuID &, Servent::TYPE, bool);
+	unsigned int		numStreams(Servent::TYPE, bool);
+	unsigned int		numConnected(int, bool, unsigned int);
+	unsigned int		numConnected(int t, int tim = 0)
 	{
-		return numConnected(t,false,tim)+numConnected(t,true,tim);
+		return numConnected(t, false, tim)+numConnected(t, true, tim);
 	}
 	unsigned int		numConnected();
 	unsigned int		numServents();
@@ -189,9 +189,9 @@ public:
 		return numConnected();
 	}
 	unsigned int		numOutgoing();
-	bool	isFiltered(int,Host &h);
-	bool	addOutgoing(Host,GnuID &,bool);
-	Servent	*findConnection(Servent::TYPE,GnuID &);
+	bool	isFiltered(int, Host &h);
+	bool	addOutgoing(Host, GnuID &, bool);
+	Servent	*findConnection(Servent::TYPE, GnuID &);
 
 
 	static	THREAD_PROC		serverProc(ThreadInfo *);
@@ -199,13 +199,13 @@ public:
 	static	THREAD_PROC		trackerProc(ThreadInfo *);
 	static	THREAD_PROC		idleProc(ThreadInfo *);
 
-	int		broadcast(GnuPacket &,Servent * = NULL);
+	int		broadcast(GnuPacket &, Servent * = NULL);
 	int		route(GnuPacket &, GnuID &, Servent * = NULL);
 
 	XML::Node *createServentXML();
 
 	void		connectBroadcaster();
-	void		procConnectArgs(char *,ChanInfo &);
+	void		procConnectArgs(char *, ChanInfo &);
 
 	void		quit();
 	void		closeConnections(Servent::TYPE);
@@ -213,13 +213,13 @@ public:
 	void		checkFirewall();
 
 	// host cache
-	void			addHost(Host &,ServHost::TYPE,unsigned int);
-	int				getNewestServents(Host *,int, Host &);
+	void			addHost(Host &, ServHost::TYPE, unsigned int);
+	int				getNewestServents(Host *, int, Host &);
 	ServHost		getOutgoingServent(GnuID &);
-	void			deadHost(Host &,ServHost::TYPE);
+	void			deadHost(Host &, ServHost::TYPE);
 	unsigned int	numHosts(ServHost::TYPE);
 	void			clearHostCache(ServHost::TYPE);
-	bool			seenHost(Host &,ServHost::TYPE,unsigned int);
+	bool			seenHost(Host &, ServHost::TYPE, unsigned int);
 
 	void	setMaxRelays(int);
 	void	setFirewall(FW_STATE);
@@ -229,7 +229,7 @@ public:
 	void	loadSettings(const char *);
 	void	setPassiveSearch(unsigned int);
 	int		findChannel(ChanInfo &);
-	bool	getChannel(char *,ChanInfo &,bool);
+	bool	getChannel(char *, ChanInfo &, bool);
 	void	setFilterDefaults();
 
 	bool	acceptGIV(ClientSocket *);
@@ -237,9 +237,9 @@ public:
 
 	void broadcastRootSettings(bool);
 	int broadcastPushRequest(ChanHit &, Host &, GnuID &, Servent::TYPE);
-	void writeRootAtoms(AtomStream &,bool);
+	void writeRootAtoms(AtomStream &, bool);
 
-	int	broadcastPacket(ChanPacket &,GnuID &,GnuID &,GnuID &,Servent::TYPE type);
+	int	broadcastPacket(ChanPacket &, GnuID &, GnuID &, GnuID &, Servent::TYPE type);
 
 	void	addValidBCID(BCID *);
 	void	removeValidBCID(GnuID &);
@@ -265,7 +265,7 @@ public:
 
 	bool	needConnections()
 	{
-		return numConnected(Servent::T_PGNU,60) < minGnuIncoming;
+		return numConnected(Servent::T_PGNU, 60) < minGnuIncoming;
 	}
 	bool	tryFull()
 	{
@@ -276,12 +276,12 @@ public:
 	bool	pubInOver()
 	{
 		return numConnected(Servent::T_PGNU) > maxGnuIncoming;
-//		return maxIncoming ? numConnected(Servent::T_INCOMING,false) > maxIncoming : false;
+//		return maxIncoming ? numConnected(Servent::T_INCOMING, false) > maxIncoming : false;
 	}
 	bool	pubInFull()
 	{
 		return numConnected(Servent::T_PGNU) >= maxGnuIncoming;
-//		return maxIncoming ? numConnected(Servent::T_INCOMING,false) >= maxIncoming : false;
+//		return maxIncoming ? numConnected(Servent::T_INCOMING, false) >= maxIncoming : false;
 	}
 
 	bool	outUsedFull()
@@ -308,11 +308,11 @@ public:
 
 	bool	relaysFull()
 	{
-		return numStreams(Servent::T_RELAY,false) >= maxRelays;
+		return numStreams(Servent::T_RELAY, false) >= maxRelays;
 	}
 	bool	directFull()
 	{
-		return numStreams(Servent::T_DIRECT,false) >= maxDirect;
+		return numStreams(Servent::T_DIRECT, false) >= maxDirect;
 	}
 
 	bool	bitrateFull(unsigned int br)
@@ -322,7 +322,7 @@ public:
 
 	unsigned int		totalOutput(bool);
 
-	static ThreadInfo serverThread,idleThread;
+	static ThreadInfo serverThread, idleThread;
 
 
 	Servent *servents;
@@ -334,8 +334,8 @@ public:
 
 	bool	allowGnutella;
 
-	unsigned int		maxBitrateOut,maxControl,maxRelays,maxDirect;
-	unsigned int		minGnuIncoming,maxGnuIncoming;
+	unsigned int		maxBitrateOut, maxControl, maxRelays, maxDirect;
+	unsigned int		minGnuIncoming, maxGnuIncoming;
 	unsigned int		maxServIn;
 
 	bool	isDisabled;
@@ -360,10 +360,10 @@ public:
 
 	bool	restartServer;
 	bool	allowDirect;
-	bool	autoConnect,autoServe,forceLookup;
+	bool	autoConnect, autoServe, forceLookup;
 	int		queryTTL;
 
-	unsigned int		allowServer1,allowServer2;
+	unsigned int		allowServer1, allowServer2;
 	unsigned int		startTime;
 	unsigned int		tryoutDelay;
 	unsigned int		refreshHTML;
@@ -382,7 +382,7 @@ public:
 	AUTH_TYPE	authType;
 
 	char	htmlPath[128];
-	unsigned int	clientVersions[MAX_VERSIONS],clientCounts[MAX_VERSIONS];
+	unsigned int	clientVersions[MAX_VERSIONS], clientCounts[MAX_VERSIONS];
 	int	numVersions;
 
 	int serventNum;

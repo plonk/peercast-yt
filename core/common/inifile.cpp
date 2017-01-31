@@ -66,7 +66,7 @@ bool	IniFile::readNext()
 
 	try
 	{
-		fStream.readLine(currLine,256);
+		fStream.readLine(currLine, 256);
 	}catch(StreamException &)
 	{
 		return false;
@@ -74,7 +74,7 @@ bool	IniFile::readNext()
 
 
 	// find end of value name and null terminate
-	char *nend = strstr(currLine,"=");
+	char *nend = strstr(currLine, "=");
 
 	if (nend)
 	{
@@ -90,7 +90,7 @@ bool	IniFile::readNext()
 // -----------------------------------------
 bool IniFile::isName(const char *str)
 {
-	return stricmp(getName(),str)==0;
+	return stricmp(getName(), str)==0;
 }
 
 // -----------------------------------------
@@ -121,9 +121,9 @@ bool	IniFile::getBoolValue()
 		return false;
 
 
-	if ( (stricmp(valueStr,"yes")==0) ||
-		 (stricmp(valueStr,"y")==0) ||
-		 (stricmp(valueStr,"1")==0) )
+	if ( (stricmp(valueStr, "yes")==0) ||
+		 (stricmp(valueStr, "y")==0) ||
+		 (stricmp(valueStr, "1")==0) )
 		return true;
 
 	return false;
@@ -132,26 +132,26 @@ bool	IniFile::getBoolValue()
 // -----------------------------------------
 void	IniFile::writeIntValue(const char *name, int iv)
 {
-	sprintf(currLine,"%s = %d",name,iv);
+	sprintf(currLine, "%s = %d", name, iv);
 	fStream.writeLine(currLine);
 }
 // -----------------------------------------
 void	IniFile::writeStrValue(const char *name, const char *sv)
 {
-	sprintf(currLine,"%s = %s",name,sv);
+	sprintf(currLine, "%s = %s", name, sv);
 	fStream.writeLine(currLine);
 }
 // -----------------------------------------
 void	IniFile::writeSection(const char *name)
 {
 	fStream.writeLine("");
-	sprintf(currLine,"[%s]",name);
+	sprintf(currLine, "[%s]", name);
 	fStream.writeLine(currLine);
 }
 // -----------------------------------------
 void	IniFile::writeBoolValue(const char *name, int v)
 {
-	sprintf(currLine,"%s = %s",name,(v!=0)?"Yes":"No");
+	sprintf(currLine, "%s = %s", name, (v!=0)?"Yes":"No");
 	fStream.writeLine(currLine);
 }
 // -----------------------------------------

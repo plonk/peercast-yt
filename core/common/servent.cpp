@@ -72,14 +72,14 @@ const char *Servent::typeMsgs[]=
 bool	Servent::isPrivate()
 {
 	Host h = getHost();
-	return servMgr->isFiltered(ServFilter::F_PRIVATE,h) || h.isLocalhost();
+	return servMgr->isFiltered(ServFilter::F_PRIVATE, h) || h.isLocalhost();
 }
 // -----------------------------------
 bool	Servent::isAllowed(int a)
 {
 	Host h = getHost();
 
-	if (servMgr->isFiltered(ServFilter::F_BAN,h))
+	if (servMgr->isFiltered(ServFilter::F_BAN, h))
 		return false;
 
 	return (allow&a)!=0;
@@ -89,17 +89,17 @@ bool	Servent::isAllowed(int a)
 bool	Servent::isFiltered(int f)
 {
 	Host h = getHost();
-	return servMgr->isFiltered(f,h);
+	return servMgr->isFiltered(f, h);
 }
 
 // -----------------------------------
 Servent::Servent(int index)
 :outPacketsPri(MAX_OUTPACKETS)
-,outPacketsNorm(MAX_OUTPACKETS)
-,seenIDs(MAX_HASH)
-,serventIndex(index)
-,sock(NULL)
-,next(NULL)
+, outPacketsNorm(MAX_OUTPACKETS)
+, seenIDs(MAX_HASH)
+, serventIndex(index)
+, sock(NULL)
+, next(NULL)
 {
 	reset();
 }
@@ -203,7 +203,7 @@ void Servent::reset()
 	type = T_NONE;
 }
 // -----------------------------------
-bool Servent::sendPacket(ChanPacket &pack,GnuID &cid,GnuID &sid,GnuID &did,Servent::TYPE t)
+bool Servent::sendPacket(ChanPacket &pack, GnuID &cid, GnuID &sid, GnuID &did, Servent::TYPE t)
 {
 
 	if  (	   (type == t)
@@ -213,7 +213,7 @@ bool Servent::sendPacket(ChanPacket &pack,GnuID &cid,GnuID &sid,GnuID &did,Serve
 			&& (pcpStream != NULL)
 		)
 	{
-		return pcpStream->sendPacket(pack,did);
+		return pcpStream->sendPacket(pack, did);
 	}
 	return false;
 }
@@ -233,7 +233,7 @@ bool Servent::acceptGIV(ClientSocket *givSock)
 // -----------------------------------
 Host Servent::getHost()
 {
-	Host h(0,0);
+	Host h(0, 0);
 
 	if (sock)
 		h = sock->host;
@@ -301,7 +301,7 @@ bool Servent::initServer(Host &h)
 
 	}catch(StreamException &e)
 	{
-		LOG_ERROR("Bad server: %s",e.msg);
+		LOG_ERROR("Bad server: %s", e.msg);
 		kill();
 		return false;
 	}
@@ -334,18 +334,18 @@ void Servent::initIncoming(ClientSocket *s, unsigned int a)
 
 		char ipStr[64];
 		sock->host.toStr(ipStr);
-		LOG_DEBUG("Incoming from %s",ipStr);
+		LOG_DEBUG("Incoming from %s", ipStr);
 
 
 		if (!sys->startThread(&thread))
 			throw StreamException("Can`t start thread");
 	}catch(StreamException &e)
 	{
-		//LOG_ERROR("!!FATAL!! Incoming error: %s",e.msg);
+		//LOG_ERROR("!!FATAL!! Incoming error: %s", e.msg);
 		//servMgr->shutdownTimer = 1;
 		kill();
 
-		LOG_ERROR("INCOMING FAILED: %s",e.msg);
+		LOG_ERROR("INCOMING FAILED: %s", e.msg);
 
 	}
 }
@@ -368,7 +368,7 @@ void Servent::initOutgoing(TYPE ty)
 
 	}catch(StreamException &e)
 	{
-		LOG_ERROR("Unable to start outgoing: %s",e.msg);
+		LOG_ERROR("Unable to start outgoing: %s", e.msg);
 		kill();
 	}
 }
@@ -394,14 +394,14 @@ void Servent::initPCP(Host &rh)
 		thread.data = this;
 		thread.func = outgoingProc;
 
-		LOG_DEBUG("Outgoing to %s",ipStr);
+		LOG_DEBUG("Outgoing to %s", ipStr);
 
 		if (!sys->startThread(&thread))
 			throw StreamException("Can`t start thread");
 
 	}catch(StreamException &e)
 	{
-		LOG_ERROR("Unable to open connection to %s - %s",ipStr,e.msg);
+		LOG_ERROR("Unable to open connection to %s - %s", ipStr, e.msg);
 		kill();
 	}
 }
@@ -459,7 +459,7 @@ void Servent::initGIV(Host &h, GnuID &id)
 
 	}catch(StreamException &e)
 	{
-		LOG_ERROR("GIV error to %s: %s",ipStr,e.msg);
+		LOG_ERROR("GIV error to %s: %s", ipStr, e.msg);
 		kill();
 	}
 }
@@ -491,23 +491,23 @@ void Servent::handshakeOut()
 
 	char str[64];
 
-	sock->writeLineF("%s %s",HTTP_HS_AGENT,PCX_AGENT);
-    sock->writeLineF("%s %d",PCX_HS_PCP,1);
+	sock->writeLineF("%s %s", HTTP_HS_AGENT, PCX_AGENT);
+    sock->writeLineF("%s %d", PCX_HS_PCP, 1);
 
 	if (priorityConnect)
-	    sock->writeLineF("%s %d",PCX_HS_PRIORITY,1);
+	    sock->writeLineF("%s %d", PCX_HS_PRIORITY, 1);
 
 	if (networkID.isSet())
 	{
 		networkID.toStr(str);
-		sock->writeLineF("%s %s",PCX_HS_NETWORKID,str);
+		sock->writeLineF("%s %s", PCX_HS_NETWORKID, str);
 	}
 
 	servMgr->sessionID.toStr(str);
-	sock->writeLineF("%s %s",PCX_HS_ID,str);
+	sock->writeLineF("%s %s", PCX_HS_ID, str);
 
 
-    sock->writeLineF("%s %s",PCX_HS_OS,peercastApp->getClientTypeOS());
+    sock->writeLineF("%s %s", PCX_HS_OS, peercastApp->getClientTypeOS());
 
 	sock->writeLine("");
 
@@ -517,7 +517,7 @@ void Servent::handshakeOut()
 
 	if (r != 200)
 	{
-		LOG_ERROR("Expected 200, got %d",r);
+		LOG_ERROR("Expected 200, got %d", r);
 		throw StreamException("Unexpected HTTP response");
 	}
 
@@ -539,17 +539,17 @@ void Servent::handshakeOut()
 		{
 			agent.set(arg);
 
-			if (strnicmp(arg,"PeerCast/",9)==0)
-				versionValid = (stricmp(arg+9,MIN_CONNECTVER)>=0);
+			if (strnicmp(arg, "PeerCast/", 9)==0)
+				versionValid = (stricmp(arg+9, MIN_CONNECTVER)>=0);
 		}else if (http.isHeader(PCX_HS_NETWORKID))
 			clientID.fromStr(arg);
     }
 
 	if (!clientID.isSame(networkID))
-		throw HTTPException(HTTP_SC_UNAVAILABLE,503);
+		throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
 	if (!versionValid)
-		throw HTTPException(HTTP_SC_UNAUTHORIZED,401);
+		throw HTTPException(HTTP_SC_UNAUTHORIZED, 401);
 
 
     sock->writeLine(GNU_OK);
@@ -581,7 +581,7 @@ void Servent::handshakeIn()
 
     while (http.nextHeader())
     {
-		LOG_DEBUG("%s",http.cmdLine);
+		LOG_DEBUG("%s", http.cmdLine);
 
 		char *arg = http.getArgStr();
 		if (!arg)
@@ -591,10 +591,10 @@ void Servent::handshakeIn()
 		{
 			agent.set(arg);
 
-			if (strnicmp(arg,"PeerCast/",9)==0)
+			if (strnicmp(arg, "PeerCast/", 9)==0)
 			{
-				versionValid = (stricmp(arg+9,MIN_CONNECTVER)>=0);
-				diffRootVer = stricmp(arg+9,MIN_ROOTVER)<0;
+				versionValid = (stricmp(arg+9, MIN_CONNECTVER)>=0);
+				diffRootVer = stricmp(arg+9, MIN_ROOTVER)<0;
 			}
 		}else if (http.isHeader(PCX_HS_NETWORKID))
 		{
@@ -613,20 +613,20 @@ void Servent::handshakeIn()
 
 		}else if (http.isHeader(PCX_HS_OS))
 		{
-			if (stricmp(arg,PCX_OS_LINUX)==0)
+			if (stricmp(arg, PCX_OS_LINUX)==0)
 				osType = 1;
-			else if (stricmp(arg,PCX_OS_WIN32)==0)
+			else if (stricmp(arg, PCX_OS_WIN32)==0)
 				osType = 2;
-			else if (stricmp(arg,PCX_OS_MACOSX)==0)
+			else if (stricmp(arg, PCX_OS_MACOSX)==0)
 				osType = 3;
-			else if (stricmp(arg,PCX_OS_WINAMP2)==0)
+			else if (stricmp(arg, PCX_OS_WINAMP2)==0)
 				osType = 4;
 		}
 
     }
 
 	if (!clientID.isSame(networkID))
-		throw HTTPException(HTTP_SC_UNAVAILABLE,503);
+		throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
 	// if this is a priority connection and all incoming connections
 	// are full then kill an old connection to make room. Otherwise reject connection.
@@ -634,30 +634,30 @@ void Servent::handshakeIn()
 	{
 		if (!isPrivate())
 			if (servMgr->pubInFull())
-				throw HTTPException(HTTP_SC_UNAVAILABLE,503);
+				throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 	}
 
 	if (!versionValid)
-		throw HTTPException(HTTP_SC_FORBIDDEN,403);
+		throw HTTPException(HTTP_SC_FORBIDDEN, 403);
 
     sock->writeLine(GNU_OK);
 
-    sock->writeLineF("%s %s",HTTP_HS_AGENT,PCX_OLDAGENT);
+    sock->writeLineF("%s %s", HTTP_HS_AGENT, PCX_OLDAGENT);
 
 	if (networkID.isSet())
 	{
 		char idStr[64];
 		networkID.toStr(idStr);
-		sock->writeLineF("%s %s",PCX_HS_NETWORKID,idStr);
+		sock->writeLineF("%s %s", PCX_HS_NETWORKID, idStr);
 	}
 
 	if (servMgr->isRoot)
 	{
-		sock->writeLineF("%s %d",PCX_HS_FLOWCTL,servMgr->useFlowControl?1:0);
-		sock->writeLineF("%s %d",PCX_HS_MINBCTTL,chanMgr->minBroadcastTTL);
-		sock->writeLineF("%s %d",PCX_HS_MAXBCTTL,chanMgr->maxBroadcastTTL);
-		sock->writeLineF("%s %d",PCX_HS_RELAYBC,servMgr->relayBroadcast);
-		//sock->writeLine("%s %d",PCX_HS_FULLHIT,2);
+		sock->writeLineF("%s %d", PCX_HS_FLOWCTL, servMgr->useFlowControl?1:0);
+		sock->writeLineF("%s %d", PCX_HS_MINBCTTL, chanMgr->minBroadcastTTL);
+		sock->writeLineF("%s %d", PCX_HS_MAXBCTTL, chanMgr->maxBroadcastTTL);
+		sock->writeLineF("%s %d", PCX_HS_RELAYBC, servMgr->relayBroadcast);
+		//sock->writeLine("%s %d", PCX_HS_FULLHIT, 2);
 
 
 		if (diffRootVer)
@@ -666,14 +666,14 @@ void Servent::handshakeIn()
 			sock->writeLine(PCX_DL_URL);
 		}
 
-		sock->writeLineF("%s %s",PCX_HS_MSG,servMgr->rootMsg.cstr());
+		sock->writeLineF("%s %s", PCX_HS_MSG, servMgr->rootMsg.cstr());
 	}
 
 
 	char hostIP[64];
 	Host h = sock->host;
 	h.IPtoStr(hostIP);
-    sock->writeLineF("%s %s",PCX_HS_REMOTEIP,hostIP);
+    sock->writeLineF("%s %s", PCX_HS_REMOTEIP, hostIP);
 
 
     sock->writeLine("");
@@ -683,11 +683,11 @@ void Servent::handshakeIn()
 }
 
 // -----------------------------------
-bool	Servent::pingHost(Host &rhost,GnuID &rsid)
+bool	Servent::pingHost(Host &rhost, GnuID &rsid)
 {
 	char ipstr[64];
 	rhost.toStr(ipstr);
-	LOG_DEBUG("Ping host %s: trying..",ipstr);
+	LOG_DEBUG("Ping host %s: trying..", ipstr);
 	ClientSocket *s=NULL;
 	bool hostOK=false;
 	try
@@ -705,29 +705,29 @@ bool	Servent::pingHost(Host &rhost,GnuID &rsid)
 
 			AtomStream atom(*s);
 
-			atom.writeInt(PCP_CONNECT,1);
-			atom.writeParent(PCP_HELO,1);
-				atom.writeBytes(PCP_HELO_SESSIONID,servMgr->sessionID.id,16);
+			atom.writeInt(PCP_CONNECT, 1);
+			atom.writeParent(PCP_HELO, 1);
+				atom.writeBytes(PCP_HELO_SESSIONID, servMgr->sessionID.id, 16);
 
 			GnuID sid;
 			sid.clear();
 
-			int numc,numd;
-			ID4 id = atom.read(numc,numd);
+			int numc, numd;
+			ID4 id = atom.read(numc, numd);
 			if (id == PCP_OLEH)
 			{
 				for(int i=0; i<numc; i++)
 				{
-					int c,d;
-					ID4 pid = atom.read(c,d);
+					int c, d;
+					ID4 pid = atom.read(c, d);
 					if (pid == PCP_SESSIONID)
-						atom.readBytes(sid.id,16,d);
+						atom.readBytes(sid.id, 16, d);
 					else
-						atom.skip(c,d);
+						atom.skip(c, d);
 				}
 			}else
 			{
-				LOG_DEBUG("Ping response: %s",id.getString().str());
+				LOG_DEBUG("Ping response: %s", id.getString().str());
 				throw StreamException("Bad ping response");
 			}
 
@@ -735,14 +735,14 @@ bool	Servent::pingHost(Host &rhost,GnuID &rsid)
 				throw StreamException("SIDs don`t match");
 
 			hostOK = true;
-			LOG_DEBUG("Ping host %s: OK",ipstr);
-			atom.writeInt(PCP_QUIT,PCP_ERROR_QUIT);
+			LOG_DEBUG("Ping host %s: OK", ipstr);
+			atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT);
 
 
 		}
 	}catch(StreamException &e)
 	{
-		LOG_DEBUG("Ping host %s: %s",ipstr,e.msg);
+		LOG_DEBUG("Ping host %s: %s", ipstr, e.msg);
 	}
 	if (s)
 	{
@@ -785,8 +785,8 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 			agent = arg;
 		else if (http.isHeader("Pragma"))
 		{
-			char *ssc = stristr(arg,"stream-switch-count=");
-			char *so = stristr(arg,"stream-offset");
+			char *ssc = stristr(arg, "stream-switch-count=");
+			char *so = stristr(arg, "stream-offset");
 
 			if (ssc || so)
 			{
@@ -795,7 +795,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 			}
 		}
 
-		LOG_DEBUG("Stream: %s",http.cmdLine);
+		LOG_DEBUG("Stream: %s", http.cmdLine);
 	}
 
 
@@ -870,10 +870,10 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 		{
 
 			sock->writeLine(HTTP_SC_UNAVAILABLE);
-			sock->writeLineF("%s %s",HTTP_HS_CONTENT,MIME_XPCP);
+			sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XPCP);
 			sock->writeLine("");
 
-			handshakeIncomingPCP(atom,rhost,remoteID,agent);
+			handshakeIncomingPCP(atom, rhost, remoteID, agent);
 
 			char ripStr[64];
 			rhost.toStr(ripStr);
@@ -932,13 +932,13 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 					if (!best.host.ip)
 						break;
 
-					best.writeAtoms(atom,chanInfo.id);
+					best.writeAtoms(atom, chanInfo.id);
 					cnt++;
 				}
 
 				if (cnt)
 				{
-					LOG_DEBUG("Sent %d channel hit(s) to %s",cnt,ripStr);
+					LOG_DEBUG("Sent %d channel hit(s) to %s", cnt, ripStr);
 
 				}
 				else if (rhost.port)
@@ -951,8 +951,8 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 					if (chl->pickHits(chs))
 					{
 						best = chs.best[0];
-						int cnt = servMgr->broadcastPushRequest(best,rhost,chl->info.id,Servent::T_RELAY);
-						LOG_DEBUG("Broadcasted channel push request to %d clients for %s",cnt,ripStr);
+						int cnt = servMgr->broadcastPushRequest(best, rhost, chl->info.id, Servent::T_RELAY);
+						LOG_DEBUG("Broadcasted channel push request to %d clients for %s", cnt, ripStr);
 					}
 				}
 
@@ -994,8 +994,8 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 
 					if (best.host.ip)
 					{
-						best.writeAtoms(atom,chanInfo.id);
-						LOG_DEBUG("Sent 1 tracker hit to %s",ripStr);
+						best.writeAtoms(atom, chanInfo.id);
+						LOG_DEBUG("Sent 1 tracker hit to %s", ripStr);
 					}else if (rhost.port)
 					{
 						// find firewalled tracker
@@ -1007,8 +1007,8 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 						if (chl->pickHits(chs))
 						{
 							best = chs.best[0];
-							int cnt = servMgr->broadcastPushRequest(best,rhost,chl->info.id,Servent::T_CIN);
-							LOG_DEBUG("Broadcasted tracker push request to %d clients for %s",cnt,ripStr);
+							int cnt = servMgr->broadcastPushRequest(best, rhost, chl->info.id, Servent::T_CIN);
+							LOG_DEBUG("Broadcasted tracker push request to %d clients for %s", cnt, ripStr);
 						}
 					}
 
@@ -1017,7 +1017,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 
 			}
 			// return not available yet code
-			atom.writeInt(PCP_QUIT,error);
+			atom.writeInt(PCP_QUIT, error);
 			result = false;
 
 		}else
@@ -1038,15 +1038,15 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 
 			sock->writeLine(ICY_OK);
 
-			sock->writeLineF("%s %s",HTTP_HS_SERVER,PCX_AGENT);
-			sock->writeLineF("icy-name:%s",chanInfo.name.cstr());
-			sock->writeLineF("icy-br:%d",chanInfo.bitrate);
-			sock->writeLineF("icy-genre:%s",chanInfo.genre.cstr());
-			sock->writeLineF("icy-url:%s",chanInfo.url.cstr());
-			sock->writeLineF("icy-metaint:%d",chanMgr->icyMetaInterval);
-			sock->writeLineF("%s %s",PCX_HS_CHANNELID,idStr);
+			sock->writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
+			sock->writeLineF("icy-name:%s", chanInfo.name.cstr());
+			sock->writeLineF("icy-br:%d", chanInfo.bitrate);
+			sock->writeLineF("icy-genre:%s", chanInfo.genre.cstr());
+			sock->writeLineF("icy-url:%s", chanInfo.url.cstr());
+			sock->writeLineF("icy-metaint:%d", chanMgr->icyMetaInterval);
+			sock->writeLineF("%s %s", PCX_HS_CHANNELID, idStr);
 
-			sock->writeLineF("%s %s",HTTP_HS_CONTENT,MIME_MP3);
+			sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_MP3);
 
 		}else
 		{
@@ -1055,16 +1055,16 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 
 			if ((chanInfo.contentType != ChanInfo::T_ASX) && (chanInfo.contentType != ChanInfo::T_WMV) && (chanInfo.contentType != ChanInfo::T_WMA))
 			{
-				sock->writeLineF("%s %s",HTTP_HS_SERVER,PCX_AGENT);
+				sock->writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
 
 				sock->writeLine("Accept-Ranges: none");
 
-				sock->writeLineF("x-audiocast-name: %s",chanInfo.name.cstr());
-				sock->writeLineF("x-audiocast-bitrate: %d",chanInfo.bitrate);
-				sock->writeLineF("x-audiocast-genre: %s",chanInfo.genre.cstr());
-				sock->writeLineF("x-audiocast-description: %s",chanInfo.desc.cstr());
-				sock->writeLineF("x-audiocast-url: %s",chanInfo.url.cstr());
-				sock->writeLineF("%s %s",PCX_HS_CHANNELID,idStr);
+				sock->writeLineF("x-audiocast-name: %s", chanInfo.name.cstr());
+				sock->writeLineF("x-audiocast-bitrate: %d", chanInfo.bitrate);
+				sock->writeLineF("x-audiocast-genre: %s", chanInfo.genre.cstr());
+				sock->writeLineF("x-audiocast-description: %s", chanInfo.desc.cstr());
+				sock->writeLineF("x-audiocast-url: %s", chanInfo.url.cstr());
+				sock->writeLineF("%s %s", PCX_HS_CHANNELID, idStr);
 			}
 
 
@@ -1075,37 +1075,37 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 					case ChanInfo::T_MOV:
 						sock->writeLine("Connection: close");
 						sock->writeLine("Content-Length: 10000000");
-						sock->writeLineF("%s %s",HTTP_HS_CONTENT,MIME_MOV);
+						sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_MOV);
 						break;
 				}
-				sock->writeLineF("%s %s",HTTP_HS_CONTENT,chanInfo.getMIMEType());
+				sock->writeLineF("%s %s", HTTP_HS_CONTENT, chanInfo.getMIMEType());
 			} else if (outputProtocol == ChanInfo::SP_MMS)
 			{
 				sock->writeLine("Server: Rex/9.0.0.2980");
 				sock->writeLine("Cache-Control: no-cache");
 				sock->writeLine("Pragma: no-cache");
 				sock->writeLine("Pragma: client-id=3587303426");
-				sock->writeLine("Pragma: features=\"broadcast,playlist\"");
+				sock->writeLine("Pragma: features=\"broadcast, playlist\"");
 
 				if (nsSwitchNum)
 				{
-					sock->writeLineF("%s %s",HTTP_HS_CONTENT,MIME_MMS);
+					sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_MMS);
 				}else
 				{
 					sock->writeLine("Content-Type: application/vnd.ms.wms-hdr.asfv1");
 					if (ch)
-						sock->writeLineF("Content-Length: %d",ch->headPack.len);
+						sock->writeLineF("Content-Length: %d", ch->headPack.len);
 					sock->writeLine("Connection: Keep-Alive");
 				}
 
 			} else if (outputProtocol == ChanInfo::SP_PCP)
 			{
-				sock->writeLineF("%s %d",PCX_HS_POS,streamPos);
-				sock->writeLineF("%s %s",HTTP_HS_CONTENT,MIME_XPCP);
+				sock->writeLineF("%s %d", PCX_HS_POS, streamPos);
+				sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XPCP);
 
 			}else if (outputProtocol == ChanInfo::SP_PEERCAST)
 			{
-				sock->writeLineF("%s %s",HTTP_HS_CONTENT,MIME_XPEERCAST);
+				sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XPEERCAST);
 			}
 		}
 		sock->writeLine("");
@@ -1113,8 +1113,8 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 
 		if (gotPCP)
 		{
-			handshakeIncomingPCP(atom,rhost,remoteID,agent);
-			atom.writeInt(PCP_OK,0);
+			handshakeIncomingPCP(atom, rhost, remoteID, agent);
+			atom.writeInt(PCP_OK, 0);
 		}
 
 	}
@@ -1131,7 +1131,7 @@ void Servent::handshakeGiv(GnuID &id)
 	{
 		char idstr[64];
 		id.toStr(idstr);
-		sock->writeLineF("GIV /%s",idstr);
+		sock->writeLineF("GIV /%s", idstr);
 	}else
 		sock->writeLine("GIV");
 
@@ -1169,7 +1169,7 @@ void Servent::processGnutella()
 	gnuStream.ping(2);
 
 //	if (type != T_LOOKUP)
-//		chanMgr->broadcastRelays(this,chanMgr->minBroadcastTTL,2);
+//		chanMgr->broadcastRelays(this, chanMgr->minBroadcastTTL, 2);
 
 	lastPacket = lastPing = sys->getTime();
 	bool doneBigPing=false;
@@ -1180,7 +1180,7 @@ void Servent::processGnutella()
 	unsigned int currBytes=0;
 	unsigned int lastWait=0;
 
-	unsigned int lastTotalIn=0,lastTotalOut=0;
+	unsigned int lastTotalIn=0, lastTotalOut=0;
 
 	while (thread.active && sock->active())
 	{
@@ -1207,7 +1207,7 @@ void Servent::processGnutella()
 				if (ret == GnuStream::R_PROCESS)
 				{
 					GnuID routeID;
-					ret = gnuStream.processPacket(pack,this,routeID);
+					ret = gnuStream.processPacket(pack, this, routeID);
 
 					if (flowControl && (ret == GnuStream::R_BROADCAST))
 						ret = GnuStream::R_DROP;
@@ -1217,13 +1217,13 @@ void Servent::processGnutella()
 				switch(ret)
 				{
 					case GnuStream::R_BROADCAST:
-						if (servMgr->broadcast(pack,this))
+						if (servMgr->broadcast(pack, this))
 							stats.add(Stats::NUMBROADCASTED);
 						else
 							stats.add(Stats::NUMDROPPED);
 						break;
 					case GnuStream::R_ROUTE:
-						if (servMgr->route(pack,routeID,NULL))
+						if (servMgr->route(pack, routeID, NULL))
 							stats.add(Stats::NUMROUTED);
 						else
 							stats.add(Stats::NUMDROPPED);
@@ -1249,7 +1249,7 @@ void Servent::processGnutella()
 				}
 
 
-				LOG_NETWORK("packet in: %s-%s, %d bytes, %d hops, %d ttl, from %s",GNU_FUNC_STR(pack.func),GnuStream::getRouteStr(ret),pack.len,pack.hops,pack.ttl,ipstr);
+				LOG_NETWORK("packet in: %s-%s, %d bytes, %d hops, %d ttl, from %s", GNU_FUNC_STR(pack.func), GnuStream::getRouteStr(ret), pack.len, pack.hops, pack.ttl, ipstr);
 
 
 
@@ -1315,7 +1315,7 @@ void Servent::processGnutella()
 
 		if (delay < (int)sys->idleSleepTime)
 			delay = sys->idleSleepTime;
-		//LOG("delay %d, in %d, out %d",delay,totIn,totOut);
+		//LOG("delay %d, in %d, out %d", delay, totIn, totOut);
 
 		sys->sleep(delay);
 	}
@@ -1343,14 +1343,14 @@ void Servent::processRoot()
 				char ipstr[64];
 				sock->host.toStr(ipstr);
 
-				LOG_NETWORK("packet in: %d from %s",pack.func,ipstr);
+				LOG_NETWORK("packet in: %d from %s", pack.func, ipstr);
 
 
 				if (pack.func == GNU_FUNC_PING)		// if ping then pong back some hosts and close
 				{
 
 					Host hl[32];
-					int cnt = servMgr->getNewestServents(hl,32,sock->host);
+					int cnt = servMgr->getNewestServents(hl, 32, sock->host);
 					if (cnt)
 					{
 						int start = sys->rnd() % cnt;
@@ -1360,18 +1360,18 @@ void Servent::processRoot()
 						{
 							GnuPacket pong;
 							pack.hops = 1;
-							pong.initPong(hl[start],false,pack);
+							pong.initPong(hl[start], false, pack);
 							gnuStream.sendPacket(pong);
 
 							char ipstr[64];
 							hl[start].toStr(ipstr);
 
-							//LOG_NETWORK("Pong %d: %s",start+1,ipstr);
+							//LOG_NETWORK("Pong %d: %s", start+1, ipstr);
 							start = (start+1) % cnt;
 						}
 						char str[64];
 						sock->host.toStr(str);
-						LOG_NETWORK("Sent %d pong(s) to %s",max,str);
+						LOG_NETWORK("Sent %d pong(s) to %s", max, str);
 					}else
 					{
 						LOG_NETWORK("No Pongs to send");
@@ -1379,27 +1379,27 @@ void Servent::processRoot()
 					}
 				}else if (pack.func == GNU_FUNC_PONG)		// pong?
 				{
-					MemoryStream pong(pack.data,pack.len);
+					MemoryStream pong(pack.data, pack.len);
 
-					int ip,port;
+					int ip, port;
 					port = pong.readShort();
 					ip = pong.readLong();
 					ip = SWAP4(ip);
 
 
-					Host h(ip,port);
+					Host h(ip, port);
 					if ((ip) && (port) && (h.globalIP()))
 					{
 
-						LOG_NETWORK("added pong: %d.%d.%d.%d:%d",ip>>24&0xff,ip>>16&0xff,ip>>8&0xff,ip&0xff,port);
-						servMgr->addHost(h,ServHost::T_SERVENT,sys->getTime());
+						LOG_NETWORK("added pong: %d.%d.%d.%d:%d", ip>>24&0xff, ip>>16&0xff, ip>>8&0xff, ip&0xff, port);
+						servMgr->addHost(h, ServHost::T_SERVENT, sys->getTime());
 					}
 					//return;
 				} else if (pack.func == GNU_FUNC_HIT)
 				{
-					MemoryStream data(pack.data,pack.len);
+					MemoryStream data(pack.data, pack.len);
 					ChanHit hit;
-					gnuStream.readHit(data,hit,pack.hops,pack.id);
+					gnuStream.readHit(data, hit, pack.hops, pack.id);
 				}
 
 				//if (gnuStream.packetsIn > 5)	// die if we get too many packets
@@ -1413,7 +1413,7 @@ void Servent::processRoot()
 
 	}catch(StreamException &e)
 	{
-		LOG_ERROR("Relay: %s",e.msg);
+		LOG_ERROR("Relay: %s", e.msg);
 	}
 
 
@@ -1431,7 +1431,7 @@ int Servent::givProc(ThreadInfo *thread)
 
 	}catch(StreamException &e)
 	{
-		LOG_ERROR("GIV: %s",e.msg);
+		LOG_ERROR("GIV: %s", e.msg);
 	}
 
 	sv->kill();
@@ -1448,28 +1448,28 @@ void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
 
 	bool sendBCID = isTrusted && chanMgr->isBroadcasting();
 
-	atom.writeParent(PCP_HELO,3 + (testFW?1:0) + (nonFW?1:0) + (sendBCID?1:0));
-		atom.writeString(PCP_HELO_AGENT,PCX_AGENT);
-		atom.writeInt(PCP_HELO_VERSION,PCP_CLIENT_VERSION);
-		atom.writeBytes(PCP_HELO_SESSIONID,servMgr->sessionID.id,16);
+	atom.writeParent(PCP_HELO, 3 + (testFW?1:0) + (nonFW?1:0) + (sendBCID?1:0));
+		atom.writeString(PCP_HELO_AGENT, PCX_AGENT);
+		atom.writeInt(PCP_HELO_VERSION, PCP_CLIENT_VERSION);
+		atom.writeBytes(PCP_HELO_SESSIONID, servMgr->sessionID.id, 16);
 		if (nonFW)
-			atom.writeShort(PCP_HELO_PORT,servMgr->serverHost.port);
+			atom.writeShort(PCP_HELO_PORT, servMgr->serverHost.port);
 		if (testFW)
-			atom.writeShort(PCP_HELO_PING,servMgr->serverHost.port);
+			atom.writeShort(PCP_HELO_PING, servMgr->serverHost.port);
 		if (sendBCID)
-			atom.writeBytes(PCP_HELO_BCID,chanMgr->broadcastID.id,16);
+			atom.writeBytes(PCP_HELO_BCID, chanMgr->broadcastID.id, 16);
 
 
 	LOG_DEBUG("PCP outgoing waiting for OLEH..");
 
 
 
-	int numc,numd;
-	ID4 id = atom.read(numc,numd);
+	int numc, numd;
+	ID4 id = atom.read(numc, numd);
 	if (id != PCP_OLEH)
 	{
-		LOG_DEBUG("PCP outgoing reply: %s",id.getString().str());
-		atom.writeInt(PCP_QUIT,PCP_ERROR_QUIT+PCP_ERROR_BADRESPONSE);
+		LOG_DEBUG("PCP outgoing reply: %s", id.getString().str());
+		atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT+PCP_ERROR_BADRESPONSE);
 		throw StreamException("Got unexpected PCP response");
 	}
 
@@ -1488,12 +1488,12 @@ void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
 	// read OLEH response
 	for(int i=0; i<numc; i++)
 	{
-		int c,dlen;
-		ID4 id = atom.read(c,dlen);
+		int c, dlen;
+		ID4 id = atom.read(c, dlen);
 
 		if (id == PCP_HELO_AGENT)
 		{
-			atom.readString(arg,sizeof(arg),dlen);
+			atom.readString(arg, sizeof(arg), dlen);
 			agent.set(arg);
 
 		}else if (id == PCP_HELO_REMOTEIP)
@@ -1514,14 +1514,14 @@ void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
 
 		}else if (id == PCP_HELO_SESSIONID)
 		{
-			atom.readBytes(rid.id,16);
+			atom.readBytes(rid.id, 16);
 			if (rid.isSame(servMgr->sessionID))
 				throw StreamException("Servent loopback");
 
 		}else
 		{
-			LOG_DEBUG("PCP handshake skip: %s",id.getString().str());
-			atom.skip(c,dlen);
+			LOG_DEBUG("PCP handshake skip: %s", id.getString().str());
+			atom.skip(c, dlen);
 		}
 
     }
@@ -1536,7 +1536,7 @@ void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
 			{
 				char ipstr[64];
 				thisHost.toStr(ipstr);
-				LOG_DEBUG("Got new ip: %s",ipstr);
+				LOG_DEBUG("Got new ip: %s", ipstr);
 				servMgr->serverHost.ip = thisHost.ip;
 			}
 
@@ -1551,7 +1551,7 @@ void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
 
 		if (disable == 1)
 		{
-			LOG_ERROR("client disabled: %d",disable);
+			LOG_ERROR("client disabled: %d", disable);
 			servMgr->isDisabled = true;
 		}else
 		{
@@ -1563,7 +1563,7 @@ void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
 
 	if (!rid.isSet())
 	{
-		atom.writeInt(PCP_QUIT,PCP_ERROR_QUIT+PCP_ERROR_NOTIDENTIFIED);
+		atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT+PCP_ERROR_NOTIDENTIFIED);
 		throw StreamException("Remote host not identified");
 	}
 
@@ -1574,14 +1574,14 @@ void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
 // -----------------------------------
 void Servent::handshakeIncomingPCP(AtomStream &atom, Host &rhost, GnuID &rid, String &agent)
 {
-	int numc,numd;
-	ID4 id = atom.read(numc,numd);
+	int numc, numd;
+	ID4 id = atom.read(numc, numd);
 
 
 	if (id != PCP_HELO)
 	{
-		LOG_DEBUG("PCP incoming reply: %s",id.getString().str());
-		atom.writeInt(PCP_QUIT,PCP_ERROR_QUIT+PCP_ERROR_BADRESPONSE);
+		LOG_DEBUG("PCP incoming reply: %s", id.getString().str());
+		atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT+PCP_ERROR_BADRESPONSE);
 		throw StreamException("Got unexpected PCP response");
 	}
 
@@ -1604,12 +1604,12 @@ void Servent::handshakeIncomingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
 	for(int i=0; i<numc; i++)
 	{
 
-		int c,dlen;
-		ID4 id = atom.read(c,dlen);
+		int c, dlen;
+		ID4 id = atom.read(c, dlen);
 
 		if (id == PCP_HELO_AGENT)
 		{
-			atom.readString(arg,sizeof(arg),dlen);
+			atom.readString(arg, sizeof(arg), dlen);
 			agent.set(arg);
 
 		}else if (id == PCP_HELO_VERSION)
@@ -1618,13 +1618,13 @@ void Servent::handshakeIncomingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
 
 		}else if (id == PCP_HELO_SESSIONID)
 		{
-			atom.readBytes(rid.id,16);
+			atom.readBytes(rid.id, 16);
 			if (rid.isSame(servMgr->sessionID))
 				throw StreamException("Servent loopback");
 
 		}else if (id == PCP_HELO_BCID)
 		{
-			atom.readBytes(bcID.id,16);
+			atom.readBytes(bcID.id, 16);
 
 		}else if (id == PCP_HELO_OSTYPE)
 		{
@@ -1637,14 +1637,14 @@ void Servent::handshakeIncomingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
 			pingPort = atom.readShort();
 		}else
 		{
-			LOG_DEBUG("PCP handshake skip: %s",id.getString().str());
-			atom.skip(c,dlen);
+			LOG_DEBUG("PCP handshake skip: %s", id.getString().str());
+			atom.skip(c, dlen);
 		}
 
     }
 
 	if (version)
-		LOG_DEBUG("Incoming PCP is %s : v%d", agent.cstr(),version);
+		LOG_DEBUG("Incoming PCP is %s : v%d", agent.cstr(), version);
 
 
 	if (!rhost.globalIP() && servMgr->serverHost.globalIP())
@@ -1656,7 +1656,7 @@ void Servent::handshakeIncomingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
 		rhost.toStr(ripStr);
 		LOG_DEBUG("Incoming firewalled test request: %s ", ripStr);
 		rhost.port = pingPort;
-		if (!rhost.globalIP() || !pingHost(rhost,rid))
+		if (!rhost.globalIP() || !pingHost(rhost, rid))
 			rhost.port = 0;
 	}
 
@@ -1669,8 +1669,8 @@ void Servent::handshakeIncomingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
 				BCID *bcid = servMgr->findValidBCID(bcID);
 				if (!bcid || (bcid && !bcid->valid))
 				{
-					atom.writeParent(PCP_OLEH,1);
-					atom.writeInt(PCP_HELO_DISABLE,1);
+					atom.writeParent(PCP_OLEH, 1);
+					atom.writeInt(PCP_HELO_DISABLE, 1);
 					throw StreamException("Client is banned");
 				}
 			}
@@ -1678,25 +1678,25 @@ void Servent::handshakeIncomingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
 	}
 
 
-	atom.writeParent(PCP_OLEH,5);
-		atom.writeString(PCP_HELO_AGENT,PCX_AGENT);
-		atom.writeBytes(PCP_HELO_SESSIONID,servMgr->sessionID.id,16);
-		atom.writeInt(PCP_HELO_VERSION,PCP_CLIENT_VERSION);
-		atom.writeInt(PCP_HELO_REMOTEIP,rhost.ip);
-		atom.writeShort(PCP_HELO_PORT,rhost.port);
+	atom.writeParent(PCP_OLEH, 5);
+		atom.writeString(PCP_HELO_AGENT, PCX_AGENT);
+		atom.writeBytes(PCP_HELO_SESSIONID, servMgr->sessionID.id, 16);
+		atom.writeInt(PCP_HELO_VERSION, PCP_CLIENT_VERSION);
+		atom.writeInt(PCP_HELO_REMOTEIP, rhost.ip);
+		atom.writeShort(PCP_HELO_PORT, rhost.port);
 
 	if (version)
 	{
 		if (version < PCP_CLIENT_MINVERSION)
 		{
-			atom.writeInt(PCP_QUIT,PCP_ERROR_QUIT+PCP_ERROR_BADAGENT);
+			atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT+PCP_ERROR_BADAGENT);
 			throw StreamException("Agent is not valid");
 		}
 	}
 
 	if (!rid.isSet())
 	{
-		atom.writeInt(PCP_QUIT,PCP_ERROR_QUIT+PCP_ERROR_NOTIDENTIFIED);
+		atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT+PCP_ERROR_NOTIDENTIFIED);
 		throw StreamException("Remote host not identified");
 	}
 
@@ -1704,7 +1704,7 @@ void Servent::handshakeIncomingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
 
 	if (servMgr->isRoot)
 	{
-		servMgr->writeRootAtoms(atom,false);
+		servMgr->writeRootAtoms(atom, false);
 	}
 
 	LOG_DEBUG("PCP Incoming handshake complete.");
@@ -1720,11 +1720,11 @@ void Servent::processIncomingPCP(bool suggestOthers)
 	AtomStream atom(*sock);
 	Host rhost = sock->host;
 
-	handshakeIncomingPCP(atom,rhost,remoteID,agent);
+	handshakeIncomingPCP(atom, rhost, remoteID, agent);
 
 
-	bool alreadyConnected = (servMgr->findConnection(Servent::T_COUT,remoteID)!=NULL)
-							|| (servMgr->findConnection(Servent::T_CIN,remoteID)!=NULL);
+	bool alreadyConnected = (servMgr->findConnection(Servent::T_COUT, remoteID)!=NULL)
+							|| (servMgr->findConnection(Servent::T_CIN, remoteID)!=NULL);
 	bool unavailable = servMgr->controlInFull();
 	bool offair = !servMgr->isRoot && !chanMgr->isBroadcasting();
 
@@ -1799,12 +1799,12 @@ void Servent::processIncomingPCP(bool suggestOthers)
 
 				GnuID noID;
 				noID.clear();
-				best.writeAtoms(atom,noID);
+				best.writeAtoms(atom, noID);
 				cnt++;
 			}
 			if (cnt)
 			{
-				LOG_DEBUG("Sent %d tracker(s) to %s",cnt,rstr);
+				LOG_DEBUG("Sent %d tracker(s) to %s", cnt, rstr);
 			}
 			else if (rhost.port)
 			{
@@ -1820,8 +1820,8 @@ void Servent::processIncomingPCP(bool suggestOthers)
 					best = chs.best[0];
 					GnuID noID;
 					noID.clear();
-					int cnt = servMgr->broadcastPushRequest(best,rhost,noID,Servent::T_CIN);
-					LOG_DEBUG("Broadcasted tracker push request to %d clients for %s",cnt,rstr);
+					int cnt = servMgr->broadcastPushRequest(best, rhost, noID, Servent::T_CIN);
+					LOG_DEBUG("Broadcasted tracker push request to %d clients for %s", cnt, rstr);
 				}
 			}else
 			{
@@ -1830,9 +1830,9 @@ void Servent::processIncomingPCP(bool suggestOthers)
 		}
 
 
-		LOG_ERROR("Sending QUIT to incoming: %d",error);
+		LOG_ERROR("Sending QUIT to incoming: %d", error);
 
-		atom.writeInt(PCP_QUIT,error);
+		atom.writeInt(PCP_QUIT, error);
 		return;
 	}
 
@@ -1840,11 +1840,11 @@ void Servent::processIncomingPCP(bool suggestOthers)
 	type = T_CIN;
 	setStatus(S_CONNECTED);
 
-	atom.writeInt(PCP_OK,0);
+	atom.writeInt(PCP_OK, 0);
 
 	// ask for update
-	atom.writeParent(PCP_ROOT,1);
-		atom.writeParent(PCP_ROOT_UPDATE,0);
+	atom.writeParent(PCP_ROOT, 1);
+		atom.writeParent(PCP_ROOT_UPDATE, 0);
 
 	pcpStream = new PCPStream(remoteID);
 
@@ -1852,7 +1852,7 @@ void Servent::processIncomingPCP(bool suggestOthers)
 	BroadcastState bcs;
 	while (!error && thread.active && !sock->eof())
 	{
-		error = pcpStream->readPacket(*sock,bcs);
+		error = pcpStream->readPacket(*sock, bcs);
 		sys->sleepIdle();
 
 		if (!servMgr->isRoot && !chanMgr->isBroadcasting())
@@ -1864,9 +1864,9 @@ void Servent::processIncomingPCP(bool suggestOthers)
 	pcpStream->flush(*sock);
 
 	error += PCP_ERROR_QUIT;
-	atom.writeInt(PCP_QUIT,error);
+	atom.writeInt(PCP_QUIT, error);
 
-	LOG_DEBUG("PCP Incoming to %s closed: %d",rstr,error);
+	LOG_DEBUG("PCP Incoming to %s closed: %d", rstr, error);
 
 }
 
@@ -1939,7 +1939,7 @@ int Servent::outgoingProc(ThreadInfo *thread)
 
 				if ((!bestHit.host.ip) && ((ctime-chanMgr->lastYPConnect) > MIN_YP_RETRY))
 				{
-					bestHit.host.fromStrName(servMgr->rootHost.cstr(),DEFAULT_PORT);
+					bestHit.host.fromStrName(servMgr->rootHost.cstr(), DEFAULT_PORT);
 					bestHit.yp = true;
 					chanMgr->lastYPConnect = ctime;
 				}
@@ -1961,7 +1961,7 @@ int Servent::outgoingProc(ThreadInfo *thread)
 			try
 			{
 
-				LOG_DEBUG("COUT to %s: Connecting..",ipStr);
+				LOG_DEBUG("COUT to %s: Connecting..", ipStr);
 
 				if (!sv->sock)
 				{
@@ -1980,12 +1980,12 @@ int Servent::outgoingProc(ThreadInfo *thread)
 				sv->setStatus(S_HANDSHAKE);
 
 				Host rhost = sv->sock->host;
-				atom.writeInt(PCP_CONNECT,1);
-				handshakeOutgoingPCP(atom,rhost,sv->remoteID,sv->agent,bestHit.yp);
+				atom.writeInt(PCP_CONNECT, 1);
+				handshakeOutgoingPCP(atom, rhost, sv->remoteID, sv->agent, bestHit.yp);
 
 				sv->setStatus(S_CONNECTED);
 
-				LOG_DEBUG("COUT to %s: OK",ipStr);
+				LOG_DEBUG("COUT to %s: OK", ipStr);
 
 				sv->pcpStream->init(sv->remoteID);
 
@@ -1993,7 +1993,7 @@ int Servent::outgoingProc(ThreadInfo *thread)
 				error = 0;
 				while (!error && sv->thread.active && !sv->sock->eof() && servMgr->autoServe)
 				{
-					error = sv->pcpStream->readPacket(*sv->sock,bcs);
+					error = sv->pcpStream->readPacket(*sv->sock, bcs);
 
 					sys->sleepIdle();
 
@@ -2011,17 +2011,17 @@ int Servent::outgoingProc(ThreadInfo *thread)
 				sv->pcpStream->flush(*sv->sock);
 
 				error += PCP_ERROR_QUIT;
-				atom.writeInt(PCP_QUIT,error);
+				atom.writeInt(PCP_QUIT, error);
 
-				LOG_ERROR("COUT to %s closed: %d",ipStr,error);
+				LOG_ERROR("COUT to %s closed: %d", ipStr, error);
 
 			}catch(TimeoutException &e)
 			{
-				LOG_ERROR("COUT to %s: timeout (%s)",ipStr,e.msg);
+				LOG_ERROR("COUT to %s: timeout (%s)", ipStr, e.msg);
 				sv->setStatus(S_TIMEOUT);
 			}catch(StreamException &e)
 			{
-				LOG_ERROR("COUT to %s: %s",ipStr,e.msg);
+				LOG_ERROR("COUT to %s: %s", ipStr, e.msg);
 				sv->setStatus(S_ERROR);
 			}
 
@@ -2072,10 +2072,10 @@ int Servent::incomingProc(ThreadInfo *thread)
 				sv->sock->writeLine("WWW-Authenticate: Basic realm=\"PeerCast\"");
 			sv->sock->writeLine("");
 		}catch(StreamException &){}
-		LOG_ERROR("Incoming from %s: %s",ipStr,e.msg);
+		LOG_ERROR("Incoming from %s: %s", ipStr, e.msg);
 	}catch(StreamException &e)
 	{
-		LOG_ERROR("Incoming from %s: %s",ipStr,e.msg);
+		LOG_ERROR("Incoming from %s: %s", ipStr, e.msg);
 	}
 
 
@@ -2097,7 +2097,7 @@ void Servent::processServent()
 }
 
 // -----------------------------------
-void Servent::processStream(bool doneHandshake,ChanInfo &chanInfo)
+void Servent::processStream(bool doneHandshake, ChanInfo &chanInfo)
 {
 	if (!doneHandshake)
 	{
@@ -2112,7 +2112,7 @@ void Servent::processStream(bool doneHandshake,ChanInfo &chanInfo)
 
 		chanID = chanInfo.id;
 
-		LOG_CHANNEL("Sending channel: %s ",ChanInfo::getProtocolStr(outputProtocol));
+		LOG_CHANNEL("Sending channel: %s ", ChanInfo::getProtocolStr(outputProtocol));
 
 		if (!waitForChannelHeader(chanInfo))
 			throw StreamException("Channel not ready");
@@ -2131,16 +2131,16 @@ void Servent::processStream(bool doneHandshake,ChanInfo &chanInfo)
 			if ((addMetadata) && (chanMgr->icyMetaInterval))
 				sendRawMetaChannel(chanMgr->icyMetaInterval);
 			else
-				sendRawChannel(true,true);
+				sendRawChannel(true, true);
 
 		}else if (outputProtocol == ChanInfo::SP_MMS)
 		{
 			if (nsSwitchNum)
 			{
-				sendRawChannel(true,true);
+				sendRawChannel(true, true);
 			}else
 			{
-				sendRawChannel(true,false);
+				sendRawChannel(true, false);
 			}
 
 		}else if (outputProtocol  == ChanInfo::SP_PCP)
@@ -2167,9 +2167,9 @@ void Servent::processStream(bool doneHandshake,ChanInfo &chanInfo)
 		int cnt=0;
 		while (!file.eof())
 		{
-			LOG_DEBUG("send %d",cnt++);
-			file.read(buf,sizeof(buf));
-			sock->write(buf,sizeof(buf));
+			LOG_DEBUG("send %d", cnt++);
+			file.read(buf, sizeof(buf));
+			sock->write(buf, sizeof(buf));
 
 		}
 		file.close();
@@ -2210,13 +2210,13 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
 
 		setStatus(S_CONNECTED);
 
-		LOG_DEBUG("Starting Raw stream of %s at %d",ch->info.name.cstr(),streamPos);
+		LOG_DEBUG("Starting Raw stream of %s at %d", ch->info.name.cstr(), streamPos);
 
 		if (sendHead)
 		{
 			ch->headPack.writeRaw(*sock);
 			streamPos = ch->headPack.pos + ch->headPack.len;
-			LOG_DEBUG("Sent %d bytes header ",ch->headPack.len);
+			LOG_DEBUG("Sent %d bytes header ", ch->headPack.len);
 		}
 
 		if (sendData)
@@ -2241,10 +2241,10 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
 					}
 
 					ChanPacket rawPack;
-					if (ch->rawData.findPacket(streamPos,rawPack))
+					if (ch->rawData.findPacket(streamPos, rawPack))
 					{
 						if (syncPos != rawPack.sync)
-							LOG_ERROR("Send skip: %d",rawPack.sync-syncPos);
+							LOG_ERROR("Send skip: %d", rawPack.sync-syncPos);
 						syncPos = rawPack.sync+1;
 
 						if ((rawPack.type == ChanPacket::T_DATA) || (rawPack.type == ChanPacket::T_HEAD))
@@ -2254,7 +2254,7 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
 						}
 
 						if (rawPack.pos < streamPos)
-							LOG_DEBUG("raw: skip back %d",rawPack.pos-streamPos);
+							LOG_DEBUG("raw: skip back %d", rawPack.pos-streamPos);
 						streamPos = rawPack.pos+rawPack.len;
 					}
 				}
@@ -2267,7 +2267,7 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
 		}
 	}catch(StreamException &e)
 	{
-		LOG_ERROR("Stream channel: %s",e.msg);
+		LOG_ERROR("Stream channel: %s", e.msg);
 	}
 }
 
@@ -2300,11 +2300,11 @@ void Servent::sendRawMultiChannel(bool sendHead, bool sendData)
 				Channel *ch = chanMgr->findChannelByID(chanIDs[i]);
 				if (ch)
 				{
-					LOG_DEBUG("Starting RawMulti stream: %s",ch->info.name.cstr());
+					LOG_DEBUG("Starting RawMulti stream: %s", ch->info.name.cstr());
 					ch->headPack.writeRaw(*sock);
 					chanStreamPos[i] = ch->headPack.pos + ch->headPack.len;
 					chanStreamIndex[i] = ch->streamIndex;
-					LOG_DEBUG("Sent %d bytes header",ch->headPack.len);
+					LOG_DEBUG("Sent %d bytes header", ch->headPack.len);
 
 				}
 			}
@@ -2327,22 +2327,22 @@ void Servent::sendRawMultiChannel(bool sendHead, bool sendData)
 						{
 							chanStreamIndex[i] = ch->streamIndex;
 							chanStreamPos[i] = ch->headPack.pos;
-							LOG_DEBUG("sendRawMulti got new stream index for chan %d",i);
+							LOG_DEBUG("sendRawMulti got new stream index for chan %d", i);
 						}
 
 						ChanPacket rawPack;
-						if (ch->rawData.findPacket(chanStreamPos[i],rawPack))
+						if (ch->rawData.findPacket(chanStreamPos[i], rawPack))
 						{
 							if ((rawPack.type == ChanPacket::T_DATA) || (rawPack.type == ChanPacket::T_HEAD))
 								rawPack.writeRaw(*sock);
 
 
 							if (rawPack.pos < chanStreamPos[i])
-								LOG_DEBUG("raw: skip back %d",rawPack.pos-chanStreamPos[i]);
+								LOG_DEBUG("raw: skip back %d", rawPack.pos-chanStreamPos[i]);
 							chanStreamPos[i] = rawPack.pos+rawPack.len;
 
 
-							//LOG("raw at %d: %d %d",streamPos,ch->rawData.getStreamPos(ch->rawData.firstPos),ch->rawData.getStreamPos(ch->rawData.lastPos));
+							//LOG("raw at %d: %d %d", streamPos, ch->rawData.getStreamPos(ch->rawData.firstPos), ch->rawData.getStreamPos(ch->rawData.lastPos));
 						}
 					}
 					break;
@@ -2354,7 +2354,7 @@ void Servent::sendRawMultiChannel(bool sendHead, bool sendData)
 		}
 	}catch(StreamException &e)
 	{
-		LOG_ERROR("Stream channel: %s",e.msg);
+		LOG_ERROR("Stream channel: %s", e.msg);
 	}
 }
 #endif
@@ -2373,10 +2373,10 @@ void Servent::sendRawMetaChannel(int interval)
 
 		setStatus(S_CONNECTED);
 
-		LOG_DEBUG("Starting Raw Meta stream of %s (metaint: %d) at %d",ch->info.name.cstr(),interval,streamPos);
+		LOG_DEBUG("Starting Raw Meta stream of %s (metaint: %d) at %d", ch->info.name.cstr(), interval, streamPos);
 
 
-		String lastTitle,lastURL;
+		String lastTitle, lastURL;
 
 		int		lastMsgTime=sys->getTime();
 		bool	showMsg=true;
@@ -2400,14 +2400,14 @@ void Servent::sendRawMetaChannel(int interval)
 			{
 
 				ChanPacket rawPack;
-				if (ch->rawData.findPacket(streamPos,rawPack))
+				if (ch->rawData.findPacket(streamPos, rawPack))
 				{
 
 					if (syncPos != rawPack.sync)
-						LOG_ERROR("Send skip: %d",rawPack.sync-syncPos);
+						LOG_ERROR("Send skip: %d", rawPack.sync-syncPos);
 					syncPos = rawPack.sync+1;
 
-					MemoryStream mem(rawPack.data,rawPack.len);
+					MemoryStream mem(rawPack.data, rawPack.len);
 
 					if (rawPack.type == ChanPacket::T_DATA)
 					{
@@ -2419,7 +2419,7 @@ void Servent::sendRawMetaChannel(int interval)
 							int rl = len;
 							if ((bufPos+rl) > interval)
 								rl = interval-bufPos;
-							memcpy(&buf[bufPos],p,rl);
+							memcpy(&buf[bufPos], p, rl);
 							bufPos+=rl;
 							p+=rl;
 							len-=rl;
@@ -2427,7 +2427,7 @@ void Servent::sendRawMetaChannel(int interval)
 							if (bufPos >= interval)
 							{
 								bufPos = 0;
-								sock->write(buf,interval);
+								sock->write(buf, interval);
 								lastWriteTime = sys->getTime();
 
 								if (chanMgr->broadcastMsgInterval)
@@ -2446,7 +2446,7 @@ void Servent::sendRawMetaChannel(int interval)
 								{
 
 									char tmp[1024];
-									String title,url;
+									String title, url;
 
 									title = *metaTitle;
 									url = ch->info.url;
@@ -2454,15 +2454,15 @@ void Servent::sendRawMetaChannel(int interval)
 									title.convertTo(String::T_META);
 									url.convertTo(String::T_META);
 
-									sprintf(tmp,"StreamTitle='%s';StreamUrl='%s';\0",title.cstr(),url.cstr());
+									sprintf(tmp, "StreamTitle='%s';StreamUrl='%s';\0", title.cstr(), url.cstr());
 									int len = ((strlen(tmp) + 15+1) / 16);
 									sock->writeChar(len);
-									sock->write(tmp,len*16);
+									sock->write(tmp, len*16);
 
 									lastTitle = *metaTitle;
 									lastURL = ch->info.url;
 
-									LOG_DEBUG("StreamTitle: %s, StreamURL: %s",lastTitle.cstr(),lastURL.cstr());
+									LOG_DEBUG("StreamTitle: %s, StreamURL: %s", lastTitle.cstr(), lastURL.cstr());
 
 								}else
 								{
@@ -2483,7 +2483,7 @@ void Servent::sendRawMetaChannel(int interval)
 		}
 	}catch(StreamException &e)
 	{
-		LOG_ERROR("Stream channel: %s",e.msg);
+		LOG_ERROR("Stream channel: %s", e.msg);
 	}
 }
 // -----------------------------------
@@ -2497,7 +2497,7 @@ void Servent::sendPeercastChannel()
 		if (!ch)
 			throw StreamException("Channel not found");
 
-		LOG_DEBUG("Starting PeerCast stream: %s",ch->info.name.cstr());
+		LOG_DEBUG("Starting PeerCast stream: %s", ch->info.name.cstr());
 
 		sock->writeTag("PCST");
 
@@ -2505,7 +2505,7 @@ void Servent::sendPeercastChannel()
 
 		ch->headPack.writePeercast(*sock);
 
-		pack.init(ChanPacket::T_META,ch->insertMeta.data,ch->insertMeta.len,ch->streamPos);
+		pack.init(ChanPacket::T_META, ch->insertMeta.data, ch->insertMeta.len, ch->streamPos);
 		pack.writePeercast(*sock);
 
 		streamPos = 0;
@@ -2517,14 +2517,14 @@ void Servent::sendPeercastChannel()
 			{
 
 				ChanPacket rawPack;
-				if (ch->rawData.findPacket(streamPos,rawPack))
+				if (ch->rawData.findPacket(streamPos, rawPack))
 				{
 					if ((rawPack.type == ChanPacket::T_DATA) || (rawPack.type == ChanPacket::T_HEAD))
 					{
 						sock->writeTag("SYNC");
 						sock->writeShort(4);
 						sock->writeShort(0);
-						sock->write(&syncPos,4);
+						sock->write(&syncPos, 4);
 						syncPos++;
 
 						rawPack.writePeercast(*sock);
@@ -2537,7 +2537,7 @@ void Servent::sendPeercastChannel()
 
 	}catch(StreamException &e)
 	{
-		LOG_ERROR("Stream channel: %s",e.msg);
+		LOG_ERROR("Stream channel: %s", e.msg);
 	}
 }
 // -----------------------------------
@@ -2555,24 +2555,24 @@ void Servent::sendPCPChannel()
 	try
 	{
 
-		LOG_DEBUG("Starting PCP stream of channel at %d",streamPos);
+		LOG_DEBUG("Starting PCP stream of channel at %d", streamPos);
 
 
 		setStatus(S_CONNECTED);
 
-		atom.writeParent(PCP_CHAN,3 + ((sendHeader)?1:0));
-			atom.writeBytes(PCP_CHAN_ID,chanID.id,16);
+		atom.writeParent(PCP_CHAN, 3 + ((sendHeader)?1:0));
+			atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
 			ch->info.writeInfoAtoms(atom);
 			ch->info.writeTrackAtoms(atom);
 			if (sendHeader)
 			{
-				atom.writeParent(PCP_CHAN_PKT,3);
-					atom.writeID4(PCP_CHAN_PKT_TYPE,PCP_CHAN_PKT_HEAD);
-					atom.writeInt(PCP_CHAN_PKT_POS,ch->headPack.pos);
-					atom.writeBytes(PCP_CHAN_PKT_DATA,ch->headPack.data,ch->headPack.len);
+				atom.writeParent(PCP_CHAN_PKT, 3);
+					atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_HEAD);
+					atom.writeInt(PCP_CHAN_PKT_POS, ch->headPack.pos);
+					atom.writeBytes(PCP_CHAN_PKT_DATA, ch->headPack.data, ch->headPack.len);
 
 				streamPos = ch->headPack.pos+ch->headPack.len;
-				LOG_DEBUG("Sent %d bytes header",ch->headPack.len);
+				LOG_DEBUG("Sent %d bytes header", ch->headPack.len);
 			}
 
 		unsigned int streamIndex = ch->streamIndex;
@@ -2594,41 +2594,41 @@ void Servent::sendPCPChannel()
 
 				ChanPacket rawPack;
 
-				if (ch->rawData.findPacket(streamPos,rawPack))
+				if (ch->rawData.findPacket(streamPos, rawPack))
 				{
 
 					if (rawPack.type == ChanPacket::T_HEAD)
 					{
-						atom.writeParent(PCP_CHAN,2);
-							atom.writeBytes(PCP_CHAN_ID,chanID.id,16);
-							atom.writeParent(PCP_CHAN_PKT,3);
-								atom.writeID4(PCP_CHAN_PKT_TYPE,PCP_CHAN_PKT_HEAD);
-								atom.writeInt(PCP_CHAN_PKT_POS,rawPack.pos);
-								atom.writeBytes(PCP_CHAN_PKT_DATA,rawPack.data,rawPack.len);
+						atom.writeParent(PCP_CHAN, 2);
+							atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
+							atom.writeParent(PCP_CHAN_PKT, 3);
+								atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_HEAD);
+								atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
+								atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
 
 
 					}else if (rawPack.type == ChanPacket::T_DATA)
 					{
-						atom.writeParent(PCP_CHAN,2);
-							atom.writeBytes(PCP_CHAN_ID,chanID.id,16);
-							atom.writeParent(PCP_CHAN_PKT,3);
-								atom.writeID4(PCP_CHAN_PKT_TYPE,PCP_CHAN_PKT_DATA);
-								atom.writeInt(PCP_CHAN_PKT_POS,rawPack.pos);
-								atom.writeBytes(PCP_CHAN_PKT_DATA,rawPack.data,rawPack.len);
+						atom.writeParent(PCP_CHAN, 2);
+							atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
+							atom.writeParent(PCP_CHAN_PKT, 3);
+								atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_DATA);
+								atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
+								atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
 
 					}
 
 					if (rawPack.pos < streamPos)
-						LOG_DEBUG("pcp: skip back %d",rawPack.pos-streamPos);
+						LOG_DEBUG("pcp: skip back %d", rawPack.pos-streamPos);
 
-					//LOG_DEBUG("Sending %d-%d (%d,%d,%d)",rawPack.pos,rawPack.pos+rawPack.len,ch->streamPos,ch->rawData.getLatestPos(),ch->rawData.getOldestPos());
+					//LOG_DEBUG("Sending %d-%d (%d, %d, %d)", rawPack.pos, rawPack.pos+rawPack.len, ch->streamPos, ch->rawData.getLatestPos(), ch->rawData.getOldestPos());
 
 					streamPos = rawPack.pos+rawPack.len;
 				}
 
 			}
 			BroadcastState bcs;
-			error = pcpStream->readPacket(*sock,bcs);
+			error = pcpStream->readPacket(*sock, bcs);
 			if (error)
 				throw StreamException("PCP exception");
 
@@ -2640,12 +2640,12 @@ void Servent::sendPCPChannel()
 
 	}catch(StreamException &e)
 	{
-		LOG_ERROR("Stream channel: %s",e.msg);
+		LOG_ERROR("Stream channel: %s", e.msg);
 	}
 
 	try
 	{
-		atom.writeInt(PCP_QUIT,error);
+		atom.writeInt(PCP_QUIT, error);
 	}catch(StreamException &) {}
 
 }
@@ -2670,9 +2670,9 @@ int Servent::serverProc(ThreadInfo *thread)
 		sv->sock->host.toStr(servIP);
 
 		if (servMgr->isRoot)
-			LOG_DEBUG("Root Server started: %s",servIP);
+			LOG_DEBUG("Root Server started: %s", servIP);
 		else
-			LOG_DEBUG("Server started: %s",servIP);
+			LOG_DEBUG("Server started: %s", servIP);
 
 
 		while ((thread->active) && (sv->sock->active()))
@@ -2689,7 +2689,7 @@ int Servent::serverProc(ThreadInfo *thread)
 						servMgr->lastIncoming = sys->getTime();
 						ns->servPort = sv->sock->host.port;
 						ns->networkID = servMgr->networkID;
-						ns->initIncoming(cs,sv->allow);
+						ns->initIncoming(cs, sv->allow);
 					}else
 						LOG_ERROR("Out of servents");
 				}
@@ -2698,7 +2698,7 @@ int Servent::serverProc(ThreadInfo *thread)
 		}
 	}catch(StreamException &e)
 	{
-		LOG_ERROR("Server Error: %s:%d",e.msg,e.err);
+		LOG_ERROR("Server Error: %s:%d", e.msg, e.err);
 	}
 
 
@@ -2715,21 +2715,21 @@ bool	Servent::writeVariable(Stream &s, const String &var)
 	char buf[1024];
 
 	if (var == "type")
-		strcpy(buf,getTypeStr());
+		strcpy(buf, getTypeStr());
 	else if (var == "status")
-		strcpy(buf,getStatusStr());
+		strcpy(buf, getStatusStr());
 	else if (var == "address")
 		getHost().toStr(buf);
 	else if (var == "agent")
-		strcpy(buf,agent.cstr());
+		strcpy(buf, agent.cstr());
 	else if (var == "bitrate")
 	{
 		if (sock)
 		{
 			unsigned int tot = sock->bytesInPerSec+sock->bytesOutPerSec;
-			sprintf(buf,"%.1f",BYTES_TO_KBPS(tot));
+			sprintf(buf, "%.1f", BYTES_TO_KBPS(tot));
 		}else
-			strcpy(buf,"0");
+			strcpy(buf, "0");
 	}else if (var == "uptime")
 	{
 		String uptime;
@@ -2737,25 +2737,25 @@ bool	Servent::writeVariable(Stream &s, const String &var)
 			uptime.setFromStopwatch(sys->getTime()-lastConnect);
 		else
 			uptime.set("-");
-		strcpy(buf,uptime.cstr());
+		strcpy(buf, uptime.cstr());
 	}else if (var.startsWith("gnet."))
 	{
 
 		float ctime = (float)(sys->getTime()-lastConnect);
 		if (var == "gnet.packetsIn")
-			sprintf(buf,"%d",gnuStream.packetsIn);
+			sprintf(buf, "%d", gnuStream.packetsIn);
 		else if (var == "gnet.packetsInPerSec")
-			sprintf(buf,"%.1f",ctime>0?((float)gnuStream.packetsIn)/ctime:0);
+			sprintf(buf, "%.1f", ctime>0?((float)gnuStream.packetsIn)/ctime:0);
 		else if (var == "gnet.packetsOut")
-			sprintf(buf,"%d",gnuStream.packetsOut);
+			sprintf(buf, "%d", gnuStream.packetsOut);
 		else if (var == "gnet.packetsOutPerSec")
-			sprintf(buf,"%.1f",ctime>0?((float)gnuStream.packetsOut)/ctime:0);
+			sprintf(buf, "%.1f", ctime>0?((float)gnuStream.packetsOut)/ctime:0);
 		else if (var == "gnet.normQueue")
-			sprintf(buf,"%d",outPacketsNorm.numPending());
+			sprintf(buf, "%d", outPacketsNorm.numPending());
 		else if (var == "gnet.priQueue")
-			sprintf(buf,"%d",outPacketsPri.numPending());
+			sprintf(buf, "%d", outPacketsPri.numPending());
 		else if (var == "gnet.flowControl")
-			sprintf(buf,"%d",flowControl?1:0);
+			sprintf(buf, "%d", flowControl?1:0);
 		else if (var == "gnet.routeTime")
 		{
 			int nr = seenIDs.numUsed();
@@ -2765,9 +2765,9 @@ bool	Servent::writeVariable(Stream &s, const String &var)
 			tstr.setFromStopwatch(tim);
 
 			if (nr)
-				strcpy(buf,tstr.cstr());
+				strcpy(buf, tstr.cstr());
 			else
-				strcpy(buf,"-");
+				strcpy(buf, "-");
 		}
 		else
 			return false;

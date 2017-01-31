@@ -26,7 +26,7 @@
 #include <stdarg.h>
 #include "common.h"
 
-#define RAND(a,b) (((a = 36969 * (a & 65535) + (a >> 16)) << 16) + \
+#define RAND(a, b) (((a = 36969 * (a & 65535) + (a >> 16)) << 16) + \
                     (b = 18000 * (b & 65535) + (b >> 16))  )
 extern char *stristr(const char *s1, const char *s2);
 extern char *trimstr(char *s);
@@ -58,13 +58,13 @@ public:
 	String() {clear();}
 	String(const char *p, TYPE t=T_ASCII)
 	{
-		set(p,t);
+		set(p, t);
 	}
 
 	// set from straight null terminated string
 	void set(const char *p, TYPE t=T_ASCII)
 	{
-		strncpy(data,p,MAX_LEN-1);
+		strncpy(data, p, MAX_LEN-1);
 		data[MAX_LEN-1] = 0;
 		type = t;
 	}
@@ -100,7 +100,7 @@ public:
 		if (slen > 2)
 		{
 			if (slen >= MAX_LEN) slen = MAX_LEN;
-			strncpy(data,p+1,slen-2);
+			strncpy(data, p+1, slen-2);
 			data[slen-2]=0;
 		}else
 			clear();
@@ -112,30 +112,30 @@ public:
 		data[0]=0;
 		type = T_UNKNOWN;
 	}
-	void ASCII2ESC(const char *,bool);
+	void ASCII2ESC(const char *, bool);
 	void ASCII2HTML(const char *);
-	void ASCII2META(const char *,bool);
+	void ASCII2META(const char *, bool);
 	void ESC2ASCII(const char *);
 	void HTML2ASCII(const char *);
 	void HTML2UNICODE(const char *);
 	void BASE642ASCII(const char *);
-	void UNKNOWN2UNICODE(const char *,bool);
+	void UNKNOWN2UNICODE(const char *, bool);
 
-	static	int	base64WordToChars(char *,const char *);
+	static	int	base64WordToChars(char *, const char *);
 
-	static bool isSame(const char *s1, const char *s2) {return strcmp(s1,s2)==0;}
+	static bool isSame(const char *s1, const char *s2) {return strcmp(s1, s2)==0;}
 
-	bool startsWith(const char *s) const {return strncmp(data,s,strlen(s))==0;}
+	bool startsWith(const char *s) const {return strncmp(data, s, strlen(s))==0;}
 	bool isValidURL();
 	bool isEmpty() {return data[0]==0;}
-	bool isSame(::String &s) const {return strcmp(data,s.data)==0;}
-	bool isSame(const char *s) const {return strcmp(data,s)==0;}
-	bool contains(::String &s) {return stristr(data,s.data)!=NULL;}
-	bool contains(const char *s) {return stristr(data,s)!=NULL;}
+	bool isSame(::String &s) const {return strcmp(data, s.data)==0;}
+	bool isSame(const char *s) const {return strcmp(data, s)==0;}
+	bool contains(::String &s) {return stristr(data, s.data)!=NULL;}
+	bool contains(const char *s) {return stristr(data, s)!=NULL;}
 	void append(const char *s)
 	{
 		if ((strlen(s)+strlen(data) < (MAX_LEN-1)))
-			strcat(data,s);
+			strcat(data, s);
 	}
 	void append(char c)
 	{
@@ -206,7 +206,7 @@ public:
 
 	unsigned int next()
 	{
-		return RAND(a[0],a[1]);
+		return RAND(a[0], a[1]);
 	}
 
 	void setSeed(int s)
@@ -228,14 +228,14 @@ public:
     virtual class ClientSocket	*createSocket() = 0;
 	virtual bool			startThread(class ThreadInfo *) = 0;
 	virtual void			sleep(int) = 0;
-	virtual void			appMsg(long,long = 0) = 0;
+	virtual void			appMsg(long, long = 0) = 0;
 	virtual unsigned int	getTime() = 0;
 	virtual double			getDTime() = 0;
 	virtual unsigned int	rnd() = 0;
 	virtual void			getURL(const char *) = 0;
 	virtual void			exit() = 0;
 	virtual bool			hasGUI() = 0;
-	virtual void			callLocalURL(const char *,int)=0;
+	virtual void			callLocalURL(const char *, int)=0;
 	virtual void			executeFile(const char *) = 0;
 	virtual void			endThread(ThreadInfo *) {}
 	virtual void			waitThread(ThreadInfo *, int timeout = 30000) {}
@@ -275,7 +275,7 @@ public:
 	{
 		 event = ::CreateEvent(NULL, // no security attributes
                                   TRUE, // manual-reset
-                                  FALSE,// initially non-signaled
+                                  FALSE, // initially non-signaled
                                   NULL);// anonymous
 	}
 
@@ -483,7 +483,7 @@ public:
 
 	char *buf;
 	unsigned int *times;
-	unsigned int currLine,maxLines,lineLen;
+	unsigned int currLine, maxLines, lineLen;
 	TYPE	*types;
 	WLock	lock;
 	static	const char *logTypes[];

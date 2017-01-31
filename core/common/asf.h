@@ -32,7 +32,7 @@ public:
 		data1 = in.readLong();
 		data2 = in.readShort();
 		data3 = in.readShort();
-		in.read(data4,8);
+		in.read(data4, 8);
 	}
 
 	void write(Stream &out)
@@ -40,22 +40,22 @@ public:
 		out.writeLong(data1);
 		out.writeShort(data2);
 		out.writeShort(data3);
-		out.write(data4,8);
+		out.write(data4, 8);
 	}
 
 
 	void toString(String &s)
 	{
-		sprintf(s.data,"%X-%X-%X-%02X%02X%02X%02X%02X%02X%02X%02X",
-			data1,data2,data3,
-			data4[0],data4[1],data4[2],data4[3],
-			data4[4],data4[5],data4[6],data4[7]);
+		sprintf(s.data, "%X-%X-%X-%02X%02X%02X%02X%02X%02X%02X%02X",
+			data1, data2, data3,
+			data4[0], data4[1], data4[2], data4[3],
+			data4[4], data4[5], data4[6], data4[7]);
 	}
 
     int operator==(const MSID& msid) const{return !memcmp(this, &msid, sizeof(MSID));}
 
 	unsigned int data1;
-	unsigned short data2,data3;
+	unsigned short data2, data3;
 	unsigned char data4[8];
 
 };
@@ -65,21 +65,21 @@ public:
 
 // -----------------------------------
 const MSID headObjID=
-	{0x75B22630, 0x668E, 0x11CF, 0xA6,0xD9,0x00,0xAA,0x00,0x62,0xCE,0x6C};
+	{0x75B22630, 0x668E, 0x11CF, 0xA6, 0xD9, 0x00, 0xAA, 0x00, 0x62, 0xCE, 0x6C};
 const MSID dataObjID=
-	{0x75B22636, 0x668E, 0x11CF, 0xA6,0xD9,0x00,0xAA,0x00,0x62,0xCE,0x6C};
+	{0x75B22636, 0x668E, 0x11CF, 0xA6, 0xD9, 0x00, 0xAA, 0x00, 0x62, 0xCE, 0x6C};
 const MSID filePropObjID=
-	{0x8CABDCA1, 0xA947, 0x11CF, 0x8E,0xE4,0x00,0xC0,0x0C,0x20,0x53,0x65};
+	{0x8CABDCA1, 0xA947, 0x11CF, 0x8E, 0xE4, 0x00, 0xC0, 0x0C, 0x20, 0x53, 0x65};
 const MSID streamPropObjID=
-	{0xB7DC0791, 0xA9B7, 0x11CF, 0x8E,0xE6,0x00,0xC0,0x0C,0x20,0x53,0x65};
+	{0xB7DC0791, 0xA9B7, 0x11CF, 0x8E, 0xE6, 0x00, 0xC0, 0x0C, 0x20, 0x53, 0x65};
 
 const MSID audioStreamObjID=
-	{0xF8699E40, 0x5B4D, 0x11CF, 0xA8,0xFD,0x00,0x80,0x5F,0x5C,0x44,0x2B};
+	{0xF8699E40, 0x5B4D, 0x11CF, 0xA8, 0xFD, 0x00, 0x80, 0x5F, 0x5C, 0x44, 0x2B};
 const MSID videoStreamObjID=
-	{0xBC19EFC0, 0x5B4D, 0x11CF, 0xA8,0xFD,0x00,0x80,0x5F,0x5C,0x44,0x2B};
+	{0xBC19EFC0, 0x5B4D, 0x11CF, 0xA8, 0xFD, 0x00, 0x80, 0x5F, 0x5C, 0x44, 0x2B};
 
 const MSID streamBitrateObjID=
-	{0x7BF875CE, 0x468D, 0x11D1, 0x8D,0x82,0x00,0x60,0x97,0xC9,0xA2,0xB2};
+	{0x7BF875CE, 0x468D, 0x11D1, 0x8D, 0x82, 0x00, 0x60, 0x97, 0xC9, 0xA2, 0xB2};
 
 
 // -----------------------------------
@@ -123,7 +123,7 @@ public:
 
 		String str;
 		id.toString(str);
-		LOG_DEBUG("ASF: %s (%s)= %d : %d\n",str.data,getTypeName(),lenLo,lenHi);
+		LOG_DEBUG("ASF: %s (%s)= %d : %d\n", str.data, getTypeName(), lenLo, lenHi);
 
 
 		dataLen = 0;
@@ -131,14 +131,14 @@ public:
 		return lenLo-24;
 	}
 
-	void readData(Stream &in,int len)
+	void readData(Stream &in, int len)
 	{
 		dataLen = len;
 
 		if ((dataLen > sizeof(data)) || (lenHi))
 			throw StreamException("ASF object too big");
 
-		in.read(data,dataLen);
+		in.read(data, dataLen);
 	}
 
 
@@ -148,7 +148,7 @@ public:
 		out.writeLong(lenLo);
 		out.writeLong(lenHi);
 		if (dataLen)
-			out.write(data,dataLen);
+			out.write(data, dataLen);
 	}
 
 	const char *getTypeName()
@@ -172,7 +172,7 @@ public:
 
 	char data[8192];
 	MSID	id;
-	unsigned int lenLo,lenHi,dataLen;
+	unsigned int lenLo, lenHi, dataLen;
 	TYPE type;
 };
 // -----------------------------------
@@ -246,7 +246,7 @@ public:
 			streams[i].reset();
 	}
 
-	unsigned int packetSize,numPackets,flags,bitrate;
+	unsigned int packetSize, numPackets, flags, bitrate;
 
 	ASFStream streams[MAX_STREAMS];
 };
@@ -267,7 +267,7 @@ public:
 		dataLen = len-8;
 		if (dataLen > sizeof(data))
 			throw StreamException("ASF chunk too big");
-		in.read(data,dataLen);
+		in.read(data, dataLen);
 	}
 
 	void write(Stream &out)
@@ -277,11 +277,11 @@ public:
 		out.writeLong(seq);
 		out.writeShort(v1);
 		out.writeShort(v2);
-		out.write(data,dataLen);
+		out.write(data, dataLen);
 	}
 
-	unsigned int seq,dataLen;
-	unsigned short type,len,v1,v2;
+	unsigned int seq, dataLen;
+	unsigned short type, len, v1, v2;
 	unsigned char data[8192];
 };
 

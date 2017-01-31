@@ -71,7 +71,7 @@ int XML::Node::getBinaryContent(void *ptr, int size)
         {
         	if (i >= size)
             	throw StreamException("Too much binary data");
-	    	out[i++] = nibsToByte(in[0],in[1]);
+	    	out[i++] = nibsToByte(in[0], in[1]);
 	        in+=2;
         }
     }
@@ -201,13 +201,13 @@ void XML::Node::setAttributes(const char *n)
     }
 }
 // ----------------------------------
-XML::Node::Node(const char *fmt,...)
+XML::Node::Node(const char *fmt, ...)
 {
 	va_list ap;
   	va_start(ap, fmt);
 
 	char tmp[8192];
-	vsprintf(tmp,fmt,ap);
+	vsprintf(tmp, fmt, ap);
 	setAttributes(tmp);
 
    	va_end(ap);
@@ -242,7 +242,7 @@ char *XML::Node::findAttr(const char *name)
 	for(int i=1; i<numAttr; i++)
     {
     	char *an = getAttrName(i);
-    	if (strnicmp(an,name,nlen)==0)
+    	if (strnicmp(an, name, nlen)==0)
         	return getAttrValue(i);
     }
     return NULL;
@@ -260,53 +260,53 @@ void XML::Node::write(Stream &out, int level)
 
 
     if (level)
-	    out.write(tabs,i);
+	    out.write(tabs, i);
 #endif
     char *name = getAttrValue(0);
 
-    out.write("<",1);
-    out.write(name,strlen(name));
+    out.write("<", 1);
+    out.write(name, strlen(name));
 
     for(i=1; i<numAttr; i++)
     {
-	    out.write(" ",1);
+	    out.write(" ", 1);
     	char *at = getAttrName(i);
-	    out.write(at,strlen(at));
+	    out.write(at, strlen(at));
 
-	    out.write("=\"",2);
+	    out.write("=\"", 2);
         char *av = getAttrValue(i);
-	    out.write(av,strlen(av));
-	    out.write("\"",1);
+	    out.write(av, strlen(av));
+	    out.write("\"", 1);
     }
 
 	if ((!contData) && (!child))
 	{
-	    out.write("/>\n",3);
+	    out.write("/>\n", 3);
 	}else
 	{
-	    out.write(">\n",2);
+	    out.write(">\n", 2);
 
 	    if (contData)
-		    out.write(contData,strlen(contData));
+		    out.write(contData, strlen(contData));
 
 		if (child)
-	    	child->write(out,level+1);
+	    	child->write(out, level+1);
 #if 0
 	    if (level)
-		    out.write(tabs,strlen(tabs));
+		    out.write(tabs, strlen(tabs));
 #endif
-	    out.write("</",2);
-	    out.write(name,strlen(name));
-	    out.write(">\n",2);
+	    out.write("</", 2);
+	    out.write(name, strlen(name));
+	    out.write(">\n", 2);
 	}
 
     if (sibling)
-    	sibling->write(out,level);
+    	sibling->write(out, level);
 }
 // ----------------------------------
 XML::Node::~Node()
 {
-//	LOG("delete %s",getName());
+//	LOG("delete %s", getName());
 
 	if (contData)
     	delete [] contData;
@@ -339,7 +339,7 @@ void XML::write(Stream &out)
     	throw StreamException("No XML root");
 
 	out.writeLine("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
-    root->write(out,1);
+    root->write(out, 1);
 
 }
 // ----------------------------------
@@ -349,7 +349,7 @@ void XML::writeCompact(Stream &out)
     	throw StreamException("No XML root");
 
 	out.writeLine("<?xml ?>");
-    root->write(out,1);
+    root->write(out, 1);
 
 }
 // ----------------------------------
@@ -358,7 +358,7 @@ void XML::writeHTML(Stream &out)
 	if (!root)
     	throw StreamException("No XML root");
 
-    root->write(out,1);
+    root->write(out, 1);
 }
 
 // ----------------------------------
@@ -381,7 +381,7 @@ XML::Node *XML::findNode(const char *n)
 // ----------------------------------
 XML::Node *XML::Node::findNode(const char *name)
 {
-   	if (stricmp(getName(),name)==0)
+   	if (stricmp(getName(), name)==0)
     	return this;
 
 	XML::Node *c = child;
@@ -438,7 +438,7 @@ void XML::read(Stream &in)
              	// do nothing
             }else if (buf[0] == '?')			// doc type
             {
-            	if (strnicmp(&buf[1],"xml ",4))
+            	if (strnicmp(&buf[1], "xml ", 4))
                 	throw StreamException("Not XML document");
             }else if (buf[0] == '/')			// end tag
             {
@@ -447,7 +447,7 @@ void XML::read(Stream &in)
             	currNode = currNode->parent;
             }else 	// new tag
             {
-	            //LOG("tag: %s",buf);
+	            //LOG("tag: %s", buf);
 
             	bool singleTag = false;
 

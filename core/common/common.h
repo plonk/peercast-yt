@@ -34,7 +34,7 @@ class GeneralException
 public:
     GeneralException(const char *m, int e = 0)
 	{
-		strcpy(msg,m);
+		strcpy(msg, m);
 		err=e;
 	}
     char msg[128];
@@ -46,7 +46,7 @@ class StreamException : public GeneralException
 {
 public:
 	StreamException(const char *m) : GeneralException(m) {}
-	StreamException(const char *m,int e) : GeneralException(m,e) {}
+	StreamException(const char *m, int e) : GeneralException(m, e) {}
 };
 
 // ----------------------------------
@@ -54,14 +54,14 @@ class SockException : public StreamException
 {
 public:
     SockException(const char *m="Socket") : StreamException(m) {}
-    SockException(const char *m, int e) : StreamException(m,e) {}
+    SockException(const char *m, int e) : StreamException(m, e) {}
 };
 // ----------------------------------
 class EOFException : public StreamException
 {
 public:
     EOFException(const char *m="EOF") : StreamException(m) {}
-    EOFException(const char *m, int e) : StreamException(m,e) {}
+    EOFException(const char *m, int e) : StreamException(m, e) {}
 };
 
 // ----------------------------------
@@ -69,7 +69,7 @@ class CryptException : public StreamException
 {
 public:
     CryptException(const char *m="Crypt") : StreamException(m) {}
-    CryptException(const char *m, int e) : StreamException(m,e) {}
+    CryptException(const char *m, int e) : StreamException(m, e) {}
 };
 
 
@@ -109,7 +109,7 @@ public:
 
 
 	void	generate(unsigned char = 0);
-	void	encode(class Host *, const char *,const char *,unsigned char);
+	void	encode(class Host *, const char *, const char *, unsigned char);
 
 	void	toStr(char *);
 	void	fromStr(const char *);
@@ -227,18 +227,18 @@ public:
 
 	void	IPtoStr(char *str)
 	{
-		sprintf(str,"%d.%d.%d.%d",(ip>>24)&0xff,(ip>>16)&0xff,(ip>>8)&0xff,(ip)&0xff);
+		sprintf(str, "%d.%d.%d.%d", (ip>>24)&0xff, (ip>>16)&0xff, (ip>>8)&0xff, (ip)&0xff);
 	}
 
 	::String IPtoStr();
 
 	void	toStr(char *str)
 	{
-		sprintf(str,"%d.%d.%d.%d:%d",(ip>>24)&0xff,(ip>>16)&0xff,(ip>>8)&0xff,(ip)&0xff,port);
+		sprintf(str, "%d.%d.%d.%d:%d", (ip>>24)&0xff, (ip>>16)&0xff, (ip>>8)&0xff, (ip)&0xff, port);
 	}
 
-	void	fromStrIP(const char *,int);
-	void	fromStrName(const char *,int);
+	void	fromStrIP(const char *, int);
+	void	fromStrName(const char *, int);
 
 	bool	isLocalhost();
 
@@ -273,7 +273,7 @@ inline int strToID(char *str)
     	int i;
         char s[8];
     };
-    strncpy(s,str,4);
+    strncpy(s, str, 4);
     return i;
 }
 
@@ -283,12 +283,12 @@ bool cmpCGIarg(const char *str, const char *arg, const char *value);
 bool hasCGIarg(const char *str, const char *arg);
 
 // ----------------------------------
-extern void LOG(const char *fmt,...) __attribute__ ((format (printf, 1, 2)));
+extern void LOG(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
 
-extern void LOG_ERROR(const char *fmt,...) __attribute__ ((format (printf, 1, 2)));
-extern void LOG_DEBUG(const char *fmt,...) __attribute__ ((format (printf, 1, 2)));
-extern void LOG_NETWORK(const char *fmt,...) __attribute__ ((format (printf, 1, 2)));
-extern void LOG_CHANNEL(const char *fmt,...) __attribute__ ((format (printf, 1, 2)));
+extern void LOG_ERROR(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
+extern void LOG_DEBUG(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
+extern void LOG_NETWORK(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
+extern void LOG_CHANNEL(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
 
 #endif
 

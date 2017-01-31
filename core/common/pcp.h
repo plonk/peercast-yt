@@ -180,9 +180,9 @@ class BroadcastState
 public:
 	BroadcastState()
 	:numHops(0)
-	,forMe(false)
-	,streamPos(0)
-	,group(0)
+	, forMe(false)
+	, streamPos(0)
+	, group(0)
 	{
 		chanID.clear();
 		bcID.clear();
@@ -199,7 +199,7 @@ public:
 	}
 
 
-	GnuID chanID,bcID;
+	GnuID chanID, bcID;
 	int numHops;
 	bool forMe;
 	unsigned int streamPos;
@@ -224,28 +224,28 @@ public:
 		outData.lock.on();
 	}
 
-	virtual bool sendPacket(ChanPacket &,GnuID &);
+	virtual bool sendPacket(ChanPacket &, GnuID &);
 	virtual void flush(Stream &);
-	virtual void readHeader(Stream &,Channel *);
-	virtual int readPacket(Stream &,Channel *);
-	virtual void readEnd(Stream &,Channel *);
+	virtual void readHeader(Stream &, Channel *);
+	virtual int readPacket(Stream &, Channel *);
+	virtual void readEnd(Stream &, Channel *);
 
-	int		readPacket(Stream &,BroadcastState &);
-	void	flushOutput(Stream &in,BroadcastState &);
+	int		readPacket(Stream &, BroadcastState &);
+	void	flushOutput(Stream &in, BroadcastState &);
 	static void	readVersion(Stream &);
 
-	int		procAtom(AtomStream &,ID4,int,int,BroadcastState &);
-	int		readAtom(AtomStream &,BroadcastState &);
-	void	readChanAtoms(AtomStream &,int,BroadcastState &);
+	int		procAtom(AtomStream &, ID4, int, int, BroadcastState &);
+	int		readAtom(AtomStream &, BroadcastState &);
+	void	readChanAtoms(AtomStream &, int, BroadcastState &);
 	void	readHostAtoms(AtomStream &, int, BroadcastState &);
-	void	readPushAtoms(AtomStream &, int,BroadcastState &);
+	void	readPushAtoms(AtomStream &, int, BroadcastState &);
 
-	void	readPktAtoms(Channel *,AtomStream &,int,BroadcastState &);
-	void	readRootAtoms(AtomStream &, int,BroadcastState &);
+	void	readPktAtoms(Channel *, AtomStream &, int, BroadcastState &);
+	void	readRootAtoms(AtomStream &, int, BroadcastState &);
 
-	int		readBroadcastAtoms(AtomStream &,int,BroadcastState &);
+	int		readBroadcastAtoms(AtomStream &, int, BroadcastState &);
 
-	ChanPacketBuffer inData,outData;
+	ChanPacketBuffer inData, outData;
 	unsigned int lastPacketTime;
 	unsigned int nextRootPacket;
 

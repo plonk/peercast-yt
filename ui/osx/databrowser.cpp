@@ -13,7 +13,7 @@ DataBrowser::DataBrowser( WindowRef window, const ControlID& controlId,
 						  DataBrowserItemDataProcPtr itemDataProcPtr,
 						  DataBrowserItemNotificationProcPtr notificationProcPtr )
 : mControlId( controlId )
- ,mControl  ( NULL )
+ , mControl  ( NULL )
 {
 	DataBrowserCallbacks dbCallbacks;
 

@@ -37,17 +37,17 @@ public:
     	class Attribute
         {
         	public:
-                int namePos,valuePos;
+                int namePos, valuePos;
         };
 
-		Node(const char *,...);
+		Node(const char *, ...);
 
 		void	init();
 
         ~Node();
 
 	    void	add(Node *);
-        void	write(Stream &,int); 	// output, level
+        void	write(Stream &, int); 	// output, level
         char 	*getName() {return getAttrName(0);}
 
         char 	*getAttrValue(int i) {return &attrData[attr[i].valuePos];}
@@ -64,12 +64,12 @@ public:
         int		findAttrInt(const char *);
         int		findAttrID(const char *);
 
-        char *contData,*attrData;
+        char *contData, *attrData;
 
         Attribute	*attr;
         int	numAttr;
 
-    	Node *child,*parent,*sibling;
+    	Node *child, *parent, *sibling;
         void *userPtr;
     };
 

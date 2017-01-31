@@ -33,18 +33,18 @@ public:
 		NONE,
 
 		PACKETSSTART,
-		NUMQUERYIN,NUMQUERYOUT,
-		NUMPINGIN,NUMPINGOUT,
-		NUMPONGIN,NUMPONGOUT,
-		NUMPUSHIN,NUMPUSHOUT,
-		NUMHITIN,NUMHITOUT,
-		NUMOTHERIN,NUMOTHEROUT,
+		NUMQUERYIN, NUMQUERYOUT,
+		NUMPINGIN, NUMPINGOUT,
+		NUMPONGIN, NUMPONGOUT,
+		NUMPUSHIN, NUMPUSHOUT,
+		NUMHITIN, NUMHITOUT,
+		NUMOTHERIN, NUMOTHEROUT,
 		NUMDROPPED,
 		NUMDUP,
 		NUMACCEPTED,
 		NUMOLD,
 		NUMBAD,
-		NUMHOPS1,NUMHOPS2,NUMHOPS3,NUMHOPS4,NUMHOPS5,NUMHOPS6,NUMHOPS7,NUMHOPS8,NUMHOPS9,NUMHOPS10,
+		NUMHOPS1, NUMHOPS2, NUMHOPS3, NUMHOPS4, NUMHOPS5, NUMHOPS6, NUMHOPS7, NUMHOPS8, NUMHOPS9, NUMHOPS10,
 		NUMPACKETSIN,
 		NUMPACKETSOUT,
 		NUMROUTED,
@@ -64,7 +64,7 @@ public:
 		MAX
 	};
 
-	bool	writeVariable(class Stream &,const class String &);
+	bool	writeVariable(class Stream &, const class String &);
 
 	void	clearRange(STAT s, STAT e)
 	{
@@ -72,11 +72,11 @@ public:
 			current[i] = 0;
 	}
 	void	clear(STAT s) {current[s]=0;}
-	void	add(STAT s,int n=1) {current[s]+=n;}
+	void	add(STAT s, int n=1) {current[s]+=n;}
 	unsigned int getPerSecond(STAT s) {return perSec[s];}
 	unsigned int getCurrent(STAT s) {return current[s];}
 
-	unsigned int	current[Stats::MAX],last[Stats::MAX],perSec[Stats::MAX];
+	unsigned int	current[Stats::MAX], last[Stats::MAX], perSec[Stats::MAX];
 	unsigned int	lastUpdate;
 };
 

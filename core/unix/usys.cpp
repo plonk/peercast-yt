@@ -51,7 +51,7 @@ double USys::getDTime()
 {
   struct timeval tv;
 
-  gettimeofday(&tv,0);
+  gettimeofday(&tv, 0);
   return (double)tv.tv_sec + ((double)tv.tv_usec)/1000000;
 }
 
@@ -75,7 +75,7 @@ void USys::endThread(ThreadInfo *info)
 {
 	numThreads--;
 
-	LOG_DEBUG("End thread: %d",numThreads);
+	LOG_DEBUG("End thread: %d", numThreads);
 
 	//pthread_exit(NULL);
 }
@@ -83,7 +83,7 @@ void USys::endThread(ThreadInfo *info)
 // ---------------------------------
 void USys::waitThread(ThreadInfo *info, int timeout)
 {
-	//pthread_join(info->handle,NULL);
+	//pthread_join(info->handle, NULL);
 }
 
 
@@ -95,20 +95,20 @@ bool	USys::startThread(ThreadInfo *info)
 	info->active = true;
 
 
-	LOG_DEBUG("New thread: %d",numThreads);
+	LOG_DEBUG("New thread: %d", numThreads);
 
 	pthread_attr_t attr;
 
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
-	int r = pthread_create(&info->handle,&attr,(THREAD_PTR)info->func,info);
+	int r = pthread_create(&info->handle, &attr, (THREAD_PTR)info->func, info);
 
 	pthread_attr_destroy(&attr);
 
 	if (r)
 	{
-		LOG_ERROR("Error creating thread %d: %d",numThreads,r);
+		LOG_ERROR("Error creating thread %d: %d", numThreads, r);
 		return false;
 	}else
 	{
@@ -125,7 +125,7 @@ void	USys::sleep(int ms)
 // ---------------------------------
 void USys::appMsg(long msg, long arg)
 {
-	//SendMessage(mainWindow,WM_USER,(WPARAM)msg,(LPARAM)arg);
+	//SendMessage(mainWindow, WM_USER, (WPARAM)msg, (LPARAM)arg);
 }
 // ---------------------------------
 #ifndef __APPLE__
@@ -133,7 +133,7 @@ void USys::getURL(const char *url)
 {
 }
 // ---------------------------------
-void USys::callLocalURL(const char *str,int port)
+void USys::callLocalURL(const char *str, int port)
 {
 }
 // ---------------------------------
@@ -162,16 +162,16 @@ void USys::openURL( const char* url )
 	}
 }
 // ---------------------------------
-void USys::callLocalURL(const char *str,int port)
+void USys::callLocalURL(const char *str, int port)
 {
 	char cmd[512];
-	sprintf(cmd,"http://localhost:%d/%s",port,str);
+	sprintf(cmd, "http://localhost:%d/%s", port, str);
 	openURL( cmd );
 }
 // ---------------------------------
 void USys::getURL(const char *url)
 {
-	if (strnicmp(url,"http://",7) || strnicmp(url,"mailto:",7))
+	if (strnicmp(url, "http://", 7) || strnicmp(url, "mailto:", 7))
 	{
 		openURL( url );
 	}

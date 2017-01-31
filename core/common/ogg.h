@@ -30,7 +30,7 @@ class OggPacket
 public:
 	enum
 	{
-		MAX_BODYLEN = 65536,		// probably too small
+		MAX_BODYLEN = 65536, 		// probably too small
 		MAX_PACKETS = 256			// prolly too small too, but realloc?!?!?!
 	};
 
@@ -49,7 +49,7 @@ class OggSubStream
 {
 public:
 	OggSubStream()
-	:maxHeaders(0),serialNo(0),bitrate(0)
+	:maxHeaders(0), serialNo(0), bitrate(0)
 	{}
 
 	bool needHeader()
@@ -75,7 +75,7 @@ public:
 
 	bool	isActive() {return serialNo!=0;}
 
-	void readHeader(Channel *,OggPage &);
+	void readHeader(Channel *, OggPage &);
 
 	virtual void procHeaders(Channel *) = 0;
 
@@ -128,12 +128,12 @@ public:
 	{}
 
 
-	virtual void readHeader(Stream &,Channel *);
-	virtual int readPacket(Stream &,Channel *);
-	virtual void readEnd(Stream &,Channel *);
+	virtual void readHeader(Stream &, Channel *);
+	virtual int readPacket(Stream &, Channel *);
+	virtual void readEnd(Stream &, Channel *);
 
 
-	void	readHeaders(Stream &,Channel *, OggPage &);
+	void	readHeaders(Stream &, Channel *, OggPage &);
 
 	OggVorbisSubStream	vorbis;
 	OggTheoraSubStream	theora;
@@ -161,7 +161,7 @@ public:
 
 
 	int64_t granPos;
-	int headLen,bodyLen;
+	int headLen, bodyLen;
 	unsigned char data[MAX_HEADERLEN+MAX_BODYLEN];
 };
 

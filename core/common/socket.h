@@ -57,7 +57,7 @@ public:
 
 
     static unsigned int    getIP(char *);
-	static bool			getHostname(char *,unsigned int);
+	static bool			getHostname(char *, unsigned int);
 
     virtual bool eof()
     {
@@ -66,7 +66,7 @@ public:
 
     Host    host;
 
-	unsigned int readTimeout,writeTimeout;
+	unsigned int readTimeout, writeTimeout;
 };
 
 

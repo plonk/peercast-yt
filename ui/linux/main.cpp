@@ -78,13 +78,13 @@ public:
 	{
 		loglock.on();
 		if (t != LogBuffer::T_NONE) {
-			printf("[%s] ",LogBuffer::getTypeStr(t));
+			printf("[%s] ", LogBuffer::getTypeStr(t));
 			if (logfile != NULL) {
-				fprintf(logfile, "[%s] ",LogBuffer::getTypeStr(t)); }
+				fprintf(logfile, "[%s] ", LogBuffer::getTypeStr(t)); }
 			}
-		printf("%s\n",str);
+		printf("%s\n", str);
 		if (logfile != NULL) {
-			fprintf(logfile, "%s\n",str);
+			fprintf(logfile, "%s\n", str);
 		}
 		loglock.off();
 	}
@@ -96,7 +96,7 @@ void setSettingsUI(){}
 // ----------------------------------
 void showConnections(){}
 // ----------------------------------
-void PRINTLOG(LogBuffer::TYPE type, const char *fmt,va_list ap)
+void PRINTLOG(LogBuffer::TYPE type, const char *fmt, va_list ap)
 {
 }
 
@@ -127,7 +127,7 @@ void sigProc(int sig)
 						fclose(logfile);
 					}
 					unlink(logFileName);
-					logfile = fopen(logFileName,"a");
+					logfile = fopen(logFileName, "a");
 					loglock.off();
 				}
 			break;
@@ -150,23 +150,23 @@ int main(int argc, char* argv[])
 
 	for (int i = 1; i < argc; i++)
 		{
-			if (!strcmp(argv[i],"--inifile") || !strcmp(argv[i],"-i")) {
+			if (!strcmp(argv[i], "--inifile") || !strcmp(argv[i], "-i")) {
 				if (++i < argc) {
 					iniFileName.setFromString(argv[i]);
 				}
-			} else if (!strcmp(argv[i],"--logfile") || !strcmp(argv[i],"-l") ) {
+			} else if (!strcmp(argv[i], "--logfile") || !strcmp(argv[i], "-l") ) {
 				if (++i < argc) {
 					logToFile = true;
 					logFileName.setFromString(argv[i]);
 				}
-			} else if (!strcmp(argv[i],"--path") || !strcmp(argv[i],"-P")) {
+			} else if (!strcmp(argv[i], "--path") || !strcmp(argv[i], "-P")) {
 				if (++i < argc) {
 					htmlPath.setFromString(argv[i]);
 					// Add a "/" in order to make this parameter more natural:
 					htmlPath.append("/");
 				}
-			} else if (!strcmp(argv[i],"--help") || !strcmp(argv[i],"-h")) {
-				printf("peercast - P2P Streaming Server, version %s\n",PCX_VERSTRING);
+			} else if (!strcmp(argv[i], "--help") || !strcmp(argv[i], "-h")) {
+				printf("peercast - P2P Streaming Server, version %s\n", PCX_VERSTRING);
 				printf("\nCopyright (c) 2002-2006 PeerCast.org <code@peercast.org>\n");
 				printf("This is free software; see the source for copying conditions.\n");
 				printf("Usage: peercast [options]\n");
@@ -177,9 +177,9 @@ int main(int argc, char* argv[])
 				printf("-p, --pidfile <pidfile>      specify pid file\n");
 				printf("-h, --help                   show this help\n");
 				return 0;
-			} else if (!strcmp(argv[i],"--daemon") || !strcmp(argv[i],"-d")) {
+			} else if (!strcmp(argv[i], "--daemon") || !strcmp(argv[i], "-d")) {
 					forkDaemon = true;
-			} else if (!strcmp(argv[i],"--pidfile") || !strcmp(argv[i],"-p")) {
+			} else if (!strcmp(argv[i], "--pidfile") || !strcmp(argv[i], "-p")) {
 				if (++i < argc)
 				{
 					setPidFile = true;
@@ -189,11 +189,11 @@ int main(int argc, char* argv[])
 		}
 
 
-	if (logToFile) logfile = fopen(logFileName,"a");
+	if (logToFile) logfile = fopen(logFileName, "a");
 
 	if (forkDaemon) {
 		LOG_DEBUG("Forking to the background");
-		daemon(1,0);
+		daemon(1, 0);
 	}
 
 	// PID file must be written after the daemon() call so that we get the daemonized PID.
