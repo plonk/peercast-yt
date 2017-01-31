@@ -338,7 +338,14 @@ bool HTML::readTemplate(Stream &in,Stream *outp,int loop)
 					return true;
 			}
 			else
-				throw StreamException("Unknown template escape");
+			{
+				// throw StreamException("Unknown template escape");
+				if (outp)
+				{
+					outp->writeChar('{');
+					outp->writeChar(c);
+				}
+			}
 		}else
 		{
 			if (outp)
