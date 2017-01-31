@@ -649,7 +649,6 @@ void PeercastSource::stream(Channel *ch)
 				pack.len = mem.pos;
 				pack.type = ChanPacket::T_PCP;
 				GnuID noID;
-				noID.clear();
 				servMgr->broadcastPacket(pack, ch->info.id, ch->remoteID, noID, Servent::T_RELAY);
 			}
 
@@ -910,7 +909,6 @@ void Channel::broadcastTrackerUpdate(GnuID &svID, bool force)
 		pack.type = ChanPacket::T_PCP;
 
 		GnuID noID;
-		noID.clear();
 		int cnt = servMgr->broadcastPacket(pack, noID, servMgr->sessionID, svID, Servent::T_COUT);
 
 		if (cnt)
@@ -967,7 +965,6 @@ void Channel::updateInfo(ChanInfo &newInfo)
 				pack.len = mem.pos;
 				pack.type = ChanPacket::T_PCP;
 				GnuID noID;
-				noID.clear();
 				servMgr->broadcastPacket(pack, info.id, servMgr->sessionID, noID, Servent::T_RELAY);
 
 				broadcastTrackerUpdate(noID);
@@ -1050,7 +1047,6 @@ void ChannelStream::updateStatus(Channel *ch)
 		if (!ch->isBroadcasting())
 		{
 			GnuID noID;
-			noID.clear();
 			int cnt = chanMgr->broadcastPacketUp(pack, ch->info.id, servMgr->sessionID, noID);
 			LOG_CHANNEL("Sent channel status update to %d clients", cnt);
 		}
@@ -1100,7 +1096,6 @@ bool ChannelStream::getStatus(Channel *ch, ChanPacket &pack)
 		AtomStream atom(pmem);
 
 		GnuID noID;
-		noID.clear();
 
 		atom.writeParent(PCP_BCST, 7);
 			atom.writeChar(PCP_BCST_GROUP, PCP_BCST_GROUP_TRACKERS);
@@ -1188,7 +1183,6 @@ int Channel::readStream(Stream &in, ChannelStream *source)
 						if ((sys->getTime()-lastTrackerUpdate) >= chanMgr->hostUpdateInterval)
 						{
 							GnuID noID;
-							noID.clear();
 							broadcastTrackerUpdate(noID);
 						}
 						wasBroadcasting = true;
@@ -1214,7 +1208,6 @@ int Channel::readStream(Stream &in, ChannelStream *source)
 	if (wasBroadcasting)
 	{
 		GnuID noID;
-		noID.clear();
 		broadcastTrackerUpdate(noID, true);
 	}
 

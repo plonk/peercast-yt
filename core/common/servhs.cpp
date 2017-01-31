@@ -312,7 +312,6 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 			throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
 		GnuID id;
-		id.clear();
 
 		char *idstr = strstr(in, "/");
 		if (idstr)
@@ -1300,7 +1299,6 @@ void Servent::handshakeCMD(char *cmd)
 			{
 
 				GnuID id;
-				id.clear();
 				while (cmd=nextCGIarg(cmd, curr, arg))
 				{
 					if (strcmp(curr, "ip")==0)

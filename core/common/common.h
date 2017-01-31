@@ -83,6 +83,11 @@ public:
 class GnuID
 {
 public:
+    GnuID()
+    {
+        clear();
+    }
+
 	bool	isSame(GnuID &gid)
 	{
 		for(int i=0; i<16; i++)

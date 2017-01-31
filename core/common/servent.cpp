@@ -525,7 +525,6 @@ void Servent::handshakeOut()
 	bool versionValid = false;
 
 	GnuID clientID;
-	clientID.clear();
 
     while (http.nextHeader())
     {
@@ -577,7 +576,6 @@ void Servent::handshakeIn()
 	bool diffRootVer = false;
 
 	GnuID clientID;
-	clientID.clear();
 
     while (http.nextHeader())
     {
@@ -710,7 +708,6 @@ bool	Servent::pingHost(Host &rhost, GnuID &rsid)
 				atom.writeBytes(PCP_HELO_SESSIONID, servMgr->sessionID.id, 16);
 
 			GnuID sid;
-			sid.clear();
 
 			int numc, numd;
 			ID4 id = atom.read(numc, numd);
@@ -1478,7 +1475,6 @@ void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
 	char arg[64];
 
 	GnuID clientID;
-	clientID.clear();
 	rid.clear();
 	int version=0;
 	int disable=0;
@@ -1595,9 +1591,6 @@ void Servent::handshakeIncomingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
 
 	GnuID bcID;
 	GnuID clientID;
-
-	bcID.clear();
-	clientID.clear();
 
 	rhost.port = 0;
 
@@ -1798,7 +1791,6 @@ void Servent::processIncomingPCP(bool suggestOthers)
 					break;
 
 				GnuID noID;
-				noID.clear();
 				best.writeAtoms(atom, noID);
 				cnt++;
 			}
@@ -1819,7 +1811,6 @@ void Servent::processIncomingPCP(bool suggestOthers)
 				{
 					best = chs.best[0];
 					GnuID noID;
-					noID.clear();
 					int cnt = servMgr->broadcastPushRequest(best, rhost, noID, Servent::T_CIN);
 					LOG_DEBUG("Broadcasted tracker push request to %d clients for %s", cnt, rstr);
 				}
@@ -1908,7 +1899,6 @@ int Servent::outgoingProc(ThreadInfo *thread)
 				}
 
 				GnuID noID;
-				noID.clear();
 				ChanHitList *chl = chanMgr->findHitListByID(noID);
 				if (chl)
 				{

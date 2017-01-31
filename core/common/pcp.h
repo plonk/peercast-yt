@@ -184,8 +184,6 @@ public:
 	, streamPos(0)
 	, group(0)
 	{
-		chanID.clear();
-		bcID.clear();
 	}
 
 

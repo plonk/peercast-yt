@@ -1745,7 +1745,6 @@ int ServMgr::broadcastPushRequest(ChanHit &hit, Host &to, GnuID &chanID, Servent
 
 
 	GnuID noID;
-	noID.clear();
 
 	return servMgr->broadcastPacket(pack, noID, servMgr->sessionID, hit.sessionID, type);
 }
@@ -1785,7 +1784,6 @@ void ServMgr::broadcastRootSettings(bool getUpdate)
 		pack.len = mem.len;
 
 		GnuID noID;
-		noID.clear();
 
 		broadcastPacket(pack, noID, servMgr->sessionID, noID, Servent::T_CIN);
 	}
@@ -1842,7 +1840,6 @@ int ServMgr::idleProc(ThreadInfo *thread)
 				if (servMgr->checkForceIP())
 				{
 					GnuID noID;
-					noID.clear();
 					chanMgr->broadcastTrackerUpdate(noID, true);
 				}
 				lastForceIPCheck = ctime;
