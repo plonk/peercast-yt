@@ -22,6 +22,8 @@
 #include <stdio.h>
 #include <string.h>
 
+class String;
+
 #ifndef NULL
 #define NULL 0
 #endif
@@ -227,6 +229,8 @@ public:
 	{
 		sprintf(str,"%d.%d.%d.%d",(ip>>24)&0xff,(ip>>16)&0xff,(ip>>8)&0xff,(ip)&0xff);
 	}
+
+	::String IPtoStr();
 
 	void	toStr(char *str)
 	{
