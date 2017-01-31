@@ -24,6 +24,8 @@ json JrpcApi::call_internal(const string& input)
 {
     json j, id, method, params, result;
 
+    LOG_DEBUG("jrpc request: %s", input.c_str());
+
     try {
         j = json::parse(input);
     } catch (std::invalid_argument&) {
@@ -49,10 +51,13 @@ json JrpcApi::call_internal(const string& input)
         return error_object(-32600, "Invalid Request", id);
     }
 
-    if (j.find("params") == j.end() ||
-        !j.at("params").is_object())
+    if (j.find("params") == j.end())
     {
-        params = json({});
+        params = json::array();
+    } else if (!j.at("params").is_object() &&
+               !j.at("params").is_array())
+    {
+        return error_object(-32602, "Invalid params", id, "params must be either object or array");
     } else {
         params = j.at("params");
     }

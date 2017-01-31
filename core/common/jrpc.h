@@ -7,6 +7,8 @@
 
 #include <stdarg.h>
 #include <string>
+#include <vector>
+#include <tuple>
 #include "json.hpp"
 
 class JrpcApi
@@ -27,7 +29,11 @@ public:
 
     std::string call(const std::string& request)
     {
-        return call_internal(request).dump(4);
+        std::string result = call_internal(request).dump();
+
+        LOG_DEBUG("jrpc response: %s", result.c_str());
+
+        return result;
     }
 
     virtual json dispatch(const json&, const json&) = 0;
@@ -38,38 +44,85 @@ private:
 
 class PeercastJrpcApi : public JrpcApi
 {
+    typedef json (PeercastJrpcApi::*JrpcMethod)(json::array_t);
+
 public:
+    PeercastJrpcApi() :
+        m_methods
+        ({
+            { "fetch", &PeercastJrpcApi::fetch, { "url", "name", "desc", "genre", "contact", "bitrate", "type" } },
+            { "getVersionInfo", &PeercastJrpcApi::getVersionInfo, {} },
+            { "getChannels", &PeercastJrpcApi::getChannels, {} },
+            { "getNewVersions", &PeercastJrpcApi::getNewVersions, {} },
+            { "getNotificationMessages", &PeercastJrpcApi::getNotificationMessages, {} },
+            { "getPlugins", &PeercastJrpcApi::getPlugins, {} },
+            { "getSettings", &PeercastJrpcApi::getSettings, {} },
+            { "getStatus", &PeercastJrpcApi::getStatus, {} },
+            { "getYellowPages", &PeercastJrpcApi::getYellowPages, {} },
+            { "getYellowPageProtocols", &PeercastJrpcApi::getYellowPageProtocols, {} },
+        })
+    {
+    }
+
+    typedef struct {
+        const char *name;
+        JrpcMethod method;
+        std::vector<std::string> parameter_names;
+    } entry;
+    std::vector<entry > m_methods;
+
+    json toPositionalArguments(json named_params, std::vector<std::string> names)
+    {
+        json result = json::array();
+
+        for (int i = 0; i < names.size(); i++)
+            result.push_back(nullptr);
+
+        for (std::pair<std::string, json> pair : named_params.get<json::object_t>())
+        {
+            auto iter = std::find(names.begin(), names.end(), pair.first);
+            if (iter != names.end())
+            {
+                result[iter - names.begin()] = pair.second;
+            }
+        }
+        return result;
+    }
+
     // dispatchメソッドを実装。パラメータの数や型が合わない場合は
     // invalid_params 例外、メソッドが存在しない場合は
     // method_not_found 例外を上げる。
     json dispatch(const json& m, const json& p) override
     {
-        try {
-            if (m == "getVersionInfo")
-                return getVersionInfo();
-            if (m == "getChannels")
-                return getChannels();
-            if (m == "getNewVersions")
-                return getNewVersions();
-            if (m == "getNotificationMessages")
-                return getNotificationMessages();
-            if (m == "getPlugins")
-                return getPlugins();
-            if (m == "getSettings")
-                return getSettings();
-            if (m == "getStatus")
-                return getStatus();
-            if (m == "getYellowPages")
-                return getYellowPages();
-            if (m == "getYellowPageProtocols")
-                return getYellowPageProtocols();
-        } catch (std::out_of_range& e) {
-            throw invalid_params(e.what());
+        for (int i = 0; i < m_methods.size(); i++)
+        {
+            entry& info = m_methods[i];
+
+            if (m != info.name)
+                continue;
+
+            json arguments;
+            if (p.is_array())
+                arguments = p;
+            else if (p.is_object())
+                arguments = toPositionalArguments(p, info.parameter_names);
+            else if (info.parameter_names.size() == 0 && p.is_null())
+                arguments = json::array();
+
+            if (arguments.size() != info.parameter_names.size())
+                throw invalid_params("Wrong number of arguments");
+
+            return (this->*(info.method))(arguments);
         }
         throw method_not_found(m.get<std::string>());
     }
 
-    json getVersionInfo()
+    json fetch(json::array_t)
+    {
+        return "OK";
+    }
+
+    json getVersionInfo(json::array_t)
     {
         return {
             { "agentName", PCX_AGENT },
@@ -160,7 +213,7 @@ public:
         return j;
     }
 
-    json getChannels()
+    json getChannels(json::array_t)
     {
         json result = json::array();
 
@@ -206,7 +259,7 @@ public:
         return result;
     }
 
-    json getYellowPages()
+    json getYellowPages(json::array_t)
     {
         servMgr->lock.on();
 
@@ -228,7 +281,7 @@ public:
         return j;
     }
 
-    json getYellowPageProtocols()
+    json getYellowPageProtocols(json::array_t)
     {
         json pcp = {
             { "name", "PCP" },
@@ -238,7 +291,7 @@ public:
         return json::array({ pcp });
     }
 
-    json getSettings()
+    json getSettings(json::array_t)
     {
         servMgr->lock.on();
         chanMgr->lock.on();
@@ -258,7 +311,7 @@ public:
         return j;
     }
 
-    json getPlugins()
+    json getPlugins(json::array_t)
     {
         return json::array_t();
     }
@@ -276,13 +329,13 @@ public:
         }
     }
 
-    json getStatus()
+    json getStatus(json::array_t)
     {
         servMgr->lock.on();
 
-        auto globalIP = servMgr->serverHost.IPtoStr();
-        auto port     = servMgr->serverHost.port;
-        auto localIP  = Host(ClientSocket::getIP(NULL), port).IPtoStr();
+        std::string globalIP = servMgr->serverHost.IPtoStr();
+        auto port       = servMgr->serverHost.port;
+        std::string localIP  = Host(ClientSocket::getIP(NULL), port).IPtoStr();
 
         json j = {
             { "uptime", servMgr->getUptime() },
@@ -298,12 +351,12 @@ public:
         return j;
     }
 
-    json getNewVersions()
+    json getNewVersions(json::array_t)
     {
         return json::array();
     }
 
-    json getNotificationMessages()
+    json getNotificationMessages(json::array_t)
     {
         return json::array();
     }
