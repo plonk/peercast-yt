@@ -20,7 +20,10 @@
 #ifndef _SYS_H
 #define _SYS_H
 
+#include <string>
+
 #include <string.h>
+#include <stdarg.h>
 #include "common.h"
 
 #define RAND(a,b) (((a = 36969 * (a & 65535) + (a >> 16)) << 16) + \
@@ -149,6 +152,32 @@ public:
 		tmp.append(data);
 		tmp.type = type;
 		*this = tmp;
+	}
+
+    void sprintf(const char* fmt, ...)
+    {
+        va_list ap;
+
+        va_start(ap, fmt);
+        vsnprintf(this->data, ::String::MAX_LEN - 1, fmt, ap);
+        va_end(ap);
+    }
+
+    static ::String format(const char* fmt, ...)
+    {
+        va_list ap;
+		::String result;
+
+        va_start(ap, fmt);
+        vsnprintf(result.data, ::String::MAX_LEN - 1, fmt, ap);
+        va_end(ap);
+
+		return result;
+    }
+
+	operator std::string () const
+	{
+		return data;
 	}
 
 	bool operator == (const char *s) const {return isSame(s);}
