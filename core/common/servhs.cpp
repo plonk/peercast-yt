@@ -125,6 +125,7 @@ void Servent::handshakeJRPC(HTTP &http)
 	http.writeLine(HTTP_SC_OK);
 	http.writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
 	http.writeLineF("%s %d", HTTP_HS_LENGTH, response.size());
+	http.writeLineF("%s %s", HTTP_HS_CONTENT, "application/json");
 	http.writeLine("");
 
 	http.write(response.c_str(), response.size());
