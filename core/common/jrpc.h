@@ -49,8 +49,16 @@ public:
                 return getVersionInfo();
             if (m == "getChannels")
                 return getChannels();
+            if (m == "getNewVersions")
+                return getNewVersions();
+            if (m == "getNotificationMessages")
+                return getNotificationMessages();
+            if (m == "getPlugins")
+                return getPlugins();
             if (m == "getSettings")
                 return getSettings();
+            if (m == "getStatus")
+                return getStatus();
             if (m == "getYellowPages")
                 return getYellowPages();
             if (m == "getYellowPageProtocols")
@@ -84,11 +92,11 @@ public:
         comment.convertTo(String::T_UNICODE);  // should not be needed
 
         return {
-            {"name", info.name.cstr()},
-            {"url", info.url.cstr()},
-            {"genre", info.genre.cstr()},
-            {"desc", info.desc.cstr()},
-            {"comment", comment.cstr()},
+            {"name", info.name},
+            {"url", info.url},
+            {"genre", info.genre},
+            {"desc", info.desc},
+            {"comment", comment},
             {"bitrate", info.bitrate},
             {"contentType", info.getTypeStr()}, //?
             {"mimeType", info.getMIMEType()}
@@ -98,11 +106,11 @@ public:
     json to_json(TrackInfo& track)
     {
         return {
-            {"name", track.title.cstr()},
-            {"genre", track.genre.cstr()},
-            {"album", track.album.cstr()},
-            {"creator", track.artist.cstr()},
-            {"url", track.contact.cstr()}
+            {"name", track.title},
+            {"genre", track.genre},
+            {"album", track.album},
+            {"creator", track.artist},
+            {"url", track.contact}
         };
     }
 
@@ -134,7 +142,7 @@ public:
         j["channelId"] = to_json(c->info.id);
         j["status"] = {
             {"status", to_json((Channel::STATUS) c->status)},
-            {"source", nullptr},
+            {"source", c->sourceURL},
             {"uptime", c->info.getUptime()},
             {"localRelays", c->localRelays()},
             {"localDirects", c->localListeners()},
@@ -198,18 +206,6 @@ public:
         return result;
     }
 
-    ::String format(const char* fmt, ...)
-    {
-        String result;
-        va_list ap;
-
-        va_start(ap, fmt);
-        vsnprintf(result.data, ::String::MAX_LEN - 1, fmt, ap);
-        va_end(ap);
-
-        return result;
-    }
-
     json getYellowPages()
     {
         servMgr->lock.on();
@@ -220,8 +216,8 @@ public:
         j = {
             { "yellowPageId", 0 },
             { "name",  root },
-            { "uri", format("pcp://%s/", root).cstr() },
-            { "announceUri", format("pcp://%s/", root).cstr() },
+            { "uri", String::format("pcp://%s/", root) },
+            { "announceUri", String::format("pcp://%s/", root) },
             { "channelsUri", nullptr },
             { "protocol", "pcp" },
             { "channels", announcingChannels() }
@@ -262,6 +258,55 @@ public:
         return j;
     }
 
+    json getPlugins()
+    {
+        return json::array_t();
+    }
+
+    json to_json(ServMgr::FW_STATE state)
+    {
+        switch (state)
+        {
+        case ServMgr::FW_OFF:
+            return false;
+        case ServMgr::FW_ON:
+            return true;
+        case ServMgr::FW_UNKNOWN:
+            return nullptr;
+        }
+    }
+
+    json getStatus()
+    {
+        servMgr->lock.on();
+
+        auto globalIP = servMgr->serverHost.IPtoStr();
+        auto port     = servMgr->serverHost.port;
+        auto localIP  = Host(ClientSocket::getIP(NULL), port).IPtoStr();
+
+        json j = {
+            { "uptime", servMgr->getUptime() },
+            { "isFirewalled", to_json(servMgr->getFirewall()) },
+            { "globalRelayEndPoint", { globalIP, port } },
+            { "globalDirectEndPoint", { globalIP, port } },
+            { "localRelayEndPoint", { localIP, port } },
+            { "localDirectEndPoint", { localIP, port } }
+        };
+
+        servMgr->lock.off();
+
+        return j;
+    }
+
+    json getNewVersions()
+    {
+        return json::array();
+    }
+
+    json getNotificationMessages()
+    {
+        return json::array();
+    }
 };
 
 #endif
