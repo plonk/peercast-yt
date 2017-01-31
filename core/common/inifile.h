@@ -26,6 +26,7 @@
 class IniFile
 {
 public:
+	~IniFile() { close(); }
 	bool	openReadOnly(const char *);
 	bool	openWriteReplace(const char *);
 	void	close();

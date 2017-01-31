@@ -43,6 +43,8 @@ void MemoryStream::convertFromBase64()
 // -------------------------------------
 void FileStream::openReadOnly(const char *fn)
 {
+    if (file)
+        close();
 	file = fopen(fn,"rb");
 
     if (!file)
@@ -51,6 +53,8 @@ void FileStream::openReadOnly(const char *fn)
 // -------------------------------------
 void FileStream::openWriteReplace(const char *fn)
 {
+    if (file)
+        close();
 	file = fopen(fn,"wb");
 
 	if (!file)
@@ -59,6 +63,8 @@ void FileStream::openWriteReplace(const char *fn)
 // -------------------------------------
 void FileStream::openWriteAppend(const char *fn)
 {
+    if (file)
+        close();
         file = fopen(fn,"ab");
 
         if (!file)
