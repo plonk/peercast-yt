@@ -24,10 +24,6 @@
 
 class String;
 
-#ifndef NULL
-#define NULL 0
-#endif
-
 // ----------------------------------
 class GeneralException
 {
