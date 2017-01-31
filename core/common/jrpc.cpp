@@ -6,13 +6,18 @@
 using namespace std;
 using json = nlohmann::json;
 
-static json error_object(int code, const char* message, json id = nullptr)
+static json error_object(int code, const char* message, json id = nullptr, json data = nullptr)
 {
-    return {
+    json j = {
         { "jsonrpc", "2.0" },
         { "error", { { "code", code }, { "message", message } } },
         { "id", id }
     };
+
+    if (!data.is_null())
+        j["error"]["data"] = data;
+
+    return j;
 }
 
 json JrpcApi::call_internal(const string& input)
@@ -54,10 +59,11 @@ json JrpcApi::call_internal(const string& input)
 
     try {
         result = dispatch(method, params);
-    } catch (method_not_found&) {
-        return error_object(-32601, "Method not found", id);
-    } catch (invalid_params&) {
-        return error_object(-32602, "Invalid params", id);
+    } catch (method_not_found& e) {
+        LOG_DEBUG("Method not found: %s", e.what());
+        return error_object(-32601, "Method not found", id, e.what());
+    } catch (invalid_params& e) {
+        return error_object(-32602, "Invalid params", id, e.what());
     }
 
     return {
