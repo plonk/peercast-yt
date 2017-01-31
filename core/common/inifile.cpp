@@ -23,8 +23,6 @@
 #include "sys.h"
 
 
-	void	openReadOnly(const char *);
-	void	openWriteReplace(const char *);
 // -----------------------------------------
 bool IniFile::openReadOnly(const char *fn)
 {
