@@ -22,6 +22,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifndef __GNUC__
+#define __attribute__(x)
+#endif
+
 class String;
 
 // ----------------------------------
@@ -279,13 +283,12 @@ bool cmpCGIarg(const char *str, const char *arg, const char *value);
 bool hasCGIarg(const char *str, const char *arg);
 
 // ----------------------------------
-extern void LOG(const char *fmt,...);
+extern void LOG(const char *fmt,...) __attribute__ ((format (printf, 1, 2)));
 
-extern void LOG_ERROR(const char *fmt,...);
-extern void LOG_DEBUG(const char *fmt,...);
-extern void LOG_NETWORK(const char *fmt,...);
-extern void LOG_CHANNEL(const char *fmt,...);
-
+extern void LOG_ERROR(const char *fmt,...) __attribute__ ((format (printf, 1, 2)));
+extern void LOG_DEBUG(const char *fmt,...) __attribute__ ((format (printf, 1, 2)));
+extern void LOG_NETWORK(const char *fmt,...) __attribute__ ((format (printf, 1, 2)));
+extern void LOG_CHANNEL(const char *fmt,...) __attribute__ ((format (printf, 1, 2)));
 
 #endif
 
