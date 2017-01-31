@@ -36,30 +36,25 @@ public:
         return result;
     }
 
-    virtual json dispatch(const json&, const json&) = 0;
-
 private:
     json call_internal(const std::string&);
-};
 
-class PeercastJrpcApi : public JrpcApi
-{
-    typedef json (PeercastJrpcApi::*JrpcMethod)(json::array_t);
+    typedef json (JrpcApi::*JrpcMethod)(json::array_t);
 
 public:
-    PeercastJrpcApi() :
+    JrpcApi() :
         m_methods
         ({
-            { "fetch", &PeercastJrpcApi::fetch, { "url", "name", "desc", "genre", "contact", "bitrate", "type" } },
-            { "getVersionInfo", &PeercastJrpcApi::getVersionInfo, {} },
-            { "getChannels", &PeercastJrpcApi::getChannels, {} },
-            { "getNewVersions", &PeercastJrpcApi::getNewVersions, {} },
-            { "getNotificationMessages", &PeercastJrpcApi::getNotificationMessages, {} },
-            { "getPlugins", &PeercastJrpcApi::getPlugins, {} },
-            { "getSettings", &PeercastJrpcApi::getSettings, {} },
-            { "getStatus", &PeercastJrpcApi::getStatus, {} },
-            { "getYellowPages", &PeercastJrpcApi::getYellowPages, {} },
-            { "getYellowPageProtocols", &PeercastJrpcApi::getYellowPageProtocols, {} },
+            { "fetch", &JrpcApi::fetch, { "url", "name", "desc", "genre", "contact", "bitrate", "type" } },
+            { "getVersionInfo", &JrpcApi::getVersionInfo, {} },
+            { "getChannels", &JrpcApi::getChannels, {} },
+            { "getNewVersions", &JrpcApi::getNewVersions, {} },
+            { "getNotificationMessages", &JrpcApi::getNotificationMessages, {} },
+            { "getPlugins", &JrpcApi::getPlugins, {} },
+            { "getSettings", &JrpcApi::getSettings, {} },
+            { "getStatus", &JrpcApi::getStatus, {} },
+            { "getYellowPages", &JrpcApi::getYellowPages, {} },
+            { "getYellowPageProtocols", &JrpcApi::getYellowPageProtocols, {} },
         })
     {
     }
@@ -92,7 +87,7 @@ public:
     // dispatchメソッドを実装。パラメータの数や型が合わない場合は
     // invalid_params 例外、メソッドが存在しない場合は
     // method_not_found 例外を上げる。
-    json dispatch(const json& m, const json& p) override
+    json dispatch(const json& m, const json& p)
     {
         for (int i = 0; i < m_methods.size(); i++)
         {

@@ -119,7 +119,7 @@ void Servent::handshakeJRPC(HTTP &http)
 		throw HTTPException(HTTP_SC_BADREQUEST, 400);
 	}
 
-	PeercastJrpcApi api;
+	JrpcApi api;
 	std::string response = api.call(body);
 
 	http.writeLine(HTTP_SC_OK);
@@ -270,8 +270,8 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 
 		}else if (strcmp(fn, "/api/1")==0)
 		{
-			PeercastJrpcApi api;
-			std::string response = api.getVersionInfo().dump();
+			JrpcApi api;
+			std::string response = api.getVersionInfo(nlohmann::json({})).dump();
 
 			while (http.nextHeader())
 				;
