@@ -150,7 +150,22 @@ public:
 	unsigned char *packet;
 };
 
+// ----------------------------------------------
+class FLVTagBuffer
+{
+public:
+	static const int MAX_DATALEN = 15 * 1024;
 
+	FLVTagBuffer() : m_mem(MAX_DATALEN) {}
+
+	bool put(FLVTag& tag, Channel* ch);
+	void flush(Channel* ch);
+
+	MemoryStream m_mem;
+
+private:
+	void sendImmediately(FLVTag& tag, Channel* ch);
+};
 
 // ----------------------------------------------
 class FLVStream : public ChannelStream
@@ -167,6 +182,8 @@ public:
 	virtual void readHeader(Stream &, Channel *);
 	virtual int	 readPacket(Stream &, Channel *);
 	virtual void readEnd(Stream &, Channel *);
+
+	FLVTagBuffer m_buffer;
 };
 
 class AMFObject
@@ -295,6 +312,5 @@ public:
 	}
 	int bitrate;
 };
-
 
 #endif
