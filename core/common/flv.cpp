@@ -92,6 +92,8 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
 
 		ch->info.bitrate = bitrate;
 
+		m_buffer.flush(ch);
+
 		ch->headPack.type = ChanPacket::T_HEAD;
 		ch->headPack.len = mem.pos;
 		ch->headPack.pos = ch->streamPos;
@@ -100,29 +102,88 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
 		ch->streamPos += ch->headPack.len;
 	}
 	else {
-		ChanPacket pack;
+		bool packet_sent;
 
-		MemoryStream mem(flvTag.packet, flvTag.packetSize);
+		packet_sent = m_buffer.put(flvTag, ch);
 
-		int rlen = flvTag.packetSize;
-		while (rlen)
-		{
-			int rl = rlen;
-			if (rl > ChanPacket::MAX_DATALEN)
-				rl = ChanPacket::MAX_DATALEN;
-
-			pack.init(ChanPacket::T_DATA, pack.data, rl, ch->streamPos);
-			mem.read(pack.data, pack.len);
-			ch->newPacket(pack);
-			ch->checkReadDelay(pack.len);
-			ch->streamPos += pack.len;
-
-			rlen -= rl;
-		}
-
-		mem.close();
-
+		if (!packet_sent && in.readReady())
+			return readPacket(in, ch);
 	}
 
 	return 0;
+}
+
+bool FLVTagBuffer::put(FLVTag& tag, Channel* ch)
+{
+	if (m_mem.pos + tag.packetSize > 15 * 1024)
+	{
+		if (m_mem.pos > 0)
+		{
+			flush(ch);
+		}
+		sendImmediately(tag, ch);
+		return true;
+	} else if (m_mem.pos + tag.packetSize > 8 * 1024)
+	{
+		flush(ch);
+
+		m_mem.write(tag.packet, tag.packetSize);
+
+		if (m_mem.pos > 8 * 1024)
+			flush(ch);
+		return true;
+	} else
+	{
+		m_mem.write(tag.packet, tag.packetSize);
+		return false;
+	}
+}
+
+void FLVTagBuffer::sendImmediately(FLVTag& tag, Channel* ch)
+{
+	ChanPacket pack;
+	MemoryStream mem(tag.packet, tag.packetSize);
+
+	int rlen = tag.packetSize;
+	while (rlen)
+	{
+		int rl = rlen;
+		if (rl > MAX_DATALEN)
+			rl = MAX_DATALEN;
+
+		pack.type = ChanPacket::T_DATA;
+		pack.pos = ch->streamPos;
+		pack.len = rl;
+
+		mem.read(pack.data, pack.len);
+
+		ch->newPacket(pack);
+		ch->checkReadDelay(pack.len);
+		ch->streamPos += pack.len;
+
+		rlen -= rl;
+	}
+}
+
+void FLVTagBuffer::flush(Channel* ch)
+{
+	if (m_mem.pos == 0)
+		return;
+
+	int length = m_mem.pos;
+
+	m_mem.rewind();
+
+	ChanPacket pack;
+
+	pack.type = ChanPacket::T_DATA;
+	pack.pos = ch->streamPos;
+	pack.len = length;
+	m_mem.read(pack.data, length);
+
+	ch->newPacket(pack);
+	ch->checkReadDelay(pack.len);
+	ch->streamPos += pack.len;
+
+	m_mem.rewind();
 }
