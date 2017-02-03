@@ -19,6 +19,9 @@
 #ifndef _CSTREAM_H
 #define _CSTREAM_H
 
+#include "atom.h"
+#include "sys.h"
+
 // ----------------------------------
 
 class Channel;
