@@ -270,36 +270,14 @@ public:
     {
         json result = json::array();
 
-        GnuID id;
-        id.fromStr(params[0].get<std::string>().c_str());
+        GnuID id = params[0].get<std::string>();
 
         Channel *c = chanMgr->findChannelByID(id);
         if (!c)
             throw application_error(-1, "Channel not found");
 
-        json remoteEndPoint;
-        if (c->sock)
-        {
-            char buf[32];
-
-            c->sock->host.toStr(buf);
-            remoteEndPoint = buf;
-        } else
-        {
-            remoteEndPoint = nullptr;
-        }
-
-        json remoteName;
-        if (c->sourceURL.isEmpty())
-        {
-            char buf[32];
-
-            c->sourceHost.host.toStr(buf);
-            remoteName = buf;
-        } else
-        {
-            remoteName = c->sourceURL.cstr();
-        }
+        json remoteEndPoint = c->sock ? (std::string) c->sock->host : nullptr;
+        json remoteName = c->sourceURL.isEmpty() ? (std::string)c->sourceHost.host : c->sourceURL.cstr();
 
         json sourceConnection =  {
             { "connectionId", (uintptr_t) c },
@@ -327,17 +305,7 @@ public:
             unsigned int bytesInPerSec = s->sock ? s->sock->bytesInPerSec : 0;
             unsigned int bytesOutPerSec = s->sock ? s->sock->bytesOutPerSec : 0;
 
-            json remoteEndPoint;
-            if (c->sock)
-            {
-                char buf[32];
-
-                c->sock->host.toStr(buf);
-                remoteEndPoint = buf;
-            } else
-            {
-                remoteEndPoint = nullptr;
-            }
+            json remoteEndPoint = c->sock ? (std::string) c->sock->host : nullptr;
 
             json connection = {
                 { "connectionId", (uintptr_t) s },
@@ -364,8 +332,7 @@ public:
 
     json getChannelInfo(json::array_t params)
     {
-        GnuID id;
-        id.fromStr(params[0].get<std::string>().c_str());
+        GnuID id(params[0].get<std::string>());
 
         Channel *c = chanMgr->findChannelByID(id);
         if (!c)
@@ -382,10 +349,7 @@ public:
 
     json getChannelStatus(json::array_t params)
     {
-        auto str = params[0].get<std::string>();
-
-        GnuID id;
-        id.fromStr(str.c_str());
+        GnuID id(params[0].get<std::string>());
 
         Channel *c = chanMgr->findChannelByID(id);
 

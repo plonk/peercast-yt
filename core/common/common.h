@@ -90,6 +90,12 @@ public:
         clear();
     }
 
+    GnuID(const std::string& str)
+    {
+        clear();
+        fromStr(str.c_str());
+    }
+
 	bool	isSame(GnuID &gid)
 	{
 		for(int i=0; i<16; i++)
@@ -249,6 +255,13 @@ public:
 	{
 		sprintf(str, "%d.%d.%d.%d:%d", (ip>>24)&0xff, (ip>>16)&0xff, (ip>>8)&0xff, (ip)&0xff, port);
 	}
+
+    operator std::string ()
+    {
+        char buf[32];
+        toStr(buf);
+        return buf;
+    }
 
 	void	fromStrIP(const char *, int);
 	void	fromStrName(const char *, int);
