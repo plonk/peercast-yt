@@ -297,15 +297,15 @@ void String::setFromStopwatch(unsigned int t)
 	day = (t/86400);
 
 	if (day)
-		sprintf(data, "%d day, %d hour", day, hour);
+		std::sprintf(data, "%d day, %d hour", day, hour);
 	else if (hour)
-		sprintf(data, "%d hour, %d min", hour, min);
+		std::sprintf(data, "%d hour, %d min", hour, min);
 	else if (min)
-		sprintf(data, "%d min, %d sec", min, sec);
+		std::sprintf(data, "%d min, %d sec", min, sec);
 	else if (sec)
-		sprintf(data, "%d sec", sec);
+		std::sprintf(data, "%d sec", sec);
 	else
-		sprintf(data, "-");
+		std::sprintf(data, "-");
 
 	type = T_ASCII;
 }
@@ -498,7 +498,7 @@ void String::ASCII2HTML(const char *in)
 			*op++ = c;
 		}else
 		{
-			sprintf(op, "&#x%02X;", (int)c);
+			std::sprintf(op, "&#x%02X;", (int)c);
 			op+=6;
 		}
 		if (op >= oe)
@@ -523,7 +523,7 @@ void String::ASCII2ESC(const char *in, bool safe)
 			if (safe)
 				*op++ = '%';
 			*op=0;
-			sprintf(op, "%02X", (int)c);
+			std::sprintf(op, "%02X", (int)c);
 			op+=2;
 		}
 		if (op >= oe)
