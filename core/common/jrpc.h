@@ -239,7 +239,7 @@ public:
     json channelStatus(Channel *c)
     {
         return {
-            {"status", to_json((Channel::STATUS) c->status)},
+            {"status", to_json(c->status)},
             {"source", c->sourceURL.cstr() },
             {"uptime", c->info.getUptime()},
             {"localRelays", c->localRelays()},
@@ -282,7 +282,7 @@ public:
         json sourceConnection =  {
             { "connectionId", (uintptr_t) c },
             { "type", "source" },
-            { "status", to_json((Channel::STATUS) c->status) },
+            { "status", to_json(c->status) },
             { "sendRate", 0.0 },
             { "recvRate", c->sourceData ? c->sourceData->getSourceRate() : 0 },
             { "protocolName", ChanInfo::getProtocolStr(c->info.srcProtocol) },

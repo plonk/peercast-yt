@@ -497,7 +497,7 @@ public:
 	ThreadInfo	thread;
 
 	unsigned int lastIdleTime;
-	int		status;
+	STATUS		status;
 	static const 	char *statusMsgs[], *srcTypes[];
 
 	ClientSocket	*sock;
