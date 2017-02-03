@@ -22,6 +22,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <string>
+
 #ifndef __GNUC__
 #define __attribute__(x)
 #endif
@@ -112,6 +114,12 @@ public:
 		storeTime = 0;
 	}
 
+    operator std::string ()
+    {
+        char buf[33];
+        toStr(buf);
+        return buf;
+    }
 
 	void	generate(unsigned char = 0);
 	void	encode(class Host *, const char *, const char *, unsigned char);
