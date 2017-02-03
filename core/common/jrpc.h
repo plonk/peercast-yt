@@ -27,6 +27,13 @@ public:
         invalid_params(const std::string& msg) : runtime_error(msg) {}
     };
 
+    class application_error : public std::runtime_error
+    {
+    public:
+        application_error(int error, const std::string& msg) : runtime_error(msg), m_errno(error) {}
+        int m_errno;
+    };
+
     std::string call(const std::string& request)
     {
         std::string result = call_internal(request).dump();
@@ -47,6 +54,9 @@ public:
         ({
             { "fetch", &JrpcApi::fetch, { "url", "name", "desc", "genre", "contact", "bitrate", "type" } },
             { "getVersionInfo", &JrpcApi::getVersionInfo, {} },
+            { "getChannelConnections", &JrpcApi::getChannelConnections, { "channelId"} },
+            { "getChannelInfo", &JrpcApi::getChannelInfo, { "channelId"} },
+            { "getChannelStatus", &JrpcApi::getChannelStatus, { "channelId"} },
             { "getChannels", &JrpcApi::getChannels, {} },
             { "getNewVersions", &JrpcApi::getNewVersions, {} },
             { "getNotificationMessages", &JrpcApi::getNotificationMessages, {} },
@@ -112,9 +122,52 @@ public:
         throw method_not_found(m.get<std::string>());
     }
 
-    json fetch(json::array_t)
+
+    json fetch(json::array_t params)
     {
-        return "OK";
+        try
+        {
+            std::string url     = params[0];
+            std::string name    = params[1];
+            std::string desc    = params[2];
+            std::string genre   = params[3];
+            std::string contact = params[4];
+            int bitrate         = params[5];
+            std::string typeStr = params[6];
+
+            ChanInfo info;
+            info.name    = name.c_str();
+            info.desc    = desc.c_str();
+            info.genre   = genre.c_str();
+            info.url     = contact.c_str();
+            info.bitrate = bitrate;
+            {
+                auto type = ChanInfo::getTypeFromStr(typeStr.c_str());
+
+                info.contentType    = type;
+                info.contentTypeStr = ChanInfo::getTypeStr(type);
+                info.streamType     = ChanInfo::getMIMEType(type);
+                info.streamExt      = ChanInfo::getTypeExt(type);
+            }
+            info.bcID = chanMgr->broadcastID;
+
+            Channel *c = chanMgr->createChannel(info, NULL); // info, mount
+            if (!c)
+            {
+                throw application_error(0, "failed to create channel");
+            }
+            c->startURL(url.c_str());
+
+            while (!c->getID().isSet())
+            {
+                sys->sleepIdle();
+            }
+
+            return (std::string) c->getID();
+        } catch (std::domain_error& e)
+        {
+            throw invalid_params(e.what());
+        }
     }
 
     json getVersionInfo(json::array_t)
@@ -140,11 +193,11 @@ public:
         comment.convertTo(String::T_UNICODE);  // should not be needed
 
         return {
-            {"name", info.name},
-            {"url", info.url},
-            {"genre", info.genre},
-            {"desc", info.desc},
-            {"comment", comment},
+            {"name", info.name.cstr()},
+            {"url", info.url.cstr()},
+            {"genre", info.genre.cstr()},
+            {"desc", info.desc.cstr()},
+            {"comment", comment.cstr()},
             {"bitrate", info.bitrate},
             {"contentType", info.getTypeStr()}, //?
             {"mimeType", info.getMIMEType()}
@@ -154,11 +207,11 @@ public:
     json to_json(TrackInfo& track)
     {
         return {
-            {"name", track.title},
-            {"genre", track.genre},
-            {"album", track.album},
-            {"creator", track.artist},
-            {"url", track.contact}
+            {"name", track.title.cstr()},
+            {"genre", track.genre.cstr()},
+            {"album", track.album.cstr()},
+            {"creator", track.artist.cstr()},
+            {"url", track.contact.cstr()}
         };
     }
 
@@ -183,14 +236,11 @@ public:
         }
     }
 
-    json to_json(Channel *c)
+    json channelStatus(Channel *c)
     {
-        json j;
-
-        j["channelId"] = to_json(c->info.id);
-        j["status"] = {
+        return {
             {"status", to_json((Channel::STATUS) c->status)},
-            {"source", c->sourceURL},
+            {"source", c->sourceURL.cstr() },
             {"uptime", c->info.getUptime()},
             {"localRelays", c->localRelays()},
             {"localDirects", c->localListeners()},
@@ -201,12 +251,150 @@ public:
             {"isDirectFull", nullptr},
             {"isReceiving", c->isReceiving()},
         };
+    }
+
+    json to_json(Channel *c)
+    {
+        json j;
+
+        j["channelId"] = to_json(c->info.id);
+        j["status"] = channelStatus(c);
         j["info"] = to_json(c->info);
         j["track"] = to_json(c->info.track);
         j["yellowPages"] = json::array();
 
         return j;
     }
+
+    json getChannelConnections(json::array_t params)
+    {
+        json result = json::array();
+
+        GnuID id;
+        id.fromStr(params[0].get<std::string>().c_str());
+
+        Channel *c = chanMgr->findChannelByID(id);
+        if (!c)
+            throw application_error(-1, "Channel not found");
+
+        json remoteEndPoint;
+        if (c->sock)
+        {
+            char buf[32];
+
+            c->sock->host.toStr(buf);
+            remoteEndPoint = buf;
+        } else
+        {
+            remoteEndPoint = nullptr;
+        }
+
+        json remoteName;
+        if (c->sourceURL.isEmpty())
+        {
+            char buf[32];
+
+            c->sourceHost.host.toStr(buf);
+            remoteName = buf;
+        } else
+        {
+            remoteName = c->sourceURL.cstr();
+        }
+
+        json sourceConnection =  {
+            { "connectionId", (uintptr_t) c },
+            { "type", "source" },
+            { "status", to_json((Channel::STATUS) c->status) },
+            { "sendRate", 0.0 },
+            { "recvRate", c->sourceData ? c->sourceData->getSourceRate() : 0 },
+            { "protocolName", ChanInfo::getProtocolStr(c->info.srcProtocol) },
+            { "localRelays", nullptr },
+            { "localDirects", nullptr },
+            { "contentPosition", c->streamPos },
+            { "agentName", nullptr },
+            { "remoteEndPoint", remoteEndPoint },
+            { "remoteHostStatus", json::array() }, // 何を入れたらいいのかわからない。
+            { "remoteName", remoteName },
+        };
+        result.push_back(sourceConnection);
+
+        servMgr->lock.on();
+        for (Servent* s = servMgr->servents; s != NULL; s = s->next)
+        {
+            if (s->type != Servent::T_RELAY)
+                continue;
+
+            unsigned int bytesInPerSec = s->sock ? s->sock->bytesInPerSec : 0;
+            unsigned int bytesOutPerSec = s->sock ? s->sock->bytesOutPerSec : 0;
+
+            json remoteEndPoint;
+            if (c->sock)
+            {
+                char buf[32];
+
+                c->sock->host.toStr(buf);
+                remoteEndPoint = buf;
+            } else
+            {
+                remoteEndPoint = nullptr;
+            }
+
+            json connection = {
+                { "connectionId", (uintptr_t) s },
+                { "type", "relay" },
+                { "status", s->getStatusStr() },
+                { "sendRate", bytesOutPerSec },
+                { "recvRate", bytesInPerSec },
+                { "protocolName", "PCP Relay" },
+                { "localRelays", nullptr },
+                { "localDirects", nullptr },
+                { "contentPosition", nullptr },
+                { "agentName", s->agent.cstr() },
+                { "remoteEndPoint", remoteEndPoint },
+                { "remoteHostStatus", json::array() }, // 何を入れたらいいのかわからない。
+                { "remoteName", remoteEndPoint },
+            };
+
+            result.push_back(connection);
+        }
+        servMgr->lock.off();
+
+        return result;
+    }
+
+    json getChannelInfo(json::array_t params)
+    {
+        GnuID id;
+        id.fromStr(params[0].get<std::string>().c_str());
+
+        Channel *c = chanMgr->findChannelByID(id);
+        if (!c)
+            throw application_error(-1, "Channel not found");
+
+        json j = {
+            { "info", to_json(c->info) },
+            { "track", to_json(c->info.track) },
+            { "yellowPages", json::array() },
+        };
+
+        return j;
+    }
+
+    json getChannelStatus(json::array_t params)
+    {
+        auto str = params[0].get<std::string>();
+
+        GnuID id;
+        id.fromStr(str.c_str());
+
+        Channel *c = chanMgr->findChannelByID(id);
+
+        if (!c)
+            throw application_error(-1, "Channel not found");
+
+        return channelStatus(c);
+    }
+
 
     json getChannels(json::array_t)
     {
@@ -256,24 +444,20 @@ public:
 
     json getYellowPages(json::array_t)
     {
-        servMgr->lock.on();
-
         json j;
         const char* root = servMgr->rootHost.cstr();
 
         j = {
             { "yellowPageId", 0 },
             { "name",  root },
-            { "uri", String::format("pcp://%s/", root) },
-            { "announceUri", String::format("pcp://%s/", root) },
+            { "uri", String::format("pcp://%s/", root).cstr() },
+            { "announceUri", String::format("pcp://%s/", root).cstr() },
             { "channelsUri", nullptr },
             { "protocol", "pcp" },
             { "channels", announcingChannels() }
         };
 
-        servMgr->lock.off();
-
-        return j;
+        return json::array({j});
     }
 
     json getYellowPageProtocols(json::array_t)
@@ -288,8 +472,6 @@ public:
 
     json getSettings(json::array_t)
     {
-        servMgr->lock.on();
-        chanMgr->lock.on();
         json j = {
             { "maxRelays", servMgr->maxRelays },
             { "maxRelaysPerChannel", chanMgr->maxRelaysPerChannel },
@@ -299,9 +481,6 @@ public:
             { "maxUpstreamRatePerChannel", servMgr->maxBitrateOut },
             // channelCleaner は無視。
         };
-
-        chanMgr->lock.off();
-        servMgr->lock.off();
 
         return j;
     }
@@ -326,10 +505,8 @@ public:
 
     json getStatus(json::array_t)
     {
-        servMgr->lock.on();
-
         std::string globalIP = servMgr->serverHost.IPtoStr();
-        auto port       = servMgr->serverHost.port;
+        auto port            = servMgr->serverHost.port;
         std::string localIP  = Host(ClientSocket::getIP(NULL), port).IPtoStr();
 
         json j = {
@@ -340,8 +517,6 @@ public:
             { "localRelayEndPoint", { localIP, port } },
             { "localDirectEndPoint", { localIP, port } }
         };
-
-        servMgr->lock.off();
 
         return j;
     }

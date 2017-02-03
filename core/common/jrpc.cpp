@@ -69,6 +69,8 @@ json JrpcApi::call_internal(const string& input)
         return error_object(-32601, "Method not found", id, e.what());
     } catch (invalid_params& e) {
         return error_object(-32602, "Invalid params", id, e.what());
+    } catch (application_error& e) {
+        return error_object(e.m_errno, e.what(), id);
     }
 
     return {
