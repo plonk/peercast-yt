@@ -3,8 +3,8 @@
 // Date: 1-april-2004
 // Author: giles
 //
-//	ShiftJIS/EUC to Unicode conversions
-//	(modified version of program by Y. Kuno, see below)
+//  ShiftJIS/EUC to Unicode conversions
+//  (modified version of program by Y. Kuno, see below)
 //
 //
 // (c) 2002-4 peercast.org
@@ -39,8 +39,8 @@
 
 // -----------------------------------
 
-#define		SJ0162	0x00e1		/* 01 - 62 ku offset */
-#define		SJ6394	0x0161		/* 63 - 94 ku offset */
+#define     SJ0162  0x00e1      /* 01 - 62 ku offset */
+#define     SJ6394  0x0161      /* 63 - 94 ku offset */
 
 
 // -----------------------------------
@@ -701,50 +701,50 @@ static unsigned short uniTable[94][94] = {
 // ------------------------------------------------------------
 unsigned short JISConverter::sjisToUnicode(unsigned short sjis)
 {
-	unsigned short u;
-	unsigned int c = sjis>>8;
-	unsigned int c1 = sjis&0xff;
+    unsigned short u;
+    unsigned int c = sjis>>8;
+    unsigned int c1 = sjis&0xff;
 
-	c = c + c - ((c <= 0x9f) ? SJ0162 : SJ6394);
-	if(c1 < 0x9f)
-	{
-		c1 = c1 - ((c1 > 0x7f) ? 0x20 : 0x1f);
-	}
-	else
-	{
-	    c1 = c1 - 0x7e; c++;
-	}
-	c -= 33;
-	c1 -= 33;
-	if(c < 0 || c1 < 0 || c > 93 || c1 > 93)
-		u = 0x3013;
-	else
-	{
-		u = uniTable[c][c1];
-		if(!u)
-			u = 0x3013;
-	}
+    c = c + c - ((c <= 0x9f) ? SJ0162 : SJ6394);
+    if(c1 < 0x9f)
+    {
+        c1 = c1 - ((c1 > 0x7f) ? 0x20 : 0x1f);
+    }
+    else
+    {
+        c1 = c1 - 0x7e; c++;
+    }
+    c -= 33;
+    c1 -= 33;
+    if(c < 0 || c1 < 0 || c > 93 || c1 > 93)
+        u = 0x3013;
+    else
+    {
+        u = uniTable[c][c1];
+        if(!u)
+            u = 0x3013;
+    }
 
-	return u;
+    return u;
 }
 // ------------------------------------------------------------
 unsigned short JISConverter::eucToUnicode(unsigned short euc)
 {
-	unsigned short u;
-	unsigned int c = euc>>8;
-	unsigned int c1 = euc&0xff;
+    unsigned short u;
+    unsigned int c = euc>>8;
+    unsigned int c1 = euc&0xff;
 
-	c &= 0x7f;
-	c -= 33;
-	c1 &= 0x7f;
-	c1 -= 33;
+    c &= 0x7f;
+    c -= 33;
+    c1 &= 0x7f;
+    c1 -= 33;
     if(c < 0 || c1 < 0 || c > 93 || c1 > 93)
-		u = 0x3013;
+        u = 0x3013;
     else
-	{
+    {
         u = uniTable[c][c1];
-		if(!u)
-			u = 0x3013;
-	}
-	return u;
+        if(!u)
+            u = 0x3013;
+    }
+    return u;
 }

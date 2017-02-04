@@ -3,7 +3,7 @@
 // Date: 4-apr-2002
 // Author: giles
 // Desc:
-//		WSys derives from Sys to provide basic win32 functions such as starting threads.
+//      WSys derives from Sys to provide basic win32 functions such as starting threads.
 //
 // (c) 2002 peercast.org
 // ------------------------------------------------
@@ -30,29 +30,29 @@
 class USys : public Sys
 {
 public:
-	USys();
+    USys();
 
-	virtual	ClientSocket	*createSocket();
-	virtual bool			startThread(ThreadInfo *);
-	virtual void			sleep(int );
-	virtual void			appMsg(long, long);
-	virtual unsigned int	getTime();
-	virtual double			getDTime();
-	virtual unsigned int	rnd() {return rndGen.next();}
-	virtual void			getURL(const char *);
-	virtual void			exit();
-	virtual bool			hasGUI() {return false;}
-	virtual void			callLocalURL(const char *, int);
-	virtual void			executeFile(const char *);
-	virtual void			endThread(ThreadInfo *);
-	virtual void			waitThread(ThreadInfo *, int timeout = 30000);
+    virtual ClientSocket    *createSocket();
+    virtual bool            startThread(ThreadInfo *);
+    virtual void            sleep(int );
+    virtual void            appMsg(long, long);
+    virtual unsigned int    getTime();
+    virtual double          getDTime();
+    virtual unsigned int    rnd() {return rndGen.next();}
+    virtual void            getURL(const char *);
+    virtual void            exit();
+    virtual bool            hasGUI() {return false;}
+    virtual void            callLocalURL(const char *, int);
+    virtual void            executeFile(const char *);
+    virtual void            endThread(ThreadInfo *);
+    virtual void            waitThread(ThreadInfo *, int timeout = 30000);
 
 
-	peercast::Random rndGen;
+    peercast::Random rndGen;
 private:
 
 #ifdef __APPLE__
-	void openURL( const char* url );
+    void openURL( const char* url );
 #endif
 };
 

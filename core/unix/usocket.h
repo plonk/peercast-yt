@@ -3,7 +3,7 @@
 // Date: 4-apr-2002
 // Author: giles
 // Desc:
-//		see .cpp for details
+//      see .cpp for details
 //
 // (c) 2002 peercast.org
 // ------------------------------------------------
@@ -38,40 +38,40 @@
 class UClientSocket : public ClientSocket
 {
 public:
-	static void	init();
+    static void init();
 
     UClientSocket()
     {
-		sockNum = 0;
+        sockNum = 0;
     }
 
 
-	virtual void	open(Host &);
-	virtual int	read(void *, int);
-	virtual int	readUpto(void *, int);
-	virtual void	write(const void *, int);
-	virtual void	bind(Host &);
-	virtual void	connect();
-	virtual void	close();
-	virtual ClientSocket * accept();
-	virtual bool	active() {return sockNum != 0;}
-	virtual bool	readReady();
-	virtual int numPending();
+    virtual void    open(Host &);
+    virtual int read(void *, int);
+    virtual int readUpto(void *, int);
+    virtual void    write(const void *, int);
+    virtual void    bind(Host &);
+    virtual void    connect();
+    virtual void    close();
+    virtual ClientSocket * accept();
+    virtual bool    active() {return sockNum != 0;}
+    virtual bool    readReady();
+    virtual int numPending();
 
-	virtual Host	getLocalHost();
-	void	setBlocking(bool);
-	void	setReuse(bool);
-	void	setNagle(bool);
-	void	setLinger(int);
+    virtual Host    getLocalHost();
+    void    setBlocking(bool);
+    void    setReuse(bool);
+    void    setNagle(bool);
+    void    setLinger(int);
 
-	static	hostent		*resolveHost(char *);
+    static  hostent     *resolveHost(char *);
 
-	void	checkTimeout(bool, bool);
-	void	checkTimeout2(bool, bool);
+    void    checkTimeout(bool, bool);
+    void    checkTimeout2(bool, bool);
 
 
-	unsigned int sockNum;
-	struct sockaddr_in remoteAddr;
+    unsigned int sockNum;
+    struct sockaddr_in remoteAddr;
 
 
 };

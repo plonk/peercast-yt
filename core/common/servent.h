@@ -40,22 +40,22 @@ class Servent
 {
 public:
 
-	enum
-	{
-		MAX_HASH = 500, 			// max. amount of packet hashes Servents can store
-		MAX_OUTPACKETS = 32		// max. output packets per queue (normal/priority)
-	};
+    enum
+    {
+        MAX_HASH = 500,             // max. amount of packet hashes Servents can store
+        MAX_OUTPACKETS = 32     // max. output packets per queue (normal/priority)
+    };
 
     enum TYPE
     {
-		T_NONE, 					// Not allocated
-        T_INCOMING, 				// Unknown incoming
-        T_SERVER, 				// The main server
-		T_RELAY, 				// Outgoing relay
-		T_DIRECT, 				// Outgoing direct connection
-		T_COUT, 					// PCP out connection
-		T_CIN, 					// PCP in connection
-		T_PGNU					// old protocol connection
+        T_NONE,                     // Not allocated
+        T_INCOMING,                 // Unknown incoming
+        T_SERVER,               // The main server
+        T_RELAY,                // Outgoing relay
+        T_DIRECT,               // Outgoing direct connection
+        T_COUT,                     // PCP out connection
+        T_CIN,                  // PCP in connection
+        T_PGNU                  // old protocol connection
     };
 
     enum STATUS
@@ -66,222 +66,222 @@ public:
         S_HANDSHAKE,
         S_CONNECTED,
         S_CLOSING,
-		S_LISTENING,
-		S_TIMEOUT,
-		S_REFUSED,
-		S_VERIFIED,
-		S_ERROR,
-		S_WAIT,
-		S_FREE
+        S_LISTENING,
+        S_TIMEOUT,
+        S_REFUSED,
+        S_VERIFIED,
+        S_ERROR,
+        S_WAIT,
+        S_FREE
     };
 
-	enum PROTOCOL
-	{
-		P_UNKNOWN,
-		P_GNUTELLA06,
-		P_PCP
-	};
+    enum PROTOCOL
+    {
+        P_UNKNOWN,
+        P_GNUTELLA06,
+        P_PCP
+    };
 
 
-	enum SORT
-	{
-		SORT_NAME = 0,
-		SORT_BITRATE,
-		SORT_LISTENERS,
-		SORT_HOSTS,
-		SORT_TYPE,
-		SORT_GENRE
-	};
+    enum SORT
+    {
+        SORT_NAME = 0,
+        SORT_BITRATE,
+        SORT_LISTENERS,
+        SORT_HOSTS,
+        SORT_TYPE,
+        SORT_GENRE
+    };
 
-	enum ALLOW
-	{
-		ALLOW_HTML		= 0x01,
-		ALLOW_BROADCAST = 0x02,
-		ALLOW_NETWORK	= 0x04,
-		ALLOW_DIRECT	= 0x08,
-		ALLOW_ALL		= 0xff
-	};
+    enum ALLOW
+    {
+        ALLOW_HTML      = 0x01,
+        ALLOW_BROADCAST = 0x02,
+        ALLOW_NETWORK   = 0x04,
+        ALLOW_DIRECT    = 0x08,
+        ALLOW_ALL       = 0xff
+    };
 
-	Servent(int);
-	~Servent();
+    Servent(int);
+    ~Servent();
 
-	void	reset();
-    bool	initServer(Host &);
-    void	initIncoming(ClientSocket *, unsigned int);
-    void	initOutgoing(TYPE);
-	void	initGIV(Host &, GnuID &);
-	void	initPCP(Host &);
+    void    reset();
+    bool    initServer(Host &);
+    void    initIncoming(ClientSocket *, unsigned int);
+    void    initOutgoing(TYPE);
+    void    initGIV(Host &, GnuID &);
+    void    initPCP(Host &);
 
-	void	checkFree();
-
-
-
-
-	//	funcs for handling status/type
-	void	setStatus(STATUS);
-	static const char *	getTypeStr(Servent::TYPE t) {return typeMsgs[t];}
-	const char *	getTypeStr() {return getTypeStr(type);}
-	const char *	getStatusStr() {return statusMsgs[status];}
-	int		getOutput();
-	void	addBytes(unsigned int);
-	bool	isOlderThan(Servent *s)
-	{
-		if (s)
-		{
-			unsigned int t = sys->getTime();
-			return ((t-lastConnect) > (t-s->lastConnect));
-		}else
-			return true;
-	}
+    void    checkFree();
 
 
 
-	// static funcs that do the actual work in the servent thread
-	static	THREAD_PROC		serverProc(ThreadInfo *);
-	static	THREAD_PROC		outgoingProc(ThreadInfo *);
-	static	THREAD_PROC		incomingProc(ThreadInfo *);
-	static	THREAD_PROC		givProc(ThreadInfo *);
-	static	THREAD_PROC		pcpProc(ThreadInfo *);
-	static	THREAD_PROC		fetchProc(ThreadInfo *);
 
-	static bool	pingHost(Host &, GnuID &);
-
-	bool	getLocalURL(char *);
-
-	// various types of handshaking are needed
-	void	handshakePLS(ChanHitList **, int, bool);
-	void	handshakePLS(ChanInfo &, bool);
-
-	void	handshakeHTML(char *);
-	void	handshakeXML();
-	void	handshakeCMD(char *);
-	bool	handshakeAuth(HTTP &, const char *, bool);
-	void	handshakeIn();
-	void	handshakeOut();
+    //  funcs for handling status/type
+    void    setStatus(STATUS);
+    static const char * getTypeStr(Servent::TYPE t) {return typeMsgs[t];}
+    const char *    getTypeStr() {return getTypeStr(type);}
+    const char *    getStatusStr() {return statusMsgs[status];}
+    int     getOutput();
+    void    addBytes(unsigned int);
+    bool    isOlderThan(Servent *s)
+    {
+        if (s)
+        {
+            unsigned int t = sys->getTime();
+            return ((t-lastConnect) > (t-s->lastConnect));
+        }else
+            return true;
+    }
 
 
-	void	processOutPCP();
-	void	processOutChannel();
 
-	bool	handshakeStream(ChanInfo &);
-	void	handshakeGiv(GnuID &);
+    // static funcs that do the actual work in the servent thread
+    static  THREAD_PROC     serverProc(ThreadInfo *);
+    static  THREAD_PROC     outgoingProc(ThreadInfo *);
+    static  THREAD_PROC     incomingProc(ThreadInfo *);
+    static  THREAD_PROC     givProc(ThreadInfo *);
+    static  THREAD_PROC     pcpProc(ThreadInfo *);
+    static  THREAD_PROC     fetchProc(ThreadInfo *);
 
-	void	handshakeICY(Channel::SRC_TYPE, bool);
-	void	handshakeIncoming();
-	void	handshakePOST();
-	void	handshakeRTSP(RTSP &);
-	void	handshakeHTTP(HTTP &, bool);
+    static bool pingHost(Host &, GnuID &);
 
-	void	handshakeJRPC(HTTP &http);
+    bool    getLocalURL(char *);
 
-	void	handshakeRemoteFile(const char *);
-	void	handshakeLocalFile(const char *);
+    // various types of handshaking are needed
+    void    handshakePLS(ChanHitList **, int, bool);
+    void    handshakePLS(ChanInfo &, bool);
 
-	static void	handshakeOutgoingPCP(AtomStream &, Host &, GnuID &, String &, bool);
-	static void	handshakeIncomingPCP(AtomStream &, Host &, GnuID &, String &);
-
-	void	processIncomingPCP(bool);
-
-	bool	waitForChannelHeader(ChanInfo &);
-	ChanInfo	findChannel(char *str, ChanInfo &);
-
-	bool	writeVariable(Stream &, const String &);
+    void    handshakeHTML(char *);
+    void    handshakeXML();
+    void    handshakeCMD(char *);
+    bool    handshakeAuth(HTTP &, const char *, bool);
+    void    handshakeIn();
+    void    handshakeOut();
 
 
-	// the "mainloop" of servents
-	void	processGnutella();
-	void	processRoot();
-	void	processServent();
-	void	processStream(bool, ChanInfo &);
-	void	processPCP(bool, bool);
+    void    processOutPCP();
+    void    processOutChannel();
 
-	bool	procAtoms(AtomStream &);
-	void	procRootAtoms(AtomStream &, int);
-	void	procHeloAtoms(AtomStream &, int, bool);
-	void	procGetAtoms(AtomStream &, int);
+    bool    handshakeStream(ChanInfo &);
+    void    handshakeGiv(GnuID &);
 
-	void	triggerChannel(char *, ChanInfo::PROTOCOL, bool);
-	void	sendPeercastChannel();
-	void	sendRawChannel(bool, bool);
-//	void	sendRawMultiChannel(bool, bool);
-	void	sendRawMetaChannel(int);
-	void	sendPCPChannel();
-	void	checkPCPComms(Channel *, AtomStream &);
+    void    handshakeICY(Channel::SRC_TYPE, bool);
+    void    handshakeIncoming();
+    void    handshakePOST();
+    void    handshakeRTSP(RTSP &);
+    void    handshakeHTTP(HTTP &, bool);
 
-	static void	readICYHeader(HTTP &, ChanInfo &, char *, size_t);
-	bool	canStream(Channel *);
+    void    handshakeJRPC(HTTP &http);
 
-	bool	isConnected() {return status == S_CONNECTED;}
-	bool	isListening() {return status == S_LISTENING;}
+    void    handshakeRemoteFile(const char *);
+    void    handshakeLocalFile(const char *);
 
-	bool	isAllowed(int);
-	bool	isFiltered(int);
+    static void handshakeOutgoingPCP(AtomStream &, Host &, GnuID &, String &, bool);
+    static void handshakeIncomingPCP(AtomStream &, Host &, GnuID &, String &);
 
-	// connection handling funcs
-	void	createSocket();
-	void	kill();
-	void	abort();
-	bool	isPrivate();
-	bool	isLocal();
+    void    processIncomingPCP(bool);
+
+    bool    waitForChannelHeader(ChanInfo &);
+    ChanInfo    findChannel(char *str, ChanInfo &);
+
+    bool    writeVariable(Stream &, const String &);
 
 
-	Host	getHost();
+    // the "mainloop" of servents
+    void    processGnutella();
+    void    processRoot();
+    void    processServent();
+    void    processStream(bool, ChanInfo &);
+    void    processPCP(bool, bool);
 
-	bool	outputPacket(GnuPacket &, bool);
-	bool	hasSeenPacket(GnuPacket &p) {return seenIDs.contains(p.id);}
-	bool	acceptGIV(ClientSocket *);
-	bool	sendPacket(ChanPacket &, GnuID &, GnuID &, GnuID &, Servent::TYPE);
+    bool    procAtoms(AtomStream &);
+    void    procRootAtoms(AtomStream &, int);
+    void    procHeloAtoms(AtomStream &, int, bool);
+    void    procGetAtoms(AtomStream &, int);
+
+    void    triggerChannel(char *, ChanInfo::PROTOCOL, bool);
+    void    sendPeercastChannel();
+    void    sendRawChannel(bool, bool);
+//  void    sendRawMultiChannel(bool, bool);
+    void    sendRawMetaChannel(int);
+    void    sendPCPChannel();
+    void    checkPCPComms(Channel *, AtomStream &);
+
+    static void readICYHeader(HTTP &, ChanInfo &, char *, size_t);
+    bool    canStream(Channel *);
+
+    bool    isConnected() {return status == S_CONNECTED;}
+    bool    isListening() {return status == S_LISTENING;}
+
+    bool    isAllowed(int);
+    bool    isFiltered(int);
+
+    // connection handling funcs
+    void    createSocket();
+    void    kill();
+    void    abort();
+    bool    isPrivate();
+    bool    isLocal();
 
 
-	TYPE type;
-	STATUS status;
+    Host    getHost();
 
-	static const char *statusMsgs[], *typeMsgs[];
-	GnuStream gnuStream;
-	GnuPacket pack;
-	unsigned int	lastConnect, lastPing, lastPacket;
-	String	agent;
-
-	GnuIDList	seenIDs;
-	GnuID	networkID;
-	int		serventIndex;
-
-	GnuID	remoteID;
-
-	GnuID	chanID;
-
-	GnuID	givID;
-
-	ThreadInfo	thread;
+    bool    outputPacket(GnuPacket &, bool);
+    bool    hasSeenPacket(GnuPacket &p) {return seenIDs.contains(p.id);}
+    bool    acceptGIV(ClientSocket *);
+    bool    sendPacket(ChanPacket &, GnuID &, GnuID &, GnuID &, Servent::TYPE);
 
 
-	String	loginPassword, loginMount;
+    TYPE type;
+    STATUS status;
 
-	bool	priorityConnect;
-	bool	addMetadata;
-	int		nsSwitchNum;
+    static const char *statusMsgs[], *typeMsgs[];
+    GnuStream gnuStream;
+    GnuPacket pack;
+    unsigned int    lastConnect, lastPing, lastPacket;
+    String  agent;
 
-	unsigned	int allow;
+    GnuIDList   seenIDs;
+    GnuID   networkID;
+    int     serventIndex;
+
+    GnuID   remoteID;
+
+    GnuID   chanID;
+
+    GnuID   givID;
+
+    ThreadInfo  thread;
+
+
+    String  loginPassword, loginMount;
+
+    bool    priorityConnect;
+    bool    addMetadata;
+    int     nsSwitchNum;
+
+    unsigned    int allow;
 
     ClientSocket *sock, *pushSock;
 
-	WLock	lock;
+    WLock   lock;
 
-	bool	sendHeader;
-	unsigned int syncPos, streamPos;
-	int		servPort;
+    bool    sendHeader;
+    unsigned int syncPos, streamPos;
+    int     servPort;
 
-	ChanInfo::PROTOCOL	outputProtocol;
+    ChanInfo::PROTOCOL  outputProtocol;
 
-	GnuPacketBuffer	outPacketsNorm, outPacketsPri;
+    GnuPacketBuffer outPacketsNorm, outPacketsPri;
 
-	unsigned int bytesPerSecond;
-	bool	flowControl;
+    unsigned int bytesPerSecond;
+    bool    flowControl;
 
-	Servent	*next;
+    Servent *next;
 
-	PCPStream *pcpStream;
-	Cookie	cookie;
+    PCPStream *pcpStream;
+    Cookie  cookie;
 
 };
 

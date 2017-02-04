@@ -35,155 +35,155 @@ void FLVStream::readEnd(Stream &, Channel *)
 // ------------------------------------------
 void FLVStream::readHeader(Stream &in, Channel *ch)
 {
-	bitrate = 0;
-	fileHeader.read(in);
+    bitrate = 0;
+    fileHeader.read(in);
 }
 
 // ------------------------------------------
 int FLVStream::readPacket(Stream &in, Channel *ch)
 {
-	bool headerUpdate = false;
+    bool headerUpdate = false;
 
-	FLVTag flvTag;
-	flvTag.read(in);
+    FLVTag flvTag;
+    flvTag.read(in);
 
-	switch (flvTag.type)
-	{
-		case FLVTag::T_SCRIPT:
-		{
-			AMFObject amf;
-			MemoryStream flvmem(flvTag.data, flvTag.size);
-			if (amf.readMetaData(flvmem)) {
-				flvmem.close();
-				bitrate = amf.bitrate;
-				metaData = flvTag;
-				headerUpdate = true;
-			}
-		}
-		case FLVTag::T_VIDEO:
-		{
-			//AVC Header
-			if (flvTag.data[0] == 0x17 && flvTag.data[1] == 0x00 &&
-				flvTag.data[2] == 0x00 && flvTag.data[3] == 0x00) {
-				avcHeader = flvTag;
-				headerUpdate = true;
-			}
-		}
-		case FLVTag::T_AUDIO:
-		{
-			//AAC Header
-			if (flvTag.data[0] == 0xaf && flvTag.data[1] == 0x00) {
-				aacHeader = flvTag;
-				headerUpdate = true;
-			}
-		}
-	}
+    switch (flvTag.type)
+    {
+        case FLVTag::T_SCRIPT:
+        {
+            AMFObject amf;
+            MemoryStream flvmem(flvTag.data, flvTag.size);
+            if (amf.readMetaData(flvmem)) {
+                flvmem.close();
+                bitrate = amf.bitrate;
+                metaData = flvTag;
+                headerUpdate = true;
+            }
+        }
+        case FLVTag::T_VIDEO:
+        {
+            //AVC Header
+            if (flvTag.data[0] == 0x17 && flvTag.data[1] == 0x00 &&
+                flvTag.data[2] == 0x00 && flvTag.data[3] == 0x00) {
+                avcHeader = flvTag;
+                headerUpdate = true;
+            }
+        }
+        case FLVTag::T_AUDIO:
+        {
+            //AAC Header
+            if (flvTag.data[0] == 0xaf && flvTag.data[1] == 0x00) {
+                aacHeader = flvTag;
+                headerUpdate = true;
+            }
+        }
+    }
 
-	if (headerUpdate && fileHeader.size>0) {
-		int len = fileHeader.size;
-		if (metaData.type == FLVTag::T_SCRIPT) len += metaData.packetSize;
-		if (avcHeader.type == FLVTag::T_VIDEO) len += avcHeader.packetSize;
-		if (aacHeader.type == FLVTag::T_AUDIO) len += aacHeader.packetSize;
-		MemoryStream mem(ch->headPack.data, len);
-		mem.write(fileHeader.data, fileHeader.size);
-		if (metaData.type == FLVTag::T_SCRIPT) mem.write(metaData.packet, metaData.packetSize);
-		if (avcHeader.type == FLVTag::T_VIDEO) mem.write(avcHeader.packet, avcHeader.packetSize);
-		if (aacHeader.type == FLVTag::T_AUDIO) mem.write(aacHeader.packet, aacHeader.packetSize);
+    if (headerUpdate && fileHeader.size>0) {
+        int len = fileHeader.size;
+        if (metaData.type == FLVTag::T_SCRIPT) len += metaData.packetSize;
+        if (avcHeader.type == FLVTag::T_VIDEO) len += avcHeader.packetSize;
+        if (aacHeader.type == FLVTag::T_AUDIO) len += aacHeader.packetSize;
+        MemoryStream mem(ch->headPack.data, len);
+        mem.write(fileHeader.data, fileHeader.size);
+        if (metaData.type == FLVTag::T_SCRIPT) mem.write(metaData.packet, metaData.packetSize);
+        if (avcHeader.type == FLVTag::T_VIDEO) mem.write(avcHeader.packet, avcHeader.packetSize);
+        if (aacHeader.type == FLVTag::T_AUDIO) mem.write(aacHeader.packet, aacHeader.packetSize);
 
-		ch->info.bitrate = bitrate;
+        ch->info.bitrate = bitrate;
 
-		m_buffer.flush(ch);
+        m_buffer.flush(ch);
 
-		ch->headPack.type = ChanPacket::T_HEAD;
-		ch->headPack.len = mem.pos;
-		ch->headPack.pos = ch->streamPos;
-		ch->newPacket(ch->headPack);
+        ch->headPack.type = ChanPacket::T_HEAD;
+        ch->headPack.len = mem.pos;
+        ch->headPack.pos = ch->streamPos;
+        ch->newPacket(ch->headPack);
 
-		ch->streamPos += ch->headPack.len;
-	}
-	else {
-		bool packet_sent;
+        ch->streamPos += ch->headPack.len;
+    }
+    else {
+        bool packet_sent;
 
-		packet_sent = m_buffer.put(flvTag, ch);
+        packet_sent = m_buffer.put(flvTag, ch);
 
-		if (!packet_sent && in.readReady())
-			return readPacket(in, ch);
-	}
+        if (!packet_sent && in.readReady())
+            return readPacket(in, ch);
+    }
 
-	return 0;
+    return 0;
 }
 
 bool FLVTagBuffer::put(FLVTag& tag, Channel* ch)
 {
-	if (m_mem.pos + tag.packetSize > 15 * 1024)
-	{
-		if (m_mem.pos > 0)
-		{
-			flush(ch);
-		}
-		sendImmediately(tag, ch);
-		return true;
-	} else if (m_mem.pos + tag.packetSize > 8 * 1024)
-	{
-		flush(ch);
+    if (m_mem.pos + tag.packetSize > 15 * 1024)
+    {
+        if (m_mem.pos > 0)
+        {
+            flush(ch);
+        }
+        sendImmediately(tag, ch);
+        return true;
+    } else if (m_mem.pos + tag.packetSize > 8 * 1024)
+    {
+        flush(ch);
 
-		m_mem.write(tag.packet, tag.packetSize);
+        m_mem.write(tag.packet, tag.packetSize);
 
-		if (m_mem.pos > 8 * 1024)
-			flush(ch);
-		return true;
-	} else
-	{
-		m_mem.write(tag.packet, tag.packetSize);
-		return false;
-	}
+        if (m_mem.pos > 8 * 1024)
+            flush(ch);
+        return true;
+    } else
+    {
+        m_mem.write(tag.packet, tag.packetSize);
+        return false;
+    }
 }
 
 void FLVTagBuffer::sendImmediately(FLVTag& tag, Channel* ch)
 {
-	ChanPacket pack;
-	MemoryStream mem(tag.packet, tag.packetSize);
+    ChanPacket pack;
+    MemoryStream mem(tag.packet, tag.packetSize);
 
-	int rlen = tag.packetSize;
-	while (rlen)
-	{
-		int rl = rlen;
-		if (rl > MAX_DATALEN)
-			rl = MAX_DATALEN;
+    int rlen = tag.packetSize;
+    while (rlen)
+    {
+        int rl = rlen;
+        if (rl > MAX_DATALEN)
+            rl = MAX_DATALEN;
 
-		pack.type = ChanPacket::T_DATA;
-		pack.pos = ch->streamPos;
-		pack.len = rl;
+        pack.type = ChanPacket::T_DATA;
+        pack.pos = ch->streamPos;
+        pack.len = rl;
 
-		mem.read(pack.data, pack.len);
+        mem.read(pack.data, pack.len);
 
-		ch->newPacket(pack);
-		ch->checkReadDelay(pack.len);
-		ch->streamPos += pack.len;
+        ch->newPacket(pack);
+        ch->checkReadDelay(pack.len);
+        ch->streamPos += pack.len;
 
-		rlen -= rl;
-	}
+        rlen -= rl;
+    }
 }
 
 void FLVTagBuffer::flush(Channel* ch)
 {
-	if (m_mem.pos == 0)
-		return;
+    if (m_mem.pos == 0)
+        return;
 
-	int length = m_mem.pos;
+    int length = m_mem.pos;
 
-	m_mem.rewind();
+    m_mem.rewind();
 
-	ChanPacket pack;
+    ChanPacket pack;
 
-	pack.type = ChanPacket::T_DATA;
-	pack.pos = ch->streamPos;
-	pack.len = length;
-	m_mem.read(pack.data, length);
+    pack.type = ChanPacket::T_DATA;
+    pack.pos = ch->streamPos;
+    pack.len = length;
+    m_mem.read(pack.data, length);
 
-	ch->newPacket(pack);
-	ch->checkReadDelay(pack.len);
-	ch->streamPos += pack.len;
+    ch->newPacket(pack);
+    ch->checkReadDelay(pack.len);
+    ch->streamPos += pack.len;
 
-	m_mem.rewind();
+    m_mem.rewind();
 }
