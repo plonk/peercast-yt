@@ -234,13 +234,12 @@ bool ServMgr::seenHost(Host &h, ServHost::TYPE type, unsigned int time)
 // -----------------------------------
 void ServMgr::addHost(Host &h, ServHost::TYPE type, unsigned int time)
 {
-    int i;
     if (!h.isValid())
         return;
 
     ServHost *sh=NULL;
 
-    for (i=0; i<MAX_HOSTCACHE; i++)
+    for (int i=0; i<MAX_HOSTCACHE; i++)
         if (hostCache[i].type == type)
             if (hostCache[i].host.isSame(h))
             {
@@ -262,7 +261,7 @@ void ServMgr::addHost(Host &h, ServHost::TYPE type, unsigned int time)
 
 
         // find empty slot
-        for (i=0; i<MAX_HOSTCACHE; i++)
+        for (int i=0; i<MAX_HOSTCACHE; i++)
             if (hostCache[i].type == ServHost::T_NONE)
             {
                 sh = &hostCache[i];
@@ -271,7 +270,7 @@ void ServMgr::addHost(Host &h, ServHost::TYPE type, unsigned int time)
 
         // otherwise, find oldest host and replace
         if (!sh)
-            for (i=0; i<MAX_HOSTCACHE; i++)
+            for (int i=0; i<MAX_HOSTCACHE; i++)
                 if (hostCache[i].type != ServHost::T_NONE)
                 {
                     if (sh)
@@ -952,9 +951,7 @@ void ServMgr::saveSettings(const char *fn)
         iniFile.writeIntValue("maxUptime", chanMgr->maxUptime);
 
 
-        int i;
-
-        for (i=0; i<servMgr->numFilters; i++)
+        for (int i=0; i<servMgr->numFilters; i++)
         {
             iniFile.writeSection("Filter");
                 writeFilterSettings(iniFile, servMgr->filters[i]);
@@ -1062,7 +1059,7 @@ void ServMgr::saveSettings(const char *fn)
         }
 #endif
 
-        for (i=0; i<ServMgr::MAX_HOSTCACHE; i++)
+        for (int i=0; i<ServMgr::MAX_HOSTCACHE; i++)
         {
             ServHost *sh = &servMgr->hostCache[i];
             if (sh->type != ServHost::T_NONE)

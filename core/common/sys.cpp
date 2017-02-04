@@ -407,9 +407,8 @@ void String::UNKNOWN2UNICODE(const char *in, bool safe)
         if (isUTF8(c, d))       // utf8 encoded
         {
             int numChars=0;
-            int i;
 
-            for (i=0; i<6; i++)
+            for (int i=0; i<6; i++)
             {
                 if (c & (0x80>>i))
                     numChars++;
@@ -418,7 +417,7 @@ void String::UNKNOWN2UNICODE(const char *in, bool safe)
             }
 
             utf8.writeChar(c);
-            for (i=0; i<numChars-1; i++)
+            for (int i=0; i<numChars-1; i++)
                 utf8.writeChar(*in++);
 
         }

@@ -495,19 +495,18 @@ void    Servent::addChanHits(HTML &html, ChanHitList *chl, ChanHit *source, Chan
             html.startTagEnd("td", "<b>Update</b>");
         html.end();
 
-        int i;
         int row=0;
 
         ChanHit *hits[ChanHitList::MAX_HITS];
 
         int numHits=0;
-        for (i=0; i<ChanHitList::MAX_HITS; i++)
+        for (int i=0; i<ChanHitList::MAX_HITS; i++)
             if (chl->hits[i].host.ip)
                 hits[numHits++] = &chl->hits[i];
 
         qsort(hits, numHits, sizeof(ChanHit*), (COMPARE_FUNC)compareHits);
 
-        for (i=0; i<numHits; i++)
+        for (int i=0; i<numHits; i++)
         {
             ChanHit *ch = hits[i];
             if (ch->host.ip)
@@ -756,8 +755,7 @@ void Servent::addNetStatsPage(HTML &html)
         html.end();
 
 
-        int i;
-        for (i=0; i<10; i++)
+        for (int i=0; i<10; i++)
         {
             char str[64];
             sprintf(str, "Hops %d", i+1);
@@ -766,7 +764,7 @@ void Servent::addNetStatsPage(HTML &html)
 
         if (totalIn)
         {
-            for (i=0; i<servMgr->numVersions; i++)
+            for (int i=0; i<servMgr->numVersions; i++)
             {
                 html.startTableRow(row++);
                     html.startTagEnd("td", "v%05X", servMgr->clientVersions[i]);
@@ -1848,8 +1846,7 @@ void Servent::addAllChannelsPage(HTML &html, SORT sort, bool dir, ChanInfo *info
 
                 ChanHitList *hits[ChanMgr::MAX_HITLISTS];
                 int numHits=0;
-                int i;
-                for (i=0; i<ChanMgr::MAX_HITLISTS; i++)
+                for (int i=0; i<ChanMgr::MAX_HITLISTS; i++)
                 {
                     ChanHitList *chl = &chanMgr->hitlists[i];
                     if (chl->isUsed())
@@ -1922,7 +1919,6 @@ void Servent::addWinampChansPage(HTML &html, const char *wildcard, const char *t
 
     ChanHitList *hits[ChanMgr::MAX_HITLISTS];
     int numHits=0;
-    int i;
 
     ChanInfo searchInfo;
     searchInfo.init();
@@ -1934,7 +1930,7 @@ void Servent::addWinampChansPage(HTML &html, const char *wildcard, const char *t
     else if (strcmp(type, "bitrate")==0)
         searchInfo.bitrate = atoi(wildcard);
 
-    for (i=0; i<ChanMgr::MAX_HITLISTS; i++)
+    for (int i=0; i<ChanMgr::MAX_HITLISTS; i++)
     {
         ChanHitList *chl = &chanMgr->hitlists[i];
         if (chl->isUsed() && chl->isAvailable())

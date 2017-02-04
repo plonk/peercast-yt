@@ -250,8 +250,8 @@ char *XML::Node::findAttr(const char *name)
 // ----------------------------------
 void XML::Node::write(Stream &out, int level)
 {
-    int i;
 #if 0
+    int i;
     char tabs[64];
 
     for (i=0; i<level; i++)
@@ -267,7 +267,7 @@ void XML::Node::write(Stream &out, int level)
     out.write("<", 1);
     out.write(name, strlen(name));
 
-    for (i=1; i<numAttr; i++)
+    for (int i=1; i<numAttr; i++)
     {
         out.write(" ", 1);
         char *at = getAttrName(i);
