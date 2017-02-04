@@ -134,7 +134,7 @@ void HTTP::getAuthUserPass(char *user, char *pass, size_t ulen, size_t plen)
 // -----------------------------------
 void    CookieList::init()
 {
-    for(int i=0; i<MAX_COOKIES; i++)
+    for (int i=0; i<MAX_COOKIES; i++)
         list[i].clear();
 
     neverExpire = false;
@@ -144,7 +144,7 @@ void    CookieList::init()
 bool    CookieList::contains(Cookie &c)
 {
     if ((c.id[0]) && (c.ip))
-        for(int i=0; i<MAX_COOKIES; i++)
+        for (int i=0; i<MAX_COOKIES; i++)
             if (list[i].compare(c))
                 return true;
 
@@ -170,7 +170,7 @@ bool    CookieList::add(Cookie &c)
     unsigned int oldestTime=(unsigned int)-1;
     int oldestIndex=0;
 
-    for(int i=0; i<MAX_COOKIES; i++)
+    for (int i=0; i<MAX_COOKIES; i++)
         if (list[i].time <= oldestTime)
         {
             oldestIndex = i;
@@ -185,7 +185,7 @@ bool    CookieList::add(Cookie &c)
 // -----------------------------------
 void    CookieList::remove(Cookie &c)
 {
-    for(int i=0; i<MAX_COOKIES; i++)
+    for (int i=0; i<MAX_COOKIES; i++)
         if (list[i].compare(c))
             list[i].clear();
 }

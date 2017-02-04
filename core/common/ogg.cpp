@@ -160,7 +160,7 @@ void OggVorbisSubStream::procHeaders(Channel *ch)
 {
     unsigned int packPtr=0;
 
-    for(int i=0; i<pack.numPackets; i++)
+    for (int i=0; i<pack.numPackets; i++)
     {
         MemoryStream vin(&pack.body[packPtr], pack.packetSizes[i]);
 
@@ -238,7 +238,7 @@ void OggTheoraSubStream::procHeaders(Channel *ch)
 {
     unsigned int packPtr=0;
 
-    for(int i=0; i<pack.numPackets; i++)
+    for (int i=0; i<pack.numPackets; i++)
     {
         MemoryStream vin(&pack.body[packPtr], pack.packetSizes[i]);
 
@@ -324,7 +324,7 @@ void OggVorbisSubStream::readComment(Stream &in, ChanInfo &info)
     info.track.clear();
 
     int cLen = in.readLong();   // comment len
-    for(int i=0; i<cLen; i++)
+    for (int i=0; i<cLen; i++)
     {
         int l = in.readLong();
         if (l > sizeof(argBuf))
@@ -422,7 +422,7 @@ void OggPage::read(Stream &in)
 
     // read segment table
     in.read(&data[27], numSegs);
-    for(int i=0; i<numSegs; i++)
+    for (int i=0; i<numSegs; i++)
         bodyLen += data[27+i];
 
     if (bodyLen >= MAX_BODYLEN)
@@ -471,7 +471,7 @@ void    OggPacket::addLacing(OggPage &ogg)
 {
 
     int numSegs = ogg.data[26];
-    for(int i=0; i<numSegs; i++)
+    for (int i=0; i<numSegs; i++)
     {
         int seg = ogg.data[27+i];
 

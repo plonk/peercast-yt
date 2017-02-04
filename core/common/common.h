@@ -98,7 +98,7 @@ public:
 
     bool    isSame(GnuID &gid)
     {
-        for(int i=0; i<16; i++)
+        for (int i=0; i<16; i++)
             if (gid.id[i] != id[i])
                 return false;
         return true;
@@ -107,7 +107,7 @@ public:
 
     bool    isSet()
     {
-        for(int i=0; i<16; i++)
+        for (int i=0; i<16; i++)
             if (id[i] != 0)
                 return true;
         return false;
@@ -115,7 +115,7 @@ public:
 
     void    clear()
     {
-        for(int i=0; i<16; i++)
+        for (int i=0; i<16; i++)
             id[i] = 0;
         storeTime = 0;
     }

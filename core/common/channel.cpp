@@ -367,7 +367,7 @@ THREAD_PROC Channel::stream(ThreadInfo *thread)
             unsigned int diff = (sys->getTime()-ch->info.lastPlayEnd) + 5;
 
             LOG_DEBUG("Channel sleeping for %d seconds", diff);
-            for(unsigned int i=0; i<diff; i++)
+            for (unsigned int i=0; i<diff; i++)
             {
                 if (!thread->active || peercastInst->isQuitting)
                     break;
@@ -570,7 +570,7 @@ void PeercastSource::stream(Channel *ch)
 
             sys->sleepIdle();
 
-        }while((ch->sourceHost.host.ip==0) && (ch->thread.active));
+        }while ((ch->sourceHost.host.ip==0) && (ch->thread.active));
 
         if (!ch->sourceHost.host.ip)
         {
@@ -631,7 +631,7 @@ void PeercastSource::stream(Channel *ch)
 
                 LOG_CHANNEL("Channel closed normally");
 
-            }catch(StreamException &e)
+            }catch (StreamException &e)
             {
                 ch->setStatus(Channel::S_ERROR);
                 LOG_ERROR("Channel to %s %s : %s", ipstr, type, e.msg);
@@ -662,7 +662,7 @@ void PeercastSource::stream(Channel *ch)
                         ch->sourceStream->updateStatus(ch);
                         ch->sourceStream->flush(*ch->sock);
                     }
-                }catch(StreamException &)
+                }catch (StreamException &)
                 {}
                 ChannelStream *cs = ch->sourceStream;
                 ch->sourceStream = NULL;
@@ -1197,7 +1197,7 @@ int Channel::readStream(Stream &in, ChannelStream *source)
 
             sys->sleepIdle();
         }
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         LOG_ERROR("readStream: %s", e.msg);
         error = -1;
@@ -1398,7 +1398,7 @@ int ChanPacketBuffer::copyFrom(ChanPacketBuffer &buf, unsigned int reqPos)
     safePos = 0;
     readPos = 0;
 
-    for(unsigned int i=buf.firstPos; i<=buf.lastPos; i++)
+    for (unsigned int i=buf.firstPos; i<=buf.lastPos; i++)
     {
         ChanPacket *src = &buf.packets[i%MAX_PACKETS];
         if (src->type & accept)
@@ -1431,7 +1431,7 @@ bool ChanPacketBuffer::findPacket(unsigned int spos, ChanPacket &pack)
         spos = fpos;
 
 
-    for(unsigned int i=firstPos; i<=lastPos; i++)
+    for (unsigned int i=firstPos; i<=lastPos; i++)
     {
         ChanPacket &p = packets[i%MAX_PACKETS];
         if (p.pos >= spos)
@@ -1771,7 +1771,7 @@ Channel *ChanMgr::findAndRelay(ChanInfo &info)
         }
     }
 
-    for(int i=0; i<600; i++)    // search for 1 minute.
+    for (int i=0; i<600; i++)    // search for 1 minute.
     {
 
         c = findChannelByNameID(info);
@@ -1989,7 +1989,7 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
 void ChanMgr::broadcastTrackerUpdate(GnuID &svID, bool force)
 {
     Channel *c = channel;
-    while(c)
+    while (c)
     {
         if ( c->isActive() && c->isBroadcasting() )
             c->broadcastTrackerUpdate(svID, force);
@@ -2004,7 +2004,7 @@ int ChanMgr::broadcastPacketUp(ChanPacket &pack, GnuID &chanID, GnuID &srcID, Gn
     int cnt=0;
 
     Channel *c = channel;
-    while(c)
+    while (c)
     {
         if (c->sendPacketUp(pack, chanID, srcID, destID))
             cnt++;
@@ -2031,7 +2031,7 @@ void ChanMgr::broadcastRelays(Servent *serv, int minTTL, int maxTTL)
         int numChans=0;
 
         Channel *c = channel;
-        while(c)
+        while (c)
         {
             if (c->isPlaying())
             {
@@ -2107,7 +2107,7 @@ void ChanMgr::setBroadcastMsg(String &msg)
         broadcastMsg = msg;
 
         Channel *c = channel;
-        while(c)
+        while (c)
         {
             if (c->isActive() && c->isBroadcasting())
             {
@@ -2198,7 +2198,7 @@ Channel *ChanMgr::createChannel(ChanInfo &info, const char *mount)
 int ChanMgr::pickHits(ChanHitSearch &chs)
 {
     ChanHitList *chl = hitlist;
-    while(chl)
+    while (chl)
     {
         if (chl->isUsed())
             if (chl->pickHits(chs))
@@ -2215,7 +2215,7 @@ int ChanMgr::pickHits(ChanHitSearch &chs)
 ChanHitList *ChanMgr::findHitList(ChanInfo &info)
 {
     ChanHitList *chl = hitlist;
-    while(chl)
+    while (chl)
     {
         if (chl->isUsed())
             if (chl->info.matchNameID(info))
@@ -2229,7 +2229,7 @@ ChanHitList *ChanMgr::findHitList(ChanInfo &info)
 ChanHitList *ChanMgr::findHitListByID(GnuID &id)
 {
     ChanHitList *chl = hitlist;
-    while(chl)
+    while (chl)
     {
         if (chl->isUsed())
             if (chl->info.id.isSame(id))
@@ -2243,7 +2243,7 @@ int ChanMgr::numHitLists()
 {
     int num=0;
     ChanHitList *chl = hitlist;
-    while(chl)
+    while (chl)
     {
         if (chl->isUsed())
             num++;
@@ -2510,7 +2510,7 @@ ChanHitList::~ChanHitList()
 // -----------------------------------
 void ChanHit::pickNearestIP(Host &h)
 {
-    for(int i=0; i<2; i++)
+    for (int i=0; i<2; i++)
     {
         if (h.classType() == rhost[i].classType())
         {
@@ -3458,7 +3458,7 @@ unsigned int ChanInfo::getAge()
 // ------------------------------------------
 void ChanInfo::readTrackAtoms(AtomStream &atom, int numc)
 {
-    for(int i=0; i<numc; i++)
+    for (int i=0; i<numc; i++)
     {
         int c, d;
         ID4 id = atom.read(c, d);
@@ -3481,7 +3481,7 @@ void ChanInfo::readTrackAtoms(AtomStream &atom, int numc)
 // ------------------------------------------
 void ChanInfo::readInfoAtoms(AtomStream &atom, int numc)
 {
-    for(int i=0; i<numc; i++)
+    for (int i=0; i<numc; i++)
     {
         int c, d;
         ID4 id = atom.read(c, d);
@@ -3740,7 +3740,7 @@ void PlayList::readASX(Stream &in)
     try
     {
         xml.read(in);
-    }catch(StreamException &) {} // TODO: eof is NOT handled properly in sockets - always get error at end
+    }catch (StreamException &) {} // TODO: eof is NOT handled properly in sockets - always get error at end
 
     if (xml.root)
     {
@@ -3796,7 +3796,7 @@ void PlayList::writeSCPLS(Stream &out)
     out.writeLine("");
     out.writeLineF("NumberOfEntries=%d", numURLs);
 
-    for(int i=0; i<numURLs; i++)
+    for (int i=0; i<numURLs; i++)
     {
         out.writeLineF("File%d=%s", i+1, urls[i].cstr());
         out.writeLineF("Title%d=%s", i+1, titles[i].cstr());
@@ -3807,13 +3807,13 @@ void PlayList::writeSCPLS(Stream &out)
 // -----------------------------------
 void PlayList::writePLS(Stream &out)
 {
-    for(int i=0; i<numURLs; i++)
+    for (int i=0; i<numURLs; i++)
         out.writeLineF("%s", urls[i].cstr());
 }
 // -----------------------------------
 void PlayList::writeRAM(Stream &out)
 {
-    for(int i=0; i<numURLs; i++)
+    for (int i=0; i<numURLs; i++)
         out.writeLineF("%s", urls[i].cstr());
 }
 
@@ -3821,7 +3821,7 @@ void PlayList::writeRAM(Stream &out)
 void PlayList::writeASX(Stream &out)
 {
     out.writeLine("<ASX Version=\"3.0\">");
-    for(int i=0; i<numURLs; i++)
+    for (int i=0; i<numURLs; i++)
     {
         out.writeLine("<ENTRY>");
         out.writeLineF("<REF href = \"%s\" />", urls[i].cstr());

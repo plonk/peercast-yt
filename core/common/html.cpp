@@ -239,7 +239,7 @@ void    HTML::readLoop(Stream &in, Stream *outp, int loop)
             if (cnt)
             {
                 int spos = in.getPosition();
-                for(int i=0; i<cnt; i++)
+                for (int i=0; i<cnt; i++)
                 {
                     in.seekTo(spos);
                     readTemplate(in, outp, i);
@@ -366,7 +366,7 @@ void HTML::writeTemplate(const char *fileName, const char *args)
         tmplArgs = args;
         readTemplate(file, out, 0);
 
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         out->writeString(e.msg);
         out->writeString(" : ");
@@ -385,7 +385,7 @@ void HTML::writeRawFile(const char *fileName)
 
         file.writeTo(*out, file.length());
 
-    }catch(StreamException &)
+    }catch (StreamException &)
     {
     }
 
@@ -442,7 +442,7 @@ void HTML::startNode(const char *tag, const char *data)
     char *o = &currTag[tagLevel][0];
 
     int i;
-    for(i=0; i<MAX_TAGLEN-1; i++)
+    for (i=0; i<MAX_TAGLEN-1; i++)
     {
         char c = *p++;
         if ((c==0) || (c==' '))

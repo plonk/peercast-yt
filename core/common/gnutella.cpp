@@ -63,7 +63,7 @@ const char *GnuStream::getRouteStr(R_TYPE r)
 // ---------------------------
 void GnuPacket::makeChecksumID()
 {
-    for(unsigned int i=0; i<len; i++)
+    for (unsigned int i=0; i<len; i++)
         id.id[i%16] += data[i];
 }
 
@@ -288,7 +288,7 @@ void GnuStream::sendPacket(GnuPacket &p)
         stats.add(Stats::PACKETDATAOUT, 23+p.len);
 
         lock.off();
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         lock.off();
         throw e;
@@ -340,7 +340,7 @@ bool GnuStream::readPacket(GnuPacket &p)
 
         lock.off();
         return true;
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         lock.off();
         throw e;
@@ -472,7 +472,7 @@ GnuStream::R_TYPE GnuStream::processPacket(GnuPacket &in, Servent *serv, GnuID &
 
 
 
-                for(int i=0; i<numHits; i++)
+                for (int i=0; i<numHits; i++)
                 {
                     bool push = (servMgr->getFirewall()!=ServMgr::FW_OFF);
                     bool busy = (servMgr->pubInFull() && servMgr->outFull()) || servMgr->relaysFull();
@@ -608,7 +608,7 @@ bool GnuStream::readHit(Stream &data, ChanHit &ch, int hops, GnuID &id)
     ChanHit *hits[100];
     int numHits=0;
 
-    for(i=0; i<num; i++)
+    for (i=0; i<num; i++)
     {
         int index, bitrate, listeners;
 
@@ -731,7 +731,7 @@ bool GnuStream::readHit(Stream &data, ChanHit &ch, int hops, GnuID &id)
     if (f1 & 32)
         isBroadcastHit = (f2 & 32)!=0;
 
-    for(i=0; i<numHits; i++)
+    for (i=0; i<numHits; i++)
     {
         if (f1 & 1)
             hits[i]->firewalled = (f2 & 1)!=0;

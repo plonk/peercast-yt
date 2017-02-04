@@ -382,7 +382,7 @@ void UClientSocket::bind(Host &h)
     localAddr.sin_port = htons(h.port);
     localAddr.sin_addr.s_addr = INADDR_ANY;
 
-    if( ::bind (sockNum, (sockaddr *)&localAddr, sizeof(localAddr)) == -1)
+    if ( ::bind (sockNum, (sockaddr *)&localAddr, sizeof(localAddr)) == -1)
         throw SockException("Can`t bind socket");
 
     if (::listen(sockNum, 3))
@@ -445,7 +445,7 @@ void UClientSocket::close()
             //char c;
             //while (readUpto(&c, 1)!=0);
             //readUpto(&c, 1);
-        }catch(StreamException &e)
+        }catch (StreamException &e)
         {
             LOG_ERROR("Socket close: %s", e.msg);
         }

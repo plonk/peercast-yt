@@ -668,7 +668,7 @@ public:
                 case T_PLS: readPLS(s); break;
                 case T_ASX: readASX(s); break;
             }
-        }catch(StreamException &) {}    // keep pls regardless of errors (eof isn`t handled properly in sockets)
+        }catch (StreamException &) {}    // keep pls regardless of errors (eof isn`t handled properly in sockets)
     }
 
     void    write(Stream &s)

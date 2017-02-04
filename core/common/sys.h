@@ -83,7 +83,7 @@ public:
     void setFromWord(const char *str)
     {
         int i;
-        for(i=0; i<MAX_LEN-1; i++)
+        for (i=0; i<MAX_LEN-1; i++)
         {
             data[i] = *str++;
             if ((data[i]==0) || (data[i]==' '))

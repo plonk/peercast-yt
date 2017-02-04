@@ -17,7 +17,7 @@ void ICYSource::stream(Channel *ch)
         source = ch->createSource();
         ch->readStream(*ch->sock, source);
 
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         LOG_ERROR("Channel aborted: %s", e.msg);
     }

@@ -68,7 +68,7 @@ public:
 
     void    clearRange(STAT s, STAT e)
     {
-        for(int i=s; i<=e; i++)
+        for (int i=s; i<=e; i++)
             current[i] = 0;
     }
     void    clear(STAT s) { current[s]=0; }

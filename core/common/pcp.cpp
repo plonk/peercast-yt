@@ -149,7 +149,7 @@ int PCPStream::readPacket(Stream &in, BroadcastState &bcs)
 
         error = 0;
 
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         LOG_ERROR("PCP readPacket: %s (%d)", e.msg, error);
     }
@@ -171,7 +171,7 @@ void PCPStream::readPushAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 
     chanID.clear();
 
-    for(int i=0; i<numc; i++)
+    for (int i=0; i<numc; i++)
     {
         int c, d;
         ID4 id = atom.read(c, d);
@@ -220,7 +220,7 @@ void PCPStream::readRootAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 {
     String url;
 
-    for(int i=0; i<numc; i++)
+    for (int i=0; i<numc; i++)
     {
         int c, d;
         ID4 id = atom.read(c, d);
@@ -294,7 +294,7 @@ void PCPStream::readPktAtoms(Channel *ch, AtomStream &atom, int numc, BroadcastS
     ID4 type;
 
 
-    for(int i=0; i<numc; i++)
+    for (int i=0; i<numc; i++)
     {
         int c, d;
         ID4 id = atom.read(c, d);
@@ -376,7 +376,7 @@ void PCPStream::readHostAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 
     unsigned int ipNum=0;
 
-    for(int i=0; i<numc; i++)
+    for (int i=0; i<numc; i++)
     {
         int c, d;
         ID4 id = atom.read(c, d);
@@ -457,7 +457,7 @@ void PCPStream::readChanAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
         newInfo = chl->info;
 
 
-    for(int i=0; i<numc; i++)
+    for (int i=0; i<numc; i++)
     {
 
         int c, d;
@@ -522,7 +522,7 @@ void PCPStream::readChanAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
                     rn->write(file, 0);
                     delete rn;
                     file.close();
-                }catch(StreamException &e)
+                }catch (StreamException &e)
                 {
                     LOG_ERROR("Unable to update channel log: %s", e.msg);
                 }
@@ -554,7 +554,7 @@ int PCPStream::readBroadcastAtoms(AtomStream &atom, int numc, BroadcastState &bc
 
     patom.writeParent(PCP_BCST, numc);
 
-    for(int i=0; i<numc; i++)
+    for (int i=0; i<numc; i++)
     {
         int c, d;
         ID4 id = atom.read(c, d);
@@ -709,7 +709,7 @@ int PCPStream::procAtom(AtomStream &atom, ID4 id, int numc, int dlen, BroadcastS
 
     }else if (id == PCP_ATOM)
     {
-        for(int i=0; i<numc; i++)
+        for (int i=0; i<numc; i++)
         {
             int nc, nd;
             ID4 aid = atom.read(nc, nd);

@@ -245,7 +245,7 @@ public:
         packetSize = 0;
         flags = 0;
         bitrate=0;
-        for(int i=0; i<MAX_STREAMS; i++)
+        for (int i=0; i<MAX_STREAMS; i++)
             streams[i].reset();
     }
 

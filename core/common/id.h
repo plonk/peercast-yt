@@ -19,7 +19,7 @@ public:
         if (cnt >= LENGTH)
             cnt=LENGTH;
         int i;
-        for(i=0; i<cnt; i++)
+        for (i=0; i<cnt; i++)
             data[i]=id[i];
         data[i]=0;
     }
@@ -62,7 +62,7 @@ public:
     :iv(0)
     {
         if (id)
-            for(int i=0; i<4; i++)
+            for (int i=0; i<4; i++)
                 if ((cv[i]=id[i])==0)
                     break;
     }

@@ -35,7 +35,7 @@ static void termArgs(char *str)
     if (str)
     {
         int slen = strlen(str);
-        for(int i=0; i<slen; i++)
+        for (int i=0; i<slen; i++)
             if (str[i]=='&') str[i] = 0;
     }
 }
@@ -202,7 +202,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
             {
                 int i;
                 int slen = strlen(fn);
-                for(i=0; i<slen; i++)
+                for (i=0; i<slen; i++)
                     if (fn[i]=='&') fn[i] = 0;
 
                 Channel *c=chanMgr->channel;
@@ -572,7 +572,7 @@ void Servent::handshakePLS(ChanHitList **cl, int num, bool doneHandshake)
 
         pls = new PlayList(PlayList::T_SCPLS, num);
 
-        for(int i=0; i<num; i++)
+        for (int i=0; i<num; i++)
             pls->addChannel(url, cl[i]->info);
 
         pls->write(*sock);
@@ -1345,7 +1345,7 @@ void Servent::handshakeCMD(char *cmd)
             }
         }
 
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         html.startTagEnd("h1", "ERROR - %s", e.msg);
         LOG_ERROR("html: %s", e.msg);
@@ -1451,7 +1451,7 @@ void Servent::handshakeXML()
 #endif
 
     XML::Node *hc = new XML::Node("host_cache");
-    for(i=0; i<ServMgr::MAX_HOSTCACHE; i++)
+    for (i=0; i<ServMgr::MAX_HOSTCACHE; i++)
     {
         ServHost *sh = &servMgr->hostCache[i];
         if (sh->type != ServHost::T_NONE)
@@ -1502,7 +1502,7 @@ void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd, size_t plen)
         info.desc.convertTo(String::T_UNICODE);
 
     }else if (http.isHeader("Authorization")){
-        if(pwd)
+        if (pwd)
             http.getAuthUserPass(NULL, pwd, 0, plen);
     }
     else if (http.isHeader(PCX_HS_CHANNELID))

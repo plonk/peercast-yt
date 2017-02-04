@@ -118,7 +118,7 @@ public:
         if (d)
             io.skip(d);
 
-        for(int i=0; i<c; i++)
+        for (int i=0; i<c; i++)
         {
             int numc, data;
             read(numc, data);
@@ -183,7 +183,7 @@ public:
             writeParent(id, cnt);
             total+=sizeof(int)*2;
 
-            for(int i=0; i<cnt; i++)
+            for (int i=0; i<cnt; i++)
             {
                 AtomStream ain(in);
                 int c, d;

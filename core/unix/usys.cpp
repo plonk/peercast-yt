@@ -150,10 +150,10 @@ void USys::openURL( const char* url )
 {
     CFStringRef urlString = CFStringCreateWithFormat( NULL, NULL, CFSTR("%s"), url );
 
-    if( urlString )
+    if ( urlString )
     {
         CFURLRef pathRef = CFURLCreateWithString( NULL, urlString, NULL );
-        if( pathRef )
+        if ( pathRef )
         {
             OSStatus err = LSOpenCFURLRef( pathRef, NULL );
             CFRelease(pathRef);
@@ -181,10 +181,10 @@ void USys::executeFile( const char *file )
 {
     CFStringRef fileString = CFStringCreateWithFormat( NULL, NULL, CFSTR("%s"), file );
 
-    if( fileString )
+    if ( fileString )
     {
         CFURLRef pathRef = CFURLCreateWithString( NULL, fileString, NULL );
-        if( pathRef )
+        if ( pathRef )
         {
             FSRef fsRef;
             CFURLGetFSRef( pathRef, &fsRef );

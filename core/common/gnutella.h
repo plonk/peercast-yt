@@ -186,7 +186,7 @@ public:
     {
         int min=100;
         int n = numPending();
-        for(int i=0; i<n; i++)
+        for (int i=0; i<n; i++)
         {
             int idx = (readPtr+i)%size;
             if (packets[idx].hops < min)
@@ -198,7 +198,7 @@ public:
     {
         int max=0;
         int n = numPending();
-        for(int i=0; i<n; i++)
+        for (int i=0; i<n; i++)
         {
             int idx = (readPtr+i)%size;
             if (packets[idx].hops > max)
@@ -217,7 +217,7 @@ public:
     {
         int tot=0;
         int n = numPending();
-        for(int i=0; i<n; i++)
+        for (int i=0; i<n; i++)
             tot+=packets[(readPtr+i)%size].len;
         return tot;
     }

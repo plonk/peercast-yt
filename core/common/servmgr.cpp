@@ -185,7 +185,7 @@ void    ServMgr::connectBroadcaster()
 // -----------------------------------
 void    ServMgr::addVersion(unsigned int ver)
 {
-    for(int i=0; i<numVersions; i++)
+    for (int i=0; i<numVersions; i++)
         if (clientVersions[i] == ver)
         {
             clientCounts[i]++;
@@ -223,7 +223,7 @@ bool ServMgr::seenHost(Host &h, ServHost::TYPE type, unsigned int time)
 {
     time = sys->getTime()-time;
 
-    for(int i=0; i<MAX_HOSTCACHE; i++)
+    for (int i=0; i<MAX_HOSTCACHE; i++)
         if (hostCache[i].type == type)
             if (hostCache[i].host.ip == h.ip)
                 if (hostCache[i].time >= time)
@@ -240,7 +240,7 @@ void ServMgr::addHost(Host &h, ServHost::TYPE type, unsigned int time)
 
     ServHost *sh=NULL;
 
-    for(i=0; i<MAX_HOSTCACHE; i++)
+    for (i=0; i<MAX_HOSTCACHE; i++)
         if (hostCache[i].type == type)
             if (hostCache[i].host.isSame(h))
             {
@@ -262,7 +262,7 @@ void ServMgr::addHost(Host &h, ServHost::TYPE type, unsigned int time)
 
 
         // find empty slot
-        for(i=0; i<MAX_HOSTCACHE; i++)
+        for (i=0; i<MAX_HOSTCACHE; i++)
             if (hostCache[i].type == ServHost::T_NONE)
             {
                 sh = &hostCache[i];
@@ -271,7 +271,7 @@ void ServMgr::addHost(Host &h, ServHost::TYPE type, unsigned int time)
 
         // otherwise, find oldest host and replace
         if (!sh)
-            for(i=0; i<MAX_HOSTCACHE; i++)
+            for (i=0; i<MAX_HOSTCACHE; i++)
                 if (hostCache[i].type != ServHost::T_NONE)
                 {
                     if (sh)
@@ -291,7 +291,7 @@ void ServMgr::addHost(Host &h, ServHost::TYPE type, unsigned int time)
 // -----------------------------------
 void ServMgr::deadHost(Host &h, ServHost::TYPE t)
 {
-    for(int i=0; i<MAX_HOSTCACHE; i++)
+    for (int i=0; i<MAX_HOSTCACHE; i++)
         if (hostCache[i].type == t)
             if (hostCache[i].host.ip == h.ip)
                 if (hostCache[i].host.port == h.port)
@@ -300,7 +300,7 @@ void ServMgr::deadHost(Host &h, ServHost::TYPE t)
 // -----------------------------------
 void ServMgr::clearHostCache(ServHost::TYPE type)
 {
-    for(int i=0; i<MAX_HOSTCACHE; i++)
+    for (int i=0; i<MAX_HOSTCACHE; i++)
         if ((hostCache[i].type == type) || (type == ServHost::T_NONE))
             hostCache[i].init();
 }
@@ -309,7 +309,7 @@ void ServMgr::clearHostCache(ServHost::TYPE type)
 unsigned int ServMgr::numHosts(ServHost::TYPE type)
 {
     unsigned int cnt = 0;
-    for(int i=0; i<MAX_HOSTCACHE; i++)
+    for (int i=0; i<MAX_HOSTCACHE; i++)
         if ((hostCache[i].type == type) || (type == ServHost::T_NONE))
             cnt++;
     return cnt;
@@ -318,11 +318,11 @@ unsigned int ServMgr::numHosts(ServHost::TYPE type)
 int ServMgr::getNewestServents(Host *hl, int max, Host &rh)
 {
     int cnt=0;
-    for(int i=0; i<max; i++)
+    for (int i=0; i<max; i++)
     {
         // find newest host not in list
         ServHost *sh=NULL;
-        for(int j=0; j<MAX_HOSTCACHE; j++)
+        for (int j=0; j<MAX_HOSTCACHE; j++)
         {
             // find newest servent
             if (hostCache[j].type == ServHost::T_SERVENT)
@@ -330,7 +330,7 @@ int ServMgr::getNewestServents(Host *hl, int max, Host &rh)
                 {
                     // and not in list already
                     bool found=false;
-                    for(int k=0; k<cnt; k++)
+                    for (int k=0; k<cnt; k++)
                         if (hl[k].isSame(hostCache[j].host))
                         {
                             found=true;
@@ -366,7 +366,7 @@ ServHost ServMgr::getOutgoingServent(GnuID &netid)
 
     // find newest host not in list
     ServHost *sh=NULL;
-    for(int j=0; j<MAX_HOSTCACHE; j++)
+    for (int j=0; j<MAX_HOSTCACHE; j++)
     {
         ServHost *hc=&hostCache[j];
         // find newest servent not already connected.
@@ -687,7 +687,7 @@ void ServMgr::quit()
                 s->thread.shutdown();
             }
 
-        }catch(StreamException &)
+        }catch (StreamException &)
         {
         }
         s=s->next;
@@ -832,7 +832,7 @@ void ServMgr::setFirewall(FW_STATE state)
 // -----------------------------------
 bool ServMgr::isFiltered(int fl, Host &h)
 {
-    for(int i=0; i<numFilters; i++)
+    for (int i=0; i<numFilters; i++)
         if (filters[i].flags & fl)
             if (h.isMemberOf(filters[i].host))
                 return true;
@@ -954,7 +954,7 @@ void ServMgr::saveSettings(const char *fn)
 
         int i;
 
-        for(i=0; i<servMgr->numFilters; i++)
+        for (i=0; i<servMgr->numFilters; i++)
         {
             iniFile.writeSection("Filter");
                 writeFilterSettings(iniFile, servMgr->filters[i]);
@@ -1062,7 +1062,7 @@ void ServMgr::saveSettings(const char *fn)
         }
 #endif
 
-        for(i=0; i<ServMgr::MAX_HOSTCACHE; i++)
+        for (i=0; i<ServMgr::MAX_HOSTCACHE; i++)
         {
             ServHost *sh = &servMgr->hostCache[i];
             if (sh->type != ServHost::T_NONE)
@@ -1643,7 +1643,7 @@ int ServMgr::clientProc(ThreadInfo *thread)
     GnuID netID;
     netID = servMgr->networkID;
 
-    while(thread->active)
+    while (thread->active)
     {
         if (servMgr->autoConnect)
         {
@@ -1670,7 +1670,7 @@ int ServMgr::clientProc(ThreadInfo *thread)
                     }
                 }
 
-                for(int i=0; i<MAX_TRYOUT; i++)
+                for (int i=0; i<MAX_TRYOUT; i++)
                 {
                     if (servMgr->outUsedFull())
                         break;
@@ -1824,7 +1824,7 @@ int ServMgr::idleProc(ThreadInfo *thread)
 
     unsigned int lastForceIPCheck = 0;
 
-    while(thread->active)
+    while (thread->active)
     {
         stats.update();
 

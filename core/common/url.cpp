@@ -292,7 +292,7 @@ int URLSource::getSourceRate()
                 try
                 {
                     url = streamURL(ch, url.cstr());
-                }catch(StreamException &)
+                }catch (StreamException &)
                 {}
             }
 
@@ -322,7 +322,7 @@ int URLSource::getSourceRate()
             inputStream->close();
         }
 
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         ch->setStatus(Channel::S_ERROR);
         LOG_ERROR("Channel error: %s", e.msg);

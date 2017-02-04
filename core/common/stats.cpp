@@ -28,7 +28,7 @@ Stats stats;
 // ------------------------------------
 void Stats::clear()
 {
-    for(int i=0; i<Stats::MAX; i++)
+    for (int i=0; i<Stats::MAX; i++)
     {
         current[i] = 0;
         last[i] = 0;
@@ -45,7 +45,7 @@ void    Stats::update()
     if (diff >= 5)
     {
 
-        for(int i=0; i<Stats::MAX; i++)
+        for (int i=0; i<Stats::MAX; i++)
         {
             perSec[i] = (current[i]-last[i])/diff;
             last[i] = current[i];

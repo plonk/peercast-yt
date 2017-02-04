@@ -29,7 +29,7 @@ bool IniFile::openReadOnly(const char *fn)
     try
     {
         fStream.openReadOnly(fn);
-    }catch(StreamException &)
+    }catch (StreamException &)
     {
         return false;
     }
@@ -45,7 +45,7 @@ bool IniFile::openWriteReplace(const char *fn)
         fStream.writeCRLF = false;
 #endif
 
-    }catch(StreamException &)
+    }catch (StreamException &)
     {
         return false;
     }
@@ -67,7 +67,7 @@ bool    IniFile::readNext()
     try
     {
         fStream.readLine(currLine, 256);
-    }catch(StreamException &)
+    }catch (StreamException &)
     {
         return false;
     }

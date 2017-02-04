@@ -299,7 +299,7 @@ bool Servent::initServer(Host &h)
         if (!sys->startThread(&thread))
             throw StreamException("Can`t start thread");
 
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         LOG_ERROR("Bad server: %s", e.msg);
         kill();
@@ -339,7 +339,7 @@ void Servent::initIncoming(ClientSocket *s, unsigned int a)
 
         if (!sys->startThread(&thread))
             throw StreamException("Can`t start thread");
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         //LOG_ERROR("!!FATAL!! Incoming error: %s", e.msg);
         //servMgr->shutdownTimer = 1;
@@ -366,7 +366,7 @@ void Servent::initOutgoing(TYPE ty)
         if (!sys->startThread(&thread))
             throw StreamException("Can`t start thread");
 
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         LOG_ERROR("Unable to start outgoing: %s", e.msg);
         kill();
@@ -399,7 +399,7 @@ void Servent::initPCP(Host &rh)
         if (!sys->startThread(&thread))
             throw StreamException("Can`t start thread");
 
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         LOG_ERROR("Unable to open connection to %s - %s", ipStr, e.msg);
         kill();
@@ -457,7 +457,7 @@ void Servent::initGIV(Host &h, GnuID &id)
         if (!sys->startThread(&thread))
             throw StreamException("Can`t start thread");
 
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         LOG_ERROR("GIV error to %s: %s", ipStr, e.msg);
         kill();
@@ -713,7 +713,7 @@ bool    Servent::pingHost(Host &rhost, GnuID &rsid)
             ID4 id = atom.read(numc, numd);
             if (id == PCP_OLEH)
             {
-                for(int i=0; i<numc; i++)
+                for (int i=0; i<numc; i++)
                 {
                     int c, d;
                     ID4 pid = atom.read(c, d);
@@ -737,7 +737,7 @@ bool    Servent::pingHost(Host &rhost, GnuID &rsid)
 
 
         }
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         LOG_DEBUG("Ping host %s: %s", ipstr, e.msg);
     }
@@ -887,7 +887,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 
                 // search for up to 8 other hits
                 int cnt=0;
-                for(int i=0; i<8; i++)
+                for (int i=0; i<8; i++)
                 {
                     best.init();
 
@@ -1353,7 +1353,7 @@ void Servent::processRoot()
                         int start = sys->rnd() % cnt;
                         int max = cnt>8?8:cnt;
 
-                        for(int i=0; i<max; i++)
+                        for (int i=0; i<max; i++)
                         {
                             GnuPacket pong;
                             pack.hops = 1;
@@ -1403,12 +1403,12 @@ void Servent::processRoot()
                 //  return;
             }
 
-            if((sys->getTime()-lastConnect > 60))
+            if ((sys->getTime()-lastConnect > 60))
                 break;
         }
 
 
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         LOG_ERROR("Relay: %s", e.msg);
     }
@@ -1426,7 +1426,7 @@ int Servent::givProc(ThreadInfo *thread)
         sv->handshakeGiv(sv->givID);
         sv->handshakeIncoming();
 
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         LOG_ERROR("GIV: %s", e.msg);
     }
@@ -1482,7 +1482,7 @@ void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
     Host thisHost;
 
     // read OLEH response
-    for(int i=0; i<numc; i++)
+    for (int i=0; i<numc; i++)
     {
         int c, dlen;
         ID4 id = atom.read(c, dlen);
@@ -1594,7 +1594,7 @@ void Servent::handshakeIncomingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
 
     rhost.port = 0;
 
-    for(int i=0; i<numc; i++)
+    for (int i=0; i<numc; i++)
     {
 
         int c, dlen;
@@ -1745,7 +1745,7 @@ void Servent::processIncomingPCP(bool suggestOthers)
             ChanHitSearch chs;
 
             int cnt=0;
-            for(int i=0; i<8; i++)
+            for (int i=0; i<8; i++)
             {
                 best.init();
 
@@ -2005,11 +2005,11 @@ int Servent::outgoingProc(ThreadInfo *thread)
 
                 LOG_ERROR("COUT to %s closed: %d", ipStr, error);
 
-            }catch(TimeoutException &e)
+            }catch (TimeoutException &e)
             {
                 LOG_ERROR("COUT to %s: timeout (%s)", ipStr, e.msg);
                 sv->setStatus(S_TIMEOUT);
-            }catch(StreamException &e)
+            }catch (StreamException &e)
             {
                 LOG_ERROR("COUT to %s: %s", ipStr, e.msg);
                 sv->setStatus(S_ERROR);
@@ -2024,7 +2024,7 @@ int Servent::outgoingProc(ThreadInfo *thread)
                     sv->sock = NULL;
                 }
 
-            }catch(StreamException &) {}
+            }catch (StreamException &) {}
 
             // don`t discard this hit if we caused the disconnect (stopped broadcasting)
             if (error != (PCP_ERROR_QUIT+PCP_ERROR_OFFAIR))
@@ -2053,7 +2053,7 @@ int Servent::incomingProc(ThreadInfo *thread)
     try
     {
         sv->handshakeIncoming();
-    }catch(HTTPException &e)
+    }catch (HTTPException &e)
     {
         try
         {
@@ -2061,9 +2061,9 @@ int Servent::incomingProc(ThreadInfo *thread)
             if (e.code == 401)
                 sv->sock->writeLine("WWW-Authenticate: Basic realm=\"PeerCast\"");
             sv->sock->writeLine("");
-        }catch(StreamException &){}
+        }catch (StreamException &){}
         LOG_ERROR("Incoming from %s: %s", ipStr, e.msg);
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         LOG_ERROR("Incoming from %s: %s", ipStr, e.msg);
     }
@@ -2171,7 +2171,7 @@ void Servent::processStream(bool doneHandshake, ChanInfo &chanInfo)
 // -----------------------------------
 bool Servent::waitForChannelHeader(ChanInfo &info)
 {
-    for(int i=0; i<30*10; i++)
+    for (int i=0; i<30*10; i++)
     {
         Channel *ch = chanMgr->findChannelByID(info.id);
         if (!ch)
@@ -2255,7 +2255,7 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
                 sys->sleepIdle();
             }
         }
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         LOG_ERROR("Stream channel: %s", e.msg);
     }
@@ -2271,7 +2271,7 @@ void Servent::sendRawMultiChannel(bool sendHead, bool sendData)
         unsigned int chanStreamPos[ChanMgr::MAX_CHANNELS];
         GnuID chanIDs[ChanMgr::MAX_CHANNELS];
         int numChanIDs=0;
-        for(int i=0; i<ChanMgr::MAX_CHANNELS; i++)
+        for (int i=0; i<ChanMgr::MAX_CHANNELS; i++)
         {
             Channel *ch = &chanMgr->channels[i];
             if (ch->isPlaying())
@@ -2285,7 +2285,7 @@ void Servent::sendRawMultiChannel(bool sendHead, bool sendData)
 
         if (sendHead)
         {
-            for(int i=0; i<numChanIDs; i++)
+            for (int i=0; i<numChanIDs; i++)
             {
                 Channel *ch = chanMgr->findChannelByID(chanIDs[i]);
                 if (ch)
@@ -2308,7 +2308,7 @@ void Servent::sendRawMultiChannel(bool sendHead, bool sendData)
             while ((thread.active) && sock->active())
             {
 
-                for(int i=1; i<numChanIDs; i++)
+                for (int i=1; i<numChanIDs; i++)
                 {
                     Channel *ch = chanMgr->findChannelByID(chanIDs[i]);
                     if (ch)
@@ -2342,7 +2342,7 @@ void Servent::sendRawMultiChannel(bool sendHead, bool sendData)
                 sys->sleepIdle();
             }
         }
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         LOG_ERROR("Stream channel: %s", e.msg);
     }
@@ -2471,7 +2471,7 @@ void Servent::sendRawMetaChannel(int interval)
             sys->sleepIdle();
 
         }
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         LOG_ERROR("Stream channel: %s", e.msg);
     }
@@ -2525,7 +2525,7 @@ void Servent::sendPeercastChannel()
             sys->sleepIdle();
         }
 
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         LOG_ERROR("Stream channel: %s", e.msg);
     }
@@ -2628,7 +2628,7 @@ void Servent::sendPCPChannel()
 
         LOG_DEBUG("PCP channel stream closed normally.");
 
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         LOG_ERROR("Stream channel: %s", e.msg);
     }
@@ -2636,7 +2636,7 @@ void Servent::sendPCPChannel()
     try
     {
         atom.writeInt(PCP_QUIT, error);
-    }catch(StreamException &) {}
+    }catch (StreamException &) {}
 
 }
 
@@ -2686,7 +2686,7 @@ int Servent::serverProc(ThreadInfo *thread)
             }
             sys->sleep(100);
         }
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         LOG_ERROR("Server Error: %s:%d", e.msg, e.err);
     }

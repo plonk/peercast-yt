@@ -66,7 +66,7 @@ static char *util_base64_encode(char *data)
     char *result = out;
     int chunk;
 
-    while(len > 0) {
+    while (len > 0) {
         chunk = (len >3)?3:len;
         *out++ = base64table[(*data & 0xFC)>>2];
         *out++ = base64table[((*data & 0x03)<<4) | ((*(data+1) & 0xF0) >> 4)];
@@ -95,17 +95,17 @@ static char *util_base64_encode(char *data)
 // -----------------------------------
 static int base64chartoval(char input)
 {
-    if(input >= 'A' && input <= 'Z')
+    if (input >= 'A' && input <= 'Z')
         return input - 'A';
-    else if(input >= 'a' && input <= 'z')
+    else if (input >= 'a' && input <= 'z')
         return input - 'a' + 26;
-    else if(input >= '0' && input <= '9')
+    else if (input >= '0' && input <= '9')
         return input - '0' + 52;
-    else if(input == '+')
+    else if (input == '+')
         return 62;
-    else if(input == '/')
+    else if (input == '/')
         return 63;
-    else if(input == '=')
+    else if (input == '=')
         return -1;
     else
         return -2;
@@ -201,17 +201,17 @@ bool Host::isMemberOf(Host &h)
     if (h.ip==0)
         return false;
 
-    if( h.ip0() != 255 && ip0() != h.ip0() )
+    if ( h.ip0() != 255 && ip0() != h.ip0() )
         return false;
-    if( h.ip1() != 255 && ip1() != h.ip1() )
+    if ( h.ip1() != 255 && ip1() != h.ip1() )
         return false;
-    if( h.ip2() != 255 && ip2() != h.ip2() )
+    if ( h.ip2() != 255 && ip2() != h.ip2() )
         return false;
-    if( h.ip3() != 255 && ip3() != h.ip3() )
+    if ( h.ip3() != 255 && ip3() != h.ip3() )
         return false;
 
 /* removed for endieness compatibility
-    for(int i=0; i<4; i++)
+    for (int i=0; i<4; i++)
         if (h.ipByte[i] != 255)
             if (ipByte[i] != h.ipByte[i])
                 return false;
@@ -358,16 +358,16 @@ int String::base64WordToChars(char *out, const char *input)
     vals[2] = base64chartoval(*input++);
     vals[3] = base64chartoval(*input++);
 
-    if(vals[0] < 0 || vals[1] < 0 || vals[2] < -1 || vals[3] < -1)
+    if (vals[0] < 0 || vals[1] < 0 || vals[2] < -1 || vals[3] < -1)
         return 0;
 
     *out++ = vals[0]<<2 | vals[1]>>4;
-    if(vals[2] >= 0)
+    if (vals[2] >= 0)
         *out++ = ((vals[1]&0x0F)<<4) | (vals[2]>>2);
     else
         *out++ = 0;
 
-    if(vals[3] >= 0)
+    if (vals[3] >= 0)
         *out++ = ((vals[2]&0x03)<<6) | (vals[3]);
     else
         *out++ = 0;
@@ -381,7 +381,7 @@ void String::BASE642ASCII(const char *input)
     char *out = data;
     int len = strlen(input);
 
-    while(len >= 4)
+    while (len >= 4)
     {
         out += base64WordToChars(out, input);
         input += 4;
@@ -409,7 +409,7 @@ void String::UNKNOWN2UNICODE(const char *in, bool safe)
             int numChars=0;
             int i;
 
-            for(i=0; i<6; i++)
+            for (i=0; i<6; i++)
             {
                 if (c & (0x80>>i))
                     numChars++;
@@ -418,17 +418,17 @@ void String::UNKNOWN2UNICODE(const char *in, bool safe)
             }
 
             utf8.writeChar(c);
-            for(i=0; i<numChars-1; i++)
+            for (i=0; i<numChars-1; i++)
                 utf8.writeChar(*in++);
 
         }
-        else if(isSJIS(c, d))           // shift_jis
+        else if (isSJIS(c, d))           // shift_jis
         {
             utf8.writeUTF8(JISConverter::sjisToUnicode((c<<8 | d)));
             in++;
 
         }
-        else if(isEUC(c) && isEUC(d))       // euc-jp
+        else if (isEUC(c) && isEUC(d))       // euc-jp
         {
             utf8.writeUTF8(JISConverter::eucToUnicode((c<<8 | d)));
             in++;
@@ -797,7 +797,7 @@ bool hasCGIarg(const char *str, const char *arg)
 void GnuID::encode(Host *h, const char *salt1, const char *salt2, unsigned char salt3)
 {
     int s1=0, s2=0;
-    for(int i=0; i<16; i++)
+    for (int i=0; i<16; i++)
     {
         unsigned char ipb = id[i];
 
@@ -835,7 +835,7 @@ void GnuID::toStr(char *str)
 {
 
     str[0] = 0;
-    for(int i=0; i<16; i++)
+    for (int i=0; i<16; i++)
     {
         char tmp[8];
         unsigned char ipb = id[i];
@@ -857,7 +857,7 @@ void GnuID::fromStr(const char *str)
 
     buf[2] = 0;
 
-    for(int i=0; i<16; i++)
+    for (int i=0; i<16; i++)
     {
         buf[0] = str[i*2];
         buf[1] = str[i*2+1];
@@ -871,7 +871,7 @@ void GnuID::generate(unsigned char flags)
 {
     clear();
 
-    for(int i=0; i<16; i++)
+    for (int i=0; i<16; i++)
         id[i] = sys->rnd();
 
     id[0] = flags;
@@ -888,7 +888,7 @@ GnuIDList::GnuIDList(int max)
 :ids(new GnuID[max])
 {
     maxID = max;
-    for(int i=0; i<maxID; i++)
+    for (int i=0; i<maxID; i++)
         ids[i].clear();
 }
 // ---------------------------
@@ -899,7 +899,7 @@ GnuIDList::~GnuIDList()
 // ---------------------------
 bool GnuIDList::contains(GnuID &id)
 {
-    for(int i=0; i<maxID; i++)
+    for (int i=0; i<maxID; i++)
         if (ids[i].isSame(id))
             return true;
     return false;
@@ -908,7 +908,7 @@ bool GnuIDList::contains(GnuID &id)
 int GnuIDList::numUsed()
 {
     int cnt=0;
-    for(int i=0; i<maxID; i++)
+    for (int i=0; i<maxID; i++)
         if (ids[i].storeTime)
             cnt++;
     return cnt;
@@ -917,7 +917,7 @@ int GnuIDList::numUsed()
 unsigned int GnuIDList::getOldest()
 {
     unsigned int t=(unsigned int)-1;
-    for(int i=0; i<maxID; i++)
+    for (int i=0; i<maxID; i++)
         if (ids[i].storeTime)
             if (ids[i].storeTime < t)
                 t = ids[i].storeTime;
@@ -930,7 +930,7 @@ void GnuIDList::add(GnuID &id)
     int minIndex = 0;
 
     // find same or oldest
-    for(int i=0; i<maxID; i++)
+    for (int i=0; i<maxID; i++)
     {
         if (ids[i].isSame(id))
         {
@@ -950,7 +950,7 @@ void GnuIDList::add(GnuID &id)
 // ---------------------------
 void GnuIDList::clear()
 {
-    for(int i=0; i<maxID; i++)
+    for (int i=0; i<maxID; i++)
         ids[i].clear();
 }
 
@@ -970,7 +970,7 @@ void LogBuffer::dumpHTML(Stream &out)
     String tim, str;
     if (nl)
     {
-        for(unsigned int i=0; i<nl; i++)
+        for (unsigned int i=0; i<nl; i++)
         {
             unsigned int bp = sp*lineLen;
 

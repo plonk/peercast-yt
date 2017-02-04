@@ -58,7 +58,7 @@ int MMSStream::readPacket(Stream &in, Channel *ch)
 
                 ASFInfo asf = parseASFHeader(asfm);
                 LOG_DEBUG("ASF Info: pnum=%d, psize=%d, br=%d", asf.numPackets, asf.packetSize, asf.bitrate);
-                for(int i=0; i<ASFInfo::MAX_STREAMS; i++)
+                for (int i=0; i<ASFInfo::MAX_STREAMS; i++)
                 {
                     ASFStream *s = &asf.streams[i];
                     if (s->id)
@@ -117,7 +117,7 @@ ASFInfo parseASFHeader(Stream &in)
         in.readChar();
 
         LOG_CHANNEL("ASF Headers: %d", numHeaders);
-        for(int i=0; i<numHeaders; i++)
+        for (int i=0; i<numHeaders; i++)
         {
 
             ASFObject obj;
@@ -158,7 +158,7 @@ ASFInfo parseASFHeader(Stream &in)
                 case ASFObject::T_STREAM_BITRATE:
                 {
                     int cnt = data.readShort();
-                    for(int i=0; i<cnt; i++)
+                    for (int i=0; i<cnt; i++)
                     {
                         unsigned int id = data.readShort();
                         int bitrate = data.readLong();
@@ -178,7 +178,7 @@ ASFInfo parseASFHeader(Stream &in)
             }
 
         }
-    }catch(StreamException &e)
+    }catch (StreamException &e)
     {
         LOG_ERROR("ASF: %s", e.msg);
     }

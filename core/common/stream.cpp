@@ -31,7 +31,7 @@ void MemoryStream::convertFromBase64()
     char *in = buf;
 
     int rl=len;
-    while(rl >= 4)
+    while (rl >= 4)
     {
         out += String::base64WordToChars(out, in);
         in += 4;
@@ -248,7 +248,7 @@ int Stream::readLine(char *in, int max)
     int i=0;
     max -= 2;
 
-    while(max--)
+    while (max--)
     {
         char c;
         read(&c, 1);

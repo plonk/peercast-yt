@@ -706,7 +706,7 @@ unsigned short JISConverter::sjisToUnicode(unsigned short sjis)
     unsigned int c1 = sjis&0xff;
 
     c = c + c - ((c <= 0x9f) ? SJ0162 : SJ6394);
-    if(c1 < 0x9f)
+    if (c1 < 0x9f)
     {
         c1 = c1 - ((c1 > 0x7f) ? 0x20 : 0x1f);
     }
@@ -716,12 +716,12 @@ unsigned short JISConverter::sjisToUnicode(unsigned short sjis)
     }
     c -= 33;
     c1 -= 33;
-    if(c < 0 || c1 < 0 || c > 93 || c1 > 93)
+    if (c < 0 || c1 < 0 || c > 93 || c1 > 93)
         u = 0x3013;
     else
     {
         u = uniTable[c][c1];
-        if(!u)
+        if (!u)
             u = 0x3013;
     }
 
@@ -738,12 +738,12 @@ unsigned short JISConverter::eucToUnicode(unsigned short euc)
     c -= 33;
     c1 &= 0x7f;
     c1 -= 33;
-    if(c < 0 || c1 < 0 || c > 93 || c1 > 93)
+    if (c < 0 || c1 < 0 || c > 93 || c1 > 93)
         u = 0x3013;
     else
     {
         u = uniTable[c][c1];
-        if(!u)
+        if (!u)
             u = 0x3013;
     }
     return u;

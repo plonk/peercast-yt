@@ -156,7 +156,7 @@ void    APICALL PeercastInstance::callLocalURL(const char *url)
 // --------------------------------------------------
 void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)
 {
-    if(sys)
+    if (sys)
     {
         const int MAX_LINELEN = 1024;
 
