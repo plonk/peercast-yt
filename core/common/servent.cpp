@@ -2061,7 +2061,7 @@ int Servent::incomingProc(ThreadInfo *thread)
             if (e.code == 401)
                 sv->sock->writeLine("WWW-Authenticate: Basic realm=\"PeerCast\"");
             sv->sock->writeLine("");
-        }catch (StreamException &){}
+        }catch (StreamException &) {}
         LOG_ERROR("Incoming from %s: %s", ipStr, e.msg);
     }catch (StreamException &e)
     {

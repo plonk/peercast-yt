@@ -92,9 +92,9 @@ public:
 };
 
 // ----------------------------------
-void setSettingsUI(){}
+void setSettingsUI() {}
 // ----------------------------------
-void showConnections(){}
+void showConnections() {}
 // ----------------------------------
 void PRINTLOG(LogBuffer::TYPE type, const char *fmt, va_list ap)
 {

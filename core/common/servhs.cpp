@@ -1496,7 +1496,7 @@ void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd, size_t plen)
         info.desc.set(arg, String::T_ASCII);
         info.desc.convertTo(String::T_UNICODE);
 
-    }else if (http.isHeader("Authorization")){
+    }else if (http.isHeader("Authorization")) {
         if (pwd)
             http.getAuthUserPass(NULL, pwd, 0, plen);
     }
