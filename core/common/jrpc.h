@@ -21,6 +21,7 @@ public:
     public:
         method_not_found(const std::string& msg) : runtime_error(msg) {}
     };
+
     class invalid_params : public std::runtime_error
     {
     public:

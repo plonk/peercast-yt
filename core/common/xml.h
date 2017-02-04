@@ -64,13 +64,13 @@ public:
         int     findAttrInt(const char *);
         int     findAttrID(const char *);
 
-        char *contData, *attrData;
+        char        *contData, *attrData;
 
         Attribute   *attr;
-        int numAttr;
+        int         numAttr;
 
-        Node *child, *parent, *sibling;
-        void *userPtr;
+        Node        *child, *parent, *sibling;
+        void        *userPtr;
     };
 
     XML()
@@ -87,6 +87,6 @@ public:
     void    read(Stream &);
     Node    *findNode(const char *n);
 
-    Node *root;
+    Node    *root;
 };
 #endif

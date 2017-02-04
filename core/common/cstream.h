@@ -67,11 +67,11 @@ public:
     void    readPeercast(Stream &);
 
 
-    unsigned int sync;
-    unsigned int pos;
-    TYPE type;
-    unsigned int len;
-    char data[MAX_DATALEN];
+    unsigned int    sync;
+    unsigned int    pos;
+    TYPE            type;
+    unsigned int    len;
+    char            data[MAX_DATALEN];
 
 };
 // ----------------------------------
@@ -93,7 +93,7 @@ public:
         lock.off();
     }
 
-    int copyFrom(ChanPacketBuffer &, unsigned in);
+    int     copyFrom(ChanPacketBuffer &, unsigned in);
 
     bool    writePacket(ChanPacket &, bool = false);
     void    readPacket(ChanPacket &);
@@ -105,17 +105,17 @@ public:
     unsigned int    getLatestPos();
     unsigned int    getOldestPos();
     unsigned int    findOldestPos(unsigned int);
-    bool    findPacket(unsigned int, ChanPacket &);
+    bool            findPacket(unsigned int, ChanPacket &);
     unsigned int    getStreamPos(unsigned int);
     unsigned int    getStreamPosEnd(unsigned int);
     unsigned int    getLastSync();
 
-    ChanPacket  packets[MAX_PACKETS];
-    volatile unsigned int lastPos, firstPos, safePos;
-    volatile unsigned int readPos, writePos;
-    unsigned int accept;
-    unsigned int lastWriteTime;
-    WLock lock;
+    ChanPacket              packets[MAX_PACKETS];
+    volatile unsigned int   lastPos, firstPos, safePos;
+    volatile unsigned int   readPos, writePos;
+    unsigned int            accept;
+    unsigned int            lastWriteTime;
+    WLock                   lock;
 };
 
 // ----------------------------------
@@ -123,7 +123,7 @@ class ChannelStream
 {
 public:
     ChannelStream()
-    :numListeners(0)
+    : numListeners(0)
     , numRelays(0)
     , isPlaying(false)
     , fwState(0)
@@ -142,11 +142,11 @@ public:
 
     void    readRaw(Stream &, Channel *);
 
-    int     numRelays;
-    int     numListeners;
-    bool    isPlaying;
-    int fwState;
-    unsigned int lastUpdate;
+    int             numRelays;
+    int             numListeners;
+    bool            isPlaying;
+    int             fwState;
+    unsigned int    lastUpdate;
 
 };
 

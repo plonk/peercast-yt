@@ -144,11 +144,12 @@ class GnuIDList
 public:
     GnuIDList(int);
     ~GnuIDList();
-    void    clear();
-    void    add(GnuID &);
-    bool    contains(GnuID &);
-    int     numUsed();
-    unsigned int getOldest();
+
+    void            clear();
+    void            add(GnuID &);
+    bool            contains(GnuID &);
+    int             numUsed();
+    unsigned int    getOldest();
 
     GnuID   *ids;
     int     maxID;
@@ -199,7 +200,7 @@ public:
         return (h.ip == ip) && (h.port == port);
     }
 
-    bool classType() {return globalIP();}
+    bool    classType() { return globalIP(); }
 
     bool    globalIP()
     {
@@ -275,8 +276,8 @@ public:
 //      unsigned char ipByte[4];
     };
 
-    unsigned short port;
-    unsigned int value;
+    unsigned short  port;
+    unsigned int    value;
 };
 // ----------------------------------
 #define SWAP2(v) ( ((v&0xff)<<8) | ((v&0xff00)>>8) )
@@ -304,9 +305,9 @@ inline int strToID(char *str)
 }
 
 // -----------------------------------
-const char *getCGIarg(const char *str, const char *arg);
-bool cmpCGIarg(const char *str, const char *arg, const char *value);
-bool hasCGIarg(const char *str, const char *arg);
+const char  *getCGIarg(const char *str, const char *arg);
+bool        cmpCGIarg(const char *str, const char *arg, const char *value);
+bool        hasCGIarg(const char *str, const char *arg);
 
 // ----------------------------------
 extern void LOG(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));

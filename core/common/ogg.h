@@ -36,12 +36,12 @@ public:
 
     void    addLacing(OggPage &);
 
-    int bodyLen;
-    unsigned char body[MAX_BODYLEN];
+    int             bodyLen;
+    unsigned char   body[MAX_BODYLEN];
 
 
-    int numPackets;
-    unsigned int packetSizes[MAX_PACKETS];
+    int             numPackets;
+    unsigned int    packetSizes[MAX_PACKETS];
 };
 
 // ----------------------------------------------
@@ -52,18 +52,18 @@ public:
     :maxHeaders(0), serialNo(0), bitrate(0)
     {}
 
-    bool needHeader()
+    bool    needHeader()
     {
         return maxHeaders && (pack.numPackets < maxHeaders);
     }
 
-    void eos()
+    void    eos()
     {
         maxHeaders=0;
         serialNo=0;
     }
 
-    void bos(unsigned int ser)
+    void    bos(unsigned int ser)
     {
         maxHeaders = 3;
         pack.numPackets=0;
@@ -75,15 +75,15 @@ public:
 
     bool    isActive() {return serialNo!=0;}
 
-    void readHeader(Channel *, OggPage &);
+    void    readHeader(Channel *, OggPage &);
 
     virtual void procHeaders(Channel *) = 0;
 
-    int bitrate;
+    int             bitrate;
 
-    OggPacket   pack;
-    int maxHeaders;
-    unsigned int serialNo;
+    OggPacket       pack;
+    int             maxHeaders;
+    unsigned int    serialNo;
 };
 // ----------------------------------------------
 class OggVorbisSubStream : public OggSubStream
@@ -112,12 +112,12 @@ public:
 
     virtual void procHeaders(Channel *);
 
-    void readInfo(Stream &, ChanInfo &);
+    void    readInfo(Stream &, ChanInfo &);
 
     double  getTime(OggPage &);
 
-    int granposShift;
-    double frameTime;
+    int     granposShift;
+    double  frameTime;
 };
 
 // ----------------------------------------------
@@ -128,12 +128,12 @@ public:
     {}
 
 
-    virtual void readHeader(Stream &, Channel *);
-    virtual int readPacket(Stream &, Channel *);
-    virtual void readEnd(Stream &, Channel *);
+    virtual void    readHeader(Stream &, Channel *);
+    virtual int     readPacket(Stream &, Channel *);
+    virtual void    readEnd(Stream &, Channel *);
 
 
-    void    readHeaders(Stream &, Channel *, OggPage &);
+    void            readHeaders(Stream &, Channel *, OggPage &);
 
     OggVorbisSubStream  vorbis;
     OggTheoraSubStream  theora;
@@ -149,20 +149,20 @@ public:
         MAX_HEADERLEN = 27+256
     };
 
-    void    read(Stream &);
-    bool    isBOS();
-    bool    isEOS();
-    bool    isNewPacket();
-    bool    isHeader();
-    unsigned int getSerialNo();
+    void            read(Stream &);
+    bool            isBOS();
+    bool            isEOS();
+    bool            isNewPacket();
+    bool            isHeader();
+    unsigned int    getSerialNo();
 
-    bool    detectVorbis();
-    bool    detectTheora();
+    bool            detectVorbis();
+    bool            detectTheora();
 
 
-    int64_t granPos;
-    int headLen, bodyLen;
-    unsigned char data[MAX_HEADERLEN+MAX_BODYLEN];
+    int64_t         granPos;
+    int             headLen, bodyLen;
+    unsigned char   data[MAX_HEADERLEN+MAX_BODYLEN];
 };
 
 

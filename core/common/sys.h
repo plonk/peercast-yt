@@ -477,16 +477,17 @@ public:
     {
         currLine = 0;
     }
-    void    write(const char *, TYPE);
-    static const char *getTypeStr(TYPE t) {return logTypes[t];}
-    void    dumpHTML(class Stream &);
 
-    char *buf;
-    unsigned int *times;
-    unsigned int currLine, maxLines, lineLen;
-    TYPE    *types;
-    WLock   lock;
-    static  const char *logTypes[];
+    void                write(const char *, TYPE);
+    static const char   *getTypeStr(TYPE t) {return logTypes[t];}
+    void                dumpHTML(class Stream &);
+
+    char            *buf;
+    unsigned int    *times;
+    unsigned int    currLine, maxLines, lineLen;
+    TYPE            *types;
+    WLock           lock;
+    static          const char *logTypes[];
 
 };
 

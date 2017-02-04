@@ -127,9 +127,9 @@ public:
 
     void    logDebug(const char *, int);
 
-    unsigned int ip;
-    char    id[64];
-    unsigned int time;
+    unsigned int    ip;
+    char            id[64];
+    unsigned int    time;
 };
 
 // --------------------------------------------
@@ -148,7 +148,7 @@ public:
     bool    contains(Cookie &);
 
 
-    Cookie list[MAX_COOKIES];
+    Cookie  list[MAX_COOKIES];
     bool    neverExpire;
 
 };

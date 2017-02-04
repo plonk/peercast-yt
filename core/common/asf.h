@@ -52,11 +52,14 @@ public:
             data4[4], data4[5], data4[6], data4[7]);
     }
 
-    int operator==(const MSID& msid) const{return !memcmp(this, &msid, sizeof(MSID));}
+    int operator==(const MSID& msid) const
+    {
+        return !memcmp(this, &msid, sizeof(MSID));
+    }
 
-    unsigned int data1;
-    unsigned short data2, data3;
-    unsigned char data4[8];
+    unsigned int    data1;
+    unsigned short  data2, data3;
+    unsigned char   data4[8];
 
 };
 
@@ -170,10 +173,10 @@ public:
         }
     }
 
-    char data[8192];
-    MSID    id;
-    unsigned int lenLo, lenHi, dataLen;
-    TYPE type;
+    char            data[8192];
+    MSID            id;
+    unsigned int    lenLo, lenHi, dataLen;
+    TYPE            type;
 };
 // -----------------------------------
 class ASFStream
@@ -222,9 +225,9 @@ public:
         type = T_UNKNOWN;
     }
 
-    unsigned int id;
-    int bitrate;
-    TYPE type;
+    unsigned int    id;
+    int             bitrate;
+    TYPE            type;
 };
 
 // -----------------------------------
@@ -246,9 +249,9 @@ public:
             streams[i].reset();
     }
 
-    unsigned int packetSize, numPackets, flags, bitrate;
+    unsigned int    packetSize, numPackets, flags, bitrate;
 
-    ASFStream streams[MAX_STREAMS];
+    ASFStream       streams[MAX_STREAMS];
 };
 
 // -----------------------------------
@@ -280,9 +283,9 @@ public:
         out.write(data, dataLen);
     }
 
-    unsigned int seq, dataLen;
-    unsigned short type, len, v1, v2;
-    unsigned char data[8192];
+    unsigned int    seq, dataLen;
+    unsigned short  type, len, v1, v2;
+    unsigned char   data[8192];
 };
 
 

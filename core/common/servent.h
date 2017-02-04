@@ -118,13 +118,13 @@ public:
 
 
     //  funcs for handling status/type
-    void    setStatus(STATUS);
-    static const char * getTypeStr(Servent::TYPE t) {return typeMsgs[t];}
-    const char *    getTypeStr() {return getTypeStr(type);}
-    const char *    getStatusStr() {return statusMsgs[status];}
-    int     getOutput();
-    void    addBytes(unsigned int);
-    bool    isOlderThan(Servent *s)
+    void                setStatus(STATUS);
+    static const char   *getTypeStr(Servent::TYPE t) {return typeMsgs[t];}
+    const char          *getTypeStr() {return getTypeStr(type);}
+    const char          *getStatusStr() {return statusMsgs[status];}
+    int                 getOutput();
+    void                addBytes(unsigned int);
+    bool                isOlderThan(Servent *s)
     {
         if (s)
         {
@@ -137,12 +137,12 @@ public:
 
 
     // static funcs that do the actual work in the servent thread
-    static  THREAD_PROC     serverProc(ThreadInfo *);
-    static  THREAD_PROC     outgoingProc(ThreadInfo *);
-    static  THREAD_PROC     incomingProc(ThreadInfo *);
-    static  THREAD_PROC     givProc(ThreadInfo *);
-    static  THREAD_PROC     pcpProc(ThreadInfo *);
-    static  THREAD_PROC     fetchProc(ThreadInfo *);
+    static THREAD_PROC  serverProc(ThreadInfo *);
+    static THREAD_PROC  outgoingProc(ThreadInfo *);
+    static THREAD_PROC  incomingProc(ThreadInfo *);
+    static THREAD_PROC  givProc(ThreadInfo *);
+    static THREAD_PROC  pcpProc(ThreadInfo *);
+    static THREAD_PROC  fetchProc(ThreadInfo *);
 
     static bool pingHost(Host &, GnuID &);
 
@@ -183,7 +183,7 @@ public:
     void    processIncomingPCP(bool);
 
     bool    waitForChannelHeader(ChanInfo &);
-    ChanInfo    findChannel(char *str, ChanInfo &);
+    ChanInfo findChannel(char *str, ChanInfo &);
 
     bool    writeVariable(Stream &, const String &);
 
@@ -233,55 +233,52 @@ public:
     bool    sendPacket(ChanPacket &, GnuID &, GnuID &, GnuID &, Servent::TYPE);
 
 
-    TYPE type;
-    STATUS status;
+    TYPE                type;
+    STATUS              status;
 
-    static const char *statusMsgs[], *typeMsgs[];
-    GnuStream gnuStream;
-    GnuPacket pack;
-    unsigned int    lastConnect, lastPing, lastPacket;
-    String  agent;
+    static const char   *statusMsgs[], *typeMsgs[];
+    GnuStream           gnuStream;
+    GnuPacket           pack;
+    unsigned int        lastConnect, lastPing, lastPacket;
+    String              agent;
 
-    GnuIDList   seenIDs;
-    GnuID   networkID;
-    int     serventIndex;
+    GnuIDList           seenIDs;
+    GnuID               networkID;
+    int                 serventIndex;
 
-    GnuID   remoteID;
+    GnuID               remoteID;
+    GnuID               chanID;
+    GnuID               givID;
 
-    GnuID   chanID;
+    ThreadInfo          thread;
 
-    GnuID   givID;
+    String              loginPassword, loginMount;
 
-    ThreadInfo  thread;
+    bool                priorityConnect;
+    bool                addMetadata;
+    int                 nsSwitchNum;
 
+    unsigned int        allow;
 
-    String  loginPassword, loginMount;
+    ClientSocket        *sock, *pushSock;
 
-    bool    priorityConnect;
-    bool    addMetadata;
-    int     nsSwitchNum;
+    WLock               lock;
 
-    unsigned    int allow;
-
-    ClientSocket *sock, *pushSock;
-
-    WLock   lock;
-
-    bool    sendHeader;
-    unsigned int syncPos, streamPos;
-    int     servPort;
+    bool                sendHeader;
+    unsigned int        syncPos, streamPos;
+    int                 servPort;
 
     ChanInfo::PROTOCOL  outputProtocol;
 
-    GnuPacketBuffer outPacketsNorm, outPacketsPri;
+    GnuPacketBuffer     outPacketsNorm, outPacketsPri;
 
-    unsigned int bytesPerSecond;
-    bool    flowControl;
+    unsigned int        bytesPerSecond;
+    bool                flowControl;
 
-    Servent *next;
+    Servent             *next;
 
-    PCPStream *pcpStream;
-    Cookie  cookie;
+    PCPStream           *pcpStream;
+    Cookie              cookie;
 
 };
 

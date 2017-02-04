@@ -56,7 +56,7 @@ public:
     virtual void    setBlocking(bool) {}
 
 
-    static unsigned int    getIP(char *);
+    static unsigned int getIP(char *);
     static bool         getHostname(char *, unsigned int);
 
     virtual bool eof()
@@ -64,9 +64,9 @@ public:
         return active()==false;
     }
 
-    Host    host;
+    Host            host;
 
-    unsigned int readTimeout, writeTimeout;
+    unsigned int    readTimeout, writeTimeout;
 };
 
 

@@ -76,12 +76,12 @@ public:
             time = sys->getTime();
     }
 
-    static const char *getTypeStr(TYPE);
-    static TYPE getTypeFromStr(const char *);
+    static const char   *getTypeStr(TYPE);
+    static TYPE         getTypeFromStr(const char *);
 
-    TYPE type;
-    Host host;
-    unsigned int time;
+    TYPE            type;
+    Host            host;
+    unsigned int    time;
 };
 // ----------------------------------
 class ServFilter
@@ -164,14 +164,15 @@ public:
 
     bool    start();
 
-    Servent *findServent(unsigned int, unsigned short, GnuID &);
-    Servent *findServent(Servent::TYPE);
-    Servent *findServent(Servent::TYPE, Host &, GnuID &);
-    Servent *findOldestServent(Servent::TYPE, bool);
-    Servent *findServentByIndex(int);
+    Servent             *findServent(unsigned int, unsigned short, GnuID &);
+    Servent             *findServent(Servent::TYPE);
+    Servent             *findServent(Servent::TYPE, Host &, GnuID &);
+    Servent             *findOldestServent(Servent::TYPE, bool);
+    Servent             *findServentByIndex(int);
 
-    bool    writeVariable(Stream &, const String &);
-    Servent *allocServent();
+    bool                writeVariable(Stream &, const String &);
+    Servent             *allocServent();
+
     unsigned int        numUsed(int);
     unsigned int        numStreams(GnuID &, Servent::TYPE, bool);
     unsigned int        numStreams(Servent::TYPE, bool);
@@ -189,28 +190,28 @@ public:
         return numConnected();
     }
     unsigned int        numOutgoing();
-    bool    isFiltered(int, Host &h);
-    bool    addOutgoing(Host, GnuID &, bool);
-    Servent *findConnection(Servent::TYPE, GnuID &);
+    bool                isFiltered(int, Host &h);
+    bool                addOutgoing(Host, GnuID &, bool);
+    Servent             *findConnection(Servent::TYPE, GnuID &);
 
 
-    static  THREAD_PROC     serverProc(ThreadInfo *);
-    static  THREAD_PROC     clientProc(ThreadInfo *);
-    static  THREAD_PROC     trackerProc(ThreadInfo *);
-    static  THREAD_PROC     idleProc(ThreadInfo *);
+    static THREAD_PROC  serverProc(ThreadInfo *);
+    static THREAD_PROC  clientProc(ThreadInfo *);
+    static THREAD_PROC  trackerProc(ThreadInfo *);
+    static THREAD_PROC  idleProc(ThreadInfo *);
 
-    int     broadcast(GnuPacket &, Servent * = NULL);
-    int     route(GnuPacket &, GnuID &, Servent * = NULL);
+    int                 broadcast(GnuPacket &, Servent * = NULL);
+    int                 route(GnuPacket &, GnuID &, Servent * = NULL);
 
-    XML::Node *createServentXML();
+    XML::Node           *createServentXML();
 
-    void        connectBroadcaster();
-    void        procConnectArgs(char *, ChanInfo &);
+    void                connectBroadcaster();
+    void                procConnectArgs(char *, ChanInfo &);
 
-    void        quit();
-    void        closeConnections(Servent::TYPE);
+    void                quit();
+    void                closeConnections(Servent::TYPE);
 
-    void        checkFirewall();
+    void                checkFirewall();
 
     // host cache
     void            addHost(Host &, ServHost::TYPE, unsigned int);
@@ -221,32 +222,32 @@ public:
     void            clearHostCache(ServHost::TYPE);
     bool            seenHost(Host &, ServHost::TYPE, unsigned int);
 
-    void    setMaxRelays(int);
-    void    setFirewall(FW_STATE);
-    bool    checkForceIP();
-    FW_STATE    getFirewall() {return firewalled;}
-    void    saveSettings(const char *);
-    void    loadSettings(const char *);
-    void    setPassiveSearch(unsigned int);
-    int     findChannel(ChanInfo &);
-    bool    getChannel(char *, ChanInfo &, bool);
-    void    setFilterDefaults();
+    void            setMaxRelays(int);
+    void            setFirewall(FW_STATE);
+    bool            checkForceIP();
+    FW_STATE        getFirewall() {return firewalled;}
+    void            saveSettings(const char *);
+    void            loadSettings(const char *);
+    void            setPassiveSearch(unsigned int);
+    int             findChannel(ChanInfo &);
+    bool            getChannel(char *, ChanInfo &, bool);
+    void            setFilterDefaults();
 
-    bool    acceptGIV(ClientSocket *);
-    void    addVersion(unsigned int);
+    bool            acceptGIV(ClientSocket *);
+    void            addVersion(unsigned int);
 
-    void broadcastRootSettings(bool);
-    int broadcastPushRequest(ChanHit &, Host &, GnuID &, Servent::TYPE);
-    void writeRootAtoms(AtomStream &, bool);
+    void            broadcastRootSettings(bool);
+    int             broadcastPushRequest(ChanHit &, Host &, GnuID &, Servent::TYPE);
+    void            writeRootAtoms(AtomStream &, bool);
 
-    int broadcastPacket(ChanPacket &, GnuID &, GnuID &, GnuID &, Servent::TYPE type);
+    int             broadcastPacket(ChanPacket &, GnuID &, GnuID &, GnuID &, Servent::TYPE type);
 
-    void    addValidBCID(BCID *);
-    void    removeValidBCID(GnuID &);
-    BCID    *findValidBCID(GnuID &);
-    BCID    *findValidBCID(int);
+    void            addValidBCID(BCID *);
+    void            removeValidBCID(GnuID &);
+    BCID            *findValidBCID(GnuID &);
+    BCID            *findValidBCID(int);
 
-    unsigned int getUptime()
+    unsigned int    getUptime()
     {
         return sys->getTime()-startTime;
     }
@@ -260,8 +261,8 @@ public:
         //return numHosts(ServHost::T_SERVENT) < maxTryout;
     }
 
-    unsigned int        numActiveOnPort(int);
-    unsigned int        numActive(Servent::TYPE);
+    unsigned int    numActiveOnPort(int);
+    unsigned int    numActive(Servent::TYPE);
 
     bool    needConnections()
     {
@@ -320,48 +321,48 @@ public:
         return maxBitrateOut ? (BYTES_TO_KBPS(totalOutput(false))+br) > maxBitrateOut  : false;
     }
 
-    unsigned int        totalOutput(bool);
+    unsigned int    totalOutput(bool);
 
-    static ThreadInfo serverThread, idleThread;
+    static ThreadInfo   serverThread, idleThread;
 
 
-    Servent *servents;
-    WLock   lock;
+    Servent             *servents;
+    WLock               lock;
 
-    ServHost    hostCache[MAX_HOSTCACHE];
+    ServHost            hostCache[MAX_HOSTCACHE];
 
-    char    password[64];
+    char                password[64];
 
-    bool    allowGnutella;
+    bool                allowGnutella;
 
     unsigned int        maxBitrateOut, maxControl, maxRelays, maxDirect;
     unsigned int        minGnuIncoming, maxGnuIncoming;
     unsigned int        maxServIn;
 
-    bool    isDisabled;
-    bool    isRoot;
-    int     totalStreams;
+    bool                isDisabled;
+    bool                isRoot;
+    int                 totalStreams;
 
-    Host    serverHost;
-    String  rootHost;
+    Host                serverHost;
+    String              rootHost;
 
-    char    downloadURL[128];
-    String  rootMsg;
-    String  forceIP;
-    char    connectHost[128];
-    GnuID   networkID;
+    char                downloadURL[128];
+    String              rootMsg;
+    String              forceIP;
+    char                connectHost[128];
+    GnuID               networkID;
     unsigned int        firewallTimeout;
-    int     showLog;
-    int     shutdownTimer;
-    bool    pauseLog;
-    bool    forceNormal;
-    bool    useFlowControl;
-    unsigned int lastIncoming;
+    int                 showLog;
+    int                 shutdownTimer;
+    bool                pauseLog;
+    bool                forceNormal;
+    bool                useFlowControl;
+    unsigned int        lastIncoming;
 
-    bool    restartServer;
-    bool    allowDirect;
-    bool    autoConnect, autoServe, forceLookup;
-    int     queryTTL;
+    bool                restartServer;
+    bool                allowDirect;
+    bool                autoConnect, autoServe, forceLookup;
+    int                 queryTTL;
 
     unsigned int        allowServer1, allowServer2;
     unsigned int        startTime;
@@ -369,29 +370,29 @@ public:
     unsigned int        refreshHTML;
     unsigned int        relayBroadcast;
 
-    unsigned int notifyMask;
+    unsigned int        notifyMask;
 
-    BCID        *validBCID;
-    GnuID       sessionID;
+    BCID                *validBCID;
+    GnuID               sessionID;
 
-    ServFilter  filters[MAX_FILTERS];
-    int numFilters;
+    ServFilter          filters[MAX_FILTERS];
+    int                 numFilters;
 
 
-    CookieList  cookieList;
-    AUTH_TYPE   authType;
+    CookieList          cookieList;
+    AUTH_TYPE           authType;
 
-    char    htmlPath[128];
-    unsigned int    clientVersions[MAX_VERSIONS], clientCounts[MAX_VERSIONS];
-    int numVersions;
+    char                htmlPath[128];
+    unsigned int        clientVersions[MAX_VERSIONS], clientCounts[MAX_VERSIONS];
+    int                 numVersions;
 
-    int serventNum;
+    int                 serventNum;
 
-    String chanLog;
+    String              chanLog;
 
 
 private:
-    FW_STATE    firewalled;
+    FW_STATE            firewalled;
 };
 
 // ----------------------------------

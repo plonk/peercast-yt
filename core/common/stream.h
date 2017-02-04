@@ -204,13 +204,13 @@ public:
     void    updateTotals(unsigned int, unsigned int);
 
 
-    unsigned char bitsBuffer;
-    unsigned int bitsPos;
+    unsigned char   bitsBuffer;
+    unsigned int    bitsPos;
 
-    unsigned int totalBytesIn, totalBytesOut;
-    unsigned int lastBytesIn, lastBytesOut;
-    unsigned int bytesInPerSec, bytesOutPerSec;
-    unsigned int lastUpdate;
+    unsigned int    totalBytesIn, totalBytesOut;
+    unsigned int    lastBytesIn, lastBytesOut;
+    unsigned int    bytesInPerSec, bytesOutPerSec;
+    unsigned int    lastUpdate;
 
 };
 
@@ -328,8 +328,8 @@ public:
     void    convertFromBase64();
 
 
-    char *buf;
-    int len, pos;
+    char    *buf;
+    int     len, pos;
 };
 // --------------------------------------------------
 class IndirectStream : public Stream

@@ -86,12 +86,12 @@ public:
         return iv!=id.iv;
     }
 
-    bool    isSet() const {return iv!=0;}
+    bool        isSet() const { return iv!=0; }
 
 
-    int getValue() const {return iv;}
-    IDString getString() const {return IDString(cv, 4);}
-    void *getData() {return cv;}
+    int         getValue() const { return iv; }
+    IDString    getString() const { return IDString(cv, 4); }
+    void        *getData() { return cv; }
 
 };
 

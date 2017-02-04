@@ -138,17 +138,16 @@ public:
     bool    initHit(Host &, Channel *, GnuPacket *, bool, bool, bool, bool, int);
     void    initPush(ChanHit &, Host &);
 
+    void    makeChecksumID();
 
-    void makeChecksumID();
-
-    unsigned char func;
-    unsigned char ttl;
-    unsigned char hops;
+    unsigned char   func;
+    unsigned char   ttl;
+    unsigned char   hops;
     unsigned int    len;
-    Hash    hash;
-    GnuID   id;
+    Hash            hash;
+    GnuID           id;
 
-    char data[MAX_DATA];
+    char            data[MAX_DATA];
 };
 // --------------------------------
 class GnuPacketBuffer
@@ -240,9 +239,9 @@ public:
         }
     }
 
-    int size;
-    GnuPacket *packets;
-    int readPtr, writePtr;
+    int         size;
+    GnuPacket   *packets;
+    int         readPtr, writePtr;
 };
 
 

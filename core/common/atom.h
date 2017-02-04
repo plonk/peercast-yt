@@ -201,8 +201,8 @@ public:
     bool    eof() {return io.eof();}
 
 
-    int numChildren, numData;
-    Stream &io;
+    int     numChildren, numData;
+    Stream  &io;
 };
 
 #endif
