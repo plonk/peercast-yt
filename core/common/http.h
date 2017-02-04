@@ -26,7 +26,7 @@
 class HTTPException : public StreamException
 {
 public:
-    HTTPException(const char *m, int c) : StreamException(m) {code=c;}
+    HTTPException(const char *m, int c) : StreamException(m) { code=c; }
     int code;
 };
 

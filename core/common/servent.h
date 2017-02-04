@@ -119,9 +119,9 @@ public:
 
     //  funcs for handling status/type
     void                setStatus(STATUS);
-    static const char   *getTypeStr(Servent::TYPE t) {return typeMsgs[t];}
-    const char          *getTypeStr() {return getTypeStr(type);}
-    const char          *getStatusStr() {return statusMsgs[status];}
+    static const char   *getTypeStr(Servent::TYPE t) { return typeMsgs[t]; }
+    const char          *getTypeStr() { return getTypeStr(type); }
+    const char          *getStatusStr() { return statusMsgs[status]; }
     int                 getOutput();
     void                addBytes(unsigned int);
     bool                isOlderThan(Servent *s)
@@ -211,8 +211,8 @@ public:
     static void readICYHeader(HTTP &, ChanInfo &, char *, size_t);
     bool    canStream(Channel *);
 
-    bool    isConnected() {return status == S_CONNECTED;}
-    bool    isListening() {return status == S_LISTENING;}
+    bool    isConnected() { return status == S_CONNECTED; }
+    bool    isListening() { return status == S_LISTENING; }
 
     bool    isAllowed(int);
     bool    isFiltered(int);
@@ -228,7 +228,7 @@ public:
     Host    getHost();
 
     bool    outputPacket(GnuPacket &, bool);
-    bool    hasSeenPacket(GnuPacket &p) {return seenIDs.contains(p.id);}
+    bool    hasSeenPacket(GnuPacket &p) { return seenIDs.contains(p.id); }
     bool    acceptGIV(ClientSocket *);
     bool    sendPacket(ChanPacket &, GnuID &, GnuID &, GnuID &, Servent::TYPE);
 

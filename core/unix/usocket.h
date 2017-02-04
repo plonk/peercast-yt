@@ -54,7 +54,7 @@ public:
     virtual void    connect();
     virtual void    close();
     virtual ClientSocket * accept();
-    virtual bool    active() {return sockNum != 0;}
+    virtual bool    active() { return sockNum != 0; }
     virtual bool    readReady();
     virtual int numPending();
 

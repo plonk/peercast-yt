@@ -58,7 +58,7 @@ public:
         T_TRACKER
     };
 
-    ServHost() {init();}
+    ServHost() { init(); }
     void init()
     {
         host.init();
@@ -95,7 +95,7 @@ public:
         F_DIRECT   = 0x08
     };
 
-    ServFilter() {init();}
+    ServFilter() { init(); }
     void    init()
     {
         flags = 0;
@@ -225,7 +225,7 @@ public:
     void            setMaxRelays(int);
     void            setFirewall(FW_STATE);
     bool            checkForceIP();
-    FW_STATE        getFirewall() {return firewalled;}
+    FW_STATE        getFirewall() { return firewalled; }
     void            saveSettings(const char *);
     void            loadSettings(const char *);
     void            setPassiveSearch(unsigned int);

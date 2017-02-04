@@ -73,7 +73,7 @@ public:
         bitrate = 0;
     }
 
-    bool    isActive() {return serialNo!=0;}
+    bool    isActive() { return serialNo!=0; }
 
     void    readHeader(Channel *, OggPage &);
 

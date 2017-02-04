@@ -198,7 +198,7 @@ public:
         return total;
     }
 
-    bool    eof() {return io.eof();}
+    bool    eof() { return io.eof(); }
 
 
     int     numChildren, numData;

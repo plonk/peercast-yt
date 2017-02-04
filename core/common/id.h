@@ -29,7 +29,7 @@ public:
         return str();
     }
 
-    const char *str() {return data;}
+    const char *str() { return data; }
 
 };
 

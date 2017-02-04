@@ -100,7 +100,7 @@ public:
 
     bool    willSkip();
 
-    int     numPending() {return writePos-readPos;}
+    int     numPending() { return writePos-readPos; }
 
     unsigned int    getLatestPos();
     unsigned int    getOldestPos();
@@ -134,7 +134,7 @@ public:
     bool getStatus(Channel *, ChanPacket &);
 
     virtual void kill() {}
-    virtual bool sendPacket(ChanPacket &, GnuID &) {return false;}
+    virtual bool sendPacket(ChanPacket &, GnuID &) { return false; }
     virtual void flush(Stream &) {}
     virtual void readHeader(Stream &, Channel *)=0;
     virtual int  readPacket(Stream &, Channel *)=0;

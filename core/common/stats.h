@@ -71,10 +71,10 @@ public:
         for(int i=s; i<=e; i++)
             current[i] = 0;
     }
-    void    clear(STAT s) {current[s]=0;}
-    void    add(STAT s, int n=1) {current[s]+=n;}
-    unsigned int getPerSecond(STAT s) {return perSec[s];}
-    unsigned int getCurrent(STAT s) {return current[s];}
+    void    clear(STAT s) { current[s]=0; }
+    void    add(STAT s, int n=1) { current[s]+=n; }
+    unsigned int getPerSecond(STAT s) { return perSec[s]; }
+    unsigned int getCurrent(STAT s) { return current[s]; }
 
     unsigned int    current[Stats::MAX], last[Stats::MAX], perSec[Stats::MAX];
     unsigned int    lastUpdate;

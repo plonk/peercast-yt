@@ -177,7 +177,7 @@ class Host
     }
 
 public:
-    Host(){init();}
+    Host() { init(); }
     Host(unsigned int i, unsigned short p)
     {
         ip = i;

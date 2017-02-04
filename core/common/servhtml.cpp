@@ -1566,31 +1566,64 @@ void Servent::addConnectionsPage(HTML &html)
 }
 // -----------------------------------
 static int compareNamesDown(ChanHitList **c2, ChanHitList **c1)
-{return stricmp(c1[0]->info.name.cstr(), c2[0]->info.name.cstr());}
+{
+    return stricmp(c1[0]->info.name.cstr(), c2[0]->info.name.cstr());
+}
+
 static int compareBitratesDown(ChanHitList **c2, ChanHitList **c1)
-{return c1[0]->info.bitrate-c2[0]->info.bitrate;}
+{
+    return c1[0]->info.bitrate - c2[0]->info.bitrate;
+}
+
 static int compareListenersDown(ChanHitList **c2, ChanHitList **c1)
-{return c1[0]->numListeners()-c2[0]->numListeners();}
+{
+    return c1[0]->numListeners() - c2[0]->numListeners();
+}
+
 static int compareHitsDown(ChanHitList **c2, ChanHitList **c1)
-{return c1[0]->numHits()-c2[0]->numHits();}
+{
+    return c1[0]->numHits() - c2[0]->numHits();
+}
+
 static int compareTypesDown(ChanHitList **c2, ChanHitList **c1)
-{return stricmp(ChanInfo::getTypeStr(c1[0]->info.contentType), ChanInfo::getTypeStr(c2[0]->info.contentType));}
+{
+    return stricmp(ChanInfo::getTypeStr(c1[0]->info.contentType), ChanInfo::getTypeStr(c2[0]->info.contentType));
+}
+
 static int compareGenresDown(ChanHitList **c2, ChanHitList **c1)
-{return stricmp(c1[0]->info.genre.cstr(), c2[0]->info.genre.cstr());}
+{
+    return stricmp(c1[0]->info.genre.cstr(), c2[0]->info.genre.cstr());
+}
 
 static int compareNamesUp(ChanHitList **c1, ChanHitList **c2)
-{return stricmp(c1[0]->info.name.cstr(), c2[0]->info.name.cstr());}
-static int compareBitratesUp(ChanHitList **c1, ChanHitList **c2)
-{return c1[0]->info.bitrate-c2[0]->info.bitrate;}
-static int compareListenersUp(ChanHitList **c1, ChanHitList **c2)
-{return c1[0]->numListeners()-c2[0]->numListeners();}
-static int compareHitsUp(ChanHitList **c1, ChanHitList **c2)
-{return c1[0]->numHits()-c2[0]->numHits();}
-static int compareTypesUp(ChanHitList **c1, ChanHitList **c2)
-{return stricmp(ChanInfo::getTypeStr(c1[0]->info.contentType), ChanInfo::getTypeStr(c2[0]->info.contentType));}
-static int compareGenresUp(ChanHitList **c1, ChanHitList **c2)
-{return stricmp(c1[0]->info.genre.cstr(), c2[0]->info.genre.cstr());}
+{
+    return stricmp(c1[0]->info.name.cstr(), c2[0]->info.name.cstr());
+}
 
+static int compareBitratesUp(ChanHitList **c1, ChanHitList **c2)
+{
+    return c1[0]->info.bitrate - c2[0]->info.bitrate;
+}
+
+static int compareListenersUp(ChanHitList **c1, ChanHitList **c2)
+{
+    return c1[0]->numListeners() - c2[0]->numListeners();
+}
+
+static int compareHitsUp(ChanHitList **c1, ChanHitList **c2)
+{
+    return c1[0]->numHits() - c2[0]->numHits();
+}
+
+static int compareTypesUp(ChanHitList **c1, ChanHitList **c2)
+{
+    return stricmp(ChanInfo::getTypeStr(c1[0]->info.contentType), ChanInfo::getTypeStr(c2[0]->info.contentType));
+}
+
+static int compareGenresUp(ChanHitList **c1, ChanHitList **c2)
+{
+    return stricmp(c1[0]->info.genre.cstr(), c2[0]->info.genre.cstr());
+}
 
 static COMPARE_FUNC2 compareFuncs[]=
 {

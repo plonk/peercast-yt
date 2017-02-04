@@ -47,7 +47,7 @@ public:
     {
     }
 
-    virtual int readUpto(void *, int) {return 0;}
+    virtual int readUpto(void *, int) { return 0; }
     virtual int read(void *, int)=0;
     virtual void write(const void *, int) = 0;
     virtual bool eof()
@@ -83,7 +83,7 @@ public:
     {
     }
 
-    virtual int     getPosition() {return 0;}
+    virtual int     getPosition() { return 0; }
 
 
     // binary
@@ -147,8 +147,8 @@ public:
         return cnt;
     }
 
-    virtual bool    readReady() {return true;}
-    virtual int numPending() {return 0;}
+    virtual bool    readReady() { return true; }
+    virtual int numPending() { return 0; }
 
 
     void writeID4(ID4 id)
@@ -170,7 +170,7 @@ public:
         CHECK_ENDIAN4(v);
         write(&v, 4);
     }
-    void writeInt(int v) {writeLong(v);}
+    void writeInt(int v) { writeLong(v); }
 
     void    writeTag(long v)
     {
@@ -219,17 +219,17 @@ public:
 class FileStream : public Stream
 {
 public:
-    FileStream() {file=NULL;}
+    FileStream() { file=NULL; }
 
     void    openReadOnly(const char *);
     void    openWriteReplace(const char *);
     void    openWriteAppend(const char *);
-    bool    isOpen(){return file!=NULL;}
+    bool    isOpen() { return file!=NULL; }
     int     length();
     int     pos();
 
     virtual void    seekTo(int);
-    virtual int     getPosition() {return pos();}
+    virtual int     getPosition() { return pos(); }
     virtual void    flush();
     virtual int     read(void *, int);
     virtual void    write(const void *, int);

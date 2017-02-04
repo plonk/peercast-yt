@@ -48,11 +48,11 @@ public:
 
         void    add(Node *);
         void    write(Stream &, int);   // output, level
-        char    *getName() {return getAttrName(0);}
+        char    *getName() { return getAttrName(0); }
 
-        char    *getAttrValue(int i) {return &attrData[attr[i].valuePos];}
-        char    *getAttrName(int i) {return &attrData[attr[i].namePos];}
-        char    *getContent()  {return contData; }
+        char    *getAttrValue(int i) { return &attrData[attr[i].valuePos]; }
+        char    *getAttrName(int i) { return &attrData[attr[i].namePos]; }
+        char    *getContent()  { return contData; }
         int     getBinaryContent(void *, int);
 
         void    setAttributes(const char *);

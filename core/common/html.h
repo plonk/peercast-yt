@@ -55,8 +55,8 @@ public:
     void    startSingleTagEnd(const char *, ...);
     void    startTableRow(int);
     void    end();
-    void    setRefresh(int sec) {refresh = sec;}
-    void    setRefreshURL(const char *u){refreshURL.set(u);}
+    void    setRefresh(int sec) { refresh = sec; }
+    void    setRefreshURL(const char *u) { refreshURL.set(u); }
     void    addHead();
     void    startHTML();
     void    startBody();

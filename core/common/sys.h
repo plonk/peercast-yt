@@ -55,7 +55,7 @@ public:
         T_UNICODESAFE
     };
 
-    String() {clear();}
+    String() { clear(); }
     String(const char *p, TYPE t=T_ASCII)
     {
         set(p, t);
@@ -123,15 +123,15 @@ public:
 
     static  int base64WordToChars(char *, const char *);
 
-    static bool isSame(const char *s1, const char *s2) {return strcmp(s1, s2)==0;}
+    static bool isSame(const char *s1, const char *s2) { return strcmp(s1, s2)==0; }
 
-    bool startsWith(const char *s) const {return strncmp(data, s, strlen(s))==0;}
+    bool startsWith(const char *s) const { return strncmp(data, s, strlen(s))==0; }
     bool isValidURL();
-    bool isEmpty() {return data[0]==0;}
-    bool isSame(::String &s) const {return strcmp(data, s.data)==0;}
-    bool isSame(const char *s) const {return strcmp(data, s)==0;}
-    bool contains(::String &s) {return stristr(data, s.data)!=NULL;}
-    bool contains(const char *s) {return stristr(data, s)!=NULL;}
+    bool isEmpty() { return data[0]==0; }
+    bool isSame(::String &s) const { return strcmp(data, s.data)==0; }
+    bool isSame(const char *s) const { return strcmp(data, s)==0; }
+    bool contains(::String &s) { return stristr(data, s.data)!=NULL; }
+    bool contains(const char *s) { return stristr(data, s)!=NULL; }
     void append(const char *s)
     {
         if ((strlen(s)+strlen(data) < (MAX_LEN-1)))
@@ -180,16 +180,16 @@ public:
         return data;
     }
 
-    bool operator == (const char *s) const {return isSame(s);}
-    bool operator != (const char *s) const {return !isSame(s);}
+    bool operator == (const char *s) const { return isSame(s); }
+    bool operator != (const char *s) const { return !isSame(s); }
 
-    operator const char *() const {return data;}
+    operator const char *() const { return data; }
 
     void convertTo(TYPE t);
 
-    char    *cstr() {return data;}
+    char    *cstr() { return data; }
 
-    static bool isWhitespace(char c) {return c==' ' || c=='\t';}
+    static bool isWhitespace(char c) { return c==' ' || c=='\t'; }
 
     TYPE    type;
     char    data[MAX_LEN];
@@ -479,7 +479,7 @@ public:
     }
 
     void                write(const char *, TYPE);
-    static const char   *getTypeStr(TYPE t) {return logTypes[t];}
+    static const char   *getTypeStr(TYPE t) { return logTypes[t]; }
     void                dumpHTML(class Stream &);
 
     char            *buf;
