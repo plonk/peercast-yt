@@ -277,8 +277,12 @@ public:
         if (!c)
             throw application_error(-1, "Channel not found");
 
-        json remoteEndPoint = c->sock ? (std::string) c->sock->host : nullptr;
-        json remoteName = c->sourceURL.isEmpty() ? (std::string)c->sourceHost.host : c->sourceURL.cstr();
+        json remoteEndPoint;
+        if (c->sock)
+            remoteEndPoint = (std::string) c->sock->host;
+        else
+            remoteEndPoint = nullptr;
+        json remoteName = c->sourceURL.isEmpty() ? ((std::string) c->sourceHost.host).c_str() : c->sourceURL.cstr();
 
         json sourceConnection =  {
             { "connectionId", (uintptr_t) c },
@@ -306,7 +310,7 @@ public:
             unsigned int bytesInPerSec = s->sock ? s->sock->bytesInPerSec : 0;
             unsigned int bytesOutPerSec = s->sock ? s->sock->bytesOutPerSec : 0;
 
-            json remoteEndPoint = c->sock ? (std::string) c->sock->host : nullptr;
+            json remoteEndPoint = c->sock ? ((std::string) c->sock->host).c_str() : nullptr;
 
             json connection = {
                 { "connectionId", (uintptr_t) s },
