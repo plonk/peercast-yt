@@ -66,6 +66,7 @@ public:
             { "getStatus", &JrpcApi::getStatus, {} },
             { "getYellowPages", &JrpcApi::getYellowPages, {} },
             { "getYellowPageProtocols", &JrpcApi::getYellowPageProtocols, {} },
+            { "setChannelInfo", &JrpcApi::setChannelInfo, { "channelId", "info", "track" } },
         })
     {
     }
@@ -498,6 +499,12 @@ public:
     json getNotificationMessages(json::array_t)
     {
         return json::array();
+    }
+
+    json setChannelInfo(json::array_t)
+    {
+        // unimplemented
+        return nullptr;
     }
 };
 
