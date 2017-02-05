@@ -79,7 +79,8 @@ SRC = \
 	chanhit_unittest.cpp \
 	chanhitsearch_unittest.cpp \
 	chanhitlist_unittest.cpp \
-	chanmgr_unittest.cpp
+	chanmgr_unittest.cpp \
+	jrpcapi_unittest.cpp
 
 OBJS = $(SRC:.cpp=.o)
 
