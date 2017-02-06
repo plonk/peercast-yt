@@ -482,6 +482,8 @@ public:
     static const char   *getTypeStr(TYPE t) { return logTypes[t]; }
     void                dumpHTML(class Stream &);
 
+    static void         escapeHTML(char* dest, char* src);
+
     char            *buf;
     unsigned int    *times;
     unsigned int    currLine, maxLines, lineLen;
