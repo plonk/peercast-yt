@@ -98,10 +98,7 @@ public:
 
     bool    isSame(GnuID &gid)
     {
-        for (int i=0; i<16; i++)
-            if (gid.id[i] != id[i])
-                return false;
-        return true;
+        return memcmp(id, gid.id, 16) == 0;
     }
 
 
@@ -115,8 +112,7 @@ public:
 
     void    clear()
     {
-        for (int i=0; i<16; i++)
-            id[i] = 0;
+        memset(id, 0, 16);
         storeTime = 0;
     }
 
