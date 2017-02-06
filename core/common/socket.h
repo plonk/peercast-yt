@@ -37,13 +37,15 @@ public:
         writeTimeout = 30000;
     }
 
+    virtual ~ClientSocket() {}
+
     // required interface
-    virtual void    open(Host &) = 0;
-    virtual void    bind(Host &) = 0;
-    virtual void    connect() = 0;
-    virtual bool    active() = 0;
+    virtual void            open(Host &) = 0;
+    virtual void            bind(Host &) = 0;
+    virtual void            connect() = 0;
+    virtual bool            active() = 0;
     virtual ClientSocket    *accept() = 0;
-    virtual Host    getLocalHost() = 0;
+    virtual Host            getLocalHost() = 0;
 
     void    setReadTimeout(unsigned int t) override
     {
@@ -53,7 +55,7 @@ public:
     {
         writeTimeout = t;
     }
-    virtual void    setBlocking(bool) {}
+    virtual void    setBlocking(bool) = 0;
 
 
     static unsigned int getIP(char *);

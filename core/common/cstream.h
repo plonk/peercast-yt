@@ -130,6 +130,8 @@ public:
     , lastUpdate(0)
     {}
 
+    virtual ~ChannelStream() {}
+
     void updateStatus(Channel *);
     bool getStatus(Channel *, ChanPacket &);
 
@@ -147,7 +149,6 @@ public:
     bool            isPlaying;
     int             fwState;
     unsigned int    lastUpdate;
-
 };
 
 #endif

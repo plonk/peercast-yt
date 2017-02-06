@@ -47,6 +47,8 @@ public:
     {
     }
 
+    virtual ~Stream() {}
+
     virtual int readUpto(void *, int) { return 0; }
     virtual int read(void *, int) = 0;
     virtual void write(const void *, int) = 0;
@@ -122,6 +124,7 @@ public:
         int v=0;
         read(&v, 3);
         CHECK_ENDIAN3(v);
+        return v;
     }
 
 

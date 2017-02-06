@@ -299,7 +299,6 @@ public:
     void readHeader(Stream &, Channel *) override;
     int  readPacket(Stream &, Channel *) override;
     void readEnd(Stream &, Channel *) override;
-
 };
 
 // ------------------------------------------
@@ -315,8 +314,9 @@ public:
 class ChannelSource
 {
 public:
-    virtual void stream(Channel *) = 0;
+    virtual ~ChannelSource() {}
 
+    virtual void stream(Channel *) = 0;
     virtual int getSourceRate() { return 0; }
 };
 // ------------------------------------------

@@ -406,7 +406,7 @@ GnuStream::R_TYPE GnuStream::processPacket(GnuPacket &in, Servent *serv, GnuID &
                     h.toStr(sIP);
                     remoteHost.toStr(rIP);
 
-                    LOG_NETWORK("pong: %s via %s : %02x%02x%02x%02x", sIP, ip, rIP, in.id.id[0], in.id.id[1], in.id.id[2], in.id.id[3]);
+                    LOG_NETWORK("pong: %s via %s : %02x%02x%02x%02x", sIP, rIP, in.id.id[0], in.id.id[1], in.id.id[2], in.id.id[3]);
 
 
                     ret = R_DISCARD;

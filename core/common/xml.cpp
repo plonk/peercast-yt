@@ -86,11 +86,11 @@ void XML::Node::setBinaryContent(void *ptr, int size)
     contData = new char[size*2+1+(size/lineWidth)];
 
     char *bp = (char *)ptr;
-    register char *ap = contData;
+    char *ap = contData;
 
-    for (register int i=0; i<size; i++)
+    for (int i=0; i<size; i++)
     {
-        register char c = bp[i];
+        char c = bp[i];
         *ap++ = hexTable[c&0xf];
         *ap++ = hexTable[(c>>4)&0xf];
         if ((i&lineWidth)==lineWidth)

@@ -32,11 +32,8 @@ public:
     }
 
     ::String        streamURL(Channel *, const char *);
-
-    void    stream(Channel *) override;
-
-    virtual int     getSourceRate();
-
+    void            stream(Channel *) override;
+    int             getSourceRate() override;
 
     Stream          *inputStream;
     ::String        baseurl;

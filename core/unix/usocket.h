@@ -45,6 +45,10 @@ public:
         sockNum = 0;
     }
 
+    ~UClientSocket()
+    {
+        close();
+    }
 
     void    open(Host &) override;
     int     read(void *, int) override;
@@ -59,7 +63,7 @@ public:
     int     numPending() override;
 
     Host    getLocalHost() override;
-    void    setBlocking(bool);
+    void    setBlocking(bool) override;
     void    setReuse(bool);
     void    setNagle(bool);
     void    setLinger(int);
