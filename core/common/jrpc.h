@@ -67,6 +67,7 @@ public:
             { "getYellowPages", &JrpcApi::getYellowPages, {} },
             { "getYellowPageProtocols", &JrpcApi::getYellowPageProtocols, {} },
             { "setChannelInfo", &JrpcApi::setChannelInfo, { "channelId", "info", "track" } },
+            { "stopChannel", &JrpcApi::stopChannel, { "channelId" } },
         })
     {
     }
@@ -513,6 +514,20 @@ public:
     json setChannelInfo(json::array_t)
     {
         // unimplemented
+        return nullptr;
+    }
+
+    json stopChannel(json::array_t args)
+    {
+        std::string channelId = args[0];
+
+        GnuID id(channelId);
+
+        Channel *channel = chanMgr->findChannelByID(id);
+
+        if (channel)
+            channel->thread.active = false;
+
         return nullptr;
     }
 };
