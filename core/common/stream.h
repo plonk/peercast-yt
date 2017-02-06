@@ -147,7 +147,7 @@ public:
         return cnt;
     }
 
-    virtual bool    readReady() { return true; }
+    virtual bool    readReady(int timeoutMilliseconds = 0) { return true; }
     virtual int numPending() { return 0; }
 
 

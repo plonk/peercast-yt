@@ -47,7 +47,7 @@ public:
 	virtual void	close();
 	virtual ClientSocket * accept();
 	virtual bool	active() { return sockNum != 0; }
-	virtual bool	readReady();
+	virtual bool	readReady(int timeoutMilliseconds);
 	virtual Host 	getLocalHost();
 	virtual void	setBlocking(bool);
 	void	setReuse(bool);

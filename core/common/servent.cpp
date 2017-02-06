@@ -2665,26 +2665,38 @@ int Servent::serverProc(ThreadInfo *thread)
             LOG_DEBUG("Server started: %s", servIP);
 
 
-        while ((thread->active) && (sv->sock->active()))
+        while (thread->active && sv->sock->active())
         {
-            if (servMgr->numActiveOnPort(sv->sock->host.port) < servMgr->maxServIn)
+            if (!sv->sock->readReady(100))
+                continue;
+
+            if (servMgr->numActiveOnPort(sv->sock->host.port) >= servMgr->maxServIn)
             {
-                ClientSocket *cs = sv->sock->accept();
-                if (cs)
-                {
-                    LOG_DEBUG("accepted incoming");
-                    Servent *ns = servMgr->allocServent();
-                    if (ns)
-                    {
-                        servMgr->lastIncoming = sys->getTime();
-                        ns->servPort = sv->sock->host.port;
-                        ns->networkID = servMgr->networkID;
-                        ns->initIncoming(cs, sv->allow);
-                    }else
-                        LOG_ERROR("Out of servents");
-                }
+                sys->sleep(100);
+                continue;
             }
-            sys->sleep(100);
+
+            ClientSocket *cs = sv->sock->accept();
+            if (!cs)
+            {
+                LOG_ERROR("accept failed");
+                continue;
+            }
+
+            LOG_NETWORK("accepted incoming");
+            Servent *ns = servMgr->allocServent();
+            if (!ns)
+            {
+                LOG_ERROR("Out of servents");
+                cs->close();
+                delete cs;
+                continue;
+            }
+
+            servMgr->lastIncoming = sys->getTime();
+            ns->servPort = sv->sock->host.port;
+            ns->networkID = servMgr->networkID;
+            ns->initIncoming(cs, sv->allow);
         }
     }catch (StreamException &e)
     {
