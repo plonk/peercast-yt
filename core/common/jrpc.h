@@ -226,8 +226,10 @@ public:
         switch (status)
         {
         case Channel::S_RECEIVING:
+        case Channel::S_BROADCASTING:
             return "Receiving";
         case Channel::S_SEARCHING:
+        case Channel::S_CONNECTING:
             return "Searching";
         case Channel::S_ERROR:
             return "Error";
