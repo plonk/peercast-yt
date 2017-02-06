@@ -33,7 +33,7 @@ public:
 
     ::String        streamURL(Channel *, const char *);
 
-    virtual void    stream(Channel *);
+    void    stream(Channel *) override;
 
     virtual int     getSourceRate();
 

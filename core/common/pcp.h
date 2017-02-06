@@ -216,17 +216,17 @@ public:
 
     void    init(GnuID &);
 
-    virtual void kill()
+    void    kill() override
     {
         inData.lock.on();
         outData.lock.on();
     }
 
-    virtual bool    sendPacket(ChanPacket &, GnuID &);
-    virtual void    flush(Stream &);
-    virtual void    readHeader(Stream &, Channel *);
-    virtual int     readPacket(Stream &, Channel *);
-    virtual void    readEnd(Stream &, Channel *);
+    bool    sendPacket(ChanPacket &, GnuID &) override;
+    void    flush(Stream &) override;
+    void    readHeader(Stream &, Channel *) override;
+    int     readPacket(Stream &, Channel *) override;
+    void    readEnd(Stream &, Channel *) override;
 
     int             readPacket(Stream &, BroadcastState &);
     void            flushOutput(Stream &in, BroadcastState &);

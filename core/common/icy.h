@@ -25,8 +25,7 @@
 class ICYSource : public ChannelSource
 {
 public:
-    virtual void stream(Channel *);
-
+    void stream(Channel *) override;
 };
 
 

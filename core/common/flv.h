@@ -179,9 +179,9 @@ public:
     FLVStream() : bitrate(0)
     {
     }
-    virtual void readHeader(Stream &, Channel *);
-    virtual int  readPacket(Stream &, Channel *);
-    virtual void readEnd(Stream &, Channel *);
+    void readHeader(Stream &, Channel *) override;
+    int  readPacket(Stream &, Channel *) override;
+    void readEnd(Stream &, Channel *) override;
 
     FLVTagBuffer m_buffer;
 };

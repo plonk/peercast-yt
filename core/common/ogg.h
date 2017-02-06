@@ -93,7 +93,7 @@ public:
     :samplerate(0)
     {}
 
-    virtual void procHeaders(Channel *);
+    void    procHeaders(Channel *) override;
 
     void    readIdent(Stream &, ChanInfo &);
     void    readSetup(Stream &);
@@ -110,7 +110,7 @@ class OggTheoraSubStream : public OggSubStream
 public:
     OggTheoraSubStream() : granposShift(0), frameTime(0) {}
 
-    virtual void procHeaders(Channel *);
+    void    procHeaders(Channel *) override;
 
     void    readInfo(Stream &, ChanInfo &);
 
@@ -128,12 +128,11 @@ public:
     {}
 
 
-    virtual void    readHeader(Stream &, Channel *);
-    virtual int     readPacket(Stream &, Channel *);
-    virtual void    readEnd(Stream &, Channel *);
+    void    readHeader(Stream &, Channel *) override;
+    int     readPacket(Stream &, Channel *) override;
+    void    readEnd(Stream &, Channel *) override;
 
-
-    void            readHeaders(Stream &, Channel *, OggPage &);
+    void    readHeaders(Stream &, Channel *, OggPage &);
 
     OggVorbisSubStream  vorbis;
     OggTheoraSubStream  theora;

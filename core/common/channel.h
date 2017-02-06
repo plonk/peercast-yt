@@ -296,9 +296,9 @@ public:
 class RawStream : public ChannelStream
 {
 public:
-    virtual void readHeader(Stream &, Channel *);
-    virtual int  readPacket(Stream &, Channel *);
-    virtual void readEnd(Stream &, Channel *);
+    void readHeader(Stream &, Channel *) override;
+    int  readPacket(Stream &, Channel *) override;
+    void readEnd(Stream &, Channel *) override;
 
 };
 
@@ -306,9 +306,9 @@ public:
 class PeercastStream : public ChannelStream
 {
 public:
-    virtual void readHeader(Stream &, Channel *);
-    virtual int  readPacket(Stream &, Channel *);
-    virtual void readEnd(Stream &, Channel *);
+    void readHeader(Stream &, Channel *) override;
+    int  readPacket(Stream &, Channel *) override;
+    void readEnd(Stream &, Channel *) override;
 };
 
 // ------------------------------------------
@@ -325,8 +325,8 @@ class PeercastSource : public ChannelSource
 public:
 
     PeercastSource() : m_channel(NULL) {}
-    virtual void    stream(Channel *);
-    int             getSourceRate();
+    void    stream(Channel *) override;
+    int     getSourceRate() override;
 private:
     Channel*        m_channel;
 };

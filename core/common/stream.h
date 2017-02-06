@@ -48,7 +48,7 @@ public:
     }
 
     virtual int readUpto(void *, int) { return 0; }
-    virtual int read(void *, int)=0;
+    virtual int read(void *, int) = 0;
     virtual void write(const void *, int) = 0;
     virtual bool eof()
     {
@@ -283,7 +283,7 @@ public:
 
     }
 
-    virtual int read(void *p, int l)
+    int read(void *p, int l) override
     {
         if (pos+l <= len)
         {
@@ -297,7 +297,7 @@ public:
         }
     }
 
-    virtual void write(const void *p, int l)
+    void write(const void *p, int l) override
     {
         if ((pos+l) > len)
             throw StreamException("Stream - premature end of write()");
@@ -305,22 +305,22 @@ public:
         pos += l;
     }
 
-    virtual bool eof()
+    bool eof() override
     {
         return pos >= len;
     }
 
-    virtual void rewind()
+    void rewind() override
     {
         pos = 0;
     }
 
-    virtual void seekTo(int p)
+    void seekTo(int p) override
     {
         pos = p;
     }
 
-    virtual int getPosition()
+    int getPosition() override
     {
         return pos;
     }
@@ -341,22 +341,22 @@ public:
         stream = s;
     }
 
-    virtual int read(void *p, int l)
+    int read(void *p, int l) override
     {
         return stream->read(p, l);
     }
 
-    virtual void write(const void *p, int l)
+    void write(const void *p, int l) override
     {
         stream->write(p, l);
     }
 
-    virtual bool eof()
+    bool eof() override
     {
         return stream->eof();
     }
 
-    virtual void close()
+    void close() override
     {
         stream->close();
     }

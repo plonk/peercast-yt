@@ -45,11 +45,11 @@ public:
     virtual ClientSocket    *accept() = 0;
     virtual Host    getLocalHost() = 0;
 
-    virtual void    setReadTimeout(unsigned int t)
+    void    setReadTimeout(unsigned int t) override
     {
         readTimeout = t;
     }
-    virtual void    setWriteTimeout(unsigned int t)
+    void    setWriteTimeout(unsigned int t) override
     {
         writeTimeout = t;
     }
@@ -59,7 +59,7 @@ public:
     static unsigned int getIP(char *);
     static bool         getHostname(char *, unsigned int);
 
-    virtual bool eof()
+    bool eof() override
     {
         return active()==false;
     }
