@@ -249,7 +249,7 @@ public:
             {"localRelays", c->localRelays()},
             {"localDirects", c->localListeners()},
             {"totalRelays", c->totalRelays()},
-            {"totalDirects", c->localListeners()},
+            {"totalDirects", c->totalListeners()},
             {"isBroadcasting", c->isBroadcasting()},
             {"isRelayFull", c->isFull()},
             {"isDirectFull", nullptr},
@@ -313,7 +313,11 @@ public:
             unsigned int bytesInPerSec = s->sock ? s->sock->bytesInPerSec : 0;
             unsigned int bytesOutPerSec = s->sock ? s->sock->bytesOutPerSec : 0;
 
-            json remoteEndPoint = c->sock ? ((std::string) c->sock->host).c_str() : nullptr;
+            json remoteEndPoint;
+            if (s->sock)
+                remoteEndPoint = (std::string) s->sock->host;
+            else
+                remoteEndPoint = nullptr;
 
             json connection = {
                 { "connectionId", (uintptr_t) s },
