@@ -66,6 +66,16 @@ public:
     void    writePeercast(Stream &);
     void    readPeercast(Stream &);
 
+    ChanPacket& operator=(const ChanPacket& other)
+    {
+        this->type = other.type;
+        this->len  = other.len;
+        this->pos  = other.pos;
+        this->sync = other.sync;
+        memcpy(this->data, other.data, this->len);
+
+        return *this;
+    }
 
     unsigned int    sync;
     unsigned int    pos;
