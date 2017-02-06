@@ -183,6 +183,22 @@ public:
     bool operator == (const char *s) const { return isSame(s); }
     bool operator != (const char *s) const { return !isSame(s); }
 
+    String& operator = (const String& other)
+    {
+        strcpy(this->data, other.data);
+        this->type = other.type;
+
+        return *this;
+    }
+
+    String& operator = (const char* cstr)
+    {
+        strcpy(this->data, cstr);
+        this->type = T_ASCII;
+
+        return *this;
+    }
+
     operator const char *() const { return data; }
 
     void convertTo(TYPE t);

@@ -124,3 +124,12 @@ TEST(StringTest, setFromStopwatch)
     ASSERT_STREQ("1 sec", (s.setFromStopwatch(1), s).cstr());
     ASSERT_STREQ("-", (s.setFromStopwatch(0), s).cstr());
 }
+
+TEST(StringTest, assignment)
+{
+    String s, t;
+
+    s = "hoge";
+    t = s;
+    ASSERT_STREQ("hoge", t.cstr());
+}
