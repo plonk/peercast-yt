@@ -160,12 +160,15 @@ public:
             }
             c->startURL(url.c_str());
 
-            while (!c->getID().isSet())
+            // チャンネルのステータスが S_BROADCASTING に変わる直前に
+            // ID がセットされるので、S_BROADCASTING に変わるのを待つ。
+            for (int i = 0; i < 100; i++)
             {
-                sys->sleepIdle();
+                sys->sleepIdle(); // 10ms or so
+                if (c->status == Channel::S_BROADCASTING)
+                    return (std::string) c->getID();
             }
-
-            return (std::string) c->getID();
+            throw application_error(0, "taking too long to set channel ID");
         } catch (std::domain_error& e)
         {
             throw invalid_params(e.what());
