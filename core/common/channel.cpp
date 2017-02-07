@@ -1166,7 +1166,7 @@ int Channel::readStream(Stream &in, ChannelStream *source)
                 break;
             }
 
-            if (in.readReady())
+            if (in.readReady(sys->idleSleepTime))
             {
                 error = source->readPacket(in, this);
 
@@ -1191,8 +1191,6 @@ int Channel::readStream(Stream &in, ChannelStream *source)
                     source->updateStatus(this);
                 }
             }
-
-            sys->sleepIdle();
         }
     }catch (StreamException &e)
     {
