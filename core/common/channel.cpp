@@ -1425,26 +1425,20 @@ bool ChanPacketBuffer::findPacket(unsigned int spos, ChanPacket &pack)
     if (spos < fpos)
         spos = fpos;
 
-    for (int64_t i = lastPos; i >= firstPos; i--)
+
+    for (unsigned int i=firstPos; i<=lastPos; i++)
     {
         ChanPacket &p = packets[i%MAX_PACKETS];
-        if (p.pos < spos)
+        if (p.pos >= spos)
         {
-            if (i == lastPos)
-            {
-                lock.off();
-                return false;
-            }else
-            {
-                pack = packets[(i + 1) % MAX_PACKETS];
-                lock.off();
-                return true;
-            }
+            pack = p;
+            lock.off();
+            return true;
         }
     }
-    pack = packets[firstPos % MAX_PACKETS];
+
     lock.off();
-    return true;
+    return false;
 }
 // -----------------------------------
 unsigned int    ChanPacketBuffer::getLatestPos()
