@@ -112,9 +112,19 @@ bool    USys::startThread(ThreadInfo *info)
         return false;
     }else
     {
+        setThreadName(info, String::format("thread %d", numThreads).cstr());
         numThreads++;
         return true;
     }
+}
+// ---------------------------------
+void    USys::setThreadName(ThreadInfo *thread, const char* name)
+{
+#ifdef _GNU_SOURCE
+    char buf[16];
+    snprintf(buf, 16, "%s", name);
+    pthread_setname_np(thread->handle, buf);
+#endif
 }
 // ---------------------------------
 void    USys::sleep(int ms)

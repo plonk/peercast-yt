@@ -303,9 +303,6 @@ void Channel::startStream()
         reset();
 }
 
-
-
-
 // -----------------------------------
 void Channel::sleepUntil(double time)
 {
@@ -339,9 +336,9 @@ void Channel::checkReadDelay(unsigned int len)
 // -----------------------------------
 THREAD_PROC Channel::stream(ThreadInfo *thread)
 {
-//  thread->lock();
-
     Channel *ch = (Channel *)thread->data;
+
+    sys->setThreadName(thread, "CHANNEL");
 
     while (thread->active && !peercastInst->isQuitting)
     {
@@ -364,7 +361,7 @@ THREAD_PROC Channel::stream(ThreadInfo *thread)
             if (!ch->info.lastPlayEnd)
                 ch->info.lastPlayEnd = sys->getTime();
 
-            unsigned int diff = (sys->getTime()-ch->info.lastPlayEnd) + 5;
+            unsigned int diff = (sys->getTime() - ch->info.lastPlayEnd) + 5;
 
             LOG_DEBUG("Channel sleeping for %d seconds", diff);
             for (unsigned int i=0; i<diff; i++)
@@ -2451,6 +2448,7 @@ void ChanMgr::findAndPlayChannel(ChanInfo &info, bool keep)
 
 
     sys->startThread(cfi);
+    sys->setThreadName(cfi, "ChanMgr::findAndPlayChannelProc");
 }
 // -----------------------------------
 void ChanMgr::playChannel(ChanInfo &info)

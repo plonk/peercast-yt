@@ -255,8 +255,7 @@ public:
     virtual void            executeFile(const char *) = 0;
     virtual void            endThread(ThreadInfo *) {}
     virtual void            waitThread(ThreadInfo *, int timeout = 30000) {}
-
-
+    virtual void            setThreadName(ThreadInfo *, const char* name) {}
 
 #ifdef __BIG_ENDIAN__
     unsigned short  convertEndian(unsigned short v) { return SWAP2(v); }
@@ -457,12 +456,12 @@ public:
 
     void    shutdown();
 
-    volatile bool    active;
-    int     id;
-    THREAD_FUNC func;
-    THREAD_HANDLE handle;
+    volatile bool   active;
+    int             id;
+    THREAD_FUNC     func;
+    THREAD_HANDLE   handle;
 
-    void    *data;
+    void            *data;
 };
 
 

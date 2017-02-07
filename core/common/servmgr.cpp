@@ -1803,8 +1803,7 @@ int ServMgr::broadcastPacket(ChanPacket &pack, GnuID &chanID, GnuID &srcID, GnuI
 // --------------------------------------------------
 int ServMgr::idleProc(ThreadInfo *thread)
 {
-
-//  thread->lock();
+    sys->setThreadName(thread, "IDLE");
 
     unsigned int lastPasvFind=0;
     unsigned int lastBroadcast=0;
@@ -1890,15 +1889,13 @@ int ServMgr::idleProc(ThreadInfo *thread)
     }
 
     sys->endThread(thread);
-//  thread->unlock();
     return 0;
 }
 
 // --------------------------------------------------
 int ServMgr::serverProc(ThreadInfo *thread)
 {
-
-//  thread->lock();
+    sys->setThreadName(thread, "SERVER");
 
     Servent *serv = servMgr->allocServent();
     Servent *serv2 = servMgr->allocServent();
@@ -1971,7 +1968,6 @@ int ServMgr::serverProc(ThreadInfo *thread)
     }
 
     sys->endThread(thread);
-//  thread->unlock();
     return 0;
 }
 

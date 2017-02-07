@@ -298,7 +298,6 @@ bool Servent::initServer(Host &h)
 
         if (!sys->startThread(&thread))
             throw StreamException("Can`t start thread");
-
     }catch (StreamException &e)
     {
         LOG_ERROR("Bad server: %s", e.msg);
@@ -365,7 +364,6 @@ void Servent::initOutgoing(TYPE ty)
 
         if (!sys->startThread(&thread))
             throw StreamException("Can`t start thread");
-
     }catch (StreamException &e)
     {
         LOG_ERROR("Unable to start outgoing: %s", e.msg);
@@ -398,7 +396,6 @@ void Servent::initPCP(Host &rh)
 
         if (!sys->startThread(&thread))
             throw StreamException("Can`t start thread");
-
     }catch (StreamException &e)
     {
         LOG_ERROR("Unable to open connection to %s - %s", ipStr, e.msg);
@@ -456,7 +453,6 @@ void Servent::initGIV(Host &h, GnuID &id)
 
         if (!sys->startThread(&thread))
             throw StreamException("Can`t start thread");
-
     }catch (StreamException &e)
     {
         LOG_ERROR("GIV error to %s: %s", ipStr, e.msg);
@@ -1419,7 +1415,8 @@ void Servent::processRoot()
 // -----------------------------------
 int Servent::givProc(ThreadInfo *thread)
 {
-//  thread->lock();
+    sys->setThreadName(thread, "Servent GIV");
+
     Servent *sv = (Servent*)thread->data;
     try
     {
@@ -1864,7 +1861,8 @@ void Servent::processIncomingPCP(bool suggestOthers)
 // -----------------------------------
 int Servent::outgoingProc(ThreadInfo *thread)
 {
-//  thread->lock();
+    sys->setThreadName(thread, "COUT");
+
     LOG_DEBUG("COUT started");
 
     Servent *sv = (Servent*)thread->data;
@@ -2043,12 +2041,12 @@ int Servent::outgoingProc(ThreadInfo *thread)
 // -----------------------------------
 int Servent::incomingProc(ThreadInfo *thread)
 {
-//  thread->lock();
-
     Servent *sv = (Servent*)thread->data;
 
     char ipStr[64];
     sv->sock->host.toStr(ipStr);
+
+    sys->setThreadName(thread, String::format("INCOMING %s", ipStr));
 
     try
     {
@@ -2643,15 +2641,14 @@ void Servent::sendPCPChannel()
 // -----------------------------------
 int Servent::serverProc(ThreadInfo *thread)
 {
-//  thread->lock();
-
-
     Servent *sv = (Servent*)thread->data;
 
     try
     {
         if (!sv->sock)
             throw StreamException("Server has no socket");
+
+        sys->setThreadName(thread, String::format("LISTEN %d", (int) sv->sock->host.port));
 
         sv->setStatus(S_LISTENING);
 

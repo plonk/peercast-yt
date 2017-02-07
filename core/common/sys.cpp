@@ -134,7 +134,6 @@ void Sys::sleepIdle()
 {
     sleep(idleSleepTime);
 }
-
 // ------------------------------------------
 bool Host::isLocalhost()
 {
