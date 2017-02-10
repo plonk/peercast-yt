@@ -270,7 +270,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
         }else if (strcmp(fn, "/api/1")==0)
         {
             JrpcApi api;
-            std::string response = api.getVersionInfo(nlohmann::json({})).dump();
+            std::string response = api.getVersionInfo(nlohmann::json::array_t()).dump();
 
             while (http.nextHeader())
                 ;
