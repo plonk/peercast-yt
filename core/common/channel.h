@@ -69,7 +69,7 @@ public:
         genre.convertTo(t);
     }
 
-    bool    update(TrackInfo &);
+    bool    update(const TrackInfo &);
 
     ::String    contact, title, artist, album, genre;
 };
@@ -130,7 +130,7 @@ public:
 
     void        readTrackXML(XML::Node *);
     void        readServentXML(XML::Node *);
-    bool        update(ChanInfo &);
+    bool        update(const ChanInfo &);
     XML::Node   *createQueryXML();
     XML::Node   *createChannelXML();
     XML::Node   *createRelayChannelXML();
@@ -441,7 +441,7 @@ public:
 
     bool         writeVariable(Stream &, const String &, int);
     bool         acceptGIV(ClientSocket *);
-    void         updateInfo(ChanInfo &);
+    void         updateInfo(const ChanInfo &);
     int          readStream(Stream &, ChannelStream *);
     void         checkReadDelay(unsigned int);
     void         processMp3Metadata(char *);
@@ -525,7 +525,7 @@ public:
     Channel *findChannelByName(const char *);
     Channel *findChannelByIndex(int);
     Channel *findChannelByMount(const char *);
-    Channel *findChannelByID(GnuID &);
+    Channel *findChannelByID(const GnuID &);
     Channel *findChannelByNameID(ChanInfo &);
     Channel *findPushChannel(int);
 

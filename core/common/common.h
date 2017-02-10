@@ -96,13 +96,13 @@ public:
         fromStr(str.c_str());
     }
 
-    bool    isSame(GnuID &gid)
+    bool    isSame(const GnuID &gid) const
     {
         return memcmp(id, gid.id, 16) == 0;
     }
 
 
-    bool    isSet()
+    bool    isSet() const
     {
         for (int i=0; i<16; i++)
             if (id[i] != 0)

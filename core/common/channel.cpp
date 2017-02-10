@@ -930,7 +930,7 @@ bool    Channel::sendPacketUp(ChanPacket &pack, GnuID &cid, GnuID &sid, GnuID &d
 }
 
 // -----------------------------------
-void Channel::updateInfo(ChanInfo &newInfo)
+void Channel::updateInfo(const ChanInfo &newInfo)
 {
     if (info.update(newInfo))
     {
@@ -1683,7 +1683,7 @@ Channel *ChanMgr::findChannelByMount(const char *str)
     return NULL;
 }
 // -----------------------------------
-Channel *ChanMgr::findChannelByID(GnuID &id)
+Channel *ChanMgr::findChannelByID(const GnuID &id)
 {
     Channel *ch = channel;
     while (ch)
@@ -3264,7 +3264,7 @@ bool    ChanInfo::match(ChanInfo &inf)
     return matchAny;
 }
 // -----------------------------------
-bool TrackInfo::update(TrackInfo &inf)
+bool TrackInfo::update(const TrackInfo &inf)
 {
     bool changed = false;
 
@@ -3304,7 +3304,7 @@ bool TrackInfo::update(TrackInfo &inf)
 
 
 // -----------------------------------
-bool ChanInfo::update(ChanInfo &info)
+bool ChanInfo::update(const ChanInfo &info)
 {
     bool changed = false;
 
