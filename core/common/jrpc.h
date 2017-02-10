@@ -154,6 +154,11 @@ public:
             }
             info.bcID = chanMgr->broadcastID;
 
+            // ソースに接続できなかった場合もチャンネルを同定したいの
+            // で、事前にチャンネルIDを設定する。
+            info.id = chanMgr->broadcastID;
+            info.id.encode(NULL, info.name, info.genre, info.bitrate);
+
             Channel *c = chanMgr->createChannel(info, NULL); // info, mount
             if (!c)
             {
@@ -161,15 +166,7 @@ public:
             }
             c->startURL(url.c_str());
 
-            // チャンネルのステータスが S_BROADCASTING に変わる直前に
-            // ID がセットされるので、S_BROADCASTING に変わるのを待つ。
-            for (int i = 0; i < 100; i++)
-            {
-                sys->sleepIdle(); // 10ms or so
-                if (c->status == Channel::S_BROADCASTING)
-                    return (std::string) c->getID();
-            }
-            throw application_error(0, "taking too long to set channel ID");
+            return (std::string) c->getID();
         } catch (std::domain_error& e)
         {
             throw invalid_params(e.what());
