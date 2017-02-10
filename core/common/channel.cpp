@@ -3363,6 +3363,12 @@ bool ChanInfo::update(const ChanInfo &info)
         changed = true;
     }
 
+    if (!desc.isSame(info.desc))
+    {
+        desc = info.desc;
+        changed = true;
+    }
+
     if (!name.isSame(info.name))
     {
         name = info.name;
