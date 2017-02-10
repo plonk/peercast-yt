@@ -293,7 +293,6 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
         if (pt)
             pt[-1] = 0;
 
-        LOG_DEBUG("is POST");
         if (strcmp(fn, "/api/1")==0)
         {
             handshakeJRPC(http);
