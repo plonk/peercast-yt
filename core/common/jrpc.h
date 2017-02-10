@@ -508,9 +508,39 @@ public:
         return json::array();
     }
 
-    json setChannelInfo(json::array_t)
+    ChanInfo mergeChanInfo(const ChanInfo& orig, json::object_t info, json::object_t track)
     {
-        // unimplemented
+        ChanInfo i = orig;
+
+        i.name    = info.at("name").get<std::string>().c_str();
+        i.desc    = info.at("desc").get<std::string>().c_str();
+        i.genre   = info.at("genre").get<std::string>().c_str();
+        i.url     = info.at("url").get<std::string>().c_str();
+        i.comment = info.at("comment").get<std::string>().c_str();
+
+        i.track.contact = track.at("url").get<std::string>().c_str();
+        i.track.title   = track.at("name").get<std::string>().c_str();
+        i.track.artist  = track.at("creator").get<std::string>().c_str();
+        i.track.album   = track.at("album").get<std::string>().c_str();
+        i.track.genre   = track.at("genre").get<std::string>().c_str();
+
+        LOG_DEBUG("i = %s", to_json(i).dump().c_str());
+
+        return i;
+    }
+
+    json setChannelInfo(json::array_t args)
+    {
+        std::string channelId = args[0];
+        json info             = args[1];
+        json track            = args[2];
+
+        Channel *channel = chanMgr->findChannelByID(channelId);
+        if (!channel)
+            throw application_error(0, "Channel not found");
+
+        channel->updateInfo(mergeChanInfo(channel->info, info, track));
+
         return nullptr;
     }
 
