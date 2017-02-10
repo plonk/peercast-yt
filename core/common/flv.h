@@ -154,9 +154,10 @@ public:
 class FLVTagBuffer
 {
 public:
-    static const int MAX_DATALEN = 15 * 1024;
+    static const int MAX_OUTGOING_PACKET_SIZE = 15 * 1024;
+    static const int FLUSH_THRESHOLD          =  4 * 1024;
 
-    FLVTagBuffer() : m_mem(MAX_DATALEN) {}
+    FLVTagBuffer() : m_mem(ChanPacket::MAX_DATALEN) {}
 
     bool put(FLVTag& tag, Channel* ch);
     void flush(Channel* ch);

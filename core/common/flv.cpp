@@ -115,7 +115,7 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
 
 bool FLVTagBuffer::put(FLVTag& tag, Channel* ch)
 {
-    if (m_mem.pos + tag.packetSize > 15 * 1024)
+    if (m_mem.pos + tag.packetSize > MAX_OUTGOING_PACKET_SIZE)
     {
         if (m_mem.pos > 0)
         {
@@ -123,13 +123,13 @@ bool FLVTagBuffer::put(FLVTag& tag, Channel* ch)
         }
         sendImmediately(tag, ch);
         return true;
-    } else if (m_mem.pos + tag.packetSize > 8 * 1024)
+    } else if (m_mem.pos + tag.packetSize > FLUSH_THRESHOLD)
     {
         flush(ch);
 
         m_mem.write(tag.packet, tag.packetSize);
 
-        if (m_mem.pos > 8 * 1024)
+        if (m_mem.pos > FLUSH_THRESHOLD)
             flush(ch);
         return true;
     } else
@@ -148,8 +148,8 @@ void FLVTagBuffer::sendImmediately(FLVTag& tag, Channel* ch)
     while (rlen)
     {
         int rl = rlen;
-        if (rl > MAX_DATALEN)
-            rl = MAX_DATALEN;
+        if (rl > MAX_OUTGOING_PACKET_SIZE)
+            rl = MAX_OUTGOING_PACKET_SIZE;
 
         pack.type = ChanPacket::T_DATA;
         pack.pos = ch->streamPos;
