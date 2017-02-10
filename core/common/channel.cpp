@@ -3525,7 +3525,12 @@ void ChanInfo::readInfoAtoms(AtomStream &atom, int numc)
 // -----------------------------------
 void ChanInfo::writeInfoAtoms(AtomStream &atom)
 {
-    atom.writeParent(PCP_CHAN_INFO, 7);
+    int natoms = 7;
+
+    natoms += !streamType.isEmpty();
+    natoms += !streamExt.isEmpty();
+
+    atom.writeParent(PCP_CHAN_INFO, natoms);
         atom.writeString(PCP_CHAN_INFO_NAME, name.cstr());
         atom.writeInt(PCP_CHAN_INFO_BITRATE, bitrate);
         atom.writeString(PCP_CHAN_INFO_GENRE, genre.cstr());
@@ -3535,9 +3540,8 @@ void ChanInfo::writeInfoAtoms(AtomStream &atom)
         atom.writeString(PCP_CHAN_INFO_TYPE, getTypeStr());
         if (!streamType.isEmpty())
             atom.writeString(PCP_CHAN_INFO_STREAMTYPE, streamType.cstr());
-    if (!streamExt.isEmpty())
+        if (!streamExt.isEmpty())
             atom.writeString(PCP_CHAN_INFO_STREAMEXT, streamExt.cstr());
-
 }
 // -----------------------------------
 void ChanInfo::writeTrackAtoms(AtomStream &atom)
