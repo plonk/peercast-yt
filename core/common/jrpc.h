@@ -458,7 +458,7 @@ public:
         servMgr->lock.on();
         for (Servent* s = servMgr->servents; s != NULL; s = s->next)
         {
-            if (s->type != Servent::T_RELAY)
+            if (s->type != Servent::T_RELAY || !s->chanID.isSame(id))
                 continue;
 
             unsigned int bytesInPerSec = s->sock ? s->sock->bytesInPerSec() : 0;
