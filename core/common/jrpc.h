@@ -53,21 +53,22 @@ public:
     JrpcApi() :
         m_methods
         ({
-            { "fetch", &JrpcApi::fetch, { "url", "name", "desc", "genre", "contact", "bitrate", "type" } },
-            { "getVersionInfo", &JrpcApi::getVersionInfo, {} },
-            { "getChannelConnections", &JrpcApi::getChannelConnections, { "channelId"} },
-            { "getChannelInfo", &JrpcApi::getChannelInfo, { "channelId"} },
-            { "getChannelStatus", &JrpcApi::getChannelStatus, { "channelId"} },
-            { "getChannels", &JrpcApi::getChannels, {} },
-            { "getNewVersions", &JrpcApi::getNewVersions, {} },
+            { "fetch",                   &JrpcApi::fetch,                   { "url", "name", "desc", "genre", "contact", "bitrate", "type" } },
+            { "getChannelConnections",   &JrpcApi::getChannelConnections,   { "channelId"} },
+            { "getChannelInfo",          &JrpcApi::getChannelInfo,          { "channelId"} },
+            { "getChannelStatus",        &JrpcApi::getChannelStatus,        { "channelId"} },
+            { "getChannels",             &JrpcApi::getChannels,             {} },
+            { "getNewVersions",          &JrpcApi::getNewVersions,          {} },
             { "getNotificationMessages", &JrpcApi::getNotificationMessages, {} },
-            { "getPlugins", &JrpcApi::getPlugins, {} },
-            { "getSettings", &JrpcApi::getSettings, {} },
-            { "getStatus", &JrpcApi::getStatus, {} },
-            { "getYellowPages", &JrpcApi::getYellowPages, {} },
-            { "getYellowPageProtocols", &JrpcApi::getYellowPageProtocols, {} },
-            { "setChannelInfo", &JrpcApi::setChannelInfo, { "channelId", "info", "track" } },
-            { "stopChannel", &JrpcApi::stopChannel, { "channelId" } },
+            { "getPlugins",              &JrpcApi::getPlugins,              {} },
+            { "getSettings",             &JrpcApi::getSettings,             {} },
+            { "getStatus",               &JrpcApi::getStatus,               {} },
+            { "getVersionInfo",          &JrpcApi::getVersionInfo,          {} },
+            { "getYellowPageProtocols",  &JrpcApi::getYellowPageProtocols,  {} },
+            { "getYellowPages",          &JrpcApi::getYellowPages,          {} },
+            { "setChannelInfo",          &JrpcApi::setChannelInfo,          { "channelId", "info", "track" } },
+            { "stopChannel",             &JrpcApi::stopChannel,             { "channelId" } },
+            { "stopChannelConnection",   &JrpcApi::stopChannelConnection,   { "channelId", "connectionId" } },
         })
     {
     }
@@ -269,6 +270,31 @@ public:
         j["yellowPages"] = json::array();
 
         return j;
+    }
+
+    // チャンネルに関して特定の接続を停止する。成功すれば true、失敗す
+    // れば false を返す。
+    json stopChannelConnection(json::array_t params)
+    {
+        GnuID id = params[0].get<std::string>();
+        uintptr_t connectionId = params[1].get<uintptr_t>();
+        bool success = false;
+
+        servMgr->lock.on();
+        for (Servent* s = servMgr->servents; s != NULL; s = s->next)
+        {
+             if ((uintptr_t) s == connectionId &&
+                 s->chanID.isSame(id) &&
+                 s->type == Servent::T_RELAY)
+             {
+                 s->abort();
+                 success = true;
+                 break;
+             }
+        }
+        servMgr->lock.off();
+
+        return success;
     }
 
     json getChannelConnections(json::array_t params)
