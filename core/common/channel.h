@@ -181,7 +181,7 @@ class ChanHit
 {
 public:
     void    init();
-    void    initLocal(int numl, int numr, int nums, int uptm, bool, unsigned int, unsigned int);
+    void    initLocal(int numl, int numr, int nums, int uptm, bool, unsigned int, unsigned int, const Host& = Host());
     XML::Node *createXML();
 
     void    writeAtoms(AtomStream &, GnuID &);
@@ -189,19 +189,30 @@ public:
 
     void    pickNearestIP(Host &);
 
-    Host                host;
-    Host                rhost[2];
-    unsigned int        numListeners, numRelays, numHops;
-    unsigned int        time, upTime, lastContact;
-    unsigned int        hitID;
-    GnuID               sessionID, chanID;
-    unsigned int        version;
-    unsigned int        oldestPos, newestPos;
+    Host            host;
+    Host            rhost[2];
+    unsigned int    numListeners, numRelays, numHops;
+    unsigned int    time, upTime, lastContact;
+    unsigned int    hitID;
+    GnuID           sessionID, chanID;
+    unsigned int    version;
+    unsigned int    oldestPos, newestPos;
 
-    bool    firewalled:1, stable:1, tracker:1, recv:1, yp:1, dead:1, direct:1, relay:1, cin:1;
+    bool            firewalled;
+    bool            stable;
+    bool            tracker;
+    bool            recv;
+    bool            yp;
+    bool            dead;
+    bool            direct;
+    bool            relay;
+    bool            cin;
+
+    // 上流ホストの情報。
+    Host            uphost;
+    unsigned int    uphostHops;
 
     ChanHit *next;
-
 };
 // ----------------------------------
 class ChanHitList

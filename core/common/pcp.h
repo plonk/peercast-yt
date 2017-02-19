@@ -84,6 +84,9 @@ static const ID4 PCP_HOST_VERSION   = "ver";
 static const ID4 PCP_HOST_FLAGS1    = "flg1";
 static const ID4 PCP_HOST_OLDPOS    = "oldp";
 static const ID4 PCP_HOST_NEWPOS    = "newp";
+static const ID4 PCP_HOST_UPHOST_IP = "upip";
+static const ID4 PCP_HOST_UPHOST_PORT = "uppt";
+static const ID4 PCP_HOST_UPHOST_HOPS = "uphp";
 
 
 static const ID4 PCP_QUIT           = "quit";

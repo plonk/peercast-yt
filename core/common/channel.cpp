@@ -885,7 +885,7 @@ void Channel::broadcastTrackerUpdate(GnuID &svID, bool force)
         unsigned int oldp = rawData.getOldestPos();
         unsigned int newp = rawData.getLatestPos();
 
-        hit.initLocal(numListeners, numRelays, info.numSkips, info.getUptime(), isPlaying(), oldp, newp);
+        hit.initLocal(numListeners, numRelays, info.numSkips, info.getUptime(), isPlaying(), oldp, newp, this->sourceHost.host);
         hit.tracker = true;
 
         atom.writeParent(PCP_BCST, 7);
@@ -1086,7 +1086,7 @@ bool ChannelStream::getStatus(Channel *ch, ChanPacket &pack)
         unsigned int oldp = ch->rawData.getOldestPos();
         unsigned int newp = ch->rawData.getLatestPos();
 
-        hit.initLocal(numListeners, numRelays, ch->info.numSkips, ch->info.getUptime(), isPlaying, oldp, newp);
+        hit.initLocal(numListeners, numRelays, ch->info.numSkips, ch->info.getUptime(), isPlaying, oldp, newp, ch->sourceHost.host);
         hit.tracker = ch->isBroadcasting();
 
         MemoryStream pmem(pack.data, sizeof(pack.data));
@@ -2543,12 +2543,16 @@ void ChanHit::init()
     chanID.clear();
 
     oldestPos = newestPos = 0;
+
+    uphost.init();
+    uphostHops = 0;
 }
 
 // -----------------------------------
-void ChanHit::initLocal(int numl, int numr, int, int uptm, bool connected, unsigned int oldp, unsigned int newp)
+void ChanHit::initLocal(int numl, int numr, int, int uptm, bool connected, unsigned int oldp, unsigned int newp, const Host& sourceHost)
 {
     init();
+
     firewalled = (servMgr->getFirewall() != ServMgr::FW_OFF);
     numListeners = numl;
     numRelays = numr;
@@ -2574,6 +2578,9 @@ void ChanHit::initLocal(int numl, int numr, int, int uptm, bool connected, unsig
     oldestPos = oldp;
     newestPos = newp;
 
+    uphost.ip   = sourceHost.ip;
+    uphost.port = sourceHost.port;
+    uphostHops  = 1;
 }
 
 // -----------------------------------
@@ -2590,7 +2597,10 @@ void ChanHit::writeAtoms(AtomStream &atom, GnuID &chanID)
     if (firewalled) fl1 |= PCP_HOST_FLAGS1_PUSH;
 
 
-    atom.writeParent(PCP_HOST, 12  + (addChan?1:0));
+    atom.writeParent(PCP_HOST,
+                     12  +
+                     (addChan ? 1 : 0) +
+                     (uphost.ip == 0 ? 3 : 0));
         if (addChan)
             atom.writeBytes(PCP_HOST_CHANID, chanID.id, 16);
         atom.writeBytes(PCP_HOST_ID, sessionID.id, 16);
@@ -2605,6 +2615,12 @@ void ChanHit::writeAtoms(AtomStream &atom, GnuID &chanID)
         atom.writeChar(PCP_HOST_FLAGS1, fl1);
         atom.writeInt(PCP_HOST_OLDPOS, oldestPos);
         atom.writeInt(PCP_HOST_NEWPOS, newestPos);
+        if (uphost.ip == 0)
+        {
+            atom.writeInt(PCP_HOST_UPHOST_IP, uphost.ip);
+            atom.writeInt(PCP_HOST_UPHOST_PORT, uphost.port);
+            atom.writeInt(PCP_HOST_UPHOST_HOPS, uphostHops);
+        }
 
 }
 // -----------------------------------

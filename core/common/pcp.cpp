@@ -421,6 +421,12 @@ void PCPStream::readHostAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
             atom.readBytes(hit.sessionID.id, 16);
         else if (id == PCP_HOST_CHANID)
             atom.readBytes(chanID.id, 16);
+        else if (id == PCP_HOST_UPHOST_IP)
+            hit.uphost.ip = atom.readInt();
+        else if (id == PCP_HOST_UPHOST_PORT)
+            hit.uphost.port = atom.readInt();
+        else if (id == PCP_HOST_UPHOST_HOPS)
+            hit.uphostHops = atom.readInt();
         else
         {
             LOG_DEBUG("PCP skip: %s, %d, %d", id.getString().str(), c, d);
