@@ -40,6 +40,12 @@ public:
     public:
         HostGraph(Channel *ch, ChanHitList *hitList)
         {
+            if (ch == nullptr)
+                throw std::invalid_argument("ch");
+
+            if (ch == nullptr)
+                throw std::invalid_argument("hitList");
+
             // 自分を追加する。
             {
                 Host uphost;
