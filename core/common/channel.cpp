@@ -888,12 +888,15 @@ void Channel::broadcastTrackerUpdate(GnuID &svID, bool force)
         hit.initLocal(numListeners, numRelays, info.numSkips, info.getUptime(), isPlaying(), oldp, newp, this->sourceHost.host);
         hit.tracker = true;
 
-        atom.writeParent(PCP_BCST, 7);
+        atom.writeParent(PCP_BCST, 10);
             atom.writeChar(PCP_BCST_GROUP, PCP_BCST_GROUP_ROOT);
             atom.writeChar(PCP_BCST_HOPS, 0);
             atom.writeChar(PCP_BCST_TTL, 7);
             atom.writeBytes(PCP_BCST_FROM, servMgr->sessionID.id, 16);
             atom.writeInt(PCP_BCST_VERSION, PCP_CLIENT_VERSION);
+            atom.writeInt(PCP_BCST_VERSION_VP, PCP_CLIENT_VERSION_VP);
+            atom.writeBytes(PCP_BCST_VERSION_EX_PREFIX, PCP_CLIENT_VERSION_EX_PREFIX, 2);
+            atom.writeShort(PCP_BCST_VERSION_EX_NUMBER, PCP_CLIENT_VERSION_EX_NUMBER);
             atom.writeParent(PCP_CHAN, 4);
                 atom.writeBytes(PCP_CHAN_ID, info.id.id, 16);
                 atom.writeBytes(PCP_CHAN_BCID, chanMgr->broadcastID.id, 16);
@@ -947,12 +950,15 @@ void Channel::updateInfo(const ChanInfo &newInfo)
 
                 AtomStream atom(mem);
 
-                atom.writeParent(PCP_BCST, 7);
+                atom.writeParent(PCP_BCST, 10);
                     atom.writeChar(PCP_BCST_HOPS, 0);
                     atom.writeChar(PCP_BCST_TTL, 7);
                     atom.writeChar(PCP_BCST_GROUP, PCP_BCST_GROUP_RELAYS);
                     atom.writeBytes(PCP_BCST_FROM, servMgr->sessionID.id, 16);
                     atom.writeInt(PCP_BCST_VERSION, PCP_CLIENT_VERSION);
+                    atom.writeInt(PCP_BCST_VERSION_VP, PCP_CLIENT_VERSION_VP);
+                    atom.writeBytes(PCP_BCST_VERSION_EX_PREFIX, PCP_CLIENT_VERSION_EX_PREFIX, 2);
+                    atom.writeShort(PCP_BCST_VERSION_EX_NUMBER, PCP_CLIENT_VERSION_EX_NUMBER);
                     atom.writeBytes(PCP_BCST_CHANID, info.id.id, 16);
                     atom.writeParent(PCP_CHAN, 3);
                         atom.writeBytes(PCP_CHAN_ID, info.id.id, 16);
@@ -1094,12 +1100,15 @@ bool ChannelStream::getStatus(Channel *ch, ChanPacket &pack)
 
         GnuID noID;
 
-        atom.writeParent(PCP_BCST, 7);
+        atom.writeParent(PCP_BCST, 10);
             atom.writeChar(PCP_BCST_GROUP, PCP_BCST_GROUP_TRACKERS);
             atom.writeChar(PCP_BCST_HOPS, 0);
             atom.writeChar(PCP_BCST_TTL, 11);
             atom.writeBytes(PCP_BCST_FROM, servMgr->sessionID.id, 16);
             atom.writeInt(PCP_BCST_VERSION, PCP_CLIENT_VERSION);
+            atom.writeInt(PCP_BCST_VERSION_VP, PCP_CLIENT_VERSION_VP);
+            atom.writeBytes(PCP_BCST_VERSION_EX_PREFIX, PCP_CLIENT_VERSION_EX_PREFIX, 2);
+            atom.writeShort(PCP_BCST_VERSION_EX_NUMBER, PCP_CLIENT_VERSION_EX_NUMBER);
             atom.writeBytes(PCP_BCST_CHANID, ch->info.id.id, 16);
             hit.writeAtoms(atom, noID);
 
@@ -2552,6 +2561,10 @@ void ChanHit::init()
 
     uphost.init();
     uphostHops = 0;
+
+    versionVP = 0;
+    strncpy(versionExPrefix, "  ", 2);
+    versionExNumber = 0;
 }
 
 // -----------------------------------
@@ -2574,6 +2587,9 @@ void ChanHit::initLocal(int numl, int numr, int, int uptm, bool connected, unsig
     host = servMgr->serverHost;
 
     version = PCP_CLIENT_VERSION;
+    versionVP = PCP_CLIENT_VERSION_VP;
+    strncpy(versionExPrefix, PCP_CLIENT_VERSION_EX_PREFIX, 2);
+    versionExNumber = PCP_CLIENT_VERSION_EX_NUMBER;
 
     rhost[0] = Host(host.ip, host.port);
     rhost[1] = Host(ClientSocket::getIP(NULL), host.port);
@@ -2604,9 +2620,10 @@ void ChanHit::writeAtoms(AtomStream &atom, GnuID &chanID)
 
 
     atom.writeParent(PCP_HOST,
-                     12  +
+                     13  +
                      (addChan ? 1 : 0) +
-                     (uphost.ip == 0 ? 3 : 0));
+                     (uphost.ip == 0 ? 3 : 0) +
+                     (versionExNumber != 0 ? 2 : 0));
         if (addChan)
             atom.writeBytes(PCP_HOST_CHANID, chanID.id, 16);
         atom.writeBytes(PCP_HOST_ID, sessionID.id, 16);
@@ -2618,6 +2635,9 @@ void ChanHit::writeAtoms(AtomStream &atom, GnuID &chanID)
         atom.writeInt(PCP_HOST_NUMR, numRelays);
         atom.writeInt(PCP_HOST_UPTIME, upTime);
         atom.writeInt(PCP_HOST_VERSION, version);
+        atom.writeInt(PCP_HOST_VERSION_VP, versionVP);
+        atom.writeBytes(PCP_HOST_VERSION_EX_PREFIX, versionExPrefix, 2);
+        atom.writeShort(PCP_HOST_VERSION_EX_NUMBER, versionExNumber);
         atom.writeChar(PCP_HOST_FLAGS1, fl1);
         atom.writeInt(PCP_HOST_OLDPOS, oldestPos);
         atom.writeInt(PCP_HOST_NEWPOS, newestPos);
@@ -2660,7 +2680,14 @@ bool    ChanHit::writeVariable(Stream &out, const String &var)
     }else if (var == "isFirewalled")
         sprintf(buf, "%d", firewalled?1:0);
     else if (var == "version")
-        sprintf(buf, "%d", version);
+    {
+        sprintf(buf, "%d (VP%d compatible; %c%c%d)",
+                version,
+                versionVP,
+                versionExPrefix[0],
+                versionExPrefix[1],
+                versionExNumber);
+    }
     else
         return false;
 

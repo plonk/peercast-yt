@@ -212,6 +212,10 @@ public:
     Host            uphost;
     unsigned int    uphostHops;
 
+    unsigned int    versionVP;
+    char            versionExPrefix[2];
+    unsigned int    versionExNumber;
+
     ChanHit *next;
 };
 // ----------------------------------

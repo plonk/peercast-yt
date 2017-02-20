@@ -1740,13 +1740,16 @@ int ServMgr::broadcastPushRequest(ChanHit &hit, Host &to, GnuID &chanID, Servent
     MemoryStream pmem(pack.data, sizeof(pack.data));
     AtomStream atom(pmem);
 
-    atom.writeParent(PCP_BCST, 7);
+    atom.writeParent(PCP_BCST, 10);
         atom.writeChar(PCP_BCST_GROUP, PCP_BCST_GROUP_ALL);
         atom.writeChar(PCP_BCST_HOPS, 0);
         atom.writeChar(PCP_BCST_TTL, 7);
         atom.writeBytes(PCP_BCST_DEST, hit.sessionID.id, 16);
         atom.writeBytes(PCP_BCST_FROM, servMgr->sessionID.id, 16);
         atom.writeInt(PCP_BCST_VERSION, PCP_CLIENT_VERSION);
+        atom.writeInt(PCP_BCST_VERSION_VP, PCP_CLIENT_VERSION_VP);
+        atom.writeBytes(PCP_BCST_VERSION_EX_PREFIX, PCP_CLIENT_VERSION_EX_PREFIX, 2);
+        atom.writeShort(PCP_BCST_VERSION_EX_NUMBER, PCP_CLIENT_VERSION_EX_NUMBER);
         atom.writeParent(PCP_PUSH, 3);
             atom.writeInt(PCP_PUSH_IP, to.ip);
             atom.writeShort(PCP_PUSH_PORT, to.port);
@@ -1784,12 +1787,15 @@ void ServMgr::broadcastRootSettings(bool getUpdate)
         ChanPacket pack;
         MemoryStream mem(pack.data, sizeof(pack.data));
         AtomStream atom(mem);
-        atom.writeParent(PCP_BCST, 6);
+        atom.writeParent(PCP_BCST, 9);
             atom.writeChar(PCP_BCST_GROUP, PCP_BCST_GROUP_TRACKERS);
             atom.writeChar(PCP_BCST_HOPS, 0);
             atom.writeChar(PCP_BCST_TTL, 7);
             atom.writeBytes(PCP_BCST_FROM, sessionID.id, 16);
             atom.writeInt(PCP_BCST_VERSION, PCP_CLIENT_VERSION);
+            atom.writeInt(PCP_BCST_VERSION_VP, PCP_CLIENT_VERSION_VP);
+            atom.writeBytes(PCP_BCST_VERSION_EX_PREFIX, PCP_CLIENT_VERSION_EX_PREFIX, 2);
+            atom.writeShort(PCP_BCST_VERSION_EX_NUMBER, PCP_CLIENT_VERSION_EX_NUMBER);
             writeRootAtoms(atom, getUpdate);
 
         mem.len = mem.pos;

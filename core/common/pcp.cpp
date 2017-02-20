@@ -405,6 +405,12 @@ void PCPStream::readHostAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
             hit.newestPos = atom.readInt();
         else if (id == PCP_HOST_VERSION)
             hit.version = atom.readInt();
+        else if (id == PCP_HOST_VERSION_VP)
+            hit.versionVP = atom.readInt();
+        else if (id == PCP_HOST_VERSION_EX_PREFIX)
+            atom.readBytes(hit.versionExPrefix, 2);
+        else if (id == PCP_HOST_VERSION_EX_NUMBER)
+            hit.versionExNumber = atom.readShort();
         else if (id == PCP_HOST_FLAGS1)
         {
             int fl1 = atom.readChar();
