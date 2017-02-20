@@ -158,6 +158,10 @@ public:
     static const int FLUSH_THRESHOLD          =  4 * 1024;
 
     FLVTagBuffer() : m_mem(ChanPacket::MAX_DATALEN) {}
+    ~FLVTagBuffer()
+    {
+        m_mem.free();
+    }
 
     bool put(FLVTag& tag, Channel* ch);
     void flush(Channel* ch);
