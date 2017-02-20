@@ -220,9 +220,11 @@ int main(int argc, char* argv[])
     while (!quit) {
         sys->sleep(1000);
         if (logfile != NULL)
+        {
             loglock.on();
             fflush(logfile);
             loglock.off();
+        }
     }
 
     peercastInst->saveSettings();
