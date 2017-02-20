@@ -35,6 +35,123 @@ public:
         int m_errno;
     };
 
+    class HostGraph
+    {
+    public:
+        HostGraph(Channel *ch, ChanHitList *hitList)
+        {
+            // 自分を追加する。
+            {
+                Host uphost;
+                ChanHit self;
+
+                if (!ch->isBroadcasting())
+                    uphost = ch->sourceHost.host;
+
+                self.initLocal(ch->localListeners(),
+                               ch->localRelays(),
+                               ch->info.numSkips,
+                               ch->info.getUptime(),
+                               ch->isPlaying(),
+                               ch->rawData.getOldestPos(),
+                               ch->rawData.getLatestPos(),
+                               uphost);
+
+                m_hit[endpoint(&self)] = self;
+                m_children[self.uphost].push_back(endpoint(&self));
+            }
+
+            for (ChanHit *p = hitList->hit;
+                 p;
+                 p = p->next)
+            {
+                Host h = endpoint(p);
+
+                LOG_DEBUG("HostGraph: endpoint = %s", h.IPtoStr().cstr());
+
+                if (h.ip == 0)
+                    continue;
+
+                m_hit[h] = *p;
+                m_hit[h].next = nullptr;
+
+                m_children[p->uphost].push_back(h);
+            }
+
+            // // 上流の項目が見付からないノードはルートにする。
+            // for (auto it = m_children.begin(); it != m_children.end(); ++it)
+            // {
+            //     try
+            //     {
+            //         m_hit.at(it->first);
+            //     }
+            //     catch (std::out_of_range&)
+            //     {
+            //         for (auto i : it->second)
+            //             m_children[Host()].push_back(i);
+            //     }
+            // }
+        }
+
+        Host endpoint(ChanHit *hit)
+        {
+            if (hit->rhost[0].ip != 0)
+                return hit->rhost[0];
+            else
+                return hit->rhost[1];
+        }
+
+        json toRelayTree(Host& endpoint, const std::vector<Host> path)
+        {
+            ChanHit& hit = m_hit[endpoint];
+            json::array_t children;
+
+            for (Host& child : m_children[endpoint])
+            {
+                if (find(path.begin(), path.end(), child) == path.end())
+                {
+                    std::vector<Host> p = path;
+                    p.push_back(endpoint);
+                    children.push_back(toRelayTree(child, p));
+                }
+                else
+                {
+                    LOG_DEBUG("toRelayTree: circularity detected. skipping %s", ((std::string) child).c_str());
+                }
+            }
+
+            return {
+                { "sessionId", (std::string) hit.sessionID },
+                { "address", endpoint.IPtoStr().cstr() },
+                { "port", endpoint.port },
+                { "isFirewalled", hit.firewalled },
+                { "localRelays", hit.numRelays },
+                { "localDirects", hit.numListeners },
+                { "isTracker", hit.tracker },
+                { "isRelayFull", !hit.relay },
+                { "isDirectFull", !hit.direct },
+                { "isReceiving", hit.recv },
+                { "isControlFull", !hit.cin },
+                { "version", hit.version },
+                { "children", children }
+            };
+        }
+
+        json::array_t getRelayTree()
+        {
+            json::array_t result;
+
+            for (Host& root : m_children[Host()])
+            {
+                result.push_back(toRelayTree(root, std::vector<Host>()));
+            }
+            return result;
+        }
+
+        std::map<Host, ChanHit> m_hit;
+        std::map<Host, std::vector<Host> > m_children;
+    };
+
     std::string call(const std::string& request)
     {
         std::string result = call_internal(request).dump();
@@ -54,9 +171,10 @@ public:
         m_methods
         ({
             { "fetch",                   &JrpcApi::fetch,                   { "url", "name", "desc", "genre", "contact", "bitrate", "type" } },
-            { "getChannelConnections",   &JrpcApi::getChannelConnections,   { "channelId"} },
-            { "getChannelInfo",          &JrpcApi::getChannelInfo,          { "channelId"} },
-            { "getChannelStatus",        &JrpcApi::getChannelStatus,        { "channelId"} },
+            { "getChannelConnections",   &JrpcApi::getChannelConnections,   { "channelId" } },
+            { "getChannelInfo",          &JrpcApi::getChannelInfo,          { "channelId" } },
+            { "getChannelRelayTree",     &JrpcApi::getChannelRelayTree,     { "channelId" } },
+            { "getChannelStatus",        &JrpcApi::getChannelStatus,        { "channelId" } },
             { "getChannels",             &JrpcApi::getChannels,             {} },
             { "getNewVersions",          &JrpcApi::getNewVersions,          {} },
             { "getNotificationMessages", &JrpcApi::getNotificationMessages, {} },
@@ -582,6 +700,23 @@ public:
             channel->thread.active = false;
 
         return nullptr;
+    }
+
+    json getChannelRelayTree(json::array_t args)
+    {
+        GnuID id = args[0].get<std::string>();
+
+        Channel *channel = chanMgr->findChannelByID(id);
+        if (!channel)
+            throw application_error(0, "Channel not found");
+
+        ChanHitList *hitList = chanMgr->findHitListByID(id);
+        if (!hitList)
+            throw application_error(0, "Hit list not found");
+
+        HostGraph graph(channel, hitList);
+
+        return graph.getRelayTree();
     }
 };
 

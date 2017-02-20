@@ -260,6 +260,19 @@ public:
         return buf;
     }
 
+    bool operator < (const Host& other) const
+    {
+        if (ip == other.ip)
+            return port < other.port;
+        else
+            return ip < other.ip;
+    }
+
+    bool operator == (const Host& other) const
+    {
+        return const_cast<Host*>(this)->isSame(const_cast<Host&>(other));
+    }
+
     void    fromStrIP(const char *, int);
     void    fromStrName(const char *, int);
 
