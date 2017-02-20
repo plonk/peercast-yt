@@ -1028,6 +1028,8 @@ void ServMgr::saveSettings(const char *fn)
                     iniFile.writeStrValue("sourceURL", c->sourceURL.cstr());
                 iniFile.writeStrValue("sourceProtocol", ChanInfo::getProtocolStr(c->info.srcProtocol));
                 iniFile.writeStrValue("contentType", c->info.getTypeStr());
+                iniFile.writeStrValue("streamType", c->info.streamType);
+                iniFile.writeStrValue("streamExt", c->info.streamExt);
                 iniFile.writeIntValue("bitrate", c->info.bitrate);
                 iniFile.writeStrValue("contactURL", c->info.url.cstr());
                 iniFile.writeStrValue("id", idstr);
@@ -1322,6 +1324,10 @@ void ServMgr::loadSettings(const char *fn)
                         info.srcProtocol = ChanInfo::getProtocolFromStr(iniFile.getStrValue());
                     else if (iniFile.isName("contentType"))
                         info.contentType = ChanInfo::getTypeFromStr(iniFile.getStrValue());
+                    else if (iniFile.isName("streamType"))
+                        info.streamType = iniFile.getStrValue();
+                    else if (iniFile.isName("streamExt"))
+                        info.streamExt = iniFile.getStrValue();
                     else if (iniFile.isName("stayConnected"))
                         stayConnected = iniFile.getBoolValue();
                     else if (iniFile.isName("sourceURL"))
