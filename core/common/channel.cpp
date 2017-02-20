@@ -1830,6 +1830,12 @@ ChanMgr::ChanMgr()
 }
 
 // -----------------------------------
+ChanMgr::~ChanMgr()
+{
+    clearHitLists();
+}
+
+// -----------------------------------
 bool ChanMgr::writeVariable(Stream &out, const String &var, int index)
 {
     char buf[1024];

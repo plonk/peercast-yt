@@ -529,6 +529,7 @@ public:
 
 
     ChanMgr();
+    ~ChanMgr();
 
     Channel *deleteChannel(Channel *);
 
