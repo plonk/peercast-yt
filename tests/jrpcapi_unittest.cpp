@@ -74,3 +74,8 @@ TEST_F(JrpcApiFixture, getStatus)
 
     ASSERT_TRUE(expected == result);
 }
+
+TEST_F(JrpcApiFixture, getChannelRelayTree)
+{
+    ASSERT_THROW(api.getChannelRelayTree({"hoge"}), JrpcApi::application_error);
+}
