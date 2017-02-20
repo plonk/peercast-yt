@@ -192,7 +192,7 @@ void Channel::reset()
     rawData.init();
     rawData.accept = ChanPacket::T_HEAD|ChanPacket::T_DATA;
 
-    setStatus(S_NONE);
+    status = S_NONE;
     type = T_NONE;
 
     readDelay = false;
