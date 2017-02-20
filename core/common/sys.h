@@ -238,8 +238,7 @@ class Sys
 {
 public:
     Sys();
-
-
+    virtual ~Sys();
 
     virtual class ClientSocket  *createSocket() = 0;
     virtual bool            startThread(class ThreadInfo *) = 0;
@@ -486,6 +485,13 @@ public:
         buf = new char[lineLen*maxLines];
         times = new unsigned int [maxLines];
         types = new TYPE [maxLines];
+    }
+
+    ~LogBuffer()
+    {
+        delete[] buf;
+        delete[] times;
+        delete[] types;
     }
 
     void    clear()

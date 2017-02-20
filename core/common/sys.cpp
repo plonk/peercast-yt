@@ -128,6 +128,11 @@ Sys::Sys()
     logBuf = new LogBuffer(1000, 100);
     numThreads=0;
 }
+// ------------------------------------------
+Sys::~Sys()
+{
+    delete logBuf;
+}
 
 // ------------------------------------------
 void Sys::sleepIdle()
