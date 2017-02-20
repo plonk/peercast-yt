@@ -280,7 +280,7 @@ public:
     {
         if (buf)
         {
-            delete buf;
+            delete[] buf;
             buf = NULL;
         }
 
