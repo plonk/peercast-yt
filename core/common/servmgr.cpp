@@ -114,6 +114,16 @@ ServMgr::ServMgr()
     chanLog="";
 }
 // -----------------------------------
+ServMgr::~ServMgr()
+{
+    while (servents)
+    {
+        auto next = servents->next;
+        delete servents;
+        servents = next;
+    }
+}
+// -----------------------------------
 BCID *ServMgr::findValidBCID(int index)
 {
     int cnt = 0;

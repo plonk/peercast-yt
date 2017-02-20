@@ -161,6 +161,7 @@ public:
 
 
     ServMgr();
+    ~ServMgr();
 
     bool    start();
 
