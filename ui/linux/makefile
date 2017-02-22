@@ -1,7 +1,7 @@
 CPPFLAGS = -g -std=c++11 -D_UNIX -D_REENTRANT $(INCLUDES)
 LDFLAGS = -pthread
 
-TAR = peercast-linux.tgz
+TAR = peercast-linux.tar
 CC = gcc
 AR = ar
 
@@ -9,7 +9,7 @@ INCLUDES = -I../../core -I../../core/common
 
 TARGET = peercast
 CORE = ../../core
-SRCHTML = ../html
+SRCHTMLTAR = ../html.tar
 HTML = html
 
 LIBOBJSTATIC = libpeercast.a
@@ -59,18 +59,19 @@ all: $(TARGET) $(TAR)
 
 deps: $(DEPENDFILE)
 
-$(SRCHTML):
-	make -C .. html
+$(SRCHTMLTAR):
+	make -C .. html.tar
 
-$(HTML): $(SRCHTML)
+$(HTML): $(SRCHTMLTAR)
 	rm -rf $(HTML)
-	cp -R $(SRCHTML) $(HTML)
+	tar xf $(SRCHTMLTAR) $(HTML)
 
 $(TAR): $(TARGET) $(HTML)
-	tar -czf $(TAR) $(HTML) $(TARGET)
+	tar cf $(TAR) $(HTML) $(TARGET)
 
 clean:
-	rm  -f $(LINUXOBJ) $(COREOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE)
+	rm -f $(LINUXOBJ) $(COREOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE)
+	rm -rf $(HTML)
 
 $(COREOBJ): %.o : $(CORE)/common/%.cpp
 	$(CC) $(CPPFLAGS) -c $< -o $@
