@@ -1,0 +1,16 @@
+{
+    // peercast.dwt
+    "_Information_navbar" : "Information",
+    "_Yellow Pages_navbar" : "Yellow Pages",
+    "_Relays_navbar" : "Relays",
+    "_Broadcast_navbar" : "Broadcast",
+    "_Connections_navbar" : "Connections",
+    "_Settings_navbar" : "Settings",
+    "_View Log_navbar" : "View Log",
+    "_Logout_navbar" : "Logout",
+
+    "_Type_connection" : "Type",
+    "_Password_login"  : "Password",
+    "Deutsch"          : "German",
+    "":""
+}

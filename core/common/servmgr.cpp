@@ -2220,6 +2220,16 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
             strcpy(buf, (showLog&(1<<LogBuffer::T_CHANNEL))?"1":"0");
         else
             return false;
+    }else if (var.startsWith("lang."))
+    {
+        const char* lang = const_cast<String&>(var).cstr() + 5;
+
+        if (strrchr(htmlPath, '/') &&
+            strcmp(strrchr(htmlPath, '/') + 1, lang) == 0)
+            strcpy(buf, "1");
+        else
+            strcpy(buf, "0");
+
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);

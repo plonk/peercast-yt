@@ -59,21 +59,14 @@ all: $(TARGET) $(TAR)
 
 deps: $(DEPENDFILE)
 
-$(TAR): $(TARGET)
-	rm -rf $(TAR)
+$(SRCHTML):
+	make -C .. html
+
+$(HTML): $(SRCHTML)
 	rm -rf $(HTML)
-	mkdir -p $(HTML)/ja/images
-	cp $(SRCHTML)/ja/images/*.* $(HTML)/ja/images
-	cp $(SRCHTML)/ja/*.* $(HTML)/ja/
-	mkdir -p $(HTML)/de/images
-	cp $(SRCHTML)/de/images/*.* $(HTML)/de/images
-	cp $(SRCHTML)/de/*.* $(HTML)/de/
-	mkdir -p $(HTML)/en/images
-	cp $(SRCHTML)/en/images/*.* $(HTML)/en/images
-	cp $(SRCHTML)/en/*.* $(HTML)/en/
-	mkdir -p $(HTML)/fr/images
-	cp $(SRCHTML)/fr/images/*.* $(HTML)/fr/images
-	cp $(SRCHTML)/fr/*.* $(HTML)/fr/
+	cp -R $(SRCHTML) $(HTML)
+
+$(TAR): $(TARGET) $(HTML)
 	tar -czf $(TAR) $(HTML) $(TARGET)
 
 clean:
