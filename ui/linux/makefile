@@ -1,4 +1,4 @@
-CPPFLAGS = -g -std=c++11 -D_UNIX -D_REENTRANT $(INCLUDES)
+CPPFLAGS = -g -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT $(INCLUDES)
 LDFLAGS = -pthread
 
 TAR = peercast-linux.tar
@@ -65,6 +65,7 @@ $(SRCHTMLTAR):
 $(HTML): $(SRCHTMLTAR)
 	rm -rf $(HTML)
 	tar xf $(SRCHTMLTAR) $(HTML)
+	touch $(HTML)
 
 $(TAR): $(TARGET) $(HTML)
 	tar cf $(TAR) $(HTML) $(TARGET)
