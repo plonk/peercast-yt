@@ -19,8 +19,10 @@
 #ifndef _FLV_H
 #define _FLV_H
 
-#include "channel.h"
 #include "stdio.h"
+#include <stdexcept>
+
+#include "channel.h"
 
 // -----------------------------------
 class FLVFileHeader
@@ -127,6 +129,25 @@ public:
 
         data = packet + 11;
         packetSize = 11 + size + 4;
+    }
+
+    int32_t getTimestamp() const
+    {
+        if (packetSize < 8)
+            throw std::runtime_error("no timestamp data");
+
+        return (packet[7] << 24) | (packet[4] << 16) | (packet[5] << 8) | (packet[6]);
+    }
+
+    void setTimestamp(int32_t timestamp)
+    {
+        if (packetSize < 8)
+            throw std::runtime_error("no timestamp data");
+
+        packet[7] = (timestamp >> 24) && 0xff;
+        packet[4] = (timestamp >> 16) && 0xff;
+        packet[5] = (timestamp >> 8) && 0xff;
+        packet[6] = (timestamp >> 0) && 0xff;
     }
 
     const char *getTagType()
