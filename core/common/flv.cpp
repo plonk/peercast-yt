@@ -26,6 +26,14 @@
 #define new DEBUG_NEW
 #endif
 
+static String timestampToString(uint32_t timestamp)
+{
+    return String::format("%d:%02d:%02d.%03d",
+                          timestamp / 1000 / 3600,
+                          timestamp / 1000 / 60 % 60,
+                          timestamp / 1000 % 60,
+                          timestamp % 1000);
+}
 
 // ------------------------------------------
 void FLVStream::readEnd(Stream &, Channel *)
@@ -47,9 +55,15 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
     FLVTag flvTag;
     flvTag.read(in);
 
+    // LOG_DEBUG("%s: %s: %d byte %s tag",
+    //           static_cast<std::string>(ch->info.id).c_str(),
+    //           timestampToString(flvTag.getTimestamp()).cstr(),
+    //           flvTag.packetSize,
+    //           flvTag.getTagType());
+
     switch (flvTag.type)
     {
-        case FLVTag::T_SCRIPT:
+    case FLVTag::T_SCRIPT:
         {
             AMFObject amf;
             MemoryStream flvmem(flvTag.data, flvTag.size);
@@ -60,23 +74,34 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
                 headerUpdate = true;
             }
         }
-        case FLVTag::T_VIDEO:
-        {
-            //AVC Header
-            if (flvTag.data[0] == 0x17 && flvTag.data[1] == 0x00 &&
-                flvTag.data[2] == 0x00 && flvTag.data[3] == 0x00) {
-                avcHeader = flvTag;
-                headerUpdate = true;
+        break;
+    case FLVTag::T_VIDEO:
+        // AVC Header
+        if (flvTag.data[0] == 0x17 && flvTag.data[1] == 0x00 &&
+            flvTag.data[2] == 0x00 && flvTag.data[3] == 0x00) {
+            avcHeader = flvTag;
+            if (avcHeader.getTimestamp() != 0)
+            {
+                LOG_CHANNEL("AVC header has non-zero timestamp. Cleared to zero.");
+                avcHeader.setTimestamp(0);
             }
+            headerUpdate = true;
         }
-        case FLVTag::T_AUDIO:
-        {
-            //AAC Header
-            if (flvTag.data[0] == 0xaf && flvTag.data[1] == 0x00) {
-                aacHeader = flvTag;
-                headerUpdate = true;
+        break;
+    case FLVTag::T_AUDIO:
+        // AAC Header
+        if (flvTag.data[0] == 0xaf && flvTag.data[1] == 0x00) {
+            aacHeader = flvTag;
+            if (aacHeader.getTimestamp() != 0)
+            {
+                LOG_CHANNEL("AAC header has non-zero timestamp. Cleared to zero.");
+                aacHeader.setTimestamp(0);
             }
+            headerUpdate = true;
         }
+        break;
+    default:
+        LOG_ERROR("Invalid FLV tag!");
     }
 
     if (headerUpdate && fileHeader.size>0) {
