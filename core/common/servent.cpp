@@ -1292,13 +1292,13 @@ void Servent::processGnutella()
             throw TimeoutException();
 
 
-        unsigned int totIn = sock->totalBytesIn-lastTotalIn;
-        unsigned int totOut = sock->totalBytesOut-lastTotalOut;
+        unsigned int totIn = sock->totalBytesIn() - lastTotalIn;
+        unsigned int totOut = sock->totalBytesOut() - lastTotalOut;
 
         unsigned int bytes = totIn+totOut;
 
-        lastTotalIn = sock->totalBytesIn;
-        lastTotalOut = sock->totalBytesOut;
+        lastTotalIn = sock->totalBytesIn();
+        lastTotalOut = sock->totalBytesOut();
 
         const int serventBandwidth = 1000;
 
@@ -2725,10 +2725,18 @@ bool    Servent::writeVariable(Stream &s, const String &var)
     {
         if (sock)
         {
-            unsigned int tot = sock->bytesInPerSec+sock->bytesOutPerSec;
+            unsigned int tot = sock->bytesInPerSec() + sock->bytesOutPerSec();
             sprintf(buf, "%.1f", BYTES_TO_KBPS(tot));
         }else
-            strcpy(buf, "0");
+            strcpy(buf, "0.0");
+    }else if (var == "bitrateAvg")
+    {
+        if (sock)
+        {
+            unsigned int tot = sock->stat.bytesInPerSecAvg() + sock->stat.bytesOutPerSecAvg();
+            sprintf(buf, "%.1f", BYTES_TO_KBPS(tot));
+        }else
+            strcpy(buf, "0.0");
     }else if (var == "uptime")
     {
         String uptime;

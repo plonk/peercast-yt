@@ -34,14 +34,7 @@ class Stream
 {
 public:
     Stream()
-    :writeCRLF(true)
-    , totalBytesIn(0)
-    , totalBytesOut(0)
-    , lastBytesIn(0)
-    , lastBytesOut(0)
-    , bytesInPerSec(0)
-    , bytesOutPerSec(0)
-    , lastUpdate(0)
+    : writeCRLF(true)
     , bitsBuffer(0)
     , bitsPos(0)
     {
@@ -210,11 +203,84 @@ public:
     unsigned char   bitsBuffer;
     unsigned int    bitsPos;
 
-    unsigned int    totalBytesIn, totalBytesOut;
-    unsigned int    lastBytesIn, lastBytesOut;
-    unsigned int    bytesInPerSec, bytesOutPerSec;
-    unsigned int    lastUpdate;
+    unsigned int totalBytesIn();
+    unsigned int totalBytesOut();
+    unsigned int lastBytesIn();
+    unsigned int lastBytesOut();
+    unsigned int bytesInPerSec();
+    unsigned int bytesOutPerSec();
 
+    class Stat
+    {
+    public:
+        const double Exp = 9.0/10.0;
+
+        Stat ()
+            : m_totalBytesIn(0)
+            , m_totalBytesOut(0)
+            , m_lastBytesIn(0)
+            , m_lastBytesOut(0)
+            , m_bytesInPerSec(0)
+            , m_bytesOutPerSec(0)
+            , m_bytesInPerSecAvg(0)
+            , m_bytesOutPerSecAvg(0)
+            , m_lastUpdate(0)
+            , m_startTime(0)
+        {}
+
+        void update(unsigned int in, unsigned int out)
+        {
+            double now = sys->getDTime();
+
+            if (m_lastUpdate == 0.0)
+            {
+                m_startTime = now;
+                m_lastUpdate = now;
+            }
+
+            m_totalBytesIn  += in;
+            m_totalBytesOut += out;
+
+            double tdiff = now - m_lastUpdate;
+            if (tdiff >= 1.0)
+            {
+                m_bytesInPerSec     = (m_totalBytesIn - m_lastBytesIn) / tdiff;
+                m_bytesOutPerSec    = (m_totalBytesOut - m_lastBytesOut) / tdiff;
+
+                m_bytesInPerSecAvg  = Exp * m_bytesInPerSecAvg + (1-Exp) * m_bytesInPerSec;
+                m_bytesOutPerSecAvg = Exp * m_bytesOutPerSecAvg + (1-Exp) * m_bytesOutPerSec;
+
+                m_lastBytesIn       = m_totalBytesIn;
+                m_lastBytesOut      = m_totalBytesOut;
+
+                m_lastUpdate        = now;
+            }
+        }
+
+        void update() { update(0, 0); }
+
+        unsigned int    totalBytesIn() { update(); return m_totalBytesIn; }
+        unsigned int    totalBytesOut() { update(); return m_totalBytesOut; }
+        unsigned int    lastBytesIn() { update(); return m_lastBytesIn; }
+        unsigned int    lastBytesOut() { update(); return m_lastBytesOut; }
+        unsigned int    bytesInPerSec() { update(); return m_bytesInPerSec; }
+        unsigned int    bytesOutPerSec() { update(); return m_bytesOutPerSec; }
+
+        unsigned int    bytesInPerSecAvg() { update(); return m_bytesInPerSecAvg; }
+        unsigned int    bytesOutPerSecAvg() { update(); return m_bytesOutPerSecAvg; }
+
+        unsigned int    m_totalBytesIn, m_totalBytesOut;
+        unsigned int    m_lastBytesIn, m_lastBytesOut;
+        unsigned int    m_bytesInPerSec, m_bytesOutPerSec;
+
+        double          m_bytesInPerSecAvg;
+        double          m_bytesOutPerSecAvg;
+
+        double          m_lastUpdate;
+        double          m_startTime;
+    };
+
+    Stat stat;
 };
 
 

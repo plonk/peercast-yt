@@ -469,7 +469,7 @@ int Channel::handshakeFetch()
 int PeercastSource::getSourceRate()
 {
     if (m_channel && m_channel->sock)
-        return m_channel->sock->bytesInPerSec;
+        return m_channel->sock->bytesInPerSec();
     else
         return 0;
 }

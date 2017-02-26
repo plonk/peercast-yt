@@ -225,22 +225,41 @@ void Stream::skip(int len)
 
 }
 
+// -------------------------------------
+unsigned int Stream::totalBytesIn()
+{
+    return stat.totalBytesIn();
+}
+
+unsigned int Stream::totalBytesOut()
+{
+    return stat.totalBytesOut();
+}
+
+unsigned int Stream::lastBytesIn()
+{
+    return stat.lastBytesIn();
+}
+
+unsigned int Stream::lastBytesOut()
+{
+    return stat.lastBytesOut();
+}
+
+unsigned int Stream::bytesInPerSec()
+{
+    return stat.bytesInPerSec();
+}
+
+unsigned int Stream::bytesOutPerSec()
+{
+    return stat.bytesOutPerSec();
+}
 
 // -------------------------------------
 void Stream::updateTotals(unsigned int in, unsigned int out)
 {
-    totalBytesIn += in;
-    totalBytesOut += out;
-
-    unsigned int tdiff = sys->getTime()-lastUpdate;
-    if (tdiff >= 5)
-    {
-        bytesInPerSec = (totalBytesIn-lastBytesIn)/tdiff;
-        bytesOutPerSec = (totalBytesOut-lastBytesOut)/tdiff;
-        lastBytesIn = totalBytesIn;
-        lastBytesOut = totalBytesOut;
-        lastUpdate = sys->getTime();
-    }
+    stat.update(in, out);
 }
 // -------------------------------------
 int Stream::readLine(char *in, int max)

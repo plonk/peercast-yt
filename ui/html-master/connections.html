@@ -81,19 +81,17 @@
                       <TD><B>{#IP:Port}</B></TD>
                       <TD><B>{#Agent}</B></TD>
                       <TD><B>{#Kbits/s}</B></TD>
+                      <TD><B>Avg. bitrate</B></TD>
                     </TR>
-                    {@loop servMgr.numServents} <tr class="normal"
-                                                    {@if loop.indexEven}
-                                                    bgColor=#eeeeee
-                                                    {@else}
-                                                    bgColor=#dddddd
-                                                    {@end}>
+                    {@loop servMgr.numServents}
+                    <tr class="normal" {@if loop.indexEven} bgColor=#eeeeee {@else} bgColor=#dddddd {@end}>
                       <TD>{$loop.servent.type}</TD>
                       <TD>{$loop.servent.status}</TD>
                       <TD>{$loop.servent.uptime}</TD>
                       <TD>{$loop.servent.address}</TD>
                       <TD>{$loop.servent.agent}</TD>
-                      <TD>{$loop.servent.bitrate}</TD>
+                      <TD align=right>{$loop.servent.bitrate}</TD>
+                      <TD align=right>{$loop.servent.bitrateAvg}</TD>
                     </TR>
                     {@end} </TBODY>
                 </TABLE>

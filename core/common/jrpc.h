@@ -461,8 +461,8 @@ public:
             if (s->type != Servent::T_RELAY)
                 continue;
 
-            unsigned int bytesInPerSec = s->sock ? s->sock->bytesInPerSec : 0;
-            unsigned int bytesOutPerSec = s->sock ? s->sock->bytesOutPerSec : 0;
+            unsigned int bytesInPerSec = s->sock ? s->sock->bytesInPerSec() : 0;
+            unsigned int bytesOutPerSec = s->sock ? s->sock->bytesOutPerSec() : 0;
 
             json remoteEndPoint;
             if (s->sock)
