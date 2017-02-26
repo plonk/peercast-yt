@@ -64,10 +64,10 @@
     "Total Relays"            : "総<br>リレー数",
     "Local Relays"            : "ローカル<br>リレー数",
     "Status"                  : "状態",
-    "Keep"                    : "保持",
+    "Keep"                    : "キープ",
     "Info"                    : "情報",
     "WWW"                     : "WWW",
-    "Bump"                    : "再接続",
+    "Bump"                    : "バンプ",
     "Stop"                    : "停止",
 
     // broadcast.html
