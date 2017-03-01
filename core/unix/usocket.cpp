@@ -385,7 +385,7 @@ void UClientSocket::bind(Host &h)
     if ( ::bind (sockNum, (sockaddr *)&localAddr, sizeof(localAddr)) == -1)
         throw SockException("Can`t bind socket");
 
-    if (::listen(sockNum, 3))
+    if (::listen(sockNum, SOMAXCONN))
         throw SockException("Can`t listen");
 
     host = h;
