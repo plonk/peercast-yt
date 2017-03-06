@@ -197,12 +197,12 @@ private:
 class FLVStream : public ChannelStream
 {
 public:
-    int bitrate;
+    int metaBitrate;
     FLVFileHeader fileHeader;
     FLVTag metaData;
     FLVTag aacHeader;
     FLVTag avcHeader;
-    FLVStream() : bitrate(0)
+    FLVStream() : metaBitrate(0)
     {
     }
     void readHeader(Stream &, Channel *) override;

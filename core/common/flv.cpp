@@ -43,7 +43,7 @@ void FLVStream::readEnd(Stream &, Channel *)
 // ------------------------------------------
 void FLVStream::readHeader(Stream &in, Channel *ch)
 {
-    bitrate = 0;
+    metaBitrate = 0;
     fileHeader.read(in);
 }
 
@@ -69,7 +69,7 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
             MemoryStream flvmem(flvTag.data, flvTag.size);
             if (amf.readMetaData(flvmem)) {
                 flvmem.close();
-                bitrate = amf.bitrate;
+                metaBitrate = amf.bitrate;
                 metaData = flvTag;
                 headerUpdate = true;
             }
@@ -104,6 +104,18 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
         LOG_ERROR("Invalid FLV tag!");
     }
 
+    // メタ情報からのビットレートが無い場合、ストリームからの実測値が
+    // 現在の公称値を超えていれば公称値を更新する。
+    if (metaBitrate == 0) {
+        ChanInfo info = ch->info;
+
+        int newBitrate = in.stat.bytesInPerSecAvg() / 1000 * 8;
+        if (newBitrate > info.bitrate) {
+            info.bitrate = newBitrate;
+            ch->updateInfo(info);
+        }
+    }
+
     if (headerUpdate && fileHeader.size>0) {
         int len = fileHeader.size;
         if (metaData.type == FLVTag::T_SCRIPT) len += metaData.packetSize;
@@ -115,7 +127,12 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
         if (avcHeader.type == FLVTag::T_VIDEO) mem.write(avcHeader.packet, avcHeader.packetSize);
         if (aacHeader.type == FLVTag::T_AUDIO) mem.write(aacHeader.packet, aacHeader.packetSize);
 
-        ch->info.bitrate = bitrate;
+        // メタ情報からのビットレートがあればその値を設定。無ければ、
+        // 前回のエンコードセッションからの値をクリアするために 0 を設
+        // 定する。
+        ChanInfo info = ch->info;
+        info.bitrate = metaBitrate;
+        ch->updateInfo(info);
 
         m_buffer.flush(ch);
 
