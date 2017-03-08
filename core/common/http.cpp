@@ -60,6 +60,7 @@ int HTTP::readResponse()
 }
 
 //-----------------------------------------
+#include <cctype>
 bool    HTTP::nextHeader()
 {
     if (readLine(cmdLine, sizeof(cmdLine)))
@@ -70,6 +71,22 @@ bool    HTTP::nextHeader()
                 if (*ap!=' ')
                     break;
         arg = ap;
+
+        if (ap)
+        {
+            using namespace std;
+
+            string name(cmdLine, strchr(cmdLine, ':'));
+            string value;
+            char *end;
+            if (!(end = strchr(ap, '\r')))
+                if (!(end = strchr(ap, '\n')))
+                    end = ap + strlen(ap);
+            value = string(ap, end);
+            for (int i = 0; i < name.size(); ++i)
+                name[i] = toupper(name[i]);
+            headers[name] = value;
+        }
         return true;
     }else
     {

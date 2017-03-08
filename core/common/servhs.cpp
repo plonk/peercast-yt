@@ -94,12 +94,13 @@ int getCGIargINT(char *a)
 // -----------------------------------
 void Servent::handshakeJRPC(HTTP &http)
 {
-    int content_length = -1;
+    int content_length;
 
-    while (http.nextHeader())
-    {
-        if (http.isHeader("content-length"))
-            content_length = http.getArgInt();
+    try {
+        string lenstr = http.headers.at("CONTENT-LENGTH");
+        content_length = atoi(lenstr.c_str());
+    } catch (std::out_of_range) {
+        content_length = -1;
     }
 
     if (content_length == -1)
@@ -269,14 +270,15 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 
         }else if (strcmp(fn, "/api/1")==0)
         {
-            if (!sock->host.isLocalhost())
+            if (!isAllowed(ALLOW_HTML))
+                throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
+
+            if (!handshakeAuth(http, "", false))
                 throw HTTPException(HTTP_SC_UNAUTHORIZED, 401);
 
             JrpcApi api;
             std::string response = api.getVersionInfo(nlohmann::json::array_t()).dump();
 
-            while (http.nextHeader())
-                ;
             http.writeLine(HTTP_SC_OK);
             http.writeLineF("%s %d", HTTP_HS_LENGTH, response.size());
             http.writeLine("");
@@ -298,7 +300,10 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 
         if (strcmp(fn, "/api/1")==0)
         {
-            if (!sock->host.isLocalhost())
+            if (!isAllowed(ALLOW_HTML))
+                throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
+
+            if (!handshakeAuth(http, "", false))
                 throw HTTPException(HTTP_SC_UNAUTHORIZED, 401);
 
             handshakeJRPC(http);

@@ -20,6 +20,9 @@
 #ifndef _HTTP_H
 #define _HTTP_H
 
+using namespace std;
+#include <map>
+
 #include "stream.h"
 
 // -------------------------------------
@@ -181,6 +184,7 @@ public:
 
     char    cmdLine[8192], *arg;
 
+    map<string,string> headers;
 };
 
 #endif
