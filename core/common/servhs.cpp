@@ -712,6 +712,7 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
     {
         http.writeLine(HTTP_SC_UNAUTHORIZED);
         http.writeLine("WWW-Authenticate: Basic realm=\"PeerCast Admin\"");
+        http.writeLine("");
     }else if (servMgr->authType == ServMgr::AUTH_COOKIE)
     {
         String file = servMgr->htmlPath;
