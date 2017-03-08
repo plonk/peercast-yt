@@ -401,13 +401,13 @@ public:
     json stopChannelConnection(json::array_t params)
     {
         GnuID id = params[0].get<std::string>();
-        uintptr_t connectionId = params[1].get<uintptr_t>();
+        int connectionId = params[1].get<int>();
         bool success = false;
 
         servMgr->lock.on();
         for (Servent* s = servMgr->servents; s != NULL; s = s->next)
         {
-             if ((uintptr_t) s == connectionId &&
+             if (s->serventIndex == connectionId &&
                  s->chanID.isSame(id) &&
                  s->type == Servent::T_RELAY)
              {
@@ -439,7 +439,7 @@ public:
         json remoteName = c->sourceURL.isEmpty() ? ((std::string) c->sourceHost.host).c_str() : c->sourceURL.cstr();
 
         json sourceConnection =  {
-            { "connectionId", (uintptr_t) c },
+            { "connectionId", -1 },
             { "type", "source" },
             { "status", to_json(c->status) },
             { "sendRate", 0.0 },
@@ -471,7 +471,7 @@ public:
                 remoteEndPoint = nullptr;
 
             json connection = {
-                { "connectionId", (uintptr_t) s },
+                { "connectionId", s->serventIndex },
                 { "type", "relay" },
                 { "status", s->getStatusStr() },
                 { "sendRate", bytesOutPerSec },

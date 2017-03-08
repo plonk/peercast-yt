@@ -244,7 +244,7 @@ public:
 
     GnuIDList           seenIDs;
     GnuID               networkID;
-    int                 serventIndex;
+    const int           serventIndex;
 
     GnuID               remoteID;
     GnuID               chanID;
