@@ -159,6 +159,7 @@ public:
     void    handshakeIn();
     void    handshakeOut();
 
+    bool    handshakeHTTPBasicAuth(HTTP &http);
 
     void    processOutPCP();
     void    processOutChannel();

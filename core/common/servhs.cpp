@@ -273,16 +273,16 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
             if (!isAllowed(ALLOW_HTML))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-            if (!handshakeAuth(http, "", true))
-                throw HTTPException(HTTP_SC_UNAUTHORIZED, 401);
+            if (handshakeHTTPBasicAuth(http))
+            {
+                JrpcApi api;
+                std::string response = api.getVersionInfo(nlohmann::json::array_t()).dump();
 
-            JrpcApi api;
-            std::string response = api.getVersionInfo(nlohmann::json::array_t()).dump();
-
-            http.writeLine(HTTP_SC_OK);
-            http.writeLineF("%s %d", HTTP_HS_LENGTH, response.size());
-            http.writeLine("");
-            http.writeString(response.c_str());
+                http.writeLine(HTTP_SC_OK);
+                http.writeLineF("%s %d", HTTP_HS_LENGTH, response.size());
+                http.writeLine("");
+                http.writeString(response.c_str());
+            }
         }else
         {
             while (http.nextHeader());
@@ -303,10 +303,8 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
             if (!isAllowed(ALLOW_HTML))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-            if (!handshakeAuth(http, "", true))
-                throw HTTPException(HTTP_SC_UNAUTHORIZED, 401);
-
-            handshakeJRPC(http);
+            if (handshakeHTTPBasicAuth(http))
+                handshakeJRPC(http);
         }else
         {
             throw HTTPException(HTTP_SC_BADREQUEST, 400);
@@ -631,6 +629,32 @@ void Servent::handshakePOST()
 void Servent::handshakeRTSP(RTSP &rtsp)
 {
     throw HTTPException(HTTP_SC_BADREQUEST, 400);
+}
+// -----------------------------------
+bool Servent::handshakeHTTPBasicAuth(HTTP &http)
+{
+    char user[64] = "", pass[64] = "";
+
+    while (http.nextHeader())
+    {
+        char *arg = http.getArgStr();
+        if (!arg)
+            continue;
+
+        if (http.isHeader("Authorization"))
+            http.getAuthUserPass(user, pass, sizeof(user), sizeof(pass));
+    }
+
+    if (sock->host.isLocalhost())
+        return true;
+
+    if (strlen(servMgr->password) != 0 && strcmp(pass, servMgr->password)==0)
+        return true;
+
+    http.writeLine(HTTP_SC_UNAUTHORIZED);
+    http.writeLine("WWW-Authenticate: Basic realm=\"PeerCast Admin\"");
+    http.writeLine("");
+    return false;
 }
 // -----------------------------------
 bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
