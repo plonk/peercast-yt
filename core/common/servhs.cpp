@@ -273,7 +273,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
             if (!isAllowed(ALLOW_HTML))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-            if (!handshakeAuth(http, "", false))
+            if (!handshakeAuth(http, "", true))
                 throw HTTPException(HTTP_SC_UNAUTHORIZED, 401);
 
             JrpcApi api;
@@ -303,7 +303,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
             if (!isAllowed(ALLOW_HTML))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-            if (!handshakeAuth(http, "", false))
+            if (!handshakeAuth(http, "", true))
                 throw HTTPException(HTTP_SC_UNAUTHORIZED, 401);
 
             handshakeJRPC(http);
