@@ -191,6 +191,7 @@ public:
             { "getVersionInfo",          &JrpcApi::getVersionInfo,          {} },
             { "getYellowPageProtocols",  &JrpcApi::getYellowPageProtocols,  {} },
             { "getYellowPages",          &JrpcApi::getYellowPages,          {} },
+            { "removeYellowPage",        &JrpcApi::removeYellowPage,        { "yellowPageId" } },
             { "setChannelInfo",          &JrpcApi::setChannelInfo,          { "channelId", "info", "track" } },
             { "stopChannel",             &JrpcApi::stopChannel,             { "channelId" } },
             { "stopChannelConnection",   &JrpcApi::stopChannelConnection,   { "channelId", "connectionId" } },
@@ -737,6 +738,11 @@ public:
         channel->bump = true;
 
         return nullptr;
+    }
+
+    json removeYellowPage(json::array_t args)
+    {
+        throw application_error(0, "Method unavailable");
     }
 };
 
