@@ -176,6 +176,7 @@ public:
     JrpcApi() :
         m_methods
         ({
+            { "bumpChannel",             &JrpcApi::bumpChannel,             { "channelId" } },
             { "fetch",                   &JrpcApi::fetch,                   { "url", "name", "desc", "genre", "contact", "bitrate", "type" } },
             { "getChannelConnections",   &JrpcApi::getChannelConnections,   { "channelId" } },
             { "getChannelInfo",          &JrpcApi::getChannelInfo,          { "channelId" } },
@@ -723,6 +724,19 @@ public:
         HostGraph graph(channel, hitList);
 
         return graph.getRelayTree();
+    }
+
+    json bumpChannel(json::array_t args)
+    {
+        GnuID id = args[0].get<std::string>();
+
+        Channel *channel = chanMgr->findChannelByID(id);
+        if (!channel)
+            throw application_error(0, "Channel not found");
+
+        channel->bump = true;
+
+        return nullptr;
     }
 };
 
