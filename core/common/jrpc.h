@@ -459,7 +459,7 @@ public:
         servMgr->lock.on();
         for (Servent* s = servMgr->servents; s != NULL; s = s->next)
         {
-            if (s->type != Servent::T_RELAY || !s->chanID.isSame(id))
+            if (!s->chanID.isSame(id))
                 continue;
 
             unsigned int bytesInPerSec = s->sock ? s->sock->bytesInPerSec() : 0;
@@ -473,11 +473,11 @@ public:
 
             json connection = {
                 { "connectionId", s->serventIndex },
-                { "type", "relay" },
+                { "type", s->getTypeStr() },
                 { "status", s->getStatusStr() },
                 { "sendRate", bytesOutPerSec },
                 { "recvRate", bytesInPerSec },
-                { "protocolName", "PCP Relay" },
+                { "protocolName", ChanInfo::getProtocolStr(s->outputProtocol) },
                 { "localRelays", nullptr },
                 { "localDirects", nullptr },
                 { "contentPosition", nullptr },
