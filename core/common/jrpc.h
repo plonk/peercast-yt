@@ -474,7 +474,7 @@ public:
 
             json connection = {
                 { "connectionId", s->serventIndex },
-                { "type", s->getTypeStr() },
+                { "type", tolower(s->getTypeStr()) },
                 { "status", s->getStatusStr() },
                 { "sendRate", bytesOutPerSec },
                 { "recvRate", bytesInPerSec },
@@ -743,6 +743,16 @@ public:
     json removeYellowPage(json::array_t args)
     {
         throw application_error(0, "Method unavailable");
+    }
+
+    static std::string tolower(std::string str)
+    {
+        std::string res;
+
+        for (int i = 0; i < str.size(); ++i)
+            res.push_back(std::tolower(str[i]));
+
+        return res;
     }
 };
 
