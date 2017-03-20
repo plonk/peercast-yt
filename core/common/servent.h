@@ -42,20 +42,20 @@ public:
 
     enum
     {
-        MAX_HASH = 500,             // max. amount of packet hashes Servents can store
-        MAX_OUTPACKETS = 32     // max. output packets per queue (normal/priority)
+        MAX_HASH = 500,     // max. amount of packet hashes Servents can store
+        MAX_OUTPACKETS = 32 // max. output packets per queue (normal/priority)
     };
 
     enum TYPE
     {
-        T_NONE,                     // Not allocated
-        T_INCOMING,                 // Unknown incoming
-        T_SERVER,               // The main server
-        T_RELAY,                // Outgoing relay
-        T_DIRECT,               // Outgoing direct connection
-        T_COUT,                     // PCP out connection
-        T_CIN,                  // PCP in connection
-        T_PGNU                  // old protocol connection
+        T_NONE,             // Not allocated
+        T_INCOMING,         // Unknown incoming
+        T_SERVER,           // The main server
+        T_RELAY,            // Outgoing relay
+        T_DIRECT,           // Outgoing direct connection
+        T_COUT,             // PCP out connection
+        T_CIN,              // PCP in connection
+        T_PGNU              // old protocol connection
     };
 
     enum STATUS
