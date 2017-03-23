@@ -45,6 +45,7 @@ public:
     int numFeeds();
     std::vector<std::string> feeds();
     bool addFeed(std::string url);
+    void clearFeeds();
 
     bool update();
 

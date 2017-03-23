@@ -259,3 +259,12 @@ bool ChannelDirectory::addFeed(std::string url)
     m_feeds.push_back(url);
     return true;
 }
+
+void ChannelDirectory::clearFeeds()
+{
+    CriticalSection cs(m_lock);
+
+    m_feeds.clear();
+    m_channels.clear();
+    m_lastUpdate = 0;
+}

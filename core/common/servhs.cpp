@@ -871,6 +871,7 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, char jumpStr[])
 {
     servMgr->numFilters = 0;
     ServFilter *currFilter=servMgr->filters;
+    servMgr->channelDirectory.clearFeeds();
 
     bool brRoot=false;
     bool getUpd=false;
@@ -964,6 +965,15 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, char jumpStr[])
                 currFilter->flags |= ServFilter::F_NETWORK;
             else if (strncmp(fs, "di", 2) == 0)
                 currFilter->flags |= ServFilter::F_DIRECT;
+        }
+        else if (strcmp(curr, "channel_feed_url") == 0)
+        {
+            if (strcmp(arg, "") != 0)
+            {
+                String str(arg, String::T_ESC);
+                str.convertTo(String::T_ASCII);
+                servMgr->channelDirectory.addFeed(str.cstr());
+            }
         }
 
         // client
