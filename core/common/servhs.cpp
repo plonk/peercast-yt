@@ -757,8 +757,7 @@ void Servent::handshakeCMD(char *cmd)
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
 
-    char    jumpStr[128];
-    const char  *jumpArg = NULL;
+    char jumpStr[128] = "";
 
     HTTP http(*sock);
     HTML html("", *sock);
@@ -796,19 +795,16 @@ void Servent::handshakeCMD(char *cmd)
         {
             sys->logBuf->clear();
             sprintf(jumpStr, "/%s/viewlog.html", servMgr->htmlPath);
-            jumpArg = jumpStr;
         }else if (cmpCGIarg(cmd, "cmd=", "save"))
         {
             peercastInst->saveSettings();
 
             sprintf(jumpStr, "/%s/settings.html", servMgr->htmlPath);
-            jumpArg = jumpStr;
         }else if (cmpCGIarg(cmd, "cmd=", "reg"))
         {
             char idstr[128];
             chanMgr->broadcastID.toStr(idstr);
             sprintf(jumpStr, "http://www.peercast.org/register/?id=%s", idstr);
-            jumpArg = jumpStr;
         }else if (cmpCGIarg(cmd, "cmd=", "edit_bcid"))
         {
             char *cp = cmd;
@@ -831,7 +827,6 @@ void Servent::handshakeCMD(char *cmd)
 
             peercastInst->saveSettings();
             sprintf(jumpStr, "/%s/bcid.html", servMgr->htmlPath);
-            jumpArg = jumpStr;
         }else if (cmpCGIarg(cmd, "cmd=", "add_bcid"))
         {
             BCID *bcid = new BCID();
@@ -865,7 +860,6 @@ void Servent::handshakeCMD(char *cmd)
             }else
             {
                 sprintf(jumpStr, "/%s/bcid.html", servMgr->htmlPath);
-                jumpArg = jumpStr;
             }
         }else if (cmpCGIarg(cmd, "cmd=", "apply"))
         {
@@ -1032,12 +1026,10 @@ void Servent::handshakeCMD(char *cmd)
 
                 servMgr->serverHost.port = newPort;
                 servMgr->restartServer=true;
-                jumpArg = jumpStr;
 
             }else
             {
                 sprintf(jumpStr, "/%s/settings.html", servMgr->htmlPath);
-                jumpArg = jumpStr;
             }
 
             peercastInst->saveSettings();
@@ -1093,7 +1085,6 @@ void Servent::handshakeCMD(char *cmd)
                 c->startURL(curl.cstr());
 
             sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
-            jumpArg = jumpStr;
         }else if (cmpCGIarg(cmd, "cmd=", "stopserv"))
         {
             char *cp = cmd;
@@ -1107,7 +1098,6 @@ void Servent::handshakeCMD(char *cmd)
                 }
             }
             sprintf(jumpStr, "/%s/connections.html", servMgr->htmlPath);
-            jumpArg = jumpStr;
         }else if (cmpCGIarg(cmd, "cmd=", "hitlist"))
         {
             bool stayConnected=hasCGIarg(cmd, "relay");
@@ -1143,7 +1133,6 @@ void Servent::handshakeCMD(char *cmd)
             {
                 sys->sleep(500);
                 sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
-                jumpArg = jumpStr;
             }
         }else if (cmpCGIarg(cmd, "cmd=", "clear"))
         {
@@ -1162,13 +1151,11 @@ void Servent::handshakeCMD(char *cmd)
             }
 
             sprintf(jumpStr, "/%s/index.html", servMgr->htmlPath);
-            jumpArg = jumpStr;
         }else if (cmpCGIarg(cmd, "cmd=", "upgrade"))
         {
             if (servMgr->downloadURL[0])
             {
                 sprintf(jumpStr, "/admin?cmd=redirect&url=%s", servMgr->downloadURL);
-                jumpArg = jumpStr;
             }
         }else if (cmpCGIarg(cmd, "cmd=", "connect"))
         {
@@ -1184,7 +1171,6 @@ void Servent::handshakeCMD(char *cmd)
                 s=s->next;
             }
             sprintf(jumpStr, "/%s/connections.html", servMgr->htmlPath);
-            jumpArg = jumpStr;
         }else if (cmpCGIarg(cmd, "cmd=", "shutdown"))
         {
             servMgr->shutdownTimer = 1;
@@ -1204,7 +1190,6 @@ void Servent::handshakeCMD(char *cmd)
 
             sys->sleep(500);
             sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
-            jumpArg = jumpStr;
         }else if (cmpCGIarg(cmd, "cmd=", "bump"))
         {
             GnuID id;
@@ -1220,7 +1205,6 @@ void Servent::handshakeCMD(char *cmd)
                 c->bump = true;
 
             sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
-            jumpArg = jumpStr;
         }else if (cmpCGIarg(cmd, "cmd=", "keep"))
         {
             GnuID id;
@@ -1236,7 +1220,6 @@ void Servent::handshakeCMD(char *cmd)
                 c->stayConnected = true;
 
             sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
-            jumpArg = jumpStr;
         }else if (cmpCGIarg(cmd, "cmd=", "relay"))
         {
             ChanInfo info;
@@ -1262,7 +1245,6 @@ void Servent::handshakeCMD(char *cmd)
             }
 
             sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
-            jumpArg = jumpStr;
         }else if (cmpCGIarg(cmd, "net=", "add"))
         {
             GnuID id;
@@ -1281,7 +1263,7 @@ void Servent::handshakeCMD(char *cmd)
             }
         }else if (cmpCGIarg(cmd, "cmd=", "logout"))
         {
-            jumpArg = "/";
+            strcpy(jumpStr, "/");
             servMgr->cookieList.remove(cookie);
         }else if (cmpCGIarg(cmd, "cmd=", "login"))
         {
@@ -1302,7 +1284,6 @@ void Servent::handshakeCMD(char *cmd)
             http.writeLine("");
         }else{
             sprintf(jumpStr, "/%s/index.html", servMgr->htmlPath);
-            jumpArg = jumpStr;
         }
     }catch (StreamException &e)
     {
@@ -1310,9 +1291,9 @@ void Servent::handshakeCMD(char *cmd)
         LOG_ERROR("html: %s", e.msg);
     }
 
-    if (jumpArg)
+    if (strcmp(jumpStr, "")!=0)
     {
-        String jmp(jumpArg, String::T_HTML);
+        String jmp(jumpStr, String::T_HTML);
         jmp.convertTo(String::T_ASCII);
         html.locateTo(jmp.cstr());
     }
