@@ -968,12 +968,18 @@ void ServMgr::saveSettings(const char *fn)
             iniFile.writeLine("[End]");
         }
 
+        for (auto feed : servMgr->channelDirectory.feeds())
+        {
+            iniFile.writeSection("Feed");
+            iniFile.writeStrValue("url", feed.c_str());
+            iniFile.writeLine("[End]");
+        }
+
         iniFile.writeSection("Notify");
             iniFile.writeBoolValue("PeerCast", notifyMask&NT_PEERCAST);
             iniFile.writeBoolValue("Broadcasters", notifyMask&NT_BROADCASTERS);
             iniFile.writeBoolValue("TrackInfo", notifyMask&NT_TRACKINFO);
         iniFile.writeLine("[End]");
-
 
         iniFile.writeSection("Server1");
             writeServerSettings(iniFile, allowServer1);
@@ -1290,6 +1296,16 @@ void ServMgr::loadSettings(const char *fn)
 
                 if (numFilters < (MAX_FILTERS-1))
                     numFilters++;
+            }
+            else if (iniFile.isName("[Feed]"))
+            {
+                while (iniFile.readNext())
+                {
+                    if (iniFile.isName("[End]"))
+                        break;
+                    else if (iniFile.isName("url"))
+                        servMgr->channelDirectory.addFeed(iniFile.getStrValue());
+                }
             }
             else if (iniFile.isName("[Notify]"))
             {

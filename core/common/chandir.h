@@ -39,15 +39,12 @@ public:
 class ChannelDirectory
 {
 public:
-    ChannelDirectory()
-        : m_lastUpdate(0)
-    {
-        m_feeds.push_back("http://bayonet.ddo.jp/sp/index.txt");
-        m_feeds.push_back("http://temp.orz.hm/yp/index.txt");
-    }
+    ChannelDirectory();
 
     int numChannels();
     int numFeeds();
+    std::vector<std::string> feeds();
+    bool addFeed(std::string url);
 
     bool update();
 

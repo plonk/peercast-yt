@@ -51,6 +51,11 @@ std::vector<ChannelEntry> ChannelEntry::textToChannelEntries(std::string text)
     return res;
 }
 
+ChannelDirectory::ChannelDirectory()
+    : m_lastUpdate(0)
+{
+}
+
 int ChannelDirectory::numChannels()
 {
     CriticalSection cs(m_lock);
@@ -226,4 +231,31 @@ bool ChannelDirectory::writeVariable(Stream& out, const String& varName, int ind
     } else {
         return false;
     }
+}
+
+std::vector<std::string> ChannelDirectory::feeds()
+{
+    CriticalSection cs(m_lock);
+    return m_feeds;
+}
+
+bool ChannelDirectory::addFeed(std::string url)
+{
+    CriticalSection cs(m_lock);
+
+    auto iter = find(m_feeds.begin(), m_feeds.end(), url);
+
+    if (iter != m_feeds.end()) {
+        LOG_ERROR("Already have feed %s", url.c_str());
+        return false;
+    }
+
+    boost::network::uri::uri u(url);
+    if (!u.is_valid() || u.scheme() != "http") {
+        LOG_ERROR("Invalid feed URL %s", url.c_str());
+        return false;
+    }
+
+    m_feeds.push_back(url);
+    return true;
 }
