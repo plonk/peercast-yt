@@ -21,6 +21,7 @@
 #define _SERVMGR_H
 
 #include "servent.h"
+#include "chandir.h"
 
 // ----------------------------------
 
@@ -322,6 +323,23 @@ public:
         return maxBitrateOut ? (BYTES_TO_KBPS(totalOutput(false))+br) > maxBitrateOut  : false;
     }
 
+    String ypIP() const
+    {
+        auto ypAddress = rootHost;
+        char *addr = ypAddress.cstr();
+        auto end = strchr(addr, ':');
+
+        if (end == nullptr)
+            end = addr + strlen(addr);
+
+        String res;
+
+        strncpy(res.cstr(), addr, end - addr);
+        res.cstr()[end - addr] = '\0';
+
+        return res;
+    }
+
     unsigned int    totalOutput(bool);
 
     static ThreadInfo   serverThread, idleThread;
@@ -391,6 +409,7 @@ public:
 
     String              chanLog;
 
+    ChannelDirectory    channelDirectory;
 
 private:
     FW_STATE            firewalled;

@@ -1907,6 +1907,9 @@ int ServMgr::idleProc(ThreadInfo *thread)
             chanMgr->closeOldestIdle();
 
 
+        // チャンネル一覧を取得する。
+        servMgr->channelDirectory.update();
+
         sys->sleep(500);
     }
 
@@ -2114,6 +2117,8 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
         serverHost.IPtoStr(buf);
     else if (var == "ypAddress")
         strcpy(buf, rootHost.cstr());
+    else if (var == "ypIP")
+        strcpy(buf, ypIP().cstr());
     else if (var == "password")
         strcpy(buf, password);
     else if (var == "isFirewalled")
@@ -2230,6 +2235,12 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
         else
             strcpy(buf, "0");
 
+    }else if (var == "numExternalChannels")
+    {
+        sprintf(buf, "%d", channelDirectory.numChannels());
+    }else if (var == "numChannelFeeds")
+    {
+        sprintf(buf, "%d", channelDirectory.numFeeds() + 1);
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);

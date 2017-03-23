@@ -61,7 +61,7 @@
               <table width="100%" border="1" cellpadding="1" cellspacing="0">
                 <tr class="normal">
                   <td width="12.5%"><div align="center"><a href="index.html">{#_Information_navbar}</a></div></td>
-                  <td width="12.5%"><div align="center"><a href="http://yp.peercast.org/?host={$servMgr.serverLocalIP}:{$servMgr.serverPort1}" target="_blank">{#_Yellow Pages_navbar}</a></div></td>
+                  <td width="12.5%"><div align="center"><a href="channels.html">{#_Yellow Pages_navbar}</a></div></td>
                   <td width="12.5%"><div align="center"><a href="relays.html">{#_Relays_navbar}</a></div></td>
                   <td width="12.5%"><div align="center"><a href="broadcast.html">{#_Broadcast_navbar}</a></div></td>
                   <td width="12.5%"><div align="center"><a href="connections.html">{#_Connections_navbar}</a></div></td>

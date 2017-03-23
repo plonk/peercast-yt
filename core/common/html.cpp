@@ -129,8 +129,13 @@ void HTML::writeVariable(Stream &s, const String &varName, int loop)
 
                 }
             }
+        }else if (varName.startsWith("loop.externalChannel."))
+        {
+            r = servMgr->channelDirectory.writeVariable(s, varName + strlen("loop."), loop);
+        }else if (varName.startsWith("loop.channelFeed."))
+        {
+            r = servMgr->channelDirectory.writeVariable(s, varName + strlen("loop."), loop);
         }
-
     }
     else if (varName.startsWith("page."))
     {
