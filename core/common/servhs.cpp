@@ -83,7 +83,7 @@ char *nextCGIarg(char *cp, char *cmd, char *arg)
 // -----------------------------------
 bool getCGIargBOOL(char *a)
 {
-    return (strcmp(a, "1")==0);
+    return (strcmp(a, "1") == 0);
 }
 // -----------------------------------
 int getCGIargINT(char *a)
@@ -147,7 +147,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
         if (pt)
             pt[-1] = 0;
 
-        if (strncmp(fn, "/admin?", 7)==0)
+        if (strncmp(fn, "/admin?", 7) == 0)
         {
             if (!isAllowed(ALLOW_HTML))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
@@ -156,7 +156,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
             LOG_DEBUG("Admin client");
             handshakeCMD(fn+7);
 
-        }else if (strncmp(fn, "/http/", 6)==0)
+        }else if (strncmp(fn, "/http/", 6) == 0)
         {
             String dirName = fn+6;
 
@@ -170,7 +170,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
             handshakeRemoteFile(dirName);
 
 
-        }else if (strncmp(fn, "/html/", 6)==0)
+        }else if (strncmp(fn, "/html/", 6) == 0)
         {
             String dirName = fn+1;
 
@@ -181,7 +181,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
                 handshakeLocalFile(dirName);
 
 
-        }else if (strncmp(fn, "/admin/?", 8)==0)
+        }else if (strncmp(fn, "/admin/?", 8) == 0)
         {
             if (!isAllowed(ALLOW_HTML))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
@@ -189,7 +189,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
             LOG_DEBUG("Admin client");
             handshakeCMD(fn+8);
 
-        }else if (strncmp(fn, "/admin.cgi", 10)==0)
+        }else if (strncmp(fn, "/admin.cgi", 10) == 0)
         {
             if (!isAllowed(ALLOW_BROADCAST))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
@@ -216,7 +216,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
                         bool match=true;
 
                         if (mountArg)
-                            match = strcmp(c->mount, mountArg)==0;
+                            match = strcmp(c->mount, mountArg) == 0;
 
                         if (match)
                         {
@@ -235,7 +235,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
                 }
             }
 
-        }else if (strncmp(fn, "/pls/", 5)==0)
+        }else if (strncmp(fn, "/pls/", 5) == 0)
         {
 
             if (!sock->host.isLocalhost())
@@ -249,7 +249,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
             else
                 throw HTTPException(HTTP_SC_NOTFOUND, 404);
 
-        }else if (strncmp(fn, "/stream/", 8)==0)
+        }else if (strncmp(fn, "/stream/", 8) == 0)
         {
 
             if (!sock->host.isLocalhost())
@@ -259,7 +259,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
             triggerChannel(fn+8, ChanInfo::SP_HTTP, isPrivate());
 
 
-        }else if (strncmp(fn, "/channel/", 9)==0)
+        }else if (strncmp(fn, "/channel/", 9) == 0)
         {
 
             if (!sock->host.isLocalhost())
@@ -268,7 +268,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 
             triggerChannel(fn+9, ChanInfo::SP_PCP, false);
 
-        }else if (strcmp(fn, "/api/1")==0)
+        }else if (strcmp(fn, "/api/1") == 0)
         {
             if (!isAllowed(ALLOW_HTML))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
@@ -298,7 +298,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
         if (pt)
             pt[-1] = 0;
 
-        if (strcmp(fn, "/api/1")==0)
+        if (strcmp(fn, "/api/1") == 0)
         {
             if (!isAllowed(ALLOW_HTML))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
@@ -648,7 +648,7 @@ bool Servent::handshakeHTTPBasicAuth(HTTP &http)
     if (sock->host.isLocalhost())
         return true;
 
-    if (strlen(servMgr->password) != 0 && strcmp(pass, servMgr->password)==0)
+    if (strlen(servMgr->password) != 0 && strcmp(pass, servMgr->password) == 0)
         return true;
 
     http.writeLine(HTTP_SC_UNAUTHORIZED);
@@ -669,7 +669,7 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
         String tmp = pwd;
         char *as = strstr(tmp.cstr(), "&");
         if (as) *as = 0;
-        if (strcmp(tmp, servMgr->password)==0)
+        if (strcmp(tmp, servMgr->password) == 0)
         {
             while (http.nextHeader());
             return true;
@@ -721,7 +721,7 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
     {
         case ServMgr::AUTH_HTTPBASIC:
 
-            if ((strcmp(pass, servMgr->password)==0) && strlen(servMgr->password))
+            if ((strcmp(pass, servMgr->password) == 0) && strlen(servMgr->password))
                 return true;
             break;
         case ServMgr::AUTH_COOKIE:
@@ -812,11 +812,11 @@ void Servent::CMD_edit_bcid(char *cmd, HTTP& http, HTML& html, char jumpStr[])
 
     while (cp=nextCGIarg(cp, curr, arg))
         {
-            if (strcmp(curr, "id")==0)
+            if (strcmp(curr, "id") == 0)
                 id.fromStr(arg);
-            else if (strcmp(curr, "del")==0)
+            else if (strcmp(curr, "del") == 0)
                 servMgr->removeValidBCID(id);
-            else if (strcmp(curr, "valid")==0)
+            else if (strcmp(curr, "valid") == 0)
                 {
                     bcid = servMgr->findValidBCID(id);
                     if (bcid)
@@ -839,17 +839,17 @@ void Servent::CMD_add_bcid(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     bool result=false;
     while (cp=nextCGIarg(cp, curr, arg))
         {
-            if (strcmp(curr, "id")==0)
+            if (strcmp(curr, "id") == 0)
                 bcid->id.fromStr(arg);
-            else if (strcmp(curr, "name")==0)
+            else if (strcmp(curr, "name") == 0)
                 bcid->name.set(arg);
-            else if (strcmp(curr, "email")==0)
+            else if (strcmp(curr, "email") == 0)
                 bcid->email.set(arg);
-            else if (strcmp(curr, "url")==0)
+            else if (strcmp(curr, "url") == 0)
                 bcid->url.set(arg);
-            else if (strcmp(curr, "valid")==0)
+            else if (strcmp(curr, "valid") == 0)
                 bcid->valid = getCGIargBOOL(arg);
-            else if (strcmp(curr, "result")==0)
+            else if (strcmp(curr, "result") == 0)
                 result = true;
         }
 
@@ -869,9 +869,6 @@ void Servent::CMD_add_bcid(char *cmd, HTTP& http, HTML& html, char jumpStr[])
 
 void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, char jumpStr[])
 {
-    char arg[MAX_CGI_LEN];
-    char curr[MAX_CGI_LEN];
-
     servMgr->numFilters = 0;
     ServFilter *currFilter=servMgr->filters;
 
@@ -882,96 +879,97 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     int allowServer2=0;
     int newPort=servMgr->serverHost.port;
 
+    char arg[MAX_CGI_LEN];
+    char curr[MAX_CGI_LEN];
     char *cp = cmd;
     while (cp=nextCGIarg(cp, curr, arg))
     {
         // server
-        if (strcmp(curr, "serveractive")==0)
+        if (strcmp(curr, "serveractive") == 0)
             servMgr->autoServe = getCGIargBOOL(arg);
-        else if (strcmp(curr, "port")==0)
+        else if (strcmp(curr, "port") == 0)
             newPort = getCGIargINT(arg);
-        else if (strcmp(curr, "icymeta")==0)
+        else if (strcmp(curr, "icymeta") == 0)
         {
             int iv = getCGIargINT(arg);
             if (iv < 0) iv = 0;
             else if (iv > 16384) iv = 16384;
 
             chanMgr->icyMetaInterval = iv;
-        }else if (strcmp(curr, "passnew")==0)
+        }else if (strcmp(curr, "passnew") == 0)
             strcpy(servMgr->password, arg);
-        else if (strcmp(curr, "root")==0)
+        else if (strcmp(curr, "root") == 0)
             servMgr->isRoot = getCGIargBOOL(arg);
-        else if (strcmp(curr, "brroot")==0)
+        else if (strcmp(curr, "brroot") == 0)
             brRoot = getCGIargBOOL(arg);
-        else if (strcmp(curr, "getupd")==0)
+        else if (strcmp(curr, "getupd") == 0)
             getUpd = getCGIargBOOL(arg);
-        else if (strcmp(curr, "huint")==0)
+        else if (strcmp(curr, "huint") == 0)
             chanMgr->setUpdateInterval(getCGIargINT(arg));
-        else if (strcmp(curr, "forceip")==0)
+        else if (strcmp(curr, "forceip") == 0)
             servMgr->forceIP = arg;
-        else if (strcmp(curr, "htmlPath")==0)
+        else if (strcmp(curr, "htmlPath") == 0)
         {
             strcpy(servMgr->htmlPath, "html/");
             strcat(servMgr->htmlPath, arg);
-        }else if (strcmp(curr, "djmsg")==0)
+        }else if (strcmp(curr, "djmsg") == 0)
         {
             String msg;
             msg.set(arg, String::T_ESC);
             msg.convertTo(String::T_UNICODE);
             chanMgr->setBroadcastMsg(msg);
         }
-        else if (strcmp(curr, "pcmsg")==0)
+        else if (strcmp(curr, "pcmsg") == 0)
         {
             servMgr->rootMsg.set(arg, String::T_ESC);
             servMgr->rootMsg.convertTo(String::T_UNICODE);
-        }else if (strcmp(curr, "minpgnu")==0)
+        }else if (strcmp(curr, "minpgnu") == 0)
             servMgr->minGnuIncoming = atoi(arg);
-        else if (strcmp(curr, "maxpgnu")==0)
+        else if (strcmp(curr, "maxpgnu") == 0)
             servMgr->maxGnuIncoming = atoi(arg);
 
         // connections
-        else if (strcmp(curr, "maxcin")==0)
+        else if (strcmp(curr, "maxcin") == 0)
             servMgr->maxControl = getCGIargINT(arg);
-        else if (strcmp(curr, "maxsin")==0)
+        else if (strcmp(curr, "maxsin") == 0)
             servMgr->maxServIn = getCGIargINT(arg);
 
-        else if (strcmp(curr, "maxup")==0)
+        else if (strcmp(curr, "maxup") == 0)
             servMgr->maxBitrateOut = getCGIargINT(arg);
-        else if (strcmp(curr, "maxrelays")==0)
+        else if (strcmp(curr, "maxrelays") == 0)
             servMgr->setMaxRelays(getCGIargINT(arg));
-        else if (strcmp(curr, "maxdirect")==0)
+        else if (strcmp(curr, "maxdirect") == 0)
             servMgr->maxDirect = getCGIargINT(arg);
-        else if (strcmp(curr, "maxrelaypc")==0)
+        else if (strcmp(curr, "maxrelaypc") == 0)
             chanMgr->maxRelaysPerChannel = getCGIargINT(arg);
-        else if (strncmp(curr, "filt_", 5)==0)
+        else if (strncmp(curr, "filt_", 5) == 0)
         {
             char *fs = curr+5;
+
+            if (strncmp(fs, "ip", 2) == 0)        // ip must be first
             {
-                if (strncmp(fs, "ip", 2)==0)        // ip must be first
+                currFilter = &servMgr->filters[servMgr->numFilters];
+                currFilter->init();
+                currFilter->host.fromStrIP(arg, DEFAULT_PORT);
+                if ((currFilter->host.ip) && (servMgr->numFilters < (ServMgr::MAX_FILTERS-1)))
                 {
-                    currFilter = &servMgr->filters[servMgr->numFilters];
-                    currFilter->init();
-                    currFilter->host.fromStrIP(arg, DEFAULT_PORT);
-                    if ((currFilter->host.ip) && (servMgr->numFilters < (ServMgr::MAX_FILTERS-1)))
-                    {
-                        servMgr->numFilters++;
-                        servMgr->filters[servMgr->numFilters].init();   // clear new entry
-                    }
-                }else if (strncmp(fs, "bn", 2)==0)
-                    currFilter->flags |= ServFilter::F_BAN;
-                else if (strncmp(fs, "pr", 2)==0)
-                    currFilter->flags |= ServFilter::F_PRIVATE;
-                else if (strncmp(fs, "nw", 2)==0)
-                    currFilter->flags |= ServFilter::F_NETWORK;
-                else if (strncmp(fs, "di", 2)==0)
-                    currFilter->flags |= ServFilter::F_DIRECT;
-            }
+                    servMgr->numFilters++;
+                    servMgr->filters[servMgr->numFilters].init();   // clear new entry
+                }
+            }else if (strncmp(fs, "bn", 2) == 0)
+                currFilter->flags |= ServFilter::F_BAN;
+            else if (strncmp(fs, "pr", 2) == 0)
+                currFilter->flags |= ServFilter::F_PRIVATE;
+            else if (strncmp(fs, "nw", 2) == 0)
+                currFilter->flags |= ServFilter::F_NETWORK;
+            else if (strncmp(fs, "di", 2) == 0)
+                currFilter->flags |= ServFilter::F_DIRECT;
         }
 
         // client
-        else if (strcmp(curr, "clientactive")==0)
+        else if (strcmp(curr, "clientactive") == 0)
             servMgr->autoConnect = getCGIargBOOL(arg);
-        else if (strcmp(curr, "yp")==0)
+        else if (strcmp(curr, "yp") == 0)
         {
             if (!PCP_FORCE_YP)
             {
@@ -980,46 +978,46 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, char jumpStr[])
                 servMgr->rootHost = str;
             }
         }
-        else if (strcmp(curr, "deadhitage")==0)
+        else if (strcmp(curr, "deadhitage") == 0)
             chanMgr->deadHitAge = getCGIargINT(arg);
-        else if (strcmp(curr, "refresh")==0)
+        else if (strcmp(curr, "refresh") == 0)
             servMgr->refreshHTML = getCGIargINT(arg);
-        else if (strcmp(curr, "auth")==0)
+        else if (strcmp(curr, "auth") == 0)
         {
-            if (strcmp(arg, "cookie")==0)
+            if (strcmp(arg, "cookie") == 0)
                 servMgr->authType = ServMgr::AUTH_COOKIE;
-            else if (strcmp(arg, "http")==0)
+            else if (strcmp(arg, "http") == 0)
                 servMgr->authType = ServMgr::AUTH_HTTPBASIC;
-        }else if (strcmp(curr, "expire")==0)
+        }else if (strcmp(curr, "expire") == 0)
         {
-            if (strcmp(arg, "session")==0)
+            if (strcmp(arg, "session") == 0)
                 servMgr->cookieList.neverExpire = false;
-            else if (strcmp(arg, "never")==0)
+            else if (strcmp(arg, "never") == 0)
                 servMgr->cookieList.neverExpire = true;
         }
 
-        else if (strcmp(curr, "logDebug")==0)
-            showLog |= atoi(arg)?(1<<LogBuffer::T_DEBUG):0;
-        else if (strcmp(curr, "logErrors")==0)
-            showLog |= atoi(arg)?(1<<LogBuffer::T_ERROR):0;
-        else if (strcmp(curr, "logNetwork")==0)
-            showLog |= atoi(arg)?(1<<LogBuffer::T_NETWORK):0;
-        else if (strcmp(curr, "logChannel")==0)
-            showLog |= atoi(arg)?(1<<LogBuffer::T_CHANNEL):0;
+        else if (strcmp(curr, "logDebug") == 0)
+            showLog |= atoi(arg) ? (1<<LogBuffer::T_DEBUG) : 0;
+        else if (strcmp(curr, "logErrors") == 0)
+            showLog |= atoi(arg) ? (1<<LogBuffer::T_ERROR) : 0;
+        else if (strcmp(curr, "logNetwork") == 0)
+            showLog |= atoi(arg) ? (1<<LogBuffer::T_NETWORK) : 0;
+        else if (strcmp(curr, "logChannel") == 0)
+            showLog |= atoi(arg) ? (1<<LogBuffer::T_CHANNEL) : 0;
 
-        else if (strcmp(curr, "allowHTML1")==0)
-            allowServer1 |= atoi(arg)?(ALLOW_HTML):0;
-        else if (strcmp(curr, "allowNetwork1")==0)
-            allowServer1 |= atoi(arg)?(ALLOW_NETWORK):0;
-        else if (strcmp(curr, "allowBroadcast1")==0)
-            allowServer1 |= atoi(arg)?(ALLOW_BROADCAST):0;
-        else if (strcmp(curr, "allowDirect1")==0)
-            allowServer1 |= atoi(arg)?(ALLOW_DIRECT):0;
+        else if (strcmp(curr, "allowHTML1") == 0)
+            allowServer1 |= atoi(arg) ? (ALLOW_HTML) : 0;
+        else if (strcmp(curr, "allowNetwork1") == 0)
+            allowServer1 |= atoi(arg) ? (ALLOW_NETWORK) : 0;
+        else if (strcmp(curr, "allowBroadcast1") == 0)
+            allowServer1 |= atoi(arg) ? (ALLOW_BROADCAST) : 0;
+        else if (strcmp(curr, "allowDirect1") == 0)
+            allowServer1 |= atoi(arg) ? (ALLOW_DIRECT) : 0;
 
-        else if (strcmp(curr, "allowHTML2")==0)
-            allowServer2 |= atoi(arg)?(ALLOW_HTML):0;
-        else if (strcmp(curr, "allowBroadcast2")==0)
-            allowServer2 |= atoi(arg)?(ALLOW_BROADCAST):0;
+        else if (strcmp(curr, "allowHTML2") == 0)
+            allowServer2 |= atoi(arg) ? (ALLOW_HTML) : 0;
+        else if (strcmp(curr, "allowBroadcast2") == 0)
+            allowServer2 |= atoi(arg) ? (ALLOW_BROADCAST) : 0;
     }
 
     servMgr->showLog = showLog;
@@ -1035,7 +1033,6 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, char jumpStr[])
 
         servMgr->serverHost.port = newPort;
         servMgr->restartServer=true;
-
     }else
     {
         sprintf(jumpStr, "/%s/settings.html", servMgr->htmlPath);
@@ -1059,30 +1056,30 @@ void Servent::CMD_fetch(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     char *cp = cmd;
     while (cp=nextCGIarg(cp, curr, arg))
     {
-        if (strcmp(curr, "url")==0)
+        if (strcmp(curr, "url") == 0)
         {
             curl.set(arg, String::T_ESC);
             curl.convertTo(String::T_UNICODE);
-        }else if (strcmp(curr, "name")==0)
+        }else if (strcmp(curr, "name") == 0)
         {
             info.name.set(arg, String::T_ESC);
             info.name.convertTo(String::T_UNICODE);
-        }else if (strcmp(curr, "desc")==0)
+        }else if (strcmp(curr, "desc") == 0)
         {
             info.desc.set(arg, String::T_ESC);
             info.desc.convertTo(String::T_UNICODE);
-        }else if (strcmp(curr, "genre")==0)
+        }else if (strcmp(curr, "genre") == 0)
         {
             info.genre.set(arg, String::T_ESC);
             info.genre.convertTo(String::T_UNICODE);
-        }else if (strcmp(curr, "contact")==0)
+        }else if (strcmp(curr, "contact") == 0)
         {
             info.url.set(arg, String::T_ESC);
             info.url.convertTo(String::T_UNICODE);
-        }else if (strcmp(curr, "bitrate")==0)
+        }else if (strcmp(curr, "bitrate") == 0)
         {
             info.bitrate = atoi(arg);
-        }else if (strcmp(curr, "type")==0)
+        }else if (strcmp(curr, "type") == 0)
         {
             ChanInfo::TYPE type = ChanInfo::getTypeFromStr(arg);
             info.contentType = type;
@@ -1109,7 +1106,7 @@ void Servent::CMD_stopserv(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     char *cp = cmd;
     while (cp=nextCGIarg(cp, curr, arg))
     {
-        if (strcmp(curr, "index")==0)
+        if (strcmp(curr, "index") == 0)
         {
             Servent *s = servMgr->findServentByIndex(atoi(arg));
             if (s)
@@ -1165,11 +1162,11 @@ void Servent::CMD_clear(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     char *cp = cmd;
     while (cp=nextCGIarg(cp, curr, arg))
     {
-        if (strcmp(curr, "hostcache")==0)
+        if (strcmp(curr, "hostcache") == 0)
             servMgr->clearHostCache(ServHost::T_SERVENT);
-        else if (strcmp(curr, "hitlists")==0)
+        else if (strcmp(curr, "hitlists") == 0)
             chanMgr->clearHitLists();
-        else if (strcmp(curr, "packets")==0)
+        else if (strcmp(curr, "packets") == 0)
         {
             stats.clearRange(Stats::PACKETSSTART, Stats::PACKETSEND);
             servMgr->numVersions = 0;
@@ -1217,7 +1214,7 @@ void Servent::CMD_stop(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     char *cp = cmd;
     while (cp=nextCGIarg(cp, curr, arg))
     {
-        if (strcmp(curr, "id")==0)
+        if (strcmp(curr, "id") == 0)
             id.fromStr(arg);
     }
 
@@ -1238,7 +1235,7 @@ void Servent::CMD_bump(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     char *cp = cmd;
     while (cp=nextCGIarg(cp, curr, arg))
     {
-        if (strcmp(curr, "id")==0)
+        if (strcmp(curr, "id") == 0)
             id.fromStr(arg);
     }
 
@@ -1258,7 +1255,7 @@ void Servent::CMD_keep(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     char *cp = cmd;
     while (cp=nextCGIarg(cp, curr, arg))
     {
-        if (strcmp(curr, "id")==0)
+        if (strcmp(curr, "id") == 0)
             id.fromStr(arg);
     }
 
@@ -1278,7 +1275,7 @@ void Servent::CMD_relay(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     char *cp = cmd;
     while (cp=nextCGIarg(cp, curr, arg))
     {
-        if (strcmp(curr, "id")==0)
+        if (strcmp(curr, "id") == 0)
             info.id.fromStr(arg);
     }
 
@@ -1307,13 +1304,13 @@ void Servent::CMD_net_add(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     GnuID id;
     while (cmd=nextCGIarg(cmd, curr, arg))
     {
-        if (strcmp(curr, "ip")==0)
+        if (strcmp(curr, "ip") == 0)
         {
             Host h;
             h.fromStrIP(arg, DEFAULT_PORT);
             if (servMgr->addOutgoing(h, id, true))
                 LOG_NETWORK("Added connection: %s", arg);
-        }else if (strcmp(curr, "id")==0)
+        }else if (strcmp(curr, "id") == 0)
         {
             id.fromStr(arg);
         }
@@ -1783,7 +1780,7 @@ void Servent::handshakeRemoteFile(const char *dirName)
         int len=0;
         char buf[4096];
         len = rsock->readUpto(buf, sizeof(buf));
-        if (len==0)
+        if (len == 0)
             break;
         else
             mem.write(buf, len);
