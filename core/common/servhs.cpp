@@ -760,7 +760,6 @@ void Servent::handshakeCMD(char *cmd)
 
     char    jumpStr[128];
     const char  *jumpArg = NULL;
-    bool    retHTML = true;
     strcpy(result, "OK");
 
     HTTP http(*sock);
@@ -795,7 +794,6 @@ void Servent::handshakeCMD(char *cmd)
         }else if (cmpCGIarg(cmd, "cmd=", "viewxml"))
         {
             handshakeXML();
-            retHTML = false;
         }else if (cmpCGIarg(cmd, "cmd=", "clearlog"))
         {
             sys->logBuf->clear();
@@ -818,6 +816,7 @@ void Servent::handshakeCMD(char *cmd)
             char *cp = cmd;
             GnuID id;
             BCID *bcid;
+
             while (cp=nextCGIarg(cp, curr, arg))
             {
                 if (strcmp(curr, "id")==0)
@@ -831,6 +830,7 @@ void Servent::handshakeCMD(char *cmd)
                         bcid->valid = getCGIargBOOL(arg);
                 }
             }
+
             peercastInst->saveSettings();
             sprintf(jumpStr, "/%s/bcid.html", servMgr->htmlPath);
             jumpArg = jumpStr;
@@ -897,7 +897,6 @@ void Servent::handshakeCMD(char *cmd)
                     else if (iv > 16384) iv = 16384;
 
                     chanMgr->icyMetaInterval = iv;
-
                 }else if (strcmp(curr, "passnew")==0)
                     strcpy(servMgr->password, arg);
                 else if (strcmp(curr, "root")==0)
@@ -958,7 +957,6 @@ void Servent::handshakeCMD(char *cmd)
                                 servMgr->numFilters++;
                                 servMgr->filters[servMgr->numFilters].init();   // clear new entry
                             }
-
                         }else if (strncmp(fs, "bn", 2)==0)
                             currFilter->flags |= ServFilter::F_BAN;
                         else if (strncmp(fs, "pr", 2)==0)
@@ -992,7 +990,6 @@ void Servent::handshakeCMD(char *cmd)
                         servMgr->authType = ServMgr::AUTH_COOKIE;
                     else if (strcmp(arg, "http")==0)
                         servMgr->authType = ServMgr::AUTH_HTTPBASIC;
-
                 }else if (strcmp(curr, "expire")==0)
                 {
                     if (strcmp(arg, "session")==0)
@@ -1047,7 +1044,6 @@ void Servent::handshakeCMD(char *cmd)
             }
 
             peercastInst->saveSettings();
-
             peercastApp->updateSettings();
 
             if ((servMgr->isRoot) && (brRoot))
@@ -1091,7 +1087,6 @@ void Servent::handshakeCMD(char *cmd)
                     info.streamType = ChanInfo::getMIMEType(type);
                     info.streamExt = ChanInfo::getTypeExt(type);
                 }
-
             }
 
             info.bcID = chanMgr->broadcastID;
@@ -1258,11 +1253,9 @@ void Servent::handshakeCMD(char *cmd)
 
             if (!chanMgr->findChannelByID(info.id))
             {
-
                 ChanHitList *chl = chanMgr->findHitList(info);
                 if (!chl)
                     throw StreamException("channel not found");
-
 
                 Channel *c = chanMgr->createChannel(chl->info, NULL);
                 if (!c)
@@ -1276,7 +1269,6 @@ void Servent::handshakeCMD(char *cmd)
             jumpArg = jumpStr;
         }else if (cmpCGIarg(cmd, "net=", "add"))
         {
-
             GnuID id;
             while (cmd=nextCGIarg(cmd, curr, arg))
             {
@@ -1286,12 +1278,10 @@ void Servent::handshakeCMD(char *cmd)
                     h.fromStrIP(arg, DEFAULT_PORT);
                     if (servMgr->addOutgoing(h, id, true))
                         LOG_NETWORK("Added connection: %s", arg);
-
                 }else if (strcmp(curr, "id")==0)
                 {
                     id.fromStr(arg);
                 }
-
             }
         }else if (cmpCGIarg(cmd, "cmd=", "logout"))
         {
@@ -1318,21 +1308,17 @@ void Servent::handshakeCMD(char *cmd)
             sprintf(jumpStr, "/%s/index.html", servMgr->htmlPath);
             jumpArg = jumpStr;
         }
-
     }catch (StreamException &e)
     {
         html.startTagEnd("h1", "ERROR - %s", e.msg);
         LOG_ERROR("html: %s", e.msg);
     }
 
-    if (retHTML)
+    if (jumpArg)
     {
-        if (jumpArg)
-        {
-            String jmp(jumpArg, String::T_HTML);
-            jmp.convertTo(String::T_ASCII);
-            html.locateTo(jmp.cstr());
-        }
+        String jmp(jumpArg, String::T_HTML);
+        jmp.convertTo(String::T_ASCII);
+        html.locateTo(jmp.cstr());
     }
 }
 
