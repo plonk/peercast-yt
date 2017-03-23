@@ -754,13 +754,11 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
 // -----------------------------------
 void Servent::handshakeCMD(char *cmd)
 {
-    char result[MAX_CGI_LEN];
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
 
     char    jumpStr[128];
     const char  *jumpArg = NULL;
-    strcpy(result, "OK");
 
     HTTP http(*sock);
     HTML html("", *sock);
@@ -854,7 +852,6 @@ void Servent::handshakeCMD(char *cmd)
                     bcid->valid = getCGIargBOOL(arg);
                 else if (strcmp(curr, "result")==0)
                     result = true;
-
             }
 
             LOG_DEBUG("Adding BCID : %s", bcid->name.cstr());
@@ -1188,7 +1185,6 @@ void Servent::handshakeCMD(char *cmd)
             }
             sprintf(jumpStr, "/%s/connections.html", servMgr->htmlPath);
             jumpArg = jumpStr;
-
         }else if (cmpCGIarg(cmd, "cmd=", "shutdown"))
         {
             servMgr->shutdownTimer = 1;
