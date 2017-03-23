@@ -138,6 +138,8 @@
     //"Max. PGNU In"          : "",
     "Broadcast IDs"           : "ブロードキャストID",
     "Save Settings"           : "設定を保存",
+    "Channel Feeds"           : "チャンネルフィード",
+    "URL of index.txt"        : "index.txtのURL",
 
     // viewlog.html
     "Clear log"               : "ログをクリア",
