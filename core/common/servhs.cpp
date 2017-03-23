@@ -759,13 +759,12 @@ void Servent::handshakeCMD(char *cmd)
     char curr[MAX_CGI_LEN];
 
     char    jumpStr[128];
-    const char  *jumpArg=NULL;
-    bool    retHTML=true;
+    const char  *jumpArg = NULL;
+    bool    retHTML = true;
     strcpy(result, "OK");
 
     HTTP http(*sock);
     HTML html("", *sock);
-
 
     if (!handshakeAuth(http, cmd, true))
         return;
@@ -792,591 +791,532 @@ void Servent::handshakeCMD(char *cmd)
                         html.startTagEnd("h3", "Please wait...");
                     html.end();
                 html.end();
+            }
+        }else if (cmpCGIarg(cmd, "cmd=", "viewxml"))
+        {
+            handshakeXML();
+            retHTML = false;
+        }else if (cmpCGIarg(cmd, "cmd=", "clearlog"))
+        {
+            sys->logBuf->clear();
+            sprintf(jumpStr, "/%s/viewlog.html", servMgr->htmlPath);
+            jumpArg = jumpStr;
+        }else if (cmpCGIarg(cmd, "cmd=", "save"))
+        {
+            peercastInst->saveSettings();
+
+            sprintf(jumpStr, "/%s/settings.html", servMgr->htmlPath);
+            jumpArg = jumpStr;
+        }else if (cmpCGIarg(cmd, "cmd=", "reg"))
+        {
+            char idstr[128];
+            chanMgr->broadcastID.toStr(idstr);
+            sprintf(jumpStr, "http://www.peercast.org/register/?id=%s", idstr);
+            jumpArg = jumpStr;
+        }else if (cmpCGIarg(cmd, "cmd=", "edit_bcid"))
+        {
+            char *cp = cmd;
+            GnuID id;
+            BCID *bcid;
+            while (cp=nextCGIarg(cp, curr, arg))
+            {
+                if (strcmp(curr, "id")==0)
+                    id.fromStr(arg);
+                else if (strcmp(curr, "del")==0)
+                    servMgr->removeValidBCID(id);
+                else if (strcmp(curr, "valid")==0)
+                {
+                    bcid = servMgr->findValidBCID(id);
+                    if (bcid)
+                        bcid->valid = getCGIargBOOL(arg);
+                }
+            }
+            peercastInst->saveSettings();
+            sprintf(jumpStr, "/%s/bcid.html", servMgr->htmlPath);
+            jumpArg = jumpStr;
+        }else if (cmpCGIarg(cmd, "cmd=", "add_bcid"))
+        {
+            BCID *bcid = new BCID();
+
+            char *cp = cmd;
+            bool result=false;
+            while (cp=nextCGIarg(cp, curr, arg))
+            {
+                if (strcmp(curr, "id")==0)
+                    bcid->id.fromStr(arg);
+                else if (strcmp(curr, "name")==0)
+                    bcid->name.set(arg);
+                else if (strcmp(curr, "email")==0)
+                    bcid->email.set(arg);
+                else if (strcmp(curr, "url")==0)
+                    bcid->url.set(arg);
+                else if (strcmp(curr, "valid")==0)
+                    bcid->valid = getCGIargBOOL(arg);
+                else if (strcmp(curr, "result")==0)
+                    result = true;
 
             }
-        }else{
 
-            if (cmpCGIarg(cmd, "cmd=", "viewxml"))
+            LOG_DEBUG("Adding BCID : %s", bcid->name.cstr());
+            servMgr->addValidBCID(bcid);
+            peercastInst->saveSettings();
+            if (result)
             {
-
-                handshakeXML();
-                retHTML = false;
-            }else if (cmpCGIarg(cmd, "cmd=", "clearlog"))
+                http.writeLine(HTTP_SC_OK);
+                http.writeLine("");
+                http.writeString("OK");
+            }else
             {
-                sys->logBuf->clear();
-                sprintf(jumpStr, "/%s/viewlog.html", servMgr->htmlPath);
-                jumpArg = jumpStr;
-
-            }else if (cmpCGIarg(cmd, "cmd=", "save"))
-            {
-
-                peercastInst->saveSettings();
-
-                sprintf(jumpStr, "/%s/settings.html", servMgr->htmlPath);
-                jumpArg = jumpStr;
-            }else if (cmpCGIarg(cmd, "cmd=", "reg"))
-            {
-                char idstr[128];
-                chanMgr->broadcastID.toStr(idstr);
-                sprintf(jumpStr, "http://www.peercast.org/register/?id=%s", idstr);
-                jumpArg = jumpStr;
-            }else if (cmpCGIarg(cmd, "cmd=", "edit_bcid"))
-            {
-                char *cp = cmd;
-                GnuID id;
-                BCID *bcid;
-                while (cp=nextCGIarg(cp, curr, arg))
-                {
-                    if (strcmp(curr, "id")==0)
-                        id.fromStr(arg);
-                    else if (strcmp(curr, "del")==0)
-                        servMgr->removeValidBCID(id);
-                    else if (strcmp(curr, "valid")==0)
-                    {
-                        bcid = servMgr->findValidBCID(id);
-                        if (bcid)
-                            bcid->valid = getCGIargBOOL(arg);
-                    }
-                }
-                peercastInst->saveSettings();
                 sprintf(jumpStr, "/%s/bcid.html", servMgr->htmlPath);
                 jumpArg = jumpStr;
+            }
+        }else if (cmpCGIarg(cmd, "cmd=", "apply"))
+        {
+            servMgr->numFilters = 0;
+            ServFilter *currFilter=servMgr->filters;
 
-            }else if (cmpCGIarg(cmd, "cmd=", "add_bcid"))
+            bool brRoot=false;
+            bool getUpd=false;
+            int showLog=0;
+            int allowServer1=0;
+            int allowServer2=0;
+            int newPort=servMgr->serverHost.port;
+
+            char *cp = cmd;
+            while (cp=nextCGIarg(cp, curr, arg))
             {
-                BCID *bcid = new BCID();
-
-                char *cp = cmd;
-                bool result=false;
-                while (cp=nextCGIarg(cp, curr, arg))
+                // server
+                if (strcmp(curr, "serveractive")==0)
+                    servMgr->autoServe = getCGIargBOOL(arg);
+                else if (strcmp(curr, "port")==0)
+                    newPort = getCGIargINT(arg);
+                else if (strcmp(curr, "icymeta")==0)
                 {
-                    if (strcmp(curr, "id")==0)
-                        bcid->id.fromStr(arg);
-                    else if (strcmp(curr, "name")==0)
-                        bcid->name.set(arg);
-                    else if (strcmp(curr, "email")==0)
-                        bcid->email.set(arg);
-                    else if (strcmp(curr, "url")==0)
-                        bcid->url.set(arg);
-                    else if (strcmp(curr, "valid")==0)
-                        bcid->valid = getCGIargBOOL(arg);
-                    else if (strcmp(curr, "result")==0)
-                        result = true;
+                    int iv = getCGIargINT(arg);
+                    if (iv < 0) iv = 0;
+                    else if (iv > 16384) iv = 16384;
 
+                    chanMgr->icyMetaInterval = iv;
+
+                }else if (strcmp(curr, "passnew")==0)
+                    strcpy(servMgr->password, arg);
+                else if (strcmp(curr, "root")==0)
+                    servMgr->isRoot = getCGIargBOOL(arg);
+                else if (strcmp(curr, "brroot")==0)
+                    brRoot = getCGIargBOOL(arg);
+                else if (strcmp(curr, "getupd")==0)
+                    getUpd = getCGIargBOOL(arg);
+                else if (strcmp(curr, "huint")==0)
+                    chanMgr->setUpdateInterval(getCGIargINT(arg));
+                else if (strcmp(curr, "forceip")==0)
+                    servMgr->forceIP = arg;
+                else if (strcmp(curr, "htmlPath")==0)
+                {
+                    strcpy(servMgr->htmlPath, "html/");
+                    strcat(servMgr->htmlPath, arg);
+                }else if (strcmp(curr, "djmsg")==0)
+                {
+                    String msg;
+                    msg.set(arg, String::T_ESC);
+                    msg.convertTo(String::T_UNICODE);
+                    chanMgr->setBroadcastMsg(msg);
                 }
-
-                LOG_DEBUG("Adding BCID : %s", bcid->name.cstr());
-                servMgr->addValidBCID(bcid);
-                peercastInst->saveSettings();
-                if (result)
+                else if (strcmp(curr, "pcmsg")==0)
                 {
-                    http.writeLine(HTTP_SC_OK);
-                    http.writeLine("");
-                    http.writeString("OK");
-                }else
+                    servMgr->rootMsg.set(arg, String::T_ESC);
+                    servMgr->rootMsg.convertTo(String::T_UNICODE);
+                }else if (strcmp(curr, "minpgnu")==0)
+                    servMgr->minGnuIncoming = atoi(arg);
+                else if (strcmp(curr, "maxpgnu")==0)
+                    servMgr->maxGnuIncoming = atoi(arg);
+
+                // connections
+                else if (strcmp(curr, "maxcin")==0)
+                    servMgr->maxControl = getCGIargINT(arg);
+                else if (strcmp(curr, "maxsin")==0)
+                    servMgr->maxServIn = getCGIargINT(arg);
+
+                else if (strcmp(curr, "maxup")==0)
+                    servMgr->maxBitrateOut = getCGIargINT(arg);
+                else if (strcmp(curr, "maxrelays")==0)
+                    servMgr->setMaxRelays(getCGIargINT(arg));
+                else if (strcmp(curr, "maxdirect")==0)
+                    servMgr->maxDirect = getCGIargINT(arg);
+                else if (strcmp(curr, "maxrelaypc")==0)
+                    chanMgr->maxRelaysPerChannel = getCGIargINT(arg);
+                else if (strncmp(curr, "filt_", 5)==0)
                 {
-                    sprintf(jumpStr, "/%s/bcid.html", servMgr->htmlPath);
-                    jumpArg = jumpStr;
-                }
-
-
-            }else if (cmpCGIarg(cmd, "cmd=", "apply"))
-            {
-                servMgr->numFilters = 0;
-                ServFilter *currFilter=servMgr->filters;
-
-                bool brRoot=false;
-                bool getUpd=false;
-                int showLog=0;
-                int allowServer1=0;
-                int allowServer2=0;
-                int newPort=servMgr->serverHost.port;
-
-                char *cp = cmd;
-                while (cp=nextCGIarg(cp, curr, arg))
-                {
-                    // server
-                    if (strcmp(curr, "serveractive")==0)
-                        servMgr->autoServe = getCGIargBOOL(arg);
-                    else if (strcmp(curr, "port")==0)
-                        newPort = getCGIargINT(arg);
-                    else if (strcmp(curr, "icymeta")==0)
+                    char *fs = curr+5;
                     {
-                        int iv = getCGIargINT(arg);
-                        if (iv < 0) iv = 0;
-                        else if (iv > 16384) iv = 16384;
-
-                        chanMgr->icyMetaInterval = iv;
-
-                    }else if (strcmp(curr, "passnew")==0)
-                        strcpy(servMgr->password, arg);
-                    else if (strcmp(curr, "root")==0)
-                        servMgr->isRoot = getCGIargBOOL(arg);
-                    else if (strcmp(curr, "brroot")==0)
-                        brRoot = getCGIargBOOL(arg);
-                    else if (strcmp(curr, "getupd")==0)
-                        getUpd = getCGIargBOOL(arg);
-                    else if (strcmp(curr, "huint")==0)
-                        chanMgr->setUpdateInterval(getCGIargINT(arg));
-                    else if (strcmp(curr, "forceip")==0)
-                        servMgr->forceIP = arg;
-                    else if (strcmp(curr, "htmlPath")==0)
-                    {
-                        strcpy(servMgr->htmlPath, "html/");
-                        strcat(servMgr->htmlPath, arg);
-                    }else if (strcmp(curr, "djmsg")==0)
-                    {
-                        String msg;
-                        msg.set(arg, String::T_ESC);
-                        msg.convertTo(String::T_UNICODE);
-                        chanMgr->setBroadcastMsg(msg);
-                    }
-                    else if (strcmp(curr, "pcmsg")==0)
-                    {
-                        servMgr->rootMsg.set(arg, String::T_ESC);
-                        servMgr->rootMsg.convertTo(String::T_UNICODE);
-                    }else if (strcmp(curr, "minpgnu")==0)
-                        servMgr->minGnuIncoming = atoi(arg);
-                    else if (strcmp(curr, "maxpgnu")==0)
-                        servMgr->maxGnuIncoming = atoi(arg);
-
-
-
-                    // connections
-                    else if (strcmp(curr, "maxcin")==0)
-                        servMgr->maxControl = getCGIargINT(arg);
-                    else if (strcmp(curr, "maxsin")==0)
-                        servMgr->maxServIn = getCGIargINT(arg);
-
-                    else if (strcmp(curr, "maxup")==0)
-                        servMgr->maxBitrateOut = getCGIargINT(arg);
-                    else if (strcmp(curr, "maxrelays")==0)
-                        servMgr->setMaxRelays(getCGIargINT(arg));
-                    else if (strcmp(curr, "maxdirect")==0)
-                        servMgr->maxDirect = getCGIargINT(arg);
-                    else if (strcmp(curr, "maxrelaypc")==0)
-                        chanMgr->maxRelaysPerChannel = getCGIargINT(arg);
-                    else if (strncmp(curr, "filt_", 5)==0)
-                    {
-                        char *fs = curr+5;
+                        if (strncmp(fs, "ip", 2)==0)        // ip must be first
                         {
-                            if (strncmp(fs, "ip", 2)==0)        // ip must be first
+                            currFilter = &servMgr->filters[servMgr->numFilters];
+                            currFilter->init();
+                            currFilter->host.fromStrIP(arg, DEFAULT_PORT);
+                            if ((currFilter->host.ip) && (servMgr->numFilters < (ServMgr::MAX_FILTERS-1)))
                             {
-                                currFilter = &servMgr->filters[servMgr->numFilters];
-                                currFilter->init();
-                                currFilter->host.fromStrIP(arg, DEFAULT_PORT);
-                                if ((currFilter->host.ip) && (servMgr->numFilters < (ServMgr::MAX_FILTERS-1)))
-                                {
-                                    servMgr->numFilters++;
-                                    servMgr->filters[servMgr->numFilters].init();   // clear new entry
-                                }
-
-                            }else if (strncmp(fs, "bn", 2)==0)
-                                currFilter->flags |= ServFilter::F_BAN;
-                            else if (strncmp(fs, "pr", 2)==0)
-                                currFilter->flags |= ServFilter::F_PRIVATE;
-                            else if (strncmp(fs, "nw", 2)==0)
-                                currFilter->flags |= ServFilter::F_NETWORK;
-                            else if (strncmp(fs, "di", 2)==0)
-                                currFilter->flags |= ServFilter::F_DIRECT;
-                        }
-                    }
-
-                    // client
-                    else if (strcmp(curr, "clientactive")==0)
-                        servMgr->autoConnect = getCGIargBOOL(arg);
-                    else if (strcmp(curr, "yp")==0)
-                    {
-                        if (!PCP_FORCE_YP)
-                        {
-                            String str(arg, String::T_ESC);
-                            str.convertTo(String::T_ASCII);
-                            servMgr->rootHost = str;
-                        }
-                    }
-                    else if (strcmp(curr, "deadhitage")==0)
-                        chanMgr->deadHitAge = getCGIargINT(arg);
-                    else if (strcmp(curr, "refresh")==0)
-                        servMgr->refreshHTML = getCGIargINT(arg);
-                    else if (strcmp(curr, "auth")==0)
-                    {
-                        if (strcmp(arg, "cookie")==0)
-                            servMgr->authType = ServMgr::AUTH_COOKIE;
-                        else if (strcmp(arg, "http")==0)
-                            servMgr->authType = ServMgr::AUTH_HTTPBASIC;
-
-                    }else if (strcmp(curr, "expire")==0)
-                    {
-                        if (strcmp(arg, "session")==0)
-                            servMgr->cookieList.neverExpire = false;
-                        else if (strcmp(arg, "never")==0)
-                            servMgr->cookieList.neverExpire = true;
-                    }
-
-                    else if (strcmp(curr, "logDebug")==0)
-                        showLog |= atoi(arg)?(1<<LogBuffer::T_DEBUG):0;
-                    else if (strcmp(curr, "logErrors")==0)
-                        showLog |= atoi(arg)?(1<<LogBuffer::T_ERROR):0;
-                    else if (strcmp(curr, "logNetwork")==0)
-                        showLog |= atoi(arg)?(1<<LogBuffer::T_NETWORK):0;
-                    else if (strcmp(curr, "logChannel")==0)
-                        showLog |= atoi(arg)?(1<<LogBuffer::T_CHANNEL):0;
-
-                    else if (strcmp(curr, "allowHTML1")==0)
-                        allowServer1 |= atoi(arg)?(ALLOW_HTML):0;
-                    else if (strcmp(curr, "allowNetwork1")==0)
-                        allowServer1 |= atoi(arg)?(ALLOW_NETWORK):0;
-                    else if (strcmp(curr, "allowBroadcast1")==0)
-                        allowServer1 |= atoi(arg)?(ALLOW_BROADCAST):0;
-                    else if (strcmp(curr, "allowDirect1")==0)
-                        allowServer1 |= atoi(arg)?(ALLOW_DIRECT):0;
-
-                    else if (strcmp(curr, "allowHTML2")==0)
-                        allowServer2 |= atoi(arg)?(ALLOW_HTML):0;
-                    else if (strcmp(curr, "allowBroadcast2")==0)
-                        allowServer2 |= atoi(arg)?(ALLOW_BROADCAST):0;
-
-                }
-
-
-
-                servMgr->showLog = showLog;
-                servMgr->allowServer1 = allowServer1;
-                servMgr->allowServer2 = allowServer2;
-
-                if (servMgr->serverHost.port != newPort)
-                {
-                    Host lh(ClientSocket::getIP(NULL), newPort);
-                    char ipstr[64];
-                    lh.toStr(ipstr);
-                    sprintf(jumpStr, "http://%s/%s/settings.html", ipstr, servMgr->htmlPath);
-
-                    servMgr->serverHost.port = newPort;
-                    servMgr->restartServer=true;
-                    //html.setRefresh(3);
-                    //html.setRefreshURL(jumpStr);
-                    //html.startHTML();
-                    //html.addHead();
-                    //  html.startBody();
-                    //      html.startTagEnd("h1", "Please wait...");
-                    //  html.end();
-                    //html.end();
-
-
-
-                    //char ipstr[64];
-                    //servMgr->serverHost.toStr(ipstr);
-                    //sprintf(jumpStr, "/%s/settings.html", ipstr, servMgr->htmlPath);
-                    jumpArg = jumpStr;
-
-                }else
-                {
-                    sprintf(jumpStr, "/%s/settings.html", servMgr->htmlPath);
-                    jumpArg = jumpStr;
-                }
-
-                peercastInst->saveSettings();
-
-                peercastApp->updateSettings();
-
-                if ((servMgr->isRoot) && (brRoot))
-                    servMgr->broadcastRootSettings(getUpd);
-
-
-
-
-
-            }else if (cmpCGIarg(cmd, "cmd=", "fetch"))
-            {
-
-                ChanInfo info;
-                String curl;
-
-                char *cp = cmd;
-                while (cp=nextCGIarg(cp, curr, arg))
-                {
-                    if (strcmp(curr, "url")==0)
-                    {
-                        curl.set(arg, String::T_ESC);
-                        curl.convertTo(String::T_UNICODE);
-                    }else if (strcmp(curr, "name")==0)
-                    {
-                        info.name.set(arg, String::T_ESC);
-                        info.name.convertTo(String::T_UNICODE);
-                    }else if (strcmp(curr, "desc")==0)
-                    {
-                        info.desc.set(arg, String::T_ESC);
-                        info.desc.convertTo(String::T_UNICODE);
-                    }else if (strcmp(curr, "genre")==0)
-                    {
-                        info.genre.set(arg, String::T_ESC);
-                        info.genre.convertTo(String::T_UNICODE);
-                    }else if (strcmp(curr, "contact")==0)
-                    {
-                        info.url.set(arg, String::T_ESC);
-                        info.url.convertTo(String::T_UNICODE);
-                    }else if (strcmp(curr, "bitrate")==0)
-                    {
-                        info.bitrate = atoi(arg);
-                    }else if (strcmp(curr, "type")==0)
-                    {
-                        ChanInfo::TYPE type = ChanInfo::getTypeFromStr(arg);
-                        info.contentType = type;
-                        info.contentTypeStr = ChanInfo::getTypeStr(type);
-                        info.streamType = ChanInfo::getMIMEType(type);
-                        info.streamExt = ChanInfo::getTypeExt(type);
-                    }
-
-                }
-
-                info.bcID = chanMgr->broadcastID;
-
-                Channel *c = chanMgr->createChannel(info, NULL);
-                if (c)
-                    c->startURL(curl.cstr());
-
-
-                sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
-                jumpArg = jumpStr;
-
-            }else if (cmpCGIarg(cmd, "cmd=", "stopserv"))
-            {
-
-                char *cp = cmd;
-                while (cp=nextCGIarg(cp, curr, arg))
-                {
-                    if (strcmp(curr, "index")==0)
-                    {
-                        Servent *s = servMgr->findServentByIndex(atoi(arg));
-                        if (s)
-                            s->abort();
-                    }
-                }
-                sprintf(jumpStr, "/%s/connections.html", servMgr->htmlPath);
-                jumpArg = jumpStr;
-
-
-            }else if (cmpCGIarg(cmd, "cmd=", "hitlist"))
-            {
-
-                bool stayConnected=hasCGIarg(cmd, "relay");
-
-                int index = 0;
-                ChanHitList *chl = chanMgr->hitlist;
-                while (chl)
-                {
-                    if (chl->isUsed())
-                    {
-                        char tmp[64];
-                        sprintf(tmp, "c%d=", index);
-                        if (cmpCGIarg(cmd, tmp, "1"))
-                        {
-                            Channel *c;
-                            if (!(c=chanMgr->findChannelByID(chl->info.id)))
-                            {
-                                c = chanMgr->createChannel(chl->info, NULL);
-                                if (!c)
-                                    throw StreamException("out of channels");
-                                c->stayConnected = stayConnected;
-                                c->startGet();
+                                servMgr->numFilters++;
+                                servMgr->filters[servMgr->numFilters].init();   // clear new entry
                             }
-                        }
+
+                        }else if (strncmp(fs, "bn", 2)==0)
+                            currFilter->flags |= ServFilter::F_BAN;
+                        else if (strncmp(fs, "pr", 2)==0)
+                            currFilter->flags |= ServFilter::F_PRIVATE;
+                        else if (strncmp(fs, "nw", 2)==0)
+                            currFilter->flags |= ServFilter::F_NETWORK;
+                        else if (strncmp(fs, "di", 2)==0)
+                            currFilter->flags |= ServFilter::F_DIRECT;
                     }
-                    chl = chl->next;
-                    index++;
                 }
 
-                const char *findArg = getCGIarg(cmd, "keywords=");
-
-                if (hasCGIarg(cmd, "relay"))
+                // client
+                else if (strcmp(curr, "clientactive")==0)
+                    servMgr->autoConnect = getCGIargBOOL(arg);
+                else if (strcmp(curr, "yp")==0)
                 {
-                    sys->sleep(500);
-                    sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
-                    jumpArg = jumpStr;
-                }
-            }else if (cmpCGIarg(cmd, "cmd=", "clear"))
-            {
-                char *cp = cmd;
-                while (cp=nextCGIarg(cp, curr, arg))
-                {
-                    if (strcmp(curr, "hostcache")==0)
-                        servMgr->clearHostCache(ServHost::T_SERVENT);
-                    else if (strcmp(curr, "hitlists")==0)
-                        chanMgr->clearHitLists();
-                    else if (strcmp(curr, "packets")==0)
+                    if (!PCP_FORCE_YP)
                     {
-                        stats.clearRange(Stats::PACKETSSTART, Stats::PACKETSEND);
-                        servMgr->numVersions = 0;
+                        String str(arg, String::T_ESC);
+                        str.convertTo(String::T_ASCII);
+                        servMgr->rootHost = str;
                     }
                 }
+                else if (strcmp(curr, "deadhitage")==0)
+                    chanMgr->deadHitAge = getCGIargINT(arg);
+                else if (strcmp(curr, "refresh")==0)
+                    servMgr->refreshHTML = getCGIargINT(arg);
+                else if (strcmp(curr, "auth")==0)
+                {
+                    if (strcmp(arg, "cookie")==0)
+                        servMgr->authType = ServMgr::AUTH_COOKIE;
+                    else if (strcmp(arg, "http")==0)
+                        servMgr->authType = ServMgr::AUTH_HTTPBASIC;
 
-                sprintf(jumpStr, "/%s/index.html", servMgr->htmlPath);
+                }else if (strcmp(curr, "expire")==0)
+                {
+                    if (strcmp(arg, "session")==0)
+                        servMgr->cookieList.neverExpire = false;
+                    else if (strcmp(arg, "never")==0)
+                        servMgr->cookieList.neverExpire = true;
+                }
+
+                else if (strcmp(curr, "logDebug")==0)
+                    showLog |= atoi(arg)?(1<<LogBuffer::T_DEBUG):0;
+                else if (strcmp(curr, "logErrors")==0)
+                    showLog |= atoi(arg)?(1<<LogBuffer::T_ERROR):0;
+                else if (strcmp(curr, "logNetwork")==0)
+                    showLog |= atoi(arg)?(1<<LogBuffer::T_NETWORK):0;
+                else if (strcmp(curr, "logChannel")==0)
+                    showLog |= atoi(arg)?(1<<LogBuffer::T_CHANNEL):0;
+
+                else if (strcmp(curr, "allowHTML1")==0)
+                    allowServer1 |= atoi(arg)?(ALLOW_HTML):0;
+                else if (strcmp(curr, "allowNetwork1")==0)
+                    allowServer1 |= atoi(arg)?(ALLOW_NETWORK):0;
+                else if (strcmp(curr, "allowBroadcast1")==0)
+                    allowServer1 |= atoi(arg)?(ALLOW_BROADCAST):0;
+                else if (strcmp(curr, "allowDirect1")==0)
+                    allowServer1 |= atoi(arg)?(ALLOW_DIRECT):0;
+
+                else if (strcmp(curr, "allowHTML2")==0)
+                    allowServer2 |= atoi(arg)?(ALLOW_HTML):0;
+                else if (strcmp(curr, "allowBroadcast2")==0)
+                    allowServer2 |= atoi(arg)?(ALLOW_BROADCAST):0;
+            }
+
+            servMgr->showLog = showLog;
+            servMgr->allowServer1 = allowServer1;
+            servMgr->allowServer2 = allowServer2;
+
+            if (servMgr->serverHost.port != newPort)
+            {
+                Host lh(ClientSocket::getIP(NULL), newPort);
+                char ipstr[64];
+                lh.toStr(ipstr);
+                sprintf(jumpStr, "http://%s/%s/settings.html", ipstr, servMgr->htmlPath);
+
+                servMgr->serverHost.port = newPort;
+                servMgr->restartServer=true;
                 jumpArg = jumpStr;
 
-            }else if (cmpCGIarg(cmd, "cmd=", "upgrade"))
+            }else
             {
-                if (servMgr->downloadURL[0])
+                sprintf(jumpStr, "/%s/settings.html", servMgr->htmlPath);
+                jumpArg = jumpStr;
+            }
+
+            peercastInst->saveSettings();
+
+            peercastApp->updateSettings();
+
+            if ((servMgr->isRoot) && (brRoot))
+                servMgr->broadcastRootSettings(getUpd);
+        }else if (cmpCGIarg(cmd, "cmd=", "fetch"))
+        {
+            ChanInfo info;
+            String curl;
+
+            char *cp = cmd;
+            while (cp=nextCGIarg(cp, curr, arg))
+            {
+                if (strcmp(curr, "url")==0)
                 {
-                    sprintf(jumpStr, "/admin?cmd=redirect&url=%s", servMgr->downloadURL);
-                    jumpArg = jumpStr;
+                    curl.set(arg, String::T_ESC);
+                    curl.convertTo(String::T_UNICODE);
+                }else if (strcmp(curr, "name")==0)
+                {
+                    info.name.set(arg, String::T_ESC);
+                    info.name.convertTo(String::T_UNICODE);
+                }else if (strcmp(curr, "desc")==0)
+                {
+                    info.desc.set(arg, String::T_ESC);
+                    info.desc.convertTo(String::T_UNICODE);
+                }else if (strcmp(curr, "genre")==0)
+                {
+                    info.genre.set(arg, String::T_ESC);
+                    info.genre.convertTo(String::T_UNICODE);
+                }else if (strcmp(curr, "contact")==0)
+                {
+                    info.url.set(arg, String::T_ESC);
+                    info.url.convertTo(String::T_UNICODE);
+                }else if (strcmp(curr, "bitrate")==0)
+                {
+                    info.bitrate = atoi(arg);
+                }else if (strcmp(curr, "type")==0)
+                {
+                    ChanInfo::TYPE type = ChanInfo::getTypeFromStr(arg);
+                    info.contentType = type;
+                    info.contentTypeStr = ChanInfo::getTypeStr(type);
+                    info.streamType = ChanInfo::getMIMEType(type);
+                    info.streamExt = ChanInfo::getTypeExt(type);
                 }
 
+            }
 
+            info.bcID = chanMgr->broadcastID;
 
+            Channel *c = chanMgr->createChannel(info, NULL);
+            if (c)
+                c->startURL(curl.cstr());
 
-            }else if (cmpCGIarg(cmd, "cmd=", "connect"))
+            sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
+            jumpArg = jumpStr;
+        }else if (cmpCGIarg(cmd, "cmd=", "stopserv"))
+        {
+            char *cp = cmd;
+            while (cp=nextCGIarg(cp, curr, arg))
             {
+                if (strcmp(curr, "index")==0)
+                {
+                    Servent *s = servMgr->findServentByIndex(atoi(arg));
+                    if (s)
+                        s->abort();
+                }
+            }
+            sprintf(jumpStr, "/%s/connections.html", servMgr->htmlPath);
+            jumpArg = jumpStr;
+        }else if (cmpCGIarg(cmd, "cmd=", "hitlist"))
+        {
+            bool stayConnected=hasCGIarg(cmd, "relay");
 
-
-                Servent *s = servMgr->servents;
+            int index = 0;
+            ChanHitList *chl = chanMgr->hitlist;
+            while (chl)
+            {
+                if (chl->isUsed())
                 {
                     char tmp[64];
-                    sprintf(tmp, "c%d=", s->serventIndex);
+                    sprintf(tmp, "c%d=", index);
                     if (cmpCGIarg(cmd, tmp, "1"))
                     {
-                        if (hasCGIarg(cmd, "stop"))
-                            s->thread.active = false;
+                        Channel *c;
+                        if (!(c=chanMgr->findChannelByID(chl->info.id)))
+                        {
+                            c = chanMgr->createChannel(chl->info, NULL);
+                            if (!c)
+                                throw StreamException("out of channels");
+                            c->stayConnected = stayConnected;
+                            c->startGet();
+                        }
                     }
-                    s=s->next;
                 }
-                sprintf(jumpStr, "/%s/connections.html", servMgr->htmlPath);
-                jumpArg = jumpStr;
+                chl = chl->next;
+                index++;
+            }
 
-            }else if (cmpCGIarg(cmd, "cmd=", "shutdown"))
+            const char *findArg = getCGIarg(cmd, "keywords=");
+
+            if (hasCGIarg(cmd, "relay"))
             {
-                servMgr->shutdownTimer = 1;
-
-            }else if (cmpCGIarg(cmd, "cmd=", "stop"))
-            {
-                GnuID id;
-                char *cp = cmd;
-                while (cp=nextCGIarg(cp, curr, arg))
-                {
-                    if (strcmp(curr, "id")==0)
-                        id.fromStr(arg);
-                }
-
-                Channel *c = chanMgr->findChannelByID(id);
-                if (c)
-                    c->thread.active = false;
-
                 sys->sleep(500);
                 sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
                 jumpArg = jumpStr;
-
-            }else if (cmpCGIarg(cmd, "cmd=", "bump"))
+            }
+        }else if (cmpCGIarg(cmd, "cmd=", "clear"))
+        {
+            char *cp = cmd;
+            while (cp=nextCGIarg(cp, curr, arg))
             {
-                GnuID id;
-                char *cp = cmd;
-                while (cp=nextCGIarg(cp, curr, arg))
+                if (strcmp(curr, "hostcache")==0)
+                    servMgr->clearHostCache(ServHost::T_SERVENT);
+                else if (strcmp(curr, "hitlists")==0)
+                    chanMgr->clearHitLists();
+                else if (strcmp(curr, "packets")==0)
                 {
-                    if (strcmp(curr, "id")==0)
-                        id.fromStr(arg);
+                    stats.clearRange(Stats::PACKETSSTART, Stats::PACKETSEND);
+                    servMgr->numVersions = 0;
                 }
+            }
 
-                Channel *c = chanMgr->findChannelByID(id);
-                if (c)
-                    c->bump = true;
-
-                sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
-                jumpArg = jumpStr;
-
-            }else if (cmpCGIarg(cmd, "cmd=", "keep"))
+            sprintf(jumpStr, "/%s/index.html", servMgr->htmlPath);
+            jumpArg = jumpStr;
+        }else if (cmpCGIarg(cmd, "cmd=", "upgrade"))
+        {
+            if (servMgr->downloadURL[0])
             {
-                GnuID id;
-                char *cp = cmd;
-                while (cp=nextCGIarg(cp, curr, arg))
-                {
-                    if (strcmp(curr, "id")==0)
-                        id.fromStr(arg);
-                }
-
-                Channel *c = chanMgr->findChannelByID(id);
-                if (c)
-                    c->stayConnected = true;
-
-                sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
-                jumpArg = jumpStr;
-
-            }else if (cmpCGIarg(cmd, "cmd=", "relay"))
-            {
-                ChanInfo info;
-                char *cp = cmd;
-                while (cp=nextCGIarg(cp, curr, arg))
-                {
-                    if (strcmp(curr, "id")==0)
-                        info.id.fromStr(arg);
-                }
-
-
-                if (!chanMgr->findChannelByID(info.id))
-                {
-
-                    ChanHitList *chl = chanMgr->findHitList(info);
-                    if (!chl)
-                        throw StreamException("channel not found");
-
-
-                    Channel *c = chanMgr->createChannel(chl->info, NULL);
-                    if (!c)
-                        throw StreamException("out of channels");
-
-                    c->stayConnected = true;
-                    c->startGet();
-                }
-
-                sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
-                jumpArg = jumpStr;
-
-
-            }else if (cmpCGIarg(cmd, "net=", "add"))
-            {
-
-                GnuID id;
-                while (cmd=nextCGIarg(cmd, curr, arg))
-                {
-                    if (strcmp(curr, "ip")==0)
-                    {
-                        Host h;
-                        h.fromStrIP(arg, DEFAULT_PORT);
-                        if (servMgr->addOutgoing(h, id, true))
-                            LOG_NETWORK("Added connection: %s", arg);
-
-                    }else if (strcmp(curr, "id")==0)
-                    {
-                        id.fromStr(arg);
-                    }
-
-                }
-
-            }else if (cmpCGIarg(cmd, "cmd=", "logout"))
-            {
-                jumpArg = "/";
-                servMgr->cookieList.remove(cookie);
-
-            }else if (cmpCGIarg(cmd, "cmd=", "login"))
-            {
-                GnuID id;
-                char idstr[64];
-                id.generate();
-                id.toStr(idstr);
-
-                cookie.set(idstr, sock->host.ip);
-                servMgr->cookieList.add(cookie);
-
-                http.writeLine(HTTP_SC_FOUND);
-                if (servMgr->cookieList.neverExpire)
-                    http.writeLineF("%s id=%s; path=/; expires=\"Mon, 01-Jan-3000 00:00:00 GMT\";", HTTP_HS_SETCOOKIE, idstr);
-                else
-                    http.writeLineF("%s id=%s; path=/;", HTTP_HS_SETCOOKIE, idstr);
-                http.writeLineF("Location: /%s/index.html", servMgr->htmlPath);
-                http.writeLine("");
-
-            }else{
-
-                sprintf(jumpStr, "/%s/index.html", servMgr->htmlPath);
+                sprintf(jumpStr, "/admin?cmd=redirect&url=%s", servMgr->downloadURL);
                 jumpArg = jumpStr;
             }
+        }else if (cmpCGIarg(cmd, "cmd=", "connect"))
+        {
+            Servent *s = servMgr->servents;
+            {
+                char tmp[64];
+                sprintf(tmp, "c%d=", s->serventIndex);
+                if (cmpCGIarg(cmd, tmp, "1"))
+                {
+                    if (hasCGIarg(cmd, "stop"))
+                        s->thread.active = false;
+                }
+                s=s->next;
+            }
+            sprintf(jumpStr, "/%s/connections.html", servMgr->htmlPath);
+            jumpArg = jumpStr;
+
+        }else if (cmpCGIarg(cmd, "cmd=", "shutdown"))
+        {
+            servMgr->shutdownTimer = 1;
+        }else if (cmpCGIarg(cmd, "cmd=", "stop"))
+        {
+            GnuID id;
+            char *cp = cmd;
+            while (cp=nextCGIarg(cp, curr, arg))
+            {
+                if (strcmp(curr, "id")==0)
+                    id.fromStr(arg);
+            }
+
+            Channel *c = chanMgr->findChannelByID(id);
+            if (c)
+                c->thread.active = false;
+
+            sys->sleep(500);
+            sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
+            jumpArg = jumpStr;
+        }else if (cmpCGIarg(cmd, "cmd=", "bump"))
+        {
+            GnuID id;
+            char *cp = cmd;
+            while (cp=nextCGIarg(cp, curr, arg))
+            {
+                if (strcmp(curr, "id")==0)
+                    id.fromStr(arg);
+            }
+
+            Channel *c = chanMgr->findChannelByID(id);
+            if (c)
+                c->bump = true;
+
+            sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
+            jumpArg = jumpStr;
+        }else if (cmpCGIarg(cmd, "cmd=", "keep"))
+        {
+            GnuID id;
+            char *cp = cmd;
+            while (cp=nextCGIarg(cp, curr, arg))
+            {
+                if (strcmp(curr, "id")==0)
+                    id.fromStr(arg);
+            }
+
+            Channel *c = chanMgr->findChannelByID(id);
+            if (c)
+                c->stayConnected = true;
+
+            sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
+            jumpArg = jumpStr;
+        }else if (cmpCGIarg(cmd, "cmd=", "relay"))
+        {
+            ChanInfo info;
+            char *cp = cmd;
+            while (cp=nextCGIarg(cp, curr, arg))
+            {
+                if (strcmp(curr, "id")==0)
+                    info.id.fromStr(arg);
+            }
+
+            if (!chanMgr->findChannelByID(info.id))
+            {
+
+                ChanHitList *chl = chanMgr->findHitList(info);
+                if (!chl)
+                    throw StreamException("channel not found");
+
+
+                Channel *c = chanMgr->createChannel(chl->info, NULL);
+                if (!c)
+                    throw StreamException("out of channels");
+
+                c->stayConnected = true;
+                c->startGet();
+            }
+
+            sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
+            jumpArg = jumpStr;
+        }else if (cmpCGIarg(cmd, "net=", "add"))
+        {
+
+            GnuID id;
+            while (cmd=nextCGIarg(cmd, curr, arg))
+            {
+                if (strcmp(curr, "ip")==0)
+                {
+                    Host h;
+                    h.fromStrIP(arg, DEFAULT_PORT);
+                    if (servMgr->addOutgoing(h, id, true))
+                        LOG_NETWORK("Added connection: %s", arg);
+
+                }else if (strcmp(curr, "id")==0)
+                {
+                    id.fromStr(arg);
+                }
+
+            }
+        }else if (cmpCGIarg(cmd, "cmd=", "logout"))
+        {
+            jumpArg = "/";
+            servMgr->cookieList.remove(cookie);
+        }else if (cmpCGIarg(cmd, "cmd=", "login"))
+        {
+            GnuID id;
+            char idstr[64];
+            id.generate();
+            id.toStr(idstr);
+
+            cookie.set(idstr, sock->host.ip);
+            servMgr->cookieList.add(cookie);
+
+            http.writeLine(HTTP_SC_FOUND);
+            if (servMgr->cookieList.neverExpire)
+                http.writeLineF("%s id=%s; path=/; expires=\"Mon, 01-Jan-3000 00:00:00 GMT\";", HTTP_HS_SETCOOKIE, idstr);
+            else
+                http.writeLineF("%s id=%s; path=/;", HTTP_HS_SETCOOKIE, idstr);
+            http.writeLineF("Location: /%s/index.html", servMgr->htmlPath);
+            http.writeLine("");
+        }else{
+            sprintf(jumpStr, "/%s/index.html", servMgr->htmlPath);
+            jumpArg = jumpStr;
         }
 
     }catch (StreamException &e)
@@ -1384,7 +1324,6 @@ void Servent::handshakeCMD(char *cmd)
         html.startTagEnd("h1", "ERROR - %s", e.msg);
         LOG_ERROR("html: %s", e.msg);
     }
-
 
     if (retHTML)
     {
@@ -1395,9 +1334,8 @@ void Servent::handshakeCMD(char *cmd)
             html.locateTo(jmp.cstr());
         }
     }
-
-
 }
+
 // -----------------------------------
 static XML::Node *createChannelXML(Channel *c)
 {
