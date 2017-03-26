@@ -87,7 +87,7 @@
                   </TR>
                   {@loop chanMgr.numChannels}
                   <tr class="normal" bgcolor={@if loop.indexEven}#eeeeee{@else}#dddddd{@end}>
-                    <TD width="1" align="left"><a href="/pls/{$loop.channel.id}.pls"><img src="images/play.png" border="0"></a></TD>
+                    <TD width="1" align="left"><a href="/pls/{$loop.channel.id}"><img src="images/play.png" border="0"></a></TD>
                     <TD align="left"> <span class="normal"><b>{$loop.channel.name}</b>
                       <font size="-1"> </font></span><font size="-1"><br>
                         <span class="normal-small">{$loop.channel.track.artist} - {$loop.channel.track.title}
