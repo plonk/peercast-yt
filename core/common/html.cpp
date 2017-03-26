@@ -101,6 +101,10 @@ void HTML::writeVariable(Stream &s, const String &varName, int loop)
         {
             s.writeStringF("%d", loop);
             r = true;
+        }else if (varName == "loop.indexBaseOne")
+        {
+            s.writeStringF("%d", loop + 1);
+            r = true;
         }else if (varName.startsWith("loop.hit."))
         {
             const char *idstr = getCGIarg(tmplArgs, "id=");
