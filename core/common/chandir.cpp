@@ -33,8 +33,11 @@ std::vector<ChannelEntry> ChannelEntry::textToChannelEntries(std::string text)
     istringstream in(text);
     string line;
     vector<ChannelEntry> res;
+    int lineno = 0;
 
     while (getline(in, line)) {
+        lineno++;
+
         vector<string> fields;
         const char *p = line.c_str();
         const char *q;
@@ -44,6 +47,10 @@ std::vector<ChannelEntry> ChannelEntry::textToChannelEntries(std::string text)
             p = q + 2; // <>をスキップ
         }
         fields.push_back(p);
+
+        if (fields.size() != 19) {
+            throw std::runtime_error(String::format("Parse error at line %d.", lineno).cstr());
+        }
 
         res.push_back(ChannelEntry(fields));
     }
@@ -68,16 +75,22 @@ int ChannelDirectory::numFeeds()
     return m_feeds.size();
 }
 
+// index.txt を指す URL である url からチャンネルリストを読み込み、out
+// に格納する。成功した場合は true が返る。失敗した場合は false が返り、
+// out は変更されない。
 static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
 {
     using namespace boost::network;
 
     uri::uri feed(url);
-    if (!feed.is_valid())
+    if (!feed.is_valid()) {
+        LOG_ERROR("invalid URL (%s)", url.c_str());
         return false;
-
-    if (feed.scheme() != "http")
+    }
+    if (feed.scheme() != "http") {
+        LOG_ERROR("unsupported protocol (%s)", url.c_str());
         return false;
+    }
 
     int port;
     if (feed.port() == "")
@@ -87,8 +100,16 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
 
     Host host;
     host.fromStrName(feed.host().c_str(), port);
+    if (host.ip==0) {
+        LOG_ERROR("Could not resolve %s", feed.host().c_str());
+        return false;
+    }
 
-    unique_ptr<ClientSocket> rsock (sys->createSocket());
+    std::string path = feed.path();
+    if (path == "")
+        path = "/";
+
+    unique_ptr<ClientSocket> rsock(sys->createSocket());
 
     try {
         LOG_DEBUG("Connecting to %s ...", feed.host().c_str());
@@ -97,17 +118,17 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
 
         HTTP rhttp(*rsock);
 
-        LOG_DEBUG("GET %s HTTP/1.0", feed.path().c_str());
-
-        rhttp.writeLineF("GET %s HTTP/1.0", feed.path().c_str());
+        rhttp.writeLineF("GET %s HTTP/1.0", path.c_str());
         rhttp.writeLineF("%s %s", HTTP_HS_HOST, feed.host().c_str());
         rhttp.writeLineF("%s %s", HTTP_HS_CONNECTION, "close");
         rhttp.writeLineF("%s %s", HTTP_HS_AGENT, PCX_AGENT);
         rhttp.writeLine("");
 
         auto code = rhttp.readResponse();
-        if (code != 200)
+        if (code != 200) {
+            LOG_DEBUG("%s: status code %d", feed.host().c_str(), code);
             return false;
+        }
 
         while (rhttp.nextHeader())
             ;
@@ -116,17 +137,27 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
         char line[1024];
 
         try {
-            while (rhttp.readLine(line, 1024)) {
+            while (true) {
+                rhttp.readLine(line, 1024);
                 text += line;
                 text += '\n';
             }
         } catch (SockException& e) {
+            // end of body reached.
         }
 
-        out = ChannelEntry::textToChannelEntries(text);
+        try {
+            out = ChannelEntry::textToChannelEntries(text);
+        } catch (std::runtime_error& e) {
+            LOG_ERROR("%s", e.what());
+            return false;
+        }
         return true;
     } catch (SockException& e) {
-        LOG_ERROR("ChannelDirectory::update: %s", e.msg);
+        LOG_ERROR("%s", e.msg);
+        return false;
+    } catch (TimeoutException& e) {
+        LOG_ERROR("%s", e.msg);
         return false;
     }
 }
@@ -143,15 +174,17 @@ bool ChannelDirectory::update()
     m_channels.clear();
     for (auto url : m_feeds) {
         std::vector<ChannelEntry> channels;
-        bool success = getFeed(url, channels);
-        LOG_DEBUG("success = %d", success);
-        LOG_DEBUG("%lu channels", channels.size());
+        bool success;
 
+        success = getFeed(url, channels);
 
         if (success) {
+            LOG_DEBUG("Got %lu channels from %s", channels.size(), url.c_str());
             for (auto ch : channels) {
                 m_channels.push_back(ch);
             }
+        } else {
+            LOG_ERROR("Failed to get channels from %s", url.c_str());
         }
     }
     sort(m_channels.begin(), m_channels.end(), [](ChannelEntry&a, ChannelEntry&b) { return a.numDirects > b.numDirects; });
