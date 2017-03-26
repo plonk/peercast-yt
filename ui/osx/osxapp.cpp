@@ -22,34 +22,34 @@
 
 enum {
 	 kChannelColumn   = 'CHAN'
-	,kBitRateColumn   = 'BITR'
-	,kStreamColumn    = 'STRM'
-	,kRelayColumn     = 'TRLY'
-	,kListenersColumn = 'LRLY'
-	,kStatusColumn    = 'STAT'
-	,kKeepColumn      = 'KEEP'
+	, kBitRateColumn   = 'BITR'
+	, kStreamColumn    = 'STRM'
+	, kRelayColumn     = 'TRLY'
+	, kListenersColumn = 'LRLY'
+	, kStatusColumn    = 'STAT'
+	, kKeepColumn      = 'KEEP'
 
-	,kNumProps = 7
+	, kNumProps = 7
 };
 
 enum {
 	 kEventClassPeercast   = 'PEER'
-	,kEventStartChannel    = 'STRT'
-	,kEventUpdateChannel   = 'UPDT'
-	,kEventStopChannel     = 'STOP'
-	,kEventParamChanStatus = 'CSTA'
-	,kEventParamSystem	   = 'PSYS'
-	,typeChanStatus        = 'CSTA'
+	, kEventStartChannel    = 'STRT'
+	, kEventUpdateChannel   = 'UPDT'
+	, kEventStopChannel     = 'STOP'
+	, kEventParamChanStatus = 'CSTA'
+	, kEventParamSystem	   = 'PSYS'
+	, typeChanStatus        = 'CSTA'
 };
 
 UInt32 propIDList[kNumProps] = {
 	kChannelColumn
-	,kBitRateColumn
-	,kStreamColumn
-	,kRelayColumn
-	,kListenersColumn
-	,kStatusColumn
-	,kKeepColumn
+	, kBitRateColumn
+	, kStreamColumn
+	, kRelayColumn
+	, kListenersColumn
+	, kStatusColumn
+	, kKeepColumn
 };
 
 static const UInt32 kPeerCast_AppSignature = FOUR_CHAR_CODE('PCTT');
@@ -62,31 +62,31 @@ static const ControlID skCommentButtonID	   = { 'RLBT', 1001 };
 static const ControlID skUpdateVersionButtonID = { 'PCST', 1007 };
 
 OSXPeercastApp::OSXPeercastApp( const char *appPath, const char *iniFilename, int argc, char* argv[]
-								,WindowRef window, const ControlID& dbControlID )
+								, WindowRef window, const ControlID& dbControlID )
 : mIniFileName    ()
-,mRelayBrowser    ( window, dbControlID,
+, mRelayBrowser    ( window, dbControlID,
 					static_cast<DataBrowserItemDataProcPtr>(itemDataCallback),
 					static_cast<DataBrowserItemNotificationProcPtr>(itemNotificationCallback) )
-,mWindowRef       ( window )
-,mUpTime		     ('PCST', 1001)
-,mDirectConnections  ('PCST', 1002)
-,mRelayConnections   ('PCST', 1003)
-,mCinCoutConnections ('PCST', 1004)
-,mPGNUConnections    ('PCST', 1005)
-,mIncomingConnections('PCST', 1006)
-,mChannelList		  ( )
-,mLock				  ( )
-,mTabControl		  ( kPeerCast_AppSignature, kPeerCast_TabControlID, window )
-,mAppEventHandler     ( OSXPeercastApp::appEventHandler )
-,mMainWindowHandler   ( OSXPeercastApp::mainWindowHandler )
-,mPeercastEventHandler( OSXPeercastApp::peercastEventHandler )
-,mAppPath             ( appPath )
+, mWindowRef       ( window )
+, mUpTime		     ('PCST', 1001)
+, mDirectConnections  ('PCST', 1002)
+, mRelayConnections   ('PCST', 1003)
+, mCinCoutConnections ('PCST', 1004)
+, mPGNUConnections    ('PCST', 1005)
+, mIncomingConnections('PCST', 1006)
+, mChannelList		  ( )
+, mLock				  ( )
+, mTabControl		  ( kPeerCast_AppSignature, kPeerCast_TabControlID, window )
+, mAppEventHandler     ( OSXPeercastApp::appEventHandler )
+, mMainWindowHandler   ( OSXPeercastApp::mainWindowHandler )
+, mPeercastEventHandler( OSXPeercastApp::peercastEventHandler )
+, mAppPath             ( appPath )
 {
 	mIniFileName.set(iniFilename);
 
 	if (argc > 2)
 	{
-		if (strcmp(argv[1],"-inifile")==0)
+		if (strcmp(argv[1], "-inifile")==0)
 			mIniFileName.setFromString(argv[2]);
 	}
 
@@ -114,10 +114,10 @@ OSStatus OSXPeercastApp::installAppEventHandler()
 	};
 
     return InstallApplicationEventHandler(  mAppEventHandler.eventHandler()
-										   ,GetEventTypeCount( appEvents )
-										   ,appEvents
-										   ,NULL
-										   ,NULL );
+										   , GetEventTypeCount( appEvents )
+										   , appEvents
+										   , NULL
+										   , NULL );
 }
 //------------------------------------------------------------------------
 OSStatus OSXPeercastApp::installWindowHandler( WindowRef window )
@@ -125,15 +125,15 @@ OSStatus OSXPeercastApp::installWindowHandler( WindowRef window )
 	static const EventTypeSpec mainWindowEvents[] =
 	{
 		 { kEventClassCommand, kEventCommandProcess }
-		,{ kEventClassWindow,  kEventWindowActivated }
+		, { kEventClassWindow,  kEventWindowActivated }
 	};
 
 	return InstallWindowEventHandler(  window
-									  ,mMainWindowHandler.eventHandler()
-							          ,GetEventTypeCount( mainWindowEvents )
-							          ,mainWindowEvents
-							          ,this
-							          ,NULL );
+									  , mMainWindowHandler.eventHandler()
+							          , GetEventTypeCount( mainWindowEvents )
+							          , mainWindowEvents
+							          , this
+							          , NULL );
 }
 //------------------------------------------------------------------------
 OSStatus OSXPeercastApp::appEventHandler( EventHandlerCallRef inCallRef, EventRef inEvent, void* inUserData )
@@ -141,12 +141,12 @@ OSStatus OSXPeercastApp::appEventHandler( EventHandlerCallRef inCallRef, EventRe
 	HICommand command;
 
 	OSStatus err = GetEventParameter(  inEvent
-									  ,kEventParamDirectObject
-									  ,typeHICommand
-									  ,NULL
-									  ,sizeof(HICommand)
-									  ,NULL
-									  ,&command );
+									  , kEventParamDirectObject
+									  , typeHICommand
+									  , NULL
+									  , sizeof(HICommand)
+									  , NULL
+									  , &command );
 
 	if( err == noErr )
 	{
@@ -166,12 +166,12 @@ OSStatus OSXPeercastApp::mainWindowHandler( EventHandlerCallRef inCallRef, Event
 	OSXPeercastApp *pOSXApp = static_cast<OSXPeercastApp*>( inUserData );
 
 	OSStatus err = GetEventParameter(  inEvent
-									  ,kEventParamDirectObject
-									  ,typeHICommand
-									  ,NULL
-									  ,sizeof(HICommand)
-									  ,NULL
-									  ,&command );
+									  , kEventParamDirectObject
+									  , typeHICommand
+									  , NULL
+									  , sizeof(HICommand)
+									  , NULL
+									  , &command );
 
 	if( err == noErr )
 	{
@@ -197,7 +197,7 @@ OSStatus OSXPeercastApp::mainWindowHandler( EventHandlerCallRef inCallRef, Event
 				break;
 			case FOUR_CHAR_CODE('UPDT'):
 				{
-					sys->callLocalURL("admin?cmd=upgrade",servMgr->serverHost.port);
+					sys->callLocalURL("admin?cmd=upgrade", servMgr->serverHost.port);
 				}
 				break;
 		}
@@ -210,14 +210,14 @@ OSStatus OSXPeercastApp::installPeercastEventHandler( WindowRef theWindow )
 	static const EventTypeSpec peercastEventTypes[] =
 	{
 		 { kEventClassPeercast, kEventStartChannel }
-		,{ kEventClassPeercast, kEventUpdateChannel }
-		,{ kEventClassPeercast, kEventStopChannel }
+		, { kEventClassPeercast, kEventUpdateChannel }
+		, { kEventClassPeercast, kEventStopChannel }
 	};
 
 	return InstallEventHandler(  GetApplicationEventTarget()
-								,mPeercastEventHandler.eventHandler()
-								,GetEventTypeCount( peercastEventTypes )
-								,peercastEventTypes, this, NULL );
+								, mPeercastEventHandler.eventHandler()
+								, GetEventTypeCount( peercastEventTypes )
+								, peercastEventTypes, this, NULL );
 }
 //------------------------------------------------------------------------
 void OSXPeercastApp::enableNewVersionButton( const Boolean visible )

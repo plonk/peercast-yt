@@ -24,13 +24,13 @@ static ControlID skTabItemID = { 'PCTB', 0 };
 
 TabControl::TabControl( const int signature, const int id, WindowRef windowRef )
 :mControlID		  ( )
-,mWindowRef		  ( windowRef )
-,mEventHandler    ( TabControl::handler )
-,mYPAddress		  ('PCCG', 1000)
-,mDJMessage		  ('PCCG', 1001)
-,mPassword		  ('PCCG', 1002)
-,mMaxRelays		  ('PCCG', 1003)
-,mLastTabIndex    ( 1 )
+, mWindowRef		  ( windowRef )
+, mEventHandler    ( TabControl::handler )
+, mYPAddress		  ('PCCG', 1000)
+, mDJMessage		  ('PCCG', 1001)
+, mPassword		  ('PCCG', 1002)
+, mMaxRelays		  ('PCCG', 1003)
+, mLastTabIndex    ( 1 )
 {
 	mControlID.signature = signature;
 	mControlID.id        = id;
@@ -45,17 +45,17 @@ OSStatus TabControl::installHandler()
 	static const EventTypeSpec tabControlEvents[] =
 	{
 		 { kEventClassControl, kEventControlHit }
-		,{ kEventClassWindow,  kEventWindowActivated }
+		, { kEventClassWindow,  kEventWindowActivated }
 	};
 
 	GetControlByID( getWindow(), &getID(), &tabControlRef );
 
 	return InstallControlEventHandler(  tabControlRef
-								       ,mEventHandler.eventHandler()
-									   ,GetEventTypeCount(tabControlEvents)
-									   ,tabControlEvents
-									   ,this
-									   ,NULL );
+								       , mEventHandler.eventHandler()
+									   , GetEventTypeCount(tabControlEvents)
+									   , tabControlEvents
+									   , this
+									   , NULL );
 }
 //------------------------------------------------------------------------
 void TabControl::updateSettings()
@@ -77,7 +77,7 @@ void TabControl::saveSettings()
 		return;
 
 	mLock.on();
-	chanMgr->broadcastMsg.set(mDJMessage.getString( mWindowRef, kCFStringEncodingUnicode ),String::T_ASCII);
+	chanMgr->broadcastMsg.set(mDJMessage.getString( mWindowRef, kCFStringEncodingUnicode ), String::T_ASCII);
 	servMgr->rootHost   = mYPAddress.getString( mWindowRef, kCFStringEncodingASCII );
 	strncpy( servMgr->password, mPassword.getString( mWindowRef, kCFStringEncodingASCII ), 64 );
 	servMgr->setMaxRelays( mMaxRelays.getIntValue( mWindowRef ) );

@@ -10,9 +10,9 @@ TEST(GnuIDTest, someThingsWork) {
 
     // GnuID はコンストラクタで初期化されないので、不定値が入っている。
     // オール0のIDが欲しければ明示的に clear メソッドでクリアする。
-    id.toStr(buf);
-    EXPECT_TRUE(id.isSet());
-    EXPECT_STRNE("00000000000000000000000000000000", buf);
+    // id.toStr(buf);
+    // EXPECT_TRUE(id.isSet());
+    // EXPECT_STRNE("00000000000000000000000000000000", buf);
 
     id.clear();
     id.toStr(buf);

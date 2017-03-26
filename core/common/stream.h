@@ -33,185 +33,254 @@
 class Stream
 {
 public:
-	Stream()
-	:writeCRLF(true)
-	,totalBytesIn(0)
-	,totalBytesOut(0)
-	,lastBytesIn(0)
-	,lastBytesOut(0)
-	,bytesInPerSec(0)
-	,bytesOutPerSec(0)
-	,lastUpdate(0)
-	,bitsBuffer(0)
-	,bitsPos(0)
-	{
-	}
+    Stream()
+    : writeCRLF(true)
+    , bitsBuffer(0)
+    , bitsPos(0)
+    {
+    }
 
-	virtual int readUpto(void *,int) {return 0;}
-	virtual int read(void *,int)=0;
-	virtual void write(const void *,int) = 0;
+    virtual ~Stream() {}
+
+    virtual int readUpto(void *, int) { return 0; }
+    virtual int read(void *, int) = 0;
+    virtual void write(const void *, int) = 0;
     virtual bool eof()
     {
-    	throw StreamException("Stream can`t eof");
-		return false;
+        throw StreamException("Stream can`t eof");
+        return false;
     }
 
-	virtual void rewind()
-	{
-    	throw StreamException("Stream can`t rewind");
-	}
-
-	virtual void seekTo(int)
-	{
-    	throw StreamException("Stream can`t seek");
-	}
-
-	void writeTo(Stream &out, int len);
-	virtual void skip(int i);
-
-	virtual void close()
-	{
-	}
-
-	virtual void	setReadTimeout(unsigned int )
-	{
-	}
-	virtual void	setWriteTimeout(unsigned int )
-	{
-	}
-	virtual void	setPollRead(bool)
-	{
-	}
-
-	virtual int		getPosition() {return 0;}
-
-
-	// binary
-    char	readChar()
+    virtual void rewind()
     {
-    	char v;
-        read(&v,1);
+        throw StreamException("Stream can`t rewind");
+    }
+
+    virtual void seekTo(int)
+    {
+        throw StreamException("Stream can`t seek");
+    }
+
+    void writeTo(Stream &out, int len);
+    virtual void skip(int i);
+
+    virtual void close()
+    {
+    }
+
+    virtual void    setReadTimeout(unsigned int )
+    {
+    }
+    virtual void    setWriteTimeout(unsigned int )
+    {
+    }
+    virtual void    setPollRead(bool)
+    {
+    }
+
+    virtual int     getPosition() { return 0; }
+
+
+    // binary
+    char    readChar()
+    {
+        char v;
+        read(&v, 1);
         return v;
     }
-    short	readShort()
+    short   readShort()
     {
-    	short v;
-        read(&v,2);
-		CHECK_ENDIAN2(v);
+        short v;
+        read(&v, 2);
+        CHECK_ENDIAN2(v);
         return v;
     }
-    long	readLong()
+    long    readLong()
     {
-    	long v;
-        read(&v,4);
-		CHECK_ENDIAN4(v);
+        long v;
+        read(&v, 4);
+        CHECK_ENDIAN4(v);
         return v;
     }
-	int readInt()
-	{
-		return readLong();
-	}
-	ID4 readID4()
-	{
-		ID4 id;
-		read(id.getData(),4);
-		return id;
-	}
-	int	readInt24()
-	{
-		int v=0;
-        read(&v,3);
-		CHECK_ENDIAN3(v);
-	}
+    int readInt()
+    {
+        return readLong();
+    }
+    ID4 readID4()
+    {
+        ID4 id;
+        read(id.getData(), 4);
+        return id;
+    }
+    int readInt24()
+    {
+        int v=0;
+        read(&v, 3);
+        CHECK_ENDIAN3(v);
+        return v;
+    }
 
 
 
-	long readTag()
-	{
-		long v = readLong();
-		return SWAP4(v);
-	}
+    long readTag()
+    {
+        long v = readLong();
+        return SWAP4(v);
+    }
 
-	int	readString(char *s, int max)
-	{
-		int cnt=0;
-		while (max)
-		{
-			char c = readChar();
-			*s++ = c;
-			cnt++;
-			max--;
-			if (!c)
-				break;
-		}
-		return cnt;
-	}
+    int readString(char *s, int max)
+    {
+        int cnt=0;
+        while (max)
+        {
+            char c = readChar();
+            *s++ = c;
+            cnt++;
+            max--;
+            if (!c)
+                break;
+        }
+        return cnt;
+    }
 
-	virtual bool	readReady() {return true;}
-	virtual int numPending() {return 0;}
-
-
-	void writeID4(ID4 id)
-	{
-		write(id.getData(),4);
-	}
-
-	void	writeChar(char v)
-	{
-		write(&v,1);
-	}
-	void	writeShort(short v)
-	{
-		CHECK_ENDIAN2(v);
-		write(&v,2);
-	}
-	void	writeLong(long v)
-	{
-		CHECK_ENDIAN4(v);
-		write(&v,4);
-	}
-	void writeInt(int v) {writeLong(v);}
-
-	void	writeTag(long v)
-	{
-		//CHECK_ENDIAN4(v);
-		writeLong(SWAP4(v));
-	}
-
-	void	writeTag(const char id[4])
-	{
-		write(id,4);
-	}
-
-	int	writeUTF8(unsigned int);
-
-	// text
-    int	readLine(char *in, int max);
-
-    int		readWord(char *, int);
-	int		readBase64(char *, int);
-
-	void	write(const char *,va_list);
-	void	writeLine(const char *);
-	void	writeLineF(const char *,...);
-	void	writeString(const char *);
-	void	writeStringF(const char *,...);
-
-	bool	writeCRLF;
-
-	int		readBits(int);
-
-	void	updateTotals(unsigned int,unsigned int);
+    virtual bool    readReady(int timeoutMilliseconds = 0) { return true; }
+    virtual int numPending() { return 0; }
 
 
-	unsigned char bitsBuffer;
-	unsigned int bitsPos;
+    void writeID4(ID4 id)
+    {
+        write(id.getData(), 4);
+    }
 
-	unsigned int totalBytesIn,totalBytesOut;
-	unsigned int lastBytesIn,lastBytesOut;
-	unsigned int bytesInPerSec,bytesOutPerSec;
-	unsigned int lastUpdate;
+    void    writeChar(char v)
+    {
+        write(&v, 1);
+    }
+    void    writeShort(short v)
+    {
+        CHECK_ENDIAN2(v);
+        write(&v, 2);
+    }
+    void    writeLong(long v)
+    {
+        CHECK_ENDIAN4(v);
+        write(&v, 4);
+    }
+    void writeInt(int v) { writeLong(v); }
 
+    void    writeTag(long v)
+    {
+        //CHECK_ENDIAN4(v);
+        writeLong(SWAP4(v));
+    }
+
+    void    writeTag(const char id[4])
+    {
+        write(id, 4);
+    }
+
+    int writeUTF8(unsigned int);
+
+    // text
+    int readLine(char *in, int max);
+
+    int     readWord(char *, int);
+    int     readBase64(char *, int);
+
+    void    write(const char *, va_list);
+    void    writeLine(const char *);
+    void    writeLineF(const char *, ...);
+    void    writeString(const char *);
+    void    writeStringF(const char *, ...);
+
+    bool    writeCRLF;
+
+    int     readBits(int);
+
+    void    updateTotals(unsigned int, unsigned int);
+
+
+    unsigned char   bitsBuffer;
+    unsigned int    bitsPos;
+
+    unsigned int totalBytesIn();
+    unsigned int totalBytesOut();
+    unsigned int lastBytesIn();
+    unsigned int lastBytesOut();
+    unsigned int bytesInPerSec();
+    unsigned int bytesOutPerSec();
+
+    class Stat
+    {
+    public:
+        const double Exp = 9.0/10.0;
+
+        Stat ()
+            : m_totalBytesIn(0)
+            , m_totalBytesOut(0)
+            , m_lastBytesIn(0)
+            , m_lastBytesOut(0)
+            , m_bytesInPerSec(0)
+            , m_bytesOutPerSec(0)
+            , m_bytesInPerSecAvg(0)
+            , m_bytesOutPerSecAvg(0)
+            , m_lastUpdate(0)
+            , m_startTime(0)
+        {}
+
+        void update(unsigned int in, unsigned int out)
+        {
+            double now = sys->getDTime();
+
+            if (m_lastUpdate == 0.0)
+            {
+                m_startTime = now;
+                m_lastUpdate = now;
+            }
+
+            m_totalBytesIn  += in;
+            m_totalBytesOut += out;
+
+            double tdiff = now - m_lastUpdate;
+            if (tdiff >= 1.0)
+            {
+                m_bytesInPerSec     = (m_totalBytesIn - m_lastBytesIn) / tdiff;
+                m_bytesOutPerSec    = (m_totalBytesOut - m_lastBytesOut) / tdiff;
+
+                m_bytesInPerSecAvg  = Exp * m_bytesInPerSecAvg + (1-Exp) * m_bytesInPerSec;
+                m_bytesOutPerSecAvg = Exp * m_bytesOutPerSecAvg + (1-Exp) * m_bytesOutPerSec;
+
+                m_lastBytesIn       = m_totalBytesIn;
+                m_lastBytesOut      = m_totalBytesOut;
+
+                m_lastUpdate        = now;
+            }
+        }
+
+        void update() { update(0, 0); }
+
+        unsigned int    totalBytesIn() { update(); return m_totalBytesIn; }
+        unsigned int    totalBytesOut() { update(); return m_totalBytesOut; }
+        unsigned int    lastBytesIn() { update(); return m_lastBytesIn; }
+        unsigned int    lastBytesOut() { update(); return m_lastBytesOut; }
+        unsigned int    bytesInPerSec() { update(); return m_bytesInPerSec; }
+        unsigned int    bytesOutPerSec() { update(); return m_bytesOutPerSec; }
+
+        unsigned int    bytesInPerSecAvg() { update(); return m_bytesInPerSecAvg; }
+        unsigned int    bytesOutPerSecAvg() { update(); return m_bytesOutPerSecAvg; }
+
+        unsigned int    m_totalBytesIn, m_totalBytesOut;
+        unsigned int    m_lastBytesIn, m_lastBytesOut;
+        unsigned int    m_bytesInPerSec, m_bytesOutPerSec;
+
+        double          m_bytesInPerSecAvg;
+        double          m_bytesOutPerSecAvg;
+
+        double          m_lastUpdate;
+        double          m_startTime;
+    };
+
+    Stat stat;
 };
 
 
@@ -219,149 +288,149 @@ public:
 class FileStream : public Stream
 {
 public:
-	FileStream() {file=NULL;}
+    FileStream() { file=NULL; }
 
-    void	openReadOnly(const char *);
-    void	openWriteReplace(const char *);
-    void	openWriteAppend(const char *);
-	bool	isOpen(){return file!=NULL;}
-	int		length();
-	int		pos();
+    void    openReadOnly(const char *);
+    void    openWriteReplace(const char *);
+    void    openWriteAppend(const char *);
+    bool    isOpen() { return file!=NULL; }
+    int     length();
+    int     pos();
 
-	virtual void	seekTo(int);
-	virtual int		getPosition() {return pos();}
-	virtual void	flush();
-    virtual int		read(void *,int);
-    virtual void	write(const void *,int);
-    virtual bool	eof();
-    virtual void	rewind();
-    virtual void	close();
+    virtual void    seekTo(int);
+    virtual int     getPosition() { return pos(); }
+    virtual void    flush();
+    virtual int     read(void *, int);
+    virtual void    write(const void *, int);
+    virtual bool    eof();
+    virtual void    rewind();
+    virtual void    close();
 
 
-	FILE *file;
+    FILE *file;
 };
 // -------------------------------------
 class MemoryStream : public Stream
 {
 public:
-	MemoryStream()
-	:buf(NULL)
-	,len(0)
-	,pos(0)
-	{
-	}
-
-	MemoryStream(void *p, int l)
-	:buf((char *)p)
-	,len(l)
-	,pos(0)
-	{
-	}
-
-	MemoryStream(int l)
-	:buf(new char[l])
-	,len(l)
-	,pos(0)
-	{
-	}
-
-	void readFromFile(FileStream &file)
-	{
-		len = file.length();
-		buf = new char[len];
-		pos = 0;
-		file.read(buf,len);
-	}
-
-	void free()
-	{
-		if (buf)
-		{
-			delete buf;
-			buf = NULL;
-		}
-
-	}
-
-	virtual int read(void *p,int l)
+    MemoryStream()
+    :buf(NULL)
+    , len(0)
+    , pos(0)
     {
-		if (pos+l <= len)
-		{
-			memcpy(p,&buf[pos],l);
-			pos += l;
-			return l;
-		}else
-		{
-			memset(p,0,l);
-			return 0;
-		}
     }
 
-	virtual void write(const void *p,int l)
+    MemoryStream(void *p, int l)
+    :buf((char *)p)
+    , len(l)
+    , pos(0)
     {
-		if ((pos+l) > len)
-			throw StreamException("Stream - premature end of write()");
-		memcpy(&buf[pos],p,l);
-		pos += l;
     }
 
-    virtual bool eof()
+    MemoryStream(int l)
+    :buf(new char[l])
+    , len(l)
+    , pos(0)
+    {
+    }
+
+    void readFromFile(FileStream &file)
+    {
+        len = file.length();
+        buf = new char[len];
+        pos = 0;
+        file.read(buf, len);
+    }
+
+    void free()
+    {
+        if (buf)
+        {
+            delete[] buf;
+            buf = NULL;
+        }
+
+    }
+
+    int read(void *p, int l) override
+    {
+        if (pos+l <= len)
+        {
+            memcpy(p, &buf[pos], l);
+            pos += l;
+            return l;
+        }else
+        {
+            memset(p, 0, l);
+            return 0;
+        }
+    }
+
+    void write(const void *p, int l) override
+    {
+        if ((pos+l) > len)
+            throw StreamException("Stream - premature end of write()");
+        memcpy(&buf[pos], p, l);
+        pos += l;
+    }
+
+    bool eof() override
     {
         return pos >= len;
     }
 
-	virtual void rewind()
-	{
-		pos = 0;
-	}
+    void rewind() override
+    {
+        pos = 0;
+    }
 
-	virtual void seekTo(int p)
-	{
-		pos = p;
-	}
+    void seekTo(int p) override
+    {
+        pos = p;
+    }
 
-	virtual int getPosition()
-	{
-		return pos;
-	}
+    int getPosition() override
+    {
+        return pos;
+    }
 
-	void	convertFromBase64();
+    void    convertFromBase64();
 
 
-	char *buf;
-	int len,pos;
+    char    *buf;
+    int     len, pos;
 };
 // --------------------------------------------------
 class IndirectStream : public Stream
 {
 public:
 
-	void init(Stream *s)
-	{
-		stream = s;
-	}
-
-	virtual int read(void *p,int l)
+    void init(Stream *s)
     {
-		return stream->read(p,l);
+        stream = s;
     }
 
-	virtual void write(const void *p,int l)
+    int read(void *p, int l) override
     {
-		stream->write(p,l);
+        return stream->read(p, l);
     }
 
-    virtual bool eof()
+    void write(const void *p, int l) override
+    {
+        stream->write(p, l);
+    }
+
+    bool eof() override
     {
         return stream->eof();
     }
 
-    virtual void close()
+    void close() override
     {
         stream->close();
     }
 
-	Stream *stream;
+    Stream *stream;
 };
 
 

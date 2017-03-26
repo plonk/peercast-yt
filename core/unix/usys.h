@@ -3,7 +3,7 @@
 // Date: 4-apr-2002
 // Author: giles
 // Desc:
-//		WSys derives from Sys to provide basic win32 functions such as starting threads.
+//      WSys derives from Sys to provide basic win32 functions such as starting threads.
 //
 // (c) 2002 peercast.org
 // ------------------------------------------------
@@ -30,29 +30,29 @@
 class USys : public Sys
 {
 public:
-	USys();
+    USys();
 
-	virtual	ClientSocket	*createSocket();
-	virtual bool			startThread(ThreadInfo *);
-	virtual void			sleep(int );
-	virtual void			appMsg(long,long);
-	virtual unsigned int	getTime();
-	virtual double			getDTime();
-	virtual unsigned int	rnd() {return rndGen.next();}
-	virtual void			getURL(const char *);
-	virtual void			exit();
-	virtual bool			hasGUI() {return false;}
-	virtual void			callLocalURL(const char *,int);
-	virtual void			executeFile(const char *);
-	virtual void			endThread(ThreadInfo *);
-	virtual void			waitThread(ThreadInfo *, int timeout = 30000);
+    ClientSocket    *createSocket() override;
+    bool            startThread(ThreadInfo *) override;
+    void            sleep(int ) override;
+    void            appMsg(long, long) override;
+    unsigned int    getTime() override;
+    double          getDTime() override;
+    unsigned int    rnd() override { return rndGen.next(); }
+    void            getURL(const char *) override;
+    void            exit() override;
+    bool            hasGUI() override { return false; }
+    void            callLocalURL(const char *, int) override;
+    void            executeFile(const char *) override;
+    void            endThread(ThreadInfo *) override;
+    void            waitThread(ThreadInfo *, int timeout = 30000) override;
+    void            setThreadName(ThreadInfo *, const char* name) override;
 
-
-	peercast::Random rndGen;
+    peercast::Random rndGen;
 private:
 
 #ifdef __APPLE__
-	void openURL( const char* url );
+    void openURL( const char* url );
 #endif
 };
 

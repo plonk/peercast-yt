@@ -10,67 +10,68 @@ public:
     {
     }
 
-    virtual class ClientSocket* createSocket()
+    class ClientSocket* createSocket() override
     {
         return NULL;
     }
 
-    virtual bool startThread(class ThreadInfo*) {
+    bool startThread(class ThreadInfo*) override
+    {
         return false;
     }
 
-    virtual void sleep(int)
+    void sleep(int) override
     {
     }
 
-    virtual void appMsg(long, long = 0)
+    void appMsg(long, long = 0) override
     {
     }
 
-    virtual unsigned int getTime()
-    {
-        return 0;
-    }
-
-    virtual double getDTime()
+    unsigned int getTime() override
     {
         return 0;
     }
 
-    virtual unsigned int rnd()
+    double getDTime() override
+    {
+        return 0;
+    }
+
+    unsigned int rnd() override
     {
         return 123456789;
     }
 
     // URLをブラウザやメーラで開く。
-    virtual void getURL(const char*)
+    void getURL(const char*) override
     {
     }
 
-    virtual void exit()
+    void exit() override
     {
     }
 
-    virtual bool hasGUI()
+    bool hasGUI() override
     {
         return false;
     }
 
     // ローカルサーバーのURLを開く。
-    virtual void callLocalURL(const char*, int)
+    void callLocalURL(const char*, int) override
     {
     }
 
     // ファイルを開く。
-    virtual void executeFile(const char*)
+    void executeFile(const char*) override
     {
     }
 
-    virtual void endThread(ThreadInfo*)
+    void endThread(ThreadInfo*) override
     {
     }
 
-    virtual void waitThread(ThreadInfo*, int timeout = 30000)
+    void waitThread(ThreadInfo*, int timeout = 30000) override
     {
     }
 };

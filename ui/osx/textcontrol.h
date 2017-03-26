@@ -28,7 +28,7 @@ class TextControl
 public:
 	explicit TextControl( const int a, const int id )
 	: mID( )
-	 ,mStringRef( NULL )
+	 , mStringRef( NULL )
 	{
 		mID.signature = a;
 		mID.id		  = id;

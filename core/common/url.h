@@ -25,21 +25,18 @@
 class URLSource : public ChannelSource
 {
 public:
-	URLSource(const char *url)
-	:inputStream(NULL)
-	{
-		baseurl.set(url);
-	}
+    URLSource(const char *url)
+    :inputStream(NULL)
+    {
+        baseurl.set(url);
+    }
 
-	::String streamURL(Channel *, const char *);
+    ::String        streamURL(Channel *, const char *);
+    void            stream(Channel *) override;
+    int             getSourceRate() override;
 
-	virtual void stream(Channel *);
-
-	virtual int getSourceRate();
-
-
-	Stream		*inputStream;
-	::String	baseurl;
+    Stream          *inputStream;
+    ::String        baseurl;
 };
 
 

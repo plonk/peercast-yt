@@ -39,10 +39,10 @@ public:
 	virtual void			appMsg(long,long);
 	virtual unsigned int	getTime();
 	virtual double			getDTime();		
-	virtual unsigned int	rnd() {return rndGen.next();}
+	virtual unsigned int	rnd() { return rndGen.next(); }
 	virtual void			getURL(const char *);
 	virtual void			exit();
-	virtual bool			hasGUI() {return mainWindow!=NULL;}
+	virtual bool			hasGUI() { return mainWindow!=NULL; }
 	virtual void			callLocalURL(const char *str,int port);
 	virtual void			executeFile(const char *);
 	virtual void			endThread(ThreadInfo *);

@@ -26,7 +26,7 @@
 class RTSP : public HTTP
 {
 public:
-	RTSP(Stream &s):HTTP(s){}
+    RTSP(Stream &s):HTTP(s) {}
 };
 
 #endif

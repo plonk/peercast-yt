@@ -3,7 +3,7 @@
 // Date: 4-apr-2002
 // Author: giles
 // Desc:
-//		ClientSocket is a generic socket interface, Non OS/HW dependant.
+//      ClientSocket is a generic socket interface, Non OS/HW dependant.
 //
 // (c) 2002 peercast.org
 // ------------------------------------------------

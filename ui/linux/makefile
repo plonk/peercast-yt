@@ -1,106 +1,94 @@
-CPPFLAGS = -DENABLE_BINRELOC -pthread  -D__cplusplus -D_UNIX -D_REENTRANT $(INCLUDES) 
-LDFLAGS = -pthread 
-LDSOFLAGS = -shared -Wl,-soname
+CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT $(INCLUDES)
+LDFLAGS = -pthread
+LIBS = -lboost_system -lcppnetlib-uri
 
-#CPPFLAGS = -static -pthread -D__cplusplus -D_UNIX -D_LINUX_STATIC -D_REENTRANT $(INCLUDES)
-#LDFLAGS = -static -pthread 
-
-LD = g++
-TAR = peercast-linux.tgz
+TAR = peercast-linux.tar
 CC = gcc
 AR = ar
 
-INCLUDES = -I../../core -I../../core/common 
+INCLUDES = -I../../core -I../../core/common
 
 TARGET = peercast
 CORE = ../../core
-SRCHTML = ../html
+SRCHTMLTAR = ../html.tar
 HTML = html
 
-LIBSONAME = libpeercast.so.1
-LIBOBJSHARED = libpeercast.so.1.0
 LIBOBJSTATIC = libpeercast.a
 
-CORESOURCE = $(CORE)/unix/usys.cpp \
-	 $(CORE)/unix/usocket.cpp \
-	 $(CORE)/common/socket.cpp \
-	 $(CORE)/common/servent.cpp \
-	 $(CORE)/common/servhs.cpp \
-	 $(CORE)/common/servmgr.cpp \
-	 $(CORE)/common/xml.cpp \
-	 $(CORE)/common/stream.cpp \
-	 $(CORE)/common/sys.cpp \
-	 $(CORE)/common/gnutella.cpp \
-	 $(CORE)/common/html.cpp \
-	 $(CORE)/common/channel.cpp \
-	 $(CORE)/common/http.cpp \
-	 $(CORE)/common/inifile.cpp \
-	 $(CORE)/common/peercast.cpp \
-	 $(CORE)/common/stats.cpp \
-	 $(CORE)/common/mms.cpp \
-	 $(CORE)/common/mp3.cpp \
-	 $(CORE)/common/nsv.cpp \
-	 $(CORE)/common/ogg.cpp \
-	 $(CORE)/common/url.cpp \
-	 $(CORE)/common/icy.cpp \
-	 $(CORE)/common/pcp.cpp \
-	 $(CORE)/common/jis.cpp \
-	 $(CORE)/common/flv.cpp 
+SYSSOURCE = \
+	$(CORE)/unix/usys.cpp \
+	$(CORE)/unix/usocket.cpp
 
+CORESOURCE = \
+	$(CORE)/common/socket.cpp \
+	$(CORE)/common/servent.cpp \
+	$(CORE)/common/servhs.cpp \
+	$(CORE)/common/servmgr.cpp \
+	$(CORE)/common/xml.cpp \
+	$(CORE)/common/stream.cpp \
+	$(CORE)/common/sys.cpp \
+	$(CORE)/common/gnutella.cpp \
+	$(CORE)/common/html.cpp \
+	$(CORE)/common/channel.cpp \
+	$(CORE)/common/http.cpp \
+	$(CORE)/common/inifile.cpp \
+	$(CORE)/common/peercast.cpp \
+	$(CORE)/common/stats.cpp \
+	$(CORE)/common/mms.cpp \
+	$(CORE)/common/mp3.cpp \
+	$(CORE)/common/nsv.cpp \
+	$(CORE)/common/ogg.cpp \
+	$(CORE)/common/url.cpp \
+	$(CORE)/common/icy.cpp \
+	$(CORE)/common/pcp.cpp \
+	$(CORE)/common/jis.cpp \
+	$(CORE)/common/flv.cpp \
+	$(CORE)/common/jrpc.cpp \
+	$(CORE)/common/chandir.cpp
 
+COREOBJ = $(notdir $(CORESOURCE:.cpp=.o))
+SYSOBJ = $(notdir $(SYSSOURCE:.cpp=.o))
 
-COREOBJ = $(CORESOURCE:.cpp=.o)
+LINUXSOURCE = main.cpp
+LINUXOBJ = $(notdir $(LINUXSOURCE:.cpp=.o))
 
-COREOBJSTATIC = $(CORESOURCE:.cpp=.a)
+DEPENDFILE = .deps
 
-LINUXSOURCE = main.cpp 
-LINUXOBJ = $(LINUXSOURCE:.cpp=.o)
+.PHONY: all clean deps
 
 # Here follow the generic build rules.
-all:  $(TARGET)
-	
-tar: $(TARGET)
-	rm -rf $(TAR)
+all: $(TARGET) $(TAR)
+
+deps: $(DEPENDFILE)
+
+$(SRCHTMLTAR):
+	make -C .. html.tar
+
+$(HTML): $(SRCHTMLTAR)
 	rm -rf $(HTML)
-	mkdir -p $(HTML)/ja/images
-	cp $(SRCHTML)/ja/images/*.* $(HTML)/ja/images
-	cp $(SRCHTML)/ja/*.* $(HTML)/ja/
-	mkdir -p $(HTML)/de/images
-	cp $(SRCHTML)/de/images/*.* $(HTML)/de/images
-	cp $(SRCHTML)/de/*.* $(HTML)/de/
-	mkdir -p $(HTML)/en/images
-	cp $(SRCHTML)/en/images/*.* $(HTML)/en/images
-	cp $(SRCHTML)/en/*.* $(HTML)/en/
-	mkdir -p $(HTML)/fr/images
-	cp $(SRCHTML)/fr/images/*.* $(HTML)/fr/images
-	cp $(SRCHTML)/fr/*.* $(HTML)/fr/
-	tar -czf $(TAR) $(HTML) $(TARGET)
+	tar xf $(SRCHTMLTAR) $(HTML)
+	touch $(HTML)
+
+$(TAR): $(TARGET) $(HTML)
+	tar cf $(TAR) $(HTML) $(TARGET)
 
 clean:
-	rm  -f $(LINUXOBJ) $(COREOBJ) $(TARGET) ${LIBOBJSTATIC} ${LIBOBJSHARED} $(COREOBJSTATIC)
+	rm -f $(LINUXOBJ) $(COREOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE)
+	rm -rf $(HTML)
 
-%.o: %.cpp
-	$(CC) $(INCLUDES) $(CPPFLAGS) -fPIC -c $< -o $@
+$(COREOBJ): %.o : $(CORE)/common/%.cpp
+	$(CC) $(CPPFLAGS) -c $< -o $@
 
-%.a: %.cpp
-	$(CC) $(INCLUDES) $(CPPFLAGS) -c $< -o $@
+$(SYSOBJ): %.o : $(CORE)/unix/%.cpp
+	$(CC) $(CPPFLAGS) -c $< -o $@
 
-DEPENDFILE = makedepend
+$(DEPENDFILE): $(CORESOURCE) $(LINUXSOURCE)
+	$(CXX) $(CPPFLAGS) -MM $(CORESOURCE) $(SYSSOURCE) $(LINUXSOURCE) > $(DEPENDFILE)
 
+$(LIBOBJSTATIC): $(COREOBJ) $(SYSOBJ)
+	$(AR) rcs $(LIBOBJSTATIC) $(COREOBJ) $(SYSOBJ)
 
-depend: 
-	echo > $(DEPENDFILE)
-	$(CC) $(INCLUDES) $(CPPFLAGS) -MD $(CORESOURCE) $(LINUXSOURCE) >> $(DEPENDFILE)
+$(TARGET): $(LINUXOBJ) $(LIBOBJSTATIC)
+	$(CXX) $(LDFLAGS) -o $@ $(LINUXOBJ) $(LIBOBJSTATIC) $(LIBS)
 
-peercast-so: $(COREOBJSTATIC) $(COREOBJ) $(LINUXOBJ)
-	$(LD) $(LDSOFLAGS),$(LIBSONAME) -o ${LIBOBJSHARED} $(COREOBJ) -lc
-	$(LD) $(LDFLAGS) -o $@ $(LINUXOBJ) $(LIBOBJSHARED) -ldl
-	${AR} rcs $(LIBOBJSTATIC) $(COREOBJSTATIC)
-
-
-$(TARGET): $(LINUXOBJ) $(COREOBJ)
-	$(LD) $(LDFLAGS) -o $@ $(LINUXOBJ) $(COREOBJ) $(LIBS)
-	
-
-
-include $(DEPENDFILE)
+-include $(DEPENDFILE)

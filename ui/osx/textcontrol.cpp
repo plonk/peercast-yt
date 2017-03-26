@@ -36,10 +36,10 @@ void TextControl::setText( WindowRef window, CFStringRef text )
 	OSStatus err = GetControlByID( window, &mID, &controlRef );
 
 	err = SetControlData(   controlRef
-						   ,0
-						   ,kControlEditTextCFStringTag
-						   ,sizeof(CFStringRef)
-						   ,&text );
+						   , 0
+						   , kControlEditTextCFStringTag
+						   , sizeof(CFStringRef)
+						   , &text );
 
 	DrawOneControl( controlRef );
 }
@@ -52,11 +52,11 @@ CFStringRef TextControl::getStringRef( WindowRef window )
 
 		OSStatus err = GetControlByID( window, &mID, &controlRef );
 		err = GetControlData( controlRef
-							 ,0
-							 ,kControlEditTextCFStringTag
-							 ,sizeof(CFStringRef)
-							 ,&mStringRef
-							 ,NULL );
+							 , 0
+							 , kControlEditTextCFStringTag
+							 , sizeof(CFStringRef)
+							 , &mStringRef
+							 , NULL );
 	}
 
 	return mStringRef;

@@ -31,42 +31,44 @@ class ClientSocket : public Stream
 {
 public:
 
-	ClientSocket()
-	{
-		readTimeout = 30000;
-		writeTimeout = 30000;
-	}
+    ClientSocket()
+    {
+        readTimeout = 30000;
+        writeTimeout = 30000;
+    }
+
+    virtual ~ClientSocket() {}
 
     // required interface
-	virtual void	open(Host &) = 0;
-	virtual void	bind(Host &) = 0;
-	virtual void	connect() = 0;
-	virtual bool	active() = 0;
-	virtual ClientSocket	*accept() = 0;
-	virtual Host	getLocalHost() = 0;
+    virtual void            open(Host &) = 0;
+    virtual void            bind(Host &) = 0;
+    virtual void            connect() = 0;
+    virtual bool            active() = 0;
+    virtual ClientSocket    *accept() = 0;
+    virtual Host            getLocalHost() = 0;
 
-	virtual void	setReadTimeout(unsigned int t)
-	{
-		readTimeout = t;
-	}
-	virtual void	setWriteTimeout(unsigned int t)
-	{
-		writeTimeout = t;
-	}
-	virtual void	setBlocking(bool) {}
+    void    setReadTimeout(unsigned int t) override
+    {
+        readTimeout = t;
+    }
+    void    setWriteTimeout(unsigned int t) override
+    {
+        writeTimeout = t;
+    }
+    virtual void    setBlocking(bool) = 0;
 
 
-    static unsigned int    getIP(char *);
-	static bool			getHostname(char *,unsigned int);
+    static unsigned int getIP(char *);
+    static bool         getHostname(char *, unsigned int);
 
-    virtual bool eof()
+    bool eof() override
     {
         return active()==false;
     }
 
-    Host    host;
+    Host            host;
 
-	unsigned int readTimeout,writeTimeout;
+    unsigned int    readTimeout, writeTimeout;
 };
 
 

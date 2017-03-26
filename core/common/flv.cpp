@@ -26,6 +26,14 @@
 #define new DEBUG_NEW
 #endif
 
+static String timestampToString(uint32_t timestamp)
+{
+    return String::format("%d:%02d:%02d.%03d",
+                          timestamp / 1000 / 3600,
+                          timestamp / 1000 / 60 % 60,
+                          timestamp / 1000 % 60,
+                          timestamp % 1000);
+}
 
 // ------------------------------------------
 void FLVStream::readEnd(Stream &, Channel *)
@@ -35,155 +43,189 @@ void FLVStream::readEnd(Stream &, Channel *)
 // ------------------------------------------
 void FLVStream::readHeader(Stream &in, Channel *ch)
 {
-	bitrate = 0;
-	fileHeader.read(in);
+    metaBitrate = 0;
+    fileHeader.read(in);
 }
 
 // ------------------------------------------
 int FLVStream::readPacket(Stream &in, Channel *ch)
 {
-	bool headerUpdate = false;
+    bool headerUpdate = false;
 
-	FLVTag flvTag;
-	flvTag.read(in);
+    FLVTag flvTag;
+    flvTag.read(in);
 
-	switch (flvTag.type)
-	{
-		case FLVTag::T_SCRIPT:
-		{
-			AMFObject amf;
-			MemoryStream flvmem(flvTag.data, flvTag.size);
-			if (amf.readMetaData(flvmem)) {
-				flvmem.close();
-				bitrate = amf.bitrate;
-				metaData = flvTag;
-				headerUpdate = true;
-			}
-		}
-		case FLVTag::T_VIDEO:
-		{
-			//AVC Header
-			if (flvTag.data[0] == 0x17 && flvTag.data[1] == 0x00 &&
-				flvTag.data[2] == 0x00 && flvTag.data[3] == 0x00) {
-				avcHeader = flvTag;
-				headerUpdate = true;
-			}
-		}
-		case FLVTag::T_AUDIO:
-		{
-			//AAC Header
-			if (flvTag.data[0] == 0xaf && flvTag.data[1] == 0x00) {
-				aacHeader = flvTag;
-				headerUpdate = true;
-			}
-		}
-	}
+    // LOG_DEBUG("%s: %s: %d byte %s tag",
+    //           static_cast<std::string>(ch->info.id).c_str(),
+    //           timestampToString(flvTag.getTimestamp()).cstr(),
+    //           flvTag.packetSize,
+    //           flvTag.getTagType());
 
-	if (headerUpdate && fileHeader.size>0) {
-		int len = fileHeader.size;
-		if (metaData.type == FLVTag::T_SCRIPT) len += metaData.packetSize;
-		if (avcHeader.type == FLVTag::T_VIDEO) len += avcHeader.packetSize;
-		if (aacHeader.type == FLVTag::T_AUDIO) len += aacHeader.packetSize;
-		MemoryStream mem(ch->headPack.data, len);
-		mem.write(fileHeader.data, fileHeader.size);
-		if (metaData.type == FLVTag::T_SCRIPT) mem.write(metaData.packet, metaData.packetSize);
-		if (avcHeader.type == FLVTag::T_VIDEO) mem.write(avcHeader.packet, avcHeader.packetSize);
-		if (aacHeader.type == FLVTag::T_AUDIO) mem.write(aacHeader.packet, aacHeader.packetSize);
+    switch (flvTag.type)
+    {
+    case FLVTag::T_SCRIPT:
+        {
+            AMFObject amf;
+            MemoryStream flvmem(flvTag.data, flvTag.size);
+            if (amf.readMetaData(flvmem)) {
+                flvmem.close();
+                metaBitrate = amf.bitrate;
+                metaData = flvTag;
+                headerUpdate = true;
+            }
+        }
+        break;
+    case FLVTag::T_VIDEO:
+        // AVC Header
+        if (flvTag.data[0] == 0x17 && flvTag.data[1] == 0x00 &&
+            flvTag.data[2] == 0x00 && flvTag.data[3] == 0x00) {
+            avcHeader = flvTag;
+            if (avcHeader.getTimestamp() != 0)
+            {
+                LOG_CHANNEL("AVC header has non-zero timestamp. Cleared to zero.");
+                avcHeader.setTimestamp(0);
+            }
+            headerUpdate = true;
+        }
+        break;
+    case FLVTag::T_AUDIO:
+        // AAC Header
+        if (flvTag.data[0] == 0xaf && flvTag.data[1] == 0x00) {
+            aacHeader = flvTag;
+            if (aacHeader.getTimestamp() != 0)
+            {
+                LOG_CHANNEL("AAC header has non-zero timestamp. Cleared to zero.");
+                aacHeader.setTimestamp(0);
+            }
+            headerUpdate = true;
+        }
+        break;
+    default:
+        LOG_ERROR("Invalid FLV tag!");
+    }
 
-		ch->info.bitrate = bitrate;
+    // メタ情報からのビットレートが無い場合、ストリームからの実測値が
+    // 現在の公称値を超えていれば公称値を更新する。
+    if (metaBitrate == 0) {
+        ChanInfo info = ch->info;
 
-		m_buffer.flush(ch);
+        int newBitrate = in.stat.bytesInPerSecAvg() / 1000 * 8;
+        if (newBitrate > info.bitrate) {
+            info.bitrate = newBitrate;
+            ch->updateInfo(info);
+        }
+    }
 
-		ch->headPack.type = ChanPacket::T_HEAD;
-		ch->headPack.len = mem.pos;
-		ch->headPack.pos = ch->streamPos;
-		ch->newPacket(ch->headPack);
+    if (headerUpdate && fileHeader.size>0) {
+        int len = fileHeader.size;
+        if (metaData.type == FLVTag::T_SCRIPT) len += metaData.packetSize;
+        if (avcHeader.type == FLVTag::T_VIDEO) len += avcHeader.packetSize;
+        if (aacHeader.type == FLVTag::T_AUDIO) len += aacHeader.packetSize;
+        MemoryStream mem(ch->headPack.data, len);
+        mem.write(fileHeader.data, fileHeader.size);
+        if (metaData.type == FLVTag::T_SCRIPT) mem.write(metaData.packet, metaData.packetSize);
+        if (avcHeader.type == FLVTag::T_VIDEO) mem.write(avcHeader.packet, avcHeader.packetSize);
+        if (aacHeader.type == FLVTag::T_AUDIO) mem.write(aacHeader.packet, aacHeader.packetSize);
 
-		ch->streamPos += ch->headPack.len;
-	}
-	else {
-		bool packet_sent;
+        // メタ情報からのビットレートがあればその値を設定。無ければ、
+        // 前回のエンコードセッションからの値をクリアするために 0 を設
+        // 定する。
+        ChanInfo info = ch->info;
+        info.bitrate = metaBitrate;
+        ch->updateInfo(info);
 
-		packet_sent = m_buffer.put(flvTag, ch);
+        m_buffer.flush(ch);
 
-		if (!packet_sent && in.readReady())
-			return readPacket(in, ch);
-	}
+        ch->headPack.type = ChanPacket::T_HEAD;
+        ch->headPack.len = mem.pos;
+        ch->headPack.pos = ch->streamPos;
+        ch->newPacket(ch->headPack);
 
-	return 0;
+        ch->streamPos += ch->headPack.len;
+    }
+    else {
+        bool packet_sent;
+
+        packet_sent = m_buffer.put(flvTag, ch);
+
+        if (!packet_sent && in.readReady())
+            return readPacket(in, ch);
+    }
+
+    return 0;
 }
 
 bool FLVTagBuffer::put(FLVTag& tag, Channel* ch)
 {
-	if (m_mem.pos + tag.packetSize > 15 * 1024)
-	{
-		if (m_mem.pos > 0)
-		{
-			flush(ch);
-		}
-		sendImmediately(tag, ch);
-		return true;
-	} else if (m_mem.pos + tag.packetSize > 8 * 1024)
-	{
-		flush(ch);
+    if (m_mem.pos + tag.packetSize > MAX_OUTGOING_PACKET_SIZE)
+    {
+        if (m_mem.pos > 0)
+        {
+            flush(ch);
+        }
+        sendImmediately(tag, ch);
+        return true;
+    } else if (m_mem.pos + tag.packetSize > FLUSH_THRESHOLD)
+    {
+        flush(ch);
 
-		m_mem.write(tag.packet, tag.packetSize);
+        m_mem.write(tag.packet, tag.packetSize);
 
-		if (m_mem.pos > 8 * 1024)
-			flush(ch);
-		return true;
-	} else
-	{
-		m_mem.write(tag.packet, tag.packetSize);
-		return false;
-	}
+        if (m_mem.pos > FLUSH_THRESHOLD)
+            flush(ch);
+        return true;
+    } else
+    {
+        m_mem.write(tag.packet, tag.packetSize);
+        return false;
+    }
 }
 
 void FLVTagBuffer::sendImmediately(FLVTag& tag, Channel* ch)
 {
-	ChanPacket pack;
-	MemoryStream mem(tag.packet, tag.packetSize);
+    ChanPacket pack;
+    MemoryStream mem(tag.packet, tag.packetSize);
 
-	int rlen = tag.packetSize;
-	while (rlen)
-	{
-		int rl = rlen;
-		if (rl > MAX_DATALEN)
-			rl = MAX_DATALEN;
+    int rlen = tag.packetSize;
+    while (rlen)
+    {
+        int rl = rlen;
+        if (rl > MAX_OUTGOING_PACKET_SIZE)
+            rl = MAX_OUTGOING_PACKET_SIZE;
 
-		pack.type = ChanPacket::T_DATA;
-		pack.pos = ch->streamPos;
-		pack.len = rl;
+        pack.type = ChanPacket::T_DATA;
+        pack.pos = ch->streamPos;
+        pack.len = rl;
 
-		mem.read(pack.data, pack.len);
+        mem.read(pack.data, pack.len);
 
-		ch->newPacket(pack);
-		ch->checkReadDelay(pack.len);
-		ch->streamPos += pack.len;
+        ch->newPacket(pack);
+        ch->checkReadDelay(pack.len);
+        ch->streamPos += pack.len;
 
-		rlen -= rl;
-	}
+        rlen -= rl;
+    }
 }
 
 void FLVTagBuffer::flush(Channel* ch)
 {
-	if (m_mem.pos == 0)
-		return;
+    if (m_mem.pos == 0)
+        return;
 
-	int length = m_mem.pos;
+    int length = m_mem.pos;
 
-	m_mem.rewind();
+    m_mem.rewind();
 
-	ChanPacket pack;
+    ChanPacket pack;
 
-	pack.type = ChanPacket::T_DATA;
-	pack.pos = ch->streamPos;
-	pack.len = length;
-	m_mem.read(pack.data, length);
+    pack.type = ChanPacket::T_DATA;
+    pack.pos = ch->streamPos;
+    pack.len = length;
+    m_mem.read(pack.data, length);
 
-	ch->newPacket(pack);
-	ch->checkReadDelay(pack.len);
-	ch->streamPos += pack.len;
+    ch->newPacket(pack);
+    ch->checkReadDelay(pack.len);
+    ch->streamPos += pack.len;
 
-	m_mem.rewind();
+    m_mem.rewind();
 }

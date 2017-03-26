@@ -20,10 +20,13 @@
 #ifndef _SYS_H
 #define _SYS_H
 
+#include <string>
+
 #include <string.h>
+#include <stdarg.h>
 #include "common.h"
 
-#define RAND(a,b) (((a = 36969 * (a & 65535) + (a >> 16)) << 16) + \
+#define RAND(a, b) (((a = 36969 * (a & 65535) + (a >> 16)) << 16) + \
                     (b = 18000 * (b & 65535) + (b >> 16))  )
 extern char *stristr(const char *s1, const char *s2);
 extern char *trimstr(char *s);
@@ -34,201 +37,241 @@ extern char *trimstr(char *s);
 class String
 {
 public:
-	enum {
-		MAX_LEN = 256
-	};
+    enum {
+        MAX_LEN = 256
+    };
 
-	enum TYPE
-	{
-		T_UNKNOWN,
-		T_ASCII,
-		T_HTML,
-		T_ESC,
-		T_ESCSAFE,
-		T_META,
-		T_METASAFE,
-		T_BASE64,
-		T_UNICODE,
-		T_UNICODESAFE
-	};
+    enum TYPE
+    {
+        T_UNKNOWN,
+        T_ASCII,
+        T_HTML,
+        T_ESC,
+        T_ESCSAFE,
+        T_META,
+        T_METASAFE,
+        T_BASE64,
+        T_UNICODE,
+        T_UNICODESAFE
+    };
 
-	String() {clear();}
-	String(const char *p, TYPE t=T_ASCII)
-	{
-		set(p,t);
-	}
+    String() { clear(); }
+    String(const char *p, TYPE t=T_ASCII)
+    {
+        set(p, t);
+    }
 
-	// set from straight null terminated string
-	void set(const char *p, TYPE t=T_ASCII)
-	{
-		strncpy(data,p,MAX_LEN-1);
-		data[MAX_LEN-1] = 0;
-		type = t;
-	}
+    // set from straight null terminated string
+    void set(const char *p, TYPE t=T_ASCII)
+    {
+        strncpy(data, p, MAX_LEN-1);
+        data[MAX_LEN-1] = 0;
+        type = t;
+    }
 
-	// set from quoted or unquoted null terminated string
-	void setFromString(const char *str, TYPE t=T_ASCII);
+    // set from quoted or unquoted null terminated string
+    void setFromString(const char *str, TYPE t=T_ASCII);
 
-	// set from stopwatch
-	void setFromStopwatch(unsigned int t);
+    // set from stopwatch
+    void setFromStopwatch(unsigned int t);
 
-	// set from time
-	void setFromTime(unsigned int t);
-
-
-	// from single word (end at whitespace)
-	void setFromWord(const char *str)
-	{
-		int i;
-		for(i=0; i<MAX_LEN-1; i++)
-		{
-			data[i] = *str++;
-			if ((data[i]==0) || (data[i]==' '))
-				break;
-		}
-		data[i]=0;
-	}
+    // set from time
+    void setFromTime(unsigned int t);
 
 
-	// set from null terminated string, remove first/last chars
-	void setUnquote(const char *p, TYPE t=T_ASCII)
-	{
-		int slen = strlen(p);
-		if (slen > 2)
-		{
-			if (slen >= MAX_LEN) slen = MAX_LEN;
-			strncpy(data,p+1,slen-2);
-			data[slen-2]=0;
-		}else
-			clear();
-		type = t;
-	}
+    // from single word (end at whitespace)
+    void setFromWord(const char *str)
+    {
+        int i;
+        for (i=0; i<MAX_LEN-1; i++)
+        {
+            data[i] = *str++;
+            if ((data[i]==0) || (data[i]==' '))
+                break;
+        }
+        data[i]=0;
+    }
 
-	void clear()
-	{
-		data[0]=0;
-		type = T_UNKNOWN;
-	}
-	void ASCII2ESC(const char *,bool);
-	void ASCII2HTML(const char *);
-	void ASCII2META(const char *,bool);
-	void ESC2ASCII(const char *);
-	void HTML2ASCII(const char *);
-	void HTML2UNICODE(const char *);
-	void BASE642ASCII(const char *);
-	void UNKNOWN2UNICODE(const char *,bool);
 
-	static	int	base64WordToChars(char *,const char *);
+    // set from null terminated string, remove first/last chars
+    void setUnquote(const char *p, TYPE t=T_ASCII)
+    {
+        int slen = strlen(p);
+        if (slen > 2)
+        {
+            if (slen >= MAX_LEN) slen = MAX_LEN;
+            strncpy(data, p+1, slen-2);
+            data[slen-2]=0;
+        }else
+            clear();
+        type = t;
+    }
 
-	static bool isSame(const char *s1, const char *s2) {return strcmp(s1,s2)==0;}
+    void clear()
+    {
+        data[0]=0;
+        type = T_UNKNOWN;
+    }
+    void ASCII2ESC(const char *, bool);
+    void ASCII2HTML(const char *);
+    void ASCII2META(const char *, bool);
+    void ESC2ASCII(const char *);
+    void HTML2ASCII(const char *);
+    void HTML2UNICODE(const char *);
+    void BASE642ASCII(const char *);
+    void UNKNOWN2UNICODE(const char *, bool);
 
-	bool startsWith(const char *s) const {return strncmp(data,s,strlen(s))==0;}
-	bool isValidURL();
-	bool isEmpty() {return data[0]==0;}
-	bool isSame(::String &s) const {return strcmp(data,s.data)==0;}
-	bool isSame(const char *s) const {return strcmp(data,s)==0;}
-	bool contains(::String &s) {return stristr(data,s.data)!=NULL;}
-	bool contains(const char *s) {return stristr(data,s)!=NULL;}
-	void append(const char *s)
-	{
-		if ((strlen(s)+strlen(data) < (MAX_LEN-1)))
-			strcat(data,s);
-	}
-	void append(char c)
-	{
-		char tmp[2];
-		tmp[0]=c;
-		tmp[1]=0;
-		append(tmp);
-	}
+    static  int base64WordToChars(char *, const char *);
 
-	void prepend(const char *s)
-	{
-		::String tmp;
-		tmp.set(s);
-		tmp.append(data);
-		tmp.type = type;
-		*this = tmp;
-	}
+    static bool isSame(const char *s1, const char *s2) { return strcmp(s1, s2)==0; }
 
-	bool operator == (const char *s) const {return isSame(s);}
-	bool operator != (const char *s) const {return !isSame(s);}
+    bool startsWith(const char *s) const { return strncmp(data, s, strlen(s))==0; }
+    bool isValidURL();
+    bool isEmpty() const { return data[0]==0; }
+    bool isSame(::String &s) const { return strcmp(data, s.data)==0; }
+    bool isSame(const char *s) const { return strcmp(data, s)==0; }
+    bool contains(::String &s) { return stristr(data, s.data)!=NULL; }
+    bool contains(const char *s) { return stristr(data, s)!=NULL; }
+    void append(const char *s)
+    {
+        if ((strlen(s)+strlen(data) < (MAX_LEN-1)))
+            strcat(data, s);
+    }
+    void append(char c)
+    {
+        char tmp[2];
+        tmp[0]=c;
+        tmp[1]=0;
+        append(tmp);
+    }
 
-	operator const char *() const {return data;}
+    void prepend(const char *s)
+    {
+        ::String tmp;
+        tmp.set(s);
+        tmp.append(data);
+        tmp.type = type;
+        *this = tmp;
+    }
 
-	void convertTo(TYPE t);
+    void sprintf(const char* fmt, ...)
+    {
+        va_list ap;
 
-	char	*cstr() {return data;}
+        va_start(ap, fmt);
+        vsnprintf(this->data, ::String::MAX_LEN - 1, fmt, ap);
+        va_end(ap);
+    }
 
-	static bool isWhitespace(char c) {return c==' ' || c=='\t';}
+    static ::String format(const char* fmt, ...)
+    {
+        va_list ap;
+        ::String result;
 
-	TYPE	type;
-	char	data[MAX_LEN];
+        va_start(ap, fmt);
+        vsnprintf(result.data, ::String::MAX_LEN - 1, fmt, ap);
+        va_end(ap);
+
+        return result;
+    }
+
+    operator std::string () const
+    {
+        return data;
+    }
+
+    bool operator == (const char *s) const { return isSame(s); }
+    bool operator != (const char *s) const { return !isSame(s); }
+
+    String& operator = (const String& other)
+    {
+        strcpy(this->data, other.data);
+        this->type = other.type;
+
+        return *this;
+    }
+
+    String& operator = (const char* cstr)
+    {
+        strcpy(this->data, cstr);
+        this->type = T_ASCII;
+
+        return *this;
+    }
+
+    operator const char *() const { return data; }
+
+    void convertTo(TYPE t);
+
+    char    *cstr() { return data; }
+
+    static bool isWhitespace(char c) { return c==' ' || c=='\t'; }
+
+    TYPE    type;
+    char    data[MAX_LEN];
 };
 
 // ------------------------------------
 namespace peercast {
 class Random {
 public:
-	Random(int s=0x14235465)
-	{
-		setSeed(s);
-	}
+    Random(int s=0x14235465)
+    {
+        setSeed(s);
+    }
 
-	unsigned int next()
-	{
-		return RAND(a[0],a[1]);
-	}
+    unsigned int next()
+    {
+        return RAND(a[0], a[1]);
+    }
 
-	void setSeed(int s)
-	{
-		a[0] = a[1] = s;
-	}
+    void setSeed(int s)
+    {
+        a[0] = a[1] = s;
+    }
 
-	unsigned long a[2];
+    unsigned long a[2];
 };
 }
 // ------------------------------------
 class Sys
 {
 public:
-	Sys();
+    Sys();
+    virtual ~Sys();
 
-
-
-    virtual class ClientSocket	*createSocket() = 0;
-	virtual bool			startThread(class ThreadInfo *) = 0;
-	virtual void			sleep(int) = 0;
-	virtual void			appMsg(long,long = 0) = 0;
-	virtual unsigned int	getTime() = 0;
-	virtual double			getDTime() = 0;
-	virtual unsigned int	rnd() = 0;
-	virtual void			getURL(const char *) = 0;
-	virtual void			exit() = 0;
-	virtual bool			hasGUI() = 0;
-	virtual void			callLocalURL(const char *,int)=0;
-	virtual void			executeFile(const char *) = 0;
-	virtual void			endThread(ThreadInfo *) {}
-	virtual void			waitThread(ThreadInfo *, int timeout = 30000) {}
-
-
+    virtual class ClientSocket  *createSocket() = 0;
+    virtual bool            startThread(class ThreadInfo *) = 0;
+    virtual void            sleep(int) = 0;
+    virtual void            appMsg(long, long = 0) = 0;
+    virtual unsigned int    getTime() = 0;
+    virtual double          getDTime() = 0;
+    virtual unsigned int    rnd() = 0;
+    virtual void            getURL(const char *) = 0;
+    virtual void            exit() = 0;
+    virtual bool            hasGUI() = 0;
+    virtual void            callLocalURL(const char *, int)=0;
+    virtual void            executeFile(const char *) = 0;
+    virtual void            endThread(ThreadInfo *) {}
+    virtual void            waitThread(ThreadInfo *, int timeout = 30000) {}
+    virtual void            setThreadName(ThreadInfo *, const char* name) {}
 
 #ifdef __BIG_ENDIAN__
-	unsigned short	convertEndian(unsigned short v) { return SWAP2(v); }
-	unsigned int	convertEndian(unsigned int v) { return SWAP4(v); }
+    unsigned short  convertEndian(unsigned short v) { return SWAP2(v); }
+    unsigned int    convertEndian(unsigned int v) { return SWAP4(v); }
 #else
-	unsigned short	convertEndian(unsigned short v) { return v; }
-	unsigned int	convertEndian(unsigned int v) { return v; }
+    unsigned short  convertEndian(unsigned short v) { return v; }
+    unsigned int    convertEndian(unsigned int v) { return v; }
 #endif
 
 
-	void	sleepIdle();
+    void    sleepIdle();
 
-	unsigned int idleSleepTime;
-	unsigned int rndSeed;
-	unsigned int numThreads;
+    unsigned int idleSleepTime;
+    unsigned int rndSeed;
+    unsigned int numThreads;
 
-	class LogBuffer	*logBuf;
+    class LogBuffer *logBuf;
 };
 
 
@@ -242,44 +285,44 @@ typedef __int64 int64_t;
 class WEvent
 {
 public:
-	WEvent()
-	{
-		 event = ::CreateEvent(NULL, // no security attributes
+    WEvent()
+    {
+         event = ::CreateEvent(NULL, // no security attributes
                                   TRUE, // manual-reset
-                                  FALSE,// initially non-signaled
+                                  FALSE, // initially non-signaled
                                   NULL);// anonymous
-	}
+    }
 
-	~WEvent()
-	{
-		::CloseHandle(event);
-	}
+    ~WEvent()
+    {
+        ::CloseHandle(event);
+    }
 
-	void	signal()
-	{
-		::SetEvent(event);
-	}
+    void    signal()
+    {
+        ::SetEvent(event);
+    }
 
-	void	wait(int timeout = 30000)
-	{
-		switch(::WaitForSingleObject(event, timeout))
-		{
+    void    wait(int timeout = 30000)
+    {
+        switch(::WaitForSingleObject(event, timeout))
+        {
           case WAIT_TIMEOUT:
               throw TimeoutException();
               break;
           //case WAIT_OBJECT_0:
               //break;
-		}
-	}
+        }
+    }
 
-	void	reset()
-	{
-		::ResetEvent(event);
-	}
+    void    reset()
+    {
+        ::ResetEvent(event);
+    }
 
 
 
-	HANDLE event;
+    HANDLE event;
 };
 
 
@@ -294,23 +337,23 @@ typedef unsigned int THREAD_HANDLE;
 class WLock
 {
 public:
-	WLock()
-	{
-		InitializeCriticalSection(&cs);
-	}
+    WLock()
+    {
+        InitializeCriticalSection(&cs);
+    }
 
 
-	void	on()
-	{
-		EnterCriticalSection(&cs);
-	}
+    void    on()
+    {
+        EnterCriticalSection(&cs);
+    }
 
-	void	off()
-	{
-		LeaveCriticalSection(&cs);
-	}
+    void    off()
+    {
+        LeaveCriticalSection(&cs);
+    }
 
-	CRITICAL_SECTION cs;
+    CRITICAL_SECTION cs;
 };
 #endif
 
@@ -340,21 +383,21 @@ class WEvent
 {
 public:
 
-	WEvent()
-	{
-	}
+    WEvent()
+    {
+    }
 
-	void	signal()
-	{
-	}
+    void    signal()
+    {
+    }
 
-	void	wait(int timeout = 30000)
-	{
-	}
+    void    wait(int timeout = 30000)
+    {
+    }
 
-	void	reset()
-	{
-	}
+    void    reset()
+    {
+    }
 
 };
 
@@ -362,37 +405,37 @@ public:
 class WLock
 {
 private:
-	pthread_mutex_t mutex;
+    pthread_mutex_t mutex;
 public:
-	WLock()
-	{
-	    const pthread_mutexattr_t mattr =
-		{
+    WLock()
+    {
+        const pthread_mutexattr_t mattr =
+        {
 #ifdef __APPLE__
-			PTHREAD_MUTEX_RECURSIVE
+            PTHREAD_MUTEX_RECURSIVE
 #else
-			PTHREAD_MUTEX_RECURSIVE_NP
+            PTHREAD_MUTEX_RECURSIVE_NP
 #endif
-		 };
+         };
 
         pthread_mutex_init( &mutex, &mattr );
-	}
+    }
 
-	~WLock()
-	{
+    ~WLock()
+    {
         pthread_mutex_destroy( &mutex );
-	}
+    }
 
 
-	void	on()
-	{
-		pthread_mutex_lock(&mutex);
-	}
+    void    on()
+    {
+        pthread_mutex_lock(&mutex);
+    }
 
-	void	off()
-	{
-		pthread_mutex_unlock(&mutex);
-	}
+    void    off()
+    {
+        pthread_mutex_unlock(&mutex);
+    }
 
 };
 #endif
@@ -400,24 +443,24 @@ public:
 class ThreadInfo
 {
 public:
-	//typedef int  (__stdcall *THREAD_FUNC)(ThreadInfo *);
+    //typedef int  (__stdcall *THREAD_FUNC)(ThreadInfo *);
 
-	ThreadInfo()
-	{
-		active = false;
-		id = 0;
-		func = NULL;
-		data = NULL;
-	}
+    ThreadInfo()
+    {
+        active = false;
+        id = 0;
+        func = NULL;
+        data = NULL;
+    }
 
-	void	shutdown();
+    void    shutdown();
 
-	volatile bool	 active;
-	int		id;
-	THREAD_FUNC func;
-	THREAD_HANDLE handle;
+    volatile bool   active;
+    int             id;
+    THREAD_FUNC     func;
+    THREAD_HANDLE   handle;
 
-	void	*data;
+    void            *data;
 };
 
 
@@ -425,39 +468,49 @@ public:
 class LogBuffer
 {
 public:
-	enum TYPE
-	{
-		T_NONE,
-		T_DEBUG,
-		T_ERROR,
-		T_NETWORK,
-		T_CHANNEL,
-	};
+    enum TYPE
+    {
+        T_NONE,
+        T_DEBUG,
+        T_ERROR,
+        T_NETWORK,
+        T_CHANNEL,
+    };
 
-	LogBuffer(int i, int l)
-	{
-		lineLen = l;
-		maxLines = i;
-		currLine = 0;
-		buf = new char[lineLen*maxLines];
-		times = new unsigned int [maxLines];
-		types = new TYPE [maxLines];
-	}
+    LogBuffer(int i, int l)
+    {
+        lineLen = l;
+        maxLines = i;
+        currLine = 0;
+        buf = new char[lineLen*maxLines];
+        times = new unsigned int [maxLines];
+        types = new TYPE [maxLines];
+    }
 
-	void	clear()
-	{
-		currLine = 0;
-	}
-	void	write(const char *, TYPE);
-	static const char *getTypeStr(TYPE t) {return logTypes[t];}
-	void	dumpHTML(class Stream &);
+    ~LogBuffer()
+    {
+        delete[] buf;
+        delete[] times;
+        delete[] types;
+    }
 
-	char *buf;
-	unsigned int *times;
-	unsigned int currLine,maxLines,lineLen;
-	TYPE	*types;
-	WLock	lock;
-	static	const char *logTypes[];
+    void    clear()
+    {
+        currLine = 0;
+    }
+
+    void                write(const char *, TYPE);
+    static const char   *getTypeStr(TYPE t) { return logTypes[t]; }
+    void                dumpHTML(class Stream &);
+
+    static void         escapeHTML(char* dest, char* src);
+
+    char            *buf;
+    unsigned int    *times;
+    unsigned int    currLine, maxLines, lineLen;
+    TYPE            *types;
+    WLock           lock;
+    static          const char *logTypes[];
 
 };
 
