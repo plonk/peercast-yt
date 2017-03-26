@@ -2254,9 +2254,12 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var == "numExternalChannels")
     {
         sprintf(buf, "%d", channelDirectory.numChannels());
-    }else if (var == "numChannelFeeds")
+    }else if (var == "numChannelFeedsPlusOne")
     {
         sprintf(buf, "%d", channelDirectory.numFeeds() + 1);
+    }else if (var == "numChannelFeeds")
+    {
+        sprintf(buf, "%d", channelDirectory.numFeeds());
     }else if (var.startsWith("channelDirectory."))
     {
         return channelDirectory.writeVariable(out, var + strlen("channelDirectory."));
