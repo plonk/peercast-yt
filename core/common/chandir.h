@@ -47,10 +47,14 @@ public:
     bool addFeed(std::string url);
     void clearFeeds();
 
+    int totalListeners();
+    int totalRelays();
+
     bool update();
 
     bool writeChannelVariable(Stream& out, const String& varName, int index);
     bool writeFeedVariable(Stream& out, const String& varName, int index);
+    bool writeVariable(Stream& out, const String& varName);
     bool writeVariable(Stream &, const String &, int);
 
     std::vector<ChannelEntry> m_channels;

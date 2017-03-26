@@ -2257,6 +2257,9 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var == "numChannelFeeds")
     {
         sprintf(buf, "%d", channelDirectory.numFeeds() + 1);
+    }else if (var.startsWith("channelDirectory."))
+    {
+        return channelDirectory.writeVariable(out, var + strlen("channelDirectory."));
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);

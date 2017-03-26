@@ -154,6 +154,7 @@ bool ChannelDirectory::update()
             }
         }
     }
+    sort(m_channels.begin(), m_channels.end(), [](ChannelEntry&a, ChannelEntry&b) { return a.numDirects > b.numDirects; });
     m_lastUpdate = sys->getTime();
     return true;
 }
@@ -231,6 +232,49 @@ bool ChannelDirectory::writeVariable(Stream& out, const String& varName, int ind
     } else {
         return false;
     }
+}
+
+bool ChannelDirectory::writeVariable(Stream& out, const String& varName)
+{
+    if (varName == "totalListeners") {
+        out.writeString(to_string(totalListeners()).c_str());
+    } else if (varName == "totalRelays") {
+        out.writeString(to_string(totalRelays()).c_str());
+    } else if (varName == "lastUpdate") {
+        auto diff = sys->getTime() - m_lastUpdate;
+        auto min = diff / 60;
+        auto sec = diff % 60;
+        if (min == 0) {
+            out.writeString(String::format("%ds", sec).cstr());
+        } else {
+            out.writeString(String::format("%dm %ds", min, sec).cstr());
+        }
+    } else {
+        return false;
+    }
+    return true;
+}
+
+int ChannelDirectory::totalListeners()
+{
+    CriticalSection cs(m_lock);
+    int res = 0;
+
+    for (ChannelEntry& e : m_channels) {
+        res += std::max(0, e.numDirects);
+    }
+    return res;
+}
+
+int ChannelDirectory::totalRelays()
+{
+    CriticalSection cs(m_lock);
+    int res = 0;
+
+    for (ChannelEntry& e : m_channels) {
+        res += std::max(0, e.numRelays);
+    }
+    return res;
 }
 
 std::vector<std::string> ChannelDirectory::feeds()
