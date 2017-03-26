@@ -172,19 +172,21 @@ bool ChannelDirectory::update()
         return false;
 
     m_channels.clear();
-    for (auto url : m_feeds) {
+    for (auto& feed : m_feeds) {
         std::vector<ChannelEntry> channels;
         bool success;
 
-        success = getFeed(url, channels);
+        success = getFeed(feed.url, channels);
 
         if (success) {
-            LOG_DEBUG("Got %lu channels from %s", channels.size(), url.c_str());
+            feed.status = ChannelFeed::Status::OK;
+            LOG_DEBUG("Got %lu channels from %s", channels.size(), feed.url.c_str());
             for (auto ch : channels) {
                 m_channels.push_back(ch);
             }
         } else {
-            LOG_ERROR("Failed to get channels from %s", url.c_str());
+            feed.status = ChannelFeed::Status::ERROR;
+            LOG_ERROR("Failed to get channels from %s", feed.url.c_str());
         }
     }
     sort(m_channels.begin(), m_channels.end(), [](ChannelEntry&a, ChannelEntry&b) { return a.numDirects > b.numDirects; });
@@ -247,7 +249,9 @@ bool ChannelDirectory::writeFeedVariable(Stream& out, const String& varName, int
     string value;
 
     if (varName == "url") {
-        value = m_feeds[index];
+        value = m_feeds[index].url;
+    } else if (varName == "status") {
+        value = ChannelFeed::statusToString(m_feeds[index].status);
     } else {
         return false;
     }
@@ -310,7 +314,7 @@ int ChannelDirectory::totalRelays()
     return res;
 }
 
-std::vector<std::string> ChannelDirectory::feeds()
+std::vector<ChannelFeed> ChannelDirectory::feeds()
 {
     CriticalSection cs(m_lock);
     return m_feeds;
@@ -320,7 +324,7 @@ bool ChannelDirectory::addFeed(std::string url)
 {
     CriticalSection cs(m_lock);
 
-    auto iter = find(m_feeds.begin(), m_feeds.end(), url);
+    auto iter = find_if(m_feeds.begin(), m_feeds.end(), [&](ChannelFeed& f) { return f.url == url;});
 
     if (iter != m_feeds.end()) {
         LOG_ERROR("Already have feed %s", url.c_str());
@@ -333,7 +337,7 @@ bool ChannelDirectory::addFeed(std::string url)
         return false;
     }
 
-    m_feeds.push_back(url);
+    m_feeds.push_back(ChannelFeed(url));
     return true;
 }
 
@@ -344,4 +348,17 @@ void ChannelDirectory::clearFeeds()
     m_feeds.clear();
     m_channels.clear();
     m_lastUpdate = 0;
+}
+
+std::string ChannelFeed::statusToString(ChannelFeed::Status s)
+{
+    switch (s) {
+    case Status::UNKNOWN:
+        return "UNKNOWN";
+    case Status::OK:
+        return "OK";
+    case Status::ERROR:
+        return "ERROR";
+    }
+    throw std::logic_error("should be unreachable");
 }

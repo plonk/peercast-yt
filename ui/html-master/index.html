@@ -118,7 +118,20 @@
                             <TD>{@if servMgr.isRoot}{#Root}{@end} {@if servMgr.isPrivate}{#Licensed}{@end} {@if servMgr.forceYP}{#ForceYP}{@end}</TD>
                           </TR>
                         </TBODY>
-                      </TABLE></TD>
+                      </TABLE>
+                      <table  class="normal">
+                        <tr bgcolor="#ccc">
+                          <th colspan="2">{#Channel Feeds}</th>
+                        </tr>
+
+                        {@loop servMgr.numChannelFeeds}
+                        <tr bgcolor="{@if loop.indexEven}#ddd{@else}#eee{@end}">
+                          <td>{$loop.channelFeed.url}</td>
+                          <td align="center">{$loop.channelFeed.status}</td>
+                        </tr>
+                        {@end}
+                      </table>
+                      </TD>
                       <TD vAlign=top> <TABLE width="100%" align=center border=0>
                         <TBODY>
                           <TR align=middle bgcolor="#cccccc">

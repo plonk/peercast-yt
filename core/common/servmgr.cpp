@@ -971,7 +971,7 @@ void ServMgr::saveSettings(const char *fn)
         for (auto feed : servMgr->channelDirectory.feeds())
         {
             iniFile.writeSection("Feed");
-            iniFile.writeStrValue("url", feed.c_str());
+            iniFile.writeStrValue("url", feed.url.c_str());
             iniFile.writeLine("[End]");
         }
 

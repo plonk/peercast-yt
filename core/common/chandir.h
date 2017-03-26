@@ -35,6 +35,33 @@ public:
     //TrackInfo track;
 };
 
+class ChannelFeed
+{
+public:
+    enum class Status {
+        UNKNOWN,
+        OK,
+        ERROR,
+    };
+
+    ChannelFeed()
+        : url(""),
+          status(Status::UNKNOWN)
+    {
+    }
+
+    ChannelFeed(std::string aUrl)
+        : url(aUrl),
+          status(Status::UNKNOWN)
+    {
+    }
+
+    static std::string statusToString(Status);
+
+    std::string url;
+    Status status;
+};
+
 // 外部からチャンネルリストを取得して保持する。
 class ChannelDirectory
 {
@@ -43,7 +70,7 @@ public:
 
     int numChannels();
     int numFeeds();
-    std::vector<std::string> feeds();
+    std::vector<ChannelFeed> feeds();
     bool addFeed(std::string url);
     void clearFeeds();
 
@@ -58,7 +85,7 @@ public:
     bool writeVariable(Stream &, const String &, int);
 
     std::vector<ChannelEntry> m_channels;
-    std::vector<std::string> m_feeds;
+    std::vector<ChannelFeed> m_feeds;
 
     unsigned int m_lastUpdate;
     WLock m_lock;
