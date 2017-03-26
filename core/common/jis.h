@@ -24,8 +24,8 @@ class JISConverter
 {
 public:
 
-	static unsigned short sjisToUnicode(unsigned short);
-	static unsigned short eucToUnicode(unsigned short);
+    static unsigned short sjisToUnicode(unsigned short);
+    static unsigned short eucToUnicode(unsigned short);
 };
 
 

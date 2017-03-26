@@ -23,7 +23,7 @@ USER_DIR = ../core/common
 CPPFLAGS += -D_UNIX -I$(GTEST_DIR)/include -I../core/common -I../core/unix
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -std=c++0x -g -w # -Wall -Wextra
+CXXFLAGS += -std=c++11 -g # -Wall -Wextra
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
@@ -68,18 +68,7 @@ gtest.a : gtest-all.o
 # gtest_main.a, depending on whether it defines its own main()
 # function.
 
-SRC = \
-	main.cpp \
-	string_unittest.cpp \
-	host_unittest.cpp \
-	memorystream_unittest.cpp \
-	gnuid_unittest.cpp \
-	id4_unittest.cpp \
-	idstring_unittest.cpp \
-	chanhit_unittest.cpp \
-	chanhitsearch_unittest.cpp \
-	chanhitlist_unittest.cpp \
-	chanmgr_unittest.cpp
+SRC = main.cpp $(wildcard *_unittest.cpp)
 
 OBJS = $(SRC:.cpp=.o)
 

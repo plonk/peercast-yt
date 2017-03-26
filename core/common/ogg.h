@@ -28,141 +28,140 @@ class OggPage;
 class OggPacket
 {
 public:
-	enum
-	{
-		MAX_BODYLEN = 65536,		// probably too small
-		MAX_PACKETS = 256			// prolly too small too, but realloc?!?!?!
-	};
+    enum
+    {
+        MAX_BODYLEN = 65536,        // probably too small
+        MAX_PACKETS = 256           // prolly too small too, but realloc?!?!?!
+    };
 
-	void	addLacing(OggPage &);
+    void    addLacing(OggPage &);
 
-	int	bodyLen;
-	unsigned char body[MAX_BODYLEN];
+    int             bodyLen;
+    unsigned char   body[MAX_BODYLEN];
 
 
-	int	numPackets;
-	unsigned int packetSizes[MAX_PACKETS];
+    int             numPackets;
+    unsigned int    packetSizes[MAX_PACKETS];
 };
 
 // ----------------------------------------------
 class OggSubStream
 {
 public:
-	OggSubStream()
-	:maxHeaders(0),serialNo(0),bitrate(0)
-	{}
+    OggSubStream()
+    :maxHeaders(0), serialNo(0), bitrate(0)
+    {}
 
-	bool needHeader()
-	{
-		return maxHeaders && (pack.numPackets < maxHeaders);
-	}
+    bool    needHeader()
+    {
+        return maxHeaders && (pack.numPackets < maxHeaders);
+    }
 
-	void eos()
-	{
-		maxHeaders=0;
-		serialNo=0;
-	}
+    void    eos()
+    {
+        maxHeaders=0;
+        serialNo=0;
+    }
 
-	void bos(unsigned int ser)
-	{
-		maxHeaders = 3;
-		pack.numPackets=0;
-		pack.packetSizes[0]=0;
-		pack.bodyLen = 0;
-		serialNo = ser;
-		bitrate = 0;
-	}
+    void    bos(unsigned int ser)
+    {
+        maxHeaders = 3;
+        pack.numPackets=0;
+        pack.packetSizes[0]=0;
+        pack.bodyLen = 0;
+        serialNo = ser;
+        bitrate = 0;
+    }
 
-	bool	isActive() {return serialNo!=0;}
+    bool    isActive() { return serialNo!=0; }
 
-	void readHeader(Channel *,OggPage &);
+    void    readHeader(Channel *, OggPage &);
 
-	virtual void procHeaders(Channel *) = 0;
+    virtual void procHeaders(Channel *) = 0;
 
-	int	bitrate;
+    int             bitrate;
 
-	OggPacket	pack;
-	int	maxHeaders;
-	unsigned int serialNo;
+    OggPacket       pack;
+    int             maxHeaders;
+    unsigned int    serialNo;
 };
 // ----------------------------------------------
 class OggVorbisSubStream : public OggSubStream
 {
 public:
-	OggVorbisSubStream()
-	:samplerate(0)
-	{}
+    OggVorbisSubStream()
+    :samplerate(0)
+    {}
 
-	virtual void procHeaders(Channel *);
+    void    procHeaders(Channel *) override;
 
-	void	readIdent(Stream &, ChanInfo &);
-	void	readSetup(Stream &);
-	void	readComment(Stream &, ChanInfo &);
+    void    readIdent(Stream &, ChanInfo &);
+    void    readSetup(Stream &);
+    void    readComment(Stream &, ChanInfo &);
 
-	double	getTime(OggPage &);
+    double  getTime(OggPage &);
 
-	int samplerate;
+    int samplerate;
 
 };
 // ----------------------------------------------
 class OggTheoraSubStream : public OggSubStream
 {
 public:
-	OggTheoraSubStream() : granposShift(0), frameTime(0) {}
+    OggTheoraSubStream() : granposShift(0), frameTime(0) {}
 
-	virtual void procHeaders(Channel *);
+    void    procHeaders(Channel *) override;
 
-	void readInfo(Stream &, ChanInfo &);
+    void    readInfo(Stream &, ChanInfo &);
 
-	double	getTime(OggPage &);
+    double  getTime(OggPage &);
 
-	int granposShift;
-	double frameTime;
+    int     granposShift;
+    double  frameTime;
 };
 
 // ----------------------------------------------
 class OGGStream : public ChannelStream
 {
 public:
-	OGGStream()
-	{}
+    OGGStream()
+    {}
 
 
-	virtual void readHeader(Stream &,Channel *);
-	virtual int readPacket(Stream &,Channel *);
-	virtual void readEnd(Stream &,Channel *);
+    void    readHeader(Stream &, Channel *) override;
+    int     readPacket(Stream &, Channel *) override;
+    void    readEnd(Stream &, Channel *) override;
 
+    void    readHeaders(Stream &, Channel *, OggPage &);
 
-	void	readHeaders(Stream &,Channel *, OggPage &);
-
-	OggVorbisSubStream	vorbis;
-	OggTheoraSubStream	theora;
+    OggVorbisSubStream  vorbis;
+    OggTheoraSubStream  theora;
 };
 
 // ----------------------------------
 class OggPage
 {
 public:
-	enum
-	{
-		MAX_BODYLEN = 65536,
-		MAX_HEADERLEN = 27+256
-	};
+    enum
+    {
+        MAX_BODYLEN = 65536,
+        MAX_HEADERLEN = 27+256
+    };
 
-	void	read(Stream &);
-	bool	isBOS();
-	bool	isEOS();
-	bool	isNewPacket();
-	bool	isHeader();
-	unsigned int getSerialNo();
+    void            read(Stream &);
+    bool            isBOS();
+    bool            isEOS();
+    bool            isNewPacket();
+    bool            isHeader();
+    unsigned int    getSerialNo();
 
-	bool	detectVorbis();
-	bool	detectTheora();
+    bool            detectVorbis();
+    bool            detectTheora();
 
 
-	int64_t granPos;
-	int headLen,bodyLen;
-	unsigned char data[MAX_HEADERLEN+MAX_BODYLEN];
+    int64_t         granPos;
+    int             headLen, bodyLen;
+    unsigned char   data[MAX_HEADERLEN+MAX_BODYLEN];
 };
 
 

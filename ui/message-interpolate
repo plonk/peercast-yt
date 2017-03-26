@@ -1,0 +1,62 @@
+#!/usr/bin/env ruby
+require 'json'
+require 'optparse'
+
+# $in → $out, with $catalog
+def process_file
+  buf = $in.read.gsub(/\{#([^}]*)\}/) {
+    translation = $catalog[$1]
+    if translation.nil?
+      translation = $1
+      STDERR.puts("Warning: translation for #{$1.inspect} missing")
+    end
+    translation
+  }
+
+  $out.write buf
+end
+
+def main
+  options = {}
+  OptionParser.new do |opts|
+    opts.banner = "Usage: message-interpolate -c lang.json [-o doc.lang.html] doc.html"
+
+    opts.on("-o FILE", "Specify output file") do |v|
+      options[:output] = v
+    end
+
+    opts.on("-c FILE", "Specify catalog file") do |v|
+      options[:catalog] = v
+    end
+  end.parse!
+
+  if options[:catalog].nil?
+    STDERR.puts("Warning: catalog file not specified")
+    $catalog = {}
+  else
+    $catalog = JSON.load(File.read(options[:catalog]))
+  end
+
+  if ARGV.size > 1
+    STDERR.puts("too many files specified")
+    exit 1
+  end
+
+  if ARGV.size == 1
+    $in = File.open(ARGV[0], 'r')
+  else
+    $in = STDIN
+  end
+
+  if options[:output]
+    $out = File.open(options[:output], 'w')
+  else
+    $out = STDOUT
+  end
+
+  process_file
+end
+
+if __FILE__ == $0
+  main
+end

@@ -65,8 +65,8 @@ public:
 	virtual void APICALL printLog(LogBuffer::TYPE t, const char *str)
 	{
 		if (t != LogBuffer::T_NONE)
-			printf("[%s] ",LogBuffer::getTypeStr(t));
-		printf("%s\n",str);
+			printf("[%s] ", LogBuffer::getTypeStr(t));
+		printf("%s\n", str);
 	}
 
 	virtual void	APICALL notifyMessage(ServMgr::NOTIFY_TYPE, const char *);
@@ -129,27 +129,27 @@ private:
 	public:
 		explicit ChanStatus()
 		:mId            ( )
-		,mName          ( )
-		,mStreamType	( )
-		,mStatus		( )
-		,mBitrate       ( )
-		,mTotalListeners( 0 )
-		,mTotalRelays   ( 0 )
-		,mLocalListeners( 0 )
-		,mLocalRelays   ( 0 )
+		, mName          ( )
+		, mStreamType	( )
+		, mStatus		( )
+		, mBitrate       ( )
+		, mTotalListeners( 0 )
+		, mTotalRelays   ( 0 )
+		, mLocalListeners( 0 )
+		, mLocalRelays   ( 0 )
 		{
 		}
 
 		explicit ChanStatus( const Channel& channel )
 		:mId            ( channel.getID() )
-		,mName          ( channel.getName() )
-		,mStreamType	( ChanInfo::getTypeStr(channel.info.contentType) )
-		,mStatus		( )
-		,mBitrate       ( channel.getBitrate() )
-		,mTotalListeners( 0 )
-		,mTotalRelays   ( 0 )
-		,mLocalListeners( 0 )
-		,mLocalRelays   ( 0 )
+		, mName          ( channel.getName() )
+		, mStreamType	( ChanInfo::getTypeStr(channel.info.contentType) )
+		, mStatus		( )
+		, mBitrate       ( channel.getBitrate() )
+		, mTotalListeners( 0 )
+		, mTotalRelays   ( 0 )
+		, mLocalListeners( 0 )
+		, mLocalRelays   ( 0 )
 		{
 		}
 

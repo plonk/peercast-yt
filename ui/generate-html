@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+require 'shellwords'
+
+def esc(s)
+  Shellwords.escape(s)
+end
+
+catalogs = Dir.glob("catalogs/*.json")
+languages = catalogs.map { |path| path =~ /catalogs\/(.+)\.json/; $1 }
+
+languages.each do |lang|
+  FileUtils.mkdir_p "html/#{lang}"
+
+  # ディレクトリはそのディレクトリにあるファイルよりも先に来ると仮定す
+  # る。
+  Dir.glob("html-master/**/*").each do |path|
+    outpath = path.sub(/^html-master/, "html/#{lang}")
+    if File.directory?(path)
+      FileUtils.mkdir_p(outpath)
+    elsif path.end_with?('.htm') || path.end_with?('.html')
+      cmd = [
+        "./apply-template #{esc path}",
+        "./message-interpolate -c catalogs/#{esc lang}.json",
+        "sed -z -r 's/<!--[^-]+-->//g'",
+        "sed -r -e 's/^\\s+//g' -e 's/\\r//' -e '/^$/d'",
+      ].join(' | ') + " > #{esc outpath}"
+      STDERR.puts cmd
+      system(cmd)
+      if $? != 0
+        exit 1
+      end
+    else
+      # 画像ファイルなどはそのままコピーする。
+      STDERR.puts("Copying #{path} to #{outpath} ...")
+      FileUtils.cp(path, outpath)
+    end
+  end
+end
+
+FileUtils.touch("html")

@@ -7,7 +7,7 @@
 class MockPeercastInstance : public PeercastInstance
 {
 public:
-    virtual Sys* createSys()
+    Sys* createSys() override
     {
         return new MockSys();
     }
@@ -16,22 +16,22 @@ public:
 class MockPeercastApplication : public PeercastApplication
 {
 public:
-    virtual const char* APICALL getIniFilename()
+    const char* APICALL getIniFilename() override
     {
         return "";
     }
 
-    virtual const char* APICALL getPath()
+    const char* APICALL getPath() override
     {
         return "";
     }
 
-    virtual const char* APICALL getClientTypeOS()
+    const char* APICALL getClientTypeOS() override
     {
         return PCX_OS_LINUX;
     }
 
-    virtual void APICALL printLog(LogBuffer::TYPE t, const char* str)
+    void APICALL printLog(LogBuffer::TYPE t, const char* str) override
     {
     }
 };

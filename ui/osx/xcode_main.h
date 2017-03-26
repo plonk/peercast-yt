@@ -28,9 +28,9 @@ public:
 	enum EPathErr
 	{
 		 kPE_NoMainBundle
-		,kPE_NoBundleURL
-		,kPE_NoFSRef
-		,kPE_CantGetPath
+		, kPE_NoBundleURL
+		, kPE_NoFSRef
+		, kPE_CantGetPath
 	};
 
 	explicit CAppPathInfo()

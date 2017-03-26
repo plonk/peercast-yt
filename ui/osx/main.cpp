@@ -63,8 +63,8 @@ public:
 	virtual void APICALL printLog(LogBuffer::TYPE t, const char *str)
 	{
 		if (t != LogBuffer::T_NONE)
-			printf("[%s] ",LogBuffer::getTypeStr(t));
-		printf("%s\n",str);
+			printf("[%s] ", LogBuffer::getTypeStr(t));
+		printf("%s\n", str);
 	}
 
 };
@@ -74,7 +74,7 @@ void setSettingsUI(){}
 // ----------------------------------
 void showConnections(){}
 // ----------------------------------
-void PRINTLOG(LogBuffer::TYPE type, const char *fmt,va_list ap)
+void PRINTLOG(LogBuffer::TYPE type, const char *fmt, va_list ap)
 {
 }
 
@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
 	iniFileName.set("peercast.ini");
 
 	if (argc > 2)
-		if (strcmp(argv[1],"-inifile")==0)
+		if (strcmp(argv[1], "-inifile")==0)
 			iniFileName.setFromString(argv[2]);
 
 	peercastInst = new MyPeercastInst();

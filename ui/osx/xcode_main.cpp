@@ -68,10 +68,10 @@ void handleGetURLEvent(const AppleEvent *appleEvent, AppleEvent *reply)
 	AEGetDescData( &directParam, urlString, dataSize );
 	urlString[dataSize] = 0;
 
-	LOG_DEBUG("URL request: %s",urlString);
+	LOG_DEBUG("URL request: %s", urlString);
 	ChanInfo info;
-	servMgr->procConnectArgs(&urlString[15],info);
-	chanMgr->findAndPlayChannel(info,false);
+	servMgr->procConnectArgs(&urlString[15], info);
+	chanMgr->findAndPlayChannel(info, false);
 
 	delete [] urlString;
 	AEDisposeDesc( &directParam );
@@ -87,12 +87,12 @@ OSErr gurlHan( const AppleEvent* theAppleEvent, AppleEvent* reply, SInt32 handle
 
 	// Get the event ID
 	err = AEGetAttributePtr( theAppleEvent
-							,keyEventIDAttr
-							,typeType
-							,&typeCode
-							,(Ptr)&eventID
-							,sizeof(eventID)
-							,&actualSize);
+							, keyEventIDAttr
+							, typeType
+							, &typeCode
+							, (Ptr)&eventID
+							, sizeof(eventID)
+							, &actualSize);
 
 	if( eventID == 'GURL' )
 	{
@@ -140,10 +140,10 @@ OSStatus runApp( int argc, char* argv[], WindowRef window )
 	//////////////////////////
 
 	Timer relayBrowserTimer(  GetMainEventLoop()
-							 ,3*kEventDurationSecond
-							 ,kEventDurationSecond
-							 ,pOSXApp
-							 ,relayBrowserUpdate );
+							 , 3*kEventDurationSecond
+							 , kEventDurationSecond
+							 , pOSXApp
+							 , relayBrowserUpdate );
 	//////////////////////////
 
 	// The window was created hidden so show it.

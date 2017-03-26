@@ -19,6 +19,9 @@
 #ifndef _CSTREAM_H
 #define _CSTREAM_H
 
+#include "atom.h"
+#include "sys.h"
+
 // ----------------------------------
 
 class Channel;
@@ -30,121 +33,132 @@ class Stream;
 class ChanPacket
 {
 public:
-	enum
-	{
-		MAX_DATALEN = 16384
-	};
+    enum
+    {
+        MAX_DATALEN = 16384
+    };
 
-	enum TYPE
-	{
-		T_UNKNOWN	= 0,
-		T_HEAD		= 1,
-		T_DATA		= 2,
-		T_META		= 4,
-		T_PCP		= 16,
-		T_ALL		= 0xff
-	};
+    enum TYPE
+    {
+        T_UNKNOWN   = 0,
+        T_HEAD      = 1,
+        T_DATA      = 2,
+        T_META      = 4,
+        T_PCP       = 16,
+        T_ALL       = 0xff
+    };
 
-	ChanPacket()
-	{
-		init();
-	}
+    ChanPacket()
+    {
+        init();
+    }
 
-	void	init()
-	{
-		type = T_UNKNOWN;
-		len = 0;
-		pos = 0;
-		sync = 0;
-	}
-	void	init(TYPE t, const void *, unsigned int , unsigned int );
+    void    init()
+    {
+        type = T_UNKNOWN;
+        len = 0;
+        pos = 0;
+        sync = 0;
+    }
+    void    init(TYPE t, const void *, unsigned int , unsigned int );
 
-	void	writeRaw(Stream &);
-	void	writePeercast(Stream &);
-	void	readPeercast(Stream &);
+    void    writeRaw(Stream &);
+    void    writePeercast(Stream &);
+    void    readPeercast(Stream &);
 
+    ChanPacket& operator=(const ChanPacket& other)
+    {
+        this->type = other.type;
+        this->len  = other.len;
+        this->pos  = other.pos;
+        this->sync = other.sync;
+        memcpy(this->data, other.data, this->len);
 
-	unsigned int sync;
-	unsigned int pos;
-	TYPE type;
-	unsigned int len;
-	char data[MAX_DATALEN];
+        return *this;
+    }
+
+    unsigned int    sync;
+    unsigned int    pos;
+    TYPE            type;
+    unsigned int    len;
+    char            data[MAX_DATALEN];
 
 };
 // ----------------------------------
 class ChanPacketBuffer
 {
 public:
-	enum {
-		MAX_PACKETS = 64,
-		NUM_SAFEPACKETS = 56
-	};
+    enum {
+        MAX_PACKETS = 64,
+        NUM_SAFEPACKETS = 56
+    };
 
-	void	init()
-	{
-		lock.on();
-		lastPos = firstPos = safePos = 0;
-		readPos = writePos = 0;
-		accept = 0;
-		lastWriteTime = 0;
-		lock.off();
-	}
+    void    init()
+    {
+        lock.on();
+        lastPos = firstPos = safePos = 0;
+        readPos = writePos = 0;
+        accept = 0;
+        lastWriteTime = 0;
+        lock.off();
+    }
 
-	int copyFrom(ChanPacketBuffer &,unsigned in);
+    int     copyFrom(ChanPacketBuffer &, unsigned in);
 
-	bool	writePacket(ChanPacket &,bool = false);
-	void	readPacket(ChanPacket &);
+    bool    writePacket(ChanPacket &, bool = false);
+    void    readPacket(ChanPacket &);
 
-	bool	willSkip();
+    bool    willSkip();
 
-	int		numPending() {return writePos-readPos;}
+    int     numPending() { return writePos-readPos; }
 
-	unsigned int	getLatestPos();
-	unsigned int	getOldestPos();
-	unsigned int	findOldestPos(unsigned int);
-	bool	findPacket(unsigned int,ChanPacket &);
-	unsigned int	getStreamPos(unsigned int);
-	unsigned int	getStreamPosEnd(unsigned int);
-	unsigned int	getLastSync();
+    unsigned int    getLatestPos();
+    unsigned int    getOldestPos();
+    unsigned int    findOldestPos(unsigned int);
+    bool            findPacket(unsigned int, ChanPacket &);
+    unsigned int    getStreamPos(unsigned int);
+    unsigned int    getStreamPosEnd(unsigned int);
+    unsigned int    getLastSync();
 
-	ChanPacket	packets[MAX_PACKETS];
-	volatile unsigned int lastPos,firstPos,safePos;
-	volatile unsigned int readPos,writePos;
-	unsigned int accept;
-	unsigned int lastWriteTime;
-	WLock lock;
+    ChanPacket              packets[MAX_PACKETS];
+    volatile unsigned int   lastPos, firstPos, safePos;
+    volatile unsigned int   readPos, writePos;
+    unsigned int            accept;
+    unsigned int            lastWriteTime;
+    WLock                   lock;
 };
 
 // ----------------------------------
 class ChannelStream
 {
 public:
-	ChannelStream()
-	:numListeners(0)
-	,numRelays(0)
-	,isPlaying(false)
-	,fwState(0)
-	,lastUpdate(0)
-	{}
+    ChannelStream()
+    : numListeners(0)
+    , numRelays(0)
+    , isPlaying(false)
+    , fwState(0)
+    , lastUpdate(0)
+    {}
 
-	void updateStatus(Channel *);
-	bool getStatus(Channel *,ChanPacket &);
+    virtual ~ChannelStream() {}
 
-	virtual void kill() {}
-	virtual bool sendPacket(ChanPacket &,GnuID &) {return false;}
-	virtual void flush(Stream &) {}
-	virtual void readHeader(Stream &,Channel *)=0;
-	virtual int  readPacket(Stream &,Channel *)=0;
-	virtual void readEnd(Stream &,Channel *)=0;
+    void updateStatus(Channel *);
+    bool getStatus(Channel *, ChanPacket &);
 
-	void	readRaw(Stream &,Channel *);
+    virtual void kill() {}
+    virtual bool sendPacket(ChanPacket &, GnuID &) { return false; }
+    virtual void flush(Stream &) {}
+    virtual void readHeader(Stream &, Channel *)=0;
+    virtual int  readPacket(Stream &, Channel *)=0;
+    virtual void readEnd(Stream &, Channel *)=0;
 
-	int		numRelays;
-	int		numListeners;
-	bool	isPlaying;
-	int	fwState;
-	unsigned int lastUpdate;
+    void    readRaw(Stream &, Channel *);
 
+    int             numRelays;
+    int             numListeners;
+    bool            isPlaying;
+    int             fwState;
+    unsigned int    lastUpdate;
 };
 
 #endif

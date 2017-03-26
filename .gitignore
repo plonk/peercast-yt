@@ -1,2 +1,9 @@
+ui/html/
 **/*.o
 **/*.a
+.clang-format
+GPATH
+GRTAGS
+GSYMS
+GTAGS
+**/*~

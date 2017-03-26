@@ -1,0 +1,49 @@
+#!/usr/bin/env ruby
+
+class FormatError < RuntimeError; end
+
+def read_instance(path)
+  dic = {}
+  buf = File.read(path)
+  unless buf.index('<!-- InstanceBegin template="/Templates/peercast.dwt" codeOutsideHTMLIsLocked="false" -->')
+    raise FormatError
+  end
+  buf.scan(/<!-- InstanceBeginEditable name="(\w+)" -->(.*?)<!-- InstanceEndEditable -->/m) do
+    dic[$1] = $2
+  end
+  dic
+end
+
+$template = "Templates/peercast.dwt"
+
+def apply_template(dic)
+  buf = File.read($template)
+  buf.gsub!(/<!-- TemplateBeginEditable name="(\w+)" -->(.*?)<!-- TemplateEndEditable -->/m) do
+    name, sample_body = $1, $2
+    if dic[name].nil? || dic[name] == ""
+      "<!-- InstanceBeginEditable name=\"#{name}\" -->#{sample_body}<!-- InstanceEndEditable -->"
+    else
+      "<!-- InstanceBeginEditable name=\"#{name}\" -->#{dic[name]}<!-- InstanceEndEditable -->"
+    end
+  end
+  buf.sub!(/<html[^>]*>/im) { $& + '<!-- InstanceBegin template="/Templates/peercast.dwt" codeOutsideHTMLIsLocked="false" -->' }
+  buf.sub!(/<\/html>/im) { '<!-- InstanceEnd -->' + $& }
+  STDOUT.write buf
+end
+
+def main
+  ARGV.each do |path|
+    begin
+      dic = read_instance(path)
+    rescue FormatError
+      STDERR.puts "Warning: #{path} is not an instance of the template #{$template}"
+      STDOUT.write File.read(path)
+      next
+    end
+    apply_template(dic)
+  end
+end
+
+if __FILE__ == $0
+  main
+end
