@@ -55,19 +55,19 @@ void HTML::writeOK(const char *content)
 // --------------------------------------
 void HTML::writeVariable(Stream &s, const String &varName, int loop)
 {
-    bool r=false;
+    bool r = false;
     if (varName.startsWith("servMgr."))
-        r=servMgr->writeVariable(s, varName+8);
+        r = servMgr->writeVariable(s, varName+8);
     else if (varName.startsWith("chanMgr."))
-        r=chanMgr->writeVariable(s, varName+8, loop);
+        r = chanMgr->writeVariable(s, varName+8, loop);
     else if (varName.startsWith("stats."))
-        r=stats.writeVariable(s, varName+6);
+        r = stats.writeVariable(s, varName+6);
     else if (varName.startsWith("sys."))
     {
         if (varName == "sys.log.dumpHTML")
         {
             sys->logBuf->dumpHTML(s);
-            r=true;
+            r = true;
         }
     }
     else if (varName.startsWith("loop."))
@@ -163,7 +163,7 @@ void HTML::writeVariable(Stream &s, const String &varName, int loop)
             if (a)
             {
                 s.writeString(a);
-                r=true;
+                r = true;
             }
         }
     }
