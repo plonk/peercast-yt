@@ -388,15 +388,13 @@ public:
 
     json to_json(Channel *c)
     {
-        json j;
-
-        j["channelId"] = to_json(c->info.id);
-        j["status"] = channelStatus(c);
-        j["info"] = to_json(c->info);
-        j["track"] = to_json(c->info.track);
-        j["yellowPages"] = json::array();
-
-        return j;
+        return {
+            {"channelId", to_json(c->info.id)},
+            {"status", channelStatus(c)},
+            {"info", to_json(c->info)},
+            {"track", to_json(c->info.track)},
+            {"yellowPages", json::array()},
+        };
     }
 
     // チャンネルに関して特定の接続を停止する。成功すれば true、失敗す
