@@ -21,7 +21,7 @@ HTML の生成に ruby を使っているので、ruby が必要です。
 cpp-netlib が必要です。APT ベースのディストリビューションでは以下のコ
 マンドで入ると思います。
 
-    # apt-get libcppnetlib-dev
+    # apt-get install libcppnetlib-dev
 
 ## 手順
 
