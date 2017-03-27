@@ -4,6 +4,7 @@
 #include "peercast.h"
 #include "channel.h"
 #include "version2.h"
+#include "critsec.h"
 
 #include <stdarg.h>
 #include <string>
@@ -406,7 +407,7 @@ public:
         int connectionId = params[1].get<int>();
         bool success = false;
 
-        servMgr->lock.on();
+        CriticalSection cs(servMgr->lock);
         for (Servent* s = servMgr->servents; s != NULL; s = s->next)
         {
              if (s->serventIndex == connectionId &&
@@ -418,7 +419,6 @@ public:
                  break;
              }
         }
-        servMgr->lock.off();
 
         return success;
     }
@@ -457,7 +457,7 @@ public:
         };
         result.push_back(sourceConnection);
 
-        servMgr->lock.on();
+        CriticalSection cs(servMgr->lock);
         for (Servent* s = servMgr->servents; s != NULL; s = s->next)
         {
             if (!s->chanID.isSame(id))
@@ -490,7 +490,6 @@ public:
 
             result.push_back(connection);
         }
-        servMgr->lock.off();
 
         return result;
     }
@@ -529,14 +528,11 @@ public:
     {
         json result = json::array();
 
-        chanMgr->lock.on();
-
+        CriticalSection cs(chanMgr->lock);
         for (Channel *c = chanMgr->channel; c != NULL; c = c->next)
         {
             result.push_back(to_json(c));
         }
-
-        chanMgr->lock.off();
 
         return result;
     }
@@ -552,8 +548,7 @@ public:
     {
         json::array_t result;
 
-        chanMgr->lock.on();
-
+        CriticalSection cs(chanMgr->lock);
         for (Channel *c = chanMgr->channel; c != NULL; c = c->next)
         {
             if (!c->isBroadcasting())
@@ -565,8 +560,6 @@ public:
             };
             result.push_back(j);
         }
-
-        chanMgr->lock.off();
 
         return result;
     }
