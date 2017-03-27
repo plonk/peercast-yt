@@ -24,11 +24,11 @@
                           <td valign="middle" nowrap>
                             <table border="0" align="center" cellpadding="1" cellspacing="0">
                               <tr>
-                                <td rowspan="2" valign="middle"><a href="http://www.peercast.org"><img src="images/small-logo.png" alt="www.peercast.org" border="0"></a></td>
+                                <td rowspan="2" valign="middle"><img src="images/small-logo.png" alt="www.peercast.org" border="0"></td>
                                 <td valign="bottom"><div align="left"><span class="titlelinksBig">peercast</span></div></td>
                               </tr>
                               <tr>
-                                <td valign="top"><div align="center"><span class="normal-small">{$servMgr.version}</span>
+                                <td valign="top"><div align="center"><a href="https://github.com/plonk/peercast-yt"><span class="normal-small">{$servMgr.version}</span></a>
                                 </div></td>
                               </tr>
                             </table>
@@ -75,8 +75,7 @@
               <div align="left"><b>content</b></div>
               <!-- TemplateEndEditable -->
               <hr size="1">
-              <div align="center" class="normal-small"> &copy; 2005<a href="http://www.peercast.org" target="_blank">
-                  peercast.org</a> </div>
+              <div align="center" class="normal-small"> &copy; 2005 peercast.org</div>
           </div></td>
         </tr>
       </table>
