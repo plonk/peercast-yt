@@ -1,3 +1,6 @@
+#ifndef _CHANDIR_H
+#define _CHANDIR_H
+
 #include <cstdlib>
 #include <vector>
 
@@ -93,3 +96,5 @@ public:
     unsigned int m_lastUpdate;
     WLock m_lock;
 };
+
+#endif
