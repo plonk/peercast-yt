@@ -1,6 +1,8 @@
 #ifndef _CRITSEC_H
 #define _CRITSEC_H
 
+#include "sys.h"
+
 // クリティカルセクションをマークする。コンストラクターでロックを取得
 // し、デストラクタで開放する。
 class CriticalSection
