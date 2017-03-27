@@ -10,6 +10,9 @@ public:
 
     ChannelEntry(const std::vector<std::string>& fields)
     {
+        if (fields.size() < 19)
+            throw std::runtime_error("too few fields");
+
         name           = fields[0];
         id             = fields[1];
         tip            = fields[2];
