@@ -23,7 +23,10 @@ USER_DIR = ../core/common
 CPPFLAGS += -D_UNIX -I$(GTEST_DIR)/include -I../core/common -I../core/unix
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -std=c++11 -g # -Wall -Wextra
+CXXFLAGS += -g -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT
+
+LDFLAGS = -pthread
+LIBS = -lboost_system -lcppnetlib-uri
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
@@ -76,4 +79,4 @@ OBJS = $(SRC:.cpp=.o)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $<
 
 test_all : $(OBJS) ../ui/linux/libpeercast.a gtest.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -lpthread -o $@
+	$(CXX) $(LDFLAGS) $^ -o $@ $(LIBS)
