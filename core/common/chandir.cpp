@@ -6,27 +6,9 @@
 #include "version2.h"
 #include "socket.h"
 #include "chandir.h"
+#include "critsec.h"
 
 using namespace std;
-
-// クリティカルセクションをマークする。コンストラクターでロックを取得
-// し、デストラクタで開放する。
-class CriticalSection
-{
-public:
-    CriticalSection(WLock& lock)
-        : m_lock(lock)
-    {
-        m_lock.on();
-    }
-
-    ~CriticalSection()
-    {
-        m_lock.off();
-    }
-
-    WLock& m_lock;
-};
 using namespace boost::network::uri;
 
 std::vector<ChannelEntry> ChannelEntry::textToChannelEntries(std::string text)
