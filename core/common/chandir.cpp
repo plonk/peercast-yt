@@ -27,6 +27,7 @@ public:
 
     WLock& m_lock;
 };
+using namespace boost::network::uri;
 
 std::vector<ChannelEntry> ChannelEntry::textToChannelEntries(std::string text)
 {
@@ -80,9 +81,7 @@ int ChannelDirectory::numFeeds()
 // out は変更されない。
 static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
 {
-    using namespace boost::network;
-
-    uri::uri feed(url);
+    uri feed(url);
     if (!feed.is_valid()) {
         LOG_ERROR("invalid URL (%s)", url.c_str());
         return false;
@@ -164,8 +163,6 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
 
 bool ChannelDirectory::update()
 {
-    using namespace boost::network;
-
     CriticalSection cs(m_lock);
 
     if (sys->getTime() - m_lastUpdate < 5 * 60)
@@ -329,7 +326,7 @@ bool ChannelDirectory::addFeed(std::string url)
         return false;
     }
 
-    boost::network::uri::uri u(url);
+    uri u(url);
     if (!u.is_valid() || u.scheme() != "http") {
         LOG_ERROR("Invalid feed URL %s", url.c_str());
         return false;
