@@ -33,3 +33,7 @@ a:hover {
 input {
 	font-family: Arial;
 }
+
+input[type=radio] {
+	vertical-align: -3px;
+}
