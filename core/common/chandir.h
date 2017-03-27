@@ -8,7 +8,7 @@ class ChannelEntry
 public:
     static std::vector<ChannelEntry> textToChannelEntries(std::string text);
 
-    ChannelEntry(std::vector<std::string> fields)
+    ChannelEntry(const std::vector<std::string>& fields)
     {
         name           = fields[0];
         id             = fields[1];
