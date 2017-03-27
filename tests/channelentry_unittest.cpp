@@ -27,7 +27,7 @@ TEST_F(ChannelEntryFixture, textToChannelEntries)
 
     ASSERT_EQ(1, vec.size());
 
-    ASSERT_STREQ("予定地", vec[0].name.cstr());
+    ASSERT_STREQ("予定地", vec[0].name.c_str());
     ASSERT_EQ(428, vec[0].bitrate);
-    ASSERT_STREQ("FLV", vec[0].contentTypeStr.cstr());
+    ASSERT_STREQ("FLV", vec[0].contentTypeStr.c_str());
 }
