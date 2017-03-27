@@ -219,8 +219,6 @@ bool ChannelDirectory::writeChannelVariable(Stream& out, const String& varName, 
         sprintf(buf, "%s", ch.genre.c_str());
     } else if (varName == "url") {
         sprintf(buf, "%s", ch.url.c_str());
-    } else if (varName == "comment") {
-        sprintf(buf, "%s", ch.comment.c_str());
     } else if (varName == "tip") {
         sprintf(buf, "%s", ch.tip.c_str());
     } else if (varName == "uptime") {

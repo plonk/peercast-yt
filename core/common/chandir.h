@@ -30,7 +30,7 @@ public:
     GnuID id;
     int bitrate;
     std::string contentTypeStr;
-    std::string desc, genre, url, comment;
+    std::string desc, genre, url;
     std::string tip;
     std::string uptime;
     int numDirects;
