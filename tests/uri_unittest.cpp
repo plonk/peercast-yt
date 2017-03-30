@@ -62,7 +62,7 @@ TEST_F(URIFixture, invalidURI)
     URI u("hoge");
 
     ASSERT_FALSE(u.isValid());
-    EXPECT_STREQ("hoge", u.scheme().c_str()); // おかしいけど、こうなる。
+    EXPECT_STREQ("", u.scheme().c_str());
 }
 
 TEST_F(URIFixture, emptyURI)
@@ -73,11 +73,18 @@ TEST_F(URIFixture, emptyURI)
     ASSERT_FALSE(u.isValid());
 }
 
+// TEST_F(URIFixture, mailtoScheme)
+// {
+//     URI u("mailto:webmaster@example.com");
+//     ASSERT_TRUE(u.isValid());
+//     ASSERT_STREQ("mailto", u.scheme().c_str());
+//     ASSERT_STREQ("webmaster@example.com", u.path().c_str());
+//     ASSERT_STREQ("", u.host().c_str());
+// }
+
+// mailtoスキームには対応しない。
 TEST_F(URIFixture, mailtoScheme)
 {
     URI u("mailto:webmaster@example.com");
-    ASSERT_TRUE(u.isValid());
-    ASSERT_STREQ("mailto", u.scheme().c_str());
-    ASSERT_STREQ("webmaster@example.com", u.path().c_str());
-    ASSERT_STREQ("", u.host().c_str());
+    ASSERT_FALSE(u.isValid());
 }

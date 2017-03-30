@@ -40,12 +40,14 @@ int         URI::port()
     int p;
     if (m_uri->GetPort(&p)) {
         return p;
-    } else return -1;
+    } else {
+        return defaultPort(scheme());
+    }
 }
 
 std::string URI::path()
 {
-    return m_uri->m_Path;
+    return "/" + m_uri->m_Path;
 }
 
 std::string URI::query()

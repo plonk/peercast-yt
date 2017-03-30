@@ -202,19 +202,11 @@ LUrlParser::clParseURL LUrlParser::clParseURL::ParseURL( const std::string& URL 
 		CurrentString = LocalString;
 	}
 
-	// end of string
-	if ( !*CurrentString )
-	{
-		return clParseURL( LUrlParserError_UnexpectedEndOfLine );
-	}
-
 	// skip '/'
-	if ( *CurrentString != '/' )
+	if ( *CurrentString == '/' )
 	{
-		return clParseURL( LUrlParserError_NoSlash );
+		CurrentString++;
 	}
-
-	CurrentString++;
 
 	// parse the path
 	LocalString = CurrentString;
