@@ -1436,7 +1436,6 @@ int Servent::givProc(ThreadInfo *thread)
 // -----------------------------------
 void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, String &agent, bool isTrusted)
 {
-
     bool nonFW = (servMgr->getFirewall() != ServMgr::FW_ON);
     bool testFW = (servMgr->getFirewall() == ServMgr::FW_UNKNOWN);
 
@@ -1453,33 +1452,28 @@ void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
         if (sendBCID)
             atom.writeBytes(PCP_HELO_BCID, chanMgr->broadcastID.id, 16);
 
-
     LOG_DEBUG("PCP outgoing waiting for OLEH..");
-
-
 
     int numc, numd;
     ID4 id = atom.read(numc, numd);
     if (id != PCP_OLEH)
     {
         LOG_DEBUG("PCP outgoing reply: %s", id.getString().str());
-        atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT+PCP_ERROR_BADRESPONSE);
+        atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT + PCP_ERROR_BADRESPONSE);
         throw StreamException("Got unexpected PCP response");
     }
-
-
 
     char arg[64];
 
     GnuID clientID;
     rid.clear();
-    int version=0;
-    int disable=0;
+    int version = 0;
+    int disable = 0;
 
     Host thisHost;
 
     // read OLEH response
-    for (int i=0; i<numc; i++)
+    for (int i = 0; i < numc; i++)
     {
         int c, dlen;
         ID4 id = atom.read(c, dlen);
@@ -1488,37 +1482,29 @@ void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
         {
             atom.readString(arg, sizeof(arg), dlen);
             agent.set(arg);
-
         }else if (id == PCP_HELO_REMOTEIP)
         {
             thisHost.ip = atom.readInt();
-
         }else if (id == PCP_HELO_PORT)
         {
             thisHost.port = atom.readShort();
-
         }else if (id == PCP_HELO_VERSION)
         {
             version = atom.readInt();
-
         }else if (id == PCP_HELO_DISABLE)
         {
             disable = atom.readInt();
-
         }else if (id == PCP_HELO_SESSIONID)
         {
             atom.readBytes(rid.id, 16);
             if (rid.isSame(servMgr->sessionID))
                 throw StreamException("Servent loopback");
-
         }else
         {
             LOG_DEBUG("PCP handshake skip: %s", id.getString().str());
             atom.skip(c, dlen);
         }
-
     }
-
 
     // update server ip/firewall status
     if (isTrusted)
@@ -1552,16 +1538,13 @@ void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
         }
     }
 
-
-
     if (!rid.isSet())
     {
-        atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT+PCP_ERROR_NOTIDENTIFIED);
+        atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT + PCP_ERROR_NOTIDENTIFIED);
         throw StreamException("Remote host not identified");
     }
 
     LOG_DEBUG("PCP Outgoing handshake complete.");
-
 }
 
 // -----------------------------------
