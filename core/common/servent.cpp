@@ -1513,10 +1513,14 @@ void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
         {
             if ((servMgr->serverHost.ip != thisHost.ip) && (servMgr->forceIP.isEmpty()))
             {
-                char ipstr[64];
-                thisHost.toStr(ipstr);
-                LOG_DEBUG("Got new ip: %s", ipstr);
-                servMgr->serverHost.ip = thisHost.ip;
+                // グローバルのリモートからプライベートIPを設定されないようにする。
+                if (rhost.globalIP() == thisHost.globalIP())
+                {
+                    char ipstr[64];
+                    thisHost.toStr(ipstr);
+                    LOG_DEBUG("Got new ip: %s", ipstr);
+                    servMgr->serverHost.ip = thisHost.ip;
+                }
             }
 
             if (servMgr->getFirewall() == ServMgr::FW_UNKNOWN)
