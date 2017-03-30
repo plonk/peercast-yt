@@ -24,6 +24,11 @@ std::string URI::scheme()
     return m_uri->scheme();
 }
 
+std::string URI::user_info()
+{
+    return m_uri->user_info();
+}
+
 std::string URI::host()
 {
     return m_uri->host();
@@ -46,6 +51,11 @@ std::string URI::path()
         return "/";
     else
         return m_uri->path();
+}
+
+std::string URI::query()
+{
+    return m_uri->query();
 }
 
 std::string URI::fragment()

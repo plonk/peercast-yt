@@ -14,9 +14,11 @@ public:
 
     bool        isValid();
     std::string scheme();
+    std::string user_info();
     std::string host();
     int         port();
     std::string path();
+    std::string query();
     std::string fragment();
 
     boost::network::uri::uri* m_uri;
