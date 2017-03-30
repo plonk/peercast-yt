@@ -1,6 +1,6 @@
 CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT $(INCLUDES)
 LDFLAGS = -pthread
-LIBS = -lboost_system -lcppnetlib-uri
+LIBS = 
 
 TAR = peercast-linux.tar
 CC = gcc
@@ -44,7 +44,10 @@ CORESOURCE = \
 	$(CORE)/common/jis.cpp \
 	$(CORE)/common/flv.cpp \
 	$(CORE)/common/jrpc.cpp \
-	$(CORE)/common/chandir.cpp
+	$(CORE)/common/chandir.cpp \
+	$(CORE)/common/uri.cpp \
+	$(CORE)/common/LUrlParser.cpp
+
 
 COREOBJ = $(notdir $(CORESOURCE:.cpp=.o))
 SYSOBJ = $(notdir $(SYSSOURCE:.cpp=.o))
