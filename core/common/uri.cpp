@@ -1,12 +1,13 @@
 #include "uri.h"
 
-#include <boost/network/protocol/http/client.hpp>
+#include "LUrlParser.h"
 
-using namespace boost::network::uri;
+using namespace LUrlParser;
 
 URI::URI(const std::string& uriString)
-    : m_uri(new uri(uriString))
+    : m_uri(new clParseURL())
 {
+    *m_uri = clParseURL::ParseURL(uriString);
 }
 
 URI::~URI()
@@ -16,51 +17,45 @@ URI::~URI()
 
 bool        URI::isValid()
 {
-    return m_uri->is_valid();
+    return m_uri->IsValid();
 }
 
 std::string URI::scheme()
 {
-    return m_uri->scheme();
+    return m_uri->m_Scheme;
 }
 
 std::string URI::user_info()
 {
-    return m_uri->user_info();
+    return m_uri->m_UserName + ":" + m_uri->m_Password;
 }
 
 std::string URI::host()
 {
-    return m_uri->host();
+    return m_uri->m_Host;
 }
 
 int         URI::port()
 {
-    if (m_uri->port() == "")
-        return defaultPort(scheme());
-    else {
-        int p;
-        sscanf(m_uri->port().c_str(), "%d", &p);
+    int p;
+    if (m_uri->GetPort(&p)) {
         return p;
-    }
+    } else return -1;
 }
 
 std::string URI::path()
 {
-    if (m_uri->path() == "")
-        return "/";
-    else
-        return m_uri->path();
+    return m_uri->m_Path;
 }
 
 std::string URI::query()
 {
-    return m_uri->query();
+    return m_uri->m_Query;
 }
 
 std::string URI::fragment()
 {
-    return m_uri->fragment();
+    return m_uri->m_Fragment;
 }
 
 int URI::defaultPort(const std::string& scheme)

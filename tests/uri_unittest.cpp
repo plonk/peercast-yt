@@ -22,6 +22,7 @@ public:
     }
 };
 
+#include "LUrlParser.h"
 TEST_F(URIFixture, httpScheme)
 {
     URI u("http://www.example.com");
