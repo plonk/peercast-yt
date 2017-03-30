@@ -10,18 +10,12 @@
 # 使用ライブラリ
 
 * [JSON for Modern C++](https://github.com/nlohmann/json)
-* [cpp-netlib](http://cpp-netlib.org/)
 
 # Linuxでのビルド
 
 ## 通常の C++ 開発環境の他に必要なもの
 
 HTML の生成に ruby を使っているので、ruby が必要です。
-
-cpp-netlib が必要です。APT ベースのディストリビューションでは以下のコ
-マンドで入ると思います。
-
-    # apt-get install libcppnetlib-dev
 
 ## 手順
 
