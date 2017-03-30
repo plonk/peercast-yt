@@ -1,15 +1,15 @@
+#include <algorithm>
 #include <sstream>
 #include <memory> // unique_ptr
-#include <boost/network/protocol/http/client.hpp>
 
 #include "http.h"
 #include "version2.h"
 #include "socket.h"
 #include "chandir.h"
 #include "critsec.h"
+#include "uri.h"
 
 using namespace std;
-using namespace boost::network::uri;
 
 std::vector<ChannelEntry> ChannelEntry::textToChannelEntries(std::string text)
 {
@@ -63,8 +63,8 @@ int ChannelDirectory::numFeeds()
 // out は変更されない。
 static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
 {
-    uri feed(url);
-    if (!feed.is_valid()) {
+    URI feed(url);
+    if (!feed.isValid()) {
         LOG_ERROR("invalid URL (%s)", url.c_str());
         return false;
     }
@@ -73,22 +73,12 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
         return false;
     }
 
-    int port;
-    if (feed.port() == "")
-        port = 80;
-    else
-        port = atoi(feed.port().c_str());
-
     Host host;
-    host.fromStrName(feed.host().c_str(), port);
+    host.fromStrName(feed.host().c_str(), feed.port());
     if (host.ip==0) {
         LOG_ERROR("Could not resolve %s", feed.host().c_str());
         return false;
     }
-
-    std::string path = feed.path();
-    if (path == "")
-        path = "/";
 
     unique_ptr<ClientSocket> rsock(sys->createSocket());
 
@@ -99,7 +89,7 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
 
         HTTP rhttp(*rsock);
 
-        rhttp.writeLineF("GET %s HTTP/1.0", path.c_str());
+        rhttp.writeLineF("GET %s HTTP/1.0", feed.path().c_str());
         rhttp.writeLineF("%s %s", HTTP_HS_HOST, feed.host().c_str());
         rhttp.writeLineF("%s %s", HTTP_HS_CONNECTION, "close");
         rhttp.writeLineF("%s %s", HTTP_HS_AGENT, PCX_AGENT);
@@ -308,8 +298,8 @@ bool ChannelDirectory::addFeed(std::string url)
         return false;
     }
 
-    uri u(url);
-    if (!u.is_valid() || u.scheme() != "http") {
+    URI u(url);
+    if (!u.isValid() || u.scheme() != "http") {
         LOG_ERROR("Invalid feed URL %s", url.c_str());
         return false;
     }
