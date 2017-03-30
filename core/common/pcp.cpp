@@ -554,6 +554,7 @@ int PCPStream::readBroadcastAtoms(AtomStream &atom, int numc, BroadcastState &bc
     ChanPacket pack;
     int ttl=1;
     int ver=0;
+    char ver_ex_prefix[3] = { '*', '*', '\0' };
     GnuID fromID, destID;
 
     fromID.clear();
@@ -611,6 +612,18 @@ int PCPStream::readBroadcastAtoms(AtomStream &atom, int numc, BroadcastState &bc
         {
             ver = atom.readInt();
             patom.writeInt(id, ver);
+            LOG_DEBUG("PCP bcst version %d", ver);
+        } else if (id == PCP_BCST_VERSION_VP) {
+            int ver_vp = atom.readInt();
+            patom.writeInt(id, ver_vp);
+            LOG_DEBUG("PCP bcst VP version %d", ver_vp);
+        } else if (id == PCP_BCST_VERSION_EX_PREFIX) {
+            atom.readBytes(ver_ex_prefix, 2);
+            patom.writeBytes(id, ver_ex_prefix, 2);
+        } else if (id == PCP_BCST_VERSION_EX_NUMBER) {
+            short ver_ex_number = atom.readShort();
+            patom.writeShort(id, ver_ex_number);
+            LOG_DEBUG("PCP bcst ex version %s%hd", ver_ex_prefix, ver_ex_number);
         }else
         {
             // copy and process atoms
