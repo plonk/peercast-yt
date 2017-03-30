@@ -689,7 +689,7 @@ int PCPStream::readBroadcastAtoms(AtomStream &atom, int numc, BroadcastState &bc
 // ------------------------------------------
 int PCPStream::procAtom(AtomStream &atom, ID4 id, int numc, int dlen, BroadcastState &bcs)
 {
-    int r=0;
+    int r = 0;
 
     if (id == PCP_CHAN)
     {
@@ -700,11 +700,9 @@ int PCPStream::procAtom(AtomStream &atom, ID4 id, int numc, int dlen, BroadcastS
             throw StreamException("Unauthorized root message");
         else
             readRootAtoms(atom, numc, bcs);
-
     }else if (id == PCP_HOST)
     {
         readHostAtoms(atom, numc, bcs);
-
     }else if ((id == PCP_MESG_ASCII) || (id == PCP_MESG))       // PCP_MESG_ASCII to be depreciated
     {
         String msg;
@@ -720,18 +718,15 @@ int PCPStream::procAtom(AtomStream &atom, ID4 id, int numc, int dlen, BroadcastS
             atom.writeBytes(PCP_HELO_SESSIONID, servMgr->sessionID.id, 16);
     }else if (id == PCP_PUSH)
     {
-
         readPushAtoms(atom, numc, bcs);
     }else if (id == PCP_OK)
     {
         atom.readInt();
-
     }else if (id == PCP_QUIT)
     {
         r = atom.readInt();
         if (!r)
             r = PCP_ERROR_QUIT;
-
     }else if (id == PCP_ATOM)
     {
         for (int i=0; i<numc; i++)
@@ -742,7 +737,6 @@ int PCPStream::procAtom(AtomStream &atom, ID4 id, int numc, int dlen, BroadcastS
             if (ar)
                 r = ar;
         }
-
     }else
     {
         LOG_CHANNEL("PCP skip: %s", id.getString().str());
@@ -750,7 +744,6 @@ int PCPStream::procAtom(AtomStream &atom, ID4 id, int numc, int dlen, BroadcastS
     }
 
     return r;
-
 }
 
 // ------------------------------------------
