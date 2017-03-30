@@ -44,7 +44,8 @@ CORESOURCE = \
 	$(CORE)/common/jis.cpp \
 	$(CORE)/common/flv.cpp \
 	$(CORE)/common/jrpc.cpp \
-	$(CORE)/common/chandir.cpp
+	$(CORE)/common/chandir.cpp \
+	$(CORE)/common/uri.cpp
 
 COREOBJ = $(notdir $(CORESOURCE:.cpp=.o))
 SYSOBJ = $(notdir $(SYSSOURCE:.cpp=.o))
