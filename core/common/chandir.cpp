@@ -8,6 +8,8 @@
 #include "chandir.h"
 #include "critsec.h"
 #include "uri.h"
+#include "servmgr.h"
+#include "cgi.h"
 
 using namespace std;
 
@@ -89,7 +91,10 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
 
         HTTP rhttp(*rsock);
 
-        rhttp.writeLineF("GET %s HTTP/1.0", feed.path().c_str());
+        auto request_line = "GET " + feed.path() + "?host=" + cgi::escape(servMgr->serverHost) + " HTTP/1.0";
+        LOG_DEBUG("Request line: %s", request_line.c_str());
+
+        rhttp.writeLineF("%s", request_line.c_str());
         rhttp.writeLineF("%s %s", HTTP_HS_HOST, feed.host().c_str());
         rhttp.writeLineF("%s %s", HTTP_HS_CONNECTION, "close");
         rhttp.writeLineF("%s %s", HTTP_HS_AGENT, PCX_AGENT);

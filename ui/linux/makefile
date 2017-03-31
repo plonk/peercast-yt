@@ -46,7 +46,8 @@ CORESOURCE = \
 	$(CORE)/common/jrpc.cpp \
 	$(CORE)/common/chandir.cpp \
 	$(CORE)/common/uri.cpp \
-	$(CORE)/common/LUrlParser.cpp
+	$(CORE)/common/LUrlParser.cpp \
+	$(CORE)/common/cgi.cpp
 
 
 COREOBJ = $(notdir $(CORESOURCE:.cpp=.o))
