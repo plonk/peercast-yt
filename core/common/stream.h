@@ -431,6 +431,57 @@ public:
 
     Stream *stream;
 };
+// --------------------------------------------------
+class WriteBufferedStream : public IndirectStream
+{
+    static const int kBufSize = 64 * 1024;
+
+public:
+    WriteBufferedStream(Stream *s)
+    {
+        init(s);
+    }
+
+    ~WriteBufferedStream()
+    {
+        flush();
+    }
+
+    void flush()
+    {
+        if (buf.size() > 0)
+        {
+            stream->write(buf.c_str(), buf.size());
+            buf.clear();
+        }
+    }
+
+    void write(const void *p, int l) override
+    {
+        if (l > kBufSize)
+        {
+            flush();
+            stream->write(p, l);
+        } else if (buf.size() + l > kBufSize)
+        {
+            for (int i = 0; i < l; i++)
+                buf.push_back(static_cast<const char*>(p)[i]);
+            flush();
+        } else
+        {
+            for (int i = 0; i < l; i++)
+                buf.push_back(static_cast<const char*>(p)[i]);
+        }
+    }
+
+    void close() override
+    {
+        flush();
+        stream->close();
+    }
+
+    std::string buf;
+};
 
 
 #endif

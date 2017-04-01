@@ -370,18 +370,17 @@ void HTML::writeTemplate(const char *fileName, const char *args)
     FileStream file;
     try
     {
+        WriteBufferedStream bufferedOut(out);
         file.openReadOnly(fileName);
 
         tmplArgs = args;
-        readTemplate(file, out, 0);
-
+        readTemplate(file, &bufferedOut, 0);
     }catch (StreamException &e)
     {
         out->writeString(e.msg);
         out->writeString(" : ");
         out->writeString(fileName);
     }
-
     file.close();
 }
 // --------------------------------------
