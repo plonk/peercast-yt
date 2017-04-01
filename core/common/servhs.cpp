@@ -1717,7 +1717,8 @@ void Servent::handshakeLocalFile(const char *fn)
 
     LOG_DEBUG("Writing HTML file: %s", fileName.cstr());
 
-    HTML html("", *sock);
+    WriteBufferedStream bufferedSock(sock);
+    HTML html("", bufferedSock);
 
     char *args = strstr(fileName.cstr(), "?");
     if (args)
@@ -1727,7 +1728,6 @@ void Servent::handshakeLocalFile(const char *fn)
     {
         html.writeOK(MIME_HTML);
         html.writeTemplate(fileName.cstr(), args);
-
     }else if (fileName.contains(".css"))
     {
         html.writeOK(MIME_CSS);

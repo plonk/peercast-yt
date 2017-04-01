@@ -444,7 +444,15 @@ public:
 
     ~WriteBufferedStream()
     {
+        try {
+            flush();
+        } catch (StreamException&e) {}
+    }
+
+    int read(void *p, int l) override
+    {
         flush();
+        return stream->read(p, l);
     }
 
     void flush()
