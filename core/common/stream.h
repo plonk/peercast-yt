@@ -297,15 +297,14 @@ public:
     int     length();
     int     pos();
 
-    virtual void    seekTo(int);
-    virtual int     getPosition() { return pos(); }
-    virtual void    flush();
-    virtual int     read(void *, int);
-    virtual void    write(const void *, int);
-    virtual bool    eof();
-    virtual void    rewind();
-    virtual void    close();
-
+    void    seekTo(int) override;
+    int     getPosition() override { return pos(); }
+    void    flush();
+    int     read(void *, int) override;
+    void    write(const void *, int) override;
+    bool    eof() override;
+    void    rewind() override;
+    void    close() override;
 
     FILE *file;
 };

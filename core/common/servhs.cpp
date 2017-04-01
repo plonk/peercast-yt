@@ -1721,7 +1721,7 @@ void Servent::handshakeLocalFile(const char *fn)
 
     char *args = strstr(fileName.cstr(), "?");
     if (args)
-        *args++=0;
+        *args++ = 0;
 
     if (fileName.contains(".htm"))
     {
