@@ -2610,6 +2610,7 @@ void Servent::sendPCPChannel()
             bsock.flush();
 
             BroadcastState bcs;
+            // どうしてここで bsock を使ったら動かないのか理解していない。
             error = pcpStream->readPacket(*sock, bcs);
             if (error)
                 throw StreamException("PCP exception");
