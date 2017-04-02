@@ -1100,6 +1100,10 @@ void Servent::CMD_fetch(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     }
 
     info.bcID = chanMgr->broadcastID;
+    // id がセットされていないチャンネルがあるといろいろまずいので、事
+    // 前に設定してから登録する。
+    info.id = chanMgr->broadcastID;
+    info.id.encode(NULL, info.name, info.genre, info.bitrate);
 
     Channel *c = chanMgr->createChannel(info, NULL);
     if (c)
