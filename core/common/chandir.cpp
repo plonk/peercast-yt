@@ -83,13 +83,14 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
     }
 
     unique_ptr<ClientSocket> rsock(sys->createSocket());
+    WriteBufferedStream brsock(&*rsock);
 
     try {
         LOG_DEBUG("Connecting to %s ...", feed.host().c_str());
         rsock->open(host);
         rsock->connect();
 
-        HTTP rhttp(*rsock);
+        HTTP rhttp(brsock);
 
         auto request_line = "GET " + feed.path() + "?host=" + cgi::escape(servMgr->serverHost) + " HTTP/1.0";
         LOG_DEBUG("Request line: %s", request_line.c_str());

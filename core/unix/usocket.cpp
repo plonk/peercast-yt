@@ -343,6 +343,7 @@ int UClientSocket::readUpto(void *p, int l)
 // --------------------------------------------------
 void UClientSocket::write(const void *p, int l)
 {
+    LOG_DEBUG("UClientSocket: write %d bytes", l);
     while (l)
     {
         int r = send(sockNum, (char *)p, l, MSG_DONTWAIT|MSG_NOSIGNAL);

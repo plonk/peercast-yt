@@ -2174,6 +2174,8 @@ bool Servent::waitForChannelHeader(ChanInfo &info)
 // -----------------------------------
 void Servent::sendRawChannel(bool sendHead, bool sendData)
 {
+    WriteBufferedStream bsock(sock);
+
     try
     {
 
@@ -2189,7 +2191,7 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
 
         if (sendHead)
         {
-            ch->headPack.writeRaw(*sock);
+            ch->headPack.writeRaw(bsock);
             streamPos = ch->headPack.pos + ch->headPack.len;
             LOG_DEBUG("Sent %d bytes header ", ch->headPack.len);
         }
@@ -2216,7 +2218,7 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
                     }
 
                     ChanPacket rawPack;
-                    if (ch->rawData.findPacket(streamPos, rawPack))
+                    while (ch->rawData.findPacket(streamPos, rawPack))
                     {
                         if (syncPos != rawPack.sync)
                             LOG_ERROR("Send skip: %d", rawPack.sync-syncPos);
@@ -2224,7 +2226,7 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
 
                         if ((rawPack.type == ChanPacket::T_DATA) || (rawPack.type == ChanPacket::T_HEAD))
                         {
-                            rawPack.writeRaw(*sock);
+                            rawPack.writeRaw(bsock);
                             lastWriteTime = sys->getTime();
                         }
 
@@ -2234,10 +2236,12 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
                     }
                 }
 
-                if ((sys->getTime()-lastWriteTime) > DIRECT_WRITE_TIMEOUT)
+                if ((sys->getTime() - lastWriteTime) > DIRECT_WRITE_TIMEOUT)
                     throw TimeoutException();
 
-                sys->sleepIdle();
+                bsock.flush();
+                sys->sleep(200);
+                //sys->sleepIdle();
             }
         }
     }catch (StreamException &e)
@@ -2522,7 +2526,8 @@ void Servent::sendPCPChannel()
     if (!ch)
         throw StreamException("Channel not found");
 
-    AtomStream atom(*sock);
+    WriteBufferedStream bsock(sock);
+    AtomStream atom(bsock);
 
     pcpStream = new PCPStream(remoteID);
     int error=0;
@@ -2569,7 +2574,7 @@ void Servent::sendPCPChannel()
 
                 ChanPacket rawPack;
 
-                if (ch->rawData.findPacket(streamPos, rawPack))
+                while (ch->rawData.findPacket(streamPos, rawPack))
                 {
 
                     if (rawPack.type == ChanPacket::T_HEAD)
@@ -2598,17 +2603,20 @@ void Servent::sendPCPChannel()
 
                     //LOG_DEBUG("Sending %d-%d (%d, %d, %d)", rawPack.pos, rawPack.pos+rawPack.len, ch->streamPos, ch->rawData.getLatestPos(), ch->rawData.getOldestPos());
 
-                    streamPos = rawPack.pos+rawPack.len;
+                    streamPos = rawPack.pos + rawPack.len;
                 }
 
             }
+            bsock.flush();
+
             BroadcastState bcs;
+            // どうしてここで bsock を使ったら動かないのか理解していない。
             error = pcpStream->readPacket(*sock, bcs);
             if (error)
                 throw StreamException("PCP exception");
 
-            sys->sleepIdle();
-
+            sys->sleep(200);
+            //sys->sleepIdle();
         }
 
         LOG_DEBUG("PCP channel stream closed normally.");

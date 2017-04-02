@@ -687,7 +687,7 @@ void PeercastSource::stream(Channel *ch)
         ch->setStatus(Channel::S_IDLE);
         while ((ch->checkIdle()) && (ch->thread.active))
         {
-            sys->sleepIdle();
+            sys->sleep(200);
         }
 
         sys->sleepIdle();
