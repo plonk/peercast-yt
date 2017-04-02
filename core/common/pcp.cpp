@@ -469,9 +469,8 @@ void PCPStream::readChanAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
         newInfo = chl->info;
 
 
-    for (int i=0; i<numc; i++)
+    for (int i = 0; i < numc; i++)
     {
-
         int c, d;
         ID4 id = atom.read(c, d);
 
@@ -481,20 +480,16 @@ void PCPStream::readChanAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
         }else if (id == PCP_CHAN_INFO)
         {
             newInfo.readInfoAtoms(atom, c);
-
         }else if (id == PCP_CHAN_TRACK)
         {
             newInfo.readTrackAtoms(atom, c);
-
         }else if (id == PCP_CHAN_BCID)
         {
             atom.readBytes(newInfo.bcID.id, 16);
-
         }else if (id == PCP_CHAN_KEY)           // depreciated
         {
             atom.readBytes(newInfo.bcID.id, 16);
             newInfo.bcID.id[0] = 0;             // clear flags
-
         }else if (id == PCP_CHAN_ID)
         {
             atom.readBytes(newInfo.id.id, 16);
@@ -518,35 +513,27 @@ void PCPStream::readChanAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 
         if (!servMgr->chanLog.isEmpty())
         {
-            //if (chl->numListeners())
+            try
             {
-                try
-                {
-                    FileStream file;
-                    file.openWriteAppend(servMgr->chanLog.cstr());
-
-                        XML::Node *rn = new XML::Node("update time=\"%u\"", sys->getTime());
-                            XML::Node *n = chl->info.createChannelXML();
-                        n->add(chl->createXML(false));
-                        n->add(chl->info.createTrackXML());
-                    rn->add(n);
-
-                    rn->write(file, 0);
-                    delete rn;
-                    file.close();
-                }catch (StreamException &e)
-                {
-                    LOG_ERROR("Unable to update channel log: %s", e.msg);
-                }
+                FileStream file;
+                file.openWriteAppend(servMgr->chanLog.cstr());
+                XML::Node *rn = new XML::Node("update time=\"%u\"", sys->getTime());
+                XML::Node *n = chl->info.createChannelXML();
+                n->add(chl->createXML(false));
+                n->add(chl->info.createTrackXML());
+                rn->add(n);
+                rn->write(file, 0);
+                delete rn;
+                file.close();
+            }catch (StreamException &e)
+            {
+                LOG_ERROR("Unable to update channel log: %s", e.msg);
             }
         }
-
     }
 
     if (ch && !ch->isBroadcasting())
         ch->updateInfo(newInfo);
-
-
 }
 // ------------------------------------------
 int PCPStream::readBroadcastAtoms(AtomStream &atom, int numc, BroadcastState &bcs)

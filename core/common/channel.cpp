@@ -940,14 +940,12 @@ void Channel::updateInfo(const ChanInfo &newInfo)
         if (isBroadcasting())
         {
             unsigned int ctime = sys->getTime();
-            if ((ctime-lastMetaUpdate) > 30)
+            if ((ctime - lastMetaUpdate) > 30)
             {
                 lastMetaUpdate = ctime;
 
                 ChanPacket pack;
-
                 MemoryStream mem(pack.data, sizeof(pack));
-
                 AtomStream atom(mem);
 
                 atom.writeParent(PCP_BCST, 10);
@@ -979,9 +977,7 @@ void Channel::updateInfo(const ChanInfo &newInfo)
             chl->info = info;
 
         peercastApp->channelUpdate(&info);
-
     }
-
 }
 // -----------------------------------
 ChannelStream *Channel::createSource()
@@ -2188,7 +2184,6 @@ Channel *ChanMgr::createChannel(ChanInfo &info, const char *mount)
     nc->next = channel;
     channel = nc;
 
-
     nc->info = info;
     nc->info.lastPlayStart = 0;
     nc->info.lastPlayEnd = 0;
@@ -3380,8 +3375,6 @@ bool ChanInfo::update(const ChanInfo &info)
         bcID = info.bcID;
     }
 
-
-
     if (bitrate != info.bitrate)
     {
         bitrate = info.bitrate;
@@ -3444,7 +3437,6 @@ bool ChanInfo::update(const ChanInfo &info)
 
     if (track.update(info.track))
         changed = true;
-
 
     return changed;
 }
