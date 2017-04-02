@@ -444,9 +444,14 @@ public:
 
     ~WriteBufferedStream()
     {
-        try {
+        try
+        {
             flush();
-        } catch (StreamException&e) {}
+        }
+        catch (StreamException& e)
+        {
+            LOG_ERROR("StreamException in ~WriteBufferedStream(): %s", e.msg);
+        }
     }
 
     int read(void *p, int l) override
