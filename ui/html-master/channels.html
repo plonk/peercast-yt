@@ -61,7 +61,10 @@
       </td>
       <td align=center nowrap>
         {$loop.externalChannel.numDirects}/{$loop.externalChannel.numRelays}<br>
-        <img src="images/chat.png"> <img src="images/graph.png">
+        {@if loop.externalChannel.encodedName}
+        <a href="{$loop.externalChannel.chatUrl}"><img alt="Chat" src="images/chat.png"></a>
+        <a href="{$loop.externalChannel.statsUrl}"><img alt="Stats" src="images/graph.png"></a>
+        {@end}
       </td>
       <td align=center nowrap>
         {$loop.externalChannel.bitrate} kb/s

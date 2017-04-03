@@ -4,14 +4,16 @@
 #include <cstdlib>
 #include <vector>
 
+#include "cgi.h"
 #include "sys.h" // WLock
 
 class ChannelEntry
 {
 public:
-    static std::vector<ChannelEntry> textToChannelEntries(std::string text);
+    static std::vector<ChannelEntry> textToChannelEntries(const std::string& text, const std::string& aFeedUrl);
 
-    ChannelEntry(const std::vector<std::string>& fields)
+    ChannelEntry(const std::vector<std::string>& fields, const std::string& aFeedUrl)
+        : feedUrl(aFeedUrl)
     {
         if (fields.size() < 19)
             throw std::runtime_error("too few fields");
@@ -26,10 +28,19 @@ public:
         numRelays      = std::atoi(fields[7].c_str());
         bitrate        = std::atoi(fields[8].c_str());
         contentTypeStr = fields[9];
+        encodedName    = fields[14];
         uptime         = fields[15];
     }
 
+    std::string chatUrl();
+    std::string statsUrl();
+
     std::string name;
+
+    // URLエンコードされたチャンネル名、このフィールドがあればチャット
+    // や統計のページがある。
+    std::string encodedName;
+
     GnuID id;
     int bitrate;
     std::string contentTypeStr;
@@ -39,6 +50,8 @@ public:
     int numDirects;
     int numRelays;
     //TrackInfo track;
+
+    std::string feedUrl;
 };
 
 class ChannelFeed

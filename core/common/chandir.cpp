@@ -9,11 +9,11 @@
 #include "critsec.h"
 #include "uri.h"
 #include "servmgr.h"
-#include "cgi.h"
 
 using namespace std;
 
-std::vector<ChannelEntry> ChannelEntry::textToChannelEntries(std::string text)
+std::vector<ChannelEntry>
+ChannelEntry::textToChannelEntries(const std::string& text, const std::string& aFeedUrl)
 {
     istringstream in(text);
     string line;
@@ -37,10 +37,34 @@ std::vector<ChannelEntry> ChannelEntry::textToChannelEntries(std::string text)
             throw std::runtime_error(String::format("Parse error at line %d.", lineno).cstr());
         }
 
-        res.push_back(ChannelEntry(fields));
+        res.push_back(ChannelEntry(fields, aFeedUrl));
     }
 
     return res;
+}
+
+std::string ChannelEntry::chatUrl()
+{
+    if (encodedName.empty())
+        return "";
+
+    auto index = feedUrl.rfind('/');
+    if (index == std::string::npos)
+        return "";
+    else
+        return feedUrl.substr(0, index) + "/chat.php?cn=" + encodedName;
+}
+
+std::string ChannelEntry::statsUrl()
+{
+    if (encodedName.empty())
+        return "";
+
+    auto index = feedUrl.rfind('/');
+    if (index == std::string::npos)
+        return "";
+    else
+        return feedUrl.substr(0, index) + "/getgmt.php?cn=" + encodedName;
 }
 
 ChannelDirectory::ChannelDirectory()
@@ -124,7 +148,7 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
         }
 
         try {
-            out = ChannelEntry::textToChannelEntries(text);
+            out = ChannelEntry::textToChannelEntries(text, url);
         } catch (std::runtime_error& e) {
             LOG_ERROR("%s", e.what());
             return false;
@@ -196,12 +220,18 @@ bool ChannelDirectory::writeChannelVariable(Stream& out, const String& varName, 
         sprintf(buf, "%s", ch.url.c_str());
     } else if (varName == "tip") {
         sprintf(buf, "%s", ch.tip.c_str());
+    } else if (varName == "encodedName") {
+        sprintf(buf, "%s", ch.encodedName.c_str());
     } else if (varName == "uptime") {
         sprintf(buf, "%s", ch.uptime.c_str());
     } else if (varName == "numDirects") {
         sprintf(buf, "%d", ch.numDirects);
     } else if (varName == "numRelays") {
         sprintf(buf, "%d", ch.numRelays);
+    } else if (varName == "chatUrl") {
+        sprintf(buf, "%s", ch.chatUrl().c_str());
+    } else if (varName == "statsUrl") {
+        sprintf(buf, "%s", ch.statsUrl().c_str());
     } else {
         return false;
     }

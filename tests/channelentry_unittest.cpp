@@ -43,6 +43,7 @@ TEST_F(ChannelEntryFixture, textToChannelEntries)
     ASSERT_STREQ("http://www.example.com/", entry.url.c_str());
     ASSERT_STREQ("127.0.0.1:7144", entry.tip.c_str());
     ASSERT_STREQ("1:14", entry.uptime.c_str());
+    ASSERT_STREQ("", entry.encodedName.c_str());
     ASSERT_EQ(-1, entry.numDirects);
     ASSERT_EQ(-1, entry.numRelays);
 }
