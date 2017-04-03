@@ -31,6 +31,8 @@
 #include "peercast.h"
 #include "version2.h"
 #include <sys/time.h>
+#include <limits.h> // PATH_MAX
+#include <libgen.h> // dirname
 
 // ----------------------------------
 String iniFileName;
@@ -150,12 +152,30 @@ void sigProc(int sig)
 }
 
 // ----------------------------------
+static void init()
+{
+    char path[PATH_MAX];
+
+    if (readlink("/proc/self/exe", path, sizeof(path)) == -1) {
+        perror("/proc/self/exe");
+        exit(1);
+    }
+    auto dir = dirname(path);
+
+    iniFileName.set(dir);
+    iniFileName.append("/peercast.ini");
+    htmlPath.set(dir);
+    htmlPath.append("/");
+    pidFileName.set(dir);
+    pidFileName.append("/peercast.pid");
+    logFileName.set(dir);
+    logFileName.append("/peercast.log");
+}
+
+// ----------------------------------
 int main(int argc, char* argv[])
 {
-    iniFileName.set("peercast.ini");
-    htmlPath.set("./");
-    pidFileName.set("peercast.pid");
-    logFileName.set("peercast.log");
+    init();
 
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "--inifile") || !strcmp(argv[i], "-i")) {
