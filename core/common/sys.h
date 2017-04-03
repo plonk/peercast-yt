@@ -55,7 +55,11 @@ public:
         T_UNICODESAFE
     };
 
-    String() { clear(); }
+    String()
+    {
+        clear();
+    }
+
     String(const char *p, TYPE t=T_ASCII)
     {
         set(p, t);
@@ -287,10 +291,10 @@ class WEvent
 public:
     WEvent()
     {
-         event = ::CreateEvent(NULL, // no security attributes
-                                  TRUE, // manual-reset
-                                  FALSE, // initially non-signaled
-                                  NULL);// anonymous
+        event = ::CreateEvent(NULL,  // no security attributes
+                              TRUE,  // manual-reset
+                              FALSE, // initially non-signaled
+                              NULL); // anonymous
     }
 
     ~WEvent()
@@ -307,11 +311,11 @@ public:
     {
         switch(::WaitForSingleObject(event, timeout))
         {
-          case WAIT_TIMEOUT:
-              throw TimeoutException();
-              break;
-          //case WAIT_OBJECT_0:
-              //break;
+        case WAIT_TIMEOUT:
+            throw TimeoutException();
+            break;
+        //case WAIT_OBJECT_0:
+            //break;
         }
     }
 
@@ -320,12 +324,8 @@ public:
         ::ResetEvent(event);
     }
 
-
-
     HANDLE event;
 };
-
-
 
 // ------------------------------------
 typedef int (WINAPI *THREAD_FUNC)(ThreadInfo *);

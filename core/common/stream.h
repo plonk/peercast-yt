@@ -450,7 +450,7 @@ public:
         }
         catch (StreamException& e)
         {
-            LOG_ERROR("StreamException in ~WriteBufferedStream(): %s", e.msg);
+            LOG_ERROR("StreamException in dtor of WriteBufferedStream: %s", e.msg);
         }
     }
 
