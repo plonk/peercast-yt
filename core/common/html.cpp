@@ -175,27 +175,31 @@ void HTML::writeVariable(Stream &s, const String &varName, int loop)
 // --------------------------------------
 int HTML::getIntVariable(const String &varName, int loop)
 {
-    String val;
-    MemoryStream mem(val.cstr(), String::MAX_LEN);
+    char val[1024];
+    MemoryStream mem(val, sizeof(val) - 1);
 
     writeVariable(mem, varName, loop);
 
-    return atoi(val.cstr());
+    val[mem.pos] = '\0';
+
+    return atoi(val);
 }
 // --------------------------------------
 bool HTML::getBoolVariable(const String &varName, int loop)
 {
-    String val;
-    MemoryStream mem(val.cstr(), String::MAX_LEN);
+    char val[1024];
+    MemoryStream mem(val, sizeof(val) - 1);
 
     writeVariable(mem, varName, loop);
 
+    val[mem.pos] = '\0';
+
     // integer
     if ((val[0] >= '0') && (val[0] <= '9'))
-        return atoi(val.cstr()) != 0;
+        return atoi(val) != 0;
 
     // string
-    if (val[0]!=0)
+    if (val[0] != 0)
         return true;
 
     return false;
