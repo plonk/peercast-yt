@@ -34,68 +34,66 @@ public:
 };
 
 // --------------------------------------------
-static const char *HTTP_SC_OK           = "HTTP/1.0 200 OK";
-static const char *HTTP_SC_NOTFOUND     = "HTTP/1.0 404 Not Found";
-static const char *HTTP_SC_UNAVAILABLE  = "HTTP/1.0 503 Service Unavailable";
-static const char *HTTP_SC_UNAUTHORIZED = "HTTP/1.0 401 Unauthorized";
-static const char *HTTP_SC_FOUND        = "HTTP/1.0 302 Found";
-static const char *HTTP_SC_BADREQUEST   = "HTTP/1.0 400 Bad Request";
-static const char *HTTP_SC_FORBIDDEN    = "HTTP/1.0 403 Forbidden";
-static const char *HTTP_SC_SWITCH       = "HTTP/1.0 101 Switch protocols";
+#define HTTP_SC_OK           "HTTP/1.0 200 OK"
+#define HTTP_SC_NOTFOUND     "HTTP/1.0 404 Not Found"
+#define HTTP_SC_UNAVAILABLE  "HTTP/1.0 503 Service Unavailable"
+#define HTTP_SC_UNAUTHORIZED "HTTP/1.0 401 Unauthorized"
+#define HTTP_SC_FOUND        "HTTP/1.0 302 Found"
+#define HTTP_SC_BADREQUEST   "HTTP/1.0 400 Bad Request"
+#define HTTP_SC_FORBIDDEN    "HTTP/1.0 403 Forbidden"
+#define HTTP_SC_SWITCH       "HTTP/1.0 101 Switch protocols"
 
-static const char *RTSP_SC_OK           = "RTSP/1.0 200 OK";
+#define RTSP_SC_OK           "RTSP/1.0 200 OK"
 
+#define HTTP_PROTO1          "HTTP/1."
+#define RTSP_PROTO1          "RTSP/1."
 
-static const char *HTTP_PROTO1      = "HTTP/1.";
-static const char *RTSP_PROTO1      = "RTSP/1.";
+#define HTTP_HS_SERVER       "Server:"
+#define HTTP_HS_AGENT        "User-Agent:"
+#define HTTP_HS_CONTENT      "Content-Type:"
+#define HTTP_HS_CACHE        "Cache-Control:"
+#define HTTP_HS_CONNECTION   "Connection:"
+#define HTTP_HS_SETCOOKIE    "Set-Cookie:"
+#define HTTP_HS_COOKIE       "Cookie:"
+#define HTTP_HS_HOST         "Host:"
+#define HTTP_HS_ACCEPT       "Accept:"
+#define HTTP_HS_LENGTH       "Content-Length:"
 
-static const char *HTTP_HS_SERVER       = "Server:";
-static const char *HTTP_HS_AGENT        = "User-Agent:";
-static const char *HTTP_HS_CONTENT      = "Content-Type:";
-static const char *HTTP_HS_CACHE        = "Cache-Control:";
-static const char *HTTP_HS_CONNECTION   = "Connection:";
-static const char *HTTP_HS_SETCOOKIE    = "Set-Cookie:";
-static const char *HTTP_HS_COOKIE       = "Cookie:";
-static const char *HTTP_HS_HOST         = "Host:";
-static const char *HTTP_HS_ACCEPT       = "Accept:";
-static const char *HTTP_HS_LENGTH       = "Content-Length:";
+#define MIME_MP3             "audio/mpeg"
+#define MIME_XMP3            "audio/x-mpeg"
+#define MIME_OGG             "application/ogg"
+#define MIME_XOGG            "application/x-ogg"
+#define MIME_MOV             "video/quicktime"
+#define MIME_MPG             "video/mpeg"
+#define MIME_NSV             "video/nsv"
+#define MIME_ASF             "video/x-ms-asf"
+#define MIME_ASX             "video/x-ms-asf"
+// same as ASF
+#define MIME_MMS             "application/x-mms-framed"
 
-static const char *MIME_MP3         = "audio/mpeg";
-static const char *MIME_XMP3        = "audio/x-mpeg";
-static const char *MIME_OGG         = "application/ogg";
-static const char *MIME_XOGG        = "application/x-ogg";
-static const char *MIME_MOV         = "video/quicktime";
-static const char *MIME_MPG         = "video/mpeg";
-static const char *MIME_NSV         = "video/nsv";
-static const char *MIME_ASF         = "video/x-ms-asf";
-static const char *MIME_ASX         = "video/x-ms-asf"; // same as ASF
-static const char *MIME_MMS         = "application/x-mms-framed";
+#define MIME_RAM             "audio/x-pn-realaudio"
 
-static const char *MIME_RAM         = "audio/x-pn-realaudio";
+#define MIME_WMA             "audio/x-ms-wma"
+#define MIME_WMV             "video/x-ms-wmv"
+#define MIME_FLV             "video/flv"
 
-
-static const char *MIME_WMA         = "audio/x-ms-wma";
-static const char *MIME_WMV         = "video/x-ms-wmv";
-static const char *MIME_FLV         = "video/flv";
-
-static const char *MIME_HTML        = "text/html";
-static const char *MIME_XML         = "text/xml";
-static const char *MIME_CSS         = "text/css";
-static const char *MIME_TEXT        = "text/plain";
-static const char *MIME_PLS         = "audio/mpegurl";
-static const char *MIME_XPLS        = "audio/x-mpegurl";
-static const char *MIME_XSCPLS      = "audio/x-scpls";
-static const char *MIME_SDP         = "application/sdp";
-static const char *MIME_M3U         = "audio/m3u";
-static const char *MIME_MPEGURL     = "audio/mpegurl";
-static const char *MIME_XM3U        = "audio/x-mpegurl";
-static const char *MIME_XPEERCAST   = "application/x-peercast";
-static const char *MIME_XPCP        = "application/x-peercast-pcp";
-static const char *MIME_RAW         = "application/binary";
-static const char *MIME_JPEG        = "image/jpeg";
-static const char *MIME_GIF         = "image/gif";
-static const char *MIME_PNG         = "image/png";
-
+#define MIME_HTML            "text/html"
+#define MIME_XML             "text/xml"
+#define MIME_CSS             "text/css"
+#define MIME_TEXT            "text/plain"
+#define MIME_PLS             "audio/mpegurl"
+#define MIME_XPLS            "audio/x-mpegurl"
+#define MIME_XSCPLS          "audio/x-scpls"
+#define MIME_SDP             "application/sdp"
+#define MIME_M3U             "audio/m3u"
+#define MIME_MPEGURL         "audio/mpegurl"
+#define MIME_XM3U            "audio/x-mpegurl"
+#define MIME_XPEERCAST       "application/x-peercast"
+#define MIME_XPCP            "application/x-peercast-pcp"
+#define MIME_RAW             "application/binary"
+#define MIME_JPEG            "image/jpeg"
+#define MIME_GIF             "image/gif"
+#define MIME_PNG             "image/png"
 
 // --------------------------------------------
 class Cookie
