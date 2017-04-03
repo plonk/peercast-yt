@@ -18,7 +18,6 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-
 #include <stdarg.h>
 #include <stdio.h>
 #include "channel.h"
@@ -34,16 +33,14 @@
 
 // ----------------------------------
 String iniFileName;
-bool quit=false;
-FILE *logfile=NULL;
+bool quit = false;
+FILE *logfile = NULL;
 String htmlPath;
 String pidFileName;
 String logFileName;
 bool forkDaemon = false;
 bool setPidFile = false;
 bool logToFile = false;
-
-
 WLock loglock;
 
 // ---------------------------------
@@ -80,15 +77,15 @@ public:
         if (t != LogBuffer::T_NONE) {
             printf("[%s] ", LogBuffer::getTypeStr(t));
             if (logfile != NULL) {
-                fprintf(logfile, "[%s] ", LogBuffer::getTypeStr(t)); }
+                fprintf(logfile, "[%s] ", LogBuffer::getTypeStr(t));
             }
+        }
         printf("%s\n", str);
         if (logfile != NULL) {
             fprintf(logfile, "%s\n", str);
         }
         loglock.off();
     }
-
 };
 
 // ----------------------------------
@@ -105,32 +102,32 @@ void sigProc(int sig)
 {
     switch (sig)
     {
-        case SIGINT:
-            if (!quit)
-                LOG_DEBUG("Received INT signal");
-            quit=true;
-            break;
-        case SIGTERM:
-            if (!quit)
-                LOG_DEBUG("Received TERM signal");
-            quit=true;
-            break;
-        case SIGHUP:
-                LOG_DEBUG("Received HUP signal, reloading a new logfile");
-                // The aim of this call is to completly reload a new log file.
-                // It can be used in conjonction with logrotate,
-                // to remove the logfile after it has been copied.
-                // some data can still be lost, but this way it is reduced to minimun at lost costs..
-                if (logToFile) {
-                    loglock.on();
-                    if (logfile != NULL) {
-                        fclose(logfile);
-                    }
-                    unlink(logFileName);
-                    logfile = fopen(logFileName, "a");
-                    loglock.off();
-                }
-            break;
+    case SIGINT:
+        if (!quit)
+            LOG_DEBUG("Received INT signal");
+        quit = true;
+        break;
+    case SIGTERM:
+        if (!quit)
+            LOG_DEBUG("Received TERM signal");
+        quit = true;
+        break;
+    case SIGHUP:
+        LOG_DEBUG("Received HUP signal, reloading a new logfile");
+        // The aim of this call is to completly reload a new log file.
+        // It can be used in conjonction with logrotate,
+        // to remove the logfile after it has been copied.
+        // some data can still be lost, but this way it is reduced to minimun at lost costs..
+        if (logToFile) {
+            loglock.on();
+            if (logfile != NULL) {
+                fclose(logfile);
+            }
+            unlink(logFileName);
+            logfile = fopen(logFileName, "a");
+            loglock.off();
+        }
+        break;
     }
 
     /* This may be nescessary for some systems... */
@@ -142,52 +139,48 @@ void sigProc(int sig)
 // ----------------------------------
 int main(int argc, char* argv[])
 {
-
     iniFileName.set("peercast.ini");
     htmlPath.set("./");
     pidFileName.set("peercast.pid");
     logFileName.set("peercast.log");
 
-    for (int i = 1; i < argc; i++)
-        {
-            if (!strcmp(argv[i], "--inifile") || !strcmp(argv[i], "-i")) {
-                if (++i < argc) {
-                    iniFileName.setFromString(argv[i]);
-                }
-            } else if (!strcmp(argv[i], "--logfile") || !strcmp(argv[i], "-l") ) {
-                if (++i < argc) {
-                    logToFile = true;
-                    logFileName.setFromString(argv[i]);
-                }
-            } else if (!strcmp(argv[i], "--path") || !strcmp(argv[i], "-P")) {
-                if (++i < argc) {
-                    htmlPath.setFromString(argv[i]);
-                    // Add a "/" in order to make this parameter more natural:
-                    htmlPath.append("/");
-                }
-            } else if (!strcmp(argv[i], "--help") || !strcmp(argv[i], "-h")) {
-                printf("peercast - P2P Streaming Server, version %s\n", PCX_VERSTRING);
-                printf("\nCopyright (c) 2002-2006 PeerCast.org <code@peercast.org>\n");
-                printf("This is free software; see the source for copying conditions.\n");
-                printf("Usage: peercast [options]\n");
-                printf("-i, --inifile <inifile>      specify ini file\n");
-                printf("-l, --logfile <logfile>      specify log file\n");
-                printf("-P, --path <path>            set path to html files\n");
-                printf("-d, --daemon                 fork in background\n");
-                printf("-p, --pidfile <pidfile>      specify pid file\n");
-                printf("-h, --help                   show this help\n");
-                return 0;
-            } else if (!strcmp(argv[i], "--daemon") || !strcmp(argv[i], "-d")) {
-                    forkDaemon = true;
-            } else if (!strcmp(argv[i], "--pidfile") || !strcmp(argv[i], "-p")) {
-                if (++i < argc)
-                {
-                    setPidFile = true;
-                    pidFileName.setFromString(argv[i]);
-                }
+    for (int i = 1; i < argc; i++) {
+        if (!strcmp(argv[i], "--inifile") || !strcmp(argv[i], "-i")) {
+            if (++i < argc) {
+                iniFileName.setFromString(argv[i]);
+            }
+        } else if (!strcmp(argv[i], "--logfile") || !strcmp(argv[i], "-l") ) {
+            if (++i < argc) {
+                logToFile = true;
+                logFileName.setFromString(argv[i]);
+            }
+        } else if (!strcmp(argv[i], "--path") || !strcmp(argv[i], "-P")) {
+            if (++i < argc) {
+                htmlPath.setFromString(argv[i]);
+                // Add a "/" in order to make this parameter more natural:
+                htmlPath.append("/");
+            }
+        } else if (!strcmp(argv[i], "--help") || !strcmp(argv[i], "-h")) {
+            printf("peercast - P2P Streaming Server, version %s\n", PCX_VERSTRING);
+            printf("\nCopyright (c) 2002-2006 PeerCast.org <code@peercast.org>\n");
+            printf("This is free software; see the source for copying conditions.\n");
+            printf("Usage: peercast [options]\n");
+            printf("-i, --inifile <inifile>      specify ini file\n");
+            printf("-l, --logfile <logfile>      specify log file\n");
+            printf("-P, --path <path>            set path to html files\n");
+            printf("-d, --daemon                 fork in background\n");
+            printf("-p, --pidfile <pidfile>      specify pid file\n");
+            printf("-h, --help                   show this help\n");
+            return 0;
+        } else if (!strcmp(argv[i], "--daemon") || !strcmp(argv[i], "-d")) {
+            forkDaemon = true;
+        } else if (!strcmp(argv[i], "--pidfile") || !strcmp(argv[i], "-p")) {
+            if (++i < argc) {
+                setPidFile = true;
+                pidFileName.setFromString(argv[i]);
             }
         }
-
+    }
 
     if (logToFile) logfile = fopen(logFileName, "a");
 
@@ -198,15 +191,13 @@ int main(int argc, char* argv[])
 
     // PID file must be written after the daemon() call so that we get the daemonized PID.
     if (setPidFile) {
-        LOG_DEBUG("Peercast PID is: %i", (int) getpid() );
+        LOG_DEBUG("Peercast PID is: %i", (int) getpid());
         FILE *pidfileopened = fopen(pidFileName, "w");
-        if (pidfileopened != NULL)
-            {
-                fprintf(pidfileopened, "%i\n", (int) getpid() );
-                fclose(pidfileopened);
-            }
+        if (pidfileopened != NULL) {
+            fprintf(pidfileopened, "%i\n", (int) getpid());
+            fclose(pidfileopened);
+        }
     }
-
 
     peercastInst = new MyPeercastInst();
     peercastApp = new MyPeercastApp();
@@ -237,9 +228,8 @@ int main(int argc, char* argv[])
         fclose(logfile);
         // Log might continue but will only be written to stdout.
         loglock.off();
-        }
+    }
     if (setPidFile) unlink(pidFileName);
-
 
     return 0;
 }

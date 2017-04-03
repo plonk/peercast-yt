@@ -906,7 +906,7 @@ void ServMgr::saveSettings(const char *fn)
     {
         LOG_ERROR("Unable to open ini file");
     }else{
-        LOG_DEBUG("Saving settings to:  %s", fn);
+        LOG_DEBUG("Saving settings to: %s", fn);
 
         char idStr[64];
 
