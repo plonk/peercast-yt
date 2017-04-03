@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include "peercast.h"
 #include "version2.h"
+#include <sys/time.h>
 
 // ----------------------------------
 String iniFileName;
@@ -74,6 +75,18 @@ public:
     virtual void APICALL printLog(LogBuffer::TYPE t, const char *str)
     {
         loglock.on();
+
+        char buf[20];
+        struct timeval tv;
+        struct tm tm;
+
+        gettimeofday(&tv, NULL);
+        localtime_r(&tv.tv_sec, &tm);
+        strftime(buf, sizeof(buf), "%Y/%m/%d %T", &tm);
+        printf("%s.%03d ", buf, (int) tv.tv_usec/1000);
+        if (logfile != NULL) {
+            fprintf(logfile, "%s.%03d ", buf, (int) tv.tv_usec/1000);
+        }
         if (t != LogBuffer::T_NONE) {
             printf("[%s] ", LogBuffer::getTypeStr(t));
             if (logfile != NULL) {
