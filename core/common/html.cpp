@@ -29,7 +29,7 @@
 #include "channel.h"
 #include "stats.h"
 #include "version2.h"
-
+#include "dmstream.h"
 
 // --------------------------------------
 HTML::HTML(const char *t, Stream &o)
@@ -175,28 +175,24 @@ void HTML::writeVariable(Stream &s, const String &varName, int loop)
 // --------------------------------------
 int HTML::getIntVariable(const String &varName, int loop)
 {
-    char val[1024];
-    MemoryStream mem(val, sizeof(val) - 1);
+    DynamicMemoryStream mem;
 
     writeVariable(mem, varName, loop);
 
-    val[mem.pos] = '\0';
-
-    return atoi(val);
+    return atoi(mem.str().c_str());
 }
 // --------------------------------------
 bool HTML::getBoolVariable(const String &varName, int loop)
 {
-    char val[1024];
-    MemoryStream mem(val, sizeof(val) - 1);
+    DynamicMemoryStream mem;
 
     writeVariable(mem, varName, loop);
 
-    val[mem.pos] = '\0';
+    const std::string val = mem.str();
 
     // integer
     if ((val[0] >= '0') && (val[0] <= '9'))
-        return atoi(val) != 0;
+        return atoi(val.c_str()) != 0;
 
     // string
     if (val[0] != 0)
