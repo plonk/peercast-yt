@@ -9,4 +9,7 @@ addons:
     packages:
     - gcc-4.9
     - g++-4.9
+env:
+  - CC=gcc-4.9
+  - CXX=g++-4.9
 script: make -C ui/linux && make -C tests && cd tests && ./test_all
