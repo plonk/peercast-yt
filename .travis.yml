@@ -7,7 +7,7 @@ addons:
     sources:
     - ubuntu-toolchain-r-test
     packages:
-    - gcc-4.9
-    - g++-4.9
+    - gcc-5
+    - g++-5
     - libgtest-dev
-script: export CC=gcc-4.9 CXX=g++-4.9; make -C ui/linux && make -C tests && cd tests && ./test_all
+script: export CC=gcc-5 CXX=g++-5; make -C ui/linux && make -C tests && cd tests && ./test_all
