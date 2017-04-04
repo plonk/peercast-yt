@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <vector>
+#include <stdexcept> // runtime_error
 
 #include "cgi.h"
 #include "sys.h" // WLock

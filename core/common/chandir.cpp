@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <sstream>
 #include <memory> // unique_ptr
+#include <stdexcept> // runtime_error
 
 #include "http.h"
 #include "version2.h"
