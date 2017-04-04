@@ -1,5 +1,7 @@
 # PeerCast YT
 
+[![Build Status](https://travis-ci.org/plonk/peercast-yt.svg?branch=master)](https://travis-ci.org/plonk/peercast-yt)
+
 以下の機能を追加した PeerCast v0.1218。VP の機能も一部取り込んでいます。
 
 * PeerCastStation 互換の JSON RPC インターフェイス。
