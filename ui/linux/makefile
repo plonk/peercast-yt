@@ -3,7 +3,6 @@ LDFLAGS = -pthread
 LIBS = 
 
 TAR = peercast-linux.tar
-CC = gcc
 AR = ar
 
 INCLUDES = -I../../core -I../../core/common
