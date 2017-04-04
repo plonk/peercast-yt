@@ -6,7 +6,7 @@ public:
     MemoryStreamFixture()
         : one_byte_mm(1),
           data("hoge"),
-          hoge_mm((char*) data, 4)
+          hoge_mm(data, 4)
     {
     }
 
