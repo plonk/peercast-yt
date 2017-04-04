@@ -188,7 +188,8 @@ TEST_F(ChanHitFixture, writeVariable)
     TEST_VARIABLE("uptime", "-");
     TEST_VARIABLE("update", "-");
     TEST_VARIABLE("isFirewalled", "0");
-    TEST_VARIABLE("version", "0");
+    //TEST_VARIABLE("version", "0"); // original
+    TEST_VARIABLE("version", "0 (VP0 compatible;   0)"); // original
     // TEST_VARIABLE("agent", "0");
     // TEST_VARIABLE("check", "<a href=\"#\" onclick=\"checkip('0.0.0.0')\">_</a>");
     // TEST_VARIABLE("uphost", "0.0.0.0:0");
@@ -204,7 +205,8 @@ TEST_F(ChanHitFixture, writeAtom)
     chid.clear();
 
     hit->writeAtoms(writer, chid);
-    ASSERT_EQ(157, mem.pos);
+    // ASSERT_EQ(157, mem.pos); // original
+    ASSERT_EQ(225, mem.pos);
 }
 
 TEST_F(ChanHitFixture, initLocal)
