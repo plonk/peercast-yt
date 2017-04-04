@@ -2,4 +2,9 @@ dist: trusty
 sudo: false
 language: cpp
 compiler: gcc
+addons:
+  apt:
+    packages:
+    - gcc-4.9
+    - g++-4.9
 script: make -C ui/linux && make -C tests && cd tests && ./test_all
