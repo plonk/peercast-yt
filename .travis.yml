@@ -9,4 +9,5 @@ addons:
     packages:
     - gcc-4.9
     - g++-4.9
+    - libgtest-dev
 script: export CC=gcc-4.9 CXX=g++-4.9; make -C ui/linux && make -C tests && cd tests && ./test_all
