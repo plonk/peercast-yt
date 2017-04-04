@@ -1,5 +1,5 @@
 dist: trusty
 sudo: false
 language: cpp
-compiler: clang
+compiler: gcc
 script: make -C ui/linux && make -C tests && cd tests && ./test_all
