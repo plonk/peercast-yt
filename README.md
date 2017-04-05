@@ -2,12 +2,14 @@
 
 [![Build Status](https://travis-ci.org/plonk/peercast-yt.svg?branch=master)](https://travis-ci.org/plonk/peercast-yt)
 
-以下の機能を追加した PeerCast v0.1218。VP の機能も一部取り込んでいます。
+VPS等の Linux で動かすのに向いている PeerCast です。PeerCast Gateway
+の縁の下で動いています。
 
-* PeerCastStation 互換の JSON RPC インターフェイス。
+* PeerCastStation と部分的に互換の JSON RPC インターフェイス。
 * FLV配信 (HTTPソースのプル)
-* HTML UI をメッセージカタログ化。各国語版で機能に違いがないようにした。
+* HTML UI をメッセージカタログ化。各国語版で機能に違いがないようにしました。
 * YPブラウザ。YP4G の index.txt を取得してチャンネルリストを表示します。
+* ネットワーク出力をバッファリングしているので、多少 IO 負荷が軽くなっているはずです。
 
 # 使用ライブラリ
 
@@ -15,16 +17,21 @@
 
 # Linuxでのビルド
 
-## 通常の C++ 開発環境の他に必要なもの
+## コンパイラ
+
+JSON ライブラリが新しめのコンパイラを必要とします。GCC 4.9 以降あるい
+は Clang 3.4 以降あたり。
+
+## その他
 
 HTML の生成に ruby を使っているので、ruby が必要です。
 
 ## 手順
 
-`ui/linux` ディレクトリで make して、成功すると `peercast-linux.tar`
-ができます。適当なディレクトリに展開して、そのディレクトリで
-`./peercast` を実行してください。設定ファイル `peercast.ini` はカレン
-トディレクトリに作られます。
+`make -C ui/linux` とすると `ui/linux/peercast-linux.tar` ができます。
+適当なディレクトリに展開して、ディレクトリ内の `peercast` を実行してく
+ださい。設定ファイル `peercast.ini` は `peercast` と同じディレクトリに
+作られます。
 
-make した後、`ui/linux` ディレクトリで `./peercast` を実行することもで
-きます。
+make した後、`ui/linux` ディレクトリの `peercast` を実行することもでき
+ます。
