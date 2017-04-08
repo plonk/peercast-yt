@@ -24,6 +24,23 @@
 #include <stdarg.h>
 
 // ----------------------------------
+static inline bool isWhiteSpace(char c)
+{
+    return (c == ' ') || (c == '\r') || (c == '\n') || (c == '\t');
+}
+
+// ----------------------------------
+static inline int strToID(char *str)
+{
+    union {
+        int i;
+        char s[8];
+    };
+    strncpy(s, str, 4);
+    return i;
+}
+
+// ----------------------------------
 void XML::Node::add(Node *n)
 {
     if (!n)
