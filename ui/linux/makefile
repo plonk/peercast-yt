@@ -14,41 +14,9 @@ HTML = html
 
 LIBOBJSTATIC = libpeercast.a
 
-SYSSOURCE = \
-	$(CORE)/unix/usys.cpp \
-	$(CORE)/unix/usocket.cpp
+SYSSOURCE = $(wildcard $(CORE)/unix/*.cpp)
 
-CORESOURCE = \
-	$(CORE)/common/socket.cpp \
-	$(CORE)/common/servent.cpp \
-	$(CORE)/common/servhs.cpp \
-	$(CORE)/common/servmgr.cpp \
-	$(CORE)/common/xml.cpp \
-	$(CORE)/common/stream.cpp \
-	$(CORE)/common/sys.cpp \
-	$(CORE)/common/gnutella.cpp \
-	$(CORE)/common/html.cpp \
-	$(CORE)/common/channel.cpp \
-	$(CORE)/common/http.cpp \
-	$(CORE)/common/inifile.cpp \
-	$(CORE)/common/peercast.cpp \
-	$(CORE)/common/stats.cpp \
-	$(CORE)/common/mms.cpp \
-	$(CORE)/common/mp3.cpp \
-	$(CORE)/common/nsv.cpp \
-	$(CORE)/common/ogg.cpp \
-	$(CORE)/common/url.cpp \
-	$(CORE)/common/icy.cpp \
-	$(CORE)/common/pcp.cpp \
-	$(CORE)/common/jis.cpp \
-	$(CORE)/common/flv.cpp \
-	$(CORE)/common/jrpc.cpp \
-	$(CORE)/common/chandir.cpp \
-	$(CORE)/common/uri.cpp \
-	$(CORE)/common/LUrlParser.cpp \
-	$(CORE)/common/cgi.cpp \
-	$(CORE)/common/dmstream.cpp
-
+CORESOURCE = $(wildcard $(CORE)/common/*.cpp) 
 
 COREOBJ = $(notdir $(CORESOURCE:.cpp=.o))
 SYSOBJ = $(notdir $(SYSSOURCE:.cpp=.o))
