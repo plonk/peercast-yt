@@ -499,8 +499,11 @@ void PCPStream::readChanAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 
         }else
         {
-            LOG_DEBUG("PCP skip: %s, %d, %d", id.getString().str(), c, d);
-            atom.skip(c, d);
+            LOG_ERROR("PCP unknown or misplaced atom: %s, %d, %d", id.getString().str(), c, d);
+            throw StreamException("Protocol error");
+
+            //LOG_DEBUG("PCP skip: %s, %d, %d", id.getString().str(), c, d);
+            //atom.skip(c, d);
         }
     }
 
@@ -726,8 +729,10 @@ int PCPStream::procAtom(AtomStream &atom, ID4 id, int numc, int dlen, BroadcastS
         }
     }else
     {
-        LOG_CHANNEL("PCP skip: %s", id.getString().str());
-        atom.skip(numc, dlen);
+        LOG_ERROR("PCP unknown or misplaced atom: %s", id.getString().str());
+        throw StreamException("Protocol error");
+        //LOG_CHANNEL("PCP skip: %s", id.getString().str());
+        //atom.skip(numc, dlen);
     }
 
     return r;
