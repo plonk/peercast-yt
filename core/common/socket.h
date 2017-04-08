@@ -58,7 +58,7 @@ public:
     virtual void    setBlocking(bool) = 0;
 
 
-    static unsigned int getIP(char *);
+    static unsigned int getIP(const char *);
     static bool         getHostname(char *, unsigned int);
 
     bool eof() override

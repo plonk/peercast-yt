@@ -68,7 +68,7 @@ bool ClientSocket::getHostname(char *str, unsigned int ip)
         return false;
 }
 // --------------------------------------------------
-unsigned int ClientSocket::getIP(char *name)
+unsigned int ClientSocket::getIP(const char *name)
 {
 
     char szHostName[256];
@@ -138,7 +138,7 @@ void UClientSocket::setReuse(bool yes)
 }
 
 // --------------------------------------------------
-hostent *UClientSocket::resolveHost(char *hostName)
+hostent *UClientSocket::resolveHost(const char *hostName)
 {
     hostent *he;
 

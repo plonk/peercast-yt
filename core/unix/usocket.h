@@ -68,7 +68,7 @@ public:
     void    setNagle(bool);
     void    setLinger(int);
 
-    static hostent  *resolveHost(char *);
+    static hostent  *resolveHost(const char *);
 
     void    checkTimeout(bool, bool);
     void    checkTimeout2(bool, bool);
