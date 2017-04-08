@@ -2601,18 +2601,22 @@ void ChanHit::initLocal(int numl, int numr, int, int uptm, bool connected, unsig
 }
 
 // -----------------------------------
+static int flags1(ChanHit* hit)
+{
+    int fl1 = 0;
+    if (hit->recv)       fl1 |= PCP_HOST_FLAGS1_RECV;
+    if (hit->relay)      fl1 |= PCP_HOST_FLAGS1_RELAY;
+    if (hit->direct)     fl1 |= PCP_HOST_FLAGS1_DIRECT;
+    if (hit->cin)        fl1 |= PCP_HOST_FLAGS1_CIN;
+    if (hit->tracker)    fl1 |= PCP_HOST_FLAGS1_TRACKER;
+    if (hit->firewalled) fl1 |= PCP_HOST_FLAGS1_PUSH;
+    return fl1;
+}
+
+// -----------------------------------
 void ChanHit::writeAtoms(AtomStream &atom, GnuID &chanID)
 {
-    bool addChan=chanID.isSet();
-
-    int fl1 = 0;
-    if (recv) fl1 |= PCP_HOST_FLAGS1_RECV;
-    if (relay) fl1 |= PCP_HOST_FLAGS1_RELAY;
-    if (direct) fl1 |= PCP_HOST_FLAGS1_DIRECT;
-    if (cin) fl1 |= PCP_HOST_FLAGS1_CIN;
-    if (tracker) fl1 |= PCP_HOST_FLAGS1_TRACKER;
-    if (firewalled) fl1 |= PCP_HOST_FLAGS1_PUSH;
-
+    bool addChan = chanID.isSet();
 
     atom.writeParent(PCP_HOST,
                      13  +
@@ -2633,7 +2637,7 @@ void ChanHit::writeAtoms(AtomStream &atom, GnuID &chanID)
         atom.writeInt(PCP_HOST_VERSION_VP, versionVP);
         atom.writeBytes(PCP_HOST_VERSION_EX_PREFIX, versionExPrefix, 2);
         atom.writeShort(PCP_HOST_VERSION_EX_NUMBER, versionExNumber);
-        atom.writeChar(PCP_HOST_FLAGS1, fl1);
+        atom.writeChar(PCP_HOST_FLAGS1, flags1(this));
         atom.writeInt(PCP_HOST_OLDPOS, oldestPos);
         atom.writeInt(PCP_HOST_NEWPOS, newestPos);
         if (uphost.ip != 0)
@@ -2642,7 +2646,6 @@ void ChanHit::writeAtoms(AtomStream &atom, GnuID &chanID)
             atom.writeInt(PCP_HOST_UPHOST_PORT, uphost.port);
             atom.writeInt(PCP_HOST_UPHOST_HOPS, uphostHops);
         }
-
 }
 // -----------------------------------
 bool    ChanHit::writeVariable(Stream &out, const String &var)
