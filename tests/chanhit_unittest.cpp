@@ -48,7 +48,7 @@ TEST_F(ChanHitFixture, initialState)
     ASSERT_FALSE(hit->chanID.isSet());
 
     ASSERT_EQ(0, hit->version);
-    // ASSERT_EQ(0, hit->version_vp);
+    ASSERT_EQ(0, hit->versionVP);
 
     ASSERT_EQ(false, hit->firewalled);
     ASSERT_EQ(false, hit->stable);
@@ -70,15 +70,15 @@ TEST_F(ChanHitFixture, initialState)
     ASSERT_EQ(0, hit->oldestPos);
     ASSERT_EQ(0, hit->newestPos);
 
-    // ASSERT_EQ(0, hit->uphost.ip);
-    // ASSERT_EQ(0, hit->uphost.port);
+    ASSERT_EQ(0, hit->uphost.ip);
+    ASSERT_EQ(0, hit->uphost.port);
 
-    // ASSERT_EQ(0, hit->uphostHops);
+    ASSERT_EQ(0, hit->uphostHops);
 
-    // ASSERT_EQ(' ', hit->version_ex_prefix[0]);
-    // ASSERT_EQ(' ', hit->version_ex_prefix[1]);
+    ASSERT_EQ(' ', hit->versionExPrefix[0]);
+    ASSERT_EQ(' ', hit->versionExPrefix[1]);
 
-    // ASSERT_EQ(0, hit->version_ex_number);
+    ASSERT_EQ(0, hit->versionExNumber);
     // ASSERT_EQ(0, hit->lastSendSeq);
 }
 
@@ -111,7 +111,7 @@ TEST_F(ChanHitFixture, pickNearestIP)
         hit->host.toStr(ip);
 
         ASSERT_STREQ("210.210.210.210:8145", ip);
-    }    
+    }
 }
 
 // TEST_F(ChanHitFixture, initLocal_pp_Stealth)
@@ -197,16 +197,61 @@ TEST_F(ChanHitFixture, writeVariable)
     // TEST_VARIABLE("canRelay", "1");
 }
 
-TEST_F(ChanHitFixture, writeAtom)
+// 条件変数: chanID.isSet()     +0 +24
+//           versionExNumber==0 +0 +20
+//           uphost.ip==0       +0 +36
+// 2^3 = 8 通りのパスがある。
+// 常に送信されるサイズは 8 + 24 + 12+10 + 12+10 + 12*5 + 9 + 12*2 = 169 バイト
+TEST_F(ChanHitFixture, writeAtom000)
+{
+    MemoryStream mem(1024);
+    AtomStream writer(mem);
+
+    GnuID chid;
+    chid.clear();
+    hit->versionExNumber = 0;
+    hit->uphost.ip = 0;
+    ASSERT_FALSE(chid.isSet());
+    hit->writeAtoms(writer, chid);
+    ASSERT_EQ(169, mem.pos);
+    // ASSERT_EQ(157, mem.pos); // オリジナルの0.1218では157バイトになる。
+}
+
+TEST_F(ChanHitFixture, writeAtom001)
 {
     MemoryStream mem(1024);
     AtomStream writer(mem);
     GnuID chid;
     chid.clear();
-
+    hit->versionExNumber = 0;
+    hit->uphost.ip = 1;
     hit->writeAtoms(writer, chid);
-    // ASSERT_EQ(157, mem.pos); // original
-    ASSERT_EQ(225, mem.pos);
+    ASSERT_EQ(169 + 36, mem.pos);
+}
+
+TEST_F(ChanHitFixture, writeAtom010)
+{
+    MemoryStream mem(1024);
+    AtomStream writer(mem);
+    GnuID chid;
+    chid.clear();
+    hit->versionExNumber = 1;
+    hit->uphost.ip = 0;
+    hit->writeAtoms(writer, chid);
+    ASSERT_EQ(169 + 20, mem.pos);
+}
+
+TEST_F(ChanHitFixture, writeAtom100)
+{
+    MemoryStream mem(1024);
+    AtomStream writer(mem);
+    GnuID chid;
+    chid.fromStr("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+
+    hit->versionExNumber = 0;
+    hit->uphost.ip = 0;
+    hit->writeAtoms(writer, chid);
+    ASSERT_EQ(169 + 24, mem.pos);
 }
 
 TEST_F(ChanHitFixture, initLocal)
@@ -227,7 +272,7 @@ TEST_F(ChanHitFixture, initLocal)
     hit->initLocal(numl, numr, nums, uptm, connected,
                    /* isFull, bitrate, ch, */
                    oldp, newp);
-    
+
     ASSERT_EQ(1, hit->numListeners);
     ASSERT_EQ(2, hit->numRelays);
 

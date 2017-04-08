@@ -2635,8 +2635,11 @@ void ChanHit::writeAtoms(AtomStream &atom, GnuID &chanID)
         atom.writeInt(PCP_HOST_UPTIME, upTime);
         atom.writeInt(PCP_HOST_VERSION, version);
         atom.writeInt(PCP_HOST_VERSION_VP, versionVP);
-        atom.writeBytes(PCP_HOST_VERSION_EX_PREFIX, versionExPrefix, 2);
-        atom.writeShort(PCP_HOST_VERSION_EX_NUMBER, versionExNumber);
+        if (versionExNumber)
+        {
+            atom.writeBytes(PCP_HOST_VERSION_EX_PREFIX, versionExPrefix, 2);
+            atom.writeShort(PCP_HOST_VERSION_EX_NUMBER, versionExNumber);
+        }
         atom.writeChar(PCP_HOST_FLAGS1, flags1(this));
         atom.writeInt(PCP_HOST_OLDPOS, oldestPos);
         atom.writeInt(PCP_HOST_NEWPOS, newestPos);
