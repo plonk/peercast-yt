@@ -152,10 +152,8 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
             if (!isAllowed(ALLOW_HTML))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-
             LOG_DEBUG("Admin client");
             handshakeCMD(fn+7);
-
         }else if (strncmp(fn, "/http/", 6) == 0)
         {
             String dirName = fn+6;
@@ -166,10 +164,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
             if (!handshakeAuth(http, fn, false))
                 throw HTTPException(HTTP_SC_UNAUTHORIZED, 401);
 
-
             handshakeRemoteFile(dirName);
-
-
         }else if (strncmp(fn, "/html/", 6) == 0)
         {
             String dirName = fn+1;
@@ -179,8 +174,6 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 
             if (handshakeAuth(http, fn, true))
                 handshakeLocalFile(dirName);
-
-
         }else if (strncmp(fn, "/admin/?", 8) == 0)
         {
             if (!isAllowed(ALLOW_HTML))
@@ -188,7 +181,6 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 
             LOG_DEBUG("Admin client");
             handshakeCMD(fn+8);
-
         }else if (strncmp(fn, "/admin.cgi", 10) == 0)
         {
             if (!isAllowed(ALLOW_BROADCAST))
@@ -234,21 +226,17 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
                     c=c->next;
                 }
             }
-
         }else if (strncmp(fn, "/pls/", 5) == 0)
         {
-
             if (!sock->host.isLocalhost())
                 if (!isAllowed(ALLOW_DIRECT) || !isFiltered(ServFilter::F_DIRECT))
                     throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
-
 
             ChanInfo info;
             if (servMgr->getChannel(fn+5, info, isPrivate()))
                 handshakePLS(info, false);
             else
                 throw HTTPException(HTTP_SC_NOTFOUND, 404);
-
         }else if (strncmp(fn, "/stream/", 8) == 0)
         {
 
@@ -257,8 +245,6 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
                     throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
             triggerChannel(fn+8, ChanInfo::SP_HTTP, isPrivate());
-
-
         }else if (strncmp(fn, "/channel/", 9) == 0)
         {
 
@@ -267,7 +253,6 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
                     throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
             triggerChannel(fn+9, ChanInfo::SP_PCP, false);
-
         }else if (strcmp(fn, "/api/1") == 0)
         {
             if (!isAllowed(ALLOW_HTML))
@@ -338,28 +323,22 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
             if (!ch->acceptGIV(sock))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-
             LOG_DEBUG("Accepted GIV channel %s from: %s", idstr, ipstr);
-
             sock=NULL;                  // release this servent but dont close socket.
         }else
         {
-
             if (!servMgr->acceptGIV(sock))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
             LOG_DEBUG("Accepted GIV PCP from: %s", ipstr);
             sock=NULL;                  // release this servent but dont close socket.
         }
-
     }else if (http.isRequest(PCX_PCP_CONNECT))
     {
-
         if (!isAllowed(ALLOW_NETWORK) || !isFiltered(ServFilter::F_NETWORK))
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
         processIncomingPCP(true);
-
     }else if (http.isRequest("PEERCAST CONNECT"))
     {
         if (!isAllowed(ALLOW_NETWORK) || !isFiltered(ServFilter::F_NETWORK))
@@ -367,7 +346,6 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 
         LOG_DEBUG("PEERCAST client");
         processServent();
-
     }else if (http.isRequest("SOURCE"))
     {
         if (!isAllowed(ALLOW_BROADCAST))
@@ -399,7 +377,6 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 
         handshakeICY(Channel::SRC_ICECAST, isHTTP);
         sock = NULL;    // socket is taken over by channel, so don`t close it
-
     }else if (http.isRequest(servMgr->password))
     {
         if (!isAllowed(ALLOW_BROADCAST))
@@ -414,12 +391,10 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 
         handshakeICY(Channel::SRC_SHOUTCAST, isHTTP);
         sock = NULL;    // socket is taken over by channel, so don`t close it
-
     }else
     {
         throw HTTPException(HTTP_SC_BADREQUEST, 400);
     }
-
 }
 // -----------------------------------
 bool Servent::canStream(Channel *ch)
@@ -447,7 +422,6 @@ bool Servent::canStream(Channel *ch)
 // -----------------------------------
 void Servent::handshakeIncoming()
 {
-
     setStatus(S_HANDSHAKE);
 
     char buf[1024];
@@ -455,7 +429,6 @@ void Servent::handshakeIncoming()
 
     char sb[64];
     sock->host.toStr(sb);
-
 
     if (stristr(buf, RTSP_PROTO1))
     {
@@ -476,12 +449,10 @@ void Servent::handshakeIncoming()
         http.initRequest(buf);
         handshakeHTTP(http, false);
     }
-
 }
 // -----------------------------------
 void Servent::triggerChannel(char *str, ChanInfo::PROTOCOL proto, bool relay)
 {
-
     ChanInfo info;
 
     servMgr->getChannel(str, info, relay);
@@ -494,7 +465,6 @@ void Servent::triggerChannel(char *str, ChanInfo::PROTOCOL proto, bool relay)
     outputProtocol = proto;
 
     processStream(false, info);
-
 }
 // -----------------------------------
 void writePLSHeader(Stream &s, PlayList::TYPE type)
@@ -530,12 +500,10 @@ void writePLSHeader(Stream &s, PlayList::TYPE type)
 void Servent::handshakePLS(ChanInfo &info, bool doneHandshake)
 {
     char url[256];
-
     char in[128];
 
     if (!doneHandshake)
         while (sock->readLine(in, 128));
-
 
     if (getLocalURL(url))
     {
@@ -552,11 +520,8 @@ void Servent::handshakePLS(ChanInfo &info, bool doneHandshake)
         writePLSHeader(*sock, type);
 
         PlayList *pls;
-
         pls = new PlayList(type, 1);
-
         pls->addChannel(url, info);
-
         pls->write(*sock);
 
         delete pls;
@@ -623,7 +588,6 @@ void Servent::handshakePOST()
 
     throw HTTPException(HTTP_SC_BADREQUEST, 400);
 }
-
 
 // -----------------------------------
 void Servent::handshakeRTSP(RTSP &rtsp)
@@ -716,7 +680,6 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
     if (sock->host.isLocalhost())
         return true;
 
-
     switch (servMgr->authType)
     {
         case ServMgr::AUTH_HTTPBASIC:
@@ -729,8 +692,6 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
                 return true;
             break;
     }
-
-
 
     if (servMgr->authType == ServMgr::AUTH_HTTPBASIC)
     {
@@ -746,7 +707,6 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
         else
             handshakeRemoteFile(file);
     }
-
 
     return false;
 }
@@ -838,20 +798,20 @@ void Servent::CMD_add_bcid(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     char *cp = cmd;
     bool result=false;
     while (cp=nextCGIarg(cp, curr, arg))
-        {
-            if (strcmp(curr, "id") == 0)
-                bcid->id.fromStr(arg);
-            else if (strcmp(curr, "name") == 0)
-                bcid->name.set(arg);
-            else if (strcmp(curr, "email") == 0)
-                bcid->email.set(arg);
-            else if (strcmp(curr, "url") == 0)
-                bcid->url.set(arg);
-            else if (strcmp(curr, "valid") == 0)
-                bcid->valid = getCGIargBOOL(arg);
-            else if (strcmp(curr, "result") == 0)
-                result = true;
-        }
+    {
+        if (strcmp(curr, "id") == 0)
+            bcid->id.fromStr(arg);
+        else if (strcmp(curr, "name") == 0)
+            bcid->name.set(arg);
+        else if (strcmp(curr, "email") == 0)
+            bcid->email.set(arg);
+        else if (strcmp(curr, "url") == 0)
+            bcid->url.set(arg);
+        else if (strcmp(curr, "valid") == 0)
+            bcid->valid = getCGIargBOOL(arg);
+        else if (strcmp(curr, "result") == 0)
+            result = true;
+    }
 
     LOG_DEBUG("Adding BCID : %s", bcid->name.cstr());
     servMgr->addValidBCID(bcid);
@@ -1477,7 +1437,6 @@ void Servent::handshakeXML()
     XML::Node *rn = new XML::Node("peercast");
     xml.setRoot(rn);
 
-
     rn->add(new XML::Node("servent uptime=\"%d\"", servMgr->getUptime()));
 
     rn->add(new XML::Node("bandwidth out=\"%d\" in=\"%d\"",
@@ -1497,7 +1456,6 @@ void Servent::handshakeXML()
             an->add(createChannelXML(c));
         c=c->next;
     }
-
 
     // add public channels
     {
@@ -1548,7 +1506,6 @@ void Servent::handshakeXML()
     }
     rn->add(hc);
 
-
     sock->writeLine(HTTP_SC_OK);
     sock->writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
     sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XML);
@@ -1557,7 +1514,6 @@ void Servent::handshakeXML()
     sock->writeLine("");
 
     xml.write(*sock);
-
 }
 // -----------------------------------
 void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd, size_t plen)
@@ -1638,10 +1594,7 @@ void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd, size_t plen)
             info.contentType = ChanInfo::T_PLS;
         else if (stristr(arg, MIME_TEXT))
             info.contentType = ChanInfo::T_PLS;
-
-
     }
-
 }
 
 // -----------------------------------
@@ -1661,8 +1614,6 @@ void Servent::handshakeICY(Channel::SRC_TYPE type, bool isHTTP)
         readICYHeader(http, info, loginPassword.cstr(), String::MAX_LEN);
     }
 
-
-
     // check password before anything else, if needed
     if (loginPassword != servMgr->password)
     {
@@ -1670,21 +1621,16 @@ void Servent::handshakeICY(Channel::SRC_TYPE type, bool isHTTP)
             throw HTTPException(HTTP_SC_UNAUTHORIZED, 401);
     }
 
-
     // we need a valid IP address before we start
     servMgr->checkFirewall();
 
-
     // attach channel ID to name, channel ID is also encoded with IP address
     // to help prevent channel hijacking.
-
 
     info.id = chanMgr->broadcastID;
     info.id.encode(NULL, info.name.cstr(), loginMount.cstr(), info.bitrate);
 
     LOG_DEBUG("Incoming source: %s : %s", info.name.cstr(), info.getTypeStr());
-
-
     if (isHTTP)
         sock->writeStringF("%s\n\n", HTTP_SC_OK);
     else
@@ -1697,7 +1643,6 @@ void Servent::handshakeICY(Channel::SRC_TYPE type, bool isHTTP)
         c->thread.shutdown();
     }
 
-
     info.comment = chanMgr->broadcastMsg;
     info.bcID = chanMgr->broadcastID;
 
@@ -1708,7 +1653,6 @@ void Servent::handshakeICY(Channel::SRC_TYPE type, bool isHTTP)
     c->startICY(sock, type);
 }
 
-
 // -----------------------------------
 void Servent::handshakeLocalFile(const char *fn)
 {
@@ -1716,7 +1660,6 @@ void Servent::handshakeLocalFile(const char *fn)
     String fileName;
 
     fileName = peercastApp->getPath();
-
     fileName.append(fn);
 
     LOG_DEBUG("Writing HTML file: %s", fileName.cstr());
