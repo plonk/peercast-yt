@@ -13,7 +13,7 @@
     <div align="center">
       <table width="100%" height="100%" border="1" align="center" cellpadding="5" cellspacing="0" bordercolor="#999999" bgcolor="#FFFFFF">
         <tr>
-          <td align="center" valign="top">
+          <td class="container" align="center" valign="top">
             <div align="center">
               <div align="center">
                 <table width="100%" border="0">
@@ -25,16 +25,21 @@
                             <table border="0" align="center" cellpadding="1" cellspacing="0">
                               <tr>
                                 <td rowspan="2" valign="middle"><img src="images/small-logo.png" alt="www.peercast.org" border="0"></td>
-                                <td valign="bottom"><div align="left"><span class="titlelinksBig">peercast</span></div></td>
+                                <td valign="bottom" style="padding: 0; padding-left: 2px">
+                                  <span class="titlelinksBig">Peercast</span>
+                                </td>
                               </tr>
                               <tr>
-                                <td valign="top"><div align="center"><a href="https://github.com/plonk/peercast-yt"><span class="normal-small">{$servMgr.version}</span></a>
-                                </div></td>
+                                <td valign="top" style="line-height: 0.8em; padding: 0; text-align: center">
+                                    <a href="https://github.com/plonk/peercast-yt">
+                                      <span class="normal-small" style="font-size: 11px">{$servMgr.version}</span>
+                                    </a>
+                                </td>
                               </tr>
                             </table>
                             <div align="center"><span class="titlelinksBig"> </span>
                           </div></td>
-                          <td>
+                          <td style="padding: 0">
                             {@if servMgr.upgradeURL}
                             <div align="center" class="normal">
                               <a href="{$servMgr.upgradeURL}" target="_blank">
@@ -46,9 +51,9 @@
                               </a>
                             </div>
                             {@else}
-                            <div align="center" class="normal-small">
-                              {$servMgr.rootMsg}
-                            </div>
+                              <div align="center" class="normal-small">
+                                {$servMgr.rootMsg}
+                              </div>
                             {@end}
                           </td>
                         </tr>
