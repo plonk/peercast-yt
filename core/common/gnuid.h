@@ -57,6 +57,11 @@ public:
 
     operator std::string ()
     {
+        return this->str();
+    }
+
+    std::string str()
+    {
         char buf[33];
         toStr(buf);
         return buf;
