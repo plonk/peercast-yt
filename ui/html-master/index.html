@@ -109,11 +109,6 @@
                             <TD bgcolor="#eeeeee"><A href="/admin?cmd=viewxml">{#View}</A></TD>
                           </TR>
                           <TR align=left bgColor=#dddddd class="normal">
-                            <TD>{#GNet Host cache}</TD>
-                            <TD>{$servMgr.numServHosts} - <A
-                              href="/admin?cmd=clear&amp;hostcache=1">{#Clear}</A></TD>
-                          </TR>
-                          <TR align=left bgColor=#eeeeee class="normal">
                             <TD>{#Host options}</TD>
                             <TD>{@if servMgr.isRoot}{#Root}{@end} {@if servMgr.isPrivate}{#Licensed}{@end} {@if servMgr.forceYP}{#ForceYP}{@end}</TD>
                           </TR>
@@ -139,33 +134,18 @@
                           </TR>
                           <TR align=left class="normal">
                             <TD bgcolor="#eeeeee"></TD>
-                            <TD bgcolor="#eeeeee"><B>{#In}</B></TD>
-                            <TD bgcolor="#eeeeee"><B>{#Out}</B></TD>
-                            <TD bgcolor="#eeeeee"><B>{#Total}</B></TD>
-                          </TR>
-                          <TR align=left class="normal">
-                            <TD bgcolor="#dddddd">{#Total (Kbit/s)}</TD>
-                            <TD bgcolor="#dddddd">{$stats.totalInPerSec}</TD>
-                            <TD bgcolor="#dddddd">{$stats.totalOutPerSec}</TD>
-                            <TD bgcolor="#dddddd">{$stats.totalPerSec}</TD>
+                            <TH bgcolor="#eeeeee" style="text-align: center; width: 2.5em">{#In}</TH>
+                            <TH bgcolor="#eeeeee" style="text-align: center; width: 2.5em">{#Out}</TH>
                           </TR>
                           <TR align=left class="normal">
                             <TD bgcolor="#eeeeee">{#Internet (Kbit/s)}</TD>
-                            <TD bgcolor="#eeeeee">{$stats.wanInPerSec}</TD>
-                            <TD bgcolor="#eeeeee">{$stats.wanOutPerSec}</TD>
-                            <TD bgcolor="#eeeeee">{$stats.wanTotalPerSec}</TD>
+                            <TD bgcolor="#eeeeee" class="numeric">{$stats.wanInPerSec}</TD>
+                            <TD bgcolor="#eeeeee" class="numeric">{$stats.wanOutPerSec}</TD>
                           </TR>
                           <TR align=left class="normal">
-                            <TD bgcolor="#dddddd">{#GNet (Kbit/s)}</TD>
-                            <TD bgcolor="#dddddd">{$stats.netInPerSec}</TD>
-                            <TD bgcolor="#dddddd">{$stats.netOutPerSec}</TD>
-                            <TD bgcolor="#dddddd">{$stats.netTotalPerSec}</TD>
-                          </TR>
-                          <TR align=left class="normal">
-                            <TD bgcolor="#eeeeee">{#GNet packets/sec}</TD>
-                            <TD bgcolor="#eeeeee">{$stats.packInPerSec}</TD>
-                            <TD bgcolor="#eeeeee">{$stats.packOutPerSec}</TD>
-                            <TD bgcolor="#eeeeee">{$stats.packTotalPerSec}</TD>
+                            <TD bgcolor="#dddddd">{#Total (Kbit/s)}</TD>
+                            <TD bgcolor="#dddddd" class="numeric">{$stats.totalInPerSec}</TD>
+                            <TD bgcolor="#dddddd" class="numeric">{$stats.totalOutPerSec}</TD>
                           </TR>
                         </TBODY>
                       </TABLE>
@@ -187,20 +167,15 @@
                           <td bgcolor="#dddddd" class="normal">{$servMgr.numCIN} / {$servMgr.numCOUT}</td>
                         </tr>
                         <tr bgcolor="#eeeeee">
-                          <td class="normal">{#PGNU}</td>
-                          <td class="normal">{$servMgr.numPGNU}</td>
-                        </tr>
-                        <tr bgcolor="#dddddd">
                           <td class="normal">{#Incoming}</td>
                           <td bgcolor="#dddddd" class="normal">{$servMgr.numIncoming}</td>
                         </tr>
-                        <tr bgcolor="#eeeeee">
+                        <tr bgcolor="#dddddd">
                           <td class="normal">{#Port} {$servMgr.serverPort1} / {$servMgr.serverPort2}</td>
                           <td class="normal">{$servMgr.numActive1} / {$servMgr.numActive2}</td>
                         </tr>
                       </table>
-                      <p>&nbsp; </p>
-                      <p>&nbsp; </p></TD>
+                      </TD>
                     </TR>
                   </TBODY>
                 </TABLE>
