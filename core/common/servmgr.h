@@ -45,7 +45,6 @@ public:
     BCID    *next;
 };
 
-
 // ----------------------------------
 class ServHost
 {
@@ -113,11 +112,7 @@ public:
 // ServMgr keeps track of Servents
 class ServMgr
 {
-
-
-
 public:
-
     enum NOTIFY_TYPE
     {
         NT_UPGRADE          = 0x0001,
@@ -132,6 +127,7 @@ public:
         FW_ON,
         FW_UNKNOWN
     };
+
     enum {
 
         MAX_HOSTCACHE = 100,        // max. amount of hosts in cache
@@ -150,7 +146,6 @@ public:
 
         MAX_PREVIEWTIME = 300,      // max. seconds preview per channel available (direct connections)
         MAX_PREVIEWWAIT = 300,      // max. seconds wait between previews
-
     };
 
     enum AUTH_TYPE
@@ -158,8 +153,6 @@ public:
         AUTH_COOKIE,
         AUTH_HTTPBASIC
     };
-
-
 
     ServMgr();
     ~ServMgr();
@@ -195,7 +188,6 @@ public:
     bool                isFiltered(int, Host &h);
     bool                addOutgoing(Host, GnuID &, bool);
     Servent             *findConnection(Servent::TYPE, GnuID &);
-
 
     static THREAD_PROC  serverProc(ThreadInfo *);
     static THREAD_PROC  clientProc(ThreadInfo *);
@@ -344,7 +336,6 @@ public:
 
     static ThreadInfo   serverThread, idleThread;
 
-
     Servent             *servents;
     WLock               lock;
 
@@ -397,7 +388,6 @@ public:
     ServFilter          filters[MAX_FILTERS];
     int                 numFilters;
 
-
     CookieList          cookieList;
     AUTH_TYPE           authType;
 
@@ -417,6 +407,5 @@ private:
 
 // ----------------------------------
 extern ServMgr *servMgr;
-
 
 #endif
