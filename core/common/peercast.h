@@ -1,7 +1,6 @@
 #ifndef _PEERCAST_H
 #define _PEERCAST_H
 
-
 //#define APICALL _stdcall
 #ifdef WIN32
 #define APICALL _cdecl
@@ -9,12 +8,10 @@
 #define APICALL
 #endif
 
-
 class ChanInfo;
 class Sys;
 
 #include "servmgr.h"
-
 
 // ------------------------------------------------------------
 // This is the interface from the application to the core.
