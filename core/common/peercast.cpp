@@ -241,11 +241,11 @@ void LOG_CHANNEL(const char *fmt, ...)
 
 namespace peercast {
 
-void notifyMessage(ServMgr::NOTIFY_TYPE type, const char *message)
+void notifyMessage(ServMgr::NOTIFY_TYPE type, const std::string& message)
 {
     Notification notif(sys->getTime(), type, message);
     g_notificationBuffer.addNotification(notif);
-    peercastApp->notifyMessage(type, message);
+    peercastApp->notifyMessage(type, message.c_str());
 }
 
 } // namespace peercast
