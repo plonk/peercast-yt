@@ -73,9 +73,9 @@ void NotificationBuffer::addNotification(const Notification& notif)
     CriticalSection cs(lock);
 
     while (notifications.size() >= MAX_NOTIFS)
-        notifications.pop_front();
+        notifications.pop_back();
 
-    notifications.push_back(Entry(notif, false));
+    notifications.push_front(Entry(notif, false));
 }
 
 bool NotificationBuffer::writeVariable(Stream& out, const String& varName)
