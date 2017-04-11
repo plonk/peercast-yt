@@ -70,6 +70,26 @@
     "Bump"                    : "バンプ",
     "Stop"                    : "停止",
 
+    // relayinfo.html
+    "Channel Information"     : "チャンネル情報",
+    "Desc."                   : "説明",
+    "Comment"                 : "コメント",
+    "Bitrate"                 : "ビットレート",
+    "Source"                  : "ソース",
+    "Position"                : "位置",
+    "Head"                    : "ヘッド",
+    "bytes"                   : "バイト",
+
+    "Current Track"           : "現在のトラック",
+    "Artist"                  : "アーティスト",
+    "Title"                   : "タイトル",
+    "Album"                   : "アルバム",
+
+    "Hops"                    : "ホップ数",
+    "Listeners"               : "リスナー数",
+    "Relays"                  : "リレー数",
+    "Update"                  : "更新",
+
     // broadcast.html
     "External Source"         : "外部ソース",
     "URL (Required)"          : "URL (必須)",
