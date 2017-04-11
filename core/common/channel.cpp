@@ -937,49 +937,53 @@ bool    Channel::sendPacketUp(ChanPacket &pack, GnuID &cid, GnuID &sid, GnuID &d
 // -----------------------------------
 void Channel::updateInfo(const ChanInfo &newInfo)
 {
-    if (info.update(newInfo))
+    String oldComment = info.comment;
+    if (!info.update(newInfo))
+        return;
+
+    if (!oldComment.isSame(info.comment))
+        peercast::notifyMessage(ServMgr::NT_PEERCAST, info.name.str() + "氏曰く: " + info.comment.str());
+
+    if (isBroadcasting())
     {
-        if (isBroadcasting())
+        unsigned int ctime = sys->getTime();
+        if ((ctime - lastMetaUpdate) > 30)
         {
-            unsigned int ctime = sys->getTime();
-            if ((ctime - lastMetaUpdate) > 30)
-            {
-                lastMetaUpdate = ctime;
+            lastMetaUpdate = ctime;
 
-                ChanPacket pack;
-                MemoryStream mem(pack.data, sizeof(pack));
-                AtomStream atom(mem);
+            ChanPacket pack;
+            MemoryStream mem(pack.data, sizeof(pack));
+            AtomStream atom(mem);
 
-                atom.writeParent(PCP_BCST, 10);
-                    atom.writeChar(PCP_BCST_HOPS, 0);
-                    atom.writeChar(PCP_BCST_TTL, 7);
-                    atom.writeChar(PCP_BCST_GROUP, PCP_BCST_GROUP_RELAYS);
-                    atom.writeBytes(PCP_BCST_FROM, servMgr->sessionID.id, 16);
-                    atom.writeInt(PCP_BCST_VERSION, PCP_CLIENT_VERSION);
-                    atom.writeInt(PCP_BCST_VERSION_VP, PCP_CLIENT_VERSION_VP);
-                    atom.writeBytes(PCP_BCST_VERSION_EX_PREFIX, PCP_CLIENT_VERSION_EX_PREFIX, 2);
-                    atom.writeShort(PCP_BCST_VERSION_EX_NUMBER, PCP_CLIENT_VERSION_EX_NUMBER);
-                    atom.writeBytes(PCP_BCST_CHANID, info.id.id, 16);
-                    atom.writeParent(PCP_CHAN, 3);
-                        atom.writeBytes(PCP_CHAN_ID, info.id.id, 16);
-                        info.writeInfoAtoms(atom);
-                        info.writeTrackAtoms(atom);
+            atom.writeParent(PCP_BCST, 10);
+                atom.writeChar(PCP_BCST_HOPS, 0);
+                atom.writeChar(PCP_BCST_TTL, 7);
+                atom.writeChar(PCP_BCST_GROUP, PCP_BCST_GROUP_RELAYS);
+                atom.writeBytes(PCP_BCST_FROM, servMgr->sessionID.id, 16);
+                atom.writeInt(PCP_BCST_VERSION, PCP_CLIENT_VERSION);
+                atom.writeInt(PCP_BCST_VERSION_VP, PCP_CLIENT_VERSION_VP);
+                atom.writeBytes(PCP_BCST_VERSION_EX_PREFIX, PCP_CLIENT_VERSION_EX_PREFIX, 2);
+                atom.writeShort(PCP_BCST_VERSION_EX_NUMBER, PCP_CLIENT_VERSION_EX_NUMBER);
+                atom.writeBytes(PCP_BCST_CHANID, info.id.id, 16);
+                atom.writeParent(PCP_CHAN, 3);
+                    atom.writeBytes(PCP_CHAN_ID, info.id.id, 16);
+                    info.writeInfoAtoms(atom);
+                    info.writeTrackAtoms(atom);
 
-                pack.len = mem.pos;
-                pack.type = ChanPacket::T_PCP;
-                GnuID noID;
-                servMgr->broadcastPacket(pack, info.id, servMgr->sessionID, noID, Servent::T_RELAY);
+            pack.len = mem.pos;
+            pack.type = ChanPacket::T_PCP;
+            GnuID noID;
+            servMgr->broadcastPacket(pack, info.id, servMgr->sessionID, noID, Servent::T_RELAY);
 
-                broadcastTrackerUpdate(noID);
-            }
+            broadcastTrackerUpdate(noID);
         }
-
-        ChanHitList *chl = chanMgr->findHitList(info);
-        if (chl)
-            chl->info = info;
-
-        peercastApp->channelUpdate(&info);
     }
+
+    ChanHitList *chl = chanMgr->findHitList(info);
+    if (chl)
+        chl->info = info;
+
+    peercastApp->channelUpdate(&info);
 }
 // -----------------------------------
 ChannelStream *Channel::createSource()
