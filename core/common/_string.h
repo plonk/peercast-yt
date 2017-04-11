@@ -19,6 +19,7 @@
 #ifndef __STRING_H
 #define __STRING_H
 
+#include <string>
 #include "sys.h"
 
 // ------------------------------------
@@ -196,6 +197,7 @@ public:
     void convertTo(TYPE t);
 
     char    *cstr() { return data; }
+    std::string str() const { return data; }
 
     static bool isWhitespace(char c) { return c==' ' || c=='\t'; }
 
