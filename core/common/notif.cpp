@@ -86,6 +86,10 @@ bool NotificationBuffer::writeVariable(Stream& out, const String& varName)
     } else if (varName == "numUnread") {
         out.writeString(std::to_string(numUnread()).c_str());
         return true;
+    } else if (varName == "markAsRead") {
+        markAsRead(sys->getTime());
+        out.writeString("marked all notifications as read");
+        return true;
     } else {
         return false;
     }

@@ -12,11 +12,15 @@
   <script>
     var notifications = [
     {@loop notificationBuffer.numNotifications}
-    { time: "{$loop.notification.time}",
-      type: "{$loop.notification.type}",
-      message: "{$loop.notification.message}" },
+      {@if !loop.notification.isRead}
+      { time: "{$loop.notification.time}",
+        type: "{$loop.notification.type}",
+        message: "{$loop.notification.message}" },
+      {@end}
     {@end}
     ];
+
+// {$notificationBuffer.markAsRead}
 
 function notifyMe() {
   if (!("Notification" in window)) {
