@@ -581,6 +581,7 @@ void PeercastSource::stream(Channel *ch)
         {
             numYPTries++;
             LOG_CHANNEL("Channel contacting YP, try %d", numYPTries);
+            peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルをYPに問い合わせています...");
         }else
         {
             LOG_CHANNEL("Channel found hit");
@@ -591,9 +592,8 @@ void PeercastSource::stream(Channel *ch)
         {
             bool isTrusted = ch->sourceHost.tracker | ch->sourceHost.yp;
 
-
-            //if (ch->sourceHost.tracker)
-            //  peercastApp->notifyMessage(ServMgr::NT_PEERCAST, "Contacting tracker, please wait...");
+            if (ch->sourceHost.tracker)
+                peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルをトラッカーに問い合わせています...");
 
             char ipstr[64];
             ch->sourceHost.host.toStr(ipstr);
@@ -634,6 +634,7 @@ void PeercastSource::stream(Channel *ch)
             {
                 ch->setStatus(Channel::S_ERROR);
                 LOG_ERROR("Channel to %s %s : %s", ipstr, type, e.msg);
+                // FIXME: トラッカーに切断されるとヒットリストから消えてしまう。
                 if (!ch->sourceHost.tracker || ((error != 503) && ch->sourceHost.tracker))
                     chanMgr->deadHit(ch->sourceHost);
             }
@@ -1161,12 +1162,14 @@ int Channel::readStream(Stream &in, ChannelStream *source)
             if (checkIdle())
             {
                 LOG_DEBUG("Channel idle");
+                peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルがアイドル状態になりました。");
                 break;
             }
 
             if (checkBump())
             {
                 LOG_DEBUG("Channel bumped");
+                peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルをバンプしました。");
                 error = -1;
                 break;
             }
@@ -1197,6 +1200,8 @@ int Channel::readStream(Stream &in, ChannelStream *source)
 
                     }else
                     {
+                        if (!isReceiving())
+                            peercast::notifyMessage(ServMgr::NT_PEERCAST, info.name.str() + "を受信中です。");
                         setStatus(Channel::S_RECEIVING);
                     }
                     source->updateStatus(this);
@@ -1760,7 +1765,7 @@ Channel *ChanMgr::findAndRelay(ChanInfo &info)
     char idStr[64];
     info.id.toStr(idStr);
     LOG_CHANNEL("Searching for: %s (%s)", idStr, info.name.cstr());
-    peercast::notifyMessage(ServMgr::NT_PEERCAST, "Finding channel...");
+    //peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルを検索中...");
 
     Channel *c = NULL;
 
@@ -1783,7 +1788,7 @@ Channel *ChanMgr::findAndRelay(ChanInfo &info)
 
         if (!c)
         {
-            peercast::notifyMessage(ServMgr::NT_PEERCAST, "Channel not found");
+            peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルは見付かりませんでした。");
             return NULL;
         }
 
@@ -2687,15 +2692,11 @@ bool    ChanHit::writeVariable(Stream &out, const String &var)
         sprintf(buf, "%d", firewalled?1:0);
     else if (var == "version")
     {
-        if (!version)
+        std::string ver = versionString();
+        if (ver.empty())
             sprintf(buf, "-");
-        else if (!versionVP)
-            sprintf(buf, "%d", version);
-        else if (!versionExNumber)
-            sprintf(buf, "%d VP%d", version, versionVP);
         else
-            sprintf(buf, "%d VP%d %c%c%d", version, versionVP,
-                    versionExPrefix[0], versionExPrefix[1], versionExNumber);
+            sprintf(buf, "%s", ver.c_str());
     }
     else
         return false;

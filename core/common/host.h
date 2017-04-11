@@ -121,11 +121,19 @@ public:
         sprintf(str, "%d.%d.%d.%d:%d", (ip>>24)&0xff, (ip>>16)&0xff, (ip>>8)&0xff, (ip)&0xff, port);
     }
 
+    std::string str(bool withPort = true)
+    {
+        char buf[22];
+        if (withPort)
+            toStr(buf);
+        else
+            IPtoStr(buf);
+        return buf;
+    }
+
     operator std::string ()
     {
-        char buf[32];
-        toStr(buf);
-        return buf;
+        return str();
     }
 
     bool operator < (const Host& other) const
