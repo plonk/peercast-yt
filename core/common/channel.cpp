@@ -44,6 +44,8 @@
 #include "icy.h"
 #include "url.h"
 
+#include "str.h"
+
 #include "version2.h"
 
 // -----------------------------------
@@ -1961,7 +1963,7 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
     }else if (var == "contactURL")
         sprintf(buf, "%s", info.url.cstr());
     else if (var == "streamPos")
-        sprintf(buf, "%u", streamPos);
+        strcpy(buf, str::group_digits(std::to_string(streamPos), ",").c_str());
     else if (var == "sourceType")
         strcpy(buf, getSrcTypeStr());
     else if (var == "sourceProtocol")
@@ -1974,9 +1976,9 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
             strcpy(buf, sourceURL.cstr());
     }
     else if (var == "headPos")
-        sprintf(buf, "%u", headPack.pos);
+        strcpy(buf, str::group_digits(std::to_string(headPack.pos), ",").c_str());
     else if (var == "headLen")
-        sprintf(buf, "%u", headPack.len);
+        strcpy(buf, str::group_digits(std::to_string(headPack.len), ",").c_str());
     else if (var == "numHits")
     {
         ChanHitList *chl = chanMgr->findHitListByID(info.id);

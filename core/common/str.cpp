@@ -1,4 +1,5 @@
 #include <string>
+#include <algorithm>
 
 namespace str
 {
@@ -79,18 +80,23 @@ std::string group_digits(const std::string& in, const std::string& separator)
 
     auto end = in.find('.'); // end of integral part
     if (end != string::npos)
-        tail = in.substr(in.find('.'));
+        tail = in.substr(end);
     else
         end = in.size();
 
-    std::string integer;
+    std::string res;
+    std::string integer = in.substr(0, end);
+    std::reverse(integer.begin(), integer.end());
+    std::string delim = separator;
+    std::reverse(delim.begin(), delim.end());
     for (int i = 0; i < end; i++)
     {
-        if (i != 0 && i % 3 == 0 && i != end - 1)
-            integer += separator;
-        integer += in[i];
+        if (i != 0 && i%3 == 0)
+            res += delim;
+        res += integer[i];
     }
-    return integer + tail;
+    std::reverse(res.begin(), res.end());
+    return res + tail;
 }
 
 } // namespace str
