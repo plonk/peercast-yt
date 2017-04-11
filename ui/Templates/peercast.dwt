@@ -9,6 +9,47 @@
     <!-- TemplateBeginEditable name="head" --><!-- TemplateEndEditable -->
   </head>
 
+  <script>
+    var notifications = [
+    {@loop notificationBuffer.numNotifications}
+    { time: "{$loop.notification.time}",
+      type: "{$loop.notification.type}",
+      message: "{$loop.notification.message}" },
+    {@end}
+    ];
+
+function notifyMe() {
+  if (!("Notification" in window)) {
+    alert("This browser does not support system notifications");
+  }
+  else if (Notification.permission === "granted") {
+    for (var i = 0; i < notifications.length; i++) {
+      spawnNotification(notifications[i].message, "images/small-logo.png", notifications[i].type);
+    }
+  }
+  else if (Notification.permission !== 'denied') {
+    Notification.requestPermission(function (permission) {
+      if (permission === "granted") {
+        for (var i = 0; i < notifications.length; i++) {
+          spawnNotification(notifications[i].message, "images/small-logo.png", notifications[i].type);
+        }
+      }
+    });
+  }
+}
+
+function spawnNotification(theBody,theIcon,theTitle) {
+  var options = {
+      body: theBody,
+      icon: theIcon
+  }
+  var n = new Notification(theTitle,options);
+  setTimeout(n.close.bind(n), 5000); 
+}
+
+notifyMe();
+</script>
+
   <body bgcolor="#DDDDDD">
     <div align="center">
       <table width="100%" height="100%" border="1" align="center" cellpadding="5" cellspacing="0" bordercolor="#999999" bgcolor="#FFFFFF">
@@ -62,20 +103,21 @@
                   </tr>
                 </table>
               </div>
-              <div align="center"></div>
-              <table width="100%" border="1" cellpadding="1" cellspacing="0">
+              <table class="navbar" width="100%" border="1" cellpadding="1" cellspacing="0">
                 <tr class="normal">
                   <td width="12.5%"><div align="center"><a href="index.html">{#_Information_navbar}</a></div></td>
                   <td width="12.5%"><div align="center"><a href="channels.html">{#_Yellow Pages_navbar}</a></div></td>
+                  <td width="12.5%"><div align="center"><a href="notifications.html">{#Notifications}</a></div></td>
                   <td width="12.5%"><div align="center"><a href="relays.html">{#_Relays_navbar}</a></div></td>
-                  <td width="12.5%"><div align="center"><a href="broadcast.html">{#_Broadcast_navbar}</a></div></td>
+<!--
+                  <td width="12.5%"><div align="center"><a href="broadcast.html">{#_Broadcast_navbar}</a></div></td> -->
+
                   <td width="12.5%"><div align="center"><a href="connections.html">{#_Connections_navbar}</a></div></td>
                   <td width="12.5%"><div align="center"><a href="settings.html">{#_Settings_navbar}</a></div></td>
                   <td width="12.5%"><div align="center"><a href="viewlog.html">{#_View Log_navbar}</a></div></td>
-                  <td width="12.5%"><div align="center"><a href="logout.html">{#_Logout_navbar}</a></div></td>
+<!--                  <td width="12.5%"><div align="center"><a href="logout.html">{#_Logout_navbar}</a></div></td> -->
                 </tr>
               </table>
-              <br>
               <!-- TemplateBeginEditable name="content" -->
               <div align="left"><b>content</b></div>
               <!-- TemplateEndEditable -->

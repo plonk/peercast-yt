@@ -66,6 +66,9 @@ public:
     Entry getNotification(int index);
     void addNotification(const Notification& notif);
 
+    bool writeVariable(Stream& out, const String& varName);
+    bool writeVariable(Stream& out, const String& varName, int loopCount);
+
     std::deque<Entry> notifications;
     WLock lock;
 };

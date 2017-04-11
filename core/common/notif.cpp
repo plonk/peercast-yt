@@ -77,3 +77,43 @@ void NotificationBuffer::addNotification(const Notification& notif)
 
     notifications.push_back(Entry(notif, false));
 }
+
+bool NotificationBuffer::writeVariable(Stream& out, const String& varName)
+{
+    if (varName == "numNotifications") {
+        out.writeString(std::to_string(numNotifications()).c_str());
+        return true;
+    } else if (varName == "numUnread") {
+        out.writeString(std::to_string(numUnread()).c_str());
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool NotificationBuffer::writeVariable(Stream& out, const String& varName, int index)
+{
+    if (varName.startsWith("notification.")) {
+        String prop = varName + strlen("notification.");
+        Entry e = getNotification(index);
+        if (prop == "message") {
+            out.writeString(e.notif.message.c_str());
+            return true;
+        } else if (prop == "isRead") {
+            out.writeString(std::to_string((int) e.isRead).c_str());
+            return true;
+        } else if (prop == "type") {
+            out.writeString(e.notif.getTypeStr().c_str());
+            return true;
+        } else if (prop == "time") {
+            String t;
+            t.setFromTime(e.notif.time);
+            if (t.cstr()[strlen(t)-1] == '\n')
+                t.cstr()[strlen(t)-1] = '\0';
+            out.writeString(t.cstr());
+            return true;
+        }
+    } else {
+        return false;
+    }
+}

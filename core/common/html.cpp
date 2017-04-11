@@ -30,6 +30,7 @@
 #include "stats.h"
 #include "version2.h"
 #include "dmstream.h"
+#include "notif.h"
 
 // --------------------------------------
 HTML::HTML(const char *t, Stream &o)
@@ -70,6 +71,8 @@ void HTML::writeVariable(Stream &s, const String &varName, int loop)
             r = true;
         }
     }
+    else if (varName.startsWith("notificationBuffer."))
+        r = g_notificationBuffer.writeVariable(s, varName + strlen("notificationBuffer."));
     else if (varName.startsWith("loop."))
     {
         if (varName.startsWith("loop.channel."))
@@ -139,6 +142,9 @@ void HTML::writeVariable(Stream &s, const String &varName, int loop)
         }else if (varName.startsWith("loop.channelFeed."))
         {
             r = servMgr->channelDirectory.writeVariable(s, varName + strlen("loop."), loop);
+        }else if (varName.startsWith("loop.notification."))
+        {
+            r = g_notificationBuffer.writeVariable(s, varName + strlen("loop."), loop);
         }
     }
     else if (varName.startsWith("page."))

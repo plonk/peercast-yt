@@ -1009,6 +1009,7 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     }
 
     peercastInst->saveSettings();
+    peercast::notifyMessage(ServMgr::NT_PEERCAST, "Settings saved.");
     peercastApp->updateSettings();
 
     if ((servMgr->isRoot) && (brRoot))
