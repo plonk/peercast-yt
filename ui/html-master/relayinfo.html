@@ -159,27 +159,26 @@
               <TABLE align=center border=0>
                 <TBODY>
                   <TR align=middle bgColor=#cccccc class="normal">
-                    <TD></TD>
-                    <TD><B>{#IP:Port}</B></TD>
+                    <TD colspan="2"><B>{#IP:Port}</B></TD>
                     <TD><B>{#Hops}</B></TD>
                     <TD><B>{#Listeners}</B></TD>
                     <TD><B>{#Relays}</B></TD>
-                    <TD><B>{#_Uptime_relayinfo}</B></TD>
+                    <TD style="min-width: 8.5em"><B>{#_Uptime_relayinfo}</B></TD>
                     <TD><B>{#_Firewalled_relayinfo}</B></TD>
                     <TD><B>{#_Agent_relayinfo}</B></TD>
-                    <TD><B>{#Update}</B></TD>
+                    <TD style="min-width: 7.5em"><B>{#Update}</B></TD>
                   </TR>
                   {@loop page.channel.numHits}
                   <tr class="normal" bgcolor={@if loop.indexEven}#eeeeee{@else}#dddddd{@end}>
-                    <TD></TD>
-                    <TD>{$loop.hit.rhost0}/{$loop.hit.rhost1}</TD>
-                    <TD>{$loop.hit.numHops}</TD>
-                    <TD>{$loop.hit.numListeners}</TD>
-                    <TD>{$loop.hit.numRelays}</TD>
-                    <TD>{$loop.hit.uptime}</TD>
-                    <TD>{$loop.hit.isFirewalled}</TD>
+                    <td align="left">{$loop.hit.rhost0}</td>
+                    <td align="left">{$loop.hit.rhost1}</td>
+                    <TD class="numeric">{$loop.hit.numHops}</TD>
+                    <TD class="numeric">{$loop.hit.numListeners}</TD>
+                    <TD class="numeric">{$loop.hit.numRelays}</TD>
+                    <TD class="numeric">{$loop.hit.uptime}</TD>
+                    <TD>{@if loop.hit.isFirewalled}{#Yes}{@else}{#No}{@end}</TD>
                     <TD>{$loop.hit.version}</TD>
-                    <TD>{$loop.hit.update}</TD>
+                    <TD class="numeric">{$loop.hit.update}</TD>
                   </TR>
                   {@end} </TBODY>
               </TABLE>
