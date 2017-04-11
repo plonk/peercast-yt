@@ -57,6 +57,30 @@
     "Incoming"                : "Entrant",
     "Port"                    : null,
 
+    // relayinfo.html
+    "Channel Information"     : "Informations sur le Canal",
+    "Desc."                   : "Description",
+    "Comment"                 : "Commentaire",
+    "Bitrate"                 : "Débit",
+    "_Uptime_relayinfo"       : "Depuis",
+    "Source"                  : "Source",
+    "Position"                : "Position",
+    "Head"                    : "Début",
+    "bytes"                   : "bytes",
+
+    "Current Track"           : "Actuellement en diffusion",
+    "Artist"                  : "Artiste",
+    "Title"                   : "Titre",
+    "Album"                   : "Album",
+    "Contact"                 : "Contact",
+
+    "Hops"                    : "Sauts",
+    "Listeners"               : "Auditeurs",
+    "Relays"                  : "Relais",
+    "_Firewalled_relayinfo"   : "Envoi",
+    "_Agent_relayinfo"        : "Client",
+    "Update"                  : "Mise à jour",
+
     // relays.html
     "Channel"                 : "Canal",
     "Bitrate (kb/s)"          : "Débit (kb/s)",

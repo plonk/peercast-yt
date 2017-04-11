@@ -12,5 +12,11 @@
     "_Type_connection" : "Type",
     "_Password_login"  : "Password",
     "Deutsch"          : "German",
+
+    // relayinfo.html
+    "_Uptime_relayinfo"       : "Uptime",
+    "_Firewalled_relayinfo"   : "Firewalled",
+    "_Agent_relayinfo"        : "Agent",
+
     "":""
 }

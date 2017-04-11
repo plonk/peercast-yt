@@ -88,7 +88,11 @@
     "Hops"                    : "ホップ数",
     "Listeners"               : "リスナー数",
     "Relays"                  : "リレー数",
+    "_Agent_relayinfo"        : "バージョン",
     "Update"                  : "更新",
+
+    "_Uptime_relayinfo"       : "稼動時間",
+    "_Firewalled_relayinfo"   : "FW有り",
 
     // broadcast.html
     "External Source"         : "外部ソース",
