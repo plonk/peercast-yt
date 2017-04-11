@@ -244,7 +244,7 @@ void PCPStream::readRootAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
             if (newVer > PCP_CLIENT_VERSION)
             {
                 strcpy(servMgr->downloadURL, url.cstr());
-                peercastApp->notifyMessage(ServMgr::NT_UPGRADE, "There is a new version of PeerCast available, please click here to upgrade your client.");
+                peercast::notifyMessage(ServMgr::NT_UPGRADE, "There is a new version of PeerCast available, please click here to upgrade your client.");
             }
             LOG_DEBUG("PCP got version check: %d / %d", newVer, PCP_CLIENT_VERSION);
 
@@ -277,7 +277,7 @@ void PCPStream::readRootAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
             {
                 servMgr->rootMsg = newMsg;
                 LOG_DEBUG("PCP got new root mesg: %s", servMgr->rootMsg.cstr());
-                peercastApp->notifyMessage(ServMgr::NT_PEERCAST, servMgr->rootMsg.cstr());
+                peercast::notifyMessage(ServMgr::NT_PEERCAST, servMgr->rootMsg.cstr());
             }
         }else
         {

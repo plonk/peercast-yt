@@ -1754,8 +1754,7 @@ Channel *ChanMgr::findAndRelay(ChanInfo &info)
     char idStr[64];
     info.id.toStr(idStr);
     LOG_CHANNEL("Searching for: %s (%s)", idStr, info.name.cstr());
-    peercastApp->notifyMessage(ServMgr::NT_PEERCAST, "Finding channel...");
-
+    peercast::notifyMessage(ServMgr::NT_PEERCAST, "Finding channel...");
 
     Channel *c = NULL;
 
@@ -1778,7 +1777,7 @@ Channel *ChanMgr::findAndRelay(ChanInfo &info)
 
         if (!c)
         {
-            peercastApp->notifyMessage(ServMgr::NT_PEERCAST, "Channel not found");
+            peercast::notifyMessage(ServMgr::NT_PEERCAST, "Channel not found");
             return NULL;
         }
 

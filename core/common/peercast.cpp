@@ -235,3 +235,18 @@ void LOG_CHANNEL(const char *fmt, ...)
         }
     }
 }
+
+// --------------------------------------------------
+#include "notif.h"
+
+namespace peercast {
+
+void notifyMessage(ServMgr::NOTIFY_TYPE type, const char *message)
+{
+    Notification notif(sys->getTime(), type, message);
+    g_notificationBuffer.addNotification(notif);
+    peercastApp->notifyMessage(type, message);
+}
+
+} // namespace peercast
+

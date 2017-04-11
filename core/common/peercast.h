@@ -91,6 +91,8 @@ __declspec( dllexport ) PeercastInstance * newPeercast(PeercastApplication *);
 #endif
 
 // ----------------------------------
-
+namespace peercast {
+void notifyMessage(ServMgr::NOTIFY_TYPE, const char *);
+}
 
 #endif
