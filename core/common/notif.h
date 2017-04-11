@@ -56,7 +56,7 @@ public:
         Notification notif;
         bool isRead;
     };
-    static const int MAX_NOTIFS = 100;
+    static const int MAX_NOTIFS = 20;
 
     NotificationBuffer();
 
