@@ -189,7 +189,7 @@ TEST_F(ChanHitFixture, writeVariable)
     TEST_VARIABLE("update", "-");
     TEST_VARIABLE("isFirewalled", "0");
     //TEST_VARIABLE("version", "0"); // original
-    TEST_VARIABLE("version", "0 (VP0 compatible;   0)"); // original
+    TEST_VARIABLE("version", "-");
     // TEST_VARIABLE("agent", "0");
     // TEST_VARIABLE("check", "<a href=\"#\" onclick=\"checkip('0.0.0.0')\">_</a>");
     // TEST_VARIABLE("uphost", "0.0.0.0:0");

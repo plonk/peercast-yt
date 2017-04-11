@@ -70,6 +70,30 @@
     "Bump"                    : "Verwerfen",
     "Stop"                    : "Beenden",
 
+    // relayinfo.html
+    "Channel Information"     : "Programm-Information",
+    "Desc."                   : "Beschreibung",
+    "Comment"                 : "Kommentar",
+    "Bitrate"                 : null,
+    "Source"                  : "Quelle",
+    "_Uptime_relayinfo"       : "Laufzeit",
+    "Position"                : null,
+    "Head"                    : null,
+    "bytes"                   : "bytes",
+
+    "Current Track"           : null,
+    "Artist"                  : "Interpret",
+    "Title"                   : "Titel",
+    "Album"                   : null,
+    "Contact"                 : "Kontakt",
+
+    "Hops"                    : null,
+    "Listeners"               : "Zuh&ouml;rer",
+    "Relays"                  : null,
+    "_Firewalled_relayinfo"   : "Firewalled",
+    "_Agent_relayinfo"        : "Programmversion",
+    "Update"                  : "Aktualisierung",
+
     // broadcast.html
     "External Source"         : "Externe Quelle",
     "URL (Required)"          : "URL (erforderlich)",

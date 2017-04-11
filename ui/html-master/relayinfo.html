@@ -74,83 +74,83 @@
               <TABLE align=center border=0>
                 <TBODY>
                   <TR align=middle bgColor=#cccccc class="normal">
-                    <TD colSpan=2><B>Channel Information</B></TD>
+                    <TD colSpan=2><B>{#Channel Information}</B></TD>
                   </TR>
                   <TR align=left bgColor=#eeeeee class="normal">
-                    <TD>Name</TD>
+                    <TD>{#Name}</TD>
                     <TD>{$page.channel.name}</TD>
                   </TR>
                   <TR align=left bgColor=#dddddd class="normal">
-                    <TD>Genre</TD>
+                    <TD>{#Genre}</TD>
                     <TD>{$page.channel.genre}</TD>
                   </TR>
                   <TR align=left bgColor=#eeeeee class="normal">
-                    <TD>Desc.</TD>
+                    <TD>{#Desc.}</TD>
                     <TD>{$page.channel.desc}</TD>
                   </TR>
                   <TR align=left bgColor=#dddddd class="normal">
-                    <TD>URL</TD>
+                    <TD>{#URL}</TD>
                     <TD><A href="http://localhost:8144/admin?cmd=redirect&amp;url="
                            target=_blank></A>{$page.channel.contactURL}</TD>
                   </TR>
                   <TR align=left bgColor=#eeeeee class="normal">
-                    <TD>Comment</TD>
+                    <TD>{#Comment}</TD>
                     <TD>{$page.channel.comment}</TD>
                   </TR>
                   <TR align=left bgColor=#dddddd class="normal">
-                    <TD>ID</TD>
+                    <TD>{#ID}</TD>
                     <TD>{$page.channel.id}</TD>
                   </TR>
                   <TR align=left bgColor=#eeeeee class="normal">
-                    <TD>Type</TD>
+                    <TD>{#Type}</TD>
                     <TD>{$page.channel.type}</TD>
                   </TR>
                   <TR align=left bgColor=#dddddd class="normal">
-                    <TD>Bitrate</TD>
+                    <TD>{#Bitrate}</TD>
                     <TD>{$page.channel.bitrate} kb/s ({$page.channel.srcrate} kb/s)</TD>
                   </TR>
                   <TR align=left bgColor=#eeeeee class="normal">
-                    <TD>Source</TD>
+                    <TD>{#Source}</TD>
                     <TD>{$page.channel.sourceType}- {$page.channel.sourceProtocol}<BR>
                       {$page.channel.sourceURL}</TD>
                   </TR>
                   <TR align=left bgColor=#dddddd class="normal">
-                    <TD>Uptime</TD>
+                    <TD>{#_Uptime_relayinfo}</TD>
                     <TD>{$page.channel.uptime}</TD>
                   </TR>
                   <TR align=left bgColor=#dddddd class="normal">
-                    <TD>Status</TD>
+                    <TD>{#Status}</TD>
                     <TD>{$page.channel.status}</TD>
                   </TR>
                   <TR align=left bgColor=#eeeeee class="normal">
-                    <TD>Position</TD>
+                    <TD>{#Position}</TD>
                     <TD>{$page.channel.streamPos}</TD>
                   </TR>
                   <TR align=left bgColor=#dddddd class="normal">
-                    <TD>Head</TD>
-                    <TD>{$page.channel.headPos} ({$page.channel.headLen} bytes)</TD>
+                    <TD>{#Head}</TD>
+                    <TD>{$page.channel.headPos} ({$page.channel.headLen} {#bytes})</TD>
                   </TR>
-                  <TR align=left bgColor=#eeeeee class="normal">
-                    <TD colSpan=2 align=middle><B>Current Track</B></TD>
+                  <TR align=left bgColor=#cccccc class="normal">
+                    <TD colSpan=2 align=middle><B>{#Current Track}</B></TD>
                   </TR>
                   <TR align=left bgColor=#dddddd class="normal">
-                    <TD>Artist</TD>
+                    <TD>{#Artist}</TD>
                     <TD>{$page.channel.track.artist}</TD>
                   </TR>
                   <TR align=left bgColor=#eeeeee class="normal">
-                    <TD>Title</TD>
+                    <TD>{#Title}</TD>
                     <TD>{$page.channel.track.title}</TD>
                   </TR>
                   <TR align=left bgColor=#dddddd class="normal">
-                    <TD>Album</TD>
+                    <TD>{#Album}</TD>
                     <TD>{$page.channel.track.album}</TD>
                   </TR>
                   <TR align=left bgColor=#eeeeee class="normal">
-                    <TD>Genre</TD>
+                    <TD>{#Genre}</TD>
                     <TD>{$page.channel.track.genre}</TD>
                   </TR>
                   <TR align=left bgColor=#dddddd class="normal">
-                    <TD>Contact</TD>
+                    <TD>{#Contact}</TD>
                     <TD>{$page.channel.track.contactURL}</TD>
                   </TR>
                 </TBODY>
@@ -159,27 +159,26 @@
               <TABLE align=center border=0>
                 <TBODY>
                   <TR align=middle bgColor=#cccccc class="normal">
-                    <TD></TD>
-                    <TD><B>IP:Port</B></TD>
-                    <TD><B>Hops</B></TD>
-                    <TD><B>Listeners</B></TD>
-                    <TD><B>Relays</B></TD>
-                    <TD><B>Uptime</B></TD>
-                    <TD><B>Firewalled</B></TD>
-                    <TD><B>Agent</B></TD>
-                    <TD><B>Update</B></TD>
+                    <TD colspan="2"><B>{#IP:Port}</B></TD>
+                    <TD><B>{#Hops}</B></TD>
+                    <TD><B>{#Listeners}</B></TD>
+                    <TD><B>{#Relays}</B></TD>
+                    <TD style="min-width: 8.5em"><B>{#_Uptime_relayinfo}</B></TD>
+                    <TD><B>{#_Firewalled_relayinfo}</B></TD>
+                    <TD><B>{#_Agent_relayinfo}</B></TD>
+                    <TD style="min-width: 7.5em"><B>{#Update}</B></TD>
                   </TR>
                   {@loop page.channel.numHits}
                   <tr class="normal" bgcolor={@if loop.indexEven}#eeeeee{@else}#dddddd{@end}>
-                    <TD></TD>
-                    <TD>{$loop.hit.rhost0}/{$loop.hit.rhost1}</TD>
-                    <TD>{$loop.hit.numHops}</TD>
-                    <TD>{$loop.hit.numListeners}</TD>
-                    <TD>{$loop.hit.numRelays}</TD>
-                    <TD>{$loop.hit.uptime}</TD>
-                    <TD>{$loop.hit.isFirewalled}</TD>
+                    <td align="left">{$loop.hit.rhost0}</td>
+                    <td align="left">{$loop.hit.rhost1}</td>
+                    <TD class="numeric">{$loop.hit.numHops}</TD>
+                    <TD class="numeric">{$loop.hit.numListeners}</TD>
+                    <TD class="numeric">{$loop.hit.numRelays}</TD>
+                    <TD class="numeric">{$loop.hit.uptime}</TD>
+                    <TD>{@if loop.hit.isFirewalled}{#Yes}{@else}{#No}{@end}</TD>
                     <TD>{$loop.hit.version}</TD>
-                    <TD>{$loop.hit.update}</TD>
+                    <TD class="numeric">{$loop.hit.update}</TD>
                   </TR>
                   {@end} </TBODY>
               </TABLE>
