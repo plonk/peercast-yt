@@ -52,5 +52,5 @@ TEST_F(NotificationBufferFixture, maxNotifs)
     for (int i = 0; i < 100; i++)
         buf.addNotification(notif);
 
-    ASSERT_EQ(100, buf.numNotifications());
+    ASSERT_EQ(20, buf.numNotifications());
 }
