@@ -2682,12 +2682,15 @@ bool    ChanHit::writeVariable(Stream &out, const String &var)
         sprintf(buf, "%d", firewalled?1:0);
     else if (var == "version")
     {
-        sprintf(buf, "%d (VP%d compatible; %c%c%d)",
-                version,
-                versionVP,
-                versionExPrefix[0],
-                versionExPrefix[1],
-                versionExNumber);
+        if (!version)
+            sprintf(buf, "-");
+        else if (!versionVP)
+            sprintf(buf, "%d", version);
+        else if (!versionExNumber)
+            sprintf(buf, "%d VP%d", version, versionVP);
+        else
+            sprintf(buf, "%d VP%d %c%c%d", version, versionVP,
+                    versionExPrefix[0], versionExPrefix[1], versionExNumber);
     }
     else
         return false;
