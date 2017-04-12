@@ -328,7 +328,7 @@ XML::Node::~Node()
     if (contData)
         delete [] contData;
     if (attrData)
-        delete [] attrData;
+        free(attrData); // strdupped
     if (attr)
         delete [] attr;
 
