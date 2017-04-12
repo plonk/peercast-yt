@@ -715,8 +715,14 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
 void Servent::CMD_redirect(char *cmd, HTTP& http, HTML& html, char jumpStr[])
 {
     const char *j = getCGIarg(cmd, "url=");
+
     if (j)
     {
+        http.writeLine(HTTP_SC_OK);
+        http.writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
+        http.writeLineF("%s %s", HTTP_HS_CONTENT, "text/html");
+        http.writeLine("");
+
         termArgs(cmd);
         String url;
         url.set(j, String::T_ESC);
@@ -732,6 +738,8 @@ void Servent::CMD_redirect(char *cmd, HTTP& http, HTML& html, char jumpStr[])
                 html.startTagEnd("h3", "Please wait...");
             html.end();
         html.end();
+    } else {
+        throw HTTPException(HTTP_SC_BADREQUEST, 400);
     }
 }
 
