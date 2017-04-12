@@ -1979,7 +1979,16 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
     else if (var == "sourceURL")
     {
         if (sourceURL.isEmpty())
-            sourceHost.host.toStr(buf);
+        {
+            std::string s;
+            s += sourceHost.str(true);
+            if (sourceHost.uphost.ip)
+            {
+                s += " recv. from ";
+                s += sourceHost.uphost.str();
+            }
+            strcpy(buf, s.c_str());
+        }
         else
             strcpy(buf, sourceURL.cstr());
     }

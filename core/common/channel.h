@@ -225,16 +225,15 @@ public:
         else if (!versionVP)
             return to_string(version);
         else if (!versionExNumber)
-            return to_string(version) + " VP" + to_string(versionVP);
+            return "VP" + to_string(versionVP);
         else
-            return to_string(version) + " VP" + to_string(versionVP) +
-                " " + versionExPrefix[0] + versionExPrefix[1] + to_string(versionExNumber);
+            return string() + versionExPrefix[0] + versionExPrefix[1] + to_string(versionExNumber);
     }
 
     // 選択されたホスト(=host)の情報を簡潔に文字列化する。
-    std::string str()
+    std::string str(bool withPort = false)
     {
-        auto res = host.str(false);
+        auto res = host.str(withPort);
 
         if (!versionString().empty())
             res += " (" + versionString() + ")";
