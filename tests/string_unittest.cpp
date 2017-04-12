@@ -133,3 +133,9 @@ TEST(StringTest, assignment)
     t = s;
     ASSERT_STREQ("hoge", t.cstr());
 }
+
+TEST(StringTest, str)
+{
+    ASSERT_STREQ("", String("").str().c_str());
+    ASSERT_STREQ("A", String("A").str().c_str());
+}
