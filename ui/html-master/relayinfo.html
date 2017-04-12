@@ -113,7 +113,7 @@
                   </TR>
                   <TR align=left bgColor=#eeeeee class="normal">
                     <TD>{#Source}</TD>
-                    <TD>{$page.channel.sourceType}- {$page.channel.sourceProtocol}<BR>
+                    <TD>{$page.channel.sourceType} - {$page.channel.sourceProtocol}<BR>
                       {$page.channel.sourceURL}</TD>
                   </TR>
                   <TR align=left bgColor=#dddddd class="normal">
@@ -178,8 +178,8 @@
                     <TD class="numeric">{$loop.hit.numListeners}</TD>
                     <TD class="numeric">{$loop.hit.numRelays}</TD>
                     <TD class="numeric">{$loop.hit.uptime}</TD>
-                    <TD>{@if loop.hit.isFirewalled}{#Yes}{@else}{#No}{@end}</TD>
-                    <TD>{$loop.hit.version}</TD>
+                    <TD nowrap>{@if loop.hit.isFirewalled}{#Yes}{@else}{#No}{@end}</TD>
+                    <TD class="numeric">{$loop.hit.version}</TD>
                     <TD class="numeric">{$loop.hit.update}</TD>
                   </TR>
                   {@end} </TBODY>
