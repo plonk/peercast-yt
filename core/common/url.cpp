@@ -23,6 +23,7 @@
 #include "servmgr.h"
 #include "peercast.h"
 #include "version2.h"
+#include "playlist.h"
 
 // ------------------------------------------------
 void URLSource::stream(Channel *ch)

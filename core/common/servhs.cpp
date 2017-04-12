@@ -28,6 +28,7 @@
 #include "pcp.h"
 #include "version2.h"
 #include "jrpc.h"
+#include "playlist.h"
 
 // -----------------------------------
 static void termArgs(char *str)
