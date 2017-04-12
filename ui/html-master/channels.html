@@ -50,7 +50,7 @@
       </td>
       <td>
         {@if loop.externalChannel.id}
-        <a href="/pls/{$loop.externalChannel.id}?tip={$loop.externalChannel.tip}"><img class="play-button" src="images/play.png"></a>
+        <a target="_blank" href="/pls/{$loop.externalChannel.id}?tip={$loop.externalChannel.tip}"><img class="play-button" src="images/play.png"></a>
         {@else}
         <img class="play-button" src="images/play_grey.png">
         {@end}
