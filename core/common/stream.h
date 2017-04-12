@@ -312,43 +312,37 @@ public:
 class MemoryStream : public Stream
 {
 public:
-    MemoryStream()
-    :buf(NULL)
-    , len(0)
-    , pos(0)
-    {
-    }
-
-    MemoryStream(void *p, int l)
-    :buf((char *)p)
-    , len(l)
-    , pos(0)
+    MemoryStream(void *p, int l, bool aOwn = false)
+        : buf((char *)p)
+        , len(l)
+        , pos(0)
+        , own(aOwn)
     {
     }
 
     MemoryStream(int l)
-    :buf(new char[l])
-    , len(l)
-    , pos(0)
+        : buf(new char[l])
+        , len(l)
+        , pos(0)
+        , own(true)
     {
+    }
+
+    ~MemoryStream()
+    {
+        if (own)
+            free();
     }
 
     void readFromFile(FileStream &file)
     {
+        free(); // free old buffer
+
         len = file.length();
         buf = new char[len];
         pos = 0;
+        own = true;
         file.read(buf, len);
-    }
-
-    void free()
-    {
-        if (buf)
-        {
-            delete[] buf;
-            buf = NULL;
-        }
-
     }
 
     int read(void *p, int l) override
@@ -395,10 +389,18 @@ public:
 
     void    convertFromBase64();
 
-
     char    *buf;
     int     len, pos;
+    bool    own;
+
+private:
+    void free()
+    {
+        delete[] buf;
+        buf = nullptr;
+    }
 };
+
 // --------------------------------------------------
 class IndirectStream : public Stream
 {

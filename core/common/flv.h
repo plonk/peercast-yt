@@ -181,7 +181,6 @@ public:
     FLVTagBuffer() : m_mem(ChanPacket::MAX_DATALEN) {}
     ~FLVTagBuffer()
     {
-        m_mem.free();
     }
 
     bool put(FLVTag& tag, Channel* ch);

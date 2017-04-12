@@ -1768,6 +1768,4 @@ void Servent::handshakeRemoteFile(const char *dirName)
         html.readTemplate(mem, sock, 0);
     }else
         sock->write(mem.buf, fileLen);
-
-    mem.free();
 }
