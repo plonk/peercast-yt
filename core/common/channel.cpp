@@ -2873,7 +2873,9 @@ int ChanHitList::clearDeadHits(unsigned int timeout, bool clearTrackers)
     {
         if (ch->host.ip)
         {
-            if (ch->dead || ((ctime-ch->time) > timeout) && (clearTrackers || (!clearTrackers & !ch->tracker)))
+            bool oldEnough = (ctime - ch->time) > timeout;
+            if (ch->dead ||
+                (oldEnough && (clearTrackers || !ch->tracker)))
             {
                 ch = deleteHit(ch);
                 continue;
