@@ -953,7 +953,13 @@ void Channel::updateInfo(const ChanInfo &newInfo)
         return;
 
     if (!oldComment.isSame(info.comment))
-        peercast::notifyMessage(ServMgr::NT_PEERCAST, info.name.str() + "氏曰く: " + info.comment.str());
+    {
+        // Shift_JIS かも知れない文字列を (HTMLエスケープされた) UTF8 に変換したい。
+        String newComment = info.comment;
+        newComment.convertTo(String::T_UNICODESAFE);
+
+        peercast::notifyMessage(ServMgr::NT_PEERCAST, info.name.str() + "氏曰く: " + newComment.str());
+    }
 
     if (isBroadcasting())
     {
