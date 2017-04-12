@@ -299,7 +299,7 @@ TEST_F(ChanHitFixture, strVP)
 {
     hit->version = 1218;
     hit->versionVP = 26;
-    ASSERT_STREQ("0.0.0.0 (1218 VP26)", hit->str().c_str());
+    ASSERT_STREQ("0.0.0.0 (VP26)", hit->str().c_str());
 }
 
 TEST_F(ChanHitFixture, strIM)
@@ -309,7 +309,7 @@ TEST_F(ChanHitFixture, strIM)
     hit->versionExPrefix[0] = 'I';
     hit->versionExPrefix[1] = 'M';
     hit->versionExNumber = 51;
-    ASSERT_STREQ("0.0.0.0 (1218 VP27 IM51)", hit->str().c_str());
+    ASSERT_STREQ("0.0.0.0 (IM51)", hit->str().c_str());
 }
 
 TEST_F(ChanHitFixture, versionString)
@@ -327,7 +327,7 @@ TEST_F(ChanHitFixture, versionStringVP)
 {
     hit->version = 1218;
     hit->versionVP = 26;
-    ASSERT_STREQ("1218 VP26", hit->versionString().c_str());
+    ASSERT_STREQ("VP26", hit->versionString().c_str());
 }
 
 TEST_F(ChanHitFixture, versionStringIM)
@@ -337,5 +337,5 @@ TEST_F(ChanHitFixture, versionStringIM)
     hit->versionExPrefix[0] = 'I';
     hit->versionExPrefix[1] = 'M';
     hit->versionExNumber = 51;
-    ASSERT_STREQ("1218 VP27 IM51", hit->versionString().c_str());
+    ASSERT_STREQ("IM51", hit->versionString().c_str());
 }
