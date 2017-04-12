@@ -478,6 +478,15 @@ int PeercastSource::getSourceRate()
 }
 
 // -----------------------------------
+static std::string chName(ChanInfo& info)
+{
+    if (info.name.str().empty())
+        return info.id.str().substr(0,7) + "...";
+    else
+        return info.name.str();
+}
+
+// -----------------------------------
 void PeercastSource::stream(Channel *ch)
 {
     m_channel = ch;
@@ -582,7 +591,7 @@ void PeercastSource::stream(Channel *ch)
         {
             numYPTries++;
             LOG_CHANNEL("Channel contacting YP, try %d", numYPTries);
-            peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルをYPに問い合わせています...");
+            peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネル "+chName(ch->info)+" をYPに問い合わせています...");
         }else
         {
             LOG_CHANNEL("Channel found hit");
@@ -594,7 +603,7 @@ void PeercastSource::stream(Channel *ch)
             bool isTrusted = ch->sourceHost.tracker | ch->sourceHost.yp;
 
             if (ch->sourceHost.tracker)
-                peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルをトラッカーに問い合わせています...");
+                peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネル "+chName(ch->info)+" をトラッカーに問い合わせています...");
 
             char ipstr[64];
             ch->sourceHost.host.toStr(ipstr);
@@ -1163,14 +1172,14 @@ int Channel::readStream(Stream &in, ChannelStream *source)
             if (checkIdle())
             {
                 LOG_DEBUG("Channel idle");
-                peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルがアイドル状態になりました。");
+                peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネル "+chName(info)+" がアイドル状態になりました。");
                 break;
             }
 
             if (checkBump())
             {
                 LOG_DEBUG("Channel bumped");
-                peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルをバンプしました。");
+                peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネル "+chName(info)+" をバンプしました。");
                 error = -1;
                 break;
             }
@@ -1789,7 +1798,7 @@ Channel *ChanMgr::findAndRelay(ChanInfo &info)
 
         if (!c)
         {
-            peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルは見付かりませんでした。");
+            peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネル "+chName(info)+" は見付かりませんでした。");
             return NULL;
         }
 
