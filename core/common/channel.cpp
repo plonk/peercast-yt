@@ -2718,6 +2718,8 @@ bool    ChanHit::writeVariable(Stream &out, const String &var)
         else
             sprintf(buf, "%s", ver.c_str());
     }
+    else if (var == "tracker")
+        sprintf(buf, "%d", tracker);
     else
         return false;
 

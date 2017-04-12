@@ -172,7 +172,9 @@
                   </TR>
                   {@loop page.channel.numHits}
                   <tr class="normal" bgcolor={@if loop.indexEven}#eeeeee{@else}#dddddd{@end}>
-                    <td align="left">{$loop.hit.rhost0}</td>
+                    <td align="left" style="{@if loop.hit.tracker}font-weight: bold;{@end}">
+                      {$loop.hit.rhost0}
+                    </td>
                     <td align="left">{$loop.hit.rhost1}</td>
                     <TD class="numeric">{$loop.hit.numHops}</TD>
                     <TD class="numeric">{$loop.hit.numListeners}</TD>
