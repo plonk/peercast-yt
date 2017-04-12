@@ -1906,8 +1906,11 @@ int ServMgr::idleProc(ThreadInfo *thread)
         }
 
 
-        // clear dead hits
-        chanMgr->clearDeadHits(true);
+        // デッドヒットをクリアする。オリジナルはトラッカーをクリアす
+        // るが、開くチャンネルがこのサーバーに設定されている YP に掲
+        // 載されているとは限らないので、トラッカーが消えると再び開く
+        // ことができないので、トラッカーを残す。
+        chanMgr->clearDeadHits(false);
 
         if (servMgr->shutdownTimer)
         {
