@@ -645,10 +645,10 @@ void PeercastSource::stream(Channel *ch)
                 ch->setStatus(Channel::S_ERROR);
                 LOG_ERROR("Channel to %s %s : %s", ipstr, type, e.msg);
                 // FIXME: トラッカーに切断されるとヒットリストから消えてしまう。
-                if (!ch->sourceHost.tracker || ((error != 503) && ch->sourceHost.tracker))
+                // if (!ch->sourceHost.tracker || ((error != 503) && ch->sourceHost.tracker))
+                if (!ch->sourceHost.tracker)
                     chanMgr->deadHit(ch->sourceHost);
             }
-
 
             // broadcast quit to any connected downstream servents
             {
