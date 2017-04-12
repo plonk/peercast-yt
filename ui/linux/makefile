@@ -26,12 +26,15 @@ LINUXOBJ = $(notdir $(LINUXSOURCE:.cpp=.o))
 
 DEPENDFILE = .deps
 
-.PHONY: all clean deps
+.PHONY: all clean build-html deps
 
 # Here follow the generic build rules.
-all: $(TARGET) $(TAR)
+all: $(TARGET) build-html $(TAR)
 
 deps: $(DEPENDFILE)
+
+build-html:
+	make -C ..
 
 $(SRCHTMLTAR):
 	make -C .. html.tar
