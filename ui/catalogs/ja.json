@@ -87,13 +87,13 @@
     "Album"                   : "アルバム",
 
     "Hops"                    : "ホップ数",
-    "Listeners"               : "リスナー数",
-    "Relays"                  : "リレー数",
+    "Listeners"               : "リスナー",
+    "Relays"                  : "リレー",
     "_Agent_relayinfo"        : "バージョン",
     "Update"                  : "更新",
 
     "_Uptime_relayinfo"       : "稼動時間",
-    "_Firewalled_relayinfo"   : "FW有り",
+    "_Firewalled_relayinfo"   : "FW有",
 
     // broadcast.html
     "External Source"         : "外部ソース",
@@ -101,7 +101,7 @@
     "Name"                    : "名前",
     "Description"             : "説明",
     "Genre"                   : "ジャンル",
-    "Contact"                 : "コンタクト",
+    "Contact"                 : "コンタクトURL",
     "Type"                    : "タイプ",
     "Create Relay"            : "リレーを作成",
 
