@@ -39,3 +39,21 @@ TEST(HostTest, isMemberOf) {
     pattern.fromStrIP("0.0.0.0", -1);
     ASSERT_FALSE(host.isMemberOf(pattern));
 }
+
+TEST(HostTest, str)
+{
+    Host host;
+    ASSERT_STREQ("0.0.0.0:0", host.str().c_str());
+    ASSERT_STREQ("0.0.0.0:0", host.str(true).c_str());
+    ASSERT_STREQ("0.0.0.0", host.str(false).c_str());
+}
+
+TEST(HostTest, strUlimit)
+{
+    Host host;
+    host.fromStrIP("255.255.255.255", 65535);
+    ASSERT_STREQ("255.255.255.255:65535", host.str().c_str());
+    ASSERT_STREQ("255.255.255.255:65535", host.str(true).c_str());
+    ASSERT_STREQ("255.255.255.255", host.str(false).c_str());
+}
+
