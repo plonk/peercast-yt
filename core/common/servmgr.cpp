@@ -1846,7 +1846,6 @@ int ServMgr::idleProc(ThreadInfo *thread)
     unsigned int lastPasvFind=0;
     unsigned int lastBroadcast=0;
 
-
     // nothing much to do for the first couple of seconds, so just hang around.
     sys->sleep(2000);
 
@@ -1862,10 +1861,7 @@ int ServMgr::idleProc(ThreadInfo *thread)
     {
         stats.update();
 
-
-
         unsigned int ctime = sys->getTime();
-
 
         if (!servMgr->forceIP.isEmpty())
         {
@@ -1879,7 +1875,6 @@ int ServMgr::idleProc(ThreadInfo *thread)
                 lastForceIPCheck = ctime;
             }
         }
-
 
         if (chanMgr->isBroadcasting())
         {
@@ -1905,7 +1900,6 @@ int ServMgr::idleProc(ThreadInfo *thread)
             }
         }
 
-
         // デッドヒットをクリアする。オリジナルはトラッカーをクリアす
         // るが、開くチャンネルがこのサーバーに設定されている YP に掲
         // 載されているとは限らないので、トラッカーが消えると再び開く
@@ -1924,7 +1918,6 @@ int ServMgr::idleProc(ThreadInfo *thread)
         // shutdown idle channels
         if (chanMgr->numIdleChannels() > ChanMgr::MAX_IDLE_CHANNELS)
             chanMgr->closeOldestIdle();
-
 
         // チャンネル一覧を取得する。
         servMgr->channelDirectory.update();

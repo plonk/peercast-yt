@@ -2318,7 +2318,6 @@ void ChanMgr::clearDeadHits(bool clearTrackers)
     else
         interval = hostUpdateInterval+30;
 
-
     ChanHitList *chl = hitlist, *prev = NULL;
     while (chl)
     {
