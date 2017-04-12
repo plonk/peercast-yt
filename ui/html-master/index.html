@@ -108,6 +108,10 @@
                             <TD>{#XML stats}</TD>
                             <TD bgcolor="#eeeeee"><A href="/admin?cmd=viewxml">{#View}</A></TD>
                           </TR>
+                          <tr align=left bgColor=#eeeeee class="normal">
+                            <td>{#YP Address}</td>
+                            <td>{$servMgr.ypAddress}</td>
+                          </tr>
                           <TR align=left bgColor=#dddddd class="normal">
                             <TD>{#Host options}</TD>
                             <TD>{@if servMgr.isRoot}{#Root}{@end} {@if servMgr.isPrivate}{#Licensed}{@end} {@if servMgr.forceYP}{#ForceYP}{@end}</TD>
