@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+  <!-- InstanceBegin template="/Templates/peercast.dwt" codeOutsideHTMLIsLocked="false" -->
+
+  <!-- InstanceBeginEditable name="title" -->
+  <title>{#PeerCast on} {$servMgr.serverIP}:{$servMgr.serverPort}</title>
+  <!-- InstanceEndEditable -->
+
+  <!-- InstanceBeginEditable name="head" -->
+  <meta http-equiv="refresh" content="{$servMgr.refreshHTML}">
+  <!-- InstanceEndEditable -->
+
+  <!-- InstanceBeginEditable name="content" -->
+  <table width="100%" class="normal">
+    <tr bgcolor="#ccc">
+      <th style="width: 14em">{#Time}</th>
+      <th style="width: 3em">{#Type}</th>
+      <th>{#Message}</th>
+    </tr>
+
+    {@loop notificationBuffer.numNotifications}
+    <tr bgcolor="{@if loop.indexEven}#ddd{@else}#eee{@end}">
+      <td>
+        {$loop.notification.time}
+      </td>
+      <td>
+        {$loop.notification.type}
+      </td>
+      <td>
+        {$loop.notification.message}
+      </td>
+    </tr>
+    {@end}
+  </table>
+  <!-- InstanceEndEditable -->
+
+  <!-- InstanceEnd -->
+</html>
