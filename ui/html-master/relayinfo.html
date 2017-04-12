@@ -90,8 +90,10 @@
                   </TR>
                   <TR align=left bgColor=#dddddd class="normal">
                     <TD>{#URL}</TD>
-                    <TD><A href="http://localhost:8144/admin?cmd=redirect&amp;url="
-                           target=_blank></A>{$page.channel.contactURL}</TD>
+                    <TD style="word-break: break-all">
+                      <A href="/admin?cmd=redirect&amp;url={$page.channel.contactURL}"
+                         target=_blank>{$page.channel.contactURL}</A>
+                    </TD>
                   </TR>
                   <TR align=left bgColor=#eeeeee class="normal">
                     <TD>{#Comment}</TD>
