@@ -1406,9 +1406,15 @@ void Servent::handshakeCMD(char *cmd)
         }else{
             sprintf(jumpStr, "/%s/index.html", servMgr->htmlPath);
         }
-    }catch (StreamException &e)
+    }catch (HTTPException &e)
     {
+        http.writeLine(e.msg);
+        http.writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
+        http.writeLineF("%s %s", HTTP_HS_CONTENT, "text/html");
+        http.writeLine("");
+
         html.startTagEnd("h1", "ERROR - %s", e.msg);
+
         LOG_ERROR("html: %s", e.msg);
     }
 
