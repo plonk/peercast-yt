@@ -139,3 +139,10 @@ TEST(StringTest, str)
     ASSERT_STREQ("", String("").str().c_str());
     ASSERT_STREQ("A", String("A").str().c_str());
 }
+
+TEST(StringTest, sjisToUtf8)
+{
+    String tmp = "4\x93\xFA\x96\xDA"; // "4日目" in Shit_JIS
+    tmp.convertTo(String::T_UNICODESAFE);
+    ASSERT_STREQ("4日目", tmp.cstr());
+}
