@@ -1692,6 +1692,9 @@ void Servent::handshakeLocalFile(const char *fn)
     {
         html.writeOK(MIME_PNG);
         html.writeRawFile(fileName.cstr());
+    }else
+    {
+        throw HTTPException(HTTP_SC_NOTFOUND, 404);
     }
 }
 
