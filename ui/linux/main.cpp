@@ -154,9 +154,9 @@ void sigProc(int sig)
 // ----------------------------------
 static void init()
 {
-    char path[PATH_MAX];
-
-    if (readlink("/proc/self/exe", path, sizeof(path)) == -1) {
+    // readlink does not append a null byte to the buffer, so we zero it out beforehand.
+    char path[PATH_MAX + 1] = "";
+    if (readlink("/proc/self/exe", path, PATH_MAX) == -1) {
         perror("/proc/self/exe");
         exit(1);
     }
