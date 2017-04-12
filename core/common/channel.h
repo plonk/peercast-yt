@@ -281,9 +281,8 @@ public:
     ChanHit      *hit;
     unsigned int lastHitTime;
     ChanHitList  *next;
-
-
 };
+
 // ----------------------------------
 class ChanHitSearch
 {

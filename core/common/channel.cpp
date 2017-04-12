@@ -2511,12 +2511,13 @@ void ChanMgr::playChannel(ChanInfo &info)
 
 // -----------------------------------
 ChanHitList::ChanHitList()
+    : used(false)
+    , hit(nullptr)
+    , lastHitTime(0)
+    , next(nullptr)
 {
-    info.init();
-    lastHitTime = 0;
-    used = false;
-    hit = NULL;
 }
+
 // -----------------------------------
 ChanHitList::~ChanHitList()
 {
