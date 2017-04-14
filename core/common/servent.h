@@ -173,6 +173,8 @@ public:
     void    handshakeRTSP(RTSP &);
     void    handshakeHTTP(HTTP &, bool);
 
+    void    handshakeHTTPPush();
+
     void    handshakeJRPC(HTTP &http);
 
     void    handshakeRemoteFile(const char *);

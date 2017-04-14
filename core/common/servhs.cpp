@@ -29,6 +29,8 @@
 #include "version2.h"
 #include "jrpc.h"
 #include "playlist.h"
+#include "dechunker.h"
+#include "matroska.h"
 
 // -----------------------------------
 static void termArgs(char *str)
@@ -291,6 +293,12 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 
             if (handshakeHTTPBasicAuth(http))
                 handshakeJRPC(http);
+        }else if (strcmp(fn, "/") == 0)
+        {
+            if (!isAllowed(ALLOW_BROADCAST))
+                throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
+
+            handshakeHTTPPush();
         }else
         {
             throw HTTPException(HTTP_SC_BADREQUEST, 400);
@@ -1611,6 +1619,56 @@ void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd, size_t plen)
         else if (stristr(arg, MIME_TEXT))
             info.contentType = ChanInfo::T_PLS;
     }
+}
+
+// -----------------------------------
+// HTTP Push 放送
+void Servent::handshakeHTTPPush()
+{
+    using namespace matroska;
+
+    // HTTP ヘッダーを全て読み込む
+    HTTP http(*sock);
+    while (http.nextHeader())
+        ;
+
+    // User-Agent ヘッダーがあれば agent をセット
+    for (auto& header : http.headers)
+    {
+        LOG_DEBUG("%s: %s", header.first.c_str(), header.second.c_str());
+        if (header.first == "USER-AGENT")
+            this->agent = header.second.c_str();
+    }
+
+    // 一発でセットするメソッドがChanInfoにあったほうがいい
+    ChanInfo info;
+    info.contentType    = ChanInfo::T_MKV;
+    info.contentTypeStr = ChanInfo::getTypeStr(ChanInfo::T_MKV);
+    info.streamType     = ChanInfo::getMIMEType(ChanInfo::T_MKV);
+    info.streamExt      = ChanInfo::getTypeExt(ChanInfo::T_MKV);
+
+    info.name = "MKVテスト";
+
+    info.id = chanMgr->broadcastID;
+    info.id.encode(NULL, info.name.cstr(), NULL, 0);
+
+    Channel *c = chanMgr->findChannelByID(info.id);
+    if (c)
+    {
+        LOG_CHANNEL("HTTP Push channel already active, closing old one");
+        c->thread.shutdown();
+    }
+    // ここでシャットダウン待たなくていいの？
+
+    info.comment = chanMgr->broadcastMsg;
+    info.bcID    = chanMgr->broadcastID;
+
+    c = chanMgr->createChannel(info, NULL);
+    if (!c)
+        throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
+
+    c->startHTTPPush(sock);
+    sock = NULL;    // socket is taken over by channel, so don`t close it
 }
 
 // -----------------------------------

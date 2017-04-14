@@ -40,9 +40,11 @@
 #include "mms.h"
 #include "nsv.h"
 #include "flv.h"
+#include "mkv.h"
 
 #include "icy.h"
 #include "url.h"
+#include "httppush.h"
 
 #include "str.h"
 #include "playlist.h"
@@ -56,7 +58,8 @@ const char *Channel::srcTypes[]=
     "PEERCAST",
     "SHOUTCAST",
     "ICECAST",
-    "URL"
+    "URL",
+    "HTTPPUSH",
 };
 // -----------------------------------
 const char *Channel::statusMsgs[]=
@@ -218,10 +221,10 @@ void Channel::reset()
 // -----------------------------------
 void    Channel::newPacket(ChanPacket &pack)
 {
-    if (pack.type != ChanPacket::T_PCP)
-    {
-        rawData.writePacket(pack, true);
-    }
+    if (pack.type == ChanPacket::T_PCP)
+        return;
+
+    rawData.writePacket(pack, true);
 }
 
 
@@ -708,6 +711,19 @@ void PeercastSource::stream(Channel *ch)
 
 }
 // -----------------------------------
+void    Channel::startHTTPPush(ClientSocket *cs)
+{
+    srcType = SRC_HTTPPUSH;
+    type    = T_BROADCAST;
+
+    sock = cs;
+    info.srcProtocol = ChanInfo::SP_HTTP;
+
+    sourceData = new HTTPPushSource();
+    startStream();
+}
+
+// -----------------------------------
 void    Channel::startICY(ClientSocket *cs, SRC_TYPE st)
 {
     srcType = st;
@@ -1050,6 +1066,10 @@ ChannelStream *Channel::createSource()
             case ChanInfo::T_OGM:
                 LOG_CHANNEL("Channel is OGG");
                 source = new OGGStream();
+                break;
+            case ChanInfo::T_MKV:
+                LOG_CHANNEL("Channel is MKV");
+                source = new MKVStream();
                 break;
             default:
                 LOG_CHANNEL("Channel is Raw");
@@ -3172,6 +3192,7 @@ const char *ChanInfo::getTypeStr(TYPE t)
         case T_NSV: return "NSV";
         case T_WMV: return "WMV";
         case T_FLV: return "FLV";
+        case T_MKV: return "MKV";
 
         case T_PLS: return "PLS";
         case T_ASX: return "ASX";
@@ -3229,6 +3250,8 @@ const char *ChanInfo::getTypeExt(TYPE t)
             return ".wma";
         case ChanInfo::T_FLV:
             return ".flv";
+        case ChanInfo::T_MKV:
+            return ".mkv";
         default:
             return "";
     }
@@ -3281,6 +3304,8 @@ ChanInfo::TYPE ChanInfo::getTypeFromStr(const char *str)
         return T_WMV;
     else if (stricmp(str, "FLV")==0)
         return T_FLV;
+    else if (stricmp(str, "MKV")==0)
+        return T_MKV;
     else if (stricmp(str, "PLS")==0)
         return T_PLS;
     else if (stricmp(str, "M3U")==0)

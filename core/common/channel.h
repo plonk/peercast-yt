@@ -92,6 +92,7 @@ public:
         T_MPG,
         T_NSV,
         T_FLV,
+        T_MKV,
 
         T_WMA,
         T_WMV,
@@ -162,8 +163,15 @@ public:
     ::String        name;
     GnuID           id, bcID;
     int             bitrate;
+
+    // TYPE はクローズドだから一般性がなく、プロトコル上は文字列でやり
+    // とりするので、冗長な気がする。
+
     TYPE            contentType;
-    ::String        contentTypeStr, streamType, streamExt;
+    ::String        contentTypeStr; // getTypeStr(contentType) "WMV" など
+    ::String        streamType;     // MIME タイプ
+    String          streamExt;      // "." で始まる拡張子
+
     PROTOCOL        srcProtocol;
     unsigned int    lastPlayStart, lastPlayEnd;
     unsigned int    numSkips;
@@ -406,7 +414,8 @@ public:
         SRC_PEERCAST,
         SRC_SHOUTCAST,
         SRC_ICECAST,
-        SRC_URL
+        SRC_URL,
+        SRC_HTTPPUSH
     };
 
 
@@ -418,6 +427,7 @@ public:
     void    startGet();
     void    startICY(ClientSocket *, SRC_TYPE);
     void    startURL(const char *);
+    void    startHTTPPush(ClientSocket *);
 
 
     ChannelStream   *createSource();
