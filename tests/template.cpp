@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-class ____Fixture : public ::testing::Test {
+class _Fixture : public ::testing::Test {
 public:
-    ____Fixture()
+    _Fixture()
     {
     }
 
@@ -14,11 +14,11 @@ public:
     {
     }
 
-    ~____Fixture()
+    ~_Fixture()
     {
     }
 };
 
-TEST_F(____Fixture, )
+TEST_F(_Fixture, )
 {
 }
