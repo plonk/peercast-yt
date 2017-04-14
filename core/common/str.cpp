@@ -1,6 +1,8 @@
+#include "str.h"
 #include <string>
 #include <algorithm>
 #include <cstring>
+#include <vector>
 
 namespace str
 {
