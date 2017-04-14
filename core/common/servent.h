@@ -173,7 +173,7 @@ public:
     void    handshakeRTSP(RTSP &);
     void    handshakeHTTP(HTTP &, bool);
 
-    void    handshakeHTTPPush();
+    void    handshakeHTTPPush(const std::string& args);
 
     void    handshakeJRPC(HTTP &http);
 

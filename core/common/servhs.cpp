@@ -31,6 +31,8 @@
 #include "playlist.h"
 #include "dechunker.h"
 #include "matroska.h"
+#include "str.h"
+#include "cgi.h"
 
 // -----------------------------------
 static void termArgs(char *str)
@@ -280,25 +282,33 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
         }
     }else if (http.isRequest("POST /"))
     {
-        char *fn = in + 5;
+        LOG_DEBUG("cmdLine: %s", http.cmdLine);
 
-        char *pt = strstr(fn, HTTP_PROTO1);
-        if (pt)
-            pt[-1] = 0;
+        auto vec = str::split(http.cmdLine, " ");
+        if (vec.size() != 3)
+            throw HTTPException(HTTP_SC_BADREQUEST, 400);
 
-        if (strcmp(fn, "/api/1") == 0)
+        std::string args;
+        auto vec2 = str::split(vec[1], "?");
+
+        if (vec2.size() >= 2)
+            args = vec2[1];
+
+        std::string path = vec2[0];
+
+        if (strcmp(path.c_str(), "/api/1") == 0)
         {
             if (!isAllowed(ALLOW_HTML))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
             if (handshakeHTTPBasicAuth(http))
                 handshakeJRPC(http);
-        }else if (strcmp(fn, "/") == 0)
+        }else if (strcmp(path.c_str(), "/") == 0)
         {
             if (!isAllowed(ALLOW_BROADCAST))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-            handshakeHTTPPush();
+            handshakeHTTPPush(args);
         }else
         {
             throw HTTPException(HTTP_SC_BADREQUEST, 400);
@@ -1623,9 +1633,12 @@ void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd, size_t plen)
 
 // -----------------------------------
 // HTTP Push 放送
-void Servent::handshakeHTTPPush()
+void Servent::handshakeHTTPPush(const std::string& args)
 {
     using namespace matroska;
+    using namespace cgi;
+
+    Query query(args);
 
     // HTTP ヘッダーを全て読み込む
     HTTP http(*sock);
@@ -1647,7 +1660,13 @@ void Servent::handshakeHTTPPush()
     info.streamType     = ChanInfo::getMIMEType(ChanInfo::T_MKV);
     info.streamExt      = ChanInfo::getTypeExt(ChanInfo::T_MKV);
 
-    info.name = "MKVテスト";
+    if (query.get("name") == "")
+        throw HTTPException(HTTP_SC_BADREQUEST, 400);
+
+    info.name  = query.get("name");
+    info.genre = query.get("genre");
+    info.desc  = query.get("desc");
+    info.url   = query.get("url");
 
     info.id = chanMgr->broadcastID;
     info.id.encode(NULL, info.name.cstr(), NULL, 0);
