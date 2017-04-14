@@ -186,7 +186,16 @@ public:
 
     String& operator = (const char* cstr)
     {
+        // FIXME: possibility of overflow
         strcpy(this->data, cstr);
+        this->type = T_ASCII;
+
+        return *this;
+    }
+
+    String& operator = (const std::string& rhs)
+    {
+        strcpy(data, rhs.substr(0, MAX_LEN - 1).c_str());
         this->type = T_ASCII;
 
         return *this;
