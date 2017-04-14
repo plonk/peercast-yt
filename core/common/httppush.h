@@ -7,7 +7,13 @@
 class HTTPPushSource : public ChannelSource
 {
 public:
+    HTTPPushSource()
+        : m_sock(nullptr) {}
+
     void stream(Channel *) override;
+    int getSourceRate() override;
+
+    ClientSocket* m_sock;
 };
 
 #endif
