@@ -1,5 +1,6 @@
 #include <string>
 #include <algorithm>
+#include <cstring>
 
 namespace str
 {
@@ -97,6 +98,30 @@ std::string group_digits(const std::string& in, const std::string& separator)
     }
     std::reverse(res.begin(), res.end());
     return res + tail;
+}
+
+std::vector<std::string> split(const std::string& in, const std::string& separator)
+{
+    std::vector<std::string> res;
+    const char *p = in.c_str();
+    const char *sep = separator.c_str();
+
+    const char *q;
+
+    while (true)
+    {
+        q = strstr(p, sep);
+        if (q)
+        {
+            res.push_back(std::string(p, q));
+            p = q + std::strlen(sep);
+        }
+        else
+        {
+            res.push_back(std::string(p));
+            return res;
+        }
+    }
 }
 
 } // namespace str

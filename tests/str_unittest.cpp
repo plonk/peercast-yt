@@ -43,3 +43,13 @@ TEST_F(strFixture, group_digits)
     ASSERT_STREQ("111,111,111",   group_digits("111111111").c_str());
     ASSERT_STREQ("1,111,111,111", group_digits("1111111111").c_str());
 }
+
+TEST_F(strFixture, split)
+{
+    auto vec = split("a b c", " ");
+
+    ASSERT_EQ(3, vec.size());
+    ASSERT_STREQ("a", vec[0].c_str());
+    ASSERT_STREQ("b", vec[1].c_str());
+    ASSERT_STREQ("c", vec[2].c_str());
+}
