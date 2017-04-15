@@ -94,4 +94,19 @@ std::vector<std::string> Query::getAll(const std::string& key)
     }
 }
 
+static const char* daysOfWeek[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+static const char* monthNames[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Nov", "Oct", "Dec" };
+
+std::string rfc1123Time(time_t t)
+{
+    tm tm;
+    char fmt[30], buf[30];
+
+    gmtime_r(&t, &tm);
+    strftime(fmt, sizeof(fmt), "%%s, %d %%s %Y %H:%M:%S GMT", &tm);
+    std::snprintf(buf, sizeof(buf), fmt, daysOfWeek[tm.tm_wday], monthNames[tm.tm_mon]);
+
+    return buf;
+}
+
 } // namespace cgi

@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <time.h>
 
 namespace cgi {
 
@@ -14,6 +15,7 @@ class Query
 {
 public:
     Query(const std::string& queryString);
+    std::string rfc1123Time(time_t t);
 
     bool hasKey(const std::string&);
     std::string get(const std::string&);
