@@ -306,7 +306,10 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
         }else if (strcmp(path.c_str(), "/") == 0)
         {
             if (!isAllowed(ALLOW_BROADCAST))
-                throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
+                throw HTTPException(HTTP_SC_FORBIDDEN, 403);
+
+            if (!isPrivate())
+                throw HTTPException(HTTP_SC_FORBIDDEN, 403);
 
             handshakeHTTPPush(args);
         }else
