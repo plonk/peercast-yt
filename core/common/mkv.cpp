@@ -9,7 +9,7 @@ using namespace matroska;
 
 void MKVStream::sendPacket(ChanPacket::TYPE type, const matroska::byte_string& data, Channel* ch)
 {
-    LOG_DEBUG("MKV Sending %d byte %s packet", data.size(), type==ChanPacket::T_HEAD?"HEAD":"DATA");
+    LOG_DEBUG("MKV Sending %lu byte %s packet", data.size(), type==ChanPacket::T_HEAD?"HEAD":"DATA");
 
     ChanPacket pack;
     pack.type = type;
