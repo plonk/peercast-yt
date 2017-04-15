@@ -169,3 +169,13 @@ TEST_F(ChanInfoFixture, static_getProtocolFromStr)
     ASSERT_EQ(ChanInfo::SP_UNKNOWN, ChanInfo::getProtocolFromStr("RTMP"));
 }
 
+TEST_F(ChanInfoFixture, setContentType)
+{
+    ASSERT_EQ(ChanInfo::T_UNKNOWN, info.contentType);
+
+    info.setContentType(ChanInfo::T_MKV);
+    ASSERT_EQ(ChanInfo::T_MKV, info.contentType);
+    ASSERT_STREQ("MKV", info.contentTypeStr.cstr());
+    ASSERT_STREQ("video/x-matroska", info.streamType.cstr());
+    ASSERT_STREQ(".mkv", info.streamExt.cstr());
+}

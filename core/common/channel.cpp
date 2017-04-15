@@ -3849,6 +3849,15 @@ void ChanInfo::init(const char *fn)
 }
 
 // -----------------------------------
+void ChanInfo::setContentType(TYPE type)
+{
+    this->contentType    = type;
+    this->contentTypeStr = getTypeStr(type);
+    this->streamType     = getMIMEType(type);
+    this->streamExt      = getTypeExt(type);
+}
+
+// -----------------------------------
 void ChanHitSearch::init()
 {
     matchHost.init();

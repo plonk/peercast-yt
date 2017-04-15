@@ -1653,12 +1653,8 @@ void Servent::handshakeHTTPPush(const std::string& args)
             this->agent = header.second.c_str();
     }
 
-    // 一発でセットするメソッドがChanInfoにあったほうがいい
     ChanInfo info;
-    info.contentType    = ChanInfo::T_MKV;
-    info.contentTypeStr = ChanInfo::getTypeStr(ChanInfo::T_MKV);
-    info.streamType     = ChanInfo::getMIMEType(ChanInfo::T_MKV);
-    info.streamExt      = ChanInfo::getTypeExt(ChanInfo::T_MKV);
+    info.setContentType(ChanInfo::T_MKV);
 
     if (query.get("name") == "")
         throw HTTPException(HTTP_SC_BADREQUEST, 400);

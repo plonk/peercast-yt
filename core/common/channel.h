@@ -160,6 +160,8 @@ public:
     static TYPE         getTypeFromStr(const char *str);
     static PROTOCOL     getProtocolFromStr(const char *str);
 
+    void setContentType(TYPE type);
+
     ::String        name;
     GnuID           id, bcID;
     int             bitrate;
