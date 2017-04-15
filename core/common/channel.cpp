@@ -1939,7 +1939,7 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
         if (sourceData)
         {
             unsigned int tot = sourceData->getSourceRate();
-            sprintf(buf, "%.1f", BYTES_TO_KBPS(tot));
+            sprintf(buf, "%.0f", BYTES_TO_KBPS(tot));
         }else
             strcpy(buf, "0");
 
