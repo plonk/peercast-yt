@@ -60,10 +60,10 @@
 
     // relays.html
     "Channel"                 : "チャンネル",
-    "Bitrate (kb/s)"          : "ビットレート (Kbps)",
+    "Bitrate (kb/s)"          : "転送速度 (Kbps)",
     "Stream"                  : "タイプ",
-    "Total Relays"            : "総<br>リレー数",
-    "Local Relays"            : "ローカル<br>リレー数",
+    "Total Relays"            : "総リレー",
+    "Local Relays"            : "ローカル<br>リレー",
     "Status"                  : "状態",
     "Keep"                    : "キープ",
     "Info"                    : "情報",
