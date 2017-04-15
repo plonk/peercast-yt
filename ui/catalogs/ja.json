@@ -105,6 +105,10 @@
     "Type"                    : "タイプ",
     "Create Relay"            : "リレーを作成",
 
+    // httppush.html
+    "HTTP Push Stream"        : "HTTP Push ストリーム",
+    "This builds a destination URL for the ffmpeg video converter." : "ffmpeg&thinsp;ビデオコンバータ用の送信先URLを作成します。",
+
     // connections.html
     "_Type_connection"        : "タイプ",
     "Time"                    : "時間",
