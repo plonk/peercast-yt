@@ -63,11 +63,11 @@ void MKVStream::readHeader(Stream &in, Channel *ch)
                           id.toName().c_str(),
                           std::to_string(size.uint()).c_str());
 
-                header += id.bytes;
-                header += size.bytes;
-
                 if (id.toName() != "Cluster")
                 {
+                    header += id.bytes;
+                    header += size.bytes;
+
                     uint8_t buffer[4096];
                     uint64_t remaining = size.uint();
 
@@ -88,9 +88,13 @@ void MKVStream::readHeader(Stream &in, Channel *ch)
                     }
                     sendPacket(ChanPacket::T_HEAD, header, ch);
 
+                    // 最初のクラスターを送信
+
+                    // クラスターヘッダー
+                    sendPacket(ChanPacket::T_DATA, id.bytes + size.bytes, ch);
+
                     uint64_t sizeRemaining = size.uint();
                     char buf[15 * 1024];
-                    // 最初のクラスターを送信
                     while (sizeRemaining > 15 * 1024)
                     {
                         in.read(buf, 15 * 1024);
