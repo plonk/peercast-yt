@@ -3281,6 +3281,8 @@ const char *ChanInfo::getMIMEType(TYPE t)
             return MIME_WMV;
         case ChanInfo::T_FLV:
             return MIME_FLV;
+        case ChanInfo::T_MKV:
+            return MIME_MKV;
         default:
             return "application/octet-stream";
     }
