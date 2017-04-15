@@ -1056,7 +1056,8 @@ ChannelStream *Channel::createSource()
                 break;
             case ChanInfo::T_WMA:
             case ChanInfo::T_WMV:
-                throw StreamException("Channel is WMA/WMV - but not MMS");
+                LOG_CHANNEL("Channel is MMS");
+                source = new MMSStream();
                 break;
             case ChanInfo::T_FLV:
                 LOG_CHANNEL("Channel is FLV");

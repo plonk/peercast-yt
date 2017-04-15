@@ -1656,12 +1656,17 @@ void Servent::handshakeHTTPPush(const std::string& args)
             this->agent = header.second.c_str();
     }
 
+    for (auto param : { "name", "type" })
+    {
+        if (query.get(param).empty())
+        {
+            LOG_ERROR("HTTP broadcast request does not have mandatory parameter `%s'", param);
+            throw HTTPException(HTTP_SC_BADREQUEST, 400);
+        }
+    }
+
     ChanInfo info;
-    info.setContentType(ChanInfo::T_MKV);
-
-    if (query.get("name") == "")
-        throw HTTPException(HTTP_SC_BADREQUEST, 400);
-
+    info.setContentType(ChanInfo::getTypeFromStr(query.get("type").c_str()));
     info.name  = query.get("name");
     info.genre = query.get("genre");
     info.desc  = query.get("desc");
