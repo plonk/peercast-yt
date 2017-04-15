@@ -364,7 +364,7 @@ bool HTML::readTemplate(Stream &in, Stream *outp, int loop)
             }
             else
             {
-                // throw StreamException("Unknown template escape");
+                // テンプレートに関係のない波括弧はそのまま表示する
                 if (outp)
                 {
                     outp->writeChar('{');
