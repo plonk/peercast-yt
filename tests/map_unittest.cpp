@@ -27,8 +27,10 @@ public:
 
 TEST_F(mapFixture, bracketsDoesNotThrow)
 {
+    ASSERT_EQ(0, dic.size());
     ASSERT_NO_THROW(dic["hoge"]);
     ASSERT_STREQ("", dic["hoge"].c_str());
+    ASSERT_EQ(1, dic.size());
 }
 
 TEST_F(mapFixture, atThrows)
