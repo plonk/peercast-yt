@@ -2016,14 +2016,19 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
     {
         if (sourceURL.isEmpty())
         {
-            std::string s;
-            s += sourceHost.str(true);
-            if (sourceHost.uphost.ip)
+            if (srcType == SRC_HTTPPUSH)
+                strcpy(buf, sock->host.str().c_str());
+            else
             {
-                s += " recv. from ";
-                s += sourceHost.uphost.str();
+                std::string s;
+                s += sourceHost.str(true);
+                if (sourceHost.uphost.ip)
+                {
+                    s += " recv. from ";
+                    s += sourceHost.uphost.str();
+                }
+                strcpy(buf, s.c_str());
             }
-            strcpy(buf, s.c_str());
         }
         else
             strcpy(buf, sourceURL.cstr());
