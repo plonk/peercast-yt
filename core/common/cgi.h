@@ -10,12 +10,12 @@ namespace cgi {
 
 std::string escape(const std::string&);
 std::string unescape(const std::string&);
+std::string rfc1123Time(time_t t);
 
 class Query
 {
 public:
     Query(const std::string& queryString);
-    std::string rfc1123Time(time_t t);
 
     bool hasKey(const std::string&);
     std::string get(const std::string&);
