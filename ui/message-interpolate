@@ -8,7 +8,9 @@ def process_file
     translation = $catalog[$1]
     if translation.nil?
       translation = $1
-      STDERR.puts("Warning: translation for #{$1.inspect} missing")
+      if $options[:verbose]
+        STDERR.puts("Warning: translation for #{$1.inspect} missing")
+      end
     end
     translation
   }
@@ -17,24 +19,28 @@ def process_file
 end
 
 def main
-  options = {}
+  $options = {}
   OptionParser.new do |opts|
-    opts.banner = "Usage: message-interpolate -c lang.json [-o doc.lang.html] doc.html"
+    opts.banner = "Usage: message-interpolate [OPTIONS]... -c lang.json doc.html"
 
     opts.on("-o FILE", "Specify output file") do |v|
-      options[:output] = v
+      $options[:output] = v
     end
 
     opts.on("-c FILE", "Specify catalog file") do |v|
-      options[:catalog] = v
+      $options[:catalog] = v
+    end
+
+    opts.on("-v", "--verbose", "Run verbosely") do |v|
+      $options[:verbose] = true
     end
   end.parse!
 
-  if options[:catalog].nil?
+  if $options[:catalog].nil?
     STDERR.puts("Warning: catalog file not specified")
     $catalog = {}
   else
-    $catalog = JSON.load(File.read(options[:catalog]))
+    $catalog = JSON.load(File.read($options[:catalog]))
   end
 
   if ARGV.size > 1
@@ -48,8 +54,8 @@ def main
     $in = STDIN
   end
 
-  if options[:output]
-    $out = File.open(options[:output], 'w')
+  if $options[:output]
+    $out = File.open($options[:output], 'w')
   else
     $out = STDOUT
   end
