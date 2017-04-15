@@ -1,5 +1,5 @@
 CATALOGS := $(wildcard catalogs/*.json)
-TEMPLATES := $(wildcard html-master/*.* html-master/images/*.* Templates/peercast.dwt)
+TEMPLATES := $(wildcard html-master/*.* html-master/images/*.* html-master/js/*.* Templates/peercast.dwt)
 
 html.tar: $(CATALOGS) $(TEMPLATES)
 	rm -rf html/
