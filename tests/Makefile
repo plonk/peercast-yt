@@ -30,7 +30,7 @@ LIBS =
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS = test_all
+TESTS = test-all
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -78,5 +78,5 @@ OBJS = $(SRC:.cpp=.o)
 %.o : %.cpp $(wildcard $(USER_DIR)/*.h) $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $<
 
-test_all : $(OBJS) ../ui/linux/libpeercast.a gtest.a
+test-all : $(OBJS) ../ui/linux/libpeercast.a gtest.a
 	$(CXX) $(LDFLAGS) $^ -o $@ $(LIBS)
