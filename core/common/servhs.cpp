@@ -1784,6 +1784,9 @@ void Servent::handshakeLocalFile(const char *fn)
     }else if (fileName.contains(".png"))
     {
         html.writeRawFile(fileName.cstr(), MIME_PNG);
+    }else if (fileName.contains(".js"))
+    {
+        html.writeRawFile(fileName.cstr(), MIME_JS);
     }else
     {
         throw HTTPException(HTTP_SC_NOTFOUND, 404);
