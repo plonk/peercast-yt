@@ -1769,20 +1769,16 @@ void Servent::handshakeLocalFile(const char *fn)
         html.writeTemplate(fileName.cstr(), args);
     }else if (fileName.contains(".css"))
     {
-        html.writeOK(MIME_CSS);
-        html.writeRawFile(fileName.cstr());
+        html.writeRawFile(fileName.cstr(), MIME_CSS);
     }else if (fileName.contains(".jpg"))
     {
-        html.writeOK(MIME_JPEG);
-        html.writeRawFile(fileName.cstr());
+        html.writeRawFile(fileName.cstr(), MIME_JPEG);
     }else if (fileName.contains(".gif"))
     {
-        html.writeOK(MIME_GIF);
-        html.writeRawFile(fileName.cstr());
+        html.writeRawFile(fileName.cstr(), MIME_GIF);
     }else if (fileName.contains(".png"))
     {
-        html.writeOK(MIME_PNG);
-        html.writeRawFile(fileName.cstr());
+        html.writeRawFile(fileName.cstr(), MIME_PNG);
     }else
     {
         throw HTTPException(HTTP_SC_NOTFOUND, 404);

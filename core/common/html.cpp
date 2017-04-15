@@ -31,6 +31,7 @@
 #include "version2.h"
 #include "dmstream.h"
 #include "notif.h"
+#include "cgi.h"
 
 // --------------------------------------
 HTML::HTML(const char *t, Stream &o)
@@ -44,14 +45,23 @@ HTML::HTML(const char *t, Stream &o)
 }
 
 // --------------------------------------
-void HTML::writeOK(const char *content)
+void HTML::writeOK(const char *content, const std::map<std::string,std::string>& additionalHeaders)
 {
+    bool crlf = out->writeCRLF;
+
+    out->writeCRLF = true;
     out->writeLine(HTTP_SC_OK);
     out->writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
     //out->writeLine("%s %s", HTTP_HS_CACHE, "no-cache");
     out->writeLineF("%s %s", HTTP_HS_CONNECTION, "close");
     out->writeLineF("%s %s", HTTP_HS_CONTENT, content);
+    out->writeLineF("Date: %s", cgi::rfc1123Time(sys->getTime()).c_str());
+
+    for (auto& pair : additionalHeaders)
+        out->writeLineF("%s: %s", pair.first.c_str(), pair.second.c_str());
+
     out->writeLine("");
+    out->writeCRLF = crlf;
 }
 // --------------------------------------
 void HTML::writeVariable(Stream &s, const String &varName, int loop)
@@ -390,15 +400,34 @@ void HTML::writeTemplate(const char *fileName, const char *args)
     file.close();
 }
 // --------------------------------------
-void HTML::writeRawFile(const char *fileName)
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+static time_t mtime(const char *path)
+{
+    struct stat st;
+    if (stat(path, &st) == -1)
+        return -1;
+    else
+        return st.st_mtime;
+}
+// --------------------------------------
+void HTML::writeRawFile(const char *fileName, const char *mimeType)
 {
     FileStream file;
+    std::map<std::string,std::string> additionalHeaders;
+
     try
     {
         file.openReadOnly(fileName);
+        time_t t = mtime(fileName);
 
+        if (t != -1)
+            additionalHeaders["Last-Modified"] = cgi::rfc1123Time(t);
+
+        writeOK(mimeType, additionalHeaders);
         file.writeTo(*out, file.length());
-
     }catch (StreamException &)
     {
     }

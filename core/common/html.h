@@ -21,6 +21,7 @@
 #define _HTML_H
 
 // ---------------------------------------
+#include <map>
 #include "xml.h"
 #include "sys.h"
 
@@ -64,9 +65,9 @@ public:
     void    locateTo(const char *);
     void    addContent(const char *);
 
-    void    writeOK(const char *);
+    void    writeOK(const char *content, const std::map<std::string,std::string>& additionalHeaders = {});
     void    writeTemplate(const char *, const char *);
-    void    writeRawFile(const char *);
+    void    writeRawFile(const char *, const char *);
     void    writeVariable(Stream &, const String &, int);
     int     getIntVariable(const String &, int);
     bool    getBoolVariable(const String &, int);
