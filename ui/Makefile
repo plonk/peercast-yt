@@ -7,4 +7,4 @@ html.tar: $(CATALOGS) $(TEMPLATES)
 	tar cf html.tar html
 
 clean:
-	rm -rf html/
+	rm -rf html/ html.tar
