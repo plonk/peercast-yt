@@ -21,17 +21,17 @@
 
 #include <stdarg.h>
 #include <stdlib.h>
+#include "cgi.h"
+#include "channel.h"
+#include "dmstream.h"
+#include "gnutella.h"
 #include "html.h"
 #include "http.h"
-#include "stream.h"
-#include "gnutella.h"
-#include "servmgr.h"
-#include "channel.h"
-#include "stats.h"
-#include "version2.h"
-#include "dmstream.h"
 #include "notif.h"
-#include "cgi.h"
+#include "servmgr.h"
+#include "stats.h"
+#include "stream.h"
+#include "version2.h"
 
 // --------------------------------------
 HTML::HTML(const char *t, Stream &o)
@@ -63,6 +63,7 @@ void HTML::writeOK(const char *content, const std::map<std::string,std::string>&
     out->writeLine("");
     out->writeCRLF = crlf;
 }
+
 // --------------------------------------
 void HTML::writeVariable(Stream &s, const String &varName, int loop)
 {
@@ -172,7 +173,6 @@ void HTML::writeVariable(Stream &s, const String &varName, int loop)
             }
         }else
         {
-
             String v = varName+5;
             v.append('=');
             const char *a = getCGIarg(tmplArgs, v);
@@ -184,10 +184,10 @@ void HTML::writeVariable(Stream &s, const String &varName, int loop)
         }
     }
 
-
     if (!r)
         s.writeString(varName);
 }
+
 // --------------------------------------
 int HTML::getIntVariable(const String &varName, int loop)
 {
@@ -197,6 +197,7 @@ int HTML::getIntVariable(const String &varName, int loop)
 
     return atoi(mem.str().c_str());
 }
+
 // --------------------------------------
 bool HTML::getBoolVariable(const String &varName, int loop)
 {
@@ -246,7 +247,6 @@ void    HTML::readIf(Stream &in, Stream *outp, int loop)
             var.append(c);
         }
     }
-
 }
 
 // --------------------------------------
@@ -274,7 +274,6 @@ void    HTML::readLoop(Stream &in, Stream *outp, int loop)
                 readTemplate(in, NULL, 0);
             }
             return;
-
         }else
         {
             var.append(c);
@@ -338,8 +337,8 @@ void    HTML::readVariable(Stream &in, Stream *outp, int loop)
             var.append(c);
         }
     }
-
 }
+
 // --------------------------------------
 bool HTML::readTemplate(Stream &in, Stream *outp, int loop)
 {
@@ -399,6 +398,7 @@ void HTML::writeTemplate(const char *fileName, const char *args)
     }
     file.close();
 }
+
 // --------------------------------------
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -412,6 +412,7 @@ static time_t mtime(const char *path)
     else
         return st.st_mtime;
 }
+
 // --------------------------------------
 void HTML::writeRawFile(const char *fileName, const char *mimeType)
 {
@@ -442,37 +443,38 @@ void HTML::locateTo(const char *url)
     out->writeLineF("Location: %s", url);
     out->writeLine("");
 }
+
 // --------------------------------------
 void HTML::startHTML()
 {
     startNode("html");
 }
+
 // --------------------------------------
 void HTML::startBody()
 {
     startNode("body");
 }
+
 // --------------------------------------
 void HTML::addHead()
 {
     char buf[512];
-        startNode("head");
-            startTagEnd("title", title.cstr());
-            startTagEnd("meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\"");
-
-            if (!refreshURL.isEmpty())
-            {
-                sprintf(buf, "meta http-equiv=\"refresh\" content=\"%d;URL=%s\"", refresh, refreshURL.cstr());
-                startTagEnd(buf);
-            }else if (refresh)
-            {
-                sprintf(buf, "meta http-equiv=\"refresh\" content=\"%d\"", refresh);
-                startTagEnd(buf);
-            }
-
-
-        end();
+    startNode("head");
+        startTagEnd("title", title.cstr());
+        startTagEnd("meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\"");
+        if (!refreshURL.isEmpty())
+        {
+            sprintf(buf, "meta http-equiv=\"refresh\" content=\"%d;URL=%s\"", refresh, refreshURL.cstr());
+            startTagEnd(buf);
+        }else if (refresh)
+        {
+            sprintf(buf, "meta http-equiv=\"refresh\" content=\"%d\"", refresh);
+            startTagEnd(buf);
+        }
+    end();
 }
+
 // --------------------------------------
 void HTML::startNode(const char *tag, const char *data)
 {
@@ -499,6 +501,7 @@ void HTML::startNode(const char *tag, const char *data)
     if (tagLevel >= MAX_TAGLEVEL)
         throw StreamException("HTML too deep!");
 }
+
 // --------------------------------------
 void HTML::end()
 {
@@ -510,6 +513,7 @@ void HTML::end()
     out->writeString(&currTag[tagLevel][0]);
     out->writeString(">");
 }
+
 // --------------------------------------
 void HTML::addLink(const char *url, const char *text, bool toblank)
 {
@@ -519,12 +523,12 @@ void HTML::addLink(const char *url, const char *text, bool toblank)
     startNode(buf, text);
     end();
 }
+
 // --------------------------------------
 void HTML::startTag(const char *tag, const char *fmt, ...)
 {
     if (fmt)
     {
-
         va_list ap;
         va_start(ap, fmt);
 
@@ -537,12 +541,12 @@ void HTML::startTag(const char *tag, const char *fmt, ...)
         startNode(tag, NULL);
     }
 }
+
 // --------------------------------------
 void HTML::startTagEnd(const char *tag, const char *fmt, ...)
 {
     if (fmt)
     {
-
         va_list ap;
         va_start(ap, fmt);
 
@@ -556,6 +560,7 @@ void HTML::startTagEnd(const char *tag, const char *fmt, ...)
     }
     end();
 }
+
 // --------------------------------------
 void HTML::startSingleTagEnd(const char *fmt, ...)
 {
