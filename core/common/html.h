@@ -67,8 +67,6 @@ public:
                     const std::map<std::string,std::string>& = {});
     void    locateTo(const char *);
 
-    void    addContent(const char *);
-
     // テンプレート
     void    writeTemplate(const char *, const char *);
     void    writeRawFile(const char *, const char *);

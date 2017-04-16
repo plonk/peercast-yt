@@ -474,11 +474,6 @@ void HTML::addHead()
         end();
 }
 // --------------------------------------
-void HTML::addContent(const char *s)
-{
-    out->writeString(s);
-}
-// --------------------------------------
 void HTML::startNode(const char *tag, const char *data)
 {
     const char *p = tag;
