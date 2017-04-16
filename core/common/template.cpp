@@ -143,6 +143,14 @@ void Template::writeVariable(Stream &s, const String &varName, int loop)
                 r = true;
             }
         }
+    }else if (varName == "TRUE")
+    {
+        s.writeString("1");
+        r = true;
+    }else if (varName == "FALSE")
+    {
+        s.writeString("0");
+        r = true;
     }
 
     if (!r)
