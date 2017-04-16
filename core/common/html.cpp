@@ -69,6 +69,11 @@ void HTML::writeTemplate(const char *fileName, const char *args)
     {
         WriteBufferedStream bufferedOut(out);
         Template temp(args);
+        if (args)
+        {
+            cgi::Query query(args);
+            temp.selectedFragment = query.get("fragment");
+        }
         file.openReadOnly(fileName);
         temp.readTemplate(file, &bufferedOut, 0);
     }catch (StreamException &e)

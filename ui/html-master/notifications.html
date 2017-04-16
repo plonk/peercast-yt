@@ -7,31 +7,34 @@
   <!-- InstanceEndEditable -->
 
   <!-- InstanceBeginEditable name="head" -->
-  <meta http-equiv="refresh" content="{$servMgr.refreshHTML}">
   <!-- InstanceEndEditable -->
 
   <!-- InstanceBeginEditable name="content" -->
-  <table width="100%" class="normal">
-    <tr bgcolor="#ccc">
-      <th style="width: 14em">{#Time}</th>
-      <th style="width: 3em">{#Type}</th>
-      <th>{#Message}</th>
-    </tr>
+  <div class="reloader" data-url="notifications.html?fragment=content" data-interval="{$servMgr.refreshHTML}">
+    {@fragment content}
+    <table width="100%" class="normal">
+      <tr bgcolor="#ccc">
+        <th style="width: 14em">{#Time}</th>
+        <th style="width: 3em">{#Type}</th>
+        <th>{#Message}</th>
+      </tr>
 
-    {@loop notificationBuffer.numNotifications}
-    <tr bgcolor="{@if loop.indexEven}#ddd{@else}#eee{@end}">
-      <td>
-        {$loop.notification.time}
-      </td>
-      <td>
-        {$loop.notification.type}
-      </td>
-      <td>
-        {$loop.notification.message}
-      </td>
-    </tr>
+      {@loop notificationBuffer.numNotifications}
+      <tr bgcolor="{@if loop.indexEven}#ddd{@else}#eee{@end}">
+        <td>
+          {$loop.notification.time}
+        </td>
+        <td>
+          {$loop.notification.type}
+        </td>
+        <td>
+          {$loop.notification.message}
+        </td>
+      </tr>
+      {@end}
+    </table>
     {@end}
-  </table>
+  </div>
   <!-- InstanceEndEditable -->
 
   <!-- InstanceEnd -->

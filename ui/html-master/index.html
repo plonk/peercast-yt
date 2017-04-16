@@ -7,7 +7,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <link href="peercast.css" rel="stylesheet" type="text/css">
     <!-- InstanceBeginEditable name="head" -->
-    <meta http-equiv="refresh" content="{$servMgr.refreshHTML}">
+    <!-- <meta http-equiv="refresh" content="{$servMgr.refreshHTML}"> -->
     <!-- InstanceEndEditable -->
   </head>
 
@@ -78,7 +78,9 @@
                     ></p>
                 </div>
                 {@end}
-              </p><DIV align=center>
+              </p>
+              <DIV align=center class="reloader" data-url="index.html?fragment=content" data-interval="{$servMgr.refreshHTML}">
+                {@fragment content}
                 <TABLE align=center border=0>
                   <TBODY>
                     <TR align=middle>
@@ -183,6 +185,7 @@
                     </TR>
                   </TBODY>
                 </TABLE>
+                {@end}
               </DIV>
               <!-- InstanceEndEditable -->
               <hr size="1">

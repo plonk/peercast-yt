@@ -188,6 +188,34 @@ bool Template::getBoolVariable(const String &varName, int loop)
 }
 
 // --------------------------------------
+void    Template::readFragment(Stream &in, Stream *outp, int loop)
+{
+    std::string fragName;
+
+    while (!in.eof())
+    {
+        char c = in.readChar();
+
+        if (c == '}')
+        {
+            auto outerFragment = currentFragment;
+            currentFragment = fragName;
+            bool elsefound = false;
+            elsefound = readTemplate(in, outp, loop);
+            if (elsefound)
+                LOG_ERROR("Stray else in fragment block");
+            currentFragment = outerFragment;
+            return;
+        }else
+        {
+            fragName += c;
+        }
+    }
+    LOG_ERROR("Premature end while processing fragment directive");
+    return;
+}
+
+// --------------------------------------
 void    Template::readIf(Stream &in, Stream *outp, int loop)
 {
     String var;
@@ -272,6 +300,10 @@ int Template::readCmd(Stream &in, Stream *outp, int loop)
             {
                 readIf(in, outp, loop);
                 tmpl = TMPL_IF;
+            }else if (cmd == "fragment")
+            {
+                readFragment(in, outp, loop);
+                tmpl = TMPL_FRAGMENT;
             }else if (cmd == "end")
             {
                 tmpl = TMPL_END;
@@ -298,7 +330,7 @@ void    Template::readVariable(Stream &in, Stream *outp, int loop)
         char c = in.readChar();
         if (c == '}')
         {
-            if (outp)
+            if (inSelectedFragment() && outp)
                 writeVariable(*outp, var, loop);
             return;
         }else
@@ -309,8 +341,16 @@ void    Template::readVariable(Stream &in, Stream *outp, int loop)
 }
 
 // --------------------------------------
+
+// in の現在の位置から 1 ブロック分のテンプレートを処理し、outp が
+// NULL でなければ *outp に出力する。{@loop} 内を処理している場合は、0
+// から始まるループカウンターの値が loop に設定される。EOF あるいは
+// {@end} に当たった場合は false を返し、{@else} に当たった場合は true
+// を返す。
 bool Template::readTemplate(Stream &in, Stream *outp, int loop)
 {
+    Stream *p = inSelectedFragment() ? outp : NULL;
+
     while (!in.eof())
     {
         char c = in.readChar();
@@ -333,16 +373,16 @@ bool Template::readTemplate(Stream &in, Stream *outp, int loop)
             else
             {
                 // テンプレートに関係のない波括弧はそのまま表示する
-                if (outp)
+                if (p)
                 {
-                    outp->writeChar('{');
-                    outp->writeChar(c);
+                    p->writeChar('{');
+                    p->writeChar(c);
                 }
             }
         }else
         {
-            if (outp)
-                outp->writeChar(c);
+            if (p)
+                p->writeChar(c);
         }
     }
     return false;

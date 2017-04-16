@@ -23,6 +23,7 @@
 #include "sys.h"
 #include "stream.h"
 
+// HTML テンプレートシステム
 class Template
 {
     enum
@@ -31,28 +32,49 @@ class Template
         TMPL_LOOP,
         TMPL_IF,
         TMPL_ELSE,
-        TMPL_END
+        TMPL_END,
+        TMPL_FRAGMENT
     };
 
 public:
-    Template(const char* args = "")
-        : tmplArgs(args)
+    Template(const char* args = NULL)
     {
+        if (args)
+            tmplArgs = strdup(args);
+        else
+            tmplArgs = NULL;
+    }
+    ~Template()
+    {
+        if (tmplArgs)
+            free(tmplArgs);
     }
 
-    // テンプレート
+    bool inSelectedFragment()
+    {
+        if (selectedFragment.empty())
+            return true;
+        else
+            return selectedFragment == currentFragment;
+    }
+
+    // 変数
     void    writeVariable(Stream &, const String &, int);
     int     getIntVariable(const String &, int);
     bool    getBoolVariable(const String &, int);
 
-    // テンプレートディレクティブの実行
+    // ディレクティブの実行
+    int     readCmd(Stream &, Stream *, int);
     void    readIf(Stream &, Stream *, int);
     void    readLoop(Stream &, Stream *, int);
+    void    readFragment(Stream &, Stream *, int);
+
     void    readVariable(Stream &, Stream *, int);
     bool    readTemplate(Stream &, Stream *, int);
-    int     readCmd(Stream &, Stream *, int);
 
-    const char *tmplArgs;
+    char * tmplArgs;
+    std::string selectedFragment;
+    std::string currentFragment;
 };
 
 #endif
