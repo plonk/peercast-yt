@@ -33,6 +33,7 @@
 #include "matroska.h"
 #include "str.h"
 #include "cgi.h"
+#include "template.h"
 
 // -----------------------------------
 static void termArgs(char *str)
@@ -1862,8 +1863,7 @@ void Servent::handshakeRemoteFile(const char *dirName)
 
     if (isTemplate)
     {
-        HTML html("", *sock);
-        html.readTemplate(mem, sock, 0);
+        Template().readTemplate(mem, sock, 0);
     }else
         sock->write(mem.buf, fileLen);
 }
