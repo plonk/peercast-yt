@@ -120,9 +120,12 @@ void HTML::writeRawFile(const char *fileName, const char *mimeType)
 // --------------------------------------
 void HTML::locateTo(const char *url)
 {
+    bool prev = out->writeCRLF;
+    out->writeCRLF = true;
     out->writeLine(HTTP_SC_FOUND);
     out->writeLineF("Location: %s", url);
     out->writeLine("");
+    out->writeCRLF = prev;
 }
 
 // --------------------------------------
