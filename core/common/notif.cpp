@@ -109,6 +109,9 @@ bool NotificationBuffer::writeVariable(Stream& out, const String& varName, int i
         } else if (prop == "type") {
             out.writeString(e.notif.getTypeStr().c_str());
             return true;
+        } else if (prop == "unixTime") {
+            out.writeString(std::to_string(e.notif.time).c_str());
+            return true;
         } else if (prop == "time") {
             String t;
             t.setFromTime(e.notif.time);

@@ -42,6 +42,10 @@ void Template::writeVariable(Stream &s, const String &varName, int loop)
         {
             sys->logBuf->dumpHTML(s);
             r = true;
+        }else if (varName == "sys.time")
+        {
+            s.writeString(std::to_string(sys->getTime()).c_str());
+            r = true;
         }
     }
     else if (varName.startsWith("notificationBuffer."))

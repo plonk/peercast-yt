@@ -15,15 +15,15 @@
     <div class="reloader" data-url="?fragment=notifications" data-interval="{$servMgr.refreshHTML}">
       {@fragment notifications}
       <script>
-        var notifications = [
+        var notifications = [];
+        var t = {$sys.time};
+        var r = {$servMgr.refreshHTML};
         {@loop notificationBuffer.numNotifications}
           {@if !loop.notification.isRead}
-          { time: "{$loop.notification.time}",
-            type: "{$loop.notification.type}",
-            message: "{$loop.notification.message}" },
+            if (t - {$loop.notification.unixTime} <= (2*r))
+              notifications.push({ time: "{$loop.notification.time}", type: "{$loop.notification.type}", message: "{$loop.notification.message}" });
           {@end}
         {@end}
-        ];
 
         // {$notificationBuffer.markAsRead}
 
