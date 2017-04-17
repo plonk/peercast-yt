@@ -53,3 +53,10 @@ TEST_F(strFixture, split)
     ASSERT_STREQ("b", vec[1].c_str());
     ASSERT_STREQ("c", vec[2].c_str());
 }
+
+TEST_F(strFixture, codepoint_to_utf8)
+{
+    ASSERT_STREQ(" ", codepoint_to_utf8(0x20).c_str());
+    ASSERT_STREQ("あ", codepoint_to_utf8(12354).c_str());
+    ASSERT_STREQ("\xf0\x9f\x92\xa9", codepoint_to_utf8(0x1f4a9).c_str()); // PILE OF POO
+}

@@ -24,6 +24,7 @@
 #include "stats.h"
 #include "dmstream.h"
 #include "notif.h"
+#include "str.h"
 
 // --------------------------------------
 void Template::writeVariable(Stream &s, const String &varName, int loop)
@@ -331,7 +332,33 @@ void    Template::readVariable(Stream &in, Stream *outp, int loop)
         if (c == '}')
         {
             if (inSelectedFragment() && outp)
+            {
+                DynamicMemoryStream mem;
+
+                writeVariable(mem, var, loop);
+                outp->writeString(cgi::escape_html(mem.str()).c_str());
+            }
+            return;
+        }else
+        {
+            var.append(c);
+        }
+    }
+}
+
+// --------------------------------------
+void    Template::readVariableRaw(Stream &in, Stream *outp, int loop)
+{
+    String var;
+    while (!in.eof())
+    {
+        char c = in.readChar();
+        if (c == '}')
+        {
+            if (inSelectedFragment() && outp)
+            {
                 writeVariable(*outp, var, loop);
+            }
             return;
         }else
         {
@@ -361,6 +388,10 @@ bool Template::readTemplate(Stream &in, Stream *outp, int loop)
             if (c == '$')
             {
                 readVariable(in, outp, loop);
+            }
+            else if (c == '!')
+            {
+                readVariableRaw(in, outp, loop);
             }
             else if (c == '@')
             {

@@ -2,6 +2,8 @@
 
 #include "cgi.h"
 
+using namespace cgi;
+
 class cgiFixture : public ::testing::Test {
 public:
     cgiFixture()
@@ -45,3 +47,23 @@ TEST_F(cgiFixture, rfc1123Time)
 {
     ASSERT_STREQ("Thu, 01 Jan 1970 00:00:00 GMT", cgi::rfc1123Time(0).c_str());
 }
+
+TEST_F(cgiFixture, escape_html)
+{
+    ASSERT_STREQ("", escape_html("").c_str());
+    ASSERT_STREQ("a", escape_html("a").c_str());
+    ASSERT_STREQ("aa", escape_html("aa").c_str());
+    ASSERT_STREQ("&lt;&amp;&gt;", escape_html("<&>").c_str());
+}
+
+TEST_F(cgiFixture, unescape_html)
+{
+    ASSERT_STREQ("", unescape_html("").c_str());
+    ASSERT_STREQ("a", unescape_html("a").c_str());
+    ASSERT_STREQ("aa", unescape_html("aa").c_str());
+    ASSERT_STREQ("<&>", unescape_html("&lt;&amp;&gt;").c_str());
+    ASSERT_STREQ("あ", unescape_html("&#12354;").c_str());
+    ASSERT_STREQ("\xf0\x9f\x92\xa9", unescape_html("&#x1f4a9;").c_str());
+    ASSERT_STREQ("\xf0\x9f\x92\xa9", unescape_html("&#X1F4A9;").c_str());
+}
+

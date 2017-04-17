@@ -970,9 +970,9 @@ void Channel::updateInfo(const ChanInfo &newInfo)
 
     if (!oldComment.isSame(info.comment))
     {
-        // Shift_JIS かも知れない文字列を (HTMLエスケープされた) UTF8 に変換したい。
+        // Shift_JIS かも知れない文字列を UTF8 に変換したい。
         String newComment = info.comment;
-        newComment.convertTo(String::T_UNICODESAFE);
+        newComment.convertTo(String::T_UNICODE);
 
         peercast::notifyMessage(ServMgr::NT_PEERCAST, info.name.str() + "氏曰く: " + newComment.str());
     }
@@ -1946,17 +1946,17 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
     }else if (var == "genre")
     {
         utf8 = info.genre;
-        utf8.convertTo(String::T_UNICODESAFE);
+        utf8.convertTo(String::T_UNICODE);
         strcpy(buf, utf8.cstr());
     }else if (var == "desc")
     {
         utf8 = info.desc;
-        utf8.convertTo(String::T_UNICODESAFE);
+        utf8.convertTo(String::T_UNICODE);
         strcpy(buf, utf8.cstr());
     }else if (var == "comment")
     {
         utf8 = info.comment;
-        utf8.convertTo(String::T_UNICODESAFE);
+        utf8.convertTo(String::T_UNICODE);
         strcpy(buf, utf8.cstr());
     }else if (var == "uptime")
     {
@@ -1990,7 +1990,6 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
         info.id.toStr(buf);
     else if (var.startsWith("track."))
     {
-
         if (var == "track.title")
             utf8 = info.track.title;
         else if (var == "track.artist")
@@ -2002,7 +2001,7 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
         else if (var == "track.contactURL")
             utf8 = info.track.contact;
 
-        utf8.convertTo(String::T_UNICODESAFE);
+        utf8.convertTo(String::T_UNICODE);
         strcpy(buf, utf8.cstr());
 
     }else if (var == "contactURL")

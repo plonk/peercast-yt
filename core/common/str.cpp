@@ -126,4 +126,38 @@ std::vector<std::string> split(const std::string& in, const std::string& separat
     }
 }
 
+std::string codepoint_to_utf8(uint32_t codepoint)
+{
+    std::string res;
+    if (codepoint >= 0 && codepoint <= 0x7f) {
+        res += (char) codepoint;
+    } else if (codepoint >= 0x80 && codepoint <= 0x7ff) {
+        res += (char) (0xb0 | (codepoint >> 6));
+        res += (char) (0x80 | (codepoint & 0x3f));
+    } else if (codepoint >= 0x800 && codepoint <= 0xffff) {
+        res += (char) (0xe0 | (codepoint >> 12));
+        res += (char) (0x80 | ((codepoint >> 6) & 0x3f));
+        res += (char) (0x80 | (codepoint & 0x3f));
+    } else if (codepoint >= 0x10000 && codepoint <= 0x1fffff) {
+        res += (char) (0xf0 | (codepoint >> 18));
+        res += (char) (0x80 | ((codepoint >> 12) & 0x3f));
+        res += (char) (0x80 | ((codepoint >> 6) & 0x3f));
+        res += (char) (0x80 | (codepoint & 0x3f));
+    } else if (codepoint >= 0x200000 && codepoint <= 0x3ffffff) {
+        res += (char) (0xf8 | (codepoint >> 24));
+        res += (char) (0x80 | ((codepoint >> 18) & 0x3f));
+        res += (char) (0x80 | ((codepoint >> 12) & 0x3f));
+        res += (char) (0x80 | ((codepoint >> 6) & 0x3f));
+        res += (char) (0x80 | (codepoint & 0x3f));
+    } else { // [0x4000000, 0x7fffffff]
+        res += (char) (0xfb | (codepoint >> 30));
+        res += (char) (0x80 | ((codepoint >> 24) & 0x3f));
+        res += (char) (0x80 | ((codepoint >> 18) & 0x3f));
+        res += (char) (0x80 | ((codepoint >> 12) & 0x3f));
+        res += (char) (0x80 | ((codepoint >> 6) & 0x3f));
+        res += (char) (0x80 | (codepoint & 0x3f));
+    }
+    return res;
+}
+
 } // namespace str

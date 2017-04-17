@@ -2111,7 +2111,6 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     else if (var == "uptime")
     {
         str.setFromStopwatch(getUptime());
-        str.convertTo(String::T_HTML);
         strcpy(buf, str.cstr());
     }else if (var == "numRelays")
         sprintf(buf, "%d", numStreams(Servent::T_RELAY, true));

@@ -62,11 +62,11 @@
             {@if loop.externalChannel.url}
             <a class="link channel-name" href="{$loop.externalChannel.url}">{$loop.externalChannel.name}</a>
             {@else}
-            {$loop.externalChannel.name}
+            {!loop.externalChannel.name}
             {@end}
           </span><br>
           <div class="detail">
-            {@if loop.externalChannel.genre}{$loop.externalChannel.genre} - {@end}{$loop.externalChannel.desc}
+            {@if loop.externalChannel.genre}{!loop.externalChannel.genre} - {@end}{!loop.externalChannel.desc}
           </div>
         </td>
         <td align=center nowrap>

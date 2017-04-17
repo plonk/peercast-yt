@@ -70,6 +70,7 @@ public:
     void    readFragment(Stream &, Stream *, int);
 
     void    readVariable(Stream &, Stream *, int);
+    void    readVariableRaw(Stream &in, Stream *outp, int loop);
     bool    readTemplate(Stream &, Stream *, int);
 
     char * tmplArgs;
