@@ -356,11 +356,11 @@ json::array_t Template::evaluateCollectionVariable(String& varName)
         res.push_back(json::object({ { "a", 2 } }));
         res.push_back(json::object({ { "a", 3 } }));
         return res;
-    }else if (varName == "channelsFound")
-    {
-        JrpcApi api;
-        LOG_DEBUG("%s", api.getChannelsFound({}).dump().c_str());
-        return api.getChannelsFound({});
+    // }else if (varName == "channelsFound")
+    // {
+    //     JrpcApi api;
+    //     LOG_DEBUG("%s", api.getChannelsFound({}).dump().c_str());
+    //     return api.getChannelsFound({});
     }else
     {
         return {};
