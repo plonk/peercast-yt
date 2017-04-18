@@ -19,17 +19,12 @@
 #ifndef _CHANNEL_H
 #define _CHANNEL_H
 
-#include <functional>
-
 #include "sys.h"
 #include "stream.h"
 #include "gnutella.h"
 #include "xml.h"
 #include "asf.h"
 #include "cstream.h"
-
-class AtomStream;
-class ChanHitSearch;
 
 // --------------------------------------------------
 struct MP3Header
@@ -51,138 +46,7 @@ struct MP3Header
 
 // ----------------------------------
 #include "chaninfo.h"
-
-// ----------------------------------
-class ChanHit
-{
-public:
-    ChanHit () { init(); }
-
-    void    init();
-    void    initLocal(int numl, int numr, int nums, int uptm, bool, unsigned int, unsigned int, const Host& = Host());
-    XML::Node *createXML();
-
-    void    writeAtoms(AtomStream &, GnuID &);
-    bool    writeVariable(Stream &, const String &);
-
-    void    pickNearestIP(Host &);
-
-    Host            host;
-    Host            rhost[2];
-    unsigned int    numListeners, numRelays, numHops;
-    unsigned int    time, upTime, lastContact;
-    unsigned int    hitID;
-    GnuID           sessionID, chanID;
-    unsigned int    version;
-    unsigned int    oldestPos, newestPos;
-
-    bool            firewalled;
-    bool            stable;
-    bool            tracker;
-    bool            recv;
-    bool            yp;
-    bool            dead;
-    bool            direct;
-    bool            relay;
-    bool            cin;
-
-    // 上流ホストの情報。
-    Host            uphost;
-    unsigned int    uphostHops;
-
-    unsigned int    versionVP;
-    char            versionExPrefix[2];
-    unsigned int    versionExNumber;
-
-
-    std::string versionString()
-    {
-        using namespace std;
-        if (!version)
-            return "";
-        else if (!versionVP)
-            return to_string(version);
-        else if (!versionExNumber)
-            return "VP" + to_string(versionVP);
-        else
-            return string() + versionExPrefix[0] + versionExPrefix[1] + to_string(versionExNumber);
-    }
-
-    // 選択されたホスト(=host)の情報を簡潔に文字列化する。
-    std::string str(bool withPort = false)
-    {
-        auto res = host.str(withPort);
-
-        if (!versionString().empty())
-            res += " (" + versionString() + ")";
-        return res;
-    }
-
-    ChanHit *next;
-};
-// ----------------------------------
-class ChanHitList
-{
-public:
-    ChanHitList();
-    ~ChanHitList();
-
-    int          contactTrackers(bool, int, int, int);
-
-    ChanHit      *addHit(ChanHit &);
-    void         delHit(ChanHit &);
-    void         deadHit(ChanHit &);
-    int          numHits();
-    int          numListeners();
-    int          numRelays();
-    int          numFirewalled();
-    int          numTrackers();
-    int          closestHit();
-    int          furthestHit();
-    unsigned int newestHit();
-
-    int          pickHits(ChanHitSearch &);
-
-    bool         isUsed() { return used; }
-    int          clearDeadHits(unsigned int, bool);
-    XML::Node    *createXML(bool addHits = true);
-
-    ChanHit      *deleteHit(ChanHit *);
-
-    int          getTotalListeners();
-    int          getTotalRelays();
-    int          getTotalFirewalled();
-
-    void         forEachHit(std::function<void(ChanHit*)> block);
-
-    bool         used;
-    ChanInfo     info;
-    ChanHit      *hit;
-    unsigned int lastHitTime;
-    ChanHitList  *next;
-};
-
-// ----------------------------------
-class ChanHitSearch
-{
-public:
-    enum
-    {
-        MAX_RESULTS = 8
-    };
-
-    ChanHitSearch() { init(); }
-    void init();
-
-    ChanHit         best[MAX_RESULTS];
-    Host            matchHost;
-    unsigned int    waitDelay;
-    bool            useFirewalled;
-    bool            trackersOnly;
-    bool            useBusyRelays, useBusyControls;
-    GnuID           excludeID;
-    int             numResults;
-};
+#include "chanhit.h"
 
 // ----------------------------------
 class ChanMeta
