@@ -210,7 +210,7 @@ TEST_F(ChanHitListFixture, getTotalFirewalled)
 
     hit.firewalled = true;
     hitlist->addHit(hit);
-    
+
     ASSERT_EQ(1, hitlist->getTotalFirewalled());
 }
 
@@ -220,3 +220,23 @@ TEST_F(ChanHitListFixture, getTotalFirewalled)
 
 //     ASSERT_EQ(seq + 1, hitlist->getSeq());
 // }
+#include "servmgr.h"
+
+TEST_F(ChanHitListFixture, forEachHit)
+{
+    ChanHit h1, h2, h3;
+
+    hitlist->used = true;
+
+    h1.rhost[0].fromStrIP("0.0.0.1", 7144);
+    h2.rhost[0].fromStrIP("0.0.0.2", 7144);
+    h3.rhost[0].fromStrIP("0.0.0.3", 7144);
+
+    hitlist->addHit(h1);
+    hitlist->addHit(h2);
+    hitlist->addHit(h3);
+
+    int count = 0;
+    hitlist->forEachHit([&](ChanHit*) { count++; });
+    ASSERT_EQ(3, count);
+}
