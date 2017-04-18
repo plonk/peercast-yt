@@ -490,6 +490,61 @@ static std::string chName(ChanInfo& info)
 }
 
 // -----------------------------------
+ChanHit PeercastSource::pickFromHitList(Channel *ch, ChanHit &oldHit)
+{
+    ChanHit res = oldHit;
+    ChanHitList *chl = NULL;
+
+    chl = chanMgr->findHitList(ch->info);
+    if (chl)
+    {
+        ChanHitSearch chs;
+
+        // find local hit
+        chs.init();
+        chs.matchHost = servMgr->serverHost;
+        chs.waitDelay = MIN_RELAY_RETRY;
+        chs.excludeID = servMgr->sessionID;
+        if (chl->pickHits(chs))
+            res = chs.best[0];
+
+        // else find global hit
+        if (!res.host.ip)
+        {
+            chs.init();
+            chs.waitDelay = MIN_RELAY_RETRY;
+            chs.excludeID = servMgr->sessionID;
+            if (chl->pickHits(chs))
+                res = chs.best[0];
+        }
+
+        // else find local tracker
+        if (!res.host.ip)
+        {
+            chs.init();
+            chs.matchHost = servMgr->serverHost;
+            chs.waitDelay = MIN_TRACKER_RETRY;
+            chs.excludeID = servMgr->sessionID;
+            chs.trackersOnly = true;
+            if (chl->pickHits(chs))
+                res = chs.best[0];
+        }
+
+        // else find global tracker
+        if (!res.host.ip)
+        {
+            chs.init();
+            chs.waitDelay = MIN_TRACKER_RETRY;
+            chs.excludeID = servMgr->sessionID;
+            chs.trackersOnly = true;
+            if (chl->pickHits(chs))
+                res = chs.best[0];
+        }
+    }
+    return res;
+}
+
+// -----------------------------------
 void PeercastSource::stream(Channel *ch)
 {
     m_channel = ch;
@@ -497,8 +552,6 @@ void PeercastSource::stream(Channel *ch)
     int numYPTries=0;
     while (ch->thread.active)
     {
-        ChanHitList *chl = NULL;
-
         ch->sourceHost.init();
 
         ch->setStatus(Channel::S_SEARCHING);
@@ -513,54 +566,14 @@ void PeercastSource::stream(Channel *ch)
                 break;
             }
 
-            chl = chanMgr->findHitList(ch->info);
-            if (chl)
+            if (ch->designatedHost.host.ip != 0)
             {
-                ChanHitSearch chs;
-
-                // find local hit
-                chs.init();
-                chs.matchHost = servMgr->serverHost;
-                chs.waitDelay = MIN_RELAY_RETRY;
-                chs.excludeID = servMgr->sessionID;
-                if (chl->pickHits(chs))
-                    ch->sourceHost = chs.best[0];
-
-                // else find global hit
-                if (!ch->sourceHost.host.ip)
-                {
-                    chs.init();
-                    chs.waitDelay = MIN_RELAY_RETRY;
-                    chs.excludeID = servMgr->sessionID;
-                    if (chl->pickHits(chs))
-                        ch->sourceHost = chs.best[0];
-                }
-
-                // else find local tracker
-                if (!ch->sourceHost.host.ip)
-                {
-                    chs.init();
-                    chs.matchHost = servMgr->serverHost;
-                    chs.waitDelay = MIN_TRACKER_RETRY;
-                    chs.excludeID = servMgr->sessionID;
-                    chs.trackersOnly = true;
-                    if (chl->pickHits(chs))
-                        ch->sourceHost = chs.best[0];
-                }
-
-
-                // else find global tracker
-                if (!ch->sourceHost.host.ip)
-                {
-                    chs.init();
-                    chs.waitDelay = MIN_TRACKER_RETRY;
-                    chs.excludeID = servMgr->sessionID;
-                    chs.trackersOnly = true;
-                    if (chl->pickHits(chs))
-                        ch->sourceHost = chs.best[0];
-                }
-
+                ch->sourceHost = ch->designatedHost;
+                ch->designatedHost.init();
+                break;
             }
+
+            ch->sourceHost = pickFromHitList(ch, ch->sourceHost);
 
             // no trackers found so contact YP
             if (!ch->sourceHost.host.ip)
@@ -581,7 +594,6 @@ void PeercastSource::stream(Channel *ch)
             }
 
             sys->sleepIdle();
-
         }while ((ch->sourceHost.host.ip==0) && (ch->thread.active));
 
         if (!ch->sourceHost.host.ip)
@@ -642,7 +654,6 @@ void PeercastSource::stream(Channel *ch)
                 ch->setStatus(Channel::S_CLOSING);
 
                 LOG_CHANNEL("Channel closed normally");
-
             }catch (StreamException &e)
             {
                 ch->setStatus(Channel::S_ERROR);
@@ -664,7 +675,6 @@ void PeercastSource::stream(Channel *ch)
                 GnuID noID;
                 servMgr->broadcastPacket(pack, ch->info.id, ch->remoteID, noID, Servent::T_RELAY);
             }
-
 
             if (ch->sourceStream)
             {
@@ -695,8 +705,6 @@ void PeercastSource::stream(Channel *ch)
                 LOG_ERROR("Channel not found");
                 return;
             }
-
-
         }
 
         ch->lastIdleTime = sys->getTime();
@@ -708,8 +716,8 @@ void PeercastSource::stream(Channel *ch)
 
         sys->sleepIdle();
     }
-
 }
+
 // -----------------------------------
 void    Channel::startHTTPPush(ClientSocket *cs)
 {
@@ -3086,6 +3094,26 @@ unsigned int    ChanHitList::newestHit()
 
     return time;
 }
+// -----------------------------------
+void ChanHitList::forEachHit(std::function<void(ChanHit*)> block)
+{
+    ChanHitList* chl = this;
+
+    while (chl)
+    {
+        if (chl->isUsed())
+        {
+            ChanHit* hit = chl->hit;
+            while (hit)
+            {
+                block(hit);
+                hit = hit->next;
+            }
+        }
+        chl = chl->next;
+    }
+}
+
 // -----------------------------------
 int ChanHitList::pickHits(ChanHitSearch &chs)
 {

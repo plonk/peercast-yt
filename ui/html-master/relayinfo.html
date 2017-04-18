@@ -111,7 +111,9 @@
       {@loop page.channel.numHits}
       <tr class="normal" bgcolor={@if loop.indexEven}#eeeeee{@else}#dddddd{@end}>
         <td align="left" style="{@if loop.hit.tracker}font-weight: bold;{@end}">
+          <a href="/admin?cmd=bump&amp;id={$page.channel.id}&amp;ip={$loop.hit.rhost0}">
           {$loop.hit.rhost0}
+          </a>
         </td>
         <td align="left">{$loop.hit.rhost1}</td>
         <TD class="numeric">{$loop.hit.numHops}</TD>

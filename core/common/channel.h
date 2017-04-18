@@ -19,6 +19,8 @@
 #ifndef _CHANNEL_H
 #define _CHANNEL_H
 
+#include <functional>
+
 #include "sys.h"
 #include "stream.h"
 #include "gnutella.h"
@@ -190,6 +192,8 @@ public:
 class ChanHit
 {
 public:
+    ChanHit () { init(); }
+
     void    init();
     void    initLocal(int numl, int numr, int nums, int uptm, bool, unsigned int, unsigned int, const Host& = Host());
     XML::Node *createXML();
@@ -285,6 +289,8 @@ public:
     int          getTotalRelays();
     int          getTotalFirewalled();
 
+    void         forEachHit(std::function<void(ChanHit*)> block);
+
     bool         used;
     ChanInfo     info;
     ChanHit      *hit;
@@ -375,7 +381,8 @@ public:
     PeercastSource() : m_channel(NULL) {}
     void    stream(Channel *) override;
     int     getSourceRate() override;
-private:
+    ChanHit pickFromHitList(Channel *ch, ChanHit &oldHit);
+
     Channel*        m_channel;
 };
 
@@ -520,6 +527,7 @@ public:
 
     ChanInfo            info;
     ChanHit             sourceHost;
+    ChanHit             designatedHost;
 
     GnuID               remoteID;
 

@@ -1234,22 +1234,55 @@ void Servent::CMD_stop(char *cmd, HTTP& http, HTML& html, char jumpStr[])
 
 void Servent::CMD_bump(char *cmd, HTTP& http, HTML& html, char jumpStr[])
 {
-    char arg[MAX_CGI_LEN];
-    char curr[MAX_CGI_LEN];
-
+    cgi::Query query(cmd);
     GnuID id;
-    char *cp = cmd;
-    while (cp=nextCGIarg(cp, curr, arg))
-    {
-        if (strcmp(curr, "id") == 0)
-            id.fromStr(arg);
-    }
+    std::string ip;
+
+    if (!query.get("id").empty())
+        id.fromStr(query.get("id").c_str());
+
+    ip = query.get("ip");
+    Host designation;
+    designation.fromStrIP(ip.c_str(), 7144);
 
     Channel *c = chanMgr->findChannelByID(id);
     if (c)
-        c->bump = true;
+    {
+        if (!ip.empty())
+        {
+            ChanHitList* chl = chanMgr->findHitList(c->info);
+            ChanHit theHit;
 
-    sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
+            if (chl)
+            {
+                chl->forEachHit(
+                    [&] (ChanHit* hit)
+                    {
+                        if (hit->host == designation)
+                            theHit = *hit;
+                    });
+            }
+
+            if (theHit.host.ip != 0)
+            {
+                c->designatedHost = theHit;
+            } else
+            {
+                // ChanHitをでっちあげる
+                c->designatedHost.init();
+                c->designatedHost.host = c->designatedHost.rhost[0] = designation;
+            }
+        }
+        c->bump = true;
+    }
+
+    try
+    {
+        strcpy(jumpStr, http.headers.at("REFERER").c_str());
+    } catch (std::out_of_range&)
+    {
+        sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
+    }
 }
 
 void Servent::CMD_keep(char *cmd, HTTP& http, HTML& html, char jumpStr[])
