@@ -344,8 +344,6 @@ public:
     char            data[MAX_DATALEN];
 };
 
-
-
 // ------------------------------------------
 class RawStream : public ChannelStream
 {
@@ -373,6 +371,7 @@ public:
     virtual void stream(Channel *) = 0;
     virtual int getSourceRate() { return 0; }
 };
+
 // ------------------------------------------
 class PeercastSource : public ChannelSource
 {
@@ -385,7 +384,6 @@ public:
 
     Channel*        m_channel;
 };
-
 
 // ----------------------------------
 class Channel
@@ -426,7 +424,6 @@ public:
         SRC_URL,
         SRC_HTTPPUSH
     };
-
 
     Channel();
     void    reset();
@@ -564,113 +561,6 @@ public:
     Channel             *next;
 };
 
-// ----------------------------------
-class ChanMgr
-{
-public:
-    enum
-    {
-        MAX_IDLE_CHANNELS = 8,      // max. number of channels that can be left idle
-        MAX_METAINT = 8192          // must be at least smaller than ChanPacket data len (ie. about half)
-    };
-
-
-    ChanMgr();
-    ~ChanMgr();
-
-    Channel *deleteChannel(Channel *);
-
-    Channel *createChannel(ChanInfo &, const char *);
-    Channel *findChannelByName(const char *);
-    Channel *findChannelByIndex(int);
-    Channel *findChannelByMount(const char *);
-    Channel *findChannelByID(const GnuID &);
-    Channel *findChannelByNameID(ChanInfo &);
-    Channel *findPushChannel(int);
-
-    void    broadcastTrackerSettings();
-    void    setUpdateInterval(unsigned int v);
-    void    broadcastRelays(Servent *, int, int);
-
-    int     broadcastPacketUp(ChanPacket &, GnuID &, GnuID &, GnuID &);
-    void    broadcastTrackerUpdate(GnuID &, bool = false);
-
-    bool    writeVariable(Stream &, const String &, int);
-
-    int     findChannels(ChanInfo &, Channel **, int);
-    int     findChannelsByStatus(Channel **, int, Channel::STATUS);
-
-    int     numIdleChannels();
-    int     numChannels();
-
-    void    closeOldestIdle();
-    void    closeAll();
-    void    quit();
-
-    void    addHit(Host &, GnuID &, bool);
-    ChanHit *addHit(ChanHit &);
-    void    delHit(ChanHit &);
-    void    deadHit(ChanHit &);
-    void    setFirewalled(Host &);
-
-    ChanHitList *findHitList(ChanInfo &);
-    ChanHitList *findHitListByID(GnuID &);
-    ChanHitList *addHitList(ChanInfo &);
-
-    void        clearHitLists();
-    void        clearDeadHits(bool);
-    int         numHitLists();
-
-    void        setBroadcastMsg(::String &);
-
-    Channel     *createRelay(ChanInfo &, bool);
-    Channel     *findAndRelay(ChanInfo &);
-    void        startSearch(ChanInfo &);
-
-    void        playChannel(ChanInfo &);
-    void        findAndPlayChannel(ChanInfo &, bool);
-
-    bool        isBroadcasting(GnuID &);
-    bool        isBroadcasting();
-
-    int         pickHits(ChanHitSearch &);
-
-
-
-    Channel         *channel;
-    ChanHitList     *hitlist;
-
-    GnuID           broadcastID;
-
-    ChanInfo        searchInfo;
-
-    int             numFinds;
-    ::String        broadcastMsg;
-    unsigned int    broadcastMsgInterval;
-    unsigned int    lastHit, lastQuery;
-    unsigned int    maxUptime;
-    bool            searchActive;
-    unsigned int    deadHitAge;
-    int             icyMetaInterval;
-    int             maxRelaysPerChannel;
-    WLock           lock;
-    int             minBroadcastTTL, maxBroadcastTTL;
-    int             pushTimeout, pushTries, maxPushHops;
-    unsigned int    autoQuery;
-    unsigned int    prefetchTime;
-    unsigned int    lastYPConnect;
-    unsigned int    icyIndex;
-
-    unsigned int    hostUpdateInterval;
-    unsigned int    bufferTime;
-
-    GnuID           currFindAndPlayChannel;
-
-};
-
-// ----------------------------------
-
-extern ChanMgr *chanMgr;
-
+#include "chanmgr.h"
 
 #endif
