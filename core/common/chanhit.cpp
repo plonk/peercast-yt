@@ -38,6 +38,7 @@ ChanHitList::~ChanHitList()
     while (hit)
         hit = deleteHit(hit);
 }
+
 // -----------------------------------
 void ChanHit::pickNearestIP(Host &h)
 {
@@ -220,6 +221,31 @@ bool    ChanHit::writeVariable(Stream &out, const String &var)
 
     out.writeString(buf);
     return true;
+}
+
+// -----------------------------------
+std::string ChanHit::versionString()
+{
+    using namespace std;
+    if (!version)
+        return "";
+    else if (!versionVP)
+        return to_string(version);
+    else if (!versionExNumber)
+        return "VP" + to_string(versionVP);
+    else
+        return string() + versionExPrefix[0] + versionExPrefix[1] + to_string(versionExNumber);
+}
+
+// -----------------------------------
+// 選択されたホストの情報を簡潔に文字列化する。
+std::string ChanHit::str(bool withPort)
+{
+    auto res = host.str(withPort);
+
+    if (!versionString().empty())
+        res += " (" + versionString() + ")";
+    return res;
 }
 
 // -----------------------------------
