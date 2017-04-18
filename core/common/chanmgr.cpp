@@ -11,7 +11,6 @@ void ChanMgr::startSearch(ChanInfo &info)
     clearHitLists();
     numFinds = 0;
     lastHit = 0;
-//  lastSearch = 0;
     searchActive = true;
 }
 
