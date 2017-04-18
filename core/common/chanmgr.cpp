@@ -166,6 +166,7 @@ int ChanMgr::findChannels(ChanInfo &info, Channel **chlist, int max)
     }
     return cnt;
 }
+
 // -----------------------------------
 int ChanMgr::findChannelsByStatus(Channel **chlist, int max, Channel::STATUS status)
 {
@@ -231,7 +232,6 @@ Channel *ChanMgr::findAndRelay(ChanInfo &info)
 
     for (int i=0; i<600; i++)    // search for 1 minute.
     {
-
         c = findChannelByNameID(info);
 
         if (!c)
@@ -239,7 +239,6 @@ Channel *ChanMgr::findAndRelay(ChanInfo &info)
             peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネル "+chName(info)+" は見付かりませんでした。");
             return NULL;
         }
-
 
         if (c->isPlaying() && (c->info.contentType!=ChanInfo::T_UNKNOWN))
             break;
@@ -357,7 +356,6 @@ void ChanMgr::broadcastRelays(Servent *serv, int minTTL, int maxTTL)
 {
     //if ((servMgr->getFirewall() == ServMgr::FW_OFF) || servMgr->serverHost.localIP())
     {
-
         Host sh = servMgr->serverHost;
         bool push = (servMgr->getFirewall()!=ServMgr::FW_OFF);
         bool busy = (servMgr->pubInFull() && servMgr->outFull()) || servMgr->relaysFull();
@@ -729,7 +727,6 @@ THREAD_PROC findAndPlayChannelProc(ThreadInfo *th)
     ChanInfo info;
     info = cfi->info;
 
-
     Channel *ch = chanMgr->findChannelByNameID(info);
 
     chanMgr->currFindAndPlayChannel = info.id;
@@ -766,14 +763,12 @@ void ChanMgr::findAndPlayChannel(ChanInfo &info, bool keep)
 // -----------------------------------
 void ChanMgr::playChannel(ChanInfo &info)
 {
-
     char str[128], fname[256], idStr[128];
 
     sprintf(str, "http://localhost:%d", servMgr->serverHost.port);
     info.id.toStr(idStr);
 
     PlayList::TYPE type;
-
 
     if ((info.contentType == ChanInfo::T_WMA) || (info.contentType == ChanInfo::T_WMV))
     {
@@ -785,17 +780,14 @@ void ChanMgr::playChannel(ChanInfo &info)
     {
         type = PlayList::T_RAM;
         sprintf(fname, "%s/play.ram", peercastApp->getPath());
-
     }else
     {
         type = PlayList::T_SCPLS;
         sprintf(fname, "%s/play.pls", peercastApp->getPath());
     }
 
-
     PlayList *pls = new PlayList(type, 1);
     pls->addChannel(str, info);
-
 
     LOG_DEBUG("Writing %s", fname);
     FileStream file;
@@ -803,9 +795,7 @@ void ChanMgr::playChannel(ChanInfo &info)
     pls->write(file);
     file.close();
 
-
     LOG_DEBUG("Executing: %s", fname);
     sys->executeFile(fname);
     delete pls;
-
 }
