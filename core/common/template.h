@@ -22,6 +22,9 @@
 
 #include "sys.h"
 #include "stream.h"
+#include "json.hpp"
+
+using json = nlohmann::json;
 
 // HTML テンプレートシステム
 class Template
@@ -33,11 +36,13 @@ class Template
         TMPL_IF,
         TMPL_ELSE,
         TMPL_END,
-        TMPL_FRAGMENT
+        TMPL_FRAGMENT,
+        TMPL_FOREACH
     };
 
 public:
     Template(const char* args = NULL)
+        : currentElement(json::object({}))
     {
         if (args)
             tmplArgs = strdup(args);
@@ -67,15 +72,19 @@ public:
     int     readCmd(Stream &, Stream *, int);
     void    readIf(Stream &, Stream *, int);
     void    readLoop(Stream &, Stream *, int);
+    void    readForeach(Stream &, Stream *, int);
     void    readFragment(Stream &, Stream *, int);
 
     void    readVariable(Stream &, Stream *, int);
     void    readVariableRaw(Stream &in, Stream *outp, int loop);
     bool    readTemplate(Stream &, Stream *, int);
+    bool    writeObjectProperty(Stream& s, const String& varName, json::object_t object);
+    json::array_t evaluateCollectionVariable(String& varName);
 
     char * tmplArgs;
     std::string selectedFragment;
     std::string currentFragment;
+    json currentElement;
 };
 
 #endif

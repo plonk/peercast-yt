@@ -25,6 +25,64 @@
 #include "dmstream.h"
 #include "notif.h"
 #include "str.h"
+#include "jrpc.h"
+
+using json = nlohmann::json;
+
+// --------------------------------------
+static json::object_t array_to_object(json::array_t arr)
+{
+    json::object_t obj;
+    for (int i = 0; i < arr.size(); i++)
+    {
+        obj[std::to_string(i)] = arr[i];
+    }
+    return obj;
+}
+
+// --------------------------------------
+bool Template::writeObjectProperty(Stream& s, const String& varName, json::object_t object)
+{
+    LOG_DEBUG("writeObjectProperty %s", varName.str().c_str());
+    auto names = str::split(varName.str(), ".");
+
+    if (names.size() == 1)
+    {
+        try
+        {
+            json value = object.at(varName.str());
+            if (value.is_string())
+            {
+                std::string str = value;
+                s.writeString(str.c_str());
+            }else
+                s.writeString(value.dump().c_str());
+        }catch (std::out_of_range&)
+        {
+            return false;
+        }
+        return true;
+    }else{
+        try
+        {
+            json value = object.at(names[0]);
+            if (value.is_null() || value.is_string() || value.is_number())
+            {
+                return false;
+            }else if (value.is_array())
+            {
+                return writeObjectProperty(s, varName + strlen(names[0].c_str()) + 1, array_to_object(value));
+            }else if (value.is_object())
+            {
+                return writeObjectProperty(s, varName + strlen(names[0].c_str()) + 1, value);
+            }
+        } catch (std::out_of_range&)
+        {
+            return false;
+        }
+        return true;
+    }
+}
 
 // --------------------------------------
 void Template::writeVariable(Stream &s, const String &varName, int loop)
@@ -122,6 +180,9 @@ void Template::writeVariable(Stream &s, const String &varName, int loop)
         }else if (varName.startsWith("loop.notification."))
         {
             r = g_notificationBuffer.writeVariable(s, varName + strlen("loop."), loop);
+        }else if (varName.startsWith("loop.this."))
+        {
+            r = writeObjectProperty(s, varName + strlen("loop.this."), currentElement);
         }
     }
     else if (varName.startsWith("page."))
@@ -285,6 +346,63 @@ void    Template::readLoop(Stream &in, Stream *outp, int loop)
 }
 
 // --------------------------------------
+json::array_t Template::evaluateCollectionVariable(String& varName)
+{
+    if (varName == "testCollection")
+    {
+        json::array_t res;
+
+        res.push_back(json::object({ { "a", 1 } }));
+        res.push_back(json::object({ { "a", 2 } }));
+        res.push_back(json::object({ { "a", 3 } }));
+        return res;
+    }else if (varName == "channelsFound")
+    {
+        JrpcApi api;
+        LOG_DEBUG("%s", api.getChannelsFound({}).dump().c_str());
+        return api.getChannelsFound({});
+    }else
+    {
+        return {};
+    }
+}
+
+// --------------------------------------
+void    Template::readForeach(Stream &in, Stream *outp, int loop)
+{
+    String var;
+    while (!in.eof())
+    {
+        char c = in.readChar();
+
+        if (c == '}')
+        {
+            auto coll = evaluateCollectionVariable(var);
+
+            if (coll.size() == 0)
+            {
+                readTemplate(in, NULL, loop);
+            }else
+            {
+                auto outer = currentElement;
+                int start = in.getPosition();
+                for (int i = 0; i < coll.size(); i++)
+                {
+                    in.seekTo(start);
+                    currentElement = coll[i];
+                    readTemplate(in, outp, i); // loop
+                }
+                currentElement = outer;
+            }
+            return;
+        }else
+        {
+            var.append(c);
+        }
+    }
+}
+
+// --------------------------------------
 int Template::readCmd(Stream &in, Stream *outp, int loop)
 {
     String cmd;
@@ -309,6 +427,10 @@ int Template::readCmd(Stream &in, Stream *outp, int loop)
             {
                 readFragment(in, outp, loop);
                 tmpl = TMPL_FRAGMENT;
+            }else if (cmd == "foreach")
+            {
+                readForeach(in, outp, loop);
+                tmpl = TMPL_FOREACH;
             }else if (cmd == "end")
             {
                 tmpl = TMPL_END;
