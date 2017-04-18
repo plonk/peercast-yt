@@ -757,7 +757,7 @@ void ChanMgr::findAndPlayChannel(ChanInfo &info, bool keep)
     cfi->func = findAndPlayChannelProc;
 
     sys->startThread(cfi);
-    sys->setThreadName(cfi, "ChanMgr::findAndPlayChannelProc");
+    sys->setThreadName(cfi, "findAndPlayChannelProc");
 }
 
 // -----------------------------------
