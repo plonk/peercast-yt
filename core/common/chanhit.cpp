@@ -42,7 +42,7 @@ ChanHitList::~ChanHitList()
 // -----------------------------------
 void ChanHit::pickNearestIP(Host &h)
 {
-    for (int i=0; i<2; i++)
+    for (int i = 0; i < 2; i++)
     {
         if (h.classType() == rhost[i].classType())
         {
@@ -176,6 +176,7 @@ void ChanHit::writeAtoms(AtomStream &atom, GnuID &chanID)
             atom.writeInt(PCP_HOST_UPHOST_HOPS, uphostHops);
         }
 }
+
 // -----------------------------------
 bool    ChanHit::writeVariable(Stream &out, const String &var)
 {
@@ -251,40 +252,42 @@ std::string ChanHit::str(bool withPort)
 // -----------------------------------
 int ChanHitList::getTotalListeners()
 {
-    int cnt=0;
+    int cnt = 0;
     ChanHit *h = hit;
     while (h)
     {
         if (h->host.ip)
-            cnt+=h->numListeners;
-        h=h->next;
+            cnt += h->numListeners;
+        h = h->next;
     }
     return cnt;
 }
+
 // -----------------------------------
 int ChanHitList::getTotalRelays()
 {
-    int cnt=0;
+    int cnt = 0;
     ChanHit *h = hit;
     while (h)
     {
         if (h->host.ip)
-            cnt+=h->numRelays;
-        h=h->next;
+            cnt += h->numRelays;
+        h = h->next;
     }
     return cnt;
 }
+
 // -----------------------------------
 int ChanHitList::getTotalFirewalled()
 {
-    int cnt=0;
+    int cnt = 0;
     ChanHit *h = hit;
     while (h)
     {
         if (h->host.ip)
             if (h->firewalled)
                 cnt++;
-        h=h->next;
+        h = h->next;
     }
     return cnt;
 }
@@ -295,11 +298,10 @@ int ChanHitList::contactTrackers(bool connected, int numl, int nums, int uptm)
     return 0;
 }
 
-
 // -----------------------------------
 ChanHit *ChanHitList::deleteHit(ChanHit *ch)
 {
-    ChanHit *c = hit, *prev=NULL;
+    ChanHit *c = hit, *prev = NULL;
     while (c)
     {
         if (c == ch)
@@ -314,12 +316,13 @@ ChanHit *ChanHitList::deleteHit(ChanHit *ch)
 
             return next;
         }
-        prev=c;
-        c=c->next;
+        prev = c;
+        c = c->next;
     }
 
     return NULL;
 }
+
 // -----------------------------------
 ChanHit *ChanHitList::addHit(ChanHit &h)
 {
@@ -328,11 +331,9 @@ ChanHit *ChanHitList::addHit(ChanHit &h)
     h.rhost[1].toStr(ip1str);
     LOG_DEBUG("Add hit: %s/%s", ip0str, ip1str);
 
-
     // dont add our own hits
     if (servMgr->sessionID.isSame(h.sessionID))
         return NULL;
-
 
     lastHitTime = sys->getTime();
     h.time = lastHitTime;
@@ -340,8 +341,10 @@ ChanHit *ChanHitList::addHit(ChanHit &h)
     ChanHit *ch = hit;
     while (ch)
     {
-        if ((ch->rhost[0].ip == h.rhost[0].ip) && (ch->rhost[0].port == h.rhost[0].port))
-            if (((ch->rhost[1].ip == h.rhost[1].ip) && (ch->rhost[1].port == h.rhost[1].port)) || (!ch->rhost[1].isValid()))
+        if ((ch->rhost[0].ip == h.rhost[0].ip) &&
+            (ch->rhost[0].port == h.rhost[0].port))
+            if (((ch->rhost[1].ip == h.rhost[1].ip) && (ch->rhost[1].port == h.rhost[1].port)) ||
+                (!ch->rhost[1].isValid()))
             {
                 if (!ch->dead)
                 {
@@ -351,7 +354,7 @@ ChanHit *ChanHitList::addHit(ChanHit &h)
                     return ch;
                 }
             }
-        ch=ch->next;
+        ch = ch->next;
     }
 
     // clear hits with same session ID (IP may have changed)
@@ -366,10 +369,9 @@ ChanHit *ChanHitList::addHit(ChanHit &h)
                     ch = deleteHit(ch);
                     continue;
                 }
-            ch=ch->next;
+            ch = ch->next;
         }
     }
-
 
     // else add new hit
     {
@@ -387,7 +389,7 @@ ChanHit *ChanHitList::addHit(ChanHit &h)
 // -----------------------------------
 int ChanHitList::clearDeadHits(unsigned int timeout, bool clearTrackers)
 {
-    int cnt=0;
+    int cnt = 0;
     unsigned int ctime = sys->getTime();
 
     ChanHit *ch = hit;
@@ -409,7 +411,6 @@ int ChanHitList::clearDeadHits(unsigned int timeout, bool clearTrackers)
     return cnt;
 }
 
-
 // -----------------------------------
 void    ChanHitList::deadHit(ChanHit &h)
 {
@@ -429,6 +430,7 @@ void    ChanHitList::deadHit(ChanHit &h)
         ch = ch->next;
     }
 }
+
 // -----------------------------------
 void    ChanHitList::delHit(ChanHit &h)
 {
@@ -443,16 +445,17 @@ void    ChanHitList::delHit(ChanHit &h)
         if (ch->host.ip)
             if (ch->rhost[0].isSame(h.rhost[0]) && ch->rhost[1].isSame(h.rhost[1]))
             {
-                ch=deleteHit(ch);
+                ch = deleteHit(ch);
                 continue;
             }
         ch = ch->next;
     }
 }
+
 // -----------------------------------
 int ChanHitList::numHits()
 {
-    int cnt=0;
+    int cnt = 0;
     ChanHit *ch = hit;
     while (ch)
     {
@@ -463,30 +466,32 @@ int ChanHitList::numHits()
 
     return cnt;
 }
+
 // -----------------------------------
 int ChanHitList::numListeners()
 {
-    int cnt=0;
+    int cnt = 0;
     ChanHit *ch = hit;
     while (ch)
     {
         if (ch->host.ip && !ch->dead)
             cnt += ch->numListeners;
-        ch=ch->next;
+        ch = ch->next;
     }
 
     return cnt;
 }
+
 // -----------------------------------
 int ChanHitList::numRelays()
 {
-    int cnt=0;
+    int cnt = 0;
     ChanHit *ch = hit;
     while (ch)
     {
         if (ch->host.ip && !ch->dead)
             cnt += ch->numRelays;
-        ch=ch->next;
+        ch = ch->next;
     }
 
     return cnt;
@@ -495,74 +500,79 @@ int ChanHitList::numRelays()
 // -----------------------------------
 int ChanHitList::numTrackers()
 {
-    int cnt=0;
+    int cnt = 0;
     ChanHit *ch = hit;
     while (ch)
     {
         if ((ch->host.ip && !ch->dead) && (ch->tracker))
             cnt++;
-        ch=ch->next;
+        ch = ch->next;
     }
     return cnt;
 }
+
 // -----------------------------------
 int ChanHitList::numFirewalled()
 {
-    int cnt=0;
+    int cnt = 0;
     ChanHit *ch = hit;
     while (ch)
     {
         if (ch->host.ip && !ch->dead)
             cnt += ch->firewalled?1:0;
-        ch=ch->next;
+        ch = ch->next;
     }
     return cnt;
 }
+
 // -----------------------------------
 int ChanHitList::closestHit()
 {
-    unsigned int hop=10000;
+    unsigned int hop = 10000;
     ChanHit *ch = hit;
     while (ch)
     {
         if (ch->host.ip && !ch->dead)
             if (ch->numHops < hop)
                 hop = ch->numHops;
-        ch=ch->next;
+        ch = ch->next;
     }
 
     return hop;
 }
+
 // -----------------------------------
 int ChanHitList::furthestHit()
 {
-    unsigned int hop=0;
+    unsigned int hop = 0;
     ChanHit *ch = hit;
     while (ch)
     {
         if (ch->host.ip && !ch->dead)
             if (ch->numHops > hop)
                 hop = ch->numHops;
-        ch=ch->next;
+        ch = ch->next;
     }
 
     return hop;
 }
+
 // -----------------------------------
 unsigned int    ChanHitList::newestHit()
 {
-    unsigned int time=0;
+    unsigned int time = 0;
     ChanHit *ch = hit;
     while (ch)
     {
         if (ch->host.ip && !ch->dead)
             if (ch->time > time)
                 time = ch->time;
-        ch=ch->next;
+        ch = ch->next;
     }
 
     return time;
 }
+
 // -----------------------------------
 void ChanHitList::forEachHit(std::function<void(ChanHit*)> block)
 {
@@ -586,7 +596,7 @@ void ChanHitList::forEachHit(std::function<void(ChanHit*)> block)
 // -----------------------------------
 int ChanHitList::pickHits(ChanHitSearch &chs)
 {
-    ChanHit best, *bestP=NULL;
+    ChanHit best, *bestP = NULL;
     best.init();
     best.numHops = 255;
     best.time = 0;
@@ -599,12 +609,11 @@ int ChanHitList::pickHits(ChanHitSearch &chs)
         if (c->host.ip && !c->dead)
         {
             if (!chs.excludeID.isSame(c->sessionID))
-            if ((chs.waitDelay==0) || ((ctime-c->lastContact) >= chs.waitDelay))
-            if ((c->numHops<best.numHops))  // (c->time>=best.time))
+            if ((chs.waitDelay == 0) || ((ctime-c->lastContact) >= chs.waitDelay))
+            if ((c->numHops < best.numHops))  // (c->time >= best.time))
             if (c->relay || (!c->relay && chs.useBusyRelays))
             if (c->cin || (!c->cin && chs.useBusyControls))
             {
-
                 if (chs.trackersOnly && c->tracker)
                 {
                     if (chs.matchHost.ip)
@@ -640,9 +649,8 @@ int ChanHitList::pickHits(ChanHitSearch &chs)
                 }
             }
         }
-        c=c->next;
+        c = c->next;
     }
-
 
     if (bestP)
     {
@@ -653,7 +661,6 @@ int ChanHitList::pickHits(ChanHitSearch &chs)
             chs.best[chs.numResults++] = best;
             return 1;
         }
-
     }
 
     return 0;
