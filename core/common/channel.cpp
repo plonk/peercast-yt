@@ -1968,7 +1968,20 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
         strcpy(buf, uptime.cstr());
     }
     else if (var == "type")
-        sprintf(buf, "%s", info.getTypeStr());
+        strcpy(buf, info.getTypeStr());
+    else if (var == "typeLong")
+    {
+        std::string s = std::string() + info.getTypeStr() + " (" + info.getMIMEType() + "; " + info.getTypeExt() + ")";
+
+        if (info.contentTypeStr == "")
+            s += " [contentTypeStr empty]"; // これが起こるのは何かがおかしい
+        if (info.streamType == "")
+            s += " [no styp]";
+        if (info.streamExt == "")
+            s += " [no sext]";
+
+        strcpy(buf, s.c_str());
+    }
     else if (var == "ext")
         sprintf(buf, "%s", info.getTypeExt());
 
