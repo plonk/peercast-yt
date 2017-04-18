@@ -24,7 +24,7 @@ void ChanMgr::quit()
 // -----------------------------------
 int ChanMgr::numIdleChannels()
 {
-    int cnt=0;
+    int cnt = 0;
     Channel *ch = channel;
     while (ch)
     {
@@ -32,7 +32,7 @@ int ChanMgr::numIdleChannels()
             if (ch->thread.active)
                 if (ch->status == Channel::S_IDLE)
                     cnt++;
-        ch=ch->next;
+        ch = ch->next;
     }
     return cnt;
 }
@@ -41,7 +41,7 @@ int ChanMgr::numIdleChannels()
 void ChanMgr::closeOldestIdle()
 {
     unsigned int idleTime = (unsigned int)-1;
-    Channel *ch = channel, *oldest=NULL;
+    Channel *ch = channel, *oldest = NULL;
     while (ch)
     {
         if (ch->isActive())
@@ -52,7 +52,7 @@ void ChanMgr::closeOldestIdle()
                         oldest = ch;
                         idleTime = ch->lastIdleTime;
                     }
-        ch=ch->next;
+        ch = ch->next;
     }
 
     if (oldest)
@@ -67,7 +67,7 @@ void ChanMgr::closeAll()
     {
         if (ch->thread.active)
             ch->thread.shutdown();
-        ch=ch->next;
+        ch = ch->next;
     }
 }
 
@@ -80,7 +80,7 @@ Channel *ChanMgr::findChannelByNameID(ChanInfo &info)
         if (ch->isActive())
             if (ch->info.matchNameID(info))
                 return ch;
-        ch=ch->next;
+        ch = ch->next;
     }
     return NULL;
 }
@@ -92,9 +92,9 @@ Channel *ChanMgr::findChannelByName(const char *n)
     while (ch)
     {
         if (ch->isActive())
-            if (stricmp(ch->info.name, n)==0)
+            if (stricmp(ch->info.name, n) == 0)
                 return ch;
-        ch=ch->next;
+        ch = ch->next;
     }
 
     return NULL;
@@ -103,7 +103,7 @@ Channel *ChanMgr::findChannelByName(const char *n)
 // -----------------------------------
 Channel *ChanMgr::findChannelByIndex(int index)
 {
-    int cnt=0;
+    int cnt = 0;
     Channel *ch = channel;
     while (ch)
     {
@@ -113,7 +113,7 @@ Channel *ChanMgr::findChannelByIndex(int index)
                 return ch;
             cnt++;
         }
-        ch=ch->next;
+        ch = ch->next;
     }
     return NULL;
 }
@@ -125,9 +125,9 @@ Channel *ChanMgr::findChannelByMount(const char *str)
     while (ch)
     {
         if (ch->isActive())
-            if (strcmp(ch->mount, str)==0)
+            if (strcmp(ch->mount, str) == 0)
                 return ch;
-        ch=ch->next;
+        ch = ch->next;
     }
 
     return NULL;
@@ -142,7 +142,7 @@ Channel *ChanMgr::findChannelByID(const GnuID &id)
         if (ch->isActive())
             if (ch->info.id.isSame(id))
                 return ch;
-        ch=ch->next;
+        ch = ch->next;
     }
     return NULL;
 }
@@ -150,7 +150,7 @@ Channel *ChanMgr::findChannelByID(const GnuID &id)
 // -----------------------------------
 int ChanMgr::findChannels(ChanInfo &info, Channel **chlist, int max)
 {
-    int cnt=0;
+    int cnt = 0;
     Channel *ch = channel;
     while (ch)
     {
@@ -161,7 +161,7 @@ int ChanMgr::findChannels(ChanInfo &info, Channel **chlist, int max)
                 if (cnt >= max)
                     break;
             }
-        ch=ch->next;
+        ch = ch->next;
     }
     return cnt;
 }
@@ -169,7 +169,7 @@ int ChanMgr::findChannels(ChanInfo &info, Channel **chlist, int max)
 // -----------------------------------
 int ChanMgr::findChannelsByStatus(Channel **chlist, int max, Channel::STATUS status)
 {
-    int cnt=0;
+    int cnt = 0;
     Channel *ch = channel;
     while (ch)
     {
@@ -180,7 +180,7 @@ int ChanMgr::findChannelsByStatus(Channel **chlist, int max, Channel::STATUS sta
                 if (cnt >= max)
                     break;
             }
-        ch=ch->next;
+        ch = ch->next;
     }
     return cnt;
 }
@@ -229,7 +229,7 @@ Channel *ChanMgr::findAndRelay(ChanInfo &info)
         }
     }
 
-    for (int i=0; i<600; i++)    // search for 1 minute.
+    for (int i = 0; i < 600; i++)    // search for 1 minute.
     {
         c = findChannelByNameID(info);
 
@@ -239,7 +239,7 @@ Channel *ChanMgr::findAndRelay(ChanInfo &info)
             return NULL;
         }
 
-        if (c->isPlaying() && (c->info.contentType!=ChanInfo::T_UNKNOWN))
+        if (c->isPlaying() && (c->info.contentType != ChanInfo::T_UNKNOWN))
             break;
 
         sys->sleep(100);
@@ -258,7 +258,7 @@ ChanMgr::ChanMgr()
     currFindAndPlayChannel.clear();
 
     broadcastMsg.clear();
-    broadcastMsgInterval=10;
+    broadcastMsgInterval = 10;
 
     broadcastID.generate(PCP_BROADCAST_FLAGS);
 
@@ -330,21 +330,21 @@ void ChanMgr::broadcastTrackerUpdate(GnuID &svID, bool force)
     {
         if ( c->isActive() && c->isBroadcasting() )
             c->broadcastTrackerUpdate(svID, force);
-        c=c->next;
+        c = c->next;
     }
 }
 
 // -----------------------------------
 int ChanMgr::broadcastPacketUp(ChanPacket &pack, GnuID &chanID, GnuID &srcID, GnuID &destID)
 {
-    int cnt=0;
+    int cnt = 0;
 
     Channel *c = channel;
     while (c)
     {
         if (c->sendPacketUp(pack, chanID, srcID, destID))
             cnt++;
-        c=c->next;
+        c = c->next;
     }
 
     return cnt;
@@ -356,13 +356,13 @@ void ChanMgr::broadcastRelays(Servent *serv, int minTTL, int maxTTL)
     //if ((servMgr->getFirewall() == ServMgr::FW_OFF) || servMgr->serverHost.localIP())
     {
         Host sh = servMgr->serverHost;
-        bool push = (servMgr->getFirewall()!=ServMgr::FW_OFF);
+        bool push = (servMgr->getFirewall() != ServMgr::FW_OFF);
         bool busy = (servMgr->pubInFull() && servMgr->outFull()) || servMgr->relaysFull();
         bool stable = servMgr->totalStreams>0;
 
         GnuPacket hit;
 
-        int numChans=0;
+        int numChans = 0;
 
         Channel *c = channel;
         while (c)
@@ -382,7 +382,7 @@ void ChanMgr::broadcastRelays(Servent *serv, int minTTL, int maxTTL)
 
                 if (hit.initHit(sh, c, NULL, push, busy, stable, tracker, ttl))
                 {
-                    int numOut=0;
+                    int numOut = 0;
                     numChans++;
                     if (serv)
                     {
@@ -391,10 +391,9 @@ void ChanMgr::broadcastRelays(Servent *serv, int minTTL, int maxTTL)
                     }
 
                     LOG_NETWORK("Sent channel to %d servents, TTL %d", numOut, ttl);
-
                 }
             }
-            c=c->next;
+            c = c->next;
         }
         //if (numChans)
         //  LOG_NETWORK("Sent %d channels to %d servents", numChans, numOut);
@@ -423,7 +422,7 @@ void ChanMgr::setBroadcastMsg(String &msg)
                 newInfo.comment = broadcastMsg;
                 c->updateInfo(newInfo);
             }
-            c=c->next;
+            c = c->next;
         }
     }
 }
@@ -448,7 +447,7 @@ Channel *ChanMgr::deleteChannel(Channel *delchan)
 {
     lock.on();
 
-    Channel *ch = channel, *prev=NULL, *next=NULL;
+    Channel *ch = channel, *prev = NULL, *next = NULL;
 
     while (ch)
     {
@@ -465,7 +464,7 @@ Channel *ChanMgr::deleteChannel(Channel *delchan)
             break;
         }
         prev = ch;
-        ch=ch->next;
+        ch = ch->next;
     }
 
     lock.off();
@@ -477,7 +476,7 @@ Channel *ChanMgr::createChannel(ChanInfo &info, const char *mount)
 {
     lock.on();
 
-    Channel *nc=NULL;
+    Channel *nc = NULL;
 
     nc = new Channel();
 
@@ -549,7 +548,7 @@ ChanHitList *ChanMgr::findHitListByID(GnuID &id)
 // -----------------------------------
 int ChanMgr::numHitLists()
 {
-    int num=0;
+    int num = 0;
     ChanHitList *chl = hitlist;
     while (chl)
     {
@@ -692,7 +691,7 @@ ChanHit *ChanMgr::addHit(ChanHit &h)
     if (searchActive)
         lastHit = sys->getTime();
 
-    ChanHitList *hl=NULL;
+    ChanHitList *hl = NULL;
 
     hl = findHitListByID(h.chanID);
 
@@ -715,7 +714,7 @@ class ChanFindInfo : public ThreadInfo
 {
 public:
     ChanInfo    info;
-    bool    keep;
+    bool        keep;
 };
 
 // -----------------------------------
