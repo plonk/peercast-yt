@@ -1086,7 +1086,7 @@ void Servent::CMD_fetch(char *cmd, HTTP& http, HTML& html, char jumpStr[])
             ChanInfo::TYPE type = ChanInfo::getTypeFromStr(arg);
             info.contentType = type;
             info.contentTypeStr = ChanInfo::getTypeStr(type);
-            info.streamType = ChanInfo::getMIMEType(type);
+            info.MIMEType = ChanInfo::getMIMEType(type);
             info.streamExt = ChanInfo::getTypeExt(type);
         }
     }

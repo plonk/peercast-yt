@@ -277,7 +277,7 @@ public:
 
                 info.contentType    = type;
                 info.contentTypeStr = ChanInfo::getTypeStr(type);
-                info.streamType     = ChanInfo::getMIMEType(type);
+                info.MIMEType       = ChanInfo::getMIMEType(type);
                 info.streamExt      = ChanInfo::getTypeExt(type);
             }
             info.bcID = chanMgr->broadcastID;

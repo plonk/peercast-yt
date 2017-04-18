@@ -173,7 +173,7 @@ public:
 
     TYPE            contentType;
     ::String        contentTypeStr; // getTypeStr(contentType) "WMV" など
-    ::String        streamType;     // MIME タイプ
+    ::String        MIMEType;       // MIME タイプ
     String          streamExt;      // "." で始まる拡張子
 
     PROTOCOL        srcProtocol;

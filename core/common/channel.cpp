@@ -1983,7 +1983,7 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
 
         if (info.contentTypeStr == "")
             s += " [contentTypeStr empty]"; // これが起こるのは何かがおかしい
-        if (info.streamType == "")
+        if (info.MIMEType == "")
             s += " [no styp]";
         if (info.streamExt == "")
             s += " [no sext]";
@@ -3214,11 +3214,11 @@ const char *ChanInfo::getTypeExt()
 // -----------------------------------
 const char *ChanInfo::getMIMEType()
 {
-    if (streamType.isEmpty()) {
+    if (MIMEType.isEmpty()) {
         return getMIMEType(contentType);
     }
     else {
-        return streamType.cstr();
+        return MIMEType.cstr();
     }
 }
 // -----------------------------------
@@ -3510,9 +3510,9 @@ bool ChanInfo::update(const ChanInfo &info)
         changed = true;
     }
 
-    if (!streamType.isSame(info.streamType))
+    if (!MIMEType.isSame(info.MIMEType))
     {
-        streamType = info.streamType;
+        MIMEType = info.MIMEType;
         changed = true;
     }
 
@@ -3574,7 +3574,7 @@ void ChanInfo::init()
     bitrate = 0;
     contentType = T_UNKNOWN;
     contentTypeStr.clear();
-    streamType.clear();
+    MIMEType.clear();
     streamExt.clear();
     srcProtocol = SP_UNKNOWN;
     id.clear();
@@ -3671,7 +3671,7 @@ void ChanInfo::readInfoAtoms(AtomStream &atom, int numc)
             contentTypeStr = type;
         }else if (id == PCP_CHAN_INFO_STREAMTYPE)
         {
-            atom.readString(streamType.data, sizeof(streamType.data), d);
+            atom.readString(MIMEType.data, sizeof(MIMEType.data), d);
         }else if (id == PCP_CHAN_INFO_STREAMEXT)
         {
             atom.readString(streamExt.data, sizeof(streamExt.data), d);
@@ -3685,7 +3685,7 @@ void ChanInfo::writeInfoAtoms(AtomStream &atom)
 {
     int natoms = 7;
 
-    natoms += !streamType.isEmpty();
+    natoms += !MIMEType.isEmpty();
     natoms += !streamExt.isEmpty();
 
     atom.writeParent(PCP_CHAN_INFO, natoms);
@@ -3696,8 +3696,8 @@ void ChanInfo::writeInfoAtoms(AtomStream &atom)
         atom.writeString(PCP_CHAN_INFO_DESC, desc.cstr());
         atom.writeString(PCP_CHAN_INFO_COMMENT, comment.cstr());
         atom.writeString(PCP_CHAN_INFO_TYPE, getTypeStr());
-        if (!streamType.isEmpty())
-            atom.writeString(PCP_CHAN_INFO_STREAMTYPE, streamType.cstr());
+        if (!MIMEType.isEmpty())
+            atom.writeString(PCP_CHAN_INFO_STREAMTYPE, MIMEType.cstr());
         if (!streamExt.isEmpty())
             atom.writeString(PCP_CHAN_INFO_STREAMEXT, streamExt.cstr());
 }
@@ -3901,7 +3901,7 @@ void ChanInfo::setContentType(TYPE type)
 {
     this->contentType    = type;
     this->contentTypeStr = getTypeStr(type);
-    this->streamType     = getMIMEType(type);
+    this->MIMEType       = getMIMEType(type);
     this->streamExt      = getTypeExt(type);
 }
 

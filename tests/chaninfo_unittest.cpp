@@ -31,7 +31,7 @@ TEST_F(ChanInfoFixture, initialState)
     ASSERT_EQ(0, info.bitrate);
     ASSERT_EQ(ChanInfo::T_UNKNOWN, info.contentType);
     ASSERT_STREQ("", info.contentTypeStr.cstr());
-    ASSERT_STREQ("", info.streamType.cstr());
+    ASSERT_STREQ("", info.MIMEType.cstr());
     ASSERT_STREQ("", info.streamExt.cstr());
     ASSERT_EQ(ChanInfo::PROTOCOL::SP_UNKNOWN, info.srcProtocol);
     ASSERT_EQ(0, info.lastPlayStart);
@@ -176,6 +176,6 @@ TEST_F(ChanInfoFixture, setContentType)
     info.setContentType(ChanInfo::T_MKV);
     ASSERT_EQ(ChanInfo::T_MKV, info.contentType);
     ASSERT_STREQ("MKV", info.contentTypeStr.cstr());
-    ASSERT_STREQ("video/x-matroska", info.streamType.cstr());
+    ASSERT_STREQ("video/x-matroska", info.MIMEType.cstr());
     ASSERT_STREQ(".mkv", info.streamExt.cstr());
 }
