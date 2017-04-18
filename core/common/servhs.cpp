@@ -274,6 +274,20 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
                 http.writeLine("");
                 http.writeString(response.c_str());
             }
+        }else if (strncmp(fn, "/yp/", 4)==0)
+        {
+            if (strcmp(fn, "/yp/")==0)
+            {
+                while (http.nextHeader());
+                http.writeLine(HTTP_SC_FOUND);
+                http.writeLine("Location: index.php");
+                http.writeLine("");
+            }else
+            {
+                String tmp = fn + 1;
+                while (http.nextHeader());
+                handshakeLocalFile(tmp.cstr());
+            }
         }else
         {
             while (http.nextHeader());
@@ -1752,9 +1766,88 @@ void Servent::handshakeICY(Channel::SRC_TYPE type, bool isHTTP)
 }
 
 // -----------------------------------
+#include <unistd.h>
+void Servent::handshakePHP(HTML& html, const char* path, const char* args)
+{
+    using json = nlohmann::json;
+
+    JrpcApi api;
+
+    json channels = api.getChannelsFound(json::array_t());
+    json context;
+
+    context["channels"] = channels;
+    //context["results"]
+
+    // 親プロセスの環境変数を利用して通信するので、一度に１つのサブプ
+    // ロセスしか起動しないようにする。
+    static WLock lock;
+
+    lock.on();
+
+    LOG_DEBUG("handshakePHP(\"%s\", \"%s\")", path, args);
+
+    String cmd = "php "; cmd.append(path); cmd.append(" 2>&1");
+
+    setenv("PEERCAST_CONTEXT", context.dump().c_str(), true);
+    FILE *fp = popen(cmd.cstr(), "r");
+
+    if (fp == NULL)
+    {
+        lock.off();
+        throw HTTPException("HTTP/1.0 500 Internal Server Error", 500);
+    }
+
+    std::string body;
+    char buf[1024];
+
+    size_t bytesRead;
+    while ((bytesRead = fread(buf, 1, 1024, fp)) > 0)
+    {
+        body += std::string(buf, bytesRead);
+    }
+
+    int status;
+    status = pclose(fp);
+
+    if (!WIFEXITED(status))
+    {
+        sock->writeLine(HTTP_SC_OK);
+        sock->writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
+        sock->writeLineF("%s %s", HTTP_HS_CONNECTION, "close");
+        sock->writeLineF("%s %s", HTTP_HS_CONTENT, "text/plain");
+        sock->writeLine("");
+
+        sock->writeString(strerror(errno));
+    }else if (WEXITSTATUS(status) != 0)
+    {
+        sock->writeLine(HTTP_SC_OK);
+        sock->writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
+        sock->writeLineF("%s %s", HTTP_HS_CONNECTION, "close");
+        sock->writeLineF("%s %s", HTTP_HS_CONTENT, "text/plain");
+        sock->writeLine("");
+
+        sock->writeStringF("\"%s\" exited abnormally. (status = %d)\n",
+                          cmd.cstr(), WEXITSTATUS(status));
+    }else
+    {
+        sock->writeLine(HTTP_SC_OK);
+        sock->writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
+        sock->writeLineF("%s %s", HTTP_HS_CONNECTION, "close");
+        sock->writeLineF("%s %s", HTTP_HS_CONTENT, "text/html; charset=utf-8");
+        sock->writeLine("");
+
+        sock->write(body.c_str(), body.size());
+    }
+
+    lock.off();
+}
+
+// -----------------------------------
+#include <sys/types.h>
+#include <dirent.h>
 void Servent::handshakeLocalFile(const char *fn)
 {
-    HTTP http(*sock);
     String fileName;
 
     fileName = peercastApp->getPath();
@@ -1768,6 +1861,23 @@ void Servent::handshakeLocalFile(const char *fn)
     char *args = strstr(fileName.cstr(), "?");
     if (args)
         *args++ = 0;
+
+    if (access(fileName.cstr(), F_OK) == -1)
+    {
+        throw HTTPException(HTTP_SC_NOTFOUND, 404);
+    }else if (access(fileName.cstr(), R_OK) == -1)
+    {
+        throw HTTPException(HTTP_SC_FORBIDDEN, 403);
+    }else
+    {
+        DIR *dir;
+        dir = opendir(fileName.cstr());
+        if (dir)
+        {
+            closedir(dir);
+            throw HTTPException(HTTP_SC_FORBIDDEN, 403); // directory listing is forbidden
+        }
+    }
 
     if (fileName.contains(".htm"))
     {
@@ -1788,6 +1898,9 @@ void Servent::handshakeLocalFile(const char *fn)
     }else if (fileName.contains(".js"))
     {
         html.writeRawFile(fileName.cstr(), MIME_JS);
+    }else if (fileName.contains(".php"))
+    {
+        handshakePHP(html, fileName.cstr(), args);
     }else
     {
         throw HTTPException(HTTP_SC_NOTFOUND, 404);
@@ -1807,6 +1920,11 @@ void Servent::handshakeRemoteFile(const char *dirName)
     Host host;
     host.fromStrName(hostName, 80);
 
+    if (host.ip == 0)
+    {
+        LOG_ERROR("handshakeRemoteFile: lookup failed for %s", hostName);
+        throw HTTPException(HTTP_SC_BADGATEWAY, 502);
+    }
 
     rsock->open(host);
     rsock->connect();

@@ -535,6 +535,91 @@ public:
         return result;
     }
 
+    json to_json(ChanHit* h)
+    {
+        return {
+            { "ip", (std::string) h->host },
+            { "hops", h->numHops },
+            { "listeners", h->numListeners },
+            { "relays", h->numRelays },
+            { "uptime", h->upTime },
+            { "push", (bool) h->firewalled },
+            { "relay", (bool) h->relay },
+            { "direct", (bool) h->direct },
+            { "cin", (bool) h->cin }, // これrootモードで動いてるかってこと？
+            { "stable", (bool) h->stable },
+            { "version", h->version },
+            { "update", sys->getTime() - h->time },
+            { "tracker", (bool) h->tracker }
+       };
+    }
+
+    json::array_t hostsToJson(ChanHitList* hitList)
+    {
+        json::array_t result;
+
+        for (ChanHit *h = hitList->hit;
+             h;
+             h = h->next)
+        {
+            if (h->host.ip)
+                result.push_back(to_json(h));
+        }
+
+        return result;
+    }
+
+    json to_json(ChanHitList* hitList)
+    {
+        ChanInfo info = hitList->info;
+        return {
+            { "name", info.name.cstr() },
+            { "id",  (std::string) info.id },
+            { "bitrate", info.bitrate },
+            { "type", info.getTypeStr() },
+            { "genre", info.genre.cstr() },
+            { "desc", info.desc.cstr() },
+            { "url", info.url.cstr() },
+            { "uptime", info.getUptime() },
+            { "comment", info.comment.cstr() },
+            { "skips", info.numSkips },
+            { "age", info.getAge() },
+            { "bcflags", info.bcID.getFlags() },
+
+            { "hit_stat", {
+                    { "hosts", hitList->numHits() },
+                    { "listeners", hitList->numListeners() },
+                    { "relays", hitList->numRelays() },
+                    { "firewalled", hitList->numFirewalled() },
+                    { "closest", hitList->closestHit() },
+                    { "furthest", hitList->furthestHit() },
+                    { "newest", sys->getTime() - hitList->newestHit() } } },
+            { "hits", hostsToJson(hitList) },
+            { "track", to_json(info.track) }
+        };
+    }
+
+    json getChannelsFound(json::array_t)
+    {
+        json result = json::array();
+
+        chanMgr->lock.on();
+
+        int publicChannels = chanMgr->numHitLists();
+
+        for (ChanHitList *hitList = chanMgr->hitlist;
+             hitList;
+             hitList = hitList->next)
+        {
+            if (hitList->isUsed())
+                result.push_back(to_json(hitList));
+        }
+
+        chanMgr->lock.off();
+
+        return result;
+    }
+
     // 配信中のチャンネルとルートサーバーとの接続状態。
     // 返り値: "Idle" | "Connecting" | "Connected" | "Error"
     json::string_t announcingChannelStatus(Channel* c)

@@ -42,6 +42,7 @@ public:
 #define HTTP_SC_BADREQUEST   "HTTP/1.0 400 Bad Request"
 #define HTTP_SC_FORBIDDEN    "HTTP/1.0 403 Forbidden"
 #define HTTP_SC_SWITCH       "HTTP/1.0 101 Switch protocols"
+#define HTTP_SC_BADGATEWAY   "HTTP/1.0 502 Bad Gateway"
 
 #define RTSP_SC_OK           "RTSP/1.0 200 OK"
 

@@ -180,6 +180,9 @@ public:
     void    handshakeRemoteFile(const char *);
     void    handshakeLocalFile(const char *);
 
+    void    handshakePHP(HTML&, const char*, const char*);
+
+
     static void handshakeOutgoingPCP(AtomStream &, Host &, GnuID &, String &, bool);
     static void handshakeIncomingPCP(AtomStream &, Host &, GnuID &, String &);
 
