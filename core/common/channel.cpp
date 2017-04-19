@@ -597,7 +597,7 @@ void PeercastSource::stream(Channel *ch)
 
         if (ch->sourceHost.host.ip)
         {
-            bool isTrusted = ch->sourceHost.tracker | ch->sourceHost.yp;
+            //bool isTrusted = ch->sourceHost.tracker | ch->sourceHost.yp;
 
             if (ch->sourceHost.tracker)
                 peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネル "+chName(ch->info)+" をトラッカーに問い合わせています...");

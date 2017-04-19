@@ -373,7 +373,7 @@ void PCPStream::readHostAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
     hit.init();
     GnuID chanID = bcs.chanID;  //use default
 
-    bool busy=false;
+    //bool busy = false;
 
     unsigned int ipNum=0;
 

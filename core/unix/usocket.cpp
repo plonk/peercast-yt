@@ -462,7 +462,6 @@ bool    UClientSocket::readReady(int timeoutMilliseconds)
 {
     timeval timeout;
     fd_set read_fds;
-    fd_set write_fds;
 
     timeout.tv_sec = timeoutMilliseconds / 1000;
     timeout.tv_usec = (timeoutMilliseconds % 1000) * 1000;
