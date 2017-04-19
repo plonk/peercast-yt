@@ -16,7 +16,7 @@ public:
     int  readPacket(Stream &, Channel *) override;
     void readEnd(Stream &, Channel *) override;
 
-    void sendPacket(ChanPacket::TYPE, const matroska::byte_string& data, Channel*);
+    void sendPacket(ChanPacket::TYPE, const matroska::byte_string& data, bool continuation, Channel*);
 };
 
 #endif

@@ -46,7 +46,6 @@ public:
     unsigned char data[13];
 };
 
-
 // -----------------------------------
 class FLVTag
 {
@@ -162,6 +161,15 @@ public:
             return "Audio";
         }
         return "Unknown";
+    }
+
+    bool isKeyFrame()
+    {
+        if (!data) return false;
+        if (type != T_VIDEO) return false;
+
+        uint8_t frameType = data[0] >> 4;
+        return frameType == 1 || frameType == 4;  // key frame or generated key frame
     }
 
     int size;

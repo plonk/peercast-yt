@@ -157,7 +157,15 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
 
 bool FLVTagBuffer::put(FLVTag& tag, Channel* ch)
 {
-    if (m_mem.pos + tag.packetSize > MAX_OUTGOING_PACKET_SIZE)
+    if (tag.isKeyFrame())
+    {
+        if (m_mem.pos > 0)
+        {
+            flush(ch);
+        }
+        sendImmediately(tag, ch);
+        return true;
+    } else if (m_mem.pos + tag.packetSize > MAX_OUTGOING_PACKET_SIZE)
     {
         if (m_mem.pos > 0)
         {
@@ -187,15 +195,22 @@ void FLVTagBuffer::sendImmediately(FLVTag& tag, Channel* ch)
     MemoryStream mem(tag.packet, tag.packetSize);
 
     int rlen = tag.packetSize;
+    bool firstTime = true;
     while (rlen)
     {
         int rl = rlen;
         if (rl > MAX_OUTGOING_PACKET_SIZE)
+        {
             rl = MAX_OUTGOING_PACKET_SIZE;
+        }
 
         pack.type = ChanPacket::T_DATA;
         pack.pos = ch->streamPos;
         pack.len = rl;
+        if (firstTime && tag.isKeyFrame())
+            pack.cont = false;
+        else
+            pack.cont = true;
 
         mem.read(pack.data, pack.len);
 
@@ -204,6 +219,7 @@ void FLVTagBuffer::sendImmediately(FLVTag& tag, Channel* ch)
         ch->streamPos += pack.len;
 
         rlen -= rl;
+        firstTime = false;
     }
 }
 
@@ -221,6 +237,7 @@ void FLVTagBuffer::flush(Channel* ch)
     pack.type = ChanPacket::T_DATA;
     pack.pos = ch->streamPos;
     pack.len = length;
+    pack.cont = true;
     m_mem.read(pack.data, length);
 
     ch->newPacket(pack);

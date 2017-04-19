@@ -2081,7 +2081,10 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
         if (sendHead)
         {
             ch->headPack.writeRaw(bsock);
-            streamPos = ch->rawData.getLatestPos();
+            // streamPos = ch->rawData.getOldestNonContinuationPos();
+            streamPos = ch->rawData.getLatestNonContinuationPos();
+            // if (streamPos == 0)
+            //     streamPos = ch->rawData.getLatestPos();
             if (streamPos == 0)
                 streamPos = ch->headPack.pos + ch->headPack.len;
             LOG_DEBUG("Sent %d bytes header ", ch->headPack.len);

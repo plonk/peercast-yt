@@ -61,28 +61,22 @@ public:
         len  = 0;
         pos  = 0;
         sync = 0;
+        cont = false;
     }
+
     void    init(TYPE type, const void *data, unsigned int length, unsigned int position);
 
     void    writeRaw(Stream &);
     void    writePeercast(Stream &);
     void    readPeercast(Stream &);
 
-    ChanPacket& operator=(const ChanPacket& other)
-    {
-        this->type = other.type;
-        this->len  = other.len;
-        this->pos  = other.pos;
-        this->sync = other.sync;
-        memcpy(this->data, other.data, this->len);
-
-        return *this;
-    }
+    ChanPacket& operator=(const ChanPacket& other);
 
     TYPE            type;
     unsigned int    len;
     unsigned int    pos;
     unsigned int    sync;
+    bool            cont; // true if this is a continuation packet
     char            data[MAX_DATALEN];
 };
 
@@ -121,16 +115,32 @@ public:
     unsigned int    getStreamPos(unsigned int);
     unsigned int    getStreamPosEnd(unsigned int);
     unsigned int    getLastSync();
+    unsigned int    getLatestNonContinuationPos();
+    unsigned int    getOldestNonContinuationPos();
 
-    std::vector<unsigned int> getPacketLengths()
+    struct Stat
+    {
+        std::vector<unsigned int> packetLengths;
+        int continuations;
+        int nonContinuations;
+    };
+
+    Stat getStatistics()
     {
         if (writePos == 0)
-            return {};
+            return { {}, 0, 0 };
 
         std::vector<unsigned int> lens;
+        int cs = 0, ncs = 0;
         for (unsigned int i = firstPos; i <= lastPos; i++)
+        {
             lens.push_back(packets[i % MAX_PACKETS].len);
-        return lens;
+            if (packets[i % MAX_PACKETS].cont)
+                cs++;
+            else
+                ncs++;
+        }
+        return { lens, cs, ncs };
     }
 
     ChanPacket              packets[MAX_PACKETS];

@@ -1430,12 +1430,13 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
             time = "just now";
         else
             time.setFromStopwatch(lastWritten);
-        auto lens = rawData.getPacketLengths();
+        auto stat = rawData.getStatistics();
+        auto& lens = stat.packetLengths;
         double byterate = (sourceData) ? sourceData->getSourceRateAvg() : 0.0;
         auto sum = std::accumulate(lens.begin(), lens.end(), 0);
 
         s += str::format("Length: %s bytes (%.2f sec)<br>", str::group_digits(std::to_string(sum)).c_str(), sum / byterate);
-        s += str::format("Packets: %lu / %d<br>", lens.size(), ChanPacketBuffer::MAX_PACKETS);
+        s += str::format("Packets: %lu (c %d / nc %d)<br>", lens.size(), stat.continuations, stat.nonContinuations);
         if (lens.size() > 0)
         {
             auto pmax = std::max_element(lens.begin(), lens.end());

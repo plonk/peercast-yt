@@ -7,7 +7,7 @@
 
 using namespace matroska;
 
-void MKVStream::sendPacket(ChanPacket::TYPE type, const matroska::byte_string& data, Channel* ch)
+void MKVStream::sendPacket(ChanPacket::TYPE type, const matroska::byte_string& data, bool continuation, Channel* ch)
 {
     LOG_DEBUG("MKV Sending %lu byte %s packet", data.size(), type==ChanPacket::T_HEAD?"HEAD":"DATA");
 
@@ -15,6 +15,7 @@ void MKVStream::sendPacket(ChanPacket::TYPE type, const matroska::byte_string& d
     pack.type = type;
     pack.pos = ch->streamPos;
     pack.len = data.size();
+    pack.cont = continuation;
     memcpy(pack.data, data.data(), data.size());
 
     if (type == ChanPacket::T_HEAD)
@@ -86,12 +87,12 @@ void MKVStream::readHeader(Stream &in, Channel *ch)
                     {
                         throw StreamException("MKV header too big");
                     }
-                    sendPacket(ChanPacket::T_HEAD, header, ch);
+                    sendPacket(ChanPacket::T_HEAD, header, false, ch);
 
                     // 最初のクラスターを送信
 
                     // クラスターヘッダー
-                    sendPacket(ChanPacket::T_DATA, id.bytes + size.bytes, ch);
+                    sendPacket(ChanPacket::T_DATA, id.bytes + size.bytes, false, ch);
 
                     uint64_t sizeRemaining = size.uint();
                     char buf[15 * 1024];
@@ -100,6 +101,7 @@ void MKVStream::readHeader(Stream &in, Channel *ch)
                         in.read(buf, 15 * 1024);
                         sendPacket(ChanPacket::T_DATA,
                                    byte_string(buf, buf + 15 * 1024),
+                                   true,
                                    ch);
                         sizeRemaining -= 15 * 1024;
                     }
@@ -108,6 +110,7 @@ void MKVStream::readHeader(Stream &in, Channel *ch)
                         in.read(buf, sizeRemaining);
                         sendPacket(ChanPacket::T_DATA,
                                    byte_string(buf, buf + sizeRemaining),
+                                   true,
                                    ch);
                         sizeRemaining = 0;
                     }
@@ -130,8 +133,6 @@ int MKVStream::readPacket(Stream &in, Channel *ch)
         }
     }
 
-    matroska::byte_string buffer;
-
     VInt id = VInt::read(in);
     VInt size = VInt::read(in);
 
@@ -143,8 +144,10 @@ int MKVStream::readPacket(Stream &in, Channel *ch)
         return 1; // 正しいエラーコードは？
     }
 
-    buffer += id.bytes;
-    buffer += size.bytes;
+    // クラスターヘッダー
+    sendPacket(ChanPacket::T_DATA, id.bytes + size.bytes, false, ch);
+
+    matroska::byte_string buffer;
 
     // クラスター要素のペイロードの残りバイト数
     uint64_t clusterRemaining = size.uint();
@@ -160,7 +163,7 @@ int MKVStream::readPacket(Stream &in, Channel *ch)
 
         if (buffer.size() + size.uint() > 15 * 1024)
         {
-            sendPacket(ChanPacket::T_DATA, buffer, ch);
+            sendPacket(ChanPacket::T_DATA, buffer, true, ch);
             buffer.clear();
         }
 
@@ -176,7 +179,7 @@ int MKVStream::readPacket(Stream &in, Channel *ch)
 
             if (buffer.size() > 0)
             {
-                sendPacket(ChanPacket::T_DATA, buffer, ch);
+                sendPacket(ChanPacket::T_DATA, buffer, true, ch);
                 buffer.clear();
             }
 
@@ -185,6 +188,7 @@ int MKVStream::readPacket(Stream &in, Channel *ch)
                 in.read(buf, 15 * 1024);
                 sendPacket(ChanPacket::T_DATA,
                            byte_string(buf, buf + 15 * 1024),
+                           true,
                            ch);
                 sizeRemaining -= 15 * 1024;
             }
@@ -193,6 +197,7 @@ int MKVStream::readPacket(Stream &in, Channel *ch)
                 in.read(buf, sizeRemaining);
                 sendPacket(ChanPacket::T_DATA,
                            byte_string(buf, buf + sizeRemaining),
+                           true,
                            ch);
                 sizeRemaining = 0;
             }
@@ -208,7 +213,7 @@ int MKVStream::readPacket(Stream &in, Channel *ch)
 
     if (buffer.size() > 0)
     {
-        sendPacket(ChanPacket::T_DATA, buffer, ch);
+        sendPacket(ChanPacket::T_DATA, buffer, true, ch);
         buffer.clear();
     }
 
