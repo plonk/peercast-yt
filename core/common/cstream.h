@@ -56,11 +56,11 @@ public:
     void    init()
     {
         type = T_UNKNOWN;
-        len = 0;
-        pos = 0;
+        len  = 0;
+        pos  = 0;
         sync = 0;
     }
-    void    init(TYPE t, const void *, unsigned int , unsigned int );
+    void    init(TYPE type, const void *data, unsigned int length, unsigned int position);
 
     void    writeRaw(Stream &);
     void    writePeercast(Stream &);
@@ -77,13 +77,13 @@ public:
         return *this;
     }
 
-    unsigned int    sync;
-    unsigned int    pos;
     TYPE            type;
     unsigned int    len;
+    unsigned int    pos;
+    unsigned int    sync;
     char            data[MAX_DATALEN];
-
 };
+
 // ----------------------------------
 class ChanPacketBuffer
 {
@@ -110,7 +110,7 @@ public:
 
     bool    willSkip();
 
-    int     numPending() { return writePos-readPos; }
+    int     numPending() { return writePos - readPos; }
 
     unsigned int    getLatestPos();
     unsigned int    getOldestPos();
@@ -148,9 +148,9 @@ public:
     virtual void kill() {}
     virtual bool sendPacket(ChanPacket &, GnuID &) { return false; }
     virtual void flush(Stream &) {}
-    virtual void readHeader(Stream &, Channel *)=0;
-    virtual int  readPacket(Stream &, Channel *)=0;
-    virtual void readEnd(Stream &, Channel *)=0;
+    virtual void readHeader(Stream &, Channel *) = 0;
+    virtual int  readPacket(Stream &, Channel *) = 0;
+    virtual void readEnd(Stream &, Channel *) = 0;
 
     void    readRaw(Stream &, Channel *);
 

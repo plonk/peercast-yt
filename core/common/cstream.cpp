@@ -83,6 +83,7 @@ void ChanPacket::readPeercast(Stream &in)
 }
 
 // -----------------------------------
+// (使われていないようだ。)
 int ChanPacketBuffer::copyFrom(ChanPacketBuffer &buf, unsigned int reqPos)
 {
     lock.on();
@@ -93,7 +94,7 @@ int ChanPacketBuffer::copyFrom(ChanPacketBuffer &buf, unsigned int reqPos)
     safePos = 0;
     readPos = 0;
 
-    for (unsigned int i=buf.firstPos; i<=buf.lastPos; i++)
+    for (unsigned int i = buf.firstPos; i <= buf.lastPos; i++)
     {
         ChanPacket *src = &buf.packets[i%MAX_PACKETS];
         if (src->type & accept)
@@ -104,15 +105,17 @@ int ChanPacketBuffer::copyFrom(ChanPacketBuffer &buf, unsigned int reqPos)
                 packets[writePos++] = *src;
             }
         }
-
     }
 
     buf.lock.off();
     lock.off();
-    return lastPos-firstPos;
+    return lastPos - firstPos;
 }
 
-// -----------------------------------
+// ------------------------------------------------------------------
+// ストリームポジションが spos か、それよりも新しいパケットが見付かれ
+// ば pack に代入する。見付かった場合は true, そうでなければ false を
+// 返す。
 bool ChanPacketBuffer::findPacket(unsigned int spos, ChanPacket &pack)
 {
     if (writePos == 0)
@@ -124,8 +127,9 @@ bool ChanPacketBuffer::findPacket(unsigned int spos, ChanPacket &pack)
     if (spos < fpos)
         spos = fpos;
 
-
-    for (unsigned int i=firstPos; i<=lastPos; i++)
+    // このループ、lastPos == UINT_MAX の時終了しないのでは？ …4G パ
+    // ケットも送らないか。
+    for (unsigned int i = firstPos; i <= lastPos; i++)
     {
         ChanPacket &p = packets[i%MAX_PACKETS];
         if (p.pos >= spos)
@@ -140,7 +144,9 @@ bool ChanPacketBuffer::findPacket(unsigned int spos, ChanPacket &pack)
     return false;
 }
 
-// -----------------------------------
+// ------------------------------------------------------------------
+// バッファー内の一番新しいパケットのストリームポジションを返す。まだ
+// パケットがない場合は 0 を返す。
 unsigned int    ChanPacketBuffer::getLatestPos()
 {
     if (!writePos)
@@ -149,7 +155,9 @@ unsigned int    ChanPacketBuffer::getLatestPos()
         return getStreamPos(lastPos);
 }
 
-// -----------------------------------
+// ------------------------------------------------------------------
+// バッファー内の一番古いパケットのストリームポジションを返す。まだパ
+// ケットが無い場合は 0 を返す。
 unsigned int    ChanPacketBuffer::getOldestPos()
 {
     if (!writePos)
@@ -173,16 +181,19 @@ unsigned int    ChanPacketBuffer::findOldestPos(unsigned int spos)
     return spos;
 }
 
-// -----------------------------------
+// -------------------------------------------------------------------
+// パケットインデックス index のパケットのストリームポジションを返す。
 unsigned int    ChanPacketBuffer::getStreamPos(unsigned int index)
 {
     return packets[index%MAX_PACKETS].pos;
 }
 
-// -----------------------------------
+// -------------------------------------------------------------------
+// パケットインデックス index のパケットの次のパケットのストリームポジ
+// ションを計算する。
 unsigned int    ChanPacketBuffer::getStreamPosEnd(unsigned int index)
 {
-    return packets[index%MAX_PACKETS].pos+packets[index%MAX_PACKETS].len;
+    return packets[index%MAX_PACKETS].pos + packets[index%MAX_PACKETS].len;
 }
 
 // -----------------------------------
@@ -237,17 +248,18 @@ void    ChanPacketBuffer::readPacket(ChanPacket &pack)
             throw TimeoutException();
     }
     lock.on();
-    pack =  packets[readPos%MAX_PACKETS];
+    pack = packets[readPos%MAX_PACKETS];
     readPos++;
     lock.off();
 
     sys->sleepIdle();
 }
 
-// -----------------------------------
+// ------------------------------------------------------------
+// バッファーがいっぱいなら true を返す。そうでなければ false。
 bool    ChanPacketBuffer::willSkip()
 {
-    return ((writePos-readPos) >= MAX_PACKETS);
+    return ((writePos - readPos) >= MAX_PACKETS);
 }
 
 // ------------------------------------------
@@ -269,9 +281,9 @@ bool ChannelStream::getStatus(Channel *ch, ChanPacket &pack)
         || (numRelays != newLocalRelays)
         || (ch->isPlaying() != isPlaying)
         || (servMgr->getFirewall() != fwState)
-        || (((ctime-lastUpdate)>chanMgr->hostUpdateInterval) && chanMgr->hostUpdateInterval)
+        || (((ctime - lastUpdate) > chanMgr->hostUpdateInterval) && chanMgr->hostUpdateInterval)
         )
-        && ((ctime-lastUpdate) > 10)
+        && ((ctime - lastUpdate) > 10)
        )
     {
         numListeners = newLocalListeners;
