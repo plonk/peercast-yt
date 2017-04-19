@@ -2430,7 +2430,6 @@ void Servent::sendPCPChannel()
 
             if (ch)
             {
-
                 if (streamIndex != ch->streamIndex)
                 {
                     streamIndex = ch->streamIndex;
@@ -2440,6 +2439,7 @@ void Servent::sendPCPChannel()
 
                 ChanPacket rawPack;
 
+                // FIXME: ストリームインデックスの変更を確かめずにどんどん読み出して大丈夫？
                 while (ch->rawData.findPacket(streamPos, rawPack))
                 {
                     if (rawPack.type == ChanPacket::T_HEAD)
