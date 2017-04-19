@@ -621,6 +621,8 @@ public:
         case ServMgr::FW_UNKNOWN:
             return nullptr;
         }
+        LOG_ERROR("Invalid firewall state");
+        return nullptr;
     }
 
     json getStatus(json::array_t)
