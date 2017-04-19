@@ -51,7 +51,7 @@
 #include "version2.h"
 
 // -----------------------------------
-const char *Channel::srcTypes[]=
+const char *Channel::srcTypes[] =
 {
     "NONE",
     "PEERCAST",
@@ -60,8 +60,9 @@ const char *Channel::srcTypes[]=
     "URL",
     "HTTPPUSH",
 };
+
 // -----------------------------------
-const char *Channel::statusMsgs[]=
+const char *Channel::statusMsgs[] =
 {
     "NONE",
     "WAIT",
@@ -86,6 +87,7 @@ Channel::Channel()
     next = NULL;
     reset();
 }
+
 // -----------------------------------------------------------------------------
 void Channel::endThread()
 {
@@ -108,19 +110,19 @@ void Channel::endThread()
         sourceData = NULL;
     }
 
-
     reset();
 
     chanMgr->deleteChannel(this);
 
     sys->endThread(&thread);
-
 }
+
 // -----------------------------------------------------------------------------
 void Channel::resetPlayTime()
 {
     info.lastPlayStart = sys->getTime();
 }
+
 // -----------------------------------------------------------------------------
 void Channel::setStatus(STATUS s)
 {
@@ -181,7 +183,7 @@ void Channel::reset()
     sourceStream = NULL;
 
     rawData.init();
-    rawData.accept = ChanPacket::T_HEAD|ChanPacket::T_DATA;
+    rawData.accept = ChanPacket::T_HEAD | ChanPacket::T_DATA;
 
     status = S_NONE;
     type = T_NONE;
@@ -215,7 +217,11 @@ void    Channel::newPacket(ChanPacket &pack)
 // -----------------------------------
 bool    Channel::checkIdle()
 {
-    return ( (info.getUptime() > chanMgr->prefetchTime) && (localListeners() == 0) && (!stayConnected) && (status != S_BROADCASTING));
+    return
+        (info.getUptime() > chanMgr->prefetchTime) &&
+        (localListeners() == 0) &&
+        (!stayConnected) &&
+        (status != S_BROADCASTING);
 }
 
 // -----------------------------------
@@ -223,11 +229,13 @@ bool    Channel::isFull()
 {
     return chanMgr->maxRelaysPerChannel ? localRelays() >= chanMgr->maxRelaysPerChannel : false;
 }
+
 // -----------------------------------
 int Channel::localRelays()
 {
     return servMgr->numStreams(info.id, Servent::T_RELAY, true);
 }
+
 // -----------------------------------
 int Channel::localListeners()
 {
@@ -243,6 +251,7 @@ int Channel::totalRelays()
         tot += chl->numHits();
     return tot;
 }
+
 // -----------------------------------
 int Channel::totalListeners()
 {
@@ -259,7 +268,6 @@ void    Channel::startGet()
     srcType = SRC_PEERCAST;
     type = T_RELAY;
     info.srcProtocol = ChanInfo::SP_PCP;
-
 
     sourceData = new PeercastSource();
 
@@ -280,7 +288,6 @@ void    Channel::startURL(const char *u)
     sourceData = new URLSource(u);
 
     startStream();
-
 }
 
 // -----------------------------------
@@ -316,10 +323,7 @@ void Channel::checkReadDelay(unsigned int len)
         unsigned int time = (len*1000)/((info.bitrate*1024)/8);
         sys->sleep(time);
     }
-
-
 }
-
 
 // -----------------------------------
 THREAD_PROC Channel::stream(ThreadInfo *thread)
@@ -331,7 +335,6 @@ THREAD_PROC Channel::stream(ThreadInfo *thread)
     while (thread->active && !peercastInst->isQuitting)
     {
         LOG_CHANNEL("Channel started");
-
 
         ChanHitList *chl = chanMgr->findHitList(ch->info);
         if (!chl)
@@ -450,7 +453,6 @@ int Channel::handshakeFetch()
     }
 
     return 0;
-
 }
 
 // -----------------------------------
@@ -778,7 +780,6 @@ void Channel::processMp3Metadata(char *str)
             newInfo.track.contact.convertTo(String::T_UNICODE);
         }
 
-
         cmd = next;
     }
 
@@ -923,7 +924,6 @@ void Channel::broadcastTrackerUpdate(GnuID &svID, bool force)
                 info.writeTrackAtoms(atom);
             hit.writeAtoms(atom, info.id);
 
-
         pack.len = mem.pos;
         pack.type = ChanPacket::T_PCP;
 
@@ -1013,7 +1013,6 @@ ChannelStream *Channel::createSource()
 {
 //  if (servMgr->relayBroadcast)
 //      chanMgr->broadcastRelays(NULL, chanMgr->minBroadcastTTL, chanMgr->maxBroadcastTTL);
-
 
     ChannelStream *source=NULL;
 
@@ -1184,13 +1183,11 @@ void PeercastStream::readHeader(Stream &in, Channel *ch)
 {
     if (in.readTag() != 'PCST')
         throw StreamException("Not PeerCast stream");
-
 }
 
 // -----------------------------------
 void PeercastStream::readEnd(Stream &, Channel *)
 {
-
 }
 
 // -----------------------------------
@@ -1198,69 +1195,63 @@ int PeercastStream::readPacket(Stream &in, Channel *ch)
 {
     ChanPacket pack;
 
+    pack.readPeercast(in);
+
+    MemoryStream mem(pack.data, pack.len);
+
+    switch(pack.type)
     {
-
-        pack.readPeercast(in);
-
-        MemoryStream mem(pack.data, pack.len);
-
-        switch(pack.type)
-        {
-            case ChanPacket::T_HEAD:
-                // update sync pos
-                ch->headPack = pack;
-                pack.pos = ch->streamPos;
-                ch->newPacket(pack);
-                ch->streamPos+=pack.len;
-                break;
-            case ChanPacket::T_DATA:
-                pack.pos = ch->streamPos;
-                ch->newPacket(pack);
-                ch->streamPos+=pack.len;
-                break;
-            case ChanPacket::T_META:
-                ch->insertMeta.fromMem(pack.data, pack.len);
+        case ChanPacket::T_HEAD:
+            // update sync pos
+            ch->headPack = pack;
+            pack.pos = ch->streamPos;
+            ch->newPacket(pack);
+            ch->streamPos += pack.len;
+            break;
+        case ChanPacket::T_DATA:
+            pack.pos = ch->streamPos;
+            ch->newPacket(pack);
+            ch->streamPos += pack.len;
+            break;
+        case ChanPacket::T_META:
+            ch->insertMeta.fromMem(pack.data, pack.len);
+            if (pack.len)
+            {
+                XML xml;
+                xml.read(mem);
+                XML::Node *n = xml.findNode("channel");
+                if (n)
                 {
-                    if (pack.len)
-                    {
-                        XML xml;
-                        xml.read(mem);
-                        XML::Node *n = xml.findNode("channel");
-                        if (n)
-                        {
-                            ChanInfo newInfo = ch->info;
-                            newInfo.updateFromXML(n);
-                            ChanHitList *chl = chanMgr->findHitList(ch->info);
-                            if (chl)
-                                newInfo.updateFromXML(n);
-                            ch->updateInfo(newInfo);
-                        }
-                    }
+                    ChanInfo newInfo = ch->info;
+                    newInfo.updateFromXML(n);
+                    ChanHitList *chl = chanMgr->findHitList(ch->info);
+                    if (chl)
+                        newInfo.updateFromXML(n);
+                    ch->updateInfo(newInfo);
                 }
-                break;
+            }
+            break;
 #if 0
-            case ChanPacket::T_SYNC:
+        case ChanPacket::T_SYNC:
+            {
+                unsigned int s = mem.readLong();
+                if ((s-ch->syncPos) != 1)
                 {
-                    unsigned int s = mem.readLong();
-                    if ((s-ch->syncPos) != 1)
+                    LOG_CHANNEL("Ch.%d SKIP: %d to %d (%d)", ch->index, ch->syncPos, s, ch->info.numSkips);
+                    if (ch->syncPos)
                     {
-                        LOG_CHANNEL("Ch.%d SKIP: %d to %d (%d)", ch->index, ch->syncPos, s, ch->info.numSkips);
-                        if (ch->syncPos)
-                        {
-                            ch->info.numSkips++;
-                            if (ch->info.numSkips>50)
-                                throw StreamException("Bumped - Too many skips");
-                        }
+                        ch->info.numSkips++;
+                        if (ch->info.numSkips>50)
+                            throw StreamException("Bumped - Too many skips");
                     }
-
-                    ch->syncPos = s;
                 }
-                break;
+
+                ch->syncPos = s;
+            }
+            break;
 #endif
-
-        }
-
     }
+
     return 0;
 }
 
@@ -1305,11 +1296,9 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
         utf8 = info.name;
         utf8.convertTo(String::T_UNICODESAFE);
         strcpy(buf, utf8.cstr());
-
     }else if (var == "bitrate")
     {
         sprintf(buf, "%d", info.bitrate);
-
     }else if (var == "srcrate")
     {
         if (sourceData)
@@ -1318,7 +1307,6 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
             sprintf(buf, "%.0f", BYTES_TO_KBPS(tot));
         }else
             strcpy(buf, "0");
-
     }else if (var == "genre")
     {
         utf8 = info.genre;
@@ -1360,17 +1348,14 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
     }
     else if (var == "ext")
         sprintf(buf, "%s", info.getTypeExt());
-
     else if (var == "localRelays")
         sprintf(buf, "%d", localRelays());
     else if (var == "localListeners")
         sprintf(buf, "%d", localListeners());
-
     else if (var == "totalRelays")
         sprintf(buf, "%d", totalRelays());
     else if (var == "totalListeners")
         sprintf(buf, "%d", totalListeners());
-
     else if (var == "status")
         sprintf(buf, "%s", getStatusStr());
     else if (var == "keep")
@@ -1392,7 +1377,6 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
 
         utf8.convertTo(String::T_UNICODE);
         strcpy(buf, utf8.cstr());
-
     }else if (var == "contactURL")
         sprintf(buf, "%s", info.url.cstr());
     else if (var == "streamPos")
@@ -1466,4 +1450,3 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
                 //int cnt = chanMgr->broadcastPacketUp(pack, noID, servMgr->sessionID);
                 //LOG_DEBUG("Sent message to %d clients", cnt);
 #endif
-
