@@ -508,7 +508,6 @@ int ChanMgr::pickHits(ChanHitSearch &chs)
         if (chl->isUsed())
             if (chl->pickHits(chs))
             {
-                chl->info.id;
                 return 1;
             }
         chl = chl->next;
