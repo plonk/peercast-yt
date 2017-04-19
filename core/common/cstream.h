@@ -19,6 +19,8 @@
 #ifndef _CSTREAM_H
 #define _CSTREAM_H
 
+#include <vector>
+
 #include "atom.h"
 #include "sys.h"
 
@@ -119,6 +121,17 @@ public:
     unsigned int    getStreamPos(unsigned int);
     unsigned int    getStreamPosEnd(unsigned int);
     unsigned int    getLastSync();
+
+    std::vector<unsigned int> getPacketLengths()
+    {
+        if (writePos == 0)
+            return {};
+
+        std::vector<unsigned int> lens;
+        for (unsigned int i = firstPos; i <= lastPos; i++)
+            lens.push_back(packets[i % MAX_PACKETS].len);
+        return lens;
+    }
 
     ChanPacket              packets[MAX_PACKETS];
     volatile unsigned int   lastPos, firstPos, safePos;

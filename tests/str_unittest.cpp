@@ -60,3 +60,12 @@ TEST_F(strFixture, codepoint_to_utf8)
     ASSERT_STREQ("あ", codepoint_to_utf8(12354).c_str());
     ASSERT_STREQ("\xf0\x9f\x92\xa9", codepoint_to_utf8(0x1f4a9).c_str()); // PILE OF POO
 }
+
+TEST_F(strFixture, format)
+{
+    EXPECT_STREQ("a", format("a").c_str());
+    EXPECT_STREQ("a", format("%s", "a").c_str());
+    EXPECT_STREQ("1", format("%d", 1).c_str());
+    EXPECT_STREQ("12", format("%d%d", 1, 2).c_str());
+}
+
