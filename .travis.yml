@@ -19,5 +19,6 @@ deploy:
   file: ui/linux/peercast-linux.tar
   on:
     repo: plonk/peercast-yt
+    skip_cleanup: true
     tags: true
     all_branches: true
