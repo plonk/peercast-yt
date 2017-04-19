@@ -13,8 +13,7 @@ addons:
 script: export CC=gcc-5 CXX=g++-5; make -C ui/linux && make -C tests && cd tests &&
   ./test-all
 before_deploy:
-- pwd \
-  && ls
+- cd $TRAVIS_BUILD_DIR
 deploy:
   provider: releases
   api_key:
@@ -25,6 +24,3 @@ deploy:
   on:
     repo: plonk/peercast-yt
     tags: true
-before_deploy:
-- pwd \
-  && ls
