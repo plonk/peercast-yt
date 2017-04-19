@@ -1140,7 +1140,7 @@ int Channel::readStream(Stream &in, ChannelStream *source)
                 {
                     if (isBroadcasting())
                     {
-                        if ((sys->getTime()-lastTrackerUpdate) >= chanMgr->hostUpdateInterval)
+                        if ((sys->getTime() - lastTrackerUpdate) >= 120)
                         {
                             GnuID noID;
                             broadcastTrackerUpdate(noID);

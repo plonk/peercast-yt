@@ -67,7 +67,7 @@ TEST_F(ChanMgrFixture, initialState)
     EXPECT_EQ(0, x->lastYPConnect);
     // EXPECT_EQ(0, x->lastYPConnect2);
     EXPECT_EQ(0, x->icyIndex);
-    EXPECT_EQ(180, x->hostUpdateInterval);
+    EXPECT_EQ(120, x->hostUpdateInterval);
     EXPECT_EQ(5, x->bufferTime);
     EXPECT_TRUE(id.isSame(x->currFindAndPlayChannel));
 }

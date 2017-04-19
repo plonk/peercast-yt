@@ -280,7 +280,7 @@ ChanMgr::ChanMgr()
 
     prefetchTime = 10;  // n seconds
 
-    hostUpdateInterval = 180; // 2 minutes
+    hostUpdateInterval = 120; // 2 minutes
 
     bufferTime = 5;
 
@@ -582,7 +582,7 @@ void ChanMgr::clearDeadHits(bool clearTrackers)
     if (servMgr->isRoot)
         interval = 1200;        // mainly for old 0.119 clients
     else
-        interval = hostUpdateInterval+30;
+        interval = 180;
 
     ChanHitList *chl = hitlist, *prev = NULL;
     while (chl)
