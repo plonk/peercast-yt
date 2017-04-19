@@ -42,7 +42,7 @@ TEST_F(ChanHitFixture, initialState)
     ASSERT_EQ(0, hit->time);
     ASSERT_EQ(0, hit->upTime);
     ASSERT_EQ(0, hit->lastContact);
-    ASSERT_EQ(0, hit->hitID);
+    //ASSERT_EQ(0, hit->hitID);
 
     ASSERT_FALSE(hit->sessionID.isSet());
     ASSERT_FALSE(hit->chanID.isSet());

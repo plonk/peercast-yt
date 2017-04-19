@@ -46,7 +46,6 @@ public:
     Host            rhost[2];
     unsigned int    numListeners, numRelays, numHops;
     unsigned int    time, upTime, lastContact;
-    unsigned int    hitID;
     GnuID           sessionID, chanID;
     unsigned int    version;
     unsigned int    oldestPos, newestPos;
