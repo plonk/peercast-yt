@@ -43,4 +43,6 @@ int HTTPPushSource::getSourceRate()
 {
     if (m_sock != nullptr)
         return m_sock->bytesInPerSec();
+    else
+        return 0;
 }
