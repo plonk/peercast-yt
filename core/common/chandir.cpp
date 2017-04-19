@@ -354,6 +354,16 @@ void ChannelDirectory::clearFeeds()
     m_lastUpdate = 0;
 }
 
+std::string ChannelDirectory::findTracker(GnuID id)
+{
+    for (ChannelEntry& entry : m_channels)
+    {
+        if (entry.id.isSame(id))
+            return entry.tip;
+    }
+    return "";
+}
+
 std::string ChannelFeed::statusToString(ChannelFeed::Status s)
 {
     switch (s) {

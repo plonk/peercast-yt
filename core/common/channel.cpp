@@ -559,6 +559,25 @@ void PeercastSource::stream(Channel *ch)
 
             ch->sourceHost = pickFromHitList(ch, ch->sourceHost);
 
+            // consult channel directory
+            if (!ch->sourceHost.host.ip)
+            {
+                std::string trackerIP = servMgr->channelDirectory.findTracker(ch->info.id);
+                if (!trackerIP.empty())
+                {
+                    peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルフィードで "+chName(ch->info)+" のトラッカーが見付かりました。");
+
+                    ch->sourceHost.host.fromStrIP(trackerIP.c_str(), DEFAULT_PORT);
+                    ch->sourceHost.rhost[0].fromStrIP(trackerIP.c_str(), DEFAULT_PORT);
+                    ch->sourceHost.tracker = true;
+
+                    auto chl = chanMgr->findHitList(ch->info);
+                    if (chl)
+                        chl->addHit(ch->sourceHost);
+                    break;
+                }
+            }
+
             // no trackers found so contact YP
             if (!ch->sourceHost.host.ip)
             {
