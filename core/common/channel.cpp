@@ -22,6 +22,8 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <algorithm>
+
 #include "common.h"
 #include "socket.h"
 #include "channel.h"
@@ -460,6 +462,15 @@ int PeercastSource::getSourceRate()
 {
     if (m_channel && m_channel->sock)
         return m_channel->sock->bytesInPerSec();
+    else
+        return 0;
+}
+
+// -----------------------------------
+int PeercastSource::getSourceRateAvg()
+{
+    if (m_channel && m_channel->sock)
+        return m_channel->sock->stat.bytesInPerSecAvg();
     else
         return 0;
 }
@@ -1410,13 +1421,37 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
         strcpy(buf, str::group_digits(std::to_string(headPack.pos), ",").c_str());
     else if (var == "headLen")
         strcpy(buf, str::group_digits(std::to_string(headPack.len), ",").c_str());
+    else if (var == "buffer")
+    {
+        std::string s;
+        String time;
+        auto lastWritten = (double) sys->getTime() - rawData.lastWriteTime;
+        if (lastWritten < 5)
+            time = "just now";
+        else
+            time.setFromStopwatch(lastWritten);
+        auto lens = rawData.getPacketLengths();
+        double byterate = (sourceData) ? sourceData->getSourceRateAvg() : 0.0;
+        auto sum = std::accumulate(lens.begin(), lens.end(), 0);
+
+        s += str::format("Length: %s bytes (%.2f sec)<br>", str::group_digits(std::to_string(sum)).c_str(), sum / byterate);
+        s += str::format("Packets: %lu / %d<br>", lens.size(), ChanPacketBuffer::MAX_PACKETS);
+        if (lens.size() > 0)
+        {
+            auto pmax = std::max_element(lens.begin(), lens.end());
+            auto pmin = std::min_element(lens.begin(), lens.end());
+            s += str::format("Packet length min/avg/max: %u/%lu/%u<br>",
+                             *pmin, sum/lens.size(), *pmax);
+        }
+        s += str::format("Last written: %s<br>", time.str().c_str());
+        s += str::format("First/Safe/Last/Read/Write: %u/%u/%u/%u/%u",
+                         rawData.firstPos, rawData.safePos, rawData.lastPos, rawData.readPos, rawData.writePos);
+        strcpy(buf, s.c_str());
+    }
     else if (var == "numHits")
     {
         ChanHitList *chl = chanMgr->findHitListByID(info.id);
-        int numHits = 0;
-        if (chl)
-            numHits = chl->numHits();
-        sprintf(buf, "%d", numHits);
+        sprintf(buf, "%d", (chl) ? chl->numHits() : 0);
     }else
         return false;
 

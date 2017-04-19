@@ -13,6 +13,7 @@ namespace str
     std::string group_digits(const std::string& in, const std::string& separator = ",");
     std::vector<std::string> split(const std::string& in, const std::string& separator);
     std::string codepoint_to_utf8(uint32_t);
+    std::string format(const char* fmt, ...);
 
 }
 
