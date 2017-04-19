@@ -1381,9 +1381,9 @@ void ServMgr::loadSettings(const char *fn)
             } else if (iniFile.isName("[Host]"))
             {
                 Host h;
-                ServHost::TYPE type=ServHost::T_NONE;
-                bool firewalled=false;
-                unsigned int time=0;
+                ServHost::TYPE type = ServHost::T_NONE;
+                unsigned int time = 0;
+
                 while (iniFile.readNext())
                 {
                     if (iniFile.isName("[End]"))
