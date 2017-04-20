@@ -1719,16 +1719,9 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
     LOG_DEBUG("Request line: %s", http.cmdLine);
 
     http.readHeaders();
-    LOG_DEBUG("%s", nlohmann::json(http.headers).dump().c_str());
+    LOG_DEBUG("Setup: %s", nlohmann::json(http.headers).dump().c_str());
 
     ASSERT(http.headers["CONTENT-TYPE"] == "application/x-wms-pushstart");
-
-    // uint8_t buf[16];
-    // while (true)
-    // {
-    //     http.read(buf, 16);
-    //     LOG_DEBUG("%s", str::hexdump(std::string(buf, buf + 16)).c_str());
-    // }
 
     // -----------------------------------------
 
@@ -1743,12 +1736,9 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
     ChanInfo info;
     info.setContentType(ChanInfo::getTypeFromStr("WMV"));
     info.name = vec[0];
-    if (vec.size() > 1)
-        info.genre = vec[1];
-    if (vec.size() > 2)
-        info.desc = vec[2];
-    if (vec.size() > 3)
-        info.url = vec[3];
+    if (vec.size() > 1) info.genre = vec[1];
+    if (vec.size() > 2) info.desc  = vec[2];
+    if (vec.size() > 3) info.url   = vec[3];
 
     info.id = chanMgr->broadcastID;
     info.id.encode(NULL, info.name.cstr(), NULL, 0);
@@ -1767,7 +1757,7 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
     if (!c)
         throw HTTPException(HTTP_SC_SERVERERROR, 500);
 
-    c->startHTTPPush(sock, false);
+    c->startWMHTTPPush(sock);
     sock = NULL;    // socket is taken over by channel, so don`t close it
 }
 

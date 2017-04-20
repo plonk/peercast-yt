@@ -162,7 +162,7 @@ public:
     void    startICY(ClientSocket *, SRC_TYPE);
     void    startURL(const char *);
     void    startHTTPPush(ClientSocket *, bool isChunked);
-
+    void    startWMHTTPPush(ClientSocket *cs);
 
     ChannelStream   *createSource();
 

@@ -736,6 +736,19 @@ void    Channel::startHTTPPush(ClientSocket *cs, bool isChunked)
 }
 
 // -----------------------------------
+void    Channel::startWMHTTPPush(ClientSocket *cs)
+{
+    srcType = SRC_HTTPPUSH;
+    type    = T_BROADCAST;
+
+    sock = cs;
+    info.srcProtocol = ChanInfo::SP_WMHTTP;
+
+    sourceData = new HTTPPushSource(false);
+    startStream();
+}
+
+// -----------------------------------
 void    Channel::startICY(ClientSocket *cs, SRC_TYPE st)
 {
     srcType = st;
@@ -1051,9 +1064,21 @@ ChannelStream *Channel::createSource()
     {
         LOG_CHANNEL("Channel is MMS");
         source = new MMSStream();
-    }else
+    }else if (info.srcProtocol == ChanInfo::SP_WMHTTP)
     {
-        switch(info.contentType)
+        switch (info.contentType)
+        {
+            case ChanInfo::T_WMA:
+            case ChanInfo::T_WMV:
+                LOG_CHANNEL("Channel is WMHTTP");
+                source = new WMHTTPStream();
+                break;
+            default:
+                throw StreamException("Channel is WMHTTP - but not WMA/WMV");
+                break;
+        }
+    }else{
+        switch (info.contentType)
         {
             case ChanInfo::T_MP3:
                 LOG_CHANNEL("Channel is MP3 - meta: %d", icyMetaInterval);
@@ -1065,8 +1090,8 @@ ChannelStream *Channel::createSource()
                 break;
             case ChanInfo::T_WMA:
             case ChanInfo::T_WMV:
-                LOG_CHANNEL("Channel is WMHTTP");
-                source = new WMHTTPStream();
+                LOG_CHANNEL("Channel is MMS");
+                source = new MMSStream();
                 break;
             case ChanInfo::T_FLV:
                 LOG_CHANNEL("Channel is FLV");

@@ -109,6 +109,7 @@ TEST_F(ChanInfoFixture, static_getProtocolStr)
     ASSERT_STREQ("FILE", ChanInfo::getProtocolStr(ChanInfo::SP_FILE));
     ASSERT_STREQ("MMS", ChanInfo::getProtocolStr(ChanInfo::SP_MMS));
     ASSERT_STREQ("PCP", ChanInfo::getProtocolStr(ChanInfo::SP_PCP));
+    ASSERT_STREQ("WMHTTP", ChanInfo::getProtocolStr(ChanInfo::SP_WMHTTP));
     ASSERT_STREQ("UNKNOWN", ChanInfo::getProtocolStr(ChanInfo::SP_UNKNOWN));
 }
 
@@ -164,6 +165,7 @@ TEST_F(ChanInfoFixture, static_getProtocolFromStr)
     ASSERT_EQ(ChanInfo::SP_FILE, ChanInfo::getProtocolFromStr("FILE"));
     ASSERT_EQ(ChanInfo::SP_MMS, ChanInfo::getProtocolFromStr("MMS"));
     ASSERT_EQ(ChanInfo::SP_PCP, ChanInfo::getProtocolFromStr("PCP"));
+    ASSERT_EQ(ChanInfo::SP_WMHTTP, ChanInfo::getProtocolFromStr("WMHTTP"));
 
     ASSERT_EQ(ChanInfo::SP_PEERCAST, ChanInfo::getProtocolFromStr("Peercast")); // type str. is case-insesitive
     ASSERT_EQ(ChanInfo::SP_UNKNOWN, ChanInfo::getProtocolFromStr("RTMP"));
