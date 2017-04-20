@@ -41,6 +41,7 @@
 #include "nsv.h"
 #include "flv.h"
 #include "mkv.h"
+#include "wmhttp.h"
 
 #include "icy.h"
 #include "url.h"
@@ -722,7 +723,7 @@ void PeercastSource::stream(Channel *ch)
 }
 
 // -----------------------------------
-void    Channel::startHTTPPush(ClientSocket *cs)
+void    Channel::startHTTPPush(ClientSocket *cs, bool isChunked)
 {
     srcType = SRC_HTTPPUSH;
     type    = T_BROADCAST;
@@ -730,7 +731,7 @@ void    Channel::startHTTPPush(ClientSocket *cs)
     sock = cs;
     info.srcProtocol = ChanInfo::SP_HTTP;
 
-    sourceData = new HTTPPushSource();
+    sourceData = new HTTPPushSource(isChunked);
     startStream();
 }
 
@@ -1064,8 +1065,8 @@ ChannelStream *Channel::createSource()
                 break;
             case ChanInfo::T_WMA:
             case ChanInfo::T_WMV:
-                LOG_CHANNEL("Channel is MMS");
-                source = new MMSStream();
+                LOG_CHANNEL("Channel is WMHTTP");
+                source = new WMHTTPStream();
                 break;
             case ChanInfo::T_FLV:
                 LOG_CHANNEL("Channel is FLV");

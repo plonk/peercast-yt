@@ -174,6 +174,7 @@ public:
     void    handshakeHTTP(HTTP &, bool);
 
     void    handshakeHTTPPush(const std::string& args);
+    void    handshakeWMHTTPPush(HTTP& http, const std::string& path);
 
     void    handshakeJRPC(HTTP &http);
 

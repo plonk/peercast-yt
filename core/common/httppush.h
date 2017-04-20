@@ -7,13 +7,17 @@
 class HTTPPushSource : public ChannelSource
 {
 public:
-    HTTPPushSource()
-        : m_sock(nullptr) {}
+    HTTPPushSource(bool isChunked)
+        : m_sock(nullptr)
+        , m_isChunked(isChunked)
+    {
+    }
 
     void stream(Channel *) override;
     int getSourceRate() override;
 
     ClientSocket* m_sock;
+    bool m_isChunked;
 };
 
 #endif
