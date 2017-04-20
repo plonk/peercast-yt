@@ -316,12 +316,17 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
         }else
         {
             http.readHeaders();
-
             auto contentType = http.headers["CONTENT-TYPE"];
-
             if (contentType == "application/x-wms-pushsetup")
+            {
+                if (!isAllowed(ALLOW_BROADCAST))
+                    throw HTTPException(HTTP_SC_FORBIDDEN, 403);
+
+                if (!isPrivate())
+                    throw HTTPException(HTTP_SC_FORBIDDEN, 403);
+
                 handshakeWMHTTPPush(http, path);
-            else
+            }else
                 throw HTTPException(HTTP_SC_BADREQUEST, 400);
         }
     }else if (http.isRequest("GIV"))
