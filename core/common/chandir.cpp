@@ -233,6 +233,8 @@ bool ChannelDirectory::writeChannelVariable(Stream& out, const String& varName, 
         sprintf(buf, "%s", ch.chatUrl().c_str());
     } else if (varName == "statsUrl") {
         sprintf(buf, "%s", ch.statsUrl().c_str());
+    } else if (varName == "isPlayable") {
+        sprintf(buf, "%d", ch.id.isSet());
     } else {
         return false;
     }
