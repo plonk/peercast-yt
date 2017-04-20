@@ -49,9 +49,6 @@ int MMSStream::readPacket(Stream &in, Channel *ch)
 
                 chunk.write(mem);
 
-
-
-
                 MemoryStream asfm(chunk.data, chunk.dataLen);
                 ASFObject asfHead;
                 asfHead.readHead(asfm);

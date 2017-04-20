@@ -60,11 +60,7 @@ public:
     unsigned int    data1;
     unsigned short  data2, data3;
     unsigned char   data4[8];
-
 };
-
-
-
 
 // -----------------------------------
 const MSID headObjID=
@@ -84,12 +80,10 @@ const MSID videoStreamObjID=
 const MSID streamBitrateObjID=
     {0x7BF875CE, 0x468D, 0x11D1, 0x8D, 0x82, 0x00, 0x60, 0x97, 0xC9, 0xA2, 0xB2};
 
-
 // -----------------------------------
 class ASFObject
 {
 public:
-
     enum TYPE
     {
         T_UNKNOWN,
@@ -127,7 +121,6 @@ public:
         String str;
         id.toString(str);
         LOG_DEBUG("ASF: %s (%s)= %d : %d\n", str.data, getTypeName(), lenLo, lenHi);
-
 
         dataLen = 0;
 
@@ -178,6 +171,7 @@ public:
     unsigned int    lenLo, lenHi, dataLen;
     TYPE            type;
 };
+
 // -----------------------------------
 class ASFStream
 {
@@ -204,7 +198,6 @@ public:
         in.skip(32);
         id = in.readShort()&0x7f;
     }
-
 
     const char *getTypeName()
     {
@@ -287,7 +280,6 @@ public:
     unsigned short  type, len, v1, v2;
     unsigned char   data[8192];
 };
-
 
 #endif
 
