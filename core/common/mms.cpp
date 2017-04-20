@@ -34,72 +34,72 @@ void MMSStream::readHeader(Stream &, Channel *)
 {
 }
 // ------------------------------------------
-int MMSStream::readPacket(Stream &in, Channel *ch)
+void MMSStream::processChunk(Stream &in, Channel *ch, ASFChunk& chunk)
 {
+    switch (chunk.type)
     {
-        ASFChunk chunk;
-
-        chunk.read(in);
-
-        switch (chunk.type)
+        case 0x4824:        // asf header
         {
-            case 0x4824:        // asf header
+            MemoryStream mem(ch->headPack.data, sizeof(ch->headPack.data));
+
+            chunk.write(mem);
+
+            MemoryStream asfm(chunk.data, chunk.dataLen);
+            ASFObject asfHead;
+            asfHead.readHead(asfm);
+
+            ASFInfo asf = parseASFHeader(asfm);
+            LOG_DEBUG("ASF Info: pnum=%d, psize=%d, br=%d", asf.numPackets, asf.packetSize, asf.bitrate);
+            for (int i=0; i<ASFInfo::MAX_STREAMS; i++)
             {
-                MemoryStream mem(ch->headPack.data, sizeof(ch->headPack.data));
-
-                chunk.write(mem);
-
-                MemoryStream asfm(chunk.data, chunk.dataLen);
-                ASFObject asfHead;
-                asfHead.readHead(asfm);
-
-                ASFInfo asf = parseASFHeader(asfm);
-                LOG_DEBUG("ASF Info: pnum=%d, psize=%d, br=%d", asf.numPackets, asf.packetSize, asf.bitrate);
-                for (int i=0; i<ASFInfo::MAX_STREAMS; i++)
-                {
-                    ASFStream *s = &asf.streams[i];
-                    if (s->id)
-                        LOG_DEBUG("ASF Stream %d : %s, br=%d", s->id, s->getTypeName(), s->bitrate);
-                }
-
-                ch->info.bitrate = asf.bitrate/1000;
-
-                ch->headPack.type = ChanPacket::T_HEAD;
-                ch->headPack.len = mem.pos;
-                ch->headPack.pos = ch->streamPos;
-                ch->newPacket(ch->headPack);
-
-                ch->streamPos += ch->headPack.len;
-
-                break;
+                ASFStream *s = &asf.streams[i];
+                if (s->id)
+                    LOG_DEBUG("ASF Stream %d : %s, br=%d", s->id, s->getTypeName(), s->bitrate);
             }
-            case 0x4424:        // asf data
-            {
 
-                ChanPacket pack;
+            ch->info.bitrate = asf.bitrate/1000;
 
-                MemoryStream mem(pack.data, sizeof(pack.data));
+            ch->headPack.type = ChanPacket::T_HEAD;
+            ch->headPack.len = mem.pos;
+            ch->headPack.pos = ch->streamPos;
+            ch->newPacket(ch->headPack);
 
-                chunk.write(mem);
+            ch->streamPos += ch->headPack.len;
 
-                pack.type = ChanPacket::T_DATA;
-                pack.len = mem.pos;
-                pack.pos = ch->streamPos;
-
-                ch->newPacket(pack);
-                ch->streamPos += pack.len;
-
-                break;
-            }
-            default:
-                throw StreamException("Unknown ASF chunk");
-
+            break;
         }
+        case 0x4424:        // asf data
+        {
+            ChanPacket pack;
 
+            MemoryStream mem(pack.data, sizeof(pack.data));
+
+            chunk.write(mem);
+
+            pack.type = ChanPacket::T_DATA;
+            pack.len = mem.pos;
+            pack.pos = ch->streamPos;
+
+            ch->newPacket(pack);
+            ch->streamPos += pack.len;
+
+            break;
+        }
+        default:
+            throw StreamException("Unknown ASF chunk");
     }
-    return 0;
 }
 
+// ------------------------------------------
+int MMSStream::readPacket(Stream &in, Channel *ch)
+{
+    ASFChunk chunk;
+
+    chunk.read(in);
+
+    processChunk(in, ch, chunk);
+    return 0;
+}
 
 // -----------------------------------
 ASFInfo parseASFHeader(Stream &in)
