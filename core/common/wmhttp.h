@@ -13,7 +13,7 @@ public:
     void read(Stream &in)
     {
         uint16_t t = in.readShort();;
-        type = { t & 0xff, t >> 8 };
+        type = { (char) (t & 0xff), (char) (t >> 8) };
         len  = in.readShort();
 
         if (len > sizeof(data))
