@@ -276,7 +276,6 @@ public:
 
     GnuPacketBuffer     outPacketsNorm, outPacketsPri;
 
-    unsigned int        bytesPerSecond;
     bool                flowControl;
 
     Servent             *next;

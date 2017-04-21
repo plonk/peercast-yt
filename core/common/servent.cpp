@@ -187,7 +187,6 @@ void Servent::reset()
     loginMount.clear();
 
 
-    bytesPerSecond = 0;
     priorityConnect = false;
     pushSock = NULL;
     sendHeader = true;
