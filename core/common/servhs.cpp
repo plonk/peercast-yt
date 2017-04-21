@@ -1671,6 +1671,7 @@ void Servent::handshakeHTTPPush(const std::string& args)
     info.genre = query.get("genre");
     info.desc  = query.get("desc");
     info.url   = query.get("url");
+    info.bitrate   = stoi(query.get("bitrate") == "" ? "0" : query.get("bitrate"));
 
     info.id = chanMgr->broadcastID;
     info.id.encode(NULL, info.name.cstr(), NULL, 0);
