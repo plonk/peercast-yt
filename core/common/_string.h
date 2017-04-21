@@ -147,7 +147,7 @@ public:
         *this = tmp;
     }
 
-    void sprintf(const char* fmt, ...)
+    void sprintf(const char* fmt, ...) __attribute__ ((format (printf, 2, 3)))
     {
         va_list ap;
 
@@ -156,7 +156,7 @@ public:
         va_end(ap);
     }
 
-    static ::String format(const char* fmt, ...)
+    static ::String format(const char* fmt, ...) __attribute__ ((format (printf, 1, 2)))
     {
         va_list ap;
         ::String result;
