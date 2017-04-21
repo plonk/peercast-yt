@@ -131,7 +131,7 @@ void Servent::handshakeJRPC(HTTP &http)
 
     http.writeLine(HTTP_SC_OK);
     http.writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
-    http.writeLineF("%s %d", HTTP_HS_LENGTH, response.size());
+    http.writeLineF("%s %zu", HTTP_HS_LENGTH, response.size());
     http.writeLineF("%s %s", HTTP_HS_CONTENT, "application/json");
     http.writeLine("");
 
@@ -270,7 +270,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
                 std::string response = api.getVersionInfo(nlohmann::json::array_t()).dump();
 
                 http.writeLine(HTTP_SC_OK);
-                http.writeLineF("%s %d", HTTP_HS_LENGTH, response.size());
+                http.writeLineF("%s %zu", HTTP_HS_LENGTH, response.size());
                 http.writeLine("");
                 http.writeString(response.c_str());
             }

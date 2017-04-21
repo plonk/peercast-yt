@@ -180,7 +180,7 @@ bool ChannelDirectory::update()
 
         if (success) {
             feed.status = ChannelFeed::Status::OK;
-            LOG_DEBUG("Got %lu channels from %s", channels.size(), feed.url.c_str());
+            LOG_DEBUG("Got %zu channels from %s", channels.size(), feed.url.c_str());
             for (auto ch : channels) {
                 m_channels.push_back(ch);
             }
