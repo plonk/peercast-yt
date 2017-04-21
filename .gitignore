@@ -1,5 +1,11 @@
 ui/linux/html/
+peercast
+peercast.ini
+.deps
+html.tar
+peercast-linux.tar
 ui/html/
+**/gmon.out
 **/*.o
 **/*.a
 .clang-format

@@ -322,7 +322,7 @@ public:
         else if (type == AMF_OBJECT_END) {
         }
         else if (type == AMF_ARRAY) {
-            int len = readInt(in);
+            readInt(in); // length
             readObject(in);
         }
         else if (type == AMF_STRICTARRAY) {

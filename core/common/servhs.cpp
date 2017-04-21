@@ -33,6 +33,7 @@
 #include "matroska.h"
 #include "str.h"
 #include "cgi.h"
+#include "template.h"
 
 // -----------------------------------
 static void termArgs(char *str)
@@ -314,7 +315,19 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
             handshakeHTTPPush(args);
         }else
         {
-            throw HTTPException(HTTP_SC_BADREQUEST, 400);
+            http.readHeaders();
+            auto contentType = http.headers["CONTENT-TYPE"];
+            if (contentType == "application/x-wms-pushsetup")
+            {
+                if (!isAllowed(ALLOW_BROADCAST))
+                    throw HTTPException(HTTP_SC_FORBIDDEN, 403);
+
+                if (!isPrivate())
+                    throw HTTPException(HTTP_SC_FORBIDDEN, 403);
+
+                handshakeWMHTTPPush(http, path);
+            }else
+                throw HTTPException(HTTP_SC_BADREQUEST, 400);
         }
     }else if (http.isRequest("GIV"))
     {
@@ -1085,7 +1098,7 @@ void Servent::CMD_fetch(char *cmd, HTTP& http, HTML& html, char jumpStr[])
             ChanInfo::TYPE type = ChanInfo::getTypeFromStr(arg);
             info.contentType = type;
             info.contentTypeStr = ChanInfo::getTypeStr(type);
-            info.streamType = ChanInfo::getMIMEType(type);
+            info.MIMEType = ChanInfo::getMIMEType(type);
             info.streamExt = ChanInfo::getTypeExt(type);
         }
     }
@@ -1233,22 +1246,55 @@ void Servent::CMD_stop(char *cmd, HTTP& http, HTML& html, char jumpStr[])
 
 void Servent::CMD_bump(char *cmd, HTTP& http, HTML& html, char jumpStr[])
 {
-    char arg[MAX_CGI_LEN];
-    char curr[MAX_CGI_LEN];
-
+    cgi::Query query(cmd);
     GnuID id;
-    char *cp = cmd;
-    while (cp=nextCGIarg(cp, curr, arg))
-    {
-        if (strcmp(curr, "id") == 0)
-            id.fromStr(arg);
-    }
+    std::string ip;
+
+    if (!query.get("id").empty())
+        id.fromStr(query.get("id").c_str());
+
+    ip = query.get("ip");
+    Host designation;
+    designation.fromStrIP(ip.c_str(), 7144);
 
     Channel *c = chanMgr->findChannelByID(id);
     if (c)
-        c->bump = true;
+    {
+        if (!ip.empty())
+        {
+            ChanHitList* chl = chanMgr->findHitList(c->info);
+            ChanHit theHit;
 
-    sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
+            if (chl)
+            {
+                chl->forEachHit(
+                    [&] (ChanHit* hit)
+                    {
+                        if (hit->host == designation)
+                            theHit = *hit;
+                    });
+            }
+
+            if (theHit.host.ip != 0)
+            {
+                c->designatedHost = theHit;
+            } else
+            {
+                // ChanHitをでっちあげる
+                c->designatedHost.init();
+                c->designatedHost.host = c->designatedHost.rhost[0] = designation;
+            }
+        }
+        c->bump = true;
+    }
+
+    try
+    {
+        strcpy(jumpStr, http.headers.at("REFERER").c_str());
+    } catch (std::out_of_range&)
+    {
+        sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
+    }
 }
 
 void Servent::CMD_keep(char *cmd, HTTP& http, HTML& html, char jumpStr[])
@@ -1635,6 +1681,92 @@ void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd, size_t plen)
 }
 
 // -----------------------------------
+// Windows Media HTTP Push Distribution Protocol
+#define ASSERT(x)
+void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
+{
+    // At this point, http has read all the headers.
+
+    ASSERT(http.headers["CONTENT-TYPE"] == "application/x-wms-pushsetup");
+    LOG_DEBUG("%s", nlohmann::json(http.headers).dump().c_str());
+
+    int size = std::atoi(http.headers["CONTENT-LENGTH"].c_str());
+
+    // エンコーダーの設定要求を読む。0 バイトの空の設定要求も合法。
+    unique_ptr<char> buffer(new char[size + 1]);
+    http.read(buffer.get(), size);
+    buffer.get()[size] = '\0';
+    LOG_DEBUG("setup: %s", str::inspect(buffer.get()).c_str());
+
+    // わかったふりをする
+    http.writeLine("HTTP/1.1 204 No Content"); // これってちゃんと CRLF 出る？
+    std::vector< std::pair<const char*,const char*> > headers =
+        {
+            { "Server"         , "Cougar/9.01.01.3814" },
+            { "Cache-Control"  , "no-cache" },
+            { "Supported"      , "com.microsoft.wm.srvppair, "
+              "com.microsoft.wm.sswitch, "
+              "com.microsoft.wm.predstrm, "
+              "com.microsoft.wm.fastcache, "
+              "com.microsoft.wm.startupprofile" },
+            { "Content-Length" , "0" },
+            { "Connection"     , "Keep-Alive" },
+        };
+    for (auto hline : headers)
+    {
+        http.writeLineF("%s: %s", hline.first, hline.second);
+    }
+    http.writeLine("");
+
+    // -----------------------------------------
+    http.reset();
+    http.readRequest();
+    LOG_DEBUG("Request line: %s", http.cmdLine);
+
+    http.readHeaders();
+    LOG_DEBUG("Setup: %s", nlohmann::json(http.headers).dump().c_str());
+
+    ASSERT(http.headers["CONTENT-TYPE"] == "application/x-wms-pushstart");
+
+    // -----------------------------------------
+
+    // User-Agent ヘッダーがあれば agent をセット
+    if (http.headers["USER-AGENT"] != "")
+        this->agent = http.headers["USER-AGENT"];
+
+    auto vec = str::split(cgi::unescape(path.substr(1)), ";");
+    if (vec.size() == 0)
+        throw HTTPException(HTTP_SC_BADREQUEST, 400);
+
+    ChanInfo info;
+    info.setContentType(ChanInfo::getTypeFromStr("WMV"));
+    info.name = vec[0];
+    if (vec.size() > 1) info.genre = vec[1];
+    if (vec.size() > 2) info.desc  = vec[2];
+    if (vec.size() > 3) info.url   = vec[3];
+
+    info.id = chanMgr->broadcastID;
+    info.id.encode(NULL, info.name.cstr(), NULL, 0);
+
+    Channel *c = chanMgr->findChannelByID(info.id);
+    if (c)
+    {
+        LOG_CHANNEL("WMHTTP Push channel already active, closing old one");
+        c->thread.shutdown();
+    }
+
+    info.comment = chanMgr->broadcastMsg;
+    info.bcID    = chanMgr->broadcastID;
+
+    c = chanMgr->createChannel(info, NULL);
+    if (!c)
+        throw HTTPException(HTTP_SC_SERVERERROR, 500);
+
+    c->startWMHTTPPush(sock);
+    sock = NULL;    // socket is taken over by channel, so don`t close it
+}
+
+// -----------------------------------
 // HTTP Push 放送
 void Servent::handshakeHTTPPush(const std::string& args)
 {
@@ -1691,7 +1823,8 @@ void Servent::handshakeHTTPPush(const std::string& args)
     if (!c)
         throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-    c->startHTTPPush(sock);
+    bool chunked = (http.headers["TRANSFER-ENCODING"] == "chunked");
+    c->startHTTPPush(sock, chunked);
     sock = NULL;    // socket is taken over by channel, so don`t close it
 }
 
@@ -1863,8 +1996,7 @@ void Servent::handshakeRemoteFile(const char *dirName)
 
     if (isTemplate)
     {
-        HTML html("", *sock);
-        html.readTemplate(mem, sock, 0);
+        Template().readTemplate(mem, sock, 0);
     }else
         sock->write(mem.buf, fileLen);
 }

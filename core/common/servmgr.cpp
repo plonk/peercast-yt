@@ -1034,7 +1034,7 @@ void ServMgr::saveSettings(const char *fn)
                     iniFile.writeStrValue("sourceURL", c->sourceURL.cstr());
                 iniFile.writeStrValue("sourceProtocol", ChanInfo::getProtocolStr(c->info.srcProtocol));
                 iniFile.writeStrValue("contentType", c->info.getTypeStr());
-                iniFile.writeStrValue("streamType", c->info.streamType);
+                iniFile.writeStrValue("MIMEType", c->info.MIMEType);
                 iniFile.writeStrValue("streamExt", c->info.streamExt);
                 iniFile.writeIntValue("bitrate", c->info.bitrate);
                 iniFile.writeStrValue("contactURL", c->info.url.cstr());
@@ -1340,8 +1340,8 @@ void ServMgr::loadSettings(const char *fn)
                         info.srcProtocol = ChanInfo::getProtocolFromStr(iniFile.getStrValue());
                     else if (iniFile.isName("contentType"))
                         info.contentType = ChanInfo::getTypeFromStr(iniFile.getStrValue());
-                    else if (iniFile.isName("streamType"))
-                        info.streamType = iniFile.getStrValue();
+                    else if (iniFile.isName("MIMEType"))
+                        info.MIMEType = iniFile.getStrValue();
                     else if (iniFile.isName("streamExt"))
                         info.streamExt = iniFile.getStrValue();
                     else if (iniFile.isName("stayConnected"))
@@ -1381,9 +1381,9 @@ void ServMgr::loadSettings(const char *fn)
             } else if (iniFile.isName("[Host]"))
             {
                 Host h;
-                ServHost::TYPE type=ServHost::T_NONE;
-                bool firewalled=false;
-                unsigned int time=0;
+                ServHost::TYPE type = ServHost::T_NONE;
+                unsigned int time = 0;
+
                 while (iniFile.readNext())
                 {
                     if (iniFile.isName("[End]"))
@@ -1843,14 +1843,14 @@ int ServMgr::idleProc(ThreadInfo *thread)
 {
     sys->setThreadName(thread, "IDLE");
 
-    unsigned int lastPasvFind=0;
-    unsigned int lastBroadcast=0;
+    //unsigned int lastPasvFind=0;
+    //unsigned int lastBroadcast=0;
 
     // nothing much to do for the first couple of seconds, so just hang around.
     sys->sleep(2000);
 
-    unsigned int lastBWcheck=0;
-    unsigned int bytesIn=0, bytesOut=0;
+    //unsigned int lastBWcheck=0;
+    //unsigned int bytesIn=0, bytesOut=0;
 
     unsigned int lastBroadcastConnect = 0;
     unsigned int lastRootBroadcast = 0;
@@ -1937,8 +1937,7 @@ int ServMgr::serverProc(ThreadInfo *thread)
     Servent *serv = servMgr->allocServent();
     Servent *serv2 = servMgr->allocServent();
 
-    unsigned int lastLookupTime=0;
-
+    //unsigned int lastLookupTime=0;
 
     while (thread->active)
     {
@@ -2111,7 +2110,6 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     else if (var == "uptime")
     {
         str.setFromStopwatch(getUptime());
-        str.convertTo(String::T_HTML);
         strcpy(buf, str.cstr());
     }else if (var == "numRelays")
         sprintf(buf, "%d", numStreams(Servent::T_RELAY, true));

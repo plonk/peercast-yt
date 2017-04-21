@@ -2,14 +2,15 @@
 
 [![Build Status](https://travis-ci.org/plonk/peercast-yt.svg?branch=master)](https://travis-ci.org/plonk/peercast-yt)
 
-VPS等の Linux で動かすのに向いている PeerCast です。PeerCast Gateway
-の縁の下で動いています。
+VPS等の Linux で動かすのに向いている PeerCast です。
 
-* PeerCastStation と部分的に互換の JSON RPC インターフェイス。
-* FLV配信 (HTTPソースのプル)
+* PeerCastStation と(部分的に)互換の JSON RPC インターフェイス。(epcyp、ginger などで使えます)
+* FLVフォーマット、MKVフォーマットに対応。
+* HTTP Push ストリームでの配信に対応。ffmpeg と直接接続できます。
 * HTML UI をメッセージカタログ化。各国語版で機能に違いがないようにしました。
-* YPブラウザ。YP4G の index.txt を取得してチャンネルリストを表示します。
+* YPブラウザ。YP4G 形式の index.txt を取得してチャンネルリストを表示します。
 * ネットワーク出力をバッファリングしているので、多少 IO 負荷が軽くなっているはずです。
+* Ajax による画面更新。
 
 # 使用ライブラリ
 

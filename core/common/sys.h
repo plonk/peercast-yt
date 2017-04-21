@@ -345,9 +345,9 @@ extern Sys *sys;
 #define CHECK_ENDIAN3(v) v=SWAP3(v)
 #define CHECK_ENDIAN4(v) v=SWAP4(v)
 #else
-#define CHECK_ENDIAN2
-#define CHECK_ENDIAN3
-#define CHECK_ENDIAN4
+#define CHECK_ENDIAN2(v)
+#define CHECK_ENDIAN3(v)
+#define CHECK_ENDIAN4(v)
 #endif
 
 

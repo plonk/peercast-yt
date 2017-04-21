@@ -42,6 +42,7 @@ public:
 #define HTTP_SC_BADREQUEST   "HTTP/1.0 400 Bad Request"
 #define HTTP_SC_FORBIDDEN    "HTTP/1.0 403 Forbidden"
 #define HTTP_SC_SWITCH       "HTTP/1.0 101 Switch protocols"
+#define HTTP_SC_SERVERERROR  "HTTP/1.0 500 Internal Server Error"
 
 #define RTSP_SC_OK           "RTSP/1.0 200 OK"
 
@@ -182,8 +183,21 @@ public:
 
     void    getAuthUserPass(char *, char *, size_t, size_t);
 
+    void    readHeaders()
+    {
+        while(nextHeader());
+    }
+
+    void reset()
+    {
+        cmdLine[0] = '\0';
+        arg = NULL;
+        headers.clear();
+    }
+
     char    cmdLine[8192], *arg;
 
+    // ヘッダー名と値。ヘッダー名は全て大文字。
     map<string,string> headers;
 };
 

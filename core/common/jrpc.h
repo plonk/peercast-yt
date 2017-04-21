@@ -277,7 +277,7 @@ public:
 
                 info.contentType    = type;
                 info.contentTypeStr = ChanInfo::getTypeStr(type);
-                info.streamType     = ChanInfo::getMIMEType(type);
+                info.MIMEType       = ChanInfo::getMIMEType(type);
                 info.streamExt      = ChanInfo::getTypeExt(type);
             }
             info.bcID = chanMgr->broadcastID;
@@ -621,6 +621,8 @@ public:
         case ServMgr::FW_UNKNOWN:
             return nullptr;
         }
+        LOG_ERROR("Invalid firewall state");
+        return nullptr;
     }
 
     json getStatus(json::array_t)

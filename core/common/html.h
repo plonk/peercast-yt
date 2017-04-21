@@ -37,18 +37,9 @@ public:
         MAX_TAGLEN = 64
     };
 
-    enum
-    {
-        TMPL_UNKNOWN,
-        TMPL_LOOP,
-        TMPL_IF,
-        TMPL_ELSE,
-        TMPL_END
-    };
-
     HTML(const char *, Stream &);
 
-
+    // HTML ヘルパー
     void    startNode(const char *, const char * = NULL);
     void    addLink(const char *, const char *, bool = false);
     void    startTag(const char *, const char * = NULL, ...);
@@ -62,25 +53,14 @@ public:
     void    startHTML();
     void    startBody();
 
+    // HTTP レスポンス
+    void    writeOK(const char *content,
+                    const std::map<std::string,std::string>& = {});
     void    locateTo(const char *);
-    void    addContent(const char *);
-
-    void    writeOK(const char *content, const std::map<std::string,std::string>& additionalHeaders = {});
-    void    writeTemplate(const char *, const char *);
     void    writeRawFile(const char *, const char *);
-    void    writeVariable(Stream &, const String &, int);
-    int     getIntVariable(const String &, int);
-    bool    getBoolVariable(const String &, int);
 
+    void    writeTemplate(const char *, const char *);
 
-    void    readIf(Stream &, Stream *, int);
-    void    readLoop(Stream &, Stream *, int);
-    void    readVariable(Stream &, Stream *, int);
-    bool    readTemplate(Stream &, Stream *, int);
-    int     readCmd(Stream &, Stream *, int);
-
-
-    const char *tmplArgs;
     String  title, refreshURL;
     char    currTag[MAX_TAGLEVEL][MAX_TAGLEN];
     int     tagLevel;

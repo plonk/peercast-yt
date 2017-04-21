@@ -3,7 +3,7 @@
 <html><!-- InstanceBegin template="/Templates/peercast.dwt" codeOutsideHTMLIsLocked="false" -->
   <head>
     <!-- InstanceBeginEditable name="title" -->
-    <title>{#PeerCast on} {$servMgr.serverIP}:{$servMgr.serverPort}</title>
+    <title>{#_View Log_navbar} - {#PeerCast on} {$servMgr.serverIP}:{$servMgr.serverPort}</title>
     <!-- InstanceEndEditable -->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <link href="peercast.css" rel="stylesheet" type="text/css">
@@ -75,7 +75,7 @@
                 </A><A
                   href="#bottom">{#View tail}</A><a name="top"></a><br>
                 <br>
-                <span class="normal-small">{$sys.log.dumpHTML}</span><A
+                <span class="normal-small">{!sys.log.dumpHTML}</span><A
                   href="#top"><BR>
                   <span class="normal">{#View top}</span></A><span class="normal"><A
                     name=bottom></A> </span></p>

@@ -50,7 +50,14 @@ TEST_F(HTMLFixture, writeOK)
                  "\r\n", mem.str().c_str());
 }
 
-TEST_F(HTMLFixture, writeOKwithAdditionalHeaders)
+TEST_F(HTMLFixture, writeOKwithHeaders)
 {
     // html.writeOK("application/octet-stream", { {"Date", "hoge"} });
+}
+
+TEST_F(HTMLFixture, locateTo)
+{
+    html.locateTo("/index.html");
+    ASSERT_STREQ("HTTP/1.0 302 Found\r\nLocation: /index.html\r\n\r\n",
+                 mem.str().c_str());
 }
