@@ -66,3 +66,9 @@ std::string DynamicMemoryStream::str()
 {
     return std::string(m_buffer.begin(), m_buffer.end());
 }
+
+void DynamicMemoryStream::str(const std::string& data)
+{
+    m_buffer = data;
+    m_pos = 0;
+}

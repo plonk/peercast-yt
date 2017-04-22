@@ -105,3 +105,31 @@ TEST_F(DynamicMemoryStreamFixture, seekToChangesLength)
     ASSERT_EQ(0, buf[999]);
 }
 
+TEST_F(DynamicMemoryStreamFixture, strGet)
+{
+    DynamicMemoryStream s;
+
+    s.writeString("hoge");
+    ASSERT_EQ(4, s.getPosition());
+    ASSERT_EQ(4, s.getLength());
+
+    ASSERT_STREQ("hoge", s.str().c_str());
+    ASSERT_EQ(4, s.getPosition());
+    ASSERT_EQ(4, s.getLength());
+}
+
+TEST_F(DynamicMemoryStreamFixture, strSet)
+{
+    DynamicMemoryStream s;
+
+    s.writeString("hoge");
+    ASSERT_EQ(4, s.getPosition());
+    ASSERT_EQ(4, s.getLength());
+
+    s.str("foo");
+    ASSERT_EQ(0, s.getPosition());
+    ASSERT_EQ(3, s.getLength());
+
+    ASSERT_STREQ("foo", s.str().c_str());
+}
+

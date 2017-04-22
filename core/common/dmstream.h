@@ -19,6 +19,7 @@ public:
     int  getLength();
 
     std::string str();
+    void str(const std::string& data);
 
     void checkSize(int);
 
