@@ -29,7 +29,7 @@ TEST_F(DynamicMemoryStreamFixture, initialState)
     ASSERT_EQ(0, s.getLength());
 
     ASSERT_TRUE(s.eof());
-    ASSERT_EQ(0, s.read(NULL, 10));
+    ASSERT_THROW(s.read(NULL, 0), StreamException);
 }
 
 TEST_F(DynamicMemoryStreamFixture, writeAdvancesPositionAndLength)
@@ -69,7 +69,7 @@ TEST_F(DynamicMemoryStreamFixture, whatIsWrittenCanBeRead)
     char buf[5] = "";
 
     s.write("hoge", 4);
-    ASSERT_EQ(0, s.read(buf, 4));
+    ASSERT_THROW(s.read(buf, 4), StreamException);
     s.rewind();
     ASSERT_EQ(4, s.read(buf, 100));
     ASSERT_STREQ("hoge", buf);
