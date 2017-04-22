@@ -23,7 +23,7 @@ public:
     void checkSize(int);
 
     int m_pos;
-    std::vector<uint8_t> m_buffer;
+    std::string m_buffer;
 };
 
 #endif
