@@ -53,7 +53,7 @@ TEST_F(cgiFixture, escape_html)
     ASSERT_STREQ("", escape_html("").c_str());
     ASSERT_STREQ("a", escape_html("a").c_str());
     ASSERT_STREQ("aa", escape_html("aa").c_str());
-    ASSERT_STREQ("&lt;&amp;&gt;", escape_html("<&>").c_str());
+    ASSERT_STREQ("&lt;&amp;&gt;&#39;&quot;", escape_html("<&>\'\"").c_str());
 }
 
 TEST_F(cgiFixture, unescape_html)

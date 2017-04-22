@@ -470,6 +470,12 @@ std::string escape_html(const std::string& input)
         case '>':
             dest += "&gt;";
             break;
+        case '\"':
+            dest += "&quot;";
+            break;
+        case '\'':
+            dest += "&#39;";
+            break;
         default:
             dest += *src;
             break;
