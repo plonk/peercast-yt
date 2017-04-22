@@ -412,7 +412,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 
         handshakeICY(Channel::SRC_ICECAST, isHTTP);
         sock = NULL;    // socket is taken over by channel, so don`t close it
-    }else if (http.isRequest(servMgr->password))
+    }else if (http.isRequest(servMgr->password)) // FIXME: check for empty password!
     {
         if (!isAllowed(ALLOW_BROADCAST))
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
