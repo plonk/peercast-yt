@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include "str.h"
 
 #include "servent.h"
 #include "dmstream.h"
@@ -94,13 +95,109 @@ TEST_F(ServentFixture, handshakeHTTP)
 
     s.sock = mock = new MockClientSocket();
 
-    HTTP http((Stream&)*mock);
+    HTTP http(*mock);
     http.initRequest("GET / HTTP/1.0");
-    mock->incoming.writeString("\r\n");
-    mock->incoming.rewind();
+    mock->incoming.str("\r\n");
 
     s.handshakeHTTP(http, true);
 
     ASSERT_STREQ("HTTP/1.0 302 Found\r\nLocation: /html/en/index.html\r\n\r\n",
                  mock->outgoing.str().c_str());
 }
+
+TEST_F(ServentFixture, handshakeIncomingGetRoot)
+{
+    Servent s(0);
+    MockClientSocket* mock;
+
+    s.sock = mock = new MockClientSocket();
+    mock->incoming.str("GET / HTTP/1.0\r\n\r\n");
+
+    s.handshakeIncoming();
+
+    ASSERT_STREQ("HTTP/1.0 302 Found\r\nLocation: /html/en/index.html\r\n\r\n",
+                 mock->outgoing.str().c_str());
+}
+
+// servMgr->password が設定されていない時に ShoutCast クライアントから
+// の放送要求だとして通してしまうが、良いのか？
+TEST_F(ServentFixture, handshakeIncomingBadRequest)
+{
+    Servent s(0);
+    MockClientSocket* mock;
+
+    s.sock = mock = new MockClientSocket();
+    mock->incoming.str("\r\n");
+
+    ASSERT_THROW(s.handshakeIncoming(), StreamException);
+}
+
+TEST_F(ServentFixture, handshakeIncomingHTMLRoot)
+{
+    Servent s(0);
+    MockClientSocket* mock;
+
+    s.sock = mock = new MockClientSocket();
+    mock->incoming.str("GET /html/en/index.html HTTP/1.0\r\n\r\n");
+
+    ASSERT_NO_THROW(s.handshakeIncoming());
+
+    std::string output = mock->outgoing.str();
+
+    // ファイルが無いのに OK はおかしくないか…
+    ASSERT_TRUE(str::contains(output, "200 OK"));
+    ASSERT_TRUE(str::contains(output, "Server: "));
+    ASSERT_TRUE(str::contains(output, "Date: "));
+    ASSERT_TRUE(str::contains(output, "Unable to open file"));
+}
+
+TEST_F(ServentFixture, handshakeIncomingJRPCGetUnauthorized)
+{
+    Servent s(0);
+    MockClientSocket* mock;
+
+    s.sock = mock = new MockClientSocket();
+    mock->incoming.str("GET /api/1 HTTP/1.0\r\n\r\n");
+
+    ASSERT_NO_THROW(s.handshakeIncoming());
+
+    std::string output = mock->outgoing.str();
+
+    ASSERT_STREQ("HTTP/1.0 401 Unauthorized\r\nWWW-Authenticate: Basic realm=\"PeerCast Admin\"\r\n\r\n", output.c_str());
+}
+
+#include "servmgr.h"
+
+TEST_F(ServentFixture, handshakeIncomingJRPCGetAuthorized)
+{
+    Servent s(0);
+    MockClientSocket* mock;
+
+    strcpy(servMgr->password, "Passw0rd");
+
+    // --------------------------------------------
+    s.sock = mock = new MockClientSocket();
+    mock->incoming.str("GET /api/1 HTTP/1.0\r\n"
+                       "\r\n");
+
+    s.handshakeIncoming();
+
+    ASSERT_TRUE(str::contains(mock->outgoing.str(), "401 Unauthorized"));
+
+    delete mock;
+
+    // --------------------------------------------
+
+    s.sock = mock = new MockClientSocket();
+    mock->incoming.str("GET /api/1 HTTP/1.0\r\n"
+                       "Authorization: BASIC OlBhc3N3MHJk\r\n" // ruby -rbase64 -e 'p Base64.strict_encode64 ":Passw0rd"'
+                       "\r\n");
+
+    s.handshakeIncoming();
+
+    ASSERT_TRUE(str::contains(mock->outgoing.str(), "200 OK"));
+    ASSERT_TRUE(str::contains(mock->outgoing.str(), "jsonrpc"));
+
+    delete mock;
+}
+
