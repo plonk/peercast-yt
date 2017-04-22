@@ -485,4 +485,27 @@ std::string escape_html(const std::string& input)
     return dest;
 }
 
+std::string escape_javascript(const std::string& input)
+{
+    std::string res;
+
+    for (char c : input)
+    {
+        if (c == '\'' || c == '\"' || c == '\\')
+        {
+            res += '\\';
+            res += c;
+        } else if (iscntrl(c))
+        {
+            char buf[3];
+
+            res += "\\x";
+            sprintf(buf, "%02hhX", c);
+            res += buf;
+        } else
+            res += c;
+    }
+    return res;
+}
+
 } // namespace cgi

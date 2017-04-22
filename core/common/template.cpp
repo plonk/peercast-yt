@@ -473,6 +473,30 @@ void    Template::readVariable(Stream &in, Stream *outp, int loop)
 }
 
 // --------------------------------------
+void    Template::readVariableJavaScript(Stream &in, Stream *outp, int loop)
+{
+    String var;
+    while (!in.eof())
+    {
+        char c = in.readChar();
+        if (c == '}')
+        {
+            if (inSelectedFragment() && outp)
+            {
+                DynamicMemoryStream mem;
+
+                writeVariable(mem, var, loop);
+                outp->writeString(cgi::escape_javascript(mem.str()).c_str());
+            }
+            return;
+        }else
+        {
+            var.append(c);
+        }
+    }
+}
+
+// --------------------------------------
 void    Template::readVariableRaw(Stream &in, Stream *outp, int loop)
 {
     String var;
@@ -514,6 +538,10 @@ bool Template::readTemplate(Stream &in, Stream *outp, int loop)
             if (c == '$')
             {
                 readVariable(in, outp, loop);
+            }
+            else if (c == '\\')
+            {
+                readVariableJavaScript(in, outp, loop);
             }
             else if (c == '!')
             {
