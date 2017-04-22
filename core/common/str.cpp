@@ -160,4 +160,9 @@ std::string codepoint_to_utf8(uint32_t codepoint)
     return res;
 }
 
+bool contains(const std::string& haystack, const std::string& needle)
+{
+    return haystack.find(needle) != std::string::npos;
+}
+
 } // namespace str
