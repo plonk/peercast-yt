@@ -23,6 +23,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <algorithm>
+#include <numeric> // accumulate
 
 #include "common.h"
 #include "socket.h"
