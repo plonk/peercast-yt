@@ -1445,9 +1445,9 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
             s += str::format("Packet length min/avg/max: %u/%lu/%u<br>",
                              *pmin, sum/lens.size(), *pmax);
         }
-        s += str::format("Last written: %s<br>", time.str().c_str());
-        s += str::format("First/Safe/Last/Read/Write: %u/%u/%u/%u/%u",
-                         rawData.firstPos, rawData.safePos, rawData.lastPos, rawData.readPos, rawData.writePos);
+        s += str::format("Last written: %s>", time.str().c_str());
+        // s += str::format("First/Safe/Last/Read/Write: %u/%u/%u/%u/%u",
+        //                  rawData.firstPos, rawData.safePos, rawData.lastPos, rawData.readPos, rawData.writePos);
         strcpy(buf, s.c_str());
     }
     else if (var == "numHits")
