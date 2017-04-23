@@ -10,6 +10,7 @@ class MKVStream : public ChannelStream
 {
 public:
     MKVStream()
+        : m_videoTrackNumber(1)
     {
     }
     void readHeader(Stream &, Channel *) override;
@@ -17,6 +18,11 @@ public:
     void readEnd(Stream &, Channel *) override;
 
     void sendPacket(ChanPacket::TYPE, const matroska::byte_string& data, bool continuation, Channel*);
+    bool hasKeyFrame(const matroska::byte_string& cluster);
+    void sendCluster(const matroska::byte_string& cluster, Channel* ch);
+    void checkBitrate(Stream &in, Channel *ch);
+
+    int m_videoTrackNumber;
 };
 
 #endif
