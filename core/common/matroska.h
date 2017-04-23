@@ -110,7 +110,7 @@ public:
             return "Unknown";
     }
 
-    std::basic_string<uint8_t> bytes;
+    const std::basic_string<uint8_t> bytes;
 };
 
 } // namespace matroska
