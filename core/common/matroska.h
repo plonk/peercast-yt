@@ -1,5 +1,5 @@
-#ifndef _VINT_H
-#define _VINT_H
+#ifndef _MATROSKA_H
+#define _MATROSKA_H
 
 #include <stdint.h>
 #include <string>
