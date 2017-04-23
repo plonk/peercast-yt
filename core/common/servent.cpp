@@ -187,7 +187,6 @@ void Servent::reset()
     loginMount.clear();
 
 
-    bytesPerSecond = 0;
     priorityConnect = false;
     pushSock = NULL;
     sendHeader = true;
@@ -2527,7 +2526,7 @@ int Servent::serverProc(ThreadInfo *thread)
         if (!sv->sock)
             throw StreamException("Server has no socket");
 
-        sys->setThreadName(thread, String::format("LISTEN %d", (int) sv->sock->host.port));
+        sys->setThreadName(thread, String::format("LISTEN %hu", sv->sock->host.port));
 
         sv->setStatus(S_LISTENING);
 

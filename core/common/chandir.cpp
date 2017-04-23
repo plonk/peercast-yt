@@ -180,7 +180,7 @@ bool ChannelDirectory::update()
 
         if (success) {
             feed.status = ChannelFeed::Status::OK;
-            LOG_DEBUG("Got %lu channels from %s", channels.size(), feed.url.c_str());
+            LOG_DEBUG("Got %zu channels from %s", channels.size(), feed.url.c_str());
             for (auto ch : channels) {
                 m_channels.push_back(ch);
             }
@@ -233,6 +233,8 @@ bool ChannelDirectory::writeChannelVariable(Stream& out, const String& varName, 
         sprintf(buf, "%s", ch.chatUrl().c_str());
     } else if (varName == "statsUrl") {
         sprintf(buf, "%s", ch.statsUrl().c_str());
+    } else if (varName == "isPlayable") {
+        sprintf(buf, "%d", ch.id.isSet());
     } else {
         return false;
     }
@@ -352,6 +354,16 @@ void ChannelDirectory::clearFeeds()
     m_feeds.clear();
     m_channels.clear();
     m_lastUpdate = 0;
+}
+
+std::string ChannelDirectory::findTracker(GnuID id)
+{
+    for (ChannelEntry& entry : m_channels)
+    {
+        if (entry.id.isSame(id))
+            return entry.tip;
+    }
+    return "";
 }
 
 std::string ChannelFeed::statusToString(ChannelFeed::Status s)

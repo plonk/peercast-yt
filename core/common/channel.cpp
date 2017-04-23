@@ -44,6 +44,7 @@
 #include "nsv.h"
 #include "flv.h"
 #include "mkv.h"
+#include "wmhttp.h"
 
 #include "icy.h"
 #include "url.h"
@@ -571,6 +572,25 @@ void PeercastSource::stream(Channel *ch)
 
             ch->sourceHost = pickFromHitList(ch, ch->sourceHost);
 
+            // consult channel directory
+            if (!ch->sourceHost.host.ip)
+            {
+                std::string trackerIP = servMgr->channelDirectory.findTracker(ch->info.id);
+                if (!trackerIP.empty())
+                {
+                    peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルフィードで "+chName(ch->info)+" のトラッカーが見付かりました。");
+
+                    ch->sourceHost.host.fromStrIP(trackerIP.c_str(), DEFAULT_PORT);
+                    ch->sourceHost.rhost[0].fromStrIP(trackerIP.c_str(), DEFAULT_PORT);
+                    ch->sourceHost.tracker = true;
+
+                    auto chl = chanMgr->findHitList(ch->info);
+                    if (chl)
+                        chl->addHit(ch->sourceHost);
+                    break;
+                }
+            }
+
             // no trackers found so contact YP
             if (!ch->sourceHost.host.ip)
             {
@@ -715,7 +735,7 @@ void PeercastSource::stream(Channel *ch)
 }
 
 // -----------------------------------
-void    Channel::startHTTPPush(ClientSocket *cs)
+void    Channel::startHTTPPush(ClientSocket *cs, bool isChunked)
 {
     srcType = SRC_HTTPPUSH;
     type    = T_BROADCAST;
@@ -723,7 +743,20 @@ void    Channel::startHTTPPush(ClientSocket *cs)
     sock = cs;
     info.srcProtocol = ChanInfo::SP_HTTP;
 
-    sourceData = new HTTPPushSource();
+    sourceData = new HTTPPushSource(isChunked);
+    startStream();
+}
+
+// -----------------------------------
+void    Channel::startWMHTTPPush(ClientSocket *cs)
+{
+    srcType = SRC_HTTPPUSH;
+    type    = T_BROADCAST;
+
+    sock = cs;
+    info.srcProtocol = ChanInfo::SP_WMHTTP;
+
+    sourceData = new HTTPPushSource(false);
     startStream();
 }
 
@@ -1043,9 +1076,21 @@ ChannelStream *Channel::createSource()
     {
         LOG_CHANNEL("Channel is MMS");
         source = new MMSStream();
-    }else
+    }else if (info.srcProtocol == ChanInfo::SP_WMHTTP)
     {
-        switch(info.contentType)
+        switch (info.contentType)
+        {
+            case ChanInfo::T_WMA:
+            case ChanInfo::T_WMV:
+                LOG_CHANNEL("Channel is WMHTTP");
+                source = new WMHTTPStream();
+                break;
+            default:
+                throw StreamException("Channel is WMHTTP - but not WMA/WMV");
+                break;
+        }
+    }else{
+        switch (info.contentType)
         {
             case ChanInfo::T_MP3:
                 LOG_CHANNEL("Channel is MP3 - meta: %d", icyMetaInterval);
@@ -1152,7 +1197,7 @@ int Channel::readStream(Stream &in, ChannelStream *source)
                 {
                     if (isBroadcasting())
                     {
-                        if ((sys->getTime()-lastTrackerUpdate) >= chanMgr->hostUpdateInterval)
+                        if ((sys->getTime() - lastTrackerUpdate) >= 120)
                         {
                             GnuID noID;
                             broadcastTrackerUpdate(noID);

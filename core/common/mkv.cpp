@@ -10,7 +10,7 @@ using namespace matroska;
 // data を type パケットとして送信する
 void MKVStream::sendPacket(ChanPacket::TYPE type, const byte_string& data, bool continuation, Channel* ch)
 {
-    LOG_DEBUG("MKV Sending %lu byte %s packet", data.size(), type==ChanPacket::T_HEAD?"HEAD":"DATA");
+    LOG_DEBUG("MKV Sending %zu byte %s packet", data.size(), type==ChanPacket::T_HEAD?"HEAD":"DATA");
 
     if (data.size() > ChanPacket::MAX_DATALEN)
         throw StreamException("MKV packet too big");

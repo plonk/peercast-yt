@@ -69,3 +69,12 @@ TEST_F(strFixture, format)
     EXPECT_STREQ("12", format("%d%d", 1, 2).c_str());
 }
 
+TEST_F(strFixture, contains)
+{
+    ASSERT_TRUE(str::contains("abc", "bc"));
+    ASSERT_FALSE(str::contains("abc", "d"));
+    ASSERT_TRUE(str::contains("abc", ""));
+    ASSERT_TRUE(str::contains("", ""));
+    ASSERT_TRUE(str::contains("abc", "abc"));
+    ASSERT_FALSE(str::contains("", "abc"));
+}

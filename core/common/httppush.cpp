@@ -1,3 +1,5 @@
+#include <memory>
+
 #include "socket.h"
 #include "httppush.h"
 #include "dechunker.h"
@@ -5,8 +7,6 @@
 // ------------------------------------------------
 void HTTPPushSource::stream(Channel *ch)
 {
-    ChannelStream *source=NULL;
-
     try
     {
         if (!ch->sock)
@@ -16,10 +16,18 @@ void HTTPPushSource::stream(Channel *ch)
         ch->resetPlayTime();
 
         ch->setStatus(Channel::S_BROADCASTING);
-        source = ch->createSource();
 
-        Dechunker dechunker(*(Stream*)ch->sock);
-        ch->readStream(dechunker, source);
+        std::unique_ptr<ChannelStream> source(ch->createSource());
+
+        if (m_isChunked)
+        {
+            Dechunker dechunker(*(Stream*)ch->sock);
+            ch->readStream(dechunker, source.get());
+        }
+        else
+        {
+            ch->readStream(*ch->sock, source.get());
+        }
     }catch (StreamException &e)
     {
         LOG_ERROR("Channel aborted: %s", e.msg);
@@ -29,14 +37,11 @@ void HTTPPushSource::stream(Channel *ch)
 
     if (ch->sock)
     {
+        m_sock = NULL;
         ch->sock->close();
         delete ch->sock;
         ch->sock = NULL;
-        m_sock = NULL;
     }
-
-    if (source)
-        delete source;
 }
 
 int HTTPPushSource::getSourceRate()

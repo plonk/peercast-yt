@@ -84,7 +84,8 @@ public:
         SP_HTTP,
         SP_FILE,
         SP_MMS,
-        SP_PCP
+        SP_PCP,
+        SP_WMHTTP
     };
 
 

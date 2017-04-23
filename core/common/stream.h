@@ -205,9 +205,9 @@ public:
 
     void    write(const char *, va_list);
     void    writeLine(const char *);
-    void    writeLineF(const char *, ...);
+    void    writeLineF(const char *, ...) __attribute__ ((format (printf, 2, 3)));
     void    writeString(const char *);
-    void    writeStringF(const char *, ...);
+    void    writeStringF(const char *, ...) __attribute__ ((format (printf, 2, 3)));
 
     bool    writeCRLF;
 

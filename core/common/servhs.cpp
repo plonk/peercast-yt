@@ -131,7 +131,7 @@ void Servent::handshakeJRPC(HTTP &http)
 
     http.writeLine(HTTP_SC_OK);
     http.writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
-    http.writeLineF("%s %d", HTTP_HS_LENGTH, response.size());
+    http.writeLineF("%s %zu", HTTP_HS_LENGTH, response.size());
     http.writeLineF("%s %s", HTTP_HS_CONTENT, "application/json");
     http.writeLine("");
 
@@ -270,7 +270,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
                 std::string response = api.getVersionInfo(nlohmann::json::array_t()).dump();
 
                 http.writeLine(HTTP_SC_OK);
-                http.writeLineF("%s %d", HTTP_HS_LENGTH, response.size());
+                http.writeLineF("%s %zu", HTTP_HS_LENGTH, response.size());
                 http.writeLine("");
                 http.writeString(response.c_str());
             }
@@ -315,7 +315,19 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
             handshakeHTTPPush(args);
         }else
         {
-            throw HTTPException(HTTP_SC_BADREQUEST, 400);
+            http.readHeaders();
+            auto contentType = http.headers["CONTENT-TYPE"];
+            if (contentType == "application/x-wms-pushsetup")
+            {
+                if (!isAllowed(ALLOW_BROADCAST))
+                    throw HTTPException(HTTP_SC_FORBIDDEN, 403);
+
+                if (!isPrivate())
+                    throw HTTPException(HTTP_SC_FORBIDDEN, 403);
+
+                handshakeWMHTTPPush(http, path);
+            }else
+                throw HTTPException(HTTP_SC_BADREQUEST, 400);
         }
     }else if (http.isRequest("GIV"))
     {
@@ -400,7 +412,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 
         handshakeICY(Channel::SRC_ICECAST, isHTTP);
         sock = NULL;    // socket is taken over by channel, so don`t close it
-    }else if (http.isRequest(servMgr->password))
+    }else if (http.isRequest(servMgr->password)) // FIXME: check for empty password!
     {
         if (!isAllowed(ALLOW_BROADCAST))
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
@@ -1669,6 +1681,92 @@ void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd, size_t plen)
 }
 
 // -----------------------------------
+// Windows Media HTTP Push Distribution Protocol
+#define ASSERT(x)
+void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
+{
+    // At this point, http has read all the headers.
+
+    ASSERT(http.headers["CONTENT-TYPE"] == "application/x-wms-pushsetup");
+    LOG_DEBUG("%s", nlohmann::json(http.headers).dump().c_str());
+
+    int size = std::atoi(http.headers["CONTENT-LENGTH"].c_str());
+
+    // エンコーダーの設定要求を読む。0 バイトの空の設定要求も合法。
+    unique_ptr<char> buffer(new char[size + 1]);
+    http.read(buffer.get(), size);
+    buffer.get()[size] = '\0';
+    LOG_DEBUG("setup: %s", str::inspect(buffer.get()).c_str());
+
+    // わかったふりをする
+    http.writeLine("HTTP/1.1 204 No Content"); // これってちゃんと CRLF 出る？
+    std::vector< std::pair<const char*,const char*> > headers =
+        {
+            { "Server"         , "Cougar/9.01.01.3814" },
+            { "Cache-Control"  , "no-cache" },
+            { "Supported"      , "com.microsoft.wm.srvppair, "
+              "com.microsoft.wm.sswitch, "
+              "com.microsoft.wm.predstrm, "
+              "com.microsoft.wm.fastcache, "
+              "com.microsoft.wm.startupprofile" },
+            { "Content-Length" , "0" },
+            { "Connection"     , "Keep-Alive" },
+        };
+    for (auto hline : headers)
+    {
+        http.writeLineF("%s: %s", hline.first, hline.second);
+    }
+    http.writeLine("");
+
+    // -----------------------------------------
+    http.reset();
+    http.readRequest();
+    LOG_DEBUG("Request line: %s", http.cmdLine);
+
+    http.readHeaders();
+    LOG_DEBUG("Setup: %s", nlohmann::json(http.headers).dump().c_str());
+
+    ASSERT(http.headers["CONTENT-TYPE"] == "application/x-wms-pushstart");
+
+    // -----------------------------------------
+
+    // User-Agent ヘッダーがあれば agent をセット
+    if (http.headers["USER-AGENT"] != "")
+        this->agent = http.headers["USER-AGENT"];
+
+    auto vec = str::split(cgi::unescape(path.substr(1)), ";");
+    if (vec.size() == 0)
+        throw HTTPException(HTTP_SC_BADREQUEST, 400);
+
+    ChanInfo info;
+    info.setContentType(ChanInfo::getTypeFromStr("WMV"));
+    info.name = vec[0];
+    if (vec.size() > 1) info.genre = vec[1];
+    if (vec.size() > 2) info.desc  = vec[2];
+    if (vec.size() > 3) info.url   = vec[3];
+
+    info.id = chanMgr->broadcastID;
+    info.id.encode(NULL, info.name.cstr(), NULL, 0);
+
+    Channel *c = chanMgr->findChannelByID(info.id);
+    if (c)
+    {
+        LOG_CHANNEL("WMHTTP Push channel already active, closing old one");
+        c->thread.shutdown();
+    }
+
+    info.comment = chanMgr->broadcastMsg;
+    info.bcID    = chanMgr->broadcastID;
+
+    c = chanMgr->createChannel(info, NULL);
+    if (!c)
+        throw HTTPException(HTTP_SC_SERVERERROR, 500);
+
+    c->startWMHTTPPush(sock);
+    sock = NULL;    // socket is taken over by channel, so don`t close it
+}
+
+// -----------------------------------
 // HTTP Push 放送
 void Servent::handshakeHTTPPush(const std::string& args)
 {
@@ -1724,7 +1822,8 @@ void Servent::handshakeHTTPPush(const std::string& args)
     if (!c)
         throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-    c->startHTTPPush(sock);
+    bool chunked = (http.headers["TRANSFER-ENCODING"] == "chunked");
+    c->startHTTPPush(sock, chunked);
     sock = NULL;    // socket is taken over by channel, so don`t close it
 }
 

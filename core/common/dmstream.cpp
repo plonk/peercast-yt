@@ -16,6 +16,9 @@ void  DynamicMemoryStream::checkSize(int size)
 
 int  DynamicMemoryStream::read(void *buf, int count)
 {
+    if (m_pos == m_buffer.size())
+        throw StreamException("End of stream");
+
     auto end = std::copy(m_buffer.begin() + m_pos,
                          m_buffer.begin() + std::min(m_pos + count, (int) m_buffer.size()),
                          static_cast<uint8_t*>(buf));
@@ -62,4 +65,10 @@ int  DynamicMemoryStream::getLength()
 std::string DynamicMemoryStream::str()
 {
     return std::string(m_buffer.begin(), m_buffer.end());
+}
+
+void DynamicMemoryStream::str(const std::string& data)
+{
+    m_buffer = data;
+    m_pos = 0;
 }

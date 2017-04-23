@@ -150,7 +150,7 @@ void HTML::addHead()
 {
     char buf[512];
     startNode("head");
-        startTagEnd("title", title.cstr());
+        startTagEnd("title", "%s", title.cstr());
         startTagEnd("meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\"");
         if (!refreshURL.isEmpty())
         {

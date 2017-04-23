@@ -104,6 +104,8 @@ public:
     bool writeVariable(Stream& out, const String& varName);
     bool writeVariable(Stream &, const String &, int);
 
+    std::string findTracker(GnuID id);
+
     std::vector<ChannelEntry> m_channels;
     std::vector<ChannelFeed> m_feeds;
 

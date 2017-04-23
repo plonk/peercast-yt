@@ -13,6 +13,7 @@ std::string unescape(const std::string&);
 std::string rfc1123Time(time_t t);
 std::string unescape_html(const std::string& input);
 std::string escape_html(const std::string& input);
+std::string escape_javascript(const std::string& input);
 
 class Query
 {

@@ -53,7 +53,7 @@ TEST_F(cgiFixture, escape_html)
     ASSERT_STREQ("", escape_html("").c_str());
     ASSERT_STREQ("a", escape_html("a").c_str());
     ASSERT_STREQ("aa", escape_html("aa").c_str());
-    ASSERT_STREQ("&lt;&amp;&gt;", escape_html("<&>").c_str());
+    ASSERT_STREQ("&lt;&amp;&gt;&#39;&quot;", escape_html("<&>\'\"").c_str());
 }
 
 TEST_F(cgiFixture, unescape_html)
@@ -67,3 +67,12 @@ TEST_F(cgiFixture, unescape_html)
     ASSERT_STREQ("\xf0\x9f\x92\xa9", unescape_html("&#X1F4A9;").c_str());
 }
 
+TEST_F(cgiFixture, unescape_javascript)
+{
+    ASSERT_STREQ("", escape_javascript("").c_str());
+    ASSERT_STREQ("a", escape_javascript("a").c_str());
+    ASSERT_STREQ("aa", escape_javascript("aa").c_str());
+    ASSERT_STREQ("\\\'\\\"\\\\", escape_javascript("\'\"\\").c_str());
+    ASSERT_STREQ("あ", escape_javascript("あ").c_str());
+    ASSERT_STREQ("\\x0D\\x0A", escape_javascript("\r\n").c_str());
+}
