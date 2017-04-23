@@ -2465,13 +2465,24 @@ void Servent::sendPCPChannel()
                                 atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
                     }else if (rawPack.type == ChanPacket::T_DATA)
                     {
-                        atom.writeParent(PCP_CHAN, 2);
-                            atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
-                            atom.writeParent(PCP_CHAN_PKT, 4);
-                                atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_DATA);
-                                atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
-                                atom.writeChar(PCP_CHAN_PKT_CONTINUATION, rawPack.cont);
-                                atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
+                        if (rawPack.cont)
+                        {
+                            atom.writeParent(PCP_CHAN, 2);
+                                atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
+                                atom.writeParent(PCP_CHAN_PKT, 4);
+                                    atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_DATA);
+                                    atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
+                                    atom.writeChar(PCP_CHAN_PKT_CONTINUATION, true);
+                                    atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
+                        }else
+                        {
+                            atom.writeParent(PCP_CHAN, 2);
+                                atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
+                                atom.writeParent(PCP_CHAN_PKT, 3);
+                                    atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_DATA);
+                                    atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
+                                    atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
+                        }
                     }
 
                     if (rawPack.pos < streamPos)
