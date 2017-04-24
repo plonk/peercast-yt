@@ -115,19 +115,18 @@ void Servent::handshakeJRPC(HTTP &http)
     if (content_length == 0)
         throw HTTPException(HTTP_SC_BADREQUEST, 400);
 
-    char *body = new char[content_length + 1];
+    unique_ptr<char> body(new char[content_length + 1]);
     try {
-        http.stream->read(body, content_length);
-        body[content_length] = '\0';
+        http.stream->read(body.get(), content_length);
+        body.get()[content_length] = '\0';
     }catch (SockException&)
     {
-        delete[] body;
         // body too short
         throw HTTPException(HTTP_SC_BADREQUEST, 400);
     }
 
     JrpcApi api;
-    std::string response = api.call(body);
+    std::string response = api.call(body.get());
 
     http.writeLine(HTTP_SC_OK);
     http.writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
@@ -136,8 +135,6 @@ void Servent::handshakeJRPC(HTTP &http)
     http.writeLine("");
 
     http.write(response.c_str(), response.size());
-
-    delete[] body;
 }
 
 // -----------------------------------
