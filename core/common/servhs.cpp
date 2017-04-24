@@ -155,13 +155,26 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 
         if (strncmp(fn, "/admin?", 7) == 0)
         {
+            // フォーム投稿用エンドポイント
+
             if (!isAllowed(ALLOW_HTML))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
             LOG_DEBUG("Admin client");
             handshakeCMD(fn+7);
+        }else if (strncmp(fn, "/admin/?", 8) == 0)
+        {
+            // 上に同じ
+
+            if (!isAllowed(ALLOW_HTML))
+                throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
+
+            LOG_DEBUG("Admin client");
+            handshakeCMD(fn+8);
         }else if (strncmp(fn, "/http/", 6) == 0)
         {
+            // peercast.org へのプロキシ接続
+
             String dirName = fn+6;
 
             if (!isAllowed(ALLOW_HTML))
@@ -173,6 +186,8 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
             handshakeRemoteFile(dirName);
         }else if (strncmp(fn, "/html/", 6) == 0)
         {
+            // HTML UI
+
             String dirName = fn+1;
 
             if (!isAllowed(ALLOW_HTML))
@@ -180,15 +195,10 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 
             if (handshakeAuth(http, fn, true))
                 handshakeLocalFile(dirName);
-        }else if (strncmp(fn, "/admin/?", 8) == 0)
-        {
-            if (!isAllowed(ALLOW_HTML))
-                throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
-
-            LOG_DEBUG("Admin client");
-            handshakeCMD(fn+8);
         }else if (strncmp(fn, "/admin.cgi", 10) == 0)
         {
+            // ShoutCast トラック情報更新用エンドポイント
+
             if (!isAllowed(ALLOW_BROADCAST))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
@@ -234,6 +244,8 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
             }
         }else if (strncmp(fn, "/pls/", 5) == 0)
         {
+            // プレイリスト
+
             if (!sock->host.isLocalhost())
                 if (!isAllowed(ALLOW_DIRECT) || !isFiltered(ServFilter::F_DIRECT))
                     throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
@@ -245,6 +257,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
                 throw HTTPException(HTTP_SC_NOTFOUND, 404);
         }else if (strncmp(fn, "/stream/", 8) == 0)
         {
+            // ストリーム
 
             if (!sock->host.isLocalhost())
                 if (!isAllowed(ALLOW_DIRECT) || !isFiltered(ServFilter::F_DIRECT))
@@ -261,6 +274,8 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
             triggerChannel(fn+9, ChanInfo::SP_PCP, false);
         }else if (strcmp(fn, "/api/1") == 0)
         {
+            // JSON RPC バージョン情報取得用
+
             if (!isAllowed(ALLOW_HTML))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
@@ -276,6 +291,8 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
             }
         }else
         {
+            // GET マッチなし
+
             while (http.nextHeader());
             http.writeLine(HTTP_SC_FOUND);
             http.writeLineF("Location: /%s/index.html", servMgr->htmlPath);
@@ -299,6 +316,8 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 
         if (strcmp(path.c_str(), "/api/1") == 0)
         {
+            // JSON API
+
             if (!isAllowed(ALLOW_HTML))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
@@ -306,6 +325,8 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
                 handshakeJRPC(http);
         }else if (strcmp(path.c_str(), "/") == 0)
         {
+            // HTTP Push
+
             if (!isAllowed(ALLOW_BROADCAST))
                 throw HTTPException(HTTP_SC_FORBIDDEN, 403);
 
@@ -319,6 +340,8 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
             auto contentType = http.headers["CONTENT-TYPE"];
             if (contentType == "application/x-wms-pushsetup")
             {
+                // WMHTTP
+
                 if (!isAllowed(ALLOW_BROADCAST))
                     throw HTTPException(HTTP_SC_FORBIDDEN, 403);
 
@@ -327,10 +350,16 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 
                 handshakeWMHTTPPush(http, path);
             }else
+            {
+                // POST マッチなし
+
                 throw HTTPException(HTTP_SC_BADREQUEST, 400);
+            }
         }
     }else if (http.isRequest("GIV"))
     {
+        // Push リレー
+
         HTTP http(*sock);
 
         while (http.nextHeader()) ;
@@ -370,6 +399,8 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
         }
     }else if (http.isRequest(PCX_PCP_CONNECT))
     {
+        // CIN
+
         if (!isAllowed(ALLOW_NETWORK) || !isFiltered(ServFilter::F_NETWORK))
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
@@ -383,6 +414,8 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
         processServent();
     }else if (http.isRequest("SOURCE"))
     {
+        // Icecast 放送
+
         if (!isAllowed(ALLOW_BROADCAST))
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
@@ -414,6 +447,8 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
         sock = NULL;    // socket is taken over by channel, so don`t close it
     }else if (http.isRequest(servMgr->password)) // FIXME: check for empty password!
     {
+        // ShoutCast broadcast
+
         if (!isAllowed(ALLOW_BROADCAST))
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
@@ -428,9 +463,12 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
         sock = NULL;    // socket is taken over by channel, so don`t close it
     }else
     {
+        // リクエスト解釈失敗
+
         throw HTTPException(HTTP_SC_BADREQUEST, 400);
     }
 }
+
 // -----------------------------------
 bool Servent::canStream(Channel *ch)
 {
