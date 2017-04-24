@@ -20,6 +20,8 @@
 
 
 #include <stdlib.h>
+#include <cctype>
+
 #include "http.h"
 #include "sys.h"
 #include "common.h"
@@ -60,9 +62,10 @@ int HTTP::readResponse()
 }
 
 //-----------------------------------------
-#include <cctype>
 bool    HTTP::nextHeader()
 {
+    using namespace std;
+
     if (readLine(cmdLine, sizeof(cmdLine)))
     {
         char *ap = strstr(cmdLine, ":");
@@ -74,8 +77,6 @@ bool    HTTP::nextHeader()
 
         if (ap)
         {
-            using namespace std;
-
             string name(cmdLine, strchr(cmdLine, ':'));
             string value;
             char *end;
