@@ -26,12 +26,20 @@
 class MMSStream : public ChannelStream
 {
 public:
+    MMSStream()
+        : m_inCleanPointStretch(false)
+        , m_videoStreamNumber(-1)
+        {}
+
 
     void    readHeader(Stream &, Channel *) override;
     int     readPacket(Stream &, Channel *) override;
     void    readEnd(Stream &, Channel *) override;
 
-    static void processChunk(Stream &in, Channel *ch, ASFChunk& chunk);
+    void    processChunk(Stream &in, Channel *ch, ASFChunk& chunk);
+
+    bool m_inCleanPointStretch;
+    int m_videoStreamNumber;
 };
 
 

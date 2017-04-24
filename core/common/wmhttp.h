@@ -56,6 +56,8 @@ public:
     void    readEnd(Stream &, Channel *) override;
 
     uint32_t m_seqno;
+
+    MMSStream m_mms;
 };
 
 #endif

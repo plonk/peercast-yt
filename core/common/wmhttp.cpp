@@ -27,6 +27,6 @@ int WMHTTPStream::readPacket(Stream &in, Channel *ch)
 
     ASFChunk chunk = c.getASFChunk(m_seqno++);
 
-    MMSStream::processChunk(in, ch, chunk);
+    m_mms.processChunk(in, ch, chunk);
     return 0;
 }

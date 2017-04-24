@@ -20,6 +20,8 @@
 #include "mms.h"
 #include "asf.h"
 
+#include "str.h"
+
 // ------------------------------------------
 ASFInfo parseASFHeader(Stream &in);
 
@@ -33,6 +35,16 @@ void MMSStream::readEnd(Stream &, Channel *)
 void MMSStream::readHeader(Stream &, Channel *)
 {
 }
+
+static int toLength(char bits)
+{
+    if (bits == 0) return 0;
+    if (bits == 1) return 1;
+    if (bits == 2) return 2;
+    if (bits == 3) return 4;
+    else throw StreamException("error");
+}
+
 // ------------------------------------------
 void MMSStream::processChunk(Stream &in, Channel *ch, ASFChunk& chunk)
 {
@@ -40,6 +52,8 @@ void MMSStream::processChunk(Stream &in, Channel *ch, ASFChunk& chunk)
     {
         case 0x4824:        // asf header
         {
+            m_inCleanPointStretch = false;
+
             MemoryStream mem(ch->headPack.data, sizeof(ch->headPack.data));
 
             chunk.write(mem);
@@ -55,6 +69,9 @@ void MMSStream::processChunk(Stream &in, Channel *ch, ASFChunk& chunk)
                 ASFStream *s = &asf.streams[i];
                 if (s->id)
                     LOG_DEBUG("ASF Stream %d : %s, br=%d", s->id, s->getTypeName(), s->bitrate);
+
+                if (s->type == ASFStream::T_VIDEO)
+                    m_videoStreamNumber = s->id;
             }
 
             ch->info.bitrate = asf.bitrate/1000;
@@ -76,13 +93,66 @@ void MMSStream::processChunk(Stream &in, Channel *ch, ASFChunk& chunk)
 
             chunk.write(mem);
 
+            // LOG_DEBUG("data: %s", str::hexdump(std::string(pack.data, pack.data + std::min(25, mem.getPosition()))).c_str());
+            //LOG_DEBUG("Stream number= %d", pack.data[15]);
+
+            int streamNumberOffset = 12 + 9;
+
+            char errorCorrectionFlags = pack.data[12];
+            // LOG_DEBUG("error correction flags = %02hhX", errorCorrectionFlags);
+
+            bool isMulti = false;
+
+            if (errorCorrectionFlags & 0x80)
+            {
+                streamNumberOffset += (errorCorrectionFlags & 0xf);
+
+                char lengthTypeFlags =
+                    pack.data[12 + 1 + (errorCorrectionFlags & 0xf)];
+
+                if (lengthTypeFlags & 1)
+                {
+                    isMulti = true;
+                    streamNumberOffset += 1;
+                }
+
+                streamNumberOffset += toLength((lengthTypeFlags >> 1) & 0x3);
+                streamNumberOffset += toLength((lengthTypeFlags >> 3) & 0x3);
+                streamNumberOffset += toLength((lengthTypeFlags >> 5) & 0x3);
+            }
+            int streamNumber = (uint8_t) pack.data[streamNumberOffset];
+
+            bool cleanPoint = ((streamNumber & 0x80) != 0);
+            bool videoStream = ((streamNumber & 0x7f) == m_videoStreamNumber);
+
             pack.type = ChanPacket::T_DATA;
             pack.len = mem.pos;
             pack.pos = ch->streamPos;
+            if (videoStream)
+            {
+                if (m_inCleanPointStretch)
+                {
+                    pack.cont = true;
+                    if (!cleanPoint)
+                        m_inCleanPointStretch = false;
+                }else
+                {
+                    if (cleanPoint)
+                    {
+                        pack.cont = false;
+                        m_inCleanPointStretch = true;
+                    }else
+                        pack.cont = true;
+                }
+            }else
+            {
+                pack.cont = true;
+            }
+
+            LOG_DEBUG("STREAM NUMBER = %02hhX\tCONT = %d\t%s", streamNumber, pack.cont, isMulti? "MULTI": "SINGLE");
 
             ch->newPacket(pack);
             ch->streamPos += pack.len;
-
             break;
         }
         default:
