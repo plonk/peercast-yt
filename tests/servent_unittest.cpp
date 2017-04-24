@@ -70,7 +70,7 @@ TEST_F(ServentFixture, initialState)
     // ASSERT_EQ(0, s.streamPos);  // 不定
     ASSERT_EQ(0, s.servPort);
 
-    ASSERT_EQ(Servent::P_UNKNOWN, s.outputProtocol);
+    ASSERT_EQ(ChanInfo::SP_UNKNOWN, s.outputProtocol);
 
     // GnuPacketBuffer     outPacketsNorm, outPacketsPri;
 

@@ -75,13 +75,12 @@ public:
         S_FREE
     };
 
-    enum PROTOCOL
-    {
-        P_UNKNOWN,
-        P_GNUTELLA06,
-        P_PCP
-    };
-
+    // enum PROTOCOL
+    // {
+    //     P_UNKNOWN,
+    //     P_GNUTELLA06,
+    //     P_PCP
+    // };
 
     enum SORT
     {
