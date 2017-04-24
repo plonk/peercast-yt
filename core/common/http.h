@@ -162,6 +162,8 @@ class HTTP : public IndirectStream
 {
 public:
     HTTP(Stream &s)
+        : cmdLine("")
+        , arg(NULL)
     {
         init(&s);
     }
