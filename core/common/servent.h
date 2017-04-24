@@ -171,6 +171,10 @@ public:
     void    handshakePOST();
     void    handshakeRTSP(RTSP &);
     void    handshakeHTTP(HTTP &, bool);
+    void    handshakeGET(HTTP &http);
+    void    handshakePOST(HTTP &http);
+    void    handshakeGIV(const char*);
+    void    handshakeSOURCE(char * in, bool isHTTP);
 
     void    handshakeHTTPPush(const std::string& args);
     void    handshakeWMHTTPPush(HTTP& http, const std::string& path);
