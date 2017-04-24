@@ -286,7 +286,7 @@ void Servent::handshakeGET(HTTP &http)
     {
         // GET マッチなし
 
-        while (http.nextHeader());
+        http.readHeaders();
         http.writeLine(HTTP_SC_FOUND);
         http.writeLineF("Location: /%s/index.html", servMgr->htmlPath);
         http.writeLine("");
@@ -357,9 +357,7 @@ void Servent::handshakePOST(HTTP &http)
 // -----------------------------------
 void Servent::handshakeGIV(const char *requestLine)
 {
-    HTTP http(*sock);
-
-    while (http.nextHeader()) ;
+    HTTP(*sock).readHeaders();
 
     if (!isAllowed(ALLOW_NETWORK))
         throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
@@ -703,7 +701,7 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
         if (as) *as = 0;
         if (strcmp(tmp, servMgr->password) == 0)
         {
-            while (http.nextHeader());
+            http.readHeaders();
             return true;
         }
     }
@@ -1810,8 +1808,7 @@ void Servent::handshakeHTTPPush(const std::string& args)
 
     // HTTP ヘッダーを全て読み込む
     HTTP http(*sock);
-    while (http.nextHeader())
-        ;
+    http.readHeaders();
 
     // User-Agent ヘッダーがあれば agent をセット
     for (auto& header : http.headers)
