@@ -603,12 +603,9 @@ void Servent::handshakePLS(ChanInfo &info, bool doneHandshake)
 
         writePLSHeader(*sock, type);
 
-        PlayList *pls;
-        pls = new PlayList(type, 1);
-        pls->addChannel(url, info);
-        pls->write(*sock);
-
-        delete pls;
+        PlayList pls(type, 1);
+        pls.addChannel(url, info);
+        pls.write(*sock);
     }
 }
 // -----------------------------------
@@ -624,16 +621,12 @@ void Servent::handshakePLS(ChanHitList **cl, int num, bool doneHandshake)
     {
         writePLSHeader(*sock, PlayList::T_SCPLS);
 
-        PlayList *pls;
-
-        pls = new PlayList(PlayList::T_SCPLS, num);
+        PlayList pls(PlayList::T_SCPLS, num);
 
         for (int i=0; i<num; i++)
-            pls->addChannel(url, cl[i]->info);
+            pls.addChannel(url, cl[i]->info);
 
-        pls->write(*sock);
-
-        delete pls;
+        pls.write(*sock);
     }
 }
 // -----------------------------------
