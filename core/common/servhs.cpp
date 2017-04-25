@@ -488,30 +488,6 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 }
 
 // -----------------------------------
-bool Servent::canStream(Channel *ch)
-{
-    if (ch==NULL)
-        return false;
-
-    if (servMgr->isDisabled)
-        return false;
-
-    if (!isPrivate())
-    {
-        if  (
-                servMgr->bitrateFull(ch->getBitrate())
-                || ((type == T_RELAY) && servMgr->relaysFull())
-                || ((type == T_DIRECT) && servMgr->directFull())
-                || !ch->isPlaying()
-                || ch->isFull()
-            )
-            return false;
-    }
-
-    return true;
-}
-
-// -----------------------------------
 void Servent::handshakeIncoming()
 {
     setStatus(S_HANDSHAKE);
