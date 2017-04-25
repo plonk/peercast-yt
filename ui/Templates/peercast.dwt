@@ -16,12 +16,12 @@
       {@fragment notifications}
       <script>
         var notifications = [];
-        var t = {$sys.time};
-        var r = {$servMgr.refreshHTML};
+        var t = {!sys.time};
+        var r = {!servMgr.refreshHTML};
         {@loop notificationBuffer.numNotifications}
           {@if !loop.notification.isRead}
             if (t - {$loop.notification.unixTime} <= (2*r))
-              notifications.push({ time: "{$loop.notification.time}", type: "{$loop.notification.type}", message: "{$loop.notification.message}" });
+              notifications.push({ time: "{\loop.notification.time}", type: "{\loop.notification.type}", message: "{\loop.notification.message}" });
           {@end}
         {@end}
 

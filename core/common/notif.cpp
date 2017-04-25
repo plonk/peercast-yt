@@ -120,7 +120,6 @@ bool NotificationBuffer::writeVariable(Stream& out, const String& varName, int i
             out.writeString(t.cstr());
             return true;
         }
-    } else {
-        return false;
     }
+    return false;
 }

@@ -76,6 +76,7 @@ public:
     void    readFragment(Stream &, Stream *, int);
 
     void    readVariable(Stream &, Stream *, int);
+    void    readVariableJavaScript(Stream &in, Stream *outp, int loop);
     void    readVariableRaw(Stream &in, Stream *outp, int loop);
     bool    readTemplate(Stream &, Stream *, int);
     bool    writeObjectProperty(Stream& s, const String& varName, json::object_t object);

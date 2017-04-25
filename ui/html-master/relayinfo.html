@@ -1,6 +1,7 @@
 <!-- InstanceBegin template="/Templates/peercast.dwt" codeOutsideHTMLIsLocked="false" -->
 
 <!-- InstanceBeginEditable name="title" -->
+<title>{#Channel Information} - {#PeerCast on} {$servMgr.serverIP}:{$servMgr.serverPort}</title>
 <!-- InstanceEndEditable -->
 
 <!-- InstanceBeginEditable name="head" -->
@@ -43,7 +44,7 @@
       </TR>
       <TR align=left bgColor=#eeeeee class="normal">
         <TD>{#Type}</TD>
-        <TD>{$page.channel.type}</TD>
+        <TD>{$page.channel.typeLong}</TD>
       </TR>
       <TR align=left bgColor=#dddddd class="normal">
         <TD>{#Bitrate}</TD>
@@ -111,7 +112,9 @@
       {@loop page.channel.numHits}
       <tr class="normal" bgcolor={@if loop.indexEven}#eeeeee{@else}#dddddd{@end}>
         <td align="left" style="{@if loop.hit.tracker}font-weight: bold;{@end}">
+          <a href="/admin?cmd=bump&amp;id={$page.channel.id}&amp;ip={$loop.hit.rhost0}">
           {$loop.hit.rhost0}
+          </a>
         </td>
         <td align="left">{$loop.hit.rhost1}</td>
         <TD class="numeric">{$loop.hit.numHops}</TD>

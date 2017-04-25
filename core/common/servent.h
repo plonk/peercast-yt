@@ -27,7 +27,6 @@
 #include "gnutella.h"
 #include "channel.h"
 #include "http.h"
-#include "rtsp.h"
 #include "pcp.h"
 
 class HTML;
@@ -75,13 +74,12 @@ public:
         S_FREE
     };
 
-    enum PROTOCOL
-    {
-        P_UNKNOWN,
-        P_GNUTELLA06,
-        P_PCP
-    };
-
+    // enum PROTOCOL
+    // {
+    //     P_UNKNOWN,
+    //     P_GNUTELLA06,
+    //     P_PCP
+    // };
 
     enum SORT
     {
@@ -170,10 +168,14 @@ public:
     void    handshakeICY(Channel::SRC_TYPE, bool);
     void    handshakeIncoming();
     void    handshakePOST();
-    void    handshakeRTSP(RTSP &);
     void    handshakeHTTP(HTTP &, bool);
+    void    handshakeGET(HTTP &http);
+    void    handshakePOST(HTTP &http);
+    void    handshakeGIV(const char*);
+    void    handshakeSOURCE(char * in, bool isHTTP);
 
     void    handshakeHTTPPush(const std::string& args);
+    void    handshakeWMHTTPPush(HTTP& http, const std::string& path);
 
     void    handshakeJRPC(HTTP &http);
 
@@ -278,7 +280,6 @@ public:
 
     GnuPacketBuffer     outPacketsNorm, outPacketsPri;
 
-    unsigned int        bytesPerSecond;
     bool                flowControl;
 
     Servent             *next;

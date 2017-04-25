@@ -106,8 +106,12 @@
     "Create Relay"            : "リレーを作成",
 
     // httppush.html
-    "HTTP Push Stream"        : "HTTP Push ストリーム",
-    "This builds a destination URL for the ffmpeg video converter." : "ffmpeg&thinsp;ビデオコンバータ用の送信先URLを作成します。",
+    "HTTP Push Stream"        : "HTTP Push&thinsp;ストリーム",
+    "Output URL for ffmpeg"   : "ffmpeg&thinsp;用出力&thinsp;URL",
+    "Windows Media HTTP Push Stream" : "Windows Media HTTP Push&thinsp;ストリーム",
+    "Encoder Settings"        : "エンコーダーの設定",
+    "Server Name"             : "サーバー名",
+    "Publishing Point"        : "公開ポイント",
 
     // connections.html
     "_Type_connection"        : "タイプ",

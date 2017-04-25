@@ -60,3 +60,13 @@ TEST_F(strFixture, codepoint_to_utf8)
     ASSERT_STREQ("あ", codepoint_to_utf8(12354).c_str());
     ASSERT_STREQ("\xf0\x9f\x92\xa9", codepoint_to_utf8(0x1f4a9).c_str()); // PILE OF POO
 }
+
+TEST_F(strFixture, contains)
+{
+    ASSERT_TRUE(str::contains("abc", "bc"));
+    ASSERT_FALSE(str::contains("abc", "d"));
+    ASSERT_TRUE(str::contains("abc", ""));
+    ASSERT_TRUE(str::contains("", ""));
+    ASSERT_TRUE(str::contains("abc", "abc"));
+    ASSERT_FALSE(str::contains("", "abc"));
+}

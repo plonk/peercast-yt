@@ -34,7 +34,7 @@ public:
     ClientSocket()
     {
         readTimeout = 30000;
-        writeTimeout = 30000;
+        writeTimeout = 5000;
     }
 
     virtual ~ClientSocket() {}

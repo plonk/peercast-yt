@@ -30,6 +30,8 @@ public:
     void    readHeader(Stream &, Channel *) override;
     int     readPacket(Stream &, Channel *) override;
     void    readEnd(Stream &, Channel *) override;
+
+    static void processChunk(Stream &in, Channel *ch, ASFChunk& chunk);
 };
 
 

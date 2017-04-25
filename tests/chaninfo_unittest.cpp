@@ -31,7 +31,7 @@ TEST_F(ChanInfoFixture, initialState)
     ASSERT_EQ(0, info.bitrate);
     ASSERT_EQ(ChanInfo::T_UNKNOWN, info.contentType);
     ASSERT_STREQ("", info.contentTypeStr.cstr());
-    ASSERT_STREQ("", info.streamType.cstr());
+    ASSERT_STREQ("", info.MIMEType.cstr());
     ASSERT_STREQ("", info.streamExt.cstr());
     ASSERT_EQ(ChanInfo::PROTOCOL::SP_UNKNOWN, info.srcProtocol);
     ASSERT_EQ(0, info.lastPlayStart);
@@ -109,6 +109,7 @@ TEST_F(ChanInfoFixture, static_getProtocolStr)
     ASSERT_STREQ("FILE", ChanInfo::getProtocolStr(ChanInfo::SP_FILE));
     ASSERT_STREQ("MMS", ChanInfo::getProtocolStr(ChanInfo::SP_MMS));
     ASSERT_STREQ("PCP", ChanInfo::getProtocolStr(ChanInfo::SP_PCP));
+    ASSERT_STREQ("WMHTTP", ChanInfo::getProtocolStr(ChanInfo::SP_WMHTTP));
     ASSERT_STREQ("UNKNOWN", ChanInfo::getProtocolStr(ChanInfo::SP_UNKNOWN));
 }
 
@@ -164,6 +165,7 @@ TEST_F(ChanInfoFixture, static_getProtocolFromStr)
     ASSERT_EQ(ChanInfo::SP_FILE, ChanInfo::getProtocolFromStr("FILE"));
     ASSERT_EQ(ChanInfo::SP_MMS, ChanInfo::getProtocolFromStr("MMS"));
     ASSERT_EQ(ChanInfo::SP_PCP, ChanInfo::getProtocolFromStr("PCP"));
+    ASSERT_EQ(ChanInfo::SP_WMHTTP, ChanInfo::getProtocolFromStr("WMHTTP"));
 
     ASSERT_EQ(ChanInfo::SP_PEERCAST, ChanInfo::getProtocolFromStr("Peercast")); // type str. is case-insesitive
     ASSERT_EQ(ChanInfo::SP_UNKNOWN, ChanInfo::getProtocolFromStr("RTMP"));
@@ -176,6 +178,6 @@ TEST_F(ChanInfoFixture, setContentType)
     info.setContentType(ChanInfo::T_MKV);
     ASSERT_EQ(ChanInfo::T_MKV, info.contentType);
     ASSERT_STREQ("MKV", info.contentTypeStr.cstr());
-    ASSERT_STREQ("video/x-matroska", info.streamType.cstr());
+    ASSERT_STREQ("video/x-matroska", info.MIMEType.cstr());
     ASSERT_STREQ(".mkv", info.streamExt.cstr());
 }
