@@ -33,6 +33,7 @@
 #include "str.h"
 #include "cgi.h"
 #include "template.h"
+#include "public.h"
 
 // -----------------------------------
 static void termArgs(char *str)
@@ -283,20 +284,13 @@ void Servent::handshakeGET(HTTP &http)
             http.writeLine("");
             http.writeString(response.c_str());
         }
-    }else if (strncmp(fn, "/yp/", 4)==0)
+    }else if (strncmp(fn, "/public/", strlen("/public/"))==0)
     {
-        if (strcmp(fn, "/yp/")==0)
-        {
-            while (http.nextHeader());
-            http.writeLine(HTTP_SC_FOUND);
-            http.writeLine("Location: index.php");
-            http.writeLine("");
-        }else
-        {
-            String tmp = fn + 1;
-            while (http.nextHeader());
-            handshakeLocalFile(tmp.cstr());
-        }
+        PublicController publicController("public");
+
+        http.readHeaders();
+        auto response = publicController(http.getRequest(), (Stream&)*sock, sock->host);
+        http.send(response);
     }else
     {
         // GET マッチなし

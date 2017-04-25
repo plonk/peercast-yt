@@ -165,4 +165,14 @@ bool contains(const std::string& haystack, const std::string& needle)
     return haystack.find(needle) != std::string::npos;
 }
 
+std::string replace_prefix(const std::string& s, const std::string& prefix, const std::string& replacement)
+{
+    if (s.size() < prefix.size()) return s;
+
+    if (s.substr(0, prefix.size()) == prefix)
+        return replacement + s.substr(prefix.size());
+    else
+        return s;
+}
+
 } // namespace str

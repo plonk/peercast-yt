@@ -310,7 +310,6 @@ private:
     void CMD_net_add(char *cmd, HTTP& http, HTML& html, char jumpStr[]);
     void CMD_logout(char *cmd, HTTP& http, HTML& html, char jumpStr[]);
     void CMD_login(char *cmd, HTTP& http, HTML& html, char jumpStr[]);
-
 };
 
 extern char *nextCGIarg(char *cp, char *cmd, char *arg);

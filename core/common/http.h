@@ -159,6 +159,62 @@ public:
 };
 
 // --------------------------------------------
+class HTTPRequest
+{
+public:
+    HTTPRequest(const std::string& aMethod, const std::string& aUrl, const std::string& aProtocolVersion,
+        std::map<std::string,std::string>& aHeaders)
+        : method(aMethod)
+        , url(aUrl)
+        , protocolVersion(aProtocolVersion)
+    {
+    }
+
+    std::string method;
+    std::string url;
+    std::string protocolVersion;
+    std::map<std::string,std::string> headers;
+};
+
+// --------------------------------------------
+class HTTPResponse
+{
+public:
+
+    HTTPResponse(int aStatusCode, const std::map<std::string,std::string>& aHeaders)
+        : statusCode(aStatusCode)
+        , headers(aHeaders)
+        , stream(NULL)
+    {
+    }
+
+    static HTTPResponse ok(const std::string& mimeType, const std::map<std::string,std::string>& aHeaders, const std::string& body)
+    {
+        HTTPResponse res(200, aHeaders);
+        res.body = body;
+        return res;
+    }
+
+    static HTTPResponse notFound()
+    {
+        HTTPResponse res(400, {{"Content-Type", "text/html"}});
+        res.body = "File not found";
+        return res;
+    }
+
+    static HTTPResponse redirectTo(const std::string& url)
+    {
+        HTTPResponse res(302, {{"Location",url}});
+        return res;
+    }
+
+    std::string body;
+    int statusCode;
+    std::map<std::string,std::string> headers;
+    Stream* stream;
+};
+
+// --------------------------------------------
 class HTTP : public IndirectStream
 {
 public:
@@ -169,10 +225,7 @@ public:
         init(&s);
     }
 
-    void    initRequest(const char *r)
-    {
-        strcpy(cmdLine, r);
-    }
+    void    initRequest(const char *r);
     void    readRequest();
     bool    isRequest(const char *);
 
@@ -195,11 +248,33 @@ public:
     {
         cmdLine[0] = '\0';
         arg = NULL;
+        method = "";
+        requestUrl = "";
+        protocolVersion = "";
         headers.clear();
     }
 
+    HTTPRequest getRequest()
+    {
+        if (method.size() > 0 &&
+            requestUrl.size() > 0 &&
+            protocolVersion.size() > 0 &&
+            strlen(cmdLine) == 0)
+        {
+            return HTTPRequest(method, requestUrl, protocolVersion, headers);
+        }else
+        {
+            throw GeneralException("Request not ready");
+        }
+    }
+
+    void send(const HTTPResponse& response);
+
     char    cmdLine[8192], *arg;
 
+    std::string method;
+    std::string requestUrl;
+    std::string protocolVersion;
     // ヘッダー名と値。ヘッダー名は全て大文字。
     map<string,string> headers;
 };

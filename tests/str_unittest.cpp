@@ -70,3 +70,15 @@ TEST_F(strFixture, contains)
     ASSERT_TRUE(str::contains("abc", "abc"));
     ASSERT_FALSE(str::contains("", "abc"));
 }
+
+TEST_F(strFixture, replace_prefix)
+{
+    ASSERT_STREQ("", str::replace_prefix("", "", "").c_str());
+    ASSERT_STREQ("b", str::replace_prefix("", "", "b").c_str());
+    ASSERT_STREQ("", str::replace_prefix("", "a", "b").c_str());
+    ASSERT_STREQ("", str::replace_prefix("", "a", "").c_str());
+    ASSERT_STREQ("xbc", str::replace_prefix("abc", "a", "x").c_str());
+    ASSERT_STREQ("abc", str::replace_prefix("abc", "x", "x").c_str());
+    ASSERT_STREQ("xabc", str::replace_prefix("abc", "", "x").c_str());
+    ASSERT_STREQ("bc", str::replace_prefix("abc", "a", "").c_str());
+}

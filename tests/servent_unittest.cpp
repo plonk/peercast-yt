@@ -140,7 +140,7 @@ TEST_F(ServentFixture, handshakeIncomingHTMLRoot)
     s.sock = mock = new MockClientSocket();
     mock->incoming.str("GET /html/en/index.html HTTP/1.0\r\n\r\n");
 
-    ASSERT_NO_THROW(s.handshakeIncoming());
+    s.handshakeIncoming();
 
     std::string output = mock->outgoing.str();
 

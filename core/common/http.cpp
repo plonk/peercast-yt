@@ -25,6 +25,7 @@
 #include "http.h"
 #include "sys.h"
 #include "common.h"
+#include "str.h"
 
 //-----------------------------------------
 bool HTTP::checkResponse(int r)
@@ -38,11 +39,34 @@ bool HTTP::checkResponse(int r)
 
     return true;
 }
+
 //-----------------------------------------
 void HTTP::readRequest()
 {
     readLine(cmdLine, sizeof(cmdLine));
+
+    auto vec = str::split(cmdLine, " ");
+    if (vec.size() > 0) method          = vec[0];
+    if (vec.size() > 1) requestUrl      = vec[1];
+    if (vec.size() > 2) protocolVersion = vec[2];
 }
+
+//-----------------------------------------
+void HTTP::initRequest(const char *r)
+{
+    strcpy(cmdLine, r);
+
+    if (strchr(cmdLine, '\r'))
+        *strchr(cmdLine, '\r') = '\0';
+    if (strchr(cmdLine, '\n'))
+        *strchr(cmdLine, '\n') = '\0';
+
+    auto vec = str::split(cmdLine, " ");
+    if (vec.size() > 0) method          = vec[0];
+    if (vec.size() > 1) requestUrl      = vec[1];
+    if (vec.size() > 2) protocolVersion = vec[2];
+}
+
 //-----------------------------------------
 int HTTP::readResponse()
 {
@@ -149,6 +173,71 @@ void HTTP::getAuthUserPass(char *user, char *pass, size_t ulen, size_t plen)
         }
     }
 }
+
+#include <functional>
+class Defer
+{
+public:
+    Defer(std::function<void()> aCallback)
+        : callback(aCallback)
+    {}
+
+    ~Defer()
+    {
+        callback();
+    }
+
+    std::function<void()> callback;
+};
+
+static const char* statusMessage(int statusCode)
+{
+    switch (statusCode)
+    {
+    case 101: return "Switch protocols";
+    case 200: return "OK";
+    case 302: return "Found";
+    case 400: return "Bad Request";
+    case 401: return "Unauthorized";
+    case 403: return "Forbidden";
+    case 404: return "Not Found";
+    case 500: return "Internal Server Error";
+    case 502: return "Bad Gateway";
+    case 503: return "Service Unavailable";
+    default: return "Unknown";
+    }
+}
+
+#include "cgi.h"
+#include "version2.h" // PCX_AGENT
+// -----------------------------------
+void HTTP::send(const HTTPResponse& response)
+{
+    bool crlf = writeCRLF;
+    Defer cb([=]() { writeCRLF = crlf; });
+
+    writeCRLF = true;
+
+    writeLineF("HTTP/1.0 %d %s", response.statusCode, statusMessage(response.statusCode));
+
+    std::map<std::string,std::string> headers = {
+        {"Server", PCX_AGENT},
+        {"Connection", "close"},
+        {"Date", cgi::rfc1123Time(sys->getTime())}
+    };
+
+    for (const auto& pair : response.headers)
+        headers[pair.first] = pair.second;
+
+    for (const auto& pair : headers)
+        writeLineF("%s: %s", pair.first.c_str(), pair.second.c_str());
+
+    writeLine("");
+
+    if (response.body.size())
+        write(response.body.data(), response.body.size());
+}
+
 // -----------------------------------
 void    CookieList::init()
 {
