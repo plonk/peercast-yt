@@ -27,7 +27,6 @@
 #include "gnutella.h"
 #include "channel.h"
 #include "http.h"
-#include "rtsp.h"
 #include "pcp.h"
 
 class HTML;
@@ -169,7 +168,6 @@ public:
     void    handshakeICY(Channel::SRC_TYPE, bool);
     void    handshakeIncoming();
     void    handshakePOST();
-    void    handshakeRTSP(RTSP &);
     void    handshakeHTTP(HTTP &, bool);
     void    handshakeGET(HTTP &http);
     void    handshakePOST(HTTP &http);
