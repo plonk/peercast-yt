@@ -18,7 +18,6 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-
 #include <stdlib.h>
 #include "servent.h"
 #include "servmgr.h"
@@ -45,6 +44,7 @@ static void termArgs(char *str)
             if (str[i]=='&') str[i] = 0;
     }
 }
+
 // -----------------------------------
 char *nextCGIarg(char *cp, char *cmd, char *arg)
 {
@@ -86,11 +86,13 @@ char *nextCGIarg(char *cp, char *cmd, char *arg)
 
     return cp;
 }
+
 // -----------------------------------
 bool getCGIargBOOL(char *a)
 {
     return (strcmp(a, "1") == 0);
 }
+
 // -----------------------------------
 int getCGIargINT(char *a)
 {
@@ -259,7 +261,6 @@ void Servent::handshakeGET(HTTP &http)
         triggerChannel(fn+8, ChanInfo::SP_HTTP, isPrivate());
     }else if (strncmp(fn, "/channel/", 9) == 0)
     {
-
         if (!sock->host.isLocalhost())
             if (!isAllowed(ALLOW_NETWORK) || !isFiltered(ServFilter::F_NETWORK))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
@@ -509,6 +510,7 @@ bool Servent::canStream(Channel *ch)
 
     return true;
 }
+
 // -----------------------------------
 void Servent::handshakeIncoming()
 {
@@ -534,6 +536,7 @@ void Servent::handshakeIncoming()
         handshakeHTTP(http, false);
     }
 }
+
 // -----------------------------------
 void Servent::triggerChannel(char *str, ChanInfo::PROTOCOL proto, bool relay)
 {
@@ -550,6 +553,7 @@ void Servent::triggerChannel(char *str, ChanInfo::PROTOCOL proto, bool relay)
 
     processStream(false, info);
 }
+
 // -----------------------------------
 void writePLSHeader(Stream &s, PlayList::TYPE type)
 {
@@ -608,6 +612,7 @@ void Servent::handshakePLS(ChanInfo &info, bool doneHandshake)
         pls.write(*sock);
     }
 }
+
 // -----------------------------------
 void Servent::handshakePLS(ChanHitList **cl, int num, bool doneHandshake)
 {
@@ -629,6 +634,7 @@ void Servent::handshakePLS(ChanHitList **cl, int num, bool doneHandshake)
         pls.write(*sock);
     }
 }
+
 // -----------------------------------
 bool Servent::getLocalURL(char *str)
 {
@@ -679,6 +685,7 @@ bool Servent::handshakeHTTPBasicAuth(HTTP &http)
     http.writeLine("");
     return false;
 }
+
 // -----------------------------------
 bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
 {
@@ -742,7 +749,6 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
     switch (servMgr->authType)
     {
         case ServMgr::AUTH_HTTPBASIC:
-
             if ((strcmp(pass, servMgr->password) == 0) && strlen(servMgr->password))
                 return true;
             break;
@@ -838,18 +844,18 @@ void Servent::CMD_edit_bcid(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     BCID *bcid;
 
     while (cp=nextCGIarg(cp, curr, arg))
+    {
+        if (strcmp(curr, "id") == 0)
+            id.fromStr(arg);
+        else if (strcmp(curr, "del") == 0)
+            servMgr->removeValidBCID(id);
+        else if (strcmp(curr, "valid") == 0)
         {
-            if (strcmp(curr, "id") == 0)
-                id.fromStr(arg);
-            else if (strcmp(curr, "del") == 0)
-                servMgr->removeValidBCID(id);
-            else if (strcmp(curr, "valid") == 0)
-                {
-                    bcid = servMgr->findValidBCID(id);
-                    if (bcid)
-                        bcid->valid = getCGIargBOOL(arg);
-                }
+            bcid = servMgr->findValidBCID(id);
+            if (bcid)
+                bcid->valid = getCGIargBOOL(arg);
         }
+    }
 
     peercastInst->saveSettings();
     sprintf(jumpStr, "/%s/bcid.html", servMgr->htmlPath);
@@ -884,28 +890,28 @@ void Servent::CMD_add_bcid(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     servMgr->addValidBCID(bcid);
     peercastInst->saveSettings();
     if (result)
-        {
-            http.writeLine(HTTP_SC_OK);
-            http.writeLine("");
-            http.writeString("OK");
-        }else
-        {
-            sprintf(jumpStr, "/%s/bcid.html", servMgr->htmlPath);
-        }
+    {
+        http.writeLine(HTTP_SC_OK);
+        http.writeLine("");
+        http.writeString("OK");
+    }else
+    {
+        sprintf(jumpStr, "/%s/bcid.html", servMgr->htmlPath);
+    }
 }
 
 void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, char jumpStr[])
 {
     servMgr->numFilters = 0;
-    ServFilter *currFilter=servMgr->filters;
+    ServFilter *currFilter = servMgr->filters;
     servMgr->channelDirectory.clearFeeds();
 
-    bool brRoot=false;
-    bool getUpd=false;
-    int showLog=0;
-    int allowServer1=0;
-    int allowServer2=0;
-    int newPort=servMgr->serverHost.port;
+    bool brRoot = false;
+    bool getUpd = false;
+    int showLog = 0;
+    int allowServer1 = 0;
+    int allowServer2 = 0;
+    int newPort = servMgr->serverHost.port;
 
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
@@ -1527,6 +1533,7 @@ static XML::Node *createChannelXML(Channel *c)
 //  n->add(c->info.createServentXML());
     return n;
 }
+
 // -----------------------------------
 static XML::Node *createChannelXML(ChanHitList *chl)
 {
@@ -1536,6 +1543,7 @@ static XML::Node *createChannelXML(ChanHitList *chl)
 //  n->add(chl->info.createServentXML());
     return n;
 }
+
 // -----------------------------------
 void Servent::handshakeXML()
 {
@@ -1622,6 +1630,7 @@ void Servent::handshakeXML()
 
     xml.write(*sock);
 }
+
 // -----------------------------------
 void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd, size_t plen)
 {
@@ -1956,12 +1965,10 @@ void Servent::handshakeRemoteFile(const char *dirName)
     if (!rsock)
         throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-
     const char *hostName = "www.peercast.org";  // hardwired for "security"
 
     Host host;
     host.fromStrName(hostName, 80);
-
 
     rsock->open(host);
     rsock->connect();
@@ -2003,7 +2010,6 @@ void Servent::handshakeRemoteFile(const char *dirName)
     int fileLen = mem.getPosition();
     mem.len = fileLen;
     mem.rewind();
-
 
     if (contentType.contains(MIME_HTML))
         isTemplate = true;
