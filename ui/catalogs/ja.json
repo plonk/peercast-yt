@@ -173,6 +173,8 @@
     "Save Settings"           : "設定を保存",
     "Channel Feeds"           : "チャンネルフィード",
     "URL of index.txt"        : "index.txtのURL",
+    "Public"                  : "公開",
+    "Public Directory"        : "公開ディレクトリ",
 
     // viewlog.html
     "Clear log"               : "ログをクリア",
