@@ -91,7 +91,7 @@
                   <TD>{#Public Directory}</TD>
                   <TD>
                     <label>
-                      <INPUT type="checkbox">
+                      <INPUT type="checkbox" name="public_directory" {@if servMgr.publicDirectoryEnabled}checked{@end}>
                       <i>{#Enable}</i>
                     </label>
                     <a href="/public/">{#View}</a>
@@ -318,7 +318,7 @@
                     <INPUT size=15 value="{$loop.channelFeed.url}" name="channel_feed_url" style="width: 100%" placeholder="{#URL of index.txt}">
                   </TD>
                   <td align="center">
-                    <input type="checkbox" name="channel_feed_public">
+                    <input type="checkbox" name="channel_feed_public{$loop.index}" {@if loop.channelFeed.isPublic}checked{@end}>
                   </td>
                 </TR>
                 {@end}

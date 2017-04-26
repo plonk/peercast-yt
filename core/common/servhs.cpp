@@ -288,9 +288,15 @@ void Servent::handshakeGET(HTTP &http)
         }
     }else if (strncmp(fn, "/public/", strlen("/public/"))==0)
     {
+        http.readHeaders();
+
+        if (!servMgr->publicDirectoryEnabled)
+        {
+            throw HTTPException(HTTP_SC_FORBIDDEN, 403);
+        }
+
         PublicController publicController("public");
 
-        http.readHeaders();
         auto response = publicController(http.getRequest(), (Stream&)*sock, sock->host);
         http.send(response);
     }else
@@ -891,6 +897,7 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     servMgr->numFilters = 0;
     ServFilter *currFilter = servMgr->filters;
     servMgr->channelDirectory.clearFeeds();
+    servMgr->publicDirectoryEnabled = false;
 
     bool brRoot = false;
     bool getUpd = false;
@@ -994,6 +1001,11 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, char jumpStr[])
                 servMgr->channelDirectory.addFeed(str.cstr());
             }
         }
+        else if (strncmp(curr, "channel_feed_public", strlen("channel_feed_public")) == 0)
+        {
+            int index = atoi(curr + strlen("channel_feed_public"));
+            servMgr->channelDirectory.setFeedPublic(index, true);
+        }
 
         // client
         else if (strcmp(curr, "clientactive") == 0)
@@ -1011,6 +1023,8 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, char jumpStr[])
             chanMgr->deadHitAge = getCGIargINT(arg);
         else if (strcmp(curr, "refresh") == 0)
             servMgr->refreshHTML = getCGIargINT(arg);
+        else if (strcmp(curr, "public_directory") == 0)
+            servMgr->publicDirectoryEnabled = true;
         else if (strcmp(curr, "auth") == 0)
         {
             if (strcmp(arg, "cookie") == 0)

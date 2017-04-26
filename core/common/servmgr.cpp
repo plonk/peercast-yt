@@ -32,6 +32,7 @@ ThreadInfo ServMgr::serverThread, ServMgr::idleThread;
 
 // -----------------------------------
 ServMgr::ServMgr()
+    : publicDirectoryEnabled(false)
 {
     validBCID = NULL;
 
@@ -929,10 +930,10 @@ void ServMgr::saveSettings(const char *fn)
         iniFile.writeIntValue("maxPGNUIncoming", servMgr->maxGnuIncoming);
         iniFile.writeIntValue("maxServIn", servMgr->maxServIn);
         iniFile.writeStrValue("chanLog", servMgr->chanLog.cstr());
+        iniFile.writeBoolValue("publicDirectory", servMgr->publicDirectoryEnabled);
 
         networkID.toStr(idStr);
         iniFile.writeStrValue("networkID", idStr);
-
 
         iniFile.writeSection("Broadcast");
         iniFile.writeIntValue("broadcastMsgInterval", chanMgr->broadcastMsgInterval);
@@ -972,6 +973,7 @@ void ServMgr::saveSettings(const char *fn)
         {
             iniFile.writeSection("Feed");
             iniFile.writeStrValue("url", feed.url.c_str());
+            iniFile.writeBoolValue("isPublic", feed.isPublic);
             iniFile.writeLine("[End]");
         }
 
@@ -1130,11 +1132,11 @@ void readFilterSettings(IniFile &iniFile, ServFilter &sv)
 // --------------------------------------------------
 void ServMgr::loadSettings(const char *fn)
 {
+    int feedIndex = 0;
     IniFile iniFile;
 
     if (!iniFile.openReadOnly(fn))
         saveSettings(fn);
-
 
     servMgr->numFilters = 0;
     showLog = 0;
@@ -1204,6 +1206,8 @@ void ServMgr::loadSettings(const char *fn)
                 servMgr->maxServIn = iniFile.getIntValue();
             else if (iniFile.isName("chanLog"))
                 servMgr->chanLog.set(iniFile.getStrValue(), String::T_ASCII);
+            else if (iniFile.isName("publicDirectory"))
+                servMgr->publicDirectoryEnabled = iniFile.getBoolValue();
 
             else if (iniFile.isName("rootMsg"))
                 rootMsg.set(iniFile.getStrValue());
@@ -1305,7 +1309,12 @@ void ServMgr::loadSettings(const char *fn)
                         break;
                     else if (iniFile.isName("url"))
                         servMgr->channelDirectory.addFeed(iniFile.getStrValue());
+                    else if (iniFile.isName("isPublic"))
+                    {
+                        servMgr->channelDirectory.setFeedPublic(feedIndex, iniFile.getBoolValue());
+                    }
                 }
+                feedIndex++;
             }
             else if (iniFile.isName("[Notify]"))
             {
@@ -2257,6 +2266,9 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var.startsWith("channelDirectory."))
     {
         return channelDirectory.writeVariable(out, var + strlen("channelDirectory."));
+    }else if (var == "publicDirectoryEnabled")
+    {
+        sprintf(buf, "%d", publicDirectoryEnabled);
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);

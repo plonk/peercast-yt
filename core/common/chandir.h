@@ -65,14 +65,16 @@ public:
     };
 
     ChannelFeed()
-        : url(""),
-          status(Status::UNKNOWN)
+        : url("")
+        , status(Status::UNKNOWN)
+        , isPublic(false)
     {
     }
 
     ChannelFeed(std::string aUrl)
-        : url(aUrl),
-          status(Status::UNKNOWN)
+        : url(aUrl)
+        , status(Status::UNKNOWN)
+        , isPublic(false)
     {
     }
 
@@ -80,6 +82,7 @@ public:
 
     std::string url;
     Status status;
+    bool isPublic;
 };
 
 // 外部からチャンネルリストを取得して保持する。
@@ -93,6 +96,7 @@ public:
     std::vector<ChannelFeed> feeds();
     bool addFeed(std::string url);
     void clearFeeds();
+    void setFeedPublic(int index, bool isPublic);
 
     int totalListeners();
     int totalRelays();

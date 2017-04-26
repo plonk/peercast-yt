@@ -400,6 +400,7 @@ public:
     String              chanLog;
 
     ChannelDirectory    channelDirectory;
+    bool                publicDirectoryEnabled;
 
 private:
     FW_STATE            firewalled;
