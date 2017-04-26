@@ -43,7 +43,7 @@ TEST_F(TemplateFixture, writeVariable)
     ASSERT_STREQ("v0.1218", out.str().substr(0,7).c_str());
 }
 
-TEST_F(TemplateFixture, writeVariableNonExistentVariable)
+TEST_F(TemplateFixture, writeVariableUndefined)
 {
     DynamicMemoryStream out;
 
@@ -72,6 +72,67 @@ TEST_F(TemplateFixture, readTemplate)
     res = temp.readTemplate(in, &out, 0);
     ASSERT_FALSE(res);
     ASSERT_STREQ("hoge", out.str().c_str());
+}
+
+TEST_F(TemplateFixture, getStringVariable)
+{
+    ASSERT_STREQ("1", temp.getStringVariable("TRUE", 0).c_str());
+    ASSERT_STREQ("0", temp.getStringVariable("FALSE", 0).c_str());
+}
+
+TEST_F(TemplateFixture, evalStringLiteral)
+{
+    ASSERT_STREQ("abc", temp.evalStringLiteral("\"abc\"").c_str());
+    ASSERT_STREQ("", temp.evalStringLiteral("\"\"").c_str());
+}
+
+TEST_F(TemplateFixture, readStringLiteral)
+{
+    std::string lit, rest;
+    std::tie(lit, rest) = temp.readStringLiteral("\"abc\"def");
+
+    ASSERT_STREQ("\"abc\"", lit.c_str());
+    ASSERT_STREQ("def", rest.c_str());
+}
+
+TEST_F(TemplateFixture, tokenizeBinaryExpression)
+{
+    auto tok = temp.tokenize("a==b");
+
+    ASSERT_EQ(3, tok.size());
+    ASSERT_STREQ("a", tok[0].c_str());
+    ASSERT_STREQ("==", tok[1].c_str());
+    ASSERT_STREQ("b", tok[2].c_str());
+}
+
+TEST_F(TemplateFixture, tokenizeVariableExpression)
+{
+    auto tok = temp.tokenize("a");
+
+    ASSERT_EQ(1, tok.size());
+    ASSERT_STREQ("a", tok[0].c_str());
+
+    tok = temp.tokenize("!a");
+    ASSERT_EQ(1, tok.size());
+    ASSERT_STREQ("!a", tok[0].c_str());
+}
+
+TEST_F(TemplateFixture, evalCondition)
+{
+    ASSERT_TRUE(temp.evalCondition("TRUE", 0));
+    ASSERT_FALSE(temp.evalCondition("FALSE", 0));
+}
+
+TEST_F(TemplateFixture, evalCondition2)
+{
+    ASSERT_TRUE(temp.evalCondition("TRUE==TRUE", 0));
+    ASSERT_FALSE(temp.evalCondition("TRUE==FALSE", 0));
+}
+
+TEST_F(TemplateFixture, evalCondition3)
+{
+    ASSERT_FALSE(temp.evalCondition("TRUE!=TRUE", 0));
+    ASSERT_TRUE(temp.evalCondition("TRUE!=FALSE", 0));
 }
 
 TEST_F(TemplateFixture, readIfTrue)

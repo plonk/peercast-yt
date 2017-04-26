@@ -1,5 +1,7 @@
 #include "public.h"
 #include "str.h"
+#include "dmstream.h"
+#include "template.h"
 
 PublicController::PublicController(const std::string& documentRoot)
     : mapper("/public", documentRoot)
@@ -43,18 +45,38 @@ HTTPResponse PublicController::operator()(const HTTPRequest& request, Stream& st
         return HTTPResponse::redirectTo("/public/index.html");
     }else if (strcmp(fn, "/public/index.txt") == 0)
     {
-        return HTTPResponse::ok(MIME_TEXT, {{"Content-Type","text/plain"}}, "hello");
+        return HTTPResponse::ok({{"Content-Type","text/plain"}}, "hello");
+    }else if (strcmp(fn, "/public/index.html") == 0)
+    {
+        FileStream file;
+        DynamicMemoryStream mem;
+        file.openReadOnly((mapper.documentRoot + "/index.html").c_str());
+        Template(request.queryString).readTemplate(file, &mem, 0);
+        return HTTPResponse::ok({{"Content-Type","text/html"}}, mem.str());
     }else
     {
-        String tmp = fn + 1;
-        auto path = mapper.toLocalFilePath(tmp);
+        auto path = mapper.toLocalFilePath(fn);
         if (path.empty())
             return HTTPResponse::notFound();
         else
         {
-            //handshakeLocalFile(path.c_str());
             auto type = MIMEType(path);
-            return HTTPResponse::ok(type, {{"Content-Type","text/plain"}}, "hoge");
+
+            DynamicMemoryStream mem;
+            FileStream file;
+            std::map<std::string,std::string> additionalHeaders;
+
+            try
+            {
+                file.openReadOnly(path.c_str());
+                file.writeTo(mem, file.length());
+            }catch (StreamException &)
+            {
+                LOG_DEBUG("StreamException in %s", __FUNCTION__);
+            }
+            file.close();
+
+            return HTTPResponse::ok({{"Content-Type",type}}, mem.str());
         }
     }
 }

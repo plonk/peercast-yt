@@ -15,6 +15,10 @@ namespace str
     std::string codepoint_to_utf8(uint32_t);
     bool contains(const std::string& haystack, const std::string& needle);
     std::string replace_prefix(const std::string& s, const std::string& prefix, const std::string& replacement);
+    std::string upcase(const std::string& input);
+    std::string downcase(const std::string& input);
+    std::string capitalize(const std::string&);
+    bool is_prefix_of(const std::string&, const std::string&);
 
 }
 

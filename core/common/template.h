@@ -49,6 +49,13 @@ public:
         else
             tmplArgs = NULL;
     }
+
+    Template(const std::string& args)
+        : currentElement(json::object({}))
+    {
+        tmplArgs = strdup(args.c_str());
+    }
+
     ~Template()
     {
         if (tmplArgs)
@@ -81,6 +88,12 @@ public:
     bool    readTemplate(Stream &, Stream *, int);
     bool    writeObjectProperty(Stream& s, const String& varName, json::object_t object);
     json::array_t evaluateCollectionVariable(String& varName);
+
+    bool    evalCondition(const std::string& cond, int loop);
+    std::vector<std::string> tokenize(const std::string& input);
+    std::pair<std::string,std::string> readStringLiteral(const std::string& input);
+    std::string evalStringLiteral(const std::string& input);
+    std::string getStringVariable(const std::string& varName, int loop);
 
     char * tmplArgs;
     std::string selectedFragment;

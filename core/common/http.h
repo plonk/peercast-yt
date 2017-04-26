@@ -20,10 +20,10 @@
 #ifndef _HTTP_H
 #define _HTTP_H
 
-using namespace std;
 #include <map>
 
 #include "stream.h"
+#include "str.h"
 
 // -------------------------------------
 class HTTPException : public StreamException
@@ -168,10 +168,19 @@ public:
         , url(aUrl)
         , protocolVersion(aProtocolVersion)
     {
+        auto vec = str::split(url, "?");
+        if (vec.size() >= 2)
+        {
+            path = vec[0];
+            queryString = vec[1];
+        }else
+            path = url;
     }
 
     std::string method;
     std::string url;
+    std::string path;
+    std::string queryString;
     std::string protocolVersion;
     std::map<std::string,std::string> headers;
 };
@@ -188,7 +197,7 @@ public:
     {
     }
 
-    static HTTPResponse ok(const std::string& mimeType, const std::map<std::string,std::string>& aHeaders, const std::string& body)
+    static HTTPResponse ok(const std::map<std::string,std::string>& aHeaders, const std::string& body)
     {
         HTTPResponse res(200, aHeaders);
         res.body = body;
@@ -276,7 +285,7 @@ public:
     std::string requestUrl;
     std::string protocolVersion;
     // ヘッダー名と値。ヘッダー名は全て大文字。
-    map<string,string> headers;
+    std::map<std::string,std::string> headers;
 };
 
 #endif

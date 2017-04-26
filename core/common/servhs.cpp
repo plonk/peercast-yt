@@ -35,6 +35,8 @@
 #include "template.h"
 #include "public.h"
 
+using namespace std;
+
 // -----------------------------------
 static void termArgs(char *str)
 {

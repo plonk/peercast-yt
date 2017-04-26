@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstring>
 #include <vector>
+#include <cctype>
 
 namespace str
 {
@@ -174,5 +175,65 @@ std::string replace_prefix(const std::string& s, const std::string& prefix, cons
     else
         return s;
 }
+
+std::string upcase(const std::string& input)
+{
+    std::string res;
+    for (auto c : input)
+    {
+        if (isalpha(c))
+            res += toupper(c);
+        else
+            res += c;
+    }
+    return res;
+}
+
+std::string downcase(const std::string& input)
+{
+    std::string res;
+    for (auto c : input)
+    {
+        if (isalpha(c))
+            res += tolower(c);
+        else
+            res += c;
+    }
+    return res;
+}
+
+std::string capitalize(const std::string& input)
+{
+    std::string res;
+    bool prevWasAlpha = false;
+
+    for (auto c : input)
+    {
+        if (isalpha(c))
+        {
+            if (prevWasAlpha)
+                res += tolower(c);
+            else
+            {
+                res += toupper(c);
+                prevWasAlpha = true;
+            }
+        }else
+        {
+            res += c;
+            prevWasAlpha = false;
+        }
+    }
+    return res;
+}
+
+bool is_prefix_of(const std::string& prefix, const std::string& string)
+{
+    if (string.size() < prefix.size())
+        return false;
+
+    return string.substr(0, prefix.size()) == prefix;
+}
+
 
 } // namespace str

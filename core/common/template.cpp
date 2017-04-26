@@ -18,6 +18,8 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
+#include <cctype>
+
 #include "template.h"
 
 #include "servmgr.h"
@@ -28,6 +30,7 @@
 #include "jrpc.h"
 
 using json = nlohmann::json;
+using namespace std;
 
 // --------------------------------------
 static json::object_t array_to_object(json::array_t arr)
@@ -35,7 +38,7 @@ static json::object_t array_to_object(json::array_t arr)
     json::object_t obj;
     for (int i = 0; i < arr.size(); i++)
     {
-        obj[std::to_string(i)] = arr[i];
+        obj[to_string(i)] = arr[i];
     }
     return obj;
 }
@@ -53,11 +56,11 @@ bool Template::writeObjectProperty(Stream& s, const String& varName, json::objec
             json value = object.at(varName.str());
             if (value.is_string())
             {
-                std::string str = value;
+                string str = value;
                 s.writeString(str.c_str());
             }else
                 s.writeString(value.dump().c_str());
-        }catch (std::out_of_range&)
+        }catch (out_of_range&)
         {
             return false;
         }
@@ -76,7 +79,7 @@ bool Template::writeObjectProperty(Stream& s, const String& varName, json::objec
             {
                 return writeObjectProperty(s, varName + strlen(names[0].c_str()) + 1, value);
             }
-        } catch (std::out_of_range&)
+        } catch (out_of_range&)
         {
             return false;
         }
@@ -102,7 +105,7 @@ void Template::writeVariable(Stream &s, const String &varName, int loop)
             r = true;
         }else if (varName == "sys.time")
         {
-            s.writeString(std::to_string(sys->getTime()).c_str());
+            s.writeString(to_string(sys->getTime()).c_str());
             r = true;
         }
     }
@@ -224,6 +227,16 @@ void Template::writeVariable(Stream &s, const String &varName, int loop)
 }
 
 // --------------------------------------
+string Template::getStringVariable(const string& varName, int loop)
+{
+    DynamicMemoryStream mem;
+
+    writeVariable(mem, varName.c_str(), loop);
+
+    return mem.str();
+}
+
+// --------------------------------------
 int Template::getIntVariable(const String &varName, int loop)
 {
     DynamicMemoryStream mem;
@@ -240,7 +253,7 @@ bool Template::getBoolVariable(const String &varName, int loop)
 
     writeVariable(mem, varName, loop);
 
-    const std::string val = mem.str();
+    const string val = mem.str();
 
     // integer
     if ((val[0] >= '0') && (val[0] <= '9'))
@@ -256,7 +269,7 @@ bool Template::getBoolVariable(const String &varName, int loop)
 // --------------------------------------
 void    Template::readFragment(Stream &in, Stream *outp, int loop)
 {
-    std::string fragName;
+    string fragName;
 
     while (!in.eof())
     {
@@ -282,10 +295,187 @@ void    Template::readFragment(Stream &in, Stream *outp, int loop)
 }
 
 // --------------------------------------
+string Template::evalStringLiteral(const string& input)
+{
+    if (input[0] != '\"' || input[input.size()-1] != '\"')
+        throw StreamException("no string literal");
+
+    string res;
+    auto s = input.substr(1);
+
+    while (!s.empty() && s[0] != '\"')
+    {
+        if (s[0] == '\\')
+        {
+            // バックスラッシュが最後の文字ではないことはわかっている
+            // ので末端チェックはしない。
+            res += s[0];
+            res += s[1];
+            s.erase(0,2);
+        }else
+        {
+            res += s[0];
+            s.erase(0,1);
+        }
+    }
+
+    if (s.empty())
+        throw StreamException("Premature end of string");
+    return res;
+}
+
+// --------------------------------------
+pair<string,string> Template::readStringLiteral(const string& input)
+{
+    if (input.empty())
+        throw StreamException("empty input");
+
+    if (input[0] != '\"')
+        throw StreamException("no string literal");
+
+    auto s = input;
+    string res = "\"";
+    s.erase(0,1);
+
+    while (!s.empty() && s[0] != '\"')
+    {
+        if (s[0] == '\\')
+        {
+            res += s[0];
+            s.erase(0,1);
+            if (!s.empty())
+            {
+                res += s[0];
+                s.erase(0,1);
+            }
+        }else
+        {
+            res += s[0];
+            s.erase(0,1);
+        }
+    }
+
+    if (s.empty())
+        throw StreamException("Premature end of string");
+
+    res += "\"";
+    s.erase(0,1);
+    return make_pair(res, s);
+}
+
+// --------------------------------------
+vector<string> Template::tokenize(const string& input)
+{
+    using namespace std;
+
+    auto isident =
+        [](int c)
+        {
+            return isalpha(c) || isdigit(c) || c=='_' || c=='.';
+        };
+
+    auto s = input;
+    vector<string> tokens;
+
+    while (!s.empty())
+    {
+        if (isspace(s[0]))
+        {
+            do {
+                s.erase(0,1);
+            }while (isspace(s[0]));
+        }else if (s[0] == '\"')
+        {
+            string t;
+            tie(t, s) = readStringLiteral(s);
+            tokens.push_back(t);
+        }else if (str::is_prefix_of("==", s)
+                  || str::is_prefix_of("!=", s))
+        {
+            tokens.push_back(s.substr(0,2));
+            s.erase(0,2);
+        }else if (isident(s[0]) || s[0] == '!')
+        {
+            string bangs, var;
+            while (!s.empty() && s[0] == '!')
+            {
+                bangs += s[0];
+                s.erase(0,1);
+            }
+
+            if (s.empty())
+                throw StreamException("Premature end of token");
+
+            if (!(isalpha(s[0]) || s[0]=='_' || s[0]=='.'))
+                throw StreamException("Identifier expected after '!'");
+
+            while (!s.empty() && isident(s[0]))
+            {
+                var += s[0];
+                s.erase(0,1);
+            };
+            tokens.push_back(bangs + var);
+        }else
+        {
+            auto c = string() + s[0];
+            throw StreamException(("Unrecognized token. Error at " + str::inspect(c)).c_str());
+        }
+    }
+    return tokens;
+}
+
+// --------------------------------------
+bool    Template::evalCondition(const string& cond, int loop)
+{
+    auto tokens = tokenize(cond);
+    bool res = false;
+
+    if (tokens.size() == 3)
+    {
+        auto op = tokens[1];
+        if (op != "==" && op != "!=")
+            throw StreamException(("Unrecognized condition operator " + op).c_str());
+
+        bool pred = (op == "==");
+
+        string lhs, rhs;
+
+        if (tokens[0][0] == '\"')
+            lhs = evalStringLiteral(tokens[0]);
+        else
+            lhs = getStringVariable(tokens[0].c_str(), loop);
+
+        if (tokens[2][0] == '\"')
+            rhs = evalStringLiteral(tokens[2]);
+        else
+            rhs = getStringVariable(tokens[2].c_str(), loop);
+
+        res = ((lhs==rhs) == pred);
+    }else if (tokens.size() == 1)
+    {
+        string varName;
+        bool pred = true;
+
+        for (auto c : tokens[0])
+        {
+            if (c == '!')
+                pred = !pred;
+            else
+                varName += c;
+        }
+
+        res = getBoolVariable(varName.c_str(), loop) == pred;
+    }else
+    {
+        throw StreamException("Malformed condition expression");
+    }
+    return res;
+}
+
+// --------------------------------------
 void    Template::readIf(Stream &in, Stream *outp, int loop)
 {
-    String var;
-    bool varCond=true;
+    String cond;
 
     while (!in.eof())
     {
@@ -293,21 +483,19 @@ void    Template::readIf(Stream &in, Stream *outp, int loop)
 
         if (c == '}')
         {
-            if (getBoolVariable(var, loop)==varCond)
+            if (evalCondition(cond, loop))
             {
                 if (readTemplate(in, outp, loop))
                     readTemplate(in, NULL, loop);
-            }else{
+            }else
+            {
                 if (readTemplate(in, NULL, loop))
                     readTemplate(in, outp, loop);
             }
             return;
-        }else if (c == '!')
-        {
-            varCond = !varCond;
         }else
         {
-            var.append(c);
+            cond.append(c);
         }
     }
 }
@@ -348,19 +536,26 @@ void    Template::readLoop(Stream &in, Stream *outp, int loop)
 // --------------------------------------
 json::array_t Template::evaluateCollectionVariable(String& varName)
 {
-    if (varName == "testCollection")
+    if (varName == "channelsFound")
     {
-        json::array_t res;
+        JrpcApi api;
+        LOG_DEBUG("%s", api.getChannelsFound({}).dump().c_str());
+        return api.getChannelsFound({});
+    }if (varName == "broadcastingChannels")
+    {
+        // このサーバーから配信中のチャンネルをリスナー数降順でソート。
+        JrpcApi api;
+        json::array_t channels = api.getChannels({});
+        auto newend = std::remove_if(channels.begin(), channels.end(),
+                                  [] (json channel)
+                                  { return !channel["status"]["isBroadcasting"]; });
+        std::sort(channels.begin(), newend,
+                  [] (json a, json b)
+                  {
+                      return a["status"]["totalDirects"] < b["status"]["totalDirects"];
+                  });
 
-        res.push_back(json::object({ { "a", 1 } }));
-        res.push_back(json::object({ { "a", 2 } }));
-        res.push_back(json::object({ { "a", 3 } }));
-        return res;
-    // }else if (varName == "channelsFound")
-    // {
-    //     JrpcApi api;
-    //     LOG_DEBUG("%s", api.getChannelsFound({}).dump().c_str());
-    //     return api.getChannelsFound({});
+        return json::array_t(channels.begin(), newend);
     }else
     {
         return {};
