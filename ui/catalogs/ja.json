@@ -11,6 +11,7 @@
     "Notifications" : "通知",
     "_View Log_navbar" : "ログ表示",
     "_Logout_navbar" : "ログアウト",
+    "Message from the root server" : "ルートサーバーからのメッセージ",
 
     // bcid.html
     "New BCID"      : "新規BCID",

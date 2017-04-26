@@ -90,7 +90,7 @@
                             </table>
                             <div align="center"><span class="titlelinksBig"> </span>
                           </div></td>
-                          <td style="padding: 0">
+                          <td style="padding: 0" align="right">
                             {@if servMgr.upgradeURL}
                             <div align="center" class="normal">
                               <a href="{$servMgr.upgradeURL}" target="_blank">
@@ -102,9 +102,11 @@
                               </a>
                             </div>
                             {@else}
-                              <div align="center" class="normal-small">
-                                {$servMgr.rootMsg}
-                              </div>
+                            {@if servMgr.rootMsg}
+                            <span title="{#Message from the root server}" class="root-message normal" align="center" class="normal-small">
+                              {$servMgr.rootMsg}
+                            </span>
+                            {@end}
                             {@end}
                           </td>
                         </tr>

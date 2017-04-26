@@ -277,8 +277,9 @@ void PCPStream::readRootAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
             {
                 servMgr->rootMsg = newMsg;
                 LOG_DEBUG("PCP got new root mesg: %s", servMgr->rootMsg.cstr());
-                peercast::notifyMessage(ServMgr::NT_PEERCAST,
-                                        (std::string() + "YP氏曰く: " + servMgr->rootMsg.cstr()).c_str());
+                if (servMgr->rootMsg != "")
+                    peercast::notifyMessage(ServMgr::NT_PEERCAST,
+                                            (std::string(servMgr->rootHost.str()) + "「" + servMgr->rootMsg.cstr() + "」").c_str());
             }
         }else
         {
