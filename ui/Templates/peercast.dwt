@@ -115,17 +115,16 @@
               </div>
               <table class="navbar" width="100%" border="1" cellpadding="1" cellspacing="0">
                 <tr class="normal">
-                  <td width="12.5%"><div align="center"><a href="index.html">{#_Information_navbar}</a></div></td>
-                  <td width="12.5%"><div align="center"><a href="channels.html">{#_Yellow Pages_navbar}</a></div></td>
-                  <td width="12.5%"><div align="center"><a href="notifications.html">{#Notifications}</a></div></td>
-                  <td width="12.5%"><div align="center"><a href="relays.html">{#_Relays_navbar}</a></div></td>
+                  <td width="14.286%"><div align="center"><a href="index.html">{#_Information_navbar}</a></div></td>
+                  <td width="14.286%"><div align="center"><a href="channels.html">{#Channels}</a></div></td>
+                  <td width="14.286%"><div align="center"><a href="notifications.html">{#Notifications}</a></div></td>
 <!--
-                  <td width="12.5%"><div align="center"><a href="broadcast.html">{#_Broadcast_navbar}</a></div></td> -->
+                  <td width="14.286%"><div align="center"><a href="broadcast.html">{#_Broadcast_navbar}</a></div></td> -->
 
-                  <td width="12.5%"><div align="center"><a href="connections.html">{#_Connections_navbar}</a></div></td>
-                  <td width="12.5%"><div align="center"><a href="settings.html">{#_Settings_navbar}</a></div></td>
-                  <td width="12.5%"><div align="center"><a href="viewlog.html">{#_View Log_navbar}</a></div></td>
-                  <td width="12.5%"><div align="center"><a href="logout.html">{#_Logout_navbar}</a></div></td>
+                  <td width="14.286%"><div align="center"><a href="connections.html">{#_Connections_navbar}</a></div></td>
+                  <td width="14.286%"><div align="center"><a href="settings.html">{#_Settings_navbar}</a></div></td>
+                  <td width="14.286%"><div align="center"><a href="viewlog.html">{#_View Log_navbar}</a></div></td>
+                  <td width="14.286%"><div align="center"><a href="logout.html">{#_Logout_navbar}</a></div></td>
                 </tr>
               </table>
               <!-- TemplateBeginEditable name="content" -->

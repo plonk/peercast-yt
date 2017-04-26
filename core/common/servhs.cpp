@@ -1129,7 +1129,7 @@ void Servent::CMD_fetch(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     if (c)
         c->startURL(curl.cstr());
 
-    sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
+    sprintf(jumpStr, "/%s/channels.html", servMgr->htmlPath);
 }
 
 void Servent::CMD_stopserv(char *cmd, HTTP& http, HTML& html, char jumpStr[])
@@ -1184,7 +1184,7 @@ void Servent::CMD_hitlist(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     if (hasCGIarg(cmd, "relay"))
     {
         sys->sleep(500);
-        sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
+        sprintf(jumpStr, "/%s/channels.html", servMgr->htmlPath);
     }
 }
 
@@ -1257,7 +1257,7 @@ void Servent::CMD_stop(char *cmd, HTTP& http, HTML& html, char jumpStr[])
         c->thread.active = false;
 
     sys->sleep(500);
-    sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
+    sprintf(jumpStr, "/%s/channels.html", servMgr->htmlPath);
 }
 
 void Servent::CMD_bump(char *cmd, HTTP& http, HTML& html, char jumpStr[])
@@ -1309,7 +1309,7 @@ void Servent::CMD_bump(char *cmd, HTTP& http, HTML& html, char jumpStr[])
         strcpy(jumpStr, http.headers.at("REFERER").c_str());
     } catch (std::out_of_range&)
     {
-        sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
+        sprintf(jumpStr, "/%s/channels.html", servMgr->htmlPath);
     }
 }
 
@@ -1330,7 +1330,7 @@ void Servent::CMD_keep(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     if (c)
         c->stayConnected = true;
 
-    sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
+    sprintf(jumpStr, "/%s/channels.html", servMgr->htmlPath);
 }
 
 void Servent::CMD_relay(char *cmd, HTTP& http, HTML& html, char jumpStr[])
@@ -1360,7 +1360,7 @@ void Servent::CMD_relay(char *cmd, HTTP& http, HTML& html, char jumpStr[])
         c->startGet();
     }
 
-    sprintf(jumpStr, "/%s/relays.html", servMgr->htmlPath);
+    sprintf(jumpStr, "/%s/channels.html", servMgr->htmlPath);
 }
 
 void Servent::CMD_net_add(char *cmd, HTTP& http, HTML& html, char jumpStr[])
