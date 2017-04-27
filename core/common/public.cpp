@@ -125,6 +125,15 @@ HTTPResponse PublicController::operator()(const HTTPRequest& request, Stream& st
 
         Template(request.queryString).prependScope(scope).readTemplate(file, &mem, 0);
         return HTTPResponse::ok({{"Content-Type","text/html"}}, mem.str());
+    }else if (strcmp(fn, "/public/play.html") == 0)
+    {
+        FileStream file;
+        DynamicMemoryStream mem;
+        file.openReadOnly((mapper.documentRoot + "/play.html").c_str());
+        HTTPRequestScope scope(request);
+
+        Template(request.queryString).prependScope(scope).readTemplate(file, &mem, 0);
+        return HTTPResponse::ok({{"Content-Type","text/html"}}, mem.str());
     }else
     {
         auto path = mapper.toLocalFilePath(fn);
