@@ -1811,6 +1811,8 @@ void Servent::handshakeHTTPPush(const std::string& args)
     info.genre = query.get("genre");
     info.desc  = query.get("desc");
     info.url   = query.get("url");
+    info.bitrate   = query.get("bitrate").empty() ? 0 : stoi(query.get("bitrate"));
+    info.comment   = query.get("comment").empty() ? chanMgr->broadcastMsg : query.get("comment");
 
     info.id = chanMgr->broadcastID;
     info.id.encode(NULL, info.name.cstr(), NULL, 0);
@@ -1823,7 +1825,6 @@ void Servent::handshakeHTTPPush(const std::string& args)
     }
     // ここでシャットダウン待たなくていいの？
 
-    info.comment = chanMgr->broadcastMsg;
     info.bcID    = chanMgr->broadcastID;
 
     c = chanMgr->createChannel(info, NULL);
