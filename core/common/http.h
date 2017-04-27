@@ -178,6 +178,15 @@ public:
             path = url;
     }
 
+    std::string getHeader(const std::string& name) const
+    {
+        auto it = headers.find(str::upcase(name));
+        if (it == headers.end())
+            return "";
+        else
+            return it->second;
+    }
+
     std::string method;
     std::string url;
     std::string path;
