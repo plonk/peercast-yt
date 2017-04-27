@@ -167,6 +167,7 @@ public:
         : method(aMethod)
         , url(aUrl)
         , protocolVersion(aProtocolVersion)
+        , headers(aHeaders)
     {
         auto vec = str::split(url, "?");
         if (vec.size() >= 2)
