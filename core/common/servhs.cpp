@@ -1988,8 +1988,6 @@ void Servent::handshakePHP(HTML& html, const char* path, const char* args)
 }
 
 // -----------------------------------
-#include <sys/types.h>
-#include <dirent.h>
 void Servent::handshakeLocalFile(const char *fn)
 {
     String fileName;
@@ -2005,23 +2003,6 @@ void Servent::handshakeLocalFile(const char *fn)
     char *args = strstr(fileName.cstr(), "?");
     if (args)
         *args++ = 0;
-
-    if (access(fileName.cstr(), F_OK) == -1)
-    {
-        throw HTTPException(HTTP_SC_NOTFOUND, 404);
-    }else if (access(fileName.cstr(), R_OK) == -1)
-    {
-        throw HTTPException(HTTP_SC_FORBIDDEN, 403);
-    }else
-    {
-        DIR *dir;
-        dir = opendir(fileName.cstr());
-        if (dir)
-        {
-            closedir(dir);
-            throw HTTPException(HTTP_SC_FORBIDDEN, 403); // directory listing is forbidden
-        }
-    }
 
     if (fileName.contains(".htm"))
     {
