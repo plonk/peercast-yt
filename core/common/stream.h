@@ -191,6 +191,14 @@ public:
     void    writeLine(const char *);
     void    writeLineF(const char *, ...) __attribute__ ((format (printf, 2, 3)));
     void    writeString(const char *);
+    void    writeString(const std::string& s)
+    {
+        write(s.data(), s.size());
+    }
+    void    writeString(const String& s)
+    {
+        write(s.c_str(), s.size());
+    }
     void    writeStringF(const char *, ...) __attribute__ ((format (printf, 2, 3)));
 
     bool    writeCRLF;
