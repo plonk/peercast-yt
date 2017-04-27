@@ -10,6 +10,7 @@ public:
     PublicController(const std::string& documentRoot);
     HTTPResponse operator()(const HTTPRequest&, Stream&, Host&);
     std::string MIMEType(const std::string& path);
+    std::string createChannelIndex();
 
     FileSystemMapper mapper;
 };
