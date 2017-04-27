@@ -237,6 +237,7 @@ public:
     void    initRequest(const char *r);
     void    readRequest();
     bool    isRequest(const char *);
+    void    parseRequestLine();
 
     int     readResponse();
     bool    checkResponse(int);

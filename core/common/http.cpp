@@ -44,23 +44,19 @@ bool HTTP::checkResponse(int r)
 void HTTP::readRequest()
 {
     readLine(cmdLine, sizeof(cmdLine));
-
-    auto vec = str::split(cmdLine, " ");
-    if (vec.size() > 0) method          = vec[0];
-    if (vec.size() > 1) requestUrl      = vec[1];
-    if (vec.size() > 2) protocolVersion = vec[2];
+    parseRequestLine();
 }
 
 //-----------------------------------------
 void HTTP::initRequest(const char *r)
 {
     strcpy(cmdLine, r);
+    parseRequestLine();
+}
 
-    if (strchr(cmdLine, '\r'))
-        *strchr(cmdLine, '\r') = '\0';
-    if (strchr(cmdLine, '\n'))
-        *strchr(cmdLine, '\n') = '\0';
-
+//-----------------------------------------
+void HTTP::parseRequestLine()
+{
     auto vec = str::split(cmdLine, " ");
     if (vec.size() > 0) method          = vec[0];
     if (vec.size() > 1) requestUrl      = vec[1];
