@@ -508,8 +508,14 @@ void Servent::handshakeIncoming()
 {
     setStatus(S_HANDSHAKE);
 
-    char buf[1024];
+    char buf[8192];
     sock->readLine(buf, sizeof(buf));
+
+    if (strlen(buf) == sizeof(buf)-1)
+    {
+        LOG_ERROR("Request line too long!");
+        throw HTTPException(HTTP_SC_BADREQUEST, 400);
+    }
 
     bool isHTTP = (stristr(buf, HTTP_PROTO1) != NULL);
 
