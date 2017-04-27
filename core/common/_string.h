@@ -211,6 +211,8 @@ public:
 
     static bool isWhitespace(char c) { return c==' ' || c=='\t'; }
 
+    size_t size() const { return strlen(data); }
+
     TYPE    type;
     char    data[MAX_LEN];
 };
