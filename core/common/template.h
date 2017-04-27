@@ -20,6 +20,7 @@
 #ifndef _TEMPLATE_H
 #define _TEMPLATE_H
 
+#include <list>
 #include "sys.h"
 #include "stream.h"
 #include "json.hpp"
@@ -29,6 +30,14 @@ using json = nlohmann::json;
 // HTML テンプレートシステム
 class Template
 {
+public:
+
+    class Scope
+    {
+    public:
+        virtual bool writeVariable(Stream &, const String &, int) = 0;
+    };
+
     enum
     {
         TMPL_UNKNOWN,
@@ -40,7 +49,6 @@ class Template
         TMPL_FOREACH
     };
 
-public:
     Template(const char* args = NULL)
         : currentElement(json::object({}))
     {
@@ -62,6 +70,12 @@ public:
             free(tmplArgs);
     }
 
+    Template& prependScope(Scope& scope)
+    {
+        m_scopes.push_front(&scope);
+        return *this;
+    }
+
     bool inSelectedFragment()
     {
         if (selectedFragment.empty())
@@ -72,6 +86,7 @@ public:
 
     // 変数
     void    writeVariable(Stream &, const String &, int);
+    void    writeGlobalVariable(Stream &, const String &, int);
     int     getIntVariable(const String &, int);
     bool    getBoolVariable(const String &, int);
 
@@ -99,6 +114,24 @@ public:
     std::string selectedFragment;
     std::string currentFragment;
     json currentElement;
+
+    std::list<Scope*> m_scopes;
+};
+
+#include "http.h"
+
+// HTTP リクエストを変数としてエクスポートするスコープ
+class HTTPRequestScope : public Template::Scope
+{
+public:
+    HTTPRequestScope(const HTTPRequest& aRequest)
+        : m_request(aRequest)
+    {
+    }
+
+    bool writeVariable(Stream &, const String &, int) override;
+
+    const HTTPRequest& m_request;
 };
 
 #endif

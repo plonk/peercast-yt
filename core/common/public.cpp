@@ -51,7 +51,9 @@ HTTPResponse PublicController::operator()(const HTTPRequest& request, Stream& st
         FileStream file;
         DynamicMemoryStream mem;
         file.openReadOnly((mapper.documentRoot + "/index.html").c_str());
-        Template(request.queryString).readTemplate(file, &mem, 0);
+        HTTPRequestScope scope(request);
+
+        Template(request.queryString).prependScope(scope).readTemplate(file, &mem, 0);
         return HTTPResponse::ok({{"Content-Type","text/html"}}, mem.str());
     }else
     {

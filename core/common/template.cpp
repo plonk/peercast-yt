@@ -90,6 +90,20 @@ bool Template::writeObjectProperty(Stream& s, const String& varName, json::objec
 // --------------------------------------
 void Template::writeVariable(Stream &s, const String &varName, int loop)
 {
+    bool written;
+    for (auto* scope : m_scopes)
+    {
+        written = scope->writeVariable(s, varName, loop);
+        if (written)
+            return;
+    }
+
+    writeGlobalVariable(s, varName, loop);
+}
+
+// --------------------------------------
+void Template::writeGlobalVariable(Stream &s, const String &varName, int loop)
+{
     bool r = false;
     if (varName.startsWith("servMgr."))
         r = servMgr->writeVariable(s, varName+8);
@@ -765,5 +779,26 @@ bool Template::readTemplate(Stream &in, Stream *outp, int loop)
                 p->writeChar(c);
         }
     }
+    return false;
+}
+
+// --------------------------------------
+bool HTTPRequestScope::writeVariable(Stream& s, const String& varName, int loop)
+{
+    if (varName == "request.host")
+    {
+        if (m_request.getHeader("Host").empty())
+        {
+            servMgr->writeVariable(s, "serverIP");
+            s.writeString(":");
+            servMgr->writeVariable(s, "serverPort");
+        }
+        else
+        {
+            s.writeString(m_request.getHeader("Host"));
+            return true;
+        }
+    }
+
     return false;
 }
