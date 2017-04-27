@@ -2,7 +2,7 @@ CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRAN
 LDFLAGS = -pthread
 LIBS = 
 
-TAR = peercast-yt-linux-amd64.tar
+TAR = peercast-yt-linux-amd64.tar.gz
 AR = ar
 
 INCLUDES = -I../../core -I../../core/common
@@ -50,7 +50,7 @@ $(TAR): $(TARGET) $(HTML)
 	mkdir peercast-yt
 	cp -vR $(HTML) $(PUBLIC) $(TARGET) peercast-yt/
 	strip peercast-yt/$(TARGET)
-	tar cvf $(TAR) peercast-yt
+	tar cvzf $(TAR) peercast-yt
 
 clean:
 	rm -f $(LINUXOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE) $(SRCHTMLTAR)
