@@ -4,7 +4,7 @@
     <title>PeerCast Yellow Pages</title>
     <link href="peercast.css" rel="stylesheet" type="text/css">
     <style>
-     body { background-color: #ddd;
+     body { background-color: #ddd; margin-top: 16px; margin-bottom: 16px;
             font-family: Verdana, sans-serif; font-size: 10px; }
 
      input, select { font-size: 12px }
@@ -18,7 +18,8 @@
      .em-link { color: blue; font-weight: bold }
      .container { background-color: white;
                   width: 700px; margin-left: auto; margin-right: auto;
-                  border: solid 1px black; padding: 5px }
+                  border: solid 1px black; padding: 5px;
+                  min-height: calc(100vh - 45px) }
      .channel-name { font-size: 12px }
      .detail { padding-left: 0.7em; padding-right: 0.3em }
      .rank { font-size: 12px }
@@ -62,16 +63,16 @@
         {@foreach broadcastingChannels}
         <tr>
           <td class="rank">{$loop.indexBaseOne}</td>
-          <td><a target="_blank" href="/pls/{$loop.externalChannel.id}?tip={$loop.externalChannel.tip}"><img class="play-button" src="images/play.png"></a></td>
+          <td><a target="_blank" href="/pls/{$this.channelId}?tip={$servMgr.serverIP}:{$servMgr.serverPort}"><img class="play-button" src="images/play.png"></a></td>
           <td style="width: 600px" class="channel-description">
-            <span class="em-link">{$loop.this.info.name}</span><br>
-            <small>{$loop.this.info.genre} - {$loop.this.info.desc}</small><br>
+            <span class="em-link">{$this.info.name}</span><br>
+            <small>{$this.info.genre} - {$this.info.desc}</small><br>
           </td>
           <td align=center nowrap>
-            {$loop.this.status.totalDirects} / {$loop.this.status.totalRelays}
+            {$this.status.totalDirects} / {$this.status.totalRelays}
           </td>
-          <td class="bitrate" align=center nowrap>{$loop.this.info.bitrate} kb/s</td>
-          <td align=center>{$loop.this.info.contentType}</td>
+          <td class="bitrate" align=center nowrap>{$this.info.bitrate} kb/s</td>
+          <td align=center>{$this.info.contentType}</td>
         </tr>
         {@end}
 
@@ -82,65 +83,53 @@
 
       <table width="100%" class="channel-list">
         <tr>
-          <td colspan="6" class="results">
-            <b>Results:</b>
-            {$servMgr.numExternalChannels} channels,
-            {$servMgr.channelDirectory.totalListeners} listeners,
-            {$servMgr.channelDirectory.totalRelays} relays. ({$servMgr.channelDirectory.lastUpdate})
-          </td>
-        </tr>
-        <tr>
           <th>Rank</th><th><img src="images/small-icon.png"></th><th>Channel</th><th>Status</th><th>Bitrate</th><th>Type</th>
         </tr>
 
-        {@loop servMgr.numExternalChannels}
+        {@foreach publicExternalChannels}
         <tr>
           <td class="rank">
             {$loop.indexBaseOne}
           </td>
           <td>
-            {@if loop.externalChannel.isPlayable}
-            <a target="_blank" href="/pls/{$loop.externalChannel.id}?tip={$loop.externalChannel.tip}"><img class="play-button" src="images/play.png"></a>
+            {@if this.id != "00000000000000000000000000000000"}
+            <a target="_blank" href="/pls/{$this.id}?tip={$this.tip}"><img class="play-button" src="images/play.png"></a>
             {@else}
             <img class="play-button" src="images/play_grey.png">
             {@end}
           </td>
           <td style="width: 600px" class="channel-description">
             <span style="font-weight: bold">
-              {@if loop.externalChannel.url}
-              <a class="link channel-name" href="{$loop.externalChannel.url}">{$loop.externalChannel.name}</a>
+              {@if this.url}
+              <a class="link channel-name" href="{$this.url}">{$this.name}</a>
               {@else}
-              {!loop.externalChannel.name}
+              {!this.name}
               {@end}
             </span><br>
             <div class="detail">
-              {@if loop.externalChannel.genre}{!loop.externalChannel.genre} - {@end}{!loop.externalChannel.desc}
+              {@if this.genre}{!this.genre} - {@end}{!this.desc}
             </div>
           </td>
           <td align=center nowrap>
             <span class="listeners">
-              {$loop.externalChannel.numDirects}/{$loop.externalChannel.numRelays}
+              {$this.numDirects}/{$this.numRelays}
             </span>
-            {@if loop.externalChannel.encodedName}
+            {@if this.encodedName}
             <div class="icons">
-              <a href="{$loop.externalChannel.chatUrl}"><img alt="Chat" src="images/chat.png"></a>
-              <a href="{$loop.externalChannel.statsUrl}"><img alt="Stats" src="images/graph.png"></a>
+              <a href="{$this.chatUrl}"><img alt="Chat" src="images/chat.png"></a>
+              <a href="{$this.statsUrl}"><img alt="Stats" src="images/graph.png"></a>
             </div>
             {@end}
           </td>
           <td class="bitrate" align=center nowrap>
-            {$loop.externalChannel.bitrate} kb/s
+            {$this.bitrate} kb/s
           </td>
           <td align=center>
-            {$loop.externalChannel.contentTypeStr}
+            {$this.contentTypeStr}
           </td>
         </tr>
         {@end}
       </table>
-
-      <center style="margin: 0.5em">
-        <b>This site is not responsible for the content of these channels</b><br>
-      </center>
 
     </div>
   </body>

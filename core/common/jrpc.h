@@ -192,6 +192,7 @@ public:
             { "getVersionInfo",          &JrpcApi::getVersionInfo,          {} },
             { "getYellowPageProtocols",  &JrpcApi::getYellowPageProtocols,  {} },
             { "getYellowPages",          &JrpcApi::getYellowPages,          {} },
+            { "getYPChannels",           &JrpcApi::getYPChannels,           {} },
             { "removeYellowPage",        &JrpcApi::removeYellowPage,        { "yellowPageId" } },
             { "setChannelInfo",          &JrpcApi::setChannelInfo,          { "channelId", "info", "track" } },
             { "stopChannel",             &JrpcApi::stopChannel,             { "channelId" } },
@@ -830,6 +831,75 @@ public:
         for (int i = 0; i < str.size(); ++i)
             res.push_back(std::tolower(str[i]));
 
+        return res;
+    }
+
+    json getYPChannels(json::array_t args)
+    {
+        auto channels = servMgr->channelDirectory.channels();
+        json::array_t res;
+
+        for (auto& c : channels)
+        {
+            res.push_back({
+                    { "yellowPage",  c.feedUrl },
+                    { "name",        c.name },
+                    { "channelId",   c.id.str() },
+                    { "tracker",     c.tip },
+                    { "contactUrl",  c.url },
+                    { "genre",       c.genre },
+                    { "description", c.desc },
+                    { "comment",     c.comment },
+                    { "bitrate",     c.bitrate },
+                    { "contentType", c.contentTypeStr },
+                    { "trackTitle",  c.trackName },
+                    { "album",       c.trackAlbum },
+                    { "creator",     c.trackArtist },
+                    { "trackUrl",    c.trackContact },
+                    { "listeners",   c.numDirects },
+                    { "relays",      c.numRelays }
+                });
+        }
+        return res;
+    }
+
+    json getYPChannelsInternal(json::array_t args = {})
+    {
+        auto channels = servMgr->channelDirectory.channels();
+        json::array_t res;
+        std::map<std::string,bool> publicFeed;
+
+        for (auto& feed : servMgr->channelDirectory.feeds())
+            publicFeed[feed.url] = feed.isPublic;
+
+        for (auto& c : channels)
+        {
+            res.push_back({
+                    { "name",           c.name },
+                    { "id",             c.id.str() },
+                    { "tip",            c.tip },
+                    { "url",            c.url },
+                    { "genre",          c.genre },
+                    { "desc",           c.desc },
+                    { "numDirects",     c.numDirects },
+                    { "numRelays",      c.numRelays },
+                    { "bitrate",        c.bitrate },
+                    { "contentTypeStr", c.contentTypeStr },
+                    { "trackArtist",    c.trackArtist },
+                    { "trackAlbum",     c.trackAlbum },
+                    { "trackName",      c.trackName },
+                    { "trackContact",   c.trackContact },
+                    { "encodedName",    c.encodedName },
+                    { "uptime",         c.uptime },
+                    { "status",         c.status },
+                    { "comment",        c.comment },
+                    { "direct",         c.direct },
+                    { "feedUrl",        c.feedUrl },
+                    { "chatUrl",        c.chatUrl() },
+                    { "statsUrl",       c.statsUrl() },
+                    { "isPublic",       publicFeed[c.feedUrl] },
+                });
+        }
         return res;
     }
 };

@@ -197,12 +197,11 @@ void Template::writeGlobalVariable(Stream &s, const String &varName, int loop)
         }else if (varName.startsWith("loop.notification."))
         {
             r = g_notificationBuffer.writeVariable(s, varName + strlen("loop."), loop);
-        }else if (varName.startsWith("loop.this."))
-        {
-            r = writeObjectProperty(s, varName + strlen("loop.this."), currentElement);
         }
-    }
-    else if (varName.startsWith("page."))
+    }else if (varName.startsWith("this."))
+    {
+        r = writeObjectProperty(s, varName + strlen("this."), currentElement);
+    }else if (varName.startsWith("page."))
     {
         if (varName.startsWith("page.channel."))
         {
@@ -555,7 +554,7 @@ json::array_t Template::evaluateCollectionVariable(String& varName)
         JrpcApi api;
         LOG_DEBUG("%s", api.getChannelsFound({}).dump().c_str());
         return api.getChannelsFound({});
-    }if (varName == "broadcastingChannels")
+    }else if (varName == "broadcastingChannels")
     {
         // このサーバーから配信中のチャンネルをリスナー数降順でソート。
         JrpcApi api;
@@ -570,6 +569,17 @@ json::array_t Template::evaluateCollectionVariable(String& varName)
                   });
 
         return json::array_t(channels.begin(), newend);
+    }else if (varName == "externalChannels")
+    {
+        auto channels = JrpcApi().getYPChannelsInternal({});
+        return channels;
+    }else if (varName == "publicExternalChannels")
+    {
+        auto channels = JrpcApi().getYPChannelsInternal({});
+        auto end = std::remove_if(channels.begin(), channels.end(),
+                                  [&] (json c)
+                                  { return !c["isPublic"]; });
+        return json::array_t(channels.begin(), end);
     }else
     {
         return {};

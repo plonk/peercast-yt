@@ -75,27 +75,28 @@ std::string PublicController::createChannelIndex()
 //"yellowPages":[]}]
 
     LOG_DEBUG("%s", json(channels).dump().c_str());
-    for (auto p = channels.begin(); p != channels.end(); p++)
+    for (auto it = channels.begin(); it != channels.end(); it++)
     {
+        auto& c = *it;
         std::vector<std::string> vec = {
-            /*  0 */ (*p)["info"]["name"],
-            /*  1 */ (*p)["channelId"],
+            /*  0 */ c["info"]["name"],
+            /*  1 */ c["channelId"],
             /*  2 */ getTIP(),
-            /*  3 */ (*p)["info"]["url"],
-            /*  4 */ (*p)["info"]["genre"],
-            /*  5 */ (*p)["info"]["desc"],
-            /*  6 */ std::to_string((int) (*p)["status"]["totalDirects"]),
-            /*  7 */ std::to_string((int) (*p)["status"]["totalRelays"]),
-            /*  8 */ std::to_string((int) (*p)["info"]["bitrate"]),
-            /*  9 */ (*p)["info"]["contentType"],
-            /* 10 */ (*p)["track"]["creator"],
-            /* 11 */ (*p)["track"]["album"],
-            /* 12 */ (*p)["track"]["name"],
-            /* 13 */ (*p)["track"]["url"],
-            /* 14 */ cgi::escape((*p)["info"]["name"]),
-            /* 15 */ formatUptime((*p)["status"]["uptime"]),
+            /*  3 */ c["info"]["url"],
+            /*  4 */ c["info"]["genre"],
+            /*  5 */ c["info"]["desc"],
+            /*  6 */ std::to_string((int) c["status"]["totalDirects"]),
+            /*  7 */ std::to_string((int) c["status"]["totalRelays"]),
+            /*  8 */ std::to_string((int) c["info"]["bitrate"]),
+            /*  9 */ c["info"]["contentType"],
+            /* 10 */ c["track"]["creator"],
+            /* 11 */ c["track"]["album"],
+            /* 12 */ c["track"]["name"],
+            /* 13 */ c["track"]["url"],
+            /* 14 */ cgi::escape(c["info"]["name"]),
+            /* 15 */ formatUptime(c["status"]["uptime"]),
             /* 16 */ "click",
-            /* 17 */ (*p)["info"]["comment"],
+            /* 17 */ c["info"]["comment"],
             /* 18 */ getDirectPermission(),
         };
         res += str::join("<>", vec) + "\n";

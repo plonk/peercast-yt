@@ -90,46 +90,46 @@
         <th>Rank</th><th><img src="images/small-icon.png"></th><th>Channel</th><th>Status</th><th>Bitrate</th><th>Type</th>
       </tr>
 
-      {@loop servMgr.numExternalChannels}
+      {@foreach externalChannels}
       <tr>
         <td class="rank">
           {$loop.indexBaseOne}
         </td>
         <td>
-          {@if loop.externalChannel.isPlayable}
-          <a target="_blank" href="/pls/{$loop.externalChannel.id}?tip={$loop.externalChannel.tip}"><img class="play-button" src="images/play.png"></a>
+          {@if this.id != "00000000000000000000000000000000"}
+          <a target="_blank" href="/pls/{$this.id}?tip={$this.tip}"><img class="play-button" src="images/play.png"></a>
           {@else}
           <img class="play-button" src="images/play_grey.png">
           {@end}
         </td>
         <td style="width: 600px" class="channel-description">
           <span style="font-weight: bold">
-            {@if loop.externalChannel.url}
-            <a class="link channel-name" href="{$loop.externalChannel.url}">{$loop.externalChannel.name}</a>
+            {@if this.url}
+            <a class="link channel-name" href="{$this.url}">{$this.name}</a>
             {@else}
-            {!loop.externalChannel.name}
+            {!this.name}
             {@end}
           </span><br>
           <div class="detail">
-            {@if loop.externalChannel.genre}{!loop.externalChannel.genre} - {@end}{!loop.externalChannel.desc}
+            {@if this.genre}{!this.genre} - {@end}{!this.desc}
           </div>
         </td>
         <td align=center nowrap>
           <span class="listeners">
-            {$loop.externalChannel.numDirects}/{$loop.externalChannel.numRelays}
+            {$this.numDirects}/{$this.numRelays}
           </span>
-          {@if loop.externalChannel.encodedName}
+          {@if this.encodedName}
           <div class="icons">
-            <a href="{$loop.externalChannel.chatUrl}"><img alt="Chat" src="images/chat.png"></a>
-            <a href="{$loop.externalChannel.statsUrl}"><img alt="Stats" src="images/graph.png"></a>
+            <a href="{$this.chatUrl}"><img alt="Chat" src="images/chat.png"></a>
+            <a href="{$this.statsUrl}"><img alt="Stats" src="images/graph.png"></a>
           </div>
           {@end}
         </td>
         <td class="bitrate" align=center nowrap>
-          {$loop.externalChannel.bitrate} kb/s
+          {$this.bitrate} kb/s
         </td>
         <td align=center>
-          {$loop.externalChannel.contentTypeStr}
+          {$this.contentTypeStr}
         </td>
       </tr>
       {@end}
