@@ -511,22 +511,16 @@ void Servent::handshakeIncoming()
     char buf[1024];
     sock->readLine(buf, sizeof(buf));
 
-    char sb[64];
-    sock->host.toStr(sb);
+    bool isHTTP = (stristr(buf, HTTP_PROTO1) != NULL);
 
-    if (stristr(buf, HTTP_PROTO1))
-    {
-        LOG_DEBUG("HTTP from %s '%s'", sb, buf);
-        HTTP http(*sock);
-        http.initRequest(buf);
-        handshakeHTTP(http, true);
-    }else
-    {
-        LOG_DEBUG("Connect from %s '%s'", sb, buf);
-        HTTP http(*sock);
-        http.initRequest(buf);
-        handshakeHTTP(http, false);
-    }
+    if (isHTTP)
+        LOG_DEBUG("HTTP from %s '%s'", sock->host.str().c_str(), buf);
+    else
+        LOG_DEBUG("Connect from %s '%s'", sock->host.str().c_str(), buf);
+
+    HTTP http(*sock);
+    http.initRequest(buf);
+    handshakeHTTP(http, isHTTP);
 }
 
 // -----------------------------------
