@@ -206,6 +206,7 @@ public:
     void convertTo(TYPE t);
 
     char    *cstr() { return data; }
+    const char* c_str() const { return data; }
     std::string str() const { return data; }
 
     static bool isWhitespace(char c) { return c==' ' || c=='\t'; }
