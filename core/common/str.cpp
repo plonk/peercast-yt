@@ -235,5 +235,18 @@ bool is_prefix_of(const std::string& prefix, const std::string& string)
     return string.substr(0, prefix.size()) == prefix;
 }
 
+std::string join(const std::string& delimiter, std::vector<std::string>& vec)
+{
+    std::string res;
+
+    for (auto it = vec.begin(); it != vec.end(); ++it)
+    {
+        if (it != vec.begin())
+            res += delimiter;
+        res += *it;
+    }
+
+    return res;
+}
 
 } // namespace str
