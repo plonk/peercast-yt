@@ -297,6 +297,7 @@ class FileStream : public Stream
 {
 public:
     FileStream() { file=NULL; }
+    ~FileStream() { close(); }
 
     void    openReadOnly(const char *);
     void    openReadOnly(const std::string& fn) { openReadOnly(fn.c_str()); }
