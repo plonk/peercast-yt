@@ -64,19 +64,21 @@
         <tr>
           <td class="rank">{$loop.indexBaseOne}</td>
           <td>
-            {@if this.info.contentType == "FLV"}
-            <a target="_blank" href="/public/play.html?id={$this.channelId}">
+            <a href="/public/play.html?id={$this.channelId}">
               <img class="play-button" src="images/play.png">
             </a>
-            {@else}
-            <a target="_blank" href="/pls/{$this.channelId}?tip={$servMgr.serverIP}:{$servMgr.serverPort}">
-              <img class="play-button" src="images/play.png">
-            </a>
-            {@end}
           </td>
           <td style="width: 600px" class="channel-description">
-            <span class="em-link">{$this.info.name}</span><br>
-            <small>{$this.info.genre} - {$this.info.desc}</small><br>
+            <span style="font-weight: bold">
+              {@if this.contactURL}
+              <a class="link channel-name" href="{$this.contactURL}">{$this.info.name}</a>
+              {@else}
+              {$this.info.name}
+              {@end}
+            </span><br>
+            <div class="detail">
+              {@if this.info.genre}{!this.info.genre} - {@end}{!this.info.desc}
+            </div>
           </td>
           <td align=center nowrap>
             {$this.status.totalDirects} / {$this.status.totalRelays}
