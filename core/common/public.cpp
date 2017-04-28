@@ -42,8 +42,7 @@ std::string PublicController::MIMEType(const std::string& path)
 // ------------------------------------------------------------
 static std::string getTIP()
 {
-    // TODO: ちゃんと servMgr から取得しましょうね。
-    return "127.0.0.1:7144";
+    return servMgr->serverHost.str();
 }
 
 static std::string formatUptime(unsigned int totalMinutes)
