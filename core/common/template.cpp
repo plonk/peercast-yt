@@ -46,7 +46,7 @@ static json::object_t array_to_object(json::array_t arr)
 // --------------------------------------
 bool Template::writeObjectProperty(Stream& s, const String& varName, json::object_t object)
 {
-    LOG_DEBUG("writeObjectProperty %s", varName.str().c_str());
+    // LOG_DEBUG("writeObjectProperty %s", varName.str().c_str());
     auto names = str::split(varName.str(), ".");
 
     if (names.size() == 1)
