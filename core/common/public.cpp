@@ -4,14 +4,16 @@
 #include "template.h"
 #include "jrpc.h"
 
+using namespace std;
+
 // ------------------------------------------------------------
-PublicController::PublicController(const std::string& documentRoot)
+PublicController::PublicController(const string& documentRoot)
     : mapper("/public", documentRoot)
 {
 }
 
 // ------------------------------------------------------------
-std::string PublicController::MIMEType(const std::string& path)
+string PublicController::MIMEType(const string& path)
 {
     using namespace str;
 
@@ -40,20 +42,20 @@ std::string PublicController::MIMEType(const std::string& path)
 }
 
 // ------------------------------------------------------------
-static std::string getTIP()
+static string getTIP()
 {
     return servMgr->serverHost.str();
 }
 
-static std::string formatUptime(unsigned int totalMinutes)
+static string formatUptime(unsigned int totalMinutes)
 {
     auto minutes = totalMinutes % 60;
     auto hours = totalMinutes / 60;
 
-    return std::to_string(hours) + ":" + std::to_string(minutes);
+    return to_string(hours) + ":" + to_string(minutes);
 }
 
-static std::string getDirectPermission()
+static string getDirectPermission()
 {
     // TODO:
     return "0";
@@ -61,28 +63,28 @@ static std::string getDirectPermission()
 
 // ------------------------------------------------------------
 // このサーバーから配信しているチャンネルの index.txt を作る
-std::string PublicController::createChannelIndex()
+string PublicController::createChannelIndex()
 {
-    std::string res;
+    string res;
     json::array_t channels = JrpcApi().getChannels({});
     auto notBroadcasting = [] (json channel) { return !channel["status"]["isBroadcasting"]; };
-    channels.erase(std::remove_if(channels.begin(), channels.end(), notBroadcasting),
+    channels.erase(remove_if(channels.begin(), channels.end(), notBroadcasting),
                    channels.end());
 
     LOG_DEBUG("%s", json(channels).dump().c_str());
     for (auto it = channels.begin(); it != channels.end(); it++)
     {
         auto& c = *it;
-        std::vector<std::string> vec = {
+        vector<string> vec = {
             /*  0 */ c["info"]["name"],
             /*  1 */ c["channelId"],
             /*  2 */ getTIP(),
             /*  3 */ c["info"]["url"],
             /*  4 */ c["info"]["genre"],
             /*  5 */ c["info"]["desc"],
-            /*  6 */ std::to_string((int) c["status"]["totalDirects"]),
-            /*  7 */ std::to_string((int) c["status"]["totalRelays"]),
-            /*  8 */ std::to_string((int) c["info"]["bitrate"]),
+            /*  6 */ to_string((int) c["status"]["totalDirects"]),
+            /*  7 */ to_string((int) c["status"]["totalRelays"]),
+            /*  8 */ to_string((int) c["info"]["bitrate"]),
             /*  9 */ c["info"]["contentType"],
             /* 10 */ c["track"]["creator"],
             /* 11 */ c["track"]["album"],
@@ -101,37 +103,27 @@ std::string PublicController::createChannelIndex()
 }
 
 // ------------------------------------------------------------
-HTTPResponse PublicController::operator()(const HTTPRequest& request, Stream& stream, Host& remoteHost)
+HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream, Host& remoteHost)
 {
-    auto fn = request.path.c_str();
-
-    if (strcmp(fn, "/public/") == 0)
+    if (req.path == "/public/")
     {
         return HTTPResponse::redirectTo("/public/index.html");
-    }else if (strcmp(fn, "/public/index.txt") == 0)
+    }else if (req.path == "/public/index.txt")
     {
         return HTTPResponse::ok({{"Content-Type","text/plain"}}, createChannelIndex());
-    }else if (strcmp(fn, "/public/index.html") == 0)
+    }else if (req.path == "/public/index.html" ||
+              req.path == "/public/play.html")
     {
         FileStream file;
         DynamicMemoryStream mem;
-        file.openReadOnly((mapper.documentRoot + "/index.html").c_str());
-        HTTPRequestScope scope(request);
+        HTTPRequestScope scope(req);
 
-        Template(request.queryString).prependScope(scope).readTemplate(file, &mem, 0);
-        return HTTPResponse::ok({{"Content-Type","text/html"}}, mem.str());
-    }else if (strcmp(fn, "/public/play.html") == 0)
-    {
-        FileStream file;
-        DynamicMemoryStream mem;
-        file.openReadOnly((mapper.documentRoot + "/play.html").c_str());
-        HTTPRequestScope scope(request);
-
-        Template(request.queryString).prependScope(scope).readTemplate(file, &mem, 0);
+        file.openReadOnly(mapper.documentRoot + str::replace_prefix(req.path, "/public", ""));
+        Template(req.queryString).prependScope(scope).readTemplate(file, &mem, 0);
         return HTTPResponse::ok({{"Content-Type","text/html"}}, mem.str());
     }else
     {
-        auto path = mapper.toLocalFilePath(fn);
+        auto path = mapper.toLocalFilePath(req.path);
         if (path.empty())
             return HTTPResponse::notFound();
         else
@@ -140,7 +132,7 @@ HTTPResponse PublicController::operator()(const HTTPRequest& request, Stream& st
 
             DynamicMemoryStream mem;
             FileStream file;
-            std::map<std::string,std::string> additionalHeaders;
+            map<string,string> additionalHeaders;
 
             try
             {
