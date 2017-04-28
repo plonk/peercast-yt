@@ -4,12 +4,13 @@
 
 VPS等の Linux で動かすのに向いている PeerCast です。
 
-* PeerCastStation と(部分的に)互換の JSON RPC インターフェイス。(epcyp、ginger などで使えます)
+* PeerCastStation 互換の JSON RPC インターフェイス。(epcyp、ginger などで使えます)
 * FLVフォーマット、MKVフォーマットに対応。
 * HTTP Push ストリームでの配信に対応。ffmpeg と直接接続できます。
+* WME、Expression Encoder、KotoEncoder からプッシュ配信できます。
 * HTML UI をメッセージカタログ化。各国語版で機能に違いがないようにしました。
 * YPブラウザ。YP4G 形式の index.txt を取得してチャンネルリストを表示します。
-* ネットワーク出力をバッファリングしているので、多少 IO 負荷が軽くなっているはずです。
+* ネットワーク出力をバッファリングしているので、多少 IO 負荷が軽いです。
 * Ajax による画面更新。
 
 # 使用ライブラリ
