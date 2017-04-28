@@ -137,7 +137,7 @@ TEST_F(ChanInfoFixture, static_getMIMEStr)
     ASSERT_STREQ("video/x-ms-asf", ChanInfo::getMIMEType(ChanInfo::T_ASX));
     ASSERT_STREQ("audio/x-ms-wma", ChanInfo::getMIMEType(ChanInfo::T_WMA));
     ASSERT_STREQ("video/x-ms-wmv", ChanInfo::getMIMEType(ChanInfo::T_WMV));
-    ASSERT_STREQ("video/flv", ChanInfo::getMIMEType(ChanInfo::T_FLV));
+    ASSERT_STREQ("video/x-flv", ChanInfo::getMIMEType(ChanInfo::T_FLV));
 }
 
 TEST_F(ChanInfoFixture, static_getTypeFromStr)
