@@ -304,11 +304,7 @@
             <TABLE width="100%" align=center border=0>
               <TBODY>
                 <TR align=middle bgColor=#ccc class="normal">
-                  <TD colSpan=2><B>{#Channel Feeds}</B></TD>
-                </TR>
-                <TR align=middle bgColor=#eee class="normal">
-                  <TH>{#URL}</TH>
-                  <TH>{#Public}</TH>
+                  <TD colSpan=1><B>{#Channel Feeds}</B></TD>
                 </TR>
                 {@loop servMgr.numChannelFeedsPlusOne}
                 {@if loop.indexEven}
@@ -317,9 +313,6 @@
                   <TD>
                     <INPUT size=15 value="{$loop.channelFeed.url}" name="channel_feed_url" style="width: 100%" placeholder="{#URL of index.txt}">
                   </TD>
-                  <td align="center">
-                    <input type="checkbox" name="channel_feed_public{$loop.index}" {@if loop.channelFeed.isPublic}checked{@end}>
-                  </td>
                 </TR>
                 {@end}
               </TBODY>
