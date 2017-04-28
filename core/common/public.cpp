@@ -67,12 +67,8 @@ std::string PublicController::createChannelIndex()
     std::string res;
     json::array_t channels = JrpcApi().getChannels({});
     auto notBroadcasting = [] (json channel) { return !channel["status"]["isBroadcasting"]; };
-    //auto end = std::remove_if(channels.begin(), channels.end(), notBroadcasting);
-// [{"channelId":"E3E4530F08C624B7FE8A9AABC1237B88",
-//"info":{"bitrate":859,"comment":"","contentType":"FLV","desc":"","genre":"","mimeType":"video/flv","name":"しいな再放送","url":""},
-// "status":{"isBroadcasting":true,"isDirectFull":null,"isReceiving":false,"isRelayFull":false,"localDirects":0,"localRelays":0,"source":"file:///home/plonk/siina.flv","status":"Receiving","totalDirects":0,"totalRelays":0,"uptime":6},
-//"track":{"album":"","creator":"","genre":"","name":"","url":""},
-//"yellowPages":[]}]
+    channels.erase(std::remove_if(channels.begin(), channels.end(), notBroadcasting),
+                   channels.end());
 
     LOG_DEBUG("%s", json(channels).dump().c_str());
     for (auto it = channels.begin(); it != channels.end(); it++)
