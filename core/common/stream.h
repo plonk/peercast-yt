@@ -299,8 +299,11 @@ public:
     FileStream() { file=NULL; }
 
     void    openReadOnly(const char *);
+    void    openReadOnly(const std::string& fn) { openReadOnly(fn.c_str()); }
     void    openWriteReplace(const char *);
+    void    openWriteReplace(const std::string& fn) { openWriteReplace(fn.c_str()); }
     void    openWriteAppend(const char *);
+    void    openWriteAppend(const std::string& fn) { openWriteAppend(fn.c_str()); }
     bool    isOpen() { return file!=NULL; }
     int     length();
     int     pos();
