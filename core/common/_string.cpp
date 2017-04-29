@@ -530,3 +530,32 @@ void String::prepend(const char *s)
     tmp.type = type;
     *this = tmp;
 }
+
+// -----------------------------------
+String& String::operator = (const String& other)
+{
+    strcpy(this->data, other.data);
+    this->type = other.type;
+
+    return *this;
+}
+
+// -----------------------------------
+String& String::operator = (const char* cstr)
+{
+    strncpy(this->data, cstr, MAX_LEN - 1);
+    this->data[MAX_LEN - 1] = '\0';
+    this->type = T_ASCII;
+
+    return *this;
+}
+
+// -----------------------------------
+String& String::operator = (const std::string& rhs)
+{
+    strcpy(data, rhs.substr(0, MAX_LEN - 1).c_str());
+    this->type = T_ASCII;
+
+    return *this;
+}
+

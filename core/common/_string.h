@@ -126,30 +126,9 @@ public:
     bool operator == (const char *s) const { return isSame(s); }
     bool operator != (const char *s) const { return !isSame(s); }
 
-    String& operator = (const String& other)
-    {
-        strcpy(this->data, other.data);
-        this->type = other.type;
-
-        return *this;
-    }
-
-    String& operator = (const char* cstr)
-    {
-        // FIXME: possibility of overflow
-        strcpy(this->data, cstr);
-        this->type = T_ASCII;
-
-        return *this;
-    }
-
-    String& operator = (const std::string& rhs)
-    {
-        strcpy(data, rhs.substr(0, MAX_LEN - 1).c_str());
-        this->type = T_ASCII;
-
-        return *this;
-    }
+    String& operator = (const String& other);
+    String& operator = (const char* cstr);
+    String& operator = (const std::string& rhs);
 
     operator const char *() const { return data; }
 
