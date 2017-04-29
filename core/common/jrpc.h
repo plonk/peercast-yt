@@ -195,6 +195,7 @@ public:
             { "getYPChannels",           &JrpcApi::getYPChannels,           {} },
             { "removeYellowPage",        &JrpcApi::removeYellowPage,        { "yellowPageId" } },
             { "setChannelInfo",          &JrpcApi::setChannelInfo,          { "channelId", "info", "track" } },
+            { "setSettings",             &JrpcApi::setSettings,             { "settings" } },
             { "stopChannel",             &JrpcApi::stopChannel,             { "channelId" } },
             { "stopChannelConnection",   &JrpcApi::stopChannelConnection,   { "channelId", "connectionId" } },
         })
@@ -674,6 +675,20 @@ public:
         };
 
         return json::array({ pcp });
+    }
+
+    json setSettings(json::array_t args)
+    {
+        json::object_t settings = args[0];
+
+        servMgr->setMaxRelays((int) settings["maxRelays"]);
+        chanMgr->maxRelaysPerChannel = (int) settings["maxRelaysPerChannel"];
+        servMgr->maxDirect = (int) settings["maxDirects"];
+        // maxDirectsPerChannel は無視。
+        servMgr->maxBitrateOut = (int) settings["maxUpstreamRate"];
+        // maxUpstreamRatePerChannel は無視。
+        // channelCleaner, portMapper は無視。
+        return nullptr;
     }
 
     json getSettings(json::array_t)
