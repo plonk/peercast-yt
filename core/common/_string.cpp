@@ -59,6 +59,7 @@ void String::setFromTime(unsigned int t)
         strcpy(data, "-");
     type = T_ASCII;
 }
+
 // -----------------------------------
 void String::setFromStopwatch(unsigned int t)
 {
@@ -82,6 +83,7 @@ void String::setFromStopwatch(unsigned int t)
 
     type = T_ASCII;
 }
+
 // -----------------------------------
 void String::setFromString(const char *str, TYPE t)
 {
@@ -162,8 +164,6 @@ void String::BASE642ASCII(const char *input)
     }
     *out = 0;
 }
-
-
 
 // -----------------------------------
 void String::UNKNOWN2UNICODE(const char *in, bool safe)
