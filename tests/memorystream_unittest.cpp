@@ -16,10 +16,6 @@ public:
         one_byte_mm.rewind();
     }
 
-    // void TearDown( ) { }
-
-    // ~MemoryTestFixture( )  { }
-
     MemoryStream one_byte_mm;
     char data[5];
     MemoryStream hoge_mm;

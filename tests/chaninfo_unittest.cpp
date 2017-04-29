@@ -4,22 +4,6 @@
 
 class ChanInfoFixture : public ::testing::Test {
 public:
-    ChanInfoFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~ChanInfoFixture()
-    {
-    }
-
     ChanInfo info;
 };
 

@@ -9,18 +9,6 @@ public:
         : http(mem)
     {
     }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~HTTPFixture()
-    {
-    }
     DynamicMemoryStream mem;
     HTTP http;
 };

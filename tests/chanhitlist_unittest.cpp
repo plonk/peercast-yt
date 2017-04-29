@@ -4,10 +4,6 @@
 
 class ChanHitListFixture : public ::testing::Test {
 public:
-    ChanHitListFixture()
-    {
-    }
-
     void SetUp()
     {
         hitlist = new ChanHitList();
@@ -25,10 +21,6 @@ public:
     void TearDown()
     {
         delete hitlist;
-    }
-
-    ~ChanHitListFixture()
-    {
     }
 
     ChanHit hit;

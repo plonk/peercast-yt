@@ -5,10 +5,6 @@
 
 class ChanMgrFixture : public ::testing::Test {
 public:
-    ChanMgrFixture()
-    {
-    }
-
     void SetUp()
     {
         x = new ChanMgr();
@@ -18,11 +14,6 @@ public:
     {
         delete x;
     }
-
-    ~ChanMgrFixture()
-    {
-    }
-
     ChanMgr* x;
 };
 

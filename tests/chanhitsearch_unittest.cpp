@@ -4,22 +4,6 @@
 
 class ChanHitSearchFixture : public ::testing::Test {
 public:
-    ChanHitSearchFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~ChanHitSearchFixture()
-    {
-    }
-
     ChanHitSearch chs;
 };
 

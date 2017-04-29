@@ -11,18 +11,6 @@ public:
     {
     }
 
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~HTMLFixture()
-    {
-    }
-
     DynamicMemoryStream mem;
     HTML html;
 };

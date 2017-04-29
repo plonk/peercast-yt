@@ -5,21 +5,6 @@ using namespace str;
 
 class strFixture : public ::testing::Test {
 public:
-    strFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~strFixture()
-    {
-    }
 };
 
 TEST_F(strFixture, group_digits)

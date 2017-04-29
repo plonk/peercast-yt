@@ -6,21 +6,6 @@
 
 class ServentFixture : public ::testing::Test {
 public:
-    ServentFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~ServentFixture()
-    {
-    }
 };
 
 TEST_F(ServentFixture, initialState)

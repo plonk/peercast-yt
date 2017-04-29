@@ -10,18 +10,6 @@ public:
     {
     }
 
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~TemplateFixture()
-    {
-    }
-
     Template temp;
 };
 

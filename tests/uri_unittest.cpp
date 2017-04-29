@@ -5,21 +5,6 @@
 
 class URIFixture : public ::testing::Test {
 public:
-    URIFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~URIFixture()
-    {
-    }
 };
 
 #include "LUrlParser.h"

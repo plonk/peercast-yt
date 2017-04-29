@@ -5,21 +5,6 @@ using namespace matroska;
 
 class VIntFixture : public ::testing::Test {
 public:
-    VIntFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~VIntFixture()
-    {
-    }
 };
 
 TEST_F(VIntFixture, numLeadingZeroes)

@@ -6,25 +6,12 @@ using namespace cgi;
 
 class cgiFixture : public ::testing::Test {
 public:
-    cgiFixture()
-    {
-    }
-
     void SetUp()
     {
         for (auto i = 0; i < 256; i++) {
             all_bytes.push_back(i);
         }
     }
-
-    void TearDown()
-    {
-    }
-
-    ~cgiFixture()
-    {
-    }
-
     std::string all_bytes;
 };
 
