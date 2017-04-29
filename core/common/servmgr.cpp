@@ -2246,7 +2246,7 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
             return false;
     }else if (var.startsWith("lang."))
     {
-        const char* lang = const_cast<String&>(var).cstr() + 5;
+        const char* lang = var.c_str() + 5;
 
         if (strrchr(htmlPath, '/') &&
             strcmp(strrchr(htmlPath, '/') + 1, lang) == 0)
