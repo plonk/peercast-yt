@@ -71,21 +71,6 @@ public:
     // set from time
     void setFromTime(unsigned int t);
 
-
-    // from single word (end at whitespace)
-    void setFromWord(const char *str)
-    {
-        int i;
-        for (i=0; i<MAX_LEN-1; i++)
-        {
-            data[i] = *str++;
-            if ((data[i]==0) || (data[i]==' '))
-                break;
-        }
-        data[i]=0;
-    }
-
-
     // set from null terminated string, remove first/last chars
     void setUnquote(const char *p, TYPE t=T_ASCII)
     {
@@ -115,8 +100,6 @@ public:
     void UNKNOWN2UNICODE(const char *, bool);
 
     static  int base64WordToChars(char *, const char *);
-
-    static bool isSame(const char *s1, const char *s2) { return strcmp(s1, s2)==0; }
 
     bool startsWith(const char *s) const { return strncmp(data, s, strlen(s))==0; }
     bool isValidURL();
