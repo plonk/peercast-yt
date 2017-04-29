@@ -55,12 +55,7 @@ public:
     }
 
     // set from straight null terminated string
-    void set(const char *p, TYPE t=T_ASCII)
-    {
-        strncpy(data, p, MAX_LEN-1);
-        data[MAX_LEN-1] = 0;
-        type = t;
-    }
+    void set(const char *p, TYPE t=T_ASCII);
 
     // set from quoted or unquoted null terminated string
     void setFromString(const char *str, TYPE t=T_ASCII);
@@ -97,31 +92,11 @@ public:
     void append(char c);
     void prepend(const char *s);
 
-    void sprintf(const char* fmt, ...) __attribute__ ((format (printf, 2, 3)))
-    {
-        va_list ap;
+    void sprintf(const char* fmt, ...) __attribute__ ((format (printf, 2, 3)));
 
-        va_start(ap, fmt);
-        vsnprintf(this->data, ::String::MAX_LEN - 1, fmt, ap);
-        va_end(ap);
-    }
+    static ::String format(const char* fmt, ...) __attribute__ ((format (printf, 1, 2)));
 
-    static ::String format(const char* fmt, ...) __attribute__ ((format (printf, 1, 2)))
-    {
-        va_list ap;
-        ::String result;
-
-        va_start(ap, fmt);
-        vsnprintf(result.data, ::String::MAX_LEN - 1, fmt, ap);
-        va_end(ap);
-
-        return result;
-    }
-
-    operator std::string () const
-    {
-        return data;
-    }
+    operator std::string () const { return data; }
 
     bool operator == (const char *s) const { return isSame(s); }
     bool operator != (const char *s) const { return !isSame(s); }

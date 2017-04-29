@@ -559,3 +559,33 @@ String& String::operator = (const std::string& rhs)
     return *this;
 }
 
+// -----------------------------------
+void String::set(const char *p, TYPE t)
+{
+    strncpy(data, p, MAX_LEN-1);
+    data[MAX_LEN-1] = 0;
+    type = t;
+}
+
+// -----------------------------------
+void String::sprintf(const char* fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    vsnprintf(this->data, ::String::MAX_LEN - 1, fmt, ap);
+    va_end(ap);
+}
+
+// -----------------------------------
+String String::format(const char* fmt, ...)
+{
+    va_list ap;
+    String result;
+
+    va_start(ap, fmt);
+    vsnprintf(result.data, ::String::MAX_LEN - 1, fmt, ap);
+    va_end(ap);
+
+    return result;
+}
