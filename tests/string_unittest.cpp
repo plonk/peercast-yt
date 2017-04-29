@@ -142,12 +142,6 @@ TEST(StringTest, assignment)
     ASSERT_STREQ("hoge", t.cstr());
 }
 
-TEST(StringTest, str)
-{
-    ASSERT_STREQ("", String("").str().c_str());
-    ASSERT_STREQ("A", String("A").str().c_str());
-}
-
 TEST(StringTest, sjisToUtf8)
 {
     String tmp = "4\x93\xFA\x96\xDA"; // "4日目" in Shit_JIS
@@ -175,4 +169,57 @@ TEST(StringTest, clear)
     s.clear();
 
     ASSERT_STREQ("", s.cstr());
+}
+
+TEST(StringTest, equalOperatorCString)
+{
+    String s;
+    const char* xs = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // 300 x's
+
+    s = xs;
+    ASSERT_STRNE(xs, s.cstr());
+    ASSERT_EQ(255, strlen(s.cstr()));
+}
+
+TEST(StringTest, equalOperatorStdString)
+{
+    String s;
+    const char* xs = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // 300 x's
+
+    s = std::string(xs);
+    ASSERT_STRNE(xs, s.cstr());
+    ASSERT_EQ(255, strlen(s.cstr()));
+}
+
+TEST(StringTest, cstr)
+{
+    String s = "abc";
+
+    ASSERT_STREQ("abc", s.cstr());
+    ASSERT_EQ(s.data, s.cstr());
+}
+
+TEST(StringTest, c_str)
+{
+    String s = "abc";
+
+    ASSERT_STREQ("abc", s.c_str());
+    ASSERT_EQ(s.data, s.c_str());
+}
+
+TEST(StringTest, str)
+{
+    ASSERT_STREQ("", String("").str().c_str());
+    ASSERT_STREQ("A", String("A").str().c_str());
+
+    String s = "abc";
+
+    ASSERT_STREQ("abc", s.str().c_str());
+    ASSERT_NE(s.data, s.str().c_str());
+}
+
+TEST(StringTest, size)
+{
+    ASSERT_EQ(0, String("").size());
+    ASSERT_EQ(3, String("abc").size());
 }
