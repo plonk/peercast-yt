@@ -401,8 +401,6 @@ public:
 
     ChannelDirectory    channelDirectory;
     bool                publicDirectoryEnabled;
-
-private:
     FW_STATE            firewalled;
 };
 
