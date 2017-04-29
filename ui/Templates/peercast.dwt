@@ -103,7 +103,7 @@
                             </div>
                             {@else}
                             {@if servMgr.rootMsg}
-                            <span title="{#Message from the root server}" class="root-message normal" align="center" class="normal-small">
+                            <span title="{#Message from the root server}" class="root-message normal-small" align="center">
                               {$servMgr.rootMsg}
                             </span>
                             {@end}
