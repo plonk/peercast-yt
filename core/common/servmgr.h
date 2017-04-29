@@ -129,7 +129,6 @@ public:
     };
 
     enum {
-
         MAX_HOSTCACHE = 100,        // max. amount of hosts in cache
         MIN_HOSTS   = 3,            // min. amount of hosts that should be kept in cache
 
@@ -137,12 +136,9 @@ public:
         MAX_INCOMING = 6,           // max. number of public incoming servents to use
         MAX_TRYOUT   = 10,          // max. number of outgoing servents to try connect
         MIN_CONNECTED = 3,          // min. amount of connected hosts that should be kept
-
         MIN_RELAYS = 2,
 
         MAX_FILTERS = 50,
-
-        MAX_VERSIONS = 16,
 
         MAX_PREVIEWTIME = 300,      // max. seconds preview per channel available (direct connections)
         MAX_PREVIEWWAIT = 300,      // max. seconds wait between previews
@@ -392,8 +388,6 @@ public:
     AUTH_TYPE           authType;
 
     char                htmlPath[128];
-    unsigned int        clientVersions[MAX_VERSIONS], clientCounts[MAX_VERSIONS];
-    int                 numVersions;
 
     int                 serventNum;
 

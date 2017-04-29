@@ -1215,10 +1215,7 @@ void Servent::CMD_clear(char *cmd, HTTP& http, HTML& html, char jumpStr[])
         else if (strcmp(curr, "hitlists") == 0)
             chanMgr->clearHitLists();
         else if (strcmp(curr, "packets") == 0)
-        {
             stats.clearRange(Stats::PACKETSSTART, Stats::PACKETSEND);
-            servMgr->numVersions = 0;
-        }
     }
 
     sprintf(jumpStr, "/%s/index.html", servMgr->htmlPath);

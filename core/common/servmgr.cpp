@@ -68,7 +68,6 @@ ServMgr::ServMgr()
     notifyMask = 0xffff;
 
     tryoutDelay = 10;
-    numVersions = 0;
 
     sessionID.generate();
 
@@ -191,23 +190,6 @@ void    ServMgr::connectBroadcaster()
                 sys->sleep(3000);
             }
         }
-    }
-}
-// -----------------------------------
-void    ServMgr::addVersion(unsigned int ver)
-{
-    for (int i=0; i<numVersions; i++)
-        if (clientVersions[i] == ver)
-        {
-            clientCounts[i]++;
-            return;
-        }
-
-    if (numVersions < MAX_VERSIONS)
-    {
-        clientVersions[numVersions] = ver;
-        clientCounts[numVersions] = 1;
-        numVersions++;
     }
 }
 
