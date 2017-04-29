@@ -223,3 +223,14 @@ TEST(StringTest, size)
     ASSERT_EQ(0, String("").size());
     ASSERT_EQ(3, String("abc").size());
 }
+
+TEST(StringTest, setFromString)
+{
+    String s;
+
+    s.setFromString("abc def");
+    ASSERT_STREQ("abc", s.data);
+
+    s.setFromString("\"abc def\"");
+    ASSERT_STREQ("abc def", s.data);
+}
