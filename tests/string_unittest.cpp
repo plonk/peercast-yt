@@ -40,7 +40,7 @@ TEST(StringTest, containsWorks) {
     ASSERT_FALSE(a.contains(abc));
 }
 
-TEST(StringTest, appendWorks) {
+TEST(StringTest, appendChar) {
     String buf;
     for (int i = 0; i < 500; i++) {
         buf.append('A');
@@ -49,6 +49,14 @@ TEST(StringTest, appendWorks) {
     // バッファーは 256 バイトあるので、NUL の分を考慮しても 255 文字
     // まで入りそうなものだが、入るのは 254 文字まで。
     ASSERT_EQ(254, strlen(buf.data));
+}
+
+TEST(StringTest, appendString) {
+    String s = "a";
+
+    s.append("bc");
+
+    ASSERT_STREQ("abc", s.cstr());
 }
 
 TEST(StringTest, prependWorks) {
@@ -145,4 +153,26 @@ TEST(StringTest, sjisToUtf8)
     String tmp = "4\x93\xFA\x96\xDA"; // "4日目" in Shit_JIS
     tmp.convertTo(String::T_UNICODESAFE);
     ASSERT_STREQ("4日目", tmp.cstr());
+}
+
+TEST(StringTest, setUnquote)
+{
+    String s = "xyz";
+
+    s.setUnquote("\"abc\"");
+    ASSERT_STREQ("abc", s.cstr());
+
+    // 二文字に満たない場合は空になる。
+    s.setUnquote("a");
+    ASSERT_STREQ("", s.cstr());
+}
+
+TEST(StringTest, clear)
+{
+    String s = "abc";
+
+    ASSERT_STREQ("abc", s.cstr());
+    s.clear();
+
+    ASSERT_STREQ("", s.cstr());
 }
