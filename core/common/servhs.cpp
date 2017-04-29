@@ -1929,12 +1929,11 @@ void Servent::handshakeLocalFile(const char *fn)
     WriteBufferedStream bufferedSock(sock);
     HTML html("", bufferedSock);
 
-    char *args = strstr(fileName.cstr(), "?");
-    if (args)
-        *args++ = 0;
-
     if (fileName.contains(".htm"))
     {
+        char *args = strstr(fileName.cstr(), "?");
+        if (args)
+            *args++ = 0;
         html.writeOK(MIME_HTML);
         html.writeTemplate(fileName.cstr(), args);
     }else if (fileName.contains(".css"))
