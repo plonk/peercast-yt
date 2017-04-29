@@ -697,9 +697,9 @@ public:
             { "maxRelays", servMgr->maxRelays },
             { "maxRelaysPerChannel", chanMgr->maxRelaysPerChannel },
             { "maxDirects", servMgr->maxDirect },
-            { "maxDirectsPerChannel", servMgr->maxDirect },
+            { "maxDirectsPerChannel", 0 },
             { "maxUpstreamRate", servMgr->maxBitrateOut },
-            { "maxUpstreamRatePerChannel", servMgr->maxBitrateOut },
+            { "maxUpstreamRatePerChannel", 0 },
             // channelCleaner は無視。
         };
 
