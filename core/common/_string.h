@@ -72,24 +72,10 @@ public:
     void setFromTime(unsigned int t);
 
     // set from null terminated string, remove first/last chars
-    void setUnquote(const char *p, TYPE t=T_ASCII)
-    {
-        int slen = strlen(p);
-        if (slen > 2)
-        {
-            if (slen >= MAX_LEN) slen = MAX_LEN;
-            strncpy(data, p+1, slen-2);
-            data[slen-2]=0;
-        }else
-            clear();
-        type = t;
-    }
+    void setUnquote(const char *p, TYPE t=T_ASCII);
 
-    void clear()
-    {
-        data[0]=0;
-        type = T_UNKNOWN;
-    }
+    void clear();
+
     void ASCII2ESC(const char *, bool);
     void ASCII2HTML(const char *);
     void ASCII2META(const char *, bool);
@@ -108,27 +94,9 @@ public:
     bool isSame(const char *s) const { return strcmp(data, s)==0; }
     bool contains(::String &s) { return stristr(data, s.data)!=NULL; }
     bool contains(const char *s) { return stristr(data, s)!=NULL; }
-    void append(const char *s)
-    {
-        if ((strlen(s)+strlen(data) < (MAX_LEN-1)))
-            strcat(data, s);
-    }
-    void append(char c)
-    {
-        char tmp[2];
-        tmp[0]=c;
-        tmp[1]=0;
-        append(tmp);
-    }
-
-    void prepend(const char *s)
-    {
-        ::String tmp;
-        tmp.set(s);
-        tmp.append(data);
-        tmp.type = type;
-        *this = tmp;
-    }
+    void append(const char *s);
+    void append(char c);
+    void prepend(const char *s);
 
     void sprintf(const char* fmt, ...) __attribute__ ((format (printf, 2, 3)))
     {

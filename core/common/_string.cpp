@@ -489,3 +489,50 @@ void String::convertTo(TYPE t)
         type = t;
     }
 }
+
+// -----------------------------------
+void String::setUnquote(const char *p, TYPE t)
+{
+    int slen = strlen(p);
+    if (slen > 2)
+    {
+        if (slen >= MAX_LEN) slen = MAX_LEN;
+        strncpy(data, p+1, slen-2);
+        data[slen-2]=0;
+    }else
+        clear();
+    type = t;
+}
+
+// -----------------------------------
+void String::clear()
+{
+    data[0] = 0;
+    type = T_UNKNOWN;
+}
+
+// -----------------------------------
+void String::append(const char *s)
+{
+    if ((strlen(s)+strlen(data) < (MAX_LEN-1)))
+        strcat(data, s);
+}
+
+// -----------------------------------
+void String::append(char c)
+{
+    char tmp[2];
+    tmp[0]=c;
+    tmp[1]=0;
+    append(tmp);
+}
+
+// -----------------------------------
+void String::prepend(const char *s)
+{
+    ::String tmp;
+    tmp.set(s);
+    tmp.append(data);
+    tmp.type = type;
+    *this = tmp;
+}
