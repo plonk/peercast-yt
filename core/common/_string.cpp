@@ -49,12 +49,6 @@ static int base64chartoval(char input)
 }
 
 // -----------------------------------
-bool String::isValidURL()
-{
-    return (strnicmp(data, "http://", 7)==0) || (strnicmp(data, "mailto:", 7)==0);
-}
-
-// -----------------------------------
 void String::setFromTime(unsigned int t)
 {
     time_t t2 = t;
