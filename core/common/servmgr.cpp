@@ -2118,8 +2118,6 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
         serverHost.IPtoStr(buf);
     else if (var == "ypAddress")
         strcpy(buf, rootHost.cstr());
-    else if (var == "ypIP")
-        strcpy(buf, ypIP().cstr());
     else if (var == "password")
         strcpy(buf, password);
     else if (var == "isFirewalled")
