@@ -247,10 +247,7 @@ int URLSource::getSourceRate()
                 fileType = ChanInfo::getTypeFromStr(ext);
             }
 
-
-            if (ch->info.bitrate)
-                ch->readDelay = true;
-
+            ch->readDelay = true;
 
             if (fileType == ChanInfo::T_PLS)
                 pls = new PlayList(PlayList::T_PLS, 1000);
