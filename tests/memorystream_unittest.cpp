@@ -5,9 +5,9 @@ class MemoryStreamFixture : public ::testing::Test {
 public:
     MemoryStreamFixture()
         : one_byte_mm(1),
-          data("hoge"),
           hoge_mm(data, 4)
     {
+        strcpy(data, "hoge");
     }
 
     void SetUp()
