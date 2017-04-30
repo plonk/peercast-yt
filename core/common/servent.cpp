@@ -94,6 +94,28 @@ bool    Servent::isFiltered(int f)
 }
 
 // -----------------------------------
+bool Servent::canStream(Channel *ch)
+{
+    if (ch==NULL)
+        return false;
+
+    if (servMgr->isDisabled)
+        return false;
+
+    if (!isPrivate())
+    {
+        if  (servMgr->bitrateFull(ch->getBitrate())
+             || ((type == T_RELAY) && servMgr->relaysFull())
+             || ((type == T_DIRECT) && servMgr->directFull())
+             || !ch->isPlaying()
+             || ch->isFull())
+            return false;
+    }
+
+    return true;
+}
+
+// -----------------------------------
 Servent::Servent(int index)
     : outPacketsPri(MAX_OUTPACKETS)
     , outPacketsNorm(MAX_OUTPACKETS)
@@ -187,7 +209,6 @@ void Servent::reset()
     loginMount.clear();
 
 
-    bytesPerSecond = 0;
     priorityConnect = false;
     pushSock = NULL;
     sendHeader = true;
@@ -1936,8 +1957,12 @@ int Servent::incomingProc(ThreadInfo *thread)
             sv->sock->writeLine(e.msg);
             if (e.code == 401)
                 sv->sock->writeLine("WWW-Authenticate: Basic realm=\"PeerCast\"");
+            sv->sock->writeLineF("Content-Type: text/plain; charset=utf-8");
+            sv->sock->writeLineF("Content-Length: %zu", strlen(e.msg));
             sv->sock->writeLine("");
+            sv->sock->writeString(e.msg);
         }catch (StreamException &) {}
+
         LOG_ERROR("Incoming from %s: %s", ipStr, e.msg);
     }catch (StreamException &e)
     {
@@ -2502,7 +2527,7 @@ int Servent::serverProc(ThreadInfo *thread)
         if (!sv->sock)
             throw StreamException("Server has no socket");
 
-        sys->setThreadName(thread, String::format("LISTEN %d", (int) sv->sock->host.port));
+        sys->setThreadName(thread, String::format("LISTEN %hu", sv->sock->host.port));
 
         sv->setStatus(S_LISTENING);
 

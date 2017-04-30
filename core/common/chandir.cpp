@@ -180,7 +180,7 @@ bool ChannelDirectory::update()
 
         if (success) {
             feed.status = ChannelFeed::Status::OK;
-            LOG_DEBUG("Got %lu channels from %s", channels.size(), feed.url.c_str());
+            LOG_DEBUG("Got %zu channels from %s", channels.size(), feed.url.c_str());
             for (auto ch : channels) {
                 m_channels.push_back(ch);
             }
@@ -258,6 +258,8 @@ bool ChannelDirectory::writeFeedVariable(Stream& out, const String& varName, int
         value = m_feeds[index].url;
     } else if (varName == "status") {
         value = ChannelFeed::statusToString(m_feeds[index].status);
+    } else if (varName == "isPublic") {
+        value = String::format("%d", m_feeds[index].isPublic).cstr();
     } else {
         return false;
     }
@@ -354,6 +356,15 @@ void ChannelDirectory::clearFeeds()
     m_feeds.clear();
     m_channels.clear();
     m_lastUpdate = 0;
+}
+
+void ChannelDirectory::setFeedPublic(int index, bool isPublic)
+{
+    CriticalSection cs(m_lock);
+    if (index < m_feeds.size())
+        m_feeds[index].isPublic = isPublic;
+    else
+        LOG_DEBUG("setFeedPublic: index %d out of range", index);
 }
 
 std::string ChannelDirectory::findTracker(GnuID id)

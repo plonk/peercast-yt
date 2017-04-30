@@ -40,7 +40,7 @@ public:
                 int namePos, valuePos;
         };
 
-        Node(const char *, ...);
+        Node(const char *, ...) __attribute__ ((format (printf, 2, 3)));
 
         void    init();
 

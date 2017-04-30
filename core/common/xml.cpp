@@ -477,7 +477,7 @@ void XML::read(Stream &in)
                 // only add valid tags
                 if (strlen(buf))
                 {
-                    Node *n = new Node(buf);
+                    Node *n = new Node("%s", buf);
 
                     if (currNode)
                         currNode->add(n);

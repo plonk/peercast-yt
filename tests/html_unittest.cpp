@@ -11,18 +11,6 @@ public:
     {
     }
 
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~HTMLFixture()
-    {
-    }
-
     DynamicMemoryStream mem;
     HTML html;
 };
@@ -61,3 +49,21 @@ TEST_F(HTMLFixture, locateTo)
     ASSERT_STREQ("HTTP/1.0 302 Found\r\nLocation: /index.html\r\n\r\n",
                  mem.str().c_str());
 }
+
+TEST_F(HTMLFixture, addHead)
+{
+    html.addHead();
+    ASSERT_STREQ("<head><title>Untitled</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\"></meta></head>", mem.str().c_str());
+}
+
+
+// タイトルはフォーマット文字列として解釈されてはいoけない。
+TEST_F(HTMLFixture, addHead2)
+{
+    DynamicMemoryStream mem2;
+    HTML html2("%s%s%s%s%s%s", mem2);
+
+    html2.addHead();
+    ASSERT_STREQ("<head><title>%s%s%s%s%s%s</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\"></meta></head>", mem2.str().c_str());
+}
+

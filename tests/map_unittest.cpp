@@ -7,21 +7,6 @@ using namespace std;
 
 class mapFixture : public ::testing::Test {
 public:
-    mapFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~mapFixture()
-    {
-    }
     map<string,string> dic;
 };
 

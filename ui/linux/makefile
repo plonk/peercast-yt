@@ -2,7 +2,7 @@ CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRAN
 LDFLAGS = -pthread
 LIBS = 
 
-TAR = peercast-linux.tar
+TAR = peercast-yt-linux-amd64.tar.gz
 AR = ar
 
 INCLUDES = -I../../core -I../../core/common
@@ -11,6 +11,7 @@ TARGET = peercast
 CORE = ../../core
 SRCHTMLTAR = ../html.tar
 HTML = html
+PUBLIC = public
 
 LIBOBJSTATIC = libpeercast.a
 
@@ -45,11 +46,16 @@ $(HTML): $(SRCHTMLTAR)
 	touch $(HTML)
 
 $(TAR): $(TARGET) $(HTML)
-	tar cf $(TAR) $(HTML) $(TARGET)
+	rm -rf peercast-yt
+	mkdir peercast-yt
+	cp -vR $(HTML) $(PUBLIC) $(TARGET) peercast-yt/
+	strip peercast-yt/$(TARGET)
+	tar cvzf $(TAR) peercast-yt
 
 clean:
 	rm -f $(LINUXOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE) $(SRCHTMLTAR)
 	rm -rf $(HTML)
+	rm -rf peercast-yt/
 
 $(COREOBJ): %.o : $(CORE)/common/%.cpp
 	$(CC) $(CPPFLAGS) -c $< -o $@

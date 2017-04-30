@@ -32,6 +32,7 @@ ThreadInfo ServMgr::serverThread, ServMgr::idleThread;
 
 // -----------------------------------
 ServMgr::ServMgr()
+    : publicDirectoryEnabled(false)
 {
     validBCID = NULL;
 
@@ -67,7 +68,6 @@ ServMgr::ServMgr()
     notifyMask = 0xffff;
 
     tryoutDelay = 10;
-    numVersions = 0;
 
     sessionID.generate();
 
@@ -190,23 +190,6 @@ void    ServMgr::connectBroadcaster()
                 sys->sleep(3000);
             }
         }
-    }
-}
-// -----------------------------------
-void    ServMgr::addVersion(unsigned int ver)
-{
-    for (int i=0; i<numVersions; i++)
-        if (clientVersions[i] == ver)
-        {
-            clientCounts[i]++;
-            return;
-        }
-
-    if (numVersions < MAX_VERSIONS)
-    {
-        clientVersions[numVersions] = ver;
-        clientCounts[numVersions] = 1;
-        numVersions++;
     }
 }
 
@@ -929,10 +912,10 @@ void ServMgr::saveSettings(const char *fn)
         iniFile.writeIntValue("maxPGNUIncoming", servMgr->maxGnuIncoming);
         iniFile.writeIntValue("maxServIn", servMgr->maxServIn);
         iniFile.writeStrValue("chanLog", servMgr->chanLog.cstr());
+        iniFile.writeBoolValue("publicDirectory", servMgr->publicDirectoryEnabled);
 
         networkID.toStr(idStr);
         iniFile.writeStrValue("networkID", idStr);
-
 
         iniFile.writeSection("Broadcast");
         iniFile.writeIntValue("broadcastMsgInterval", chanMgr->broadcastMsgInterval);
@@ -972,6 +955,7 @@ void ServMgr::saveSettings(const char *fn)
         {
             iniFile.writeSection("Feed");
             iniFile.writeStrValue("url", feed.url.c_str());
+            iniFile.writeBoolValue("isPublic", feed.isPublic);
             iniFile.writeLine("[End]");
         }
 
@@ -1130,11 +1114,11 @@ void readFilterSettings(IniFile &iniFile, ServFilter &sv)
 // --------------------------------------------------
 void ServMgr::loadSettings(const char *fn)
 {
+    int feedIndex = 0;
     IniFile iniFile;
 
     if (!iniFile.openReadOnly(fn))
         saveSettings(fn);
-
 
     servMgr->numFilters = 0;
     showLog = 0;
@@ -1204,6 +1188,8 @@ void ServMgr::loadSettings(const char *fn)
                 servMgr->maxServIn = iniFile.getIntValue();
             else if (iniFile.isName("chanLog"))
                 servMgr->chanLog.set(iniFile.getStrValue(), String::T_ASCII);
+            else if (iniFile.isName("publicDirectory"))
+                servMgr->publicDirectoryEnabled = iniFile.getBoolValue();
 
             else if (iniFile.isName("rootMsg"))
                 rootMsg.set(iniFile.getStrValue());
@@ -1305,7 +1291,12 @@ void ServMgr::loadSettings(const char *fn)
                         break;
                     else if (iniFile.isName("url"))
                         servMgr->channelDirectory.addFeed(iniFile.getStrValue());
+                    else if (iniFile.isName("isPublic"))
+                    {
+                        servMgr->channelDirectory.setFeedPublic(feedIndex, iniFile.getBoolValue());
+                    }
                 }
+                feedIndex++;
             }
             else if (iniFile.isName("[Notify]"))
             {
@@ -2127,8 +2118,6 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
         serverHost.IPtoStr(buf);
     else if (var == "ypAddress")
         strcpy(buf, rootHost.cstr());
-    else if (var == "ypIP")
-        strcpy(buf, ypIP().cstr());
     else if (var == "password")
         strcpy(buf, password);
     else if (var == "isFirewalled")
@@ -2237,7 +2226,7 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
             return false;
     }else if (var.startsWith("lang."))
     {
-        const char* lang = const_cast<String&>(var).cstr() + 5;
+        const char* lang = var.c_str() + 5;
 
         if (strrchr(htmlPath, '/') &&
             strcmp(strrchr(htmlPath, '/') + 1, lang) == 0)
@@ -2257,6 +2246,9 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var.startsWith("channelDirectory."))
     {
         return channelDirectory.writeVariable(out, var + strlen("channelDirectory."));
+    }else if (var == "publicDirectoryEnabled")
+    {
+        sprintf(buf, "%d", publicDirectoryEnabled);
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);

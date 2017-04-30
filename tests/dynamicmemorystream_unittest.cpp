@@ -4,21 +4,6 @@
 
 class DynamicMemoryStreamFixture : public ::testing::Test {
 public:
-    DynamicMemoryStreamFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~DynamicMemoryStreamFixture()
-    {
-    }
 };
 
 TEST_F(DynamicMemoryStreamFixture, initialState)
@@ -29,7 +14,7 @@ TEST_F(DynamicMemoryStreamFixture, initialState)
     ASSERT_EQ(0, s.getLength());
 
     ASSERT_TRUE(s.eof());
-    ASSERT_EQ(0, s.read(NULL, 10));
+    ASSERT_THROW(s.read(NULL, 0), StreamException);
 }
 
 TEST_F(DynamicMemoryStreamFixture, writeAdvancesPositionAndLength)
@@ -69,7 +54,7 @@ TEST_F(DynamicMemoryStreamFixture, whatIsWrittenCanBeRead)
     char buf[5] = "";
 
     s.write("hoge", 4);
-    ASSERT_EQ(0, s.read(buf, 4));
+    ASSERT_THROW(s.read(buf, 4), StreamException);
     s.rewind();
     ASSERT_EQ(4, s.read(buf, 100));
     ASSERT_STREQ("hoge", buf);
@@ -103,5 +88,33 @@ TEST_F(DynamicMemoryStreamFixture, seekToChangesLength)
     s.read(buf, 1000);
     ASSERT_EQ(0, buf[0]);
     ASSERT_EQ(0, buf[999]);
+}
+
+TEST_F(DynamicMemoryStreamFixture, strGet)
+{
+    DynamicMemoryStream s;
+
+    s.writeString("hoge");
+    ASSERT_EQ(4, s.getPosition());
+    ASSERT_EQ(4, s.getLength());
+
+    ASSERT_STREQ("hoge", s.str().c_str());
+    ASSERT_EQ(4, s.getPosition());
+    ASSERT_EQ(4, s.getLength());
+}
+
+TEST_F(DynamicMemoryStreamFixture, strSet)
+{
+    DynamicMemoryStream s;
+
+    s.writeString("hoge");
+    ASSERT_EQ(4, s.getPosition());
+    ASSERT_EQ(4, s.getLength());
+
+    s.str("foo");
+    ASSERT_EQ(0, s.getPosition());
+    ASSERT_EQ(3, s.getLength());
+
+    ASSERT_STREQ("foo", s.str().c_str());
 }
 

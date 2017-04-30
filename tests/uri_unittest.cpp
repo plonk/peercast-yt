@@ -5,21 +5,6 @@
 
 class URIFixture : public ::testing::Test {
 public:
-    URIFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~URIFixture()
-    {
-    }
 };
 
 #include "LUrlParser.h"
@@ -86,5 +71,14 @@ TEST_F(URIFixture, emptyURI)
 TEST_F(URIFixture, mailtoScheme)
 {
     URI u("mailto:webmaster@example.com");
+    ASSERT_FALSE(u.isValid());
+}
+
+// 相対URLは使えない。
+TEST_F(URIFixture, relativeURI)
+{
+    ASSERT_NO_THROW(URI("/index.html"));
+
+    URI u("/index.html");
     ASSERT_FALSE(u.isValid());
 }

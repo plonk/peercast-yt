@@ -192,8 +192,10 @@ public:
             { "getVersionInfo",          &JrpcApi::getVersionInfo,          {} },
             { "getYellowPageProtocols",  &JrpcApi::getYellowPageProtocols,  {} },
             { "getYellowPages",          &JrpcApi::getYellowPages,          {} },
+            { "getYPChannels",           &JrpcApi::getYPChannels,           {} },
             { "removeYellowPage",        &JrpcApi::removeYellowPage,        { "yellowPageId" } },
             { "setChannelInfo",          &JrpcApi::setChannelInfo,          { "channelId", "info", "track" } },
+            { "setSettings",             &JrpcApi::setSettings,             { "settings" } },
             { "stopChannel",             &JrpcApi::stopChannel,             { "channelId" } },
             { "stopChannelConnection",   &JrpcApi::stopChannelConnection,   { "channelId", "connectionId" } },
         })
@@ -535,6 +537,91 @@ public:
         return result;
     }
 
+    json to_json(ChanHit* h)
+    {
+        return {
+            { "ip", (std::string) h->host },
+            { "hops", h->numHops },
+            { "listeners", h->numListeners },
+            { "relays", h->numRelays },
+            { "uptime", h->upTime },
+            { "push", (bool) h->firewalled },
+            { "relay", (bool) h->relay },
+            { "direct", (bool) h->direct },
+            { "cin", (bool) h->cin }, // これrootモードで動いてるかってこと？
+            { "stable", (bool) h->stable },
+            { "version", h->version },
+            { "update", sys->getTime() - h->time },
+            { "tracker", (bool) h->tracker }
+       };
+    }
+
+    json::array_t hostsToJson(ChanHitList* hitList)
+    {
+        json::array_t result;
+
+        for (ChanHit *h = hitList->hit;
+             h;
+             h = h->next)
+        {
+            if (h->host.ip)
+                result.push_back(to_json(h));
+        }
+
+        return result;
+    }
+
+    json to_json(ChanHitList* hitList)
+    {
+        ChanInfo info = hitList->info;
+        return {
+            { "name", info.name.cstr() },
+            { "id",  (std::string) info.id },
+            { "bitrate", info.bitrate },
+            { "type", info.getTypeStr() },
+            { "genre", info.genre.cstr() },
+            { "desc", info.desc.cstr() },
+            { "url", info.url.cstr() },
+            { "uptime", info.getUptime() },
+            { "comment", info.comment.cstr() },
+            { "skips", info.numSkips },
+            { "age", info.getAge() },
+            { "bcflags", info.bcID.getFlags() },
+
+            { "hit_stat", {
+                    { "hosts", hitList->numHits() },
+                    { "listeners", hitList->numListeners() },
+                    { "relays", hitList->numRelays() },
+                    { "firewalled", hitList->numFirewalled() },
+                    { "closest", hitList->closestHit() },
+                    { "furthest", hitList->furthestHit() },
+                    { "newest", sys->getTime() - hitList->newestHit() } } },
+            { "hits", hostsToJson(hitList) },
+            { "track", to_json(info.track) }
+        };
+    }
+
+    json getChannelsFound(json::array_t)
+    {
+        json result = json::array();
+
+        chanMgr->lock.on();
+
+        int publicChannels = chanMgr->numHitLists();
+
+        for (ChanHitList *hitList = chanMgr->hitlist;
+             hitList;
+             hitList = hitList->next)
+        {
+            if (hitList->isUsed())
+                result.push_back(to_json(hitList));
+        }
+
+        chanMgr->lock.off();
+
+        return result;
+    }
+
     // 配信中のチャンネルとルートサーバーとの接続状態。
     // 返り値: "Idle" | "Connecting" | "Connected" | "Error"
     json::string_t announcingChannelStatus(Channel* c)
@@ -590,15 +677,29 @@ public:
         return json::array({ pcp });
     }
 
+    json setSettings(json::array_t args)
+    {
+        json::object_t settings = args[0];
+
+        servMgr->setMaxRelays((int) settings["maxRelays"]);
+        chanMgr->maxRelaysPerChannel = (int) settings["maxRelaysPerChannel"];
+        servMgr->maxDirect = (int) settings["maxDirects"];
+        // maxDirectsPerChannel は無視。
+        servMgr->maxBitrateOut = (int) settings["maxUpstreamRate"];
+        // maxUpstreamRatePerChannel は無視。
+        // channelCleaner, portMapper は無視。
+        return nullptr;
+    }
+
     json getSettings(json::array_t)
     {
         json j = {
             { "maxRelays", servMgr->maxRelays },
             { "maxRelaysPerChannel", chanMgr->maxRelaysPerChannel },
             { "maxDirects", servMgr->maxDirect },
-            { "maxDirectsPerChannel", servMgr->maxDirect },
+            { "maxDirectsPerChannel", 0 },
             { "maxUpstreamRate", servMgr->maxBitrateOut },
-            { "maxUpstreamRatePerChannel", servMgr->maxBitrateOut },
+            { "maxUpstreamRatePerChannel", 0 },
             // channelCleaner は無視。
         };
 
@@ -745,6 +846,75 @@ public:
         for (int i = 0; i < str.size(); ++i)
             res.push_back(std::tolower(str[i]));
 
+        return res;
+    }
+
+    json getYPChannels(json::array_t args)
+    {
+        auto channels = servMgr->channelDirectory.channels();
+        json::array_t res;
+
+        for (auto& c : channels)
+        {
+            res.push_back({
+                    { "yellowPage",  c.feedUrl },
+                    { "name",        c.name },
+                    { "channelId",   c.id.str() },
+                    { "tracker",     c.tip },
+                    { "contactUrl",  c.url },
+                    { "genre",       c.genre },
+                    { "description", c.desc },
+                    { "comment",     c.comment },
+                    { "bitrate",     c.bitrate },
+                    { "contentType", c.contentTypeStr },
+                    { "trackTitle",  c.trackName },
+                    { "album",       c.trackAlbum },
+                    { "creator",     c.trackArtist },
+                    { "trackUrl",    c.trackContact },
+                    { "listeners",   c.numDirects },
+                    { "relays",      c.numRelays }
+                });
+        }
+        return res;
+    }
+
+    json getYPChannelsInternal(json::array_t args = {})
+    {
+        auto channels = servMgr->channelDirectory.channels();
+        json::array_t res;
+        std::map<std::string,bool> publicFeed;
+
+        for (auto& feed : servMgr->channelDirectory.feeds())
+            publicFeed[feed.url] = feed.isPublic;
+
+        for (auto& c : channels)
+        {
+            res.push_back({
+                    { "name",           c.name },
+                    { "id",             c.id.str() },
+                    { "tip",            c.tip },
+                    { "url",            c.url },
+                    { "genre",          c.genre },
+                    { "desc",           c.desc },
+                    { "numDirects",     c.numDirects },
+                    { "numRelays",      c.numRelays },
+                    { "bitrate",        c.bitrate },
+                    { "contentTypeStr", c.contentTypeStr },
+                    { "trackArtist",    c.trackArtist },
+                    { "trackAlbum",     c.trackAlbum },
+                    { "trackName",      c.trackName },
+                    { "trackContact",   c.trackContact },
+                    { "encodedName",    c.encodedName },
+                    { "uptime",         c.uptime },
+                    { "status",         c.status },
+                    { "comment",        c.comment },
+                    { "direct",         c.direct },
+                    { "feedUrl",        c.feedUrl },
+                    { "chatUrl",        c.chatUrl() },
+                    { "statsUrl",       c.statsUrl() },
+                    { "isPublic",       publicFeed[c.feedUrl] },
+                });
+        }
         return res;
     }
 };

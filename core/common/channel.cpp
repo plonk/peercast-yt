@@ -997,7 +997,7 @@ void Channel::updateInfo(const ChanInfo &newInfo)
         String newComment = info.comment;
         newComment.convertTo(String::T_UNICODE);
 
-        peercast::notifyMessage(ServMgr::NT_PEERCAST, info.name.str() + "氏曰く: " + newComment.str());
+        peercast::notifyMessage(ServMgr::NT_PEERCAST, info.name.str() + "「" + newComment.str() + "」");
     }
 
     if (isBroadcasting())

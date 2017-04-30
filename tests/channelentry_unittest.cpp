@@ -4,21 +4,6 @@
 
 class ChannelEntryFixture : public ::testing::Test {
 public:
-    ChannelEntryFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~ChannelEntryFixture()
-    {
-    }
 };
 
 TEST_F(ChannelEntryFixture, constructor)

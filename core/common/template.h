@@ -20,6 +20,7 @@
 #ifndef _TEMPLATE_H
 #define _TEMPLATE_H
 
+#include <list>
 #include "sys.h"
 #include "stream.h"
 #include "json.hpp"
@@ -29,6 +30,14 @@ using json = nlohmann::json;
 // HTML テンプレートシステム
 class Template
 {
+public:
+
+    class Scope
+    {
+    public:
+        virtual bool writeVariable(Stream &, const String &, int) = 0;
+    };
+
     enum
     {
         TMPL_UNKNOWN,
@@ -40,7 +49,6 @@ class Template
         TMPL_FOREACH
     };
 
-public:
     Template(const char* args = NULL)
         : currentElement(json::object({}))
     {
@@ -49,10 +57,23 @@ public:
         else
             tmplArgs = NULL;
     }
+
+    Template(const std::string& args)
+        : currentElement(json::object({}))
+    {
+        tmplArgs = strdup(args.c_str());
+    }
+
     ~Template()
     {
         if (tmplArgs)
             free(tmplArgs);
+    }
+
+    Template& prependScope(Scope& scope)
+    {
+        m_scopes.push_front(&scope);
+        return *this;
     }
 
     bool inSelectedFragment()
@@ -65,6 +86,7 @@ public:
 
     // 変数
     void    writeVariable(Stream &, const String &, int);
+    void    writeGlobalVariable(Stream &, const String &, int);
     int     getIntVariable(const String &, int);
     bool    getBoolVariable(const String &, int);
 
@@ -76,15 +98,40 @@ public:
     void    readFragment(Stream &, Stream *, int);
 
     void    readVariable(Stream &, Stream *, int);
+    void    readVariableJavaScript(Stream &in, Stream *outp, int loop);
     void    readVariableRaw(Stream &in, Stream *outp, int loop);
     bool    readTemplate(Stream &, Stream *, int);
     bool    writeObjectProperty(Stream& s, const String& varName, json::object_t object);
     json::array_t evaluateCollectionVariable(String& varName);
 
+    bool    evalCondition(const std::string& cond, int loop);
+    std::vector<std::string> tokenize(const std::string& input);
+    std::pair<std::string,std::string> readStringLiteral(const std::string& input);
+    std::string evalStringLiteral(const std::string& input);
+    std::string getStringVariable(const std::string& varName, int loop);
+
     char * tmplArgs;
     std::string selectedFragment;
     std::string currentFragment;
     json currentElement;
+
+    std::list<Scope*> m_scopes;
+};
+
+#include "http.h"
+
+// HTTP リクエストを変数としてエクスポートするスコープ
+class HTTPRequestScope : public Template::Scope
+{
+public:
+    HTTPRequestScope(const HTTPRequest& aRequest)
+        : m_request(aRequest)
+    {
+    }
+
+    bool writeVariable(Stream &, const String &, int) override;
+
+    const HTTPRequest& m_request;
 };
 
 #endif

@@ -4,21 +4,6 @@
 
 class NotificationBufferFixture : public ::testing::Test {
 public:
-    NotificationBufferFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~NotificationBufferFixture()
-    {
-    }
 };
 
 TEST_F(NotificationBufferFixture, initialState)

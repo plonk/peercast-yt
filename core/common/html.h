@@ -42,9 +42,9 @@ public:
     // HTML ヘルパー
     void    startNode(const char *, const char * = NULL);
     void    addLink(const char *, const char *, bool = false);
-    void    startTag(const char *, const char * = NULL, ...);
-    void    startTagEnd(const char *, const char * = NULL, ...);
-    void    startSingleTagEnd(const char *, ...);
+    void    startTag(const char *, const char * = NULL, ...) __attribute__ ((format (printf, 3, 4)));
+    void    startTagEnd(const char *, const char * = NULL, ...) __attribute__ ((format (printf, 3, 4)));
+    void    startSingleTagEnd(const char *, ...) __attribute__ ((format (printf, 2, 3)));
     void    startTableRow(int);
     void    end();
     void    setRefresh(int sec) { refresh = sec; }

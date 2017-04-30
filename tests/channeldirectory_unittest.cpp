@@ -4,22 +4,6 @@
 
 class ChannelDirectoryFixture : public ::testing::Test {
 public:
-    ChannelDirectoryFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~ChannelDirectoryFixture()
-    {
-    }
-
     ChannelDirectory dir;
 };
 

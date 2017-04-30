@@ -21,7 +21,7 @@
 #include "stream.h"
 
 // -----------------------------------
-#define isSJIS(a, b) ((a >= 0x81 && a <= 0x9f || a >= 0xe0 && a<=0xfc) && (b >= 0x40 && b <= 0x7e || b >= 0x80 && b<=0xfc))
+#define isSJIS(a, b) ((a >= 0x81 && a <= 0x9f || a >= 0xe0 && a <= 0xfc) && (b >= 0x40 && b <= 0x7e || b >= 0x80 && b <= 0xfc))
 #define isEUC(a) (a >= 0xa1 && a <= 0xfe)
 #define isASCII(a) (a <= 0x7f)
 #define isPLAINASCII(a) (((a >= '0') && (a <= '9')) || ((a >= 'a') && (a <= 'z')) || ((a >= 'A') && (a <= 'Z')))
@@ -49,12 +49,6 @@ static int base64chartoval(char input)
 }
 
 // -----------------------------------
-bool String::isValidURL()
-{
-    return (strnicmp(data, "http://", 7)==0) || (strnicmp(data, "mailto:", 7)==0);
-}
-
-// -----------------------------------
 void String::setFromTime(unsigned int t)
 {
     time_t t2 = t;
@@ -65,6 +59,7 @@ void String::setFromTime(unsigned int t)
         strcpy(data, "-");
     type = T_ASCII;
 }
+
 // -----------------------------------
 void String::setFromStopwatch(unsigned int t)
 {
@@ -88,14 +83,15 @@ void String::setFromStopwatch(unsigned int t)
 
     type = T_ASCII;
 }
+
 // -----------------------------------
 void String::setFromString(const char *str, TYPE t)
 {
-    int cnt=0;
-    bool quote=false;
+    int cnt = 0;
+    bool quote = false;
     while (*str)
     {
-        bool add=true;
+        bool add = true;
         if (*str == '\"')
         {
             if (quote)
@@ -117,7 +113,7 @@ void String::setFromString(const char *str, TYPE t)
         if (add)
         {
             data[cnt++] = *str++;
-            if (cnt >= (MAX_LEN-1))
+            if (cnt >= (MAX_LEN - 1))
                 break;
         }else
             str++;
@@ -169,12 +165,10 @@ void String::BASE642ASCII(const char *input)
     *out = 0;
 }
 
-
-
 // -----------------------------------
 void String::UNKNOWN2UNICODE(const char *in, bool safe)
 {
-    MemoryStream utf8(data, MAX_LEN-1);
+    MemoryStream utf8(data, MAX_LEN - 1);
 
     unsigned char c;
     unsigned char d;
@@ -185,9 +179,9 @@ void String::UNKNOWN2UNICODE(const char *in, bool safe)
 
         if (isUTF8(c, d))       // utf8 encoded
         {
-            int numChars=0;
+            int numChars = 0;
 
-            for (int i=0; i<6; i++)
+            for (int i = 0; i < 6; i++)
             {
                 if (c & (0x80>>i))
                     numChars++;
@@ -196,7 +190,7 @@ void String::UNKNOWN2UNICODE(const char *in, bool safe)
             }
 
             utf8.writeChar(c);
-            for (int i=0; i<numChars-1; i++)
+            for (int i = 0; i < numChars - 1; i++)
                 utf8.writeChar(*in++);
 
         }
@@ -217,9 +211,9 @@ void String::UNKNOWN2UNICODE(const char *in, bool safe)
             in++;
             char code[16];
             char *cp = code;
-            while (c=*in++)
+            while (c = *in++)
             {
-                if (c!=';')
+                if (c != ';')
                     *cp++ = c;
                 else
                     break;
@@ -227,12 +221,10 @@ void String::UNKNOWN2UNICODE(const char *in, bool safe)
             *cp = 0;
 
             utf8.writeUTF8(strtoul(code, NULL, 10));
-
         }
         else if (isPLAINASCII(c))   // plain ascii : a-z 0-9 etc..
         {
             utf8.writeUTF8(c);
-
         }
         else if (isHTMLSPECIAL(c) && safe)
         {
@@ -251,39 +243,36 @@ void String::UNKNOWN2UNICODE(const char *in, bool safe)
             utf8.writeUTF8(c);
         }
 
-        if (utf8.pos >= (MAX_LEN-10))
+        if (utf8.pos >= (MAX_LEN - 10))
             break;
-
-
     }
 
     utf8.writeChar(0);  // null terminate
-
 }
 
 // -----------------------------------
 void String::ASCII2HTML(const char *in)
 {
     char *op = data;
-    char *oe = data+MAX_LEN-10;
+    char *oe = data+MAX_LEN - 10;
     unsigned char c;
     const char *p = in;
     while (c = *p++)
     {
-
         if (((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z')))
         {
             *op++ = c;
         }else
         {
             std::sprintf(op, "&#x%02X;", (int)c);
-            op+=6;
+            op += 6;
         }
         if (op >= oe)
             break;
     }
     *op = 0;
 }
+
 // -----------------------------------
 void String::ASCII2ESC(const char *in, bool safe)
 {
@@ -300,14 +289,14 @@ void String::ASCII2ESC(const char *in, bool safe)
             *op++ = '%';
             if (safe)
                 *op++ = '%';
-            *op=0;
+            *op = 0;
             std::sprintf(op, "%02X", (int)c);
-            op+=2;
+            op += 2;
         }
         if (op >= oe)
             break;
     }
-    *op=0;
+    *op = 0;
 }
 // -----------------------------------
 void String::HTML2ASCII(const char *in)
@@ -324,9 +313,9 @@ void String::HTML2ASCII(const char *in)
             char code[8];
             char *cp = code;
             char ec = *p++;     // hex/dec
-            while (c=*p++)
+            while (c = *p++)
             {
-                if (c!=';')
+                if (c != ';')
                     *cp++ = c;
                 else
                     break;
@@ -339,7 +328,7 @@ void String::HTML2ASCII(const char *in)
             break;
     }
 
-    *o=0;
+    *o = 0;
 }
 // -----------------------------------
 void String::HTML2UNICODE(const char *in)
@@ -355,9 +344,9 @@ void String::HTML2UNICODE(const char *in)
             char code[16];
             char *cp = code;
             char ec = *in++;        // hex/dec
-            while (c=*in++)
+            while (c = *in++)
             {
-                if (c!=';')
+                if (c != ';')
                     *cp++ = c;
                 else
                     break;
@@ -393,14 +382,14 @@ void String::ESC2ASCII(const char *in)
             char hi = TOUPPER(p[0]);
             char lo = TOUPPER(p[1]);
             c = (TONIBBLE(hi)<<4) | TONIBBLE(lo);
-            p+=2;
+            p += 2;
         }
         *o++ = c;
         if (o >= oe)
             break;
     }
 
-    *o=0;
+    *o = 0;
 }
 // -----------------------------------
 void String::ASCII2META(const char *in, bool safe)
@@ -415,19 +404,20 @@ void String::ASCII2META(const char *in, bool safe)
         {
             case '%':
                 if (safe)
-                    *op++='%';
+                    *op++ = '%';
                 break;
             case ';':
                 c = ':';
                 break;
         }
 
-        *op++=c;
+        *op++ = c;
         if (op >= oe)
             break;
     }
-    *op=0;
+    *op = 0;
 }
+
 // -----------------------------------
 void String::convertTo(TYPE t)
 {
@@ -488,4 +478,110 @@ void String::convertTo(TYPE t)
 
         type = t;
     }
+}
+
+// -----------------------------------
+void String::setUnquote(const char *p, TYPE t)
+{
+    int slen = strlen(p);
+    if (slen > 2)
+    {
+        if (slen >= MAX_LEN) slen = MAX_LEN;
+        strncpy(data, p+1, slen-2);
+        data[slen-2] = 0;
+    }else
+        clear();
+    type = t;
+}
+
+// -----------------------------------
+void String::clear()
+{
+    data[0] = 0;
+    type = T_UNKNOWN;
+}
+
+// -----------------------------------
+void String::append(const char *s)
+{
+    if ((strlen(s)+strlen(data)) < (MAX_LEN-1))
+        strcat(data, s);
+}
+
+// -----------------------------------
+void String::append(char c)
+{
+    char tmp[2];
+    tmp[0] = c;
+    tmp[1] = 0;
+    append(tmp);
+}
+
+// -----------------------------------
+void String::prepend(const char *s)
+{
+    ::String tmp;
+    tmp.set(s);
+    tmp.append(data);
+    tmp.type = type;
+    *this = tmp;
+}
+
+// -----------------------------------
+String& String::operator = (const String& other)
+{
+    strcpy(this->data, other.data);
+    this->type = other.type;
+
+    return *this;
+}
+
+// -----------------------------------
+String& String::operator = (const char* cstr)
+{
+    strncpy(this->data, cstr, MAX_LEN - 1);
+    this->data[MAX_LEN - 1] = '\0';
+    this->type = T_ASCII;
+
+    return *this;
+}
+
+// -----------------------------------
+String& String::operator = (const std::string& rhs)
+{
+    strcpy(data, rhs.substr(0, MAX_LEN - 1).c_str());
+    this->type = T_ASCII;
+
+    return *this;
+}
+
+// -----------------------------------
+void String::set(const char *p, TYPE t)
+{
+    strncpy(data, p, MAX_LEN-1);
+    data[MAX_LEN-1] = 0;
+    type = t;
+}
+
+// -----------------------------------
+void String::sprintf(const char* fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    vsnprintf(this->data, ::String::MAX_LEN - 1, fmt, ap);
+    va_end(ap);
+}
+
+// -----------------------------------
+String String::format(const char* fmt, ...)
+{
+    va_list ap;
+    String result;
+
+    va_start(ap, fmt);
+    vsnprintf(result.data, ::String::MAX_LEN - 1, fmt, ap);
+    va_end(ap);
+
+    return result;
 }

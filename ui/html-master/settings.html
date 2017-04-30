@@ -24,12 +24,12 @@
                 </TR>
                 <TR align=left bgColor=#eee class="normal">
                   <TD>{#Password}</TD>
-                  <TD bgcolor="#eee">
+                  <TD>
                     <INPUT name=passnew type=password size="10" maxlength="32" {@if servMgr.password}value={$servMgr.password}{@end}>
                   </TD>
                 </TR>
                 <TR align=left bgColor=#ddd class="normal">
-                  <TD bgcolor="#ddd">{#Max. Relays}</TD>
+                  <TD>{#Max. Relays}</TD>
                   <TD><INPUT size=5 value={$servMgr.maxRelays} name=maxrelays></TD>
                 </TR>
                 <TR align=left bgColor=#eee class="normal">
@@ -66,7 +66,7 @@
                   <TD colSpan=2><B>{#Server}</B></TD>
                 </TR>
                 <TR align=left bgColor=#eee class="normal">
-                  <TD width="50%" bgcolor="#eee">{#DJ Message}</TD>
+                  <TD width="50%">{#DJ Message}</TD>
                   <TD><INPUT {@if chanMgr.djMessage}value="{$chanMgr.djMessage}"{@end} name=djmsg>
                   </TD>
                 </TR>
@@ -76,7 +76,7 @@
                   </TD>
                 </TR>
                 <TR align=left bgColor=#eee class="normal">
-                  <TD bgcolor="#eee">{#Mode}</TD>
+                  <TD>{#Mode}</TD>
                   <TD>
                     <label><INPUT type=radio {@if !servMgr.isRoot}CHECKED{@end} value=0 name=root>
                       <I>{#Normal}</I></label><BR>
@@ -84,8 +84,18 @@
                         <I>{#Root}</I></label></TD>
                 </TR>
                 <TR align=left bgColor=#ddd class="normal">
-                  <TD bgcolor="#ddd">{#Refresh HTML (sec)}</TD>
+                  <TD>{#Refresh HTML (sec)}</TD>
                   <TD><INPUT size=10 value={$servMgr.refreshHTML} name=refresh></TD>
+                </TR>
+                <TR align=left bgColor=#eee class="normal">
+                  <TD>{#Public Directory}</TD>
+                  <TD>
+                    <label>
+                      <INPUT type="checkbox" name="public_directory" {@if servMgr.publicDirectoryEnabled}checked{@end}>
+                      <i>{#Enable}</i>
+                    </label>
+                    <a href="/public/">{#View}</a>
+                  </TD>
                 </TR>
               </TBODY>
             </TABLE>
@@ -96,9 +106,9 @@
                 <TR align=middle bgColor=#ccc class="normal">
                   <TD colSpan=2><B>{#Network}</B></TD>
                 </TR>
-                <TR align=left bgColor=#ddd class="normal">
-                  <TD bgcolor="#eee">{#YP Address}</TD>
-                  <TD bgcolor="#eee"><input {@if servMgr.ypAddress}value={$servMgr.ypAddress}{@end} name=yp></TD>
+                <TR align=left bgColor=#eee class="normal">
+                  <TD>{#YP Address}</TD>
+                  <TD><input {@if servMgr.ypAddress}value={$servMgr.ypAddress}{@end} name=yp></TD>
                 </TR>
                 <TR align=left bgColor=#ddd class="normal">
                   <TD>{#Max. Output (Kbits/s)}</TD>
@@ -106,15 +116,15 @@
                 </TR>
                 <TR align=left bgColor=#eee class="normal">
                   <TD width="50%">{#Max. Relays Per Channel}</TD>
-                  <TD bgcolor="#eee"><INPUT size=5 value={$chanMgr.maxRelaysPerChannel} name=maxrelaypc></TD>
+                  <TD><INPUT size=5 value={$chanMgr.maxRelaysPerChannel} name=maxrelaypc></TD>
                 </TR>
                 <TR align=left bgColor=#ddd class="normal">
                   <TD width="50%">{#Max. Controls In}</TD>
                   <TD><INPUT size=5 value={$servMgr.maxControlsIn} name=maxcin></TD>
                 </TR>
-                <TR align=left bgColor=#ddd class="normal">
-                  <TD bgcolor="#eee">{#Max. Connections In} </TD>
-                  <TD bgcolor="#eee"><INPUT name=maxsin id="maxsin" value={$servMgr.maxServIn} size=5></TD>
+                <TR align=left bgColor=#eee class="normal">
+                  <TD>{#Max. Connections In} </TD>
+                  <TD><INPUT name=maxsin id="maxsin" value={$servMgr.maxServIn} size=5></TD>
                 </TR>
               </TBODY>
             </TABLE>
@@ -267,7 +277,7 @@
                 </TR>
                 <TR align=left bgColor=#eee class="normal">
                   <TD width="50%">{#Get Update}</TD>
-                  <TD bgcolor="#eee"><INPUT type=checkbox value=1 name=getupd></TD>
+                  <TD><INPUT type=checkbox value=1 name=getupd></TD>
                 </TR>
                 <TR align=left bgColor=#ddd class="normal">
                   <TD width="50%">{#Send}</TD>
@@ -275,7 +285,7 @@
                 </TR>
                 <TR align=left bgColor=#eee class="normal">
                   <TD>{#Min. PGNU In}</TD>
-                  <TD bgcolor="#eee"><INPUT size=5 value={$servMgr.minPGNUIn} name=minpgnu></TD>
+                  <TD><INPUT size=5 value={$servMgr.minPGNUIn} name=minpgnu></TD>
                 </TR>
                 <TR align=left bgColor=#ddd class="normal">
                   <TD>{#Max. PGNU In}</TD>
@@ -294,7 +304,7 @@
             <TABLE width="100%" align=center border=0>
               <TBODY>
                 <TR align=middle bgColor=#ccc class="normal">
-                  <TD colSpan=2><B>{#Channel Feeds}</B></TD>
+                  <TD colSpan=1><B>{#Channel Feeds}</B></TD>
                 </TR>
                 {@loop servMgr.numChannelFeedsPlusOne}
                 {@if loop.indexEven}

@@ -10,12 +10,6 @@ public:
     {
     }
 
-    void SetUp()
-    {
-    }
-
-    // void TearDown( ) { }
-
     ~ID4Fixture( )
     {
         delete pid;

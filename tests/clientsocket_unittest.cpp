@@ -3,21 +3,6 @@
 
 class ClientSocketFixture : public ::testing::Test {
 public:
-    ClientSocketFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~ClientSocketFixture()
-    {
-    }
 };
 
 TEST_F(ClientSocketFixture, getIP)

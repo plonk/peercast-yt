@@ -16,12 +16,12 @@
       {@fragment notifications}
       <script>
         var notifications = [];
-        var t = {$sys.time};
-        var r = {$servMgr.refreshHTML};
+        var t = {!sys.time};
+        var r = {!servMgr.refreshHTML};
         {@loop notificationBuffer.numNotifications}
           {@if !loop.notification.isRead}
             if (t - {$loop.notification.unixTime} <= (2*r))
-              notifications.push({ time: "{$loop.notification.time}", type: "{$loop.notification.type}", message: "{$loop.notification.message}" });
+              notifications.push({ time: "{\loop.notification.time}", type: "{\loop.notification.type}", message: "{\loop.notification.message}" });
           {@end}
         {@end}
 
@@ -90,7 +90,7 @@
                             </table>
                             <div align="center"><span class="titlelinksBig"> </span>
                           </div></td>
-                          <td style="padding: 0">
+                          <td style="padding: 0" align="right">
                             {@if servMgr.upgradeURL}
                             <div align="center" class="normal">
                               <a href="{$servMgr.upgradeURL}" target="_blank">
@@ -102,9 +102,11 @@
                               </a>
                             </div>
                             {@else}
-                              <div align="center" class="normal-small">
-                                {$servMgr.rootMsg}
-                              </div>
+                            {@if servMgr.rootMsg}
+                            <span title="{#Message from the root server}" class="root-message normal-small" align="center">
+                              {$servMgr.rootMsg}
+                            </span>
+                            {@end}
                             {@end}
                           </td>
                         </tr>
@@ -115,17 +117,16 @@
               </div>
               <table class="navbar" width="100%" border="1" cellpadding="1" cellspacing="0">
                 <tr class="normal">
-                  <td width="12.5%"><div align="center"><a href="index.html">{#_Information_navbar}</a></div></td>
-                  <td width="12.5%"><div align="center"><a href="channels.html">{#_Yellow Pages_navbar}</a></div></td>
-                  <td width="12.5%"><div align="center"><a href="notifications.html">{#Notifications}</a></div></td>
-                  <td width="12.5%"><div align="center"><a href="relays.html">{#_Relays_navbar}</a></div></td>
+                  <td width="14.286%"><div align="center"><a href="index.html">{#_Information_navbar}</a></div></td>
+                  <td width="14.286%"><div align="center"><a href="channels.html">{#Channels}</a></div></td>
+                  <td width="14.286%"><div align="center"><a href="notifications.html">{#Notifications}</a></div></td>
 <!--
-                  <td width="12.5%"><div align="center"><a href="broadcast.html">{#_Broadcast_navbar}</a></div></td> -->
+                  <td width="14.286%"><div align="center"><a href="broadcast.html">{#_Broadcast_navbar}</a></div></td> -->
 
-                  <td width="12.5%"><div align="center"><a href="connections.html">{#_Connections_navbar}</a></div></td>
-                  <td width="12.5%"><div align="center"><a href="settings.html">{#_Settings_navbar}</a></div></td>
-                  <td width="12.5%"><div align="center"><a href="viewlog.html">{#_View Log_navbar}</a></div></td>
-                  <td width="12.5%"><div align="center"><a href="logout.html">{#_Logout_navbar}</a></div></td>
+                  <td width="14.286%"><div align="center"><a href="connections.html">{#_Connections_navbar}</a></div></td>
+                  <td width="14.286%"><div align="center"><a href="settings.html">{#_Settings_navbar}</a></div></td>
+                  <td width="14.286%"><div align="center"><a href="viewlog.html">{#_View Log_navbar}</a></div></td>
+                  <td width="14.286%"><div align="center"><a href="logout.html">{#_Logout_navbar}</a></div></td>
                 </tr>
               </table>
               <!-- TemplateBeginEditable name="content" -->

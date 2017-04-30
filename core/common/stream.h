@@ -189,9 +189,17 @@ public:
 
     void    write(const char *, va_list);
     void    writeLine(const char *);
-    void    writeLineF(const char *, ...);
+    void    writeLineF(const char *, ...) __attribute__ ((format (printf, 2, 3)));
     void    writeString(const char *);
-    void    writeStringF(const char *, ...);
+    void    writeString(const std::string& s)
+    {
+        write(s.data(), s.size());
+    }
+    void    writeString(const String& s)
+    {
+        write(s.c_str(), s.size());
+    }
+    void    writeStringF(const char *, ...) __attribute__ ((format (printf, 2, 3)));
 
     bool    writeCRLF;
 
@@ -289,10 +297,14 @@ class FileStream : public Stream
 {
 public:
     FileStream() { file=NULL; }
+    ~FileStream() { close(); }
 
     void    openReadOnly(const char *);
+    void    openReadOnly(const std::string& fn) { openReadOnly(fn.c_str()); }
     void    openWriteReplace(const char *);
+    void    openWriteReplace(const std::string& fn) { openWriteReplace(fn.c_str()); }
     void    openWriteAppend(const char *);
+    void    openWriteAppend(const std::string& fn) { openWriteAppend(fn.c_str()); }
     bool    isOpen() { return file!=NULL; }
     int     length();
     int     pos();

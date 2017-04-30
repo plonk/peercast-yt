@@ -5,22 +5,6 @@ using json = nlohmann::json;
 
 class JrpcApiFixture : public ::testing::Test {
 public:
-    JrpcApiFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~JrpcApiFixture()
-    {
-    }
-
     JrpcApi api;
 };
 
