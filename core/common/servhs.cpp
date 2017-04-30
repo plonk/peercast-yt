@@ -297,8 +297,9 @@ void Servent::handshakeGET(HTTP &http)
 
         try
         {
-            PublicController publicController("public");
-            auto response = publicController(http.getRequest(), (Stream&)*sock, sock->host);
+            std::string dir = peercastApp->getPath() + std::string("public");
+            PublicController publicController(dir);
+            HTTPResponse response = publicController(http.getRequest(), (Stream&)*sock, sock->host);
             http.send(response);
         } catch (GeneralException& e)
         {
