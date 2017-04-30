@@ -135,7 +135,6 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
 
             DynamicMemoryStream mem;
             FileStream file;
-            map<string,string> additionalHeaders;
 
             try
             {
@@ -147,7 +146,12 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
             }
             file.close();
 
-            return HTTPResponse::ok({{"Content-Type",type}}, mem.str());
+            std::string body = mem.str();
+            map<string,string> headers = {
+                {"Content-Type",type},
+                {"Content-Length",to_string(body.size())}
+            };
+            return HTTPResponse::ok(headers, body);
         }
     }
 }
