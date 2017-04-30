@@ -286,7 +286,8 @@ void Servent::handshakeGET(HTTP &http)
             http.writeLine("");
             http.writeString(response.c_str());
         }
-    }else if (strncmp(fn, "/public/", strlen("/public/"))==0)
+    }else if (strcmp(fn, "/public")== 0 ||
+              strncmp(fn, "/public/", strlen("/public/"))==0)
     {
         http.readHeaders();
 

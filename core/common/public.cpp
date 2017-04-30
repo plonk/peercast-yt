@@ -105,7 +105,10 @@ string PublicController::createChannelIndex()
 // ------------------------------------------------------------
 HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream, Host& remoteHost)
 {
-    if (req.path == "/public/")
+    if (req.path == "/public")
+    {
+        return HTTPResponse::redirectTo("/public/");
+    }else if (req.path == "/public/")
     {
         return HTTPResponse::redirectTo("/public/index.html");
     }else if (req.path == "/public/index.txt")
