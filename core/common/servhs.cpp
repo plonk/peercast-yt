@@ -295,10 +295,16 @@ void Servent::handshakeGET(HTTP &http)
             throw HTTPException(HTTP_SC_FORBIDDEN, 403);
         }
 
-        PublicController publicController("public");
-
-        auto response = publicController(http.getRequest(), (Stream&)*sock, sock->host);
-        http.send(response);
+        try
+        {
+            PublicController publicController("public");
+            auto response = publicController(http.getRequest(), (Stream&)*sock, sock->host);
+            http.send(response);
+        } catch (GeneralException& e)
+        {
+            LOG_ERROR("Error: %s", e.msg);
+            throw HTTPException(HTTP_SC_SERVERERROR, 500);
+        }
     }else
     {
         // GET マッチなし
