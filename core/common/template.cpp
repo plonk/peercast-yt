@@ -523,6 +523,12 @@ void    Template::readLoop(Stream &in, Stream *outp, int loop)
 
         if (c == '}')
         {
+            if (!inSelectedFragment() || !outp)
+            {
+                readTemplate(in, NULL, 0);
+                return;
+            }
+
             int cnt = getIntVariable(var, loop);
 
             if (cnt)
@@ -596,6 +602,12 @@ void    Template::readForeach(Stream &in, Stream *outp, int loop)
 
         if (c == '}')
         {
+            if (!inSelectedFragment() || !outp)
+            {
+                readTemplate(in, NULL, loop);
+                return;
+            }
+
             auto coll = evaluateCollectionVariable(var);
 
             if (coll.size() == 0)
