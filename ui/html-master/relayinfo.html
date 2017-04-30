@@ -10,6 +10,7 @@
 <!-- InstanceBeginEditable name="content" -->
 <div class="reloader" data-url="?id={$page.channel.id}&fragment=content" data-interval="{$servMgr.refreshHTML}">
   {@fragment content}
+  {@if page.channel.exist}
   <TABLE align=center border=0>
     <TBODY>
       <TR align=middle bgColor=#cccccc class="normal">
@@ -125,8 +126,14 @@
         <TD class="numeric">{$loop.hit.version}</TD>
         <TD class="numeric">{$loop.hit.update}</TD>
       </TR>
-      {@end} </TBODY>
+      {@end}
+    </TBODY>
   </TABLE>
+  {@else}
+  <p class="normal" style="text-align: center">
+    {#Channel not found.}
+  </p>
+  {@end}
   {@end}
 </div>
 <!-- InstanceEndEditable -->

@@ -203,7 +203,21 @@ void Template::writeGlobalVariable(Stream &s, const String &varName, int loop)
         r = writeObjectProperty(s, varName + strlen("this."), currentElement);
     }else if (varName.startsWith("page."))
     {
-        if (varName.startsWith("page.channel."))
+        if (varName == "page.channel.exist")
+        {
+            const char *idstr = getCGIarg(tmplArgs, "id=");
+            if (idstr)
+            {
+                GnuID id;
+                id.fromStr(idstr);
+                Channel *ch = chanMgr->findChannelByID(id);
+                if (ch)
+                    s.writeString("1");
+                else
+                    s.writeString("0");
+                r = true;
+            }
+        }if (varName.startsWith("page.channel."))
         {
             const char *idstr = getCGIarg(tmplArgs, "id=");
             if (idstr)
