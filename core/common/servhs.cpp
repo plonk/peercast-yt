@@ -289,6 +289,8 @@ void Servent::handshakeGET(HTTP &http)
     }else if (strcmp(fn, "/public")== 0 ||
               strncmp(fn, "/public/", strlen("/public/"))==0)
     {
+        // 公開ディレクトリ
+
         http.readHeaders();
 
         if (!servMgr->publicDirectoryEnabled)
