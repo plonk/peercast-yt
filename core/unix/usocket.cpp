@@ -21,7 +21,6 @@
 
 // TODO: fix socket closing
 
-
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -42,7 +41,6 @@
 #ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0
 #endif
-
 
 // --------------------------------------------------
 void UClientSocket::init()
@@ -67,6 +65,7 @@ bool ClientSocket::getHostname(char *str, unsigned int ip)
     }else
         return false;
 }
+
 // --------------------------------------------------
 unsigned int ClientSocket::getIP(const char *name)
 {
@@ -97,6 +96,7 @@ unsigned int ClientSocket::getIP(const char *name)
     }
     return 0;
 }
+
 // --------------------------------------------------
 void UClientSocket::setLinger(int sec)
 {
@@ -115,6 +115,7 @@ void UClientSocket::setNagle(bool on)
      if (setsockopt(sockNum, IPPROTO_TCP, TCP_NODELAY, (void*) &nodelay, sizeof(nodelay)) < 0)
         throw SockException("Unable to set NODELAY");
 }
+
 // --------------------------------------------------
 void UClientSocket::setBlocking(bool block)
 {
@@ -156,11 +157,10 @@ hostent *UClientSocket::resolveHost(const char *hostName)
     }
     return he;
 }
+
 // --------------------------------------------------
 void UClientSocket::open(Host &rh)
 {
-
-
     sockNum = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     if (sockNum == INVALID_SOCKET)
@@ -179,8 +179,8 @@ void UClientSocket::open(Host &rh)
     remoteAddr.sin_family = AF_INET;
     remoteAddr.sin_port = htons(host.port);
     remoteAddr.sin_addr.s_addr = htonl(host.ip);
-
 }
+
 // --------------------------------------------------
 void UClientSocket::checkTimeout(bool r, bool w)
 {
@@ -223,7 +223,6 @@ void UClientSocket::checkTimeout(bool r, bool w)
             throw TimeoutException();
         else if (r == SOCKET_ERROR)
             throw SockException("select failed.");
-
     }else{
         char str[64];
         snprintf(str, 64, "Closed: %s", strerror(err));
@@ -280,6 +279,7 @@ void UClientSocket::connect()
     if (::connect(sockNum, (struct sockaddr *)&remoteAddr, sizeof(remoteAddr)) == SOCKET_ERROR)
         checkTimeout(false, true);
 }
+
 // --------------------------------------------------
 int UClientSocket::read(void *p, int l)
 {
@@ -339,7 +339,6 @@ int UClientSocket::readUpto(void *p, int l)
     return bytesRead;
 }
 
-
 // --------------------------------------------------
 void UClientSocket::write(const void *p, int l)
 {
@@ -366,7 +365,6 @@ void UClientSocket::write(const void *p, int l)
     }
 }
 
-
 // --------------------------------------------------
 void UClientSocket::bind(Host &h)
 {
@@ -391,10 +389,10 @@ void UClientSocket::bind(Host &h)
 
     host = h;
 }
+
 // --------------------------------------------------
 ClientSocket *UClientSocket::accept()
 {
-
     socklen_t fromSize = sizeof(sockaddr_in);
     sockaddr_in from;
 
@@ -431,6 +429,7 @@ Host UClientSocket::getLocalHost()
     else
         return Host(0, 0);
 }
+
 // --------------------------------------------------
 void UClientSocket::close()
 {
@@ -482,4 +481,3 @@ int UClientSocket::numPending()
 
     return (int)len;
 }
-
