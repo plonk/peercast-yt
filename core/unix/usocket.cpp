@@ -231,49 +231,6 @@ void UClientSocket::checkTimeout(bool r, bool w)
 }
 
 // --------------------------------------------------
-void UClientSocket::checkTimeout2(bool r, bool w)
-{
-    {
-        //LOG("checktimeout %d %d", (int)r, (int)w);
-
-        timeval timeout;
-        fd_set read_fds;
-        fd_set write_fds;
-
-        timeout.tv_sec = 0;
-        timeout.tv_usec = 0;
-
-        FD_ZERO (&write_fds);
-        if (w)
-        {
-            timeout.tv_sec = (int)this->writeTimeout/1000;
-            FD_SET (sockNum, &write_fds);
-        }
-
-        FD_ZERO (&read_fds);
-        if (r)
-        {
-            timeout.tv_sec = (int)this->readTimeout/1000;
-            FD_SET (sockNum, &read_fds);
-        }
-
-        timeval *tp;
-        if (timeout.tv_sec)
-            tp = &timeout;
-        else
-            tp = NULL;
-
-
-        int r=select (sockNum+1, &read_fds, &write_fds, NULL, tp);
-
-        if (r == 0)
-            throw TimeoutException();
-        else if (r == SOCKET_ERROR)
-            throw SockException("select failed.");
-    }
-}
-
-// --------------------------------------------------
 void UClientSocket::connect()
 {
     if (::connect(sockNum, (struct sockaddr *)&remoteAddr, sizeof(remoteAddr)) == SOCKET_ERROR)
