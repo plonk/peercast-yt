@@ -46,7 +46,6 @@
 void UClientSocket::init()
 {
     LOG_DEBUG("LStartup:  OK");
-
 }
 
 // --------------------------------------------------
@@ -69,7 +68,6 @@ bool ClientSocket::getHostname(char *str, unsigned int ip)
 // --------------------------------------------------
 unsigned int ClientSocket::getIP(const char *name)
 {
-
     char szHostName[256];
 
     if (!name)
@@ -84,7 +82,6 @@ unsigned int ClientSocket::getIP(const char *name)
 
     if (!he)
         return 0;
-
 
     char* lpAddr = he->h_addr_list[0];
     if (lpAddr)
@@ -132,7 +129,6 @@ void UClientSocket::setBlocking(bool block)
 // --------------------------------------------------
 void UClientSocket::setReuse(bool yes)
 {
-
     unsigned long op = yes ? 1 : 0;
     if (setsockopt(sockNum, SOL_SOCKET, SO_REUSEADDR, (char *)&op, sizeof(op)) < 0)
         throw SockException("Unable to set REUSE");
@@ -215,7 +211,6 @@ void UClientSocket::checkTimeout(bool r, bool w)
             tp = &timeout;
         else
             tp = NULL;
-
 
         int r=select (sockNum+1, &read_fds, &write_fds, NULL, tp);
 
@@ -355,10 +350,8 @@ ClientSocket *UClientSocket::accept()
 
     int conSock = ::accept(sockNum, (sockaddr *)&from, &fromSize);
 
-
     if (conSock ==  INVALID_SOCKET)
         return NULL;
-
 
     UClientSocket *cs = new UClientSocket();
     cs->sockNum = conSock;
