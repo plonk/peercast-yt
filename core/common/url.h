@@ -39,8 +39,5 @@ public:
     ::String        baseurl;
 };
 
-
-
-
 #endif
 

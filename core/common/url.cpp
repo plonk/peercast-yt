@@ -28,7 +28,6 @@
 // ------------------------------------------------
 void URLSource::stream(Channel *ch)
 {
-
     String url;
     while (ch->thread.active && !peercastInst->isQuitting)
     {
@@ -37,8 +36,8 @@ void URLSource::stream(Channel *ch)
 
         url = streamURL(ch, url.cstr());
     }
-
 }
+
 // ------------------------------------------------
 int URLSource::getSourceRate()
 {
@@ -56,20 +55,18 @@ int URLSource::getSourceRate()
     if (peercastInst->isQuitting || !ch->thread.active)
         return nextURL;
 
-
     String urlTmp;
     urlTmp.set(url);
 
     char *fileName = urlTmp.cstr();
 
-    PlayList *pls=NULL;
-    ChannelStream *source=NULL;
+    PlayList *pls = NULL;
+    ChannelStream *source = NULL;
 
     LOG_CHANNEL("Fetch URL=%s", fileName);
 
     try
     {
-
         // get the source protocol
         if (strnicmp(fileName, "http://", 7)==0)
         {
@@ -100,7 +97,6 @@ int URLSource::getSourceRate()
         if (ch->info.contentType == ChanInfo::T_PLS)
             ch->info.contentType = ChanInfo::T_MP3;
 
-
         ch->setStatus(Channel::S_CONNECTING);
 
         if ((ch->info.srcProtocol == ChanInfo::SP_HTTP) || (ch->info.srcProtocol == ChanInfo::SP_PCP) || (ch->info.srcProtocol == ChanInfo::SP_MMS))
@@ -109,26 +105,21 @@ int URLSource::getSourceRate()
             if ((ch->info.contentType == ChanInfo::T_WMA) || (ch->info.contentType == ChanInfo::T_WMV))
                 ch->info.srcProtocol = ChanInfo::SP_MMS;
 
-
             LOG_CHANNEL("Channel source is HTTP");
 
             ClientSocket *inputSocket = sys->createSocket();
             if (!inputSocket)
                 throw StreamException("Channel cannot create socket");
 
-
             inputStream = inputSocket;
-
 
             char *dir = strstr(fileName, "/");
             if (dir)
-                *dir++=0;
-
+                *dir++ = 0;
 
             LOG_CHANNEL("Fetch Host=%s", fileName);
             if (dir)
                 LOG_CHANNEL("Fetch Dir=%s", dir);
-
 
             Host host;
             host.fromStrName(fileName, 80);
@@ -165,7 +156,6 @@ int URLSource::getSourceRate()
 
             while (http.nextHeader())
             {
-
                 LOG_CHANNEL("Fetch HTTP: %s", http.cmdLine);
 
                 ChanInfo tmpInfo = ch->info;
@@ -204,10 +194,9 @@ int URLSource::getSourceRate()
                             ch->info.srcProtocol = ChanInfo::SP_MMS;
                     }
                 }
-
             }
 
-            if ((!nextURL.isEmpty()) && (res==302))
+            if ((!nextURL.isEmpty()) && (res == 302))
             {
                 LOG_CHANNEL("Channel redirect: %s", nextURL.cstr());
                 inputSocket->close();
@@ -216,16 +205,14 @@ int URLSource::getSourceRate()
                 return nextURL;
             }
 
-            if (res!=200)
+            if (res != 200)
             {
                 LOG_ERROR("HTTP response: %d", res);
                 throw StreamException("Bad HTTP connect");
             }
 
-
         }else if (ch->info.srcProtocol == ChanInfo::SP_FILE)
         {
-
             LOG_CHANNEL("Channel source is FILE");
 
             FileStream *fs = new FileStream();
@@ -238,7 +225,7 @@ int URLSource::getSourceRate()
             {
                 const char *ext = fileName+strlen(fileName);
                 while (*--ext)
-                    if (*ext=='.')
+                    if (*ext == '.')
                     {
                         ext++;
                         break;
@@ -255,16 +242,13 @@ int URLSource::getSourceRate()
                 pls = new PlayList(PlayList::T_ASX, 1000);
             else
                 ch->info.contentType = fileType;
-
         }else
         {
             throw StreamException("Unsupported URL");
         }
 
-
         if (pls)
         {
-
             LOG_CHANNEL("Channel is Playlist");
 
             pls->read(*inputStream);
@@ -273,7 +257,7 @@ int URLSource::getSourceRate()
             delete inputStream;
             inputStream = NULL;
 
-            int urlNum=0;
+            int urlNum = 0;
             String url;
 
             LOG_CHANNEL("Playlist: %d URLs", pls->numURLs);
@@ -292,10 +276,8 @@ int URLSource::getSourceRate()
             }
 
             delete pls;
-
         }else
         {
-
             // if we didn`t get a channel id from the source, then create our own (its an original broadcast)
             if (!ch->info.id.isSet())
             {
@@ -316,14 +298,12 @@ int URLSource::getSourceRate()
 
             inputStream->close();
         }
-
     }catch (StreamException &e)
     {
         ch->setStatus(Channel::S_ERROR);
         LOG_ERROR("Channel error: %s", e.msg);
         sys->sleep(1000);
     }
-
 
     ch->setStatus(Channel::S_CLOSING);
     if (inputStream)
@@ -335,7 +315,5 @@ int URLSource::getSourceRate()
     if (source)
         delete source;
 
-
     return nextURL;
-
 }
