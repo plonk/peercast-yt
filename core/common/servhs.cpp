@@ -1807,6 +1807,25 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
 }
 
 // -----------------------------------
+ChanInfo Servent::createChannelInfo(GnuID broadcastID, const String& broadcastMsg, cgi::Query& query)
+{
+    ChanInfo info;
+
+    info.setContentType(ChanInfo::getTypeFromStr(query.get("type").c_str()));
+    info.name    = query.get("name");
+    info.genre   = query.get("genre");
+    info.desc    = query.get("desc");
+    info.url     = query.get("url");
+    info.bitrate = atoi(query.get("bitrate").c_str());
+    info.comment = query.get("comment").empty() ? broadcastMsg : query.get("comment");
+
+    info.id = broadcastID;
+    info.id.encode(NULL, info.name.cstr(), NULL, 0);
+
+    return info;
+}
+
+// -----------------------------------
 // HTTP Push 放送
 void Servent::handshakeHTTPPush(const std::string& args)
 {
@@ -1836,17 +1855,8 @@ void Servent::handshakeHTTPPush(const std::string& args)
         }
     }
 
-    ChanInfo info;
-    info.setContentType(ChanInfo::getTypeFromStr(query.get("type").c_str()));
-    info.name  = query.get("name");
-    info.genre = query.get("genre");
-    info.desc  = query.get("desc");
-    info.url   = query.get("url");
-    info.bitrate   = query.get("bitrate").empty() ? 0 : stoi(query.get("bitrate"));
-    info.comment   = query.get("comment").empty() ? chanMgr->broadcastMsg : query.get("comment");
-
-    info.id = chanMgr->broadcastID;
-    info.id.encode(NULL, info.name.cstr(), NULL, 0);
+    
+    ChanInfo info = createChannelInfo(chanMgr->broadcastID, chanMgr->broadcastMsg, query);
 
     Channel *c = chanMgr->findChannelByID(info.id);
     if (c)
