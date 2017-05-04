@@ -60,6 +60,7 @@ const char *GnuStream::getRouteStr(R_TYPE r)
         default: return "UNKNOWN"; break;
     }
 }
+
 // ---------------------------
 void GnuPacket::makeChecksumID()
 {
@@ -77,6 +78,7 @@ void GnuPacket::initPing(int t)
 
     id.generate();
 }
+
 // ---------------------------
 void GnuPacket::initPong(Host &h, bool ownPong, GnuPacket &ping)
 {
@@ -99,6 +101,7 @@ void GnuPacket::initPong(Host &h, bool ownPong, GnuPacket &ping)
         pk.writeLong(0);                // total
     }
 }
+
 // ---------------------------
 void GnuPacket::initPush(ChanHit &ch, Host &sh)
 {
@@ -282,6 +285,7 @@ void GnuStream::sendPacket(GnuPacket &p)
         throw e;
     }
 }
+
 // ---------------------------
 bool GnuStream::readPacket(GnuPacket &p)
 {

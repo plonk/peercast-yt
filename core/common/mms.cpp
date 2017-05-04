@@ -32,6 +32,7 @@ void MMSStream::readEnd(Stream &, Channel *)
 void MMSStream::readHeader(Stream &, Channel *)
 {
 }
+
 // ------------------------------------------
 void MMSStream::processChunk(Stream &in, Channel *ch, ASFChunk& chunk)
 {

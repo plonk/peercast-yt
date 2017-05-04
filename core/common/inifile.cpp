@@ -34,6 +34,7 @@ bool IniFile::openReadOnly(const char *fn)
     }
     return true;
 }
+
 // -----------------------------------------
 bool IniFile::openWriteReplace(const char *fn)
 {
@@ -49,6 +50,7 @@ bool IniFile::openWriteReplace(const char *fn)
     }
     return true;
 }
+
 // -----------------------------------------
 void IniFile::close()
 {
@@ -83,6 +85,7 @@ bool    IniFile::readNext()
 
     return true;
 }
+
 // -----------------------------------------
 bool IniFile::isName(const char *str)
 {
@@ -94,6 +97,7 @@ char *  IniFile::getName()
 {
     return nameStr;
 }
+
 // -----------------------------------------
 int     IniFile::getIntValue()
 {
@@ -102,6 +106,7 @@ int     IniFile::getIntValue()
     else
         return 0;
 }
+
 // -----------------------------------------
 const char *    IniFile::getStrValue()
 {
@@ -110,6 +115,7 @@ const char *    IniFile::getStrValue()
     else
         return "";
 }
+
 // -----------------------------------------
 bool    IniFile::getBoolValue()
 {
@@ -130,12 +136,14 @@ void    IniFile::writeIntValue(const char *name, int iv)
     sprintf(currLine, "%s = %d", name, iv);
     fStream.writeLine(currLine);
 }
+
 // -----------------------------------------
 void    IniFile::writeStrValue(const char *name, const char *sv)
 {
     sprintf(currLine, "%s = %s", name, sv);
     fStream.writeLine(currLine);
 }
+
 // -----------------------------------------
 void    IniFile::writeSection(const char *name)
 {
@@ -143,12 +151,14 @@ void    IniFile::writeSection(const char *name)
     sprintf(currLine, "[%s]", name);
     fStream.writeLine(currLine);
 }
+
 // -----------------------------------------
 void    IniFile::writeBoolValue(const char *name, int v)
 {
     sprintf(currLine, "%s = %s", name, (v!=0)?"Yes":"No");
     fStream.writeLine(currLine);
 }
+
 // -----------------------------------------
 void    IniFile::writeLine(const char *str)
 {

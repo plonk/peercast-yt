@@ -61,6 +61,7 @@ void XML::Node::add(Node *n)
         child = n;
     }
 }
+
 // ---------------------------------
 inline char nibsToByte(char n1, char n2)
 {
@@ -94,6 +95,7 @@ int XML::Node::getBinaryContent(void *ptr, int size)
     }
     return i;
 }
+
 // ----------------------------------
 void XML::Node::setBinaryContent(void *ptr, int size)
 {
@@ -121,6 +123,7 @@ void XML::Node::setContent(const char *n)
 {
     contData = strdup(n);
 }
+
 // ----------------------------------
 void XML::Node::setAttributes(const char *n)
 {
@@ -211,6 +214,7 @@ void XML::Node::setAttributes(const char *n)
         }
     }
 }
+
 // ----------------------------------
 XML::Node::Node(const char *fmt, ...)
 {
@@ -232,6 +236,7 @@ void XML::Node::init()
     contData = NULL;
     userPtr = NULL;
 }
+
 // ----------------------------------
 int XML::Node::findAttrInt(const char *name)
 {
@@ -239,6 +244,7 @@ int XML::Node::findAttrInt(const char *name)
     if (!v) return 0;
     return atoi(v);
 }
+
 // ----------------------------------
 int XML::Node::findAttrID(const char *name)
 {
@@ -246,6 +252,7 @@ int XML::Node::findAttrID(const char *name)
     if (!v) return 0;
     return strToID(v);
 }
+
 // ----------------------------------
 char *XML::Node::findAttr(const char *name)
 {
@@ -258,6 +265,7 @@ char *XML::Node::findAttr(const char *name)
     }
     return NULL;
 }
+
 // ----------------------------------
 void XML::Node::write(Stream &out, int level)
 {
@@ -313,6 +321,7 @@ void XML::Node::write(Stream &out, int level)
     if (sibling)
         sibling->write(out, level);
 }
+
 // ----------------------------------
 XML::Node::~Node()
 {
@@ -350,6 +359,7 @@ void XML::write(Stream &out)
     out.writeLine("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
     root->write(out, 1);
 }
+
 // ----------------------------------
 void XML::writeCompact(Stream &out)
 {
@@ -359,6 +369,7 @@ void XML::writeCompact(Stream &out)
     out.writeLine("<?xml ?>");
     root->write(out, 1);
 }
+
 // ----------------------------------
 void XML::writeHTML(Stream &out)
 {

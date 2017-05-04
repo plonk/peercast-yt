@@ -28,6 +28,7 @@ void MP3Stream::readEnd(Stream &, Channel *)
 void MP3Stream::readHeader(Stream &, Channel *)
 {
 }
+
 // ------------------------------------------
 int MP3Stream::readPacket(Stream &in, Channel *ch)
 {

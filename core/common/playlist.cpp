@@ -52,6 +52,7 @@ void PlayList::readASX(Stream &in)
         }
     }
 }
+
 // -----------------------------------
 void PlayList::readSCPLS(Stream &in)
 {
@@ -66,6 +67,7 @@ void PlayList::readSCPLS(Stream &in)
         }
     }
 }
+
 // -----------------------------------
 void PlayList::readPLS(Stream &in)
 {
@@ -76,6 +78,7 @@ void PlayList::readPLS(Stream &in)
             addURL(tmp, "");
     }
 }
+
 // -----------------------------------
 void PlayList::writeSCPLS(Stream &out)
 {
@@ -91,12 +94,14 @@ void PlayList::writeSCPLS(Stream &out)
     }
     out.writeLine("Version=2");
 }
+
 // -----------------------------------
 void PlayList::writePLS(Stream &out)
 {
     for (int i=0; i<numURLs; i++)
         out.writeLineF("%s", urls[i].cstr());
 }
+
 // -----------------------------------
 void PlayList::writeRAM(Stream &out)
 {

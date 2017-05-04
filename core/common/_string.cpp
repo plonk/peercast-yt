@@ -295,6 +295,7 @@ void String::ASCII2ESC(const char *in, bool safe)
     }
     *op = 0;
 }
+
 // -----------------------------------
 void String::HTML2ASCII(const char *in)
 {
@@ -327,6 +328,7 @@ void String::HTML2ASCII(const char *in)
 
     *o = 0;
 }
+
 // -----------------------------------
 void String::HTML2UNICODE(const char *in)
 {
@@ -388,6 +390,7 @@ void String::ESC2ASCII(const char *in)
 
     *o = 0;
 }
+
 // -----------------------------------
 void String::ASCII2META(const char *in, bool safe)
 {

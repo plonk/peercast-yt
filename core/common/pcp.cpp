@@ -36,6 +36,7 @@ void PCPStream::init(GnuID &rid)
     outData.init();
     outData.accept = ChanPacket::T_PCP;
 }
+
 // ------------------------------------------
 void PCPStream::readVersion(Stream &in)
 {
@@ -48,6 +49,7 @@ void PCPStream::readVersion(Stream &in)
 
     LOG_DEBUG("PCP ver: %d", ver);
 }
+
 // ------------------------------------------
 void PCPStream::readHeader(Stream &in, Channel *)
 {
@@ -58,6 +60,7 @@ void PCPStream::readHeader(Stream &in, Channel *)
 
 //  readVersion(in);
 }
+
 // ------------------------------------------
 bool PCPStream::sendPacket(ChanPacket &pack, GnuID &destID)
 {
@@ -68,6 +71,7 @@ bool PCPStream::sendPacket(ChanPacket &pack, GnuID &destID)
 
     return outData.writePacket(pack);
 }
+
 // ------------------------------------------
 void PCPStream::flush(Stream &in)
 {
@@ -79,12 +83,14 @@ void PCPStream::flush(Stream &in)
         pack.writeRaw(in);
     }
 }
+
 // ------------------------------------------
 int PCPStream::readPacket(Stream &in, Channel *)
 {
     BroadcastState bcs;
     return readPacket(in, bcs);
 }
+
 // ------------------------------------------
 int PCPStream::readPacket(Stream &in, BroadcastState &bcs)
 {
@@ -209,6 +215,7 @@ void PCPStream::readPushAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
         }
     }
 }
+
 // ------------------------------------------
 void PCPStream::readRootAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 {
@@ -348,6 +355,7 @@ void PCPStream::readPktAtoms(Channel *ch, AtomStream &atom, int numc, BroadcastS
     if ((pack.pos) && (!bcs.streamPos || (pack.pos < bcs.streamPos)))
         bcs.streamPos = pack.pos;
 }
+
 // -----------------------------------
 void PCPStream::readHostAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 {
@@ -515,6 +523,7 @@ void PCPStream::readChanAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
     if (ch && !ch->isBroadcasting())
         ch->updateInfo(newInfo);
 }
+
 // ------------------------------------------
 int PCPStream::readBroadcastAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 {

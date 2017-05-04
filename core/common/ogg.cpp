@@ -20,6 +20,7 @@
 #include "ogg.h"
 
 static int test=0;
+
 // ------------------------------------------
 void OGGStream::readHeader(Stream &, Channel *)
 {
@@ -144,6 +145,7 @@ void OggSubStream::readHeader(Channel *ch, OggPage &ogg)
     if (pack.numPackets >= maxHeaders)
         procHeaders(ch);
 }
+
 // -----------------------------------
 void OggVorbisSubStream::procHeaders(Channel *ch)
 {
@@ -184,6 +186,7 @@ void OggVorbisSubStream::procHeaders(Channel *ch)
         }
     }
 }
+
 // -----------------------------------
 double OggTheoraSubStream::getTime(OggPage &ogg)
 {
@@ -192,6 +195,7 @@ double OggTheoraSubStream::getTime(OggPage &ogg)
 
     return (iframe+pframe)*frameTime;
 }
+
 // -----------------------------------
 void OggTheoraSubStream::readInfo(Stream &in, ChanInfo &info)
 {
@@ -219,6 +223,7 @@ void OggTheoraSubStream::readInfo(Stream &in, ChanInfo &info)
 
     LOG_CHANNEL("OGG Theora Info: %dx%dx%.1ffps %dkbps %dQ %dG", encWidth, encHeight, fps, bitrate, quality, granposShift);
 }
+
 // -----------------------------------
 void OggTheoraSubStream::procHeaders(Channel *ch)
 {
@@ -289,6 +294,7 @@ void OggVorbisSubStream::readSetup(Stream &in)
 
     LOG_CHANNEL("Read %d bytes of Vorbis Setup", cnt);
 }
+
 // -----------------------------------
 void OggVorbisSubStream::readComment(Stream &in, ChanInfo &info)
 {
@@ -346,21 +352,25 @@ bool OggPage::isBOS()
 {
     return (data[5] & 0x02) != 0;
 }
+
 // -----------------------------------
 bool OggPage::isEOS()
 {
     return (data[5] & 0x04) != 0;
 }
+
 // -----------------------------------
 bool OggPage::isNewPacket()
 {
     return (data[5] & 0x01) == 0;
 }
+
 // -----------------------------------
 bool OggPage::isHeader()
 {
     return ((*(unsigned int *)&data[6]) || (*(unsigned int *)&data[10])) == 0;
 }
+
 // -----------------------------------
 unsigned int OggPage::getSerialNo()
 {
@@ -423,11 +433,13 @@ void OggPage::read(Stream &in)
 
     #endif
 }
+
 // -----------------------------------
 bool OggPage::detectVorbis()
 {
     return memcmp(&data[headLen+1], "vorbis", 6) == 0;
 }
+
 // -----------------------------------
 bool OggPage::detectTheora()
 {

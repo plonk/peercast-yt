@@ -43,6 +43,7 @@ Sys::Sys()
     logBuf = new LogBuffer(1000, 100);
     numThreads=0;
 }
+
 // ------------------------------------------
 Sys::~Sys()
 {
@@ -54,6 +55,7 @@ void Sys::sleepIdle()
 {
     sleep(idleSleepTime);
 }
+
 // -----------------------------------
 char *trimstr(char *s1)
 {
@@ -103,6 +105,7 @@ char *stristr(const char *s1, const char *s2)
     }
     return NULL;
 }
+
 // -----------------------------------
 void LogBuffer::write(const char *str, TYPE t)
 {
@@ -169,6 +172,7 @@ bool cmpCGIarg(const char *str, const char *arg, const char *value)
     }else
         return false;
 }
+
 // -----------------------------------
 bool hasCGIarg(const char *str, const char *arg)
 {

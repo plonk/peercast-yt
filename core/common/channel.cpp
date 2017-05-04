@@ -378,6 +378,7 @@ bool Channel::acceptGIV(ClientSocket *givSock)
     }else
         return false;
 }
+
 // -----------------------------------
 void Channel::connectFetch()
 {
@@ -775,6 +776,7 @@ static char *nextMetaPart(char *str, char delim)
     }
     return NULL;
 }
+
 // -----------------------------------
 static void copyStr(char *to, char *from, int max)
 {
@@ -894,12 +896,14 @@ void ChanMeta::fromXML(XML &xml)
 
     len = tout.pos;
 }
+
 // -----------------------------------
 void ChanMeta::fromMem(void *p, int l)
 {
     len = l;
     memcpy(data, p, len);
 }
+
 // -----------------------------------
 void ChanMeta::addMem(void *p, int l)
 {
@@ -909,6 +913,7 @@ void ChanMeta::addMem(void *p, int l)
         len += l;
     }
 }
+
 // -----------------------------------
 void Channel::broadcastTrackerUpdate(GnuID &svID, bool force)
 {
@@ -1037,6 +1042,7 @@ void Channel::updateInfo(const ChanInfo &newInfo)
 
     peercastApp->channelUpdate(&info);
 }
+
 // -----------------------------------
 ChannelStream *Channel::createSource()
 {

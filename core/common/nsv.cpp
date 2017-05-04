@@ -27,6 +27,7 @@ void NSVStream::readEnd(Stream &, Channel *)
 void NSVStream::readHeader(Stream &, Channel *)
 {
 }
+
 // ------------------------------------------
 int NSVStream::readPacket(Stream &in, Channel *ch)
 {

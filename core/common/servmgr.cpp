@@ -112,6 +112,7 @@ ServMgr::ServMgr()
 
     chanLog="";
 }
+
 // -----------------------------------
 ServMgr::~ServMgr()
 {
@@ -122,6 +123,7 @@ ServMgr::~ServMgr()
         servents = next;
     }
 }
+
 // -----------------------------------
 BCID *ServMgr::findValidBCID(int index)
 {
@@ -136,6 +138,7 @@ BCID *ServMgr::findValidBCID(int index)
     }
     return 0;
 }
+
 // -----------------------------------
 BCID *ServMgr::findValidBCID(GnuID &id)
 {
@@ -148,6 +151,7 @@ BCID *ServMgr::findValidBCID(GnuID &id)
     }
     return 0;
 }
+
 // -----------------------------------
 void ServMgr::removeValidBCID(GnuID &id)
 {
@@ -166,6 +170,7 @@ void ServMgr::removeValidBCID(GnuID &id)
         bcid=bcid->next;
     }
 }
+
 // -----------------------------------
 void ServMgr::addValidBCID(BCID *bcid)
 {
@@ -209,6 +214,7 @@ void    ServMgr::setPassiveSearch(unsigned int t)
 //      t = 60;
 //  passiveSearch = t;
 }
+
 // -----------------------------------
 bool ServMgr::seenHost(Host &h, ServHost::TYPE type, unsigned int time)
 {
@@ -285,6 +291,7 @@ void ServMgr::deadHost(Host &h, ServHost::TYPE t)
                 if (hostCache[i].host.port == h.port)
                     hostCache[i].init();
 }
+
 // -----------------------------------
 void ServMgr::clearHostCache(ServHost::TYPE type)
 {
@@ -302,6 +309,7 @@ unsigned int ServMgr::numHosts(ServHost::TYPE type)
             cnt++;
     return cnt;
 }
+
 // -----------------------------------
 int ServMgr::getNewestServents(Host *hl, int max, Host &rh)
 {
@@ -345,6 +353,7 @@ int ServMgr::getNewestServents(Host *hl, int max, Host &rh)
 
     return cnt;
 }
+
 // -----------------------------------
 ServHost ServMgr::getOutgoingServent(GnuID &netid)
 {
@@ -383,6 +392,7 @@ ServHost ServMgr::getOutgoingServent(GnuID &netid)
 
     return host;
 }
+
 // -----------------------------------
 Servent *ServMgr::findOldestServent(Servent::TYPE type, bool priv)
 {
@@ -400,6 +410,7 @@ Servent *ServMgr::findOldestServent(Servent::TYPE type, bool priv)
     }
     return oldest;
 }
+
 // -----------------------------------
 Servent *ServMgr::findServent(Servent::TYPE type, Host &host, GnuID &netid)
 {
@@ -456,6 +467,7 @@ Servent *ServMgr::findServent(Servent::TYPE t)
     }
     return NULL;
 }
+
 // -----------------------------------
 Servent *ServMgr::findServentByIndex(int id)
 {
@@ -500,6 +512,7 @@ Servent *ServMgr::allocServent()
 
     return s;
 }
+
 // --------------------------------------------------
 void    ServMgr::closeConnections(Servent::TYPE type)
 {
@@ -533,6 +546,7 @@ unsigned int ServMgr::numConnected(int type, bool priv, unsigned int uptime)
     }
     return cnt;
 }
+
 // -----------------------------------
 unsigned int ServMgr::numConnected()
 {
@@ -549,6 +563,7 @@ unsigned int ServMgr::numConnected()
     }
     return cnt;
 }
+
 // -----------------------------------
 unsigned int ServMgr::numServents()
 {
@@ -577,6 +592,7 @@ unsigned int ServMgr::numUsed(int type)
     }
     return cnt;
 }
+
 // -----------------------------------
 unsigned int ServMgr::numActiveOnPort(int port)
 {
@@ -591,6 +607,7 @@ unsigned int ServMgr::numActiveOnPort(int port)
     }
     return cnt;
 }
+
 // -----------------------------------
 unsigned int ServMgr::numActive(Servent::TYPE tp)
 {
@@ -705,6 +722,7 @@ int ServMgr::broadcast(GnuPacket &pack, Servent *src)
 
     return cnt;
 }
+
 // -----------------------------------
 int ServMgr::route(GnuPacket &pack, GnuID &routeID, Servent *src)
 {
@@ -734,6 +752,7 @@ int ServMgr::route(GnuPacket &pack, GnuID &routeID, Servent *src)
     LOG_NETWORK("route: %s (%d) to %d servents", GNU_FUNC_STR(pack.func), pack.ttl, cnt);
     return cnt;
 }
+
 // -----------------------------------
 bool ServMgr::checkForceIP()
 {
@@ -807,6 +826,7 @@ void ServMgr::setFirewall(FW_STATE state)
         firewalled = state;
     }
 }
+
 // -----------------------------------
 bool ServMgr::isFiltered(int fl, Host &h)
 {
@@ -841,6 +861,7 @@ void writeServerSettings(IniFile &iniFile, unsigned int a)
     iniFile.writeBoolValue("allowNetwork", a & Servent::ALLOW_NETWORK);
     iniFile.writeBoolValue("allowDirect", a & Servent::ALLOW_DIRECT);
 }
+
 // --------------------------------------------------
 void writeFilterSettings(IniFile &iniFile, ServFilter &f)
 {
@@ -1049,6 +1070,7 @@ void ServMgr::saveSettings(const char *fn)
         iniFile.close();
     }
 }
+
 // --------------------------------------------------
 unsigned int readServerSettings(IniFile &iniFile, unsigned int a)
 {
@@ -1067,6 +1089,7 @@ unsigned int readServerSettings(IniFile &iniFile, unsigned int a)
     }
     return a;
 }
+
 // --------------------------------------------------
 void readFilterSettings(IniFile &iniFile, ServFilter &sv)
 {
@@ -1088,6 +1111,7 @@ void readFilterSettings(IniFile &iniFile, ServFilter &sv)
             sv.flags = (sv.flags & ~ServFilter::F_DIRECT) | (iniFile.getBoolValue()?ServFilter::F_DIRECT:0);
     }
 }
+
 // --------------------------------------------------
 void ServMgr::loadSettings(const char *fn)
 {
@@ -1403,6 +1427,7 @@ unsigned int ServMgr::numStreams(GnuID &cid, Servent::TYPE tp, bool all)
     }
     return cnt;
 }
+
 // --------------------------------------------------
 unsigned int ServMgr::numStreams(Servent::TYPE tp, bool all)
 {
@@ -1461,6 +1486,7 @@ bool ServMgr::getChannel(char *str, ChanInfo &info, bool relay)
 
     return false;
 }
+
 // --------------------------------------------------
 int ServMgr::findChannel(ChanInfo &info)
 {
@@ -1491,6 +1517,7 @@ int ServMgr::findChannel(ChanInfo &info)
 #endif
     return 0;
 }
+
 // --------------------------------------------------
 // add outgoing network connection from string (ip:port format)
 bool ServMgr::addOutgoing(Host h, GnuID &netid, bool pri)
@@ -1514,6 +1541,7 @@ bool ServMgr::addOutgoing(Host h, GnuID &netid, bool pri)
 #endif
     return false;
 }
+
 // --------------------------------------------------
 Servent *ServMgr::findConnection(Servent::TYPE t, GnuID &sid)
 {
@@ -1617,6 +1645,7 @@ bool ServMgr::start()
 
     return true;
 }
+
 // --------------------------------------------------
 int ServMgr::clientProc(ThreadInfo *thread)
 {
@@ -1684,6 +1713,7 @@ int ServMgr::clientProc(ThreadInfo *thread)
 #endif
     return 0;
 }
+
 // -----------------------------------
 bool    ServMgr::acceptGIV(ClientSocket *sock)
 {
@@ -1742,6 +1772,7 @@ void ServMgr::writeRootAtoms(AtomStream &atom, bool getUpdate)
         if (getUpdate)
             atom.writeParent(PCP_ROOT_UPDATE, 0);
 }
+
 // --------------------------------------------------
 void ServMgr::broadcastRootSettings(bool getUpdate)
 {
@@ -1770,6 +1801,7 @@ void ServMgr::broadcastRootSettings(bool getUpdate)
         broadcastPacket(pack, noID, servMgr->sessionID, noID, Servent::T_CIN);
     }
 }
+
 // --------------------------------------------------
 int ServMgr::broadcastPacket(ChanPacket &pack, GnuID &chanID, GnuID &srcID, GnuID &destID, Servent::TYPE type)
 {
@@ -1975,6 +2007,7 @@ const char *ServHost::getTypeStr(TYPE t)
     }
     return "UNKNOWN";
 }
+
 // --------------------------------------------------
 ServHost::TYPE ServHost::getTypeFromStr(const char *s)
 {
@@ -2013,6 +2046,7 @@ bool    ServFilter::writeVariable(Stream &out, const String &var)
     out.writeString(buf);
     return true;
 }
+
 // --------------------------------------------------
 bool    BCID::writeVariable(Stream &out, const String &var)
 {

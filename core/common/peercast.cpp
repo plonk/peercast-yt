@@ -25,12 +25,14 @@ void APICALL PeercastInstance::init()
 
     servMgr->start();
 }
+
 // --------------------------------------------------
 void    APICALL PeercastInstance::setNotifyMask(int mask)
 {
     if (servMgr)
         servMgr->notifyMask = mask;
 }
+
 // --------------------------------------------------
 int     APICALL PeercastInstance::getNotifyMask()
 {
@@ -46,6 +48,7 @@ void    APICALL PeercastInstance::setAutoConnect(bool on)
     if (servMgr)
         servMgr->autoConnect = on;
 }
+
 // --------------------------------------------------
 bool    APICALL PeercastInstance::getAutoConnect()
 {
@@ -54,6 +57,7 @@ bool    APICALL PeercastInstance::getAutoConnect()
     else
         return false;
 }
+
 // --------------------------------------------------
 void    APICALL PeercastInstance::setMaxOutput(int kbps)
 {
@@ -68,12 +72,14 @@ int     APICALL PeercastInstance::getMaxOutput()
     else
         return 0;
 }
+
 // --------------------------------------------------
 void    APICALL PeercastInstance::setMaxRelays(int max)
 {
     if (servMgr)
         servMgr->setMaxRelays(max);
 }
+
 // --------------------------------------------------
 int     APICALL PeercastInstance::getMaxRelays()
 {
@@ -82,6 +88,7 @@ int     APICALL PeercastInstance::getMaxRelays()
     else
         return 0;
 }
+
 // --------------------------------------------------
 void    APICALL PeercastInstance::setActive(bool on)
 {
@@ -91,6 +98,7 @@ void    APICALL PeercastInstance::setActive(bool on)
         servMgr->autoServe = on;
     }
 }
+
 // --------------------------------------------------
 bool    APICALL PeercastInstance::getActive()
 {
@@ -99,12 +107,14 @@ bool    APICALL PeercastInstance::getActive()
     else
         return false;
 }
+
 // --------------------------------------------------
 void    APICALL PeercastInstance::saveSettings()
 {
     if (servMgr)
         servMgr->saveSettings(peercastApp->getIniFilename());
 }
+
 // --------------------------------------------------
 void    APICALL PeercastInstance::quit()
 {
@@ -114,6 +124,7 @@ void    APICALL PeercastInstance::quit()
     if (servMgr)
         servMgr->quit();
 }
+
 // --------------------------------------------------
 void    APICALL PeercastInstance::setServerPort(int port)
 {
@@ -123,6 +134,7 @@ void    APICALL PeercastInstance::setServerPort(int port)
         servMgr->restartServer = true;
     }
 }
+
 // --------------------------------------------------
 int     APICALL PeercastInstance::getServerPort()
 {
@@ -131,17 +143,20 @@ int     APICALL PeercastInstance::getServerPort()
     else
         return 0;
 }
+
 // --------------------------------------------------
 void    APICALL PeercastInstance::setServerPassword(const char *pwd)
 {
     if (servMgr)
         strcpy(servMgr->password, pwd);
 }
+
 // --------------------------------------------------
 const char *APICALL PeercastInstance::getServerPassword()
 {
     return servMgr->password;
 }
+
 // --------------------------------------------------
 void    APICALL PeercastInstance::callLocalURL(const char *url)
 {
@@ -166,6 +181,7 @@ void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)
         peercastApp->printLog(type, str);
     }
 }
+
 // --------------------------------------------------
 void LOG(const char *fmt, ...)
 {
@@ -189,6 +205,7 @@ void LOG_ERROR(const char *fmt, ...)
         }
     }
 }
+
 // --------------------------------------------------
 void LOG_DEBUG(const char *fmt, ...)
 {
@@ -203,6 +220,7 @@ void LOG_DEBUG(const char *fmt, ...)
         }
     }
 }
+
 // --------------------------------------------------
 void LOG_NETWORK(const char *fmt, ...)
 {
@@ -217,6 +235,7 @@ void LOG_NETWORK(const char *fmt, ...)
         }
     }
 }
+
 // --------------------------------------------------
 void LOG_CHANNEL(const char *fmt, ...)
 {

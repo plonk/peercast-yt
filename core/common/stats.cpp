@@ -24,6 +24,7 @@
 #include "stream.h"
 
 Stats stats;
+
 // ------------------------------------
 void Stats::clear()
 {
@@ -35,6 +36,7 @@ void Stats::clear()
     }
     lastUpdate = 0;
 }
+
 // ------------------------------------
 void    Stats::update()
 {
@@ -52,6 +54,7 @@ void    Stats::update()
         lastUpdate = ctime;
     }
 }
+
 // ------------------------------------
 bool Stats::writeVariable(Stream &out, const String &var)
 {

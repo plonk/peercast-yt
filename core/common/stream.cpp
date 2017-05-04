@@ -38,6 +38,7 @@ void MemoryStream::convertFromBase64()
     *out = 0;
     len = out-buf;
 }
+
 // -------------------------------------
 void FileStream::openReadOnly(const char *fn)
 {
@@ -48,6 +49,7 @@ void FileStream::openReadOnly(const char *fn)
     if (!file)
         throw StreamException("Unable to open file");
 }
+
 // -------------------------------------
 void FileStream::openWriteReplace(const char *fn)
 {
@@ -58,6 +60,7 @@ void FileStream::openWriteReplace(const char *fn)
     if (!file)
         throw StreamException("Unable to open file");
 }
+
 // -------------------------------------
 void FileStream::openWriteAppend(const char *fn)
 {
@@ -78,12 +81,14 @@ void FileStream::close()
         file = NULL;
     }
 }
+
 // -------------------------------------
 void FileStream::rewind()
 {
     if (file)
         fseek(file, 0, SEEK_SET);
 }
+
 // -------------------------------------
 int FileStream::length()
 {
@@ -106,6 +111,7 @@ bool FileStream::eof()
     else
         return true;
 }
+
 // -------------------------------------
 int FileStream::read(void *ptr, int len)
 {
@@ -137,6 +143,7 @@ void FileStream::write(const void *ptr, int len)
     fwrite(ptr, 1, len, file);
     updateTotals(0, len);
 }
+
 // -------------------------------------
 void FileStream::flush()
 {
@@ -144,6 +151,7 @@ void FileStream::flush()
         return;
     fflush(file);
 }
+
 // -------------------------------------
 int FileStream::pos()
 {
@@ -176,6 +184,7 @@ void Stream::writeTo(Stream &out, int len)
         len-=rlen;
     }
 }
+
 // -------------------------------------
 int Stream::writeUTF8(unsigned int code)
 {
@@ -255,6 +264,7 @@ void Stream::updateTotals(unsigned int in, unsigned int out)
 {
     stat.update(in, out);
 }
+
 // -------------------------------------
 int Stream::readLine(char *in, int max)
 {
@@ -274,6 +284,7 @@ int Stream::readLine(char *in, int max)
     in[i] = 0;
     return i;
 }
+
 // -------------------------------------
 void Stream::write(const char *fmt, va_list ap)
 {
@@ -281,6 +292,7 @@ void Stream::write(const char *fmt, va_list ap)
     vsprintf(tmp, fmt, ap);
     write(tmp, strlen(tmp));
 }
+
 // -------------------------------------
 void Stream::writeStringF(const char *fmt, ...)
 {
@@ -289,11 +301,13 @@ void Stream::writeStringF(const char *fmt, ...)
     write(fmt, ap);
     va_end(ap);
 }
+
 // -------------------------------------
 void Stream::writeString(const char *str)
 {
     write(str, strlen(str));
 }
+
 // -------------------------------------
 void Stream::writeLineF(const char *fmt, ...)
 {
