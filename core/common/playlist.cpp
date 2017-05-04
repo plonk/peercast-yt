@@ -46,7 +46,6 @@ void PlayList::readASX(Stream &in)
                         addURL(hr, "");
                         //LOG("asx url %s", hr);
                     }
-
                 }
             }
             n=n->sibling;

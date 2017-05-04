@@ -139,7 +139,6 @@ void FileStream::write(const void *ptr, int len)
         return;
     fwrite(ptr, 1, len, file);
     updateTotals(0, len);
-
 }
 // -------------------------------------
 void FileStream::flush()
@@ -207,7 +206,6 @@ int Stream::writeUTF8(unsigned int code)
         writeChar(code & 0x3F | 0x80);
         return 4;
     }
-
 }
 
 // -------------------------------------
@@ -222,7 +220,6 @@ void Stream::skip(int len)
         read(tmp, rlen);
         len-=rlen;
     }
-
 }
 
 // -------------------------------------

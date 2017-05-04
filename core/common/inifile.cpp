@@ -44,7 +44,6 @@ bool IniFile::openWriteReplace(const char *fn)
 #if defined(_LINUX) || defined(__APPLE__)
         fStream.writeCRLF = false;
 #endif
-
     }catch (StreamException &)
     {
         return false;

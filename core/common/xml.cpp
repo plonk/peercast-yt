@@ -357,7 +357,6 @@ void XML::write(Stream &out)
 
     out.writeLine("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
     root->write(out, 1);
-
 }
 // ----------------------------------
 void XML::writeCompact(Stream &out)
@@ -367,7 +366,6 @@ void XML::writeCompact(Stream &out)
 
     out.writeLine("<?xml ?>");
     root->write(out, 1);
-
 }
 // ----------------------------------
 void XML::writeHTML(Stream &out)
@@ -491,12 +489,10 @@ void XML::read(Stream &in)
 
             tp = 0;
         } else {
-
             if (tp >= BUFFER_LEN)
                 throw StreamException("Content too big");
 
             buf[tp++] = c;
-
         }
     }
 }

@@ -63,7 +63,6 @@ char *trimstr(char *s1)
             s1++;
         else
             break;
-
     }
 
     char *s = s1;
@@ -164,7 +163,6 @@ bool cmpCGIarg(const char *str, const char *arg, const char *value)
 
     if (strnicmp(str, arg, strlen(arg)) == 0)
     {
-
         str += strlen(arg);
 
         return strncmp(str, value, strlen(value))==0;
@@ -256,7 +254,6 @@ void LogBuffer::dumpHTML(Stream &out)
     delete escaped;
 
     lock.off();
-
 }
 
 // ---------------------------

@@ -101,7 +101,6 @@ int URLSource::getSourceRate()
 
         if ((ch->info.srcProtocol == ChanInfo::SP_HTTP) || (ch->info.srcProtocol == ChanInfo::SP_PCP) || (ch->info.srcProtocol == ChanInfo::SP_MMS))
         {
-
             if ((ch->info.contentType == ChanInfo::T_WMA) || (ch->info.contentType == ChanInfo::T_WMV))
                 ch->info.srcProtocol = ChanInfo::SP_MMS;
 
@@ -210,7 +209,6 @@ int URLSource::getSourceRate()
                 LOG_ERROR("HTTP response: %d", res);
                 throw StreamException("Bad HTTP connect");
             }
-
         }else if (ch->info.srcProtocol == ChanInfo::SP_FILE)
         {
             LOG_CHANNEL("Channel source is FILE");

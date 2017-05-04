@@ -1056,7 +1056,6 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                         sock->writeLineF("Content-Length: %d", ch->headPack.len);
                     sock->writeLine("Connection: Keep-Alive");
                 }
-
             } else if (outputProtocol == ChanInfo::SP_PCP)
             {
                 sock->writeLineF("%s %d", PCX_HS_POS, streamPos);
@@ -1325,7 +1324,6 @@ void Servent::processRoot()
                     Host h(ip, port);
                     if ((ip) && (port) && (h.globalIP()))
                     {
-
                         LOG_NETWORK("added pong: %d.%d.%d.%d:%d", ip>>24&0xff, ip>>16&0xff, ip>>8&0xff, ip&0xff, port);
                         servMgr->addHost(h, ServHost::T_SERVENT, sys->getTime());
                     }
@@ -1360,7 +1358,6 @@ int Servent::givProc(ThreadInfo *thread)
     {
         sv->handshakeGiv(sv->givID);
         sv->handshakeIncoming();
-
     }catch (StreamException &e)
     {
         LOG_ERROR("GIV: %s", e.msg);
@@ -1516,7 +1513,6 @@ void Servent::handshakeIncomingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
 
     for (int i=0; i<numc; i++)
     {
-
         int c, dlen;
         ID4 id = atom.read(c, dlen);
 
@@ -1647,7 +1643,6 @@ void Servent::processIncomingPCP(bool suggestOthers)
 
         if (suggestOthers)
         {
-
             ChanHit best;
             ChanHitSearch chs;
 
@@ -2058,7 +2053,6 @@ void Servent::processStream(bool doneHandshake, ChanInfo &chanInfo)
             LOG_DEBUG("send %d", cnt++);
             file.read(buf, sizeof(buf));
             sock->write(buf, sizeof(buf));
-
         }
         file.close();
         LOG_DEBUG("raw file sent");
@@ -2193,7 +2187,6 @@ void Servent::sendRawMultiChannel(bool sendHead, bool sendData)
                     chanStreamPos[i] = ch->headPack.pos + ch->headPack.len;
                     chanStreamIndex[i] = ch->streamIndex;
                     LOG_DEBUG("Sent %d bytes header", ch->headPack.len);
-
                 }
             }
         }

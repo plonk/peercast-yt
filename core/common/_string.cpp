@@ -192,19 +192,16 @@ void String::UNKNOWN2UNICODE(const char *in, bool safe)
             utf8.writeChar(c);
             for (int i = 0; i < numChars - 1; i++)
                 utf8.writeChar(*in++);
-
         }
         else if (isSJIS(c, d))           // shift_jis
         {
             utf8.writeUTF8(JISConverter::sjisToUnicode((c<<8 | d)));
             in++;
-
         }
         else if (isEUC(c) && isEUC(d))       // euc-jp
         {
             utf8.writeUTF8(JISConverter::eucToUnicode((c<<8 | d)));
             in++;
-
         }
         else if (isESCAPE(c, d))        // html escape tags &#xx;
         {

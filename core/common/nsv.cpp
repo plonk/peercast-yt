@@ -34,7 +34,6 @@ int NSVStream::readPacket(Stream &in, Channel *ch)
 
     if (ch->icyMetaInterval)
     {
-
         int rlen = ch->icyMetaInterval;
 
         while (rlen)
@@ -63,7 +62,6 @@ int NSVStream::readPacket(Stream &in, Channel *ch)
         }
 
     }else{
-
         pack.init(ChanPacket::T_DATA, pack.data, ChanMgr::MAX_METAINT, ch->streamPos);
         in.read(pack.data, pack.len);
         ch->newPacket(pack);

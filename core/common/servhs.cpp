@@ -597,7 +597,6 @@ void Servent::handshakePLS(ChanInfo &info, bool doneHandshake)
 
     if (getLocalURL(url))
     {
-
         PlayList::TYPE type;
 
         if ((info.contentType == ChanInfo::T_WMA) || (info.contentType == ChanInfo::T_WMV))
@@ -738,7 +737,6 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
                             cookie = gotCookie;
                             break;
                         }
-
                     }
                 }
                 break;
@@ -1623,7 +1621,6 @@ void Servent::handshakeXML()
             sh->host.toStr(ipstr);
 
             hc->add(new XML::Node("host ip=\"%s\" type=\"%s\" time=\"%d\"", ipstr, ServHost::getTypeStr(sh->type), sh->time));
-
         }
     }
     rn->add(hc);
@@ -1648,7 +1645,6 @@ void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd, size_t plen)
     {
         info.name.set(arg, String::T_ASCII);
         info.name.convertTo(String::T_UNICODE);
-
     }else if (http.isHeader("x-audiocast-url") || http.isHeader("icy-url") || http.isHeader("ice-url"))
         info.url.set(arg, String::T_ASCII);
     else if (http.isHeader("x-audiocast-bitrate") || (http.isHeader("icy-br")) || http.isHeader("ice-bitrate") || http.isHeader("icy-bitrate"))
@@ -1657,7 +1653,6 @@ void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd, size_t plen)
     {
         info.genre.set(arg, String::T_ASCII);
         info.genre.convertTo(String::T_UNICODE);
-
     }else if (http.isHeader("x-audiocast-description") || http.isHeader("ice-description"))
     {
         info.desc.set(arg, String::T_ASCII);
@@ -2025,7 +2020,6 @@ void Servent::handshakeRemoteFile(const char *dirName)
             break;
         else
             mem.write(buf, len);
-
     }
     rsock->close();
 

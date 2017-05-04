@@ -369,7 +369,6 @@ void ChanMgr::broadcastRelays(Servent *serv, int minTTL, int maxTTL)
         {
             if (c->isPlaying())
             {
-
                 bool tracker = c->isBroadcasting();
 
                 int ttl = (c->info.getUptime() / servMgr->relayBroadcast);  // 1 hop per N seconds

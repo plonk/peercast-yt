@@ -116,7 +116,6 @@ ASFInfo parseASFHeader(Stream &in)
         LOG_CHANNEL("ASF Headers: %d", numHeaders);
         for (int i=0; i<numHeaders; i++)
         {
-
             ASFObject obj;
 
             unsigned int l = obj.readHead(in);
@@ -173,7 +172,6 @@ ASFInfo parseASFHeader(Stream &in)
                     break;
                 }
             }
-
         }
     }catch (StreamException &e)
     {

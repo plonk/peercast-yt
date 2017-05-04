@@ -114,7 +114,6 @@ bool    HTTP::nextHeader()
         arg = NULL;
         return false;
     }
-
 }
 //-----------------------------------------
 bool    HTTP::isHeader(const char *hs)

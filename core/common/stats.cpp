@@ -44,7 +44,6 @@ void    Stats::update()
     unsigned int diff = ctime - lastUpdate;
     if (diff >= 5)
     {
-
         for (int i=0; i<Stats::MAX; i++)
         {
             perSec[i] = (current[i]-last[i])/diff;
@@ -53,7 +52,6 @@ void    Stats::update()
 
         lastUpdate = ctime;
     }
-
 }
 // ------------------------------------
 bool Stats::writeVariable(Stream &out, const String &var)

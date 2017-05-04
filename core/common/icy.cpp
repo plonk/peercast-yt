@@ -7,7 +7,6 @@ void ICYSource::stream(Channel *ch)
     ChannelStream *source=NULL;
     try
     {
-
         if (!ch->sock)
             throw StreamException("ICY channel has no socket");
 
@@ -16,7 +15,6 @@ void ICYSource::stream(Channel *ch)
         ch->setStatus(Channel::S_BROADCASTING);
         source = ch->createSource();
         ch->readStream(*ch->sock, source);
-
     }catch (StreamException &e)
     {
         LOG_ERROR("Channel aborted: %s", e.msg);
@@ -34,5 +32,4 @@ void ICYSource::stream(Channel *ch)
 
     if (source)
         delete source;
-
 }

@@ -152,7 +152,6 @@ void Channel::setStatus(STATUS s)
         }
 
         peercastApp->channelUpdate(&info);
-
     }
 }
 
@@ -806,7 +805,6 @@ void Channel::processMp3Metadata(char *str)
         {
             newInfo.track.title.setUnquote(arg, String::T_ASCII);
             newInfo.track.title.convertTo(String::T_UNICODE);
-
         }else if (strcmp(cmd, "StreamUrl")==0)
         {
             newInfo.track.contact.setUnquote(arg, String::T_ASCII);
@@ -841,7 +839,6 @@ XML::Node *ChanHit::createXML()
         sys->getTime()-time,
         tracker
         );
-
 }
 
 // -----------------------------------
@@ -1191,7 +1188,6 @@ int Channel::readStream(Stream &in, ChannelStream *source)
                             broadcastTrackerUpdate(noID);
                         }
                         wasBroadcasting = true;
-
                     }else
                     {
                         if (!isReceiving())
