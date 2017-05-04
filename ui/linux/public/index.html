@@ -70,8 +70,8 @@
           </td>
           <td style="width: 600px" class="channel-description">
             <span style="font-weight: bold">
-              {@if this.contactURL}
-              <a class="link channel-name" href="{$this.contactURL}">{$this.info.name}</a>
+              {@if this.info.url}
+              <a class="link channel-name" href="{$this.info.url}">{$this.info.name}</a>
               {@else}
               {$this.info.name}
               {@end}
