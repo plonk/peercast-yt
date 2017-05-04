@@ -20,7 +20,6 @@ void ICYSource::stream(Channel *ch)
         LOG_ERROR("Channel aborted: %s", e.msg);
     }
 
-
     ch->setStatus(Channel::S_CLOSING);
 
     if (ch->sock)

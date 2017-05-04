@@ -642,7 +642,6 @@ bool Servent::getLocalURL(char *str)
     if (!sock)
         throw StreamException("Not connected");
 
-
     char ipStr[64];
 
     Host h;
@@ -1850,7 +1849,6 @@ void Servent::handshakeHTTPPush(const std::string& args)
         }
     }
 
-    
     ChanInfo info = createChannelInfo(chanMgr->broadcastID, chanMgr->broadcastMsg, query);
 
     Channel *c = chanMgr->findChannelByID(info.id);

@@ -19,7 +19,6 @@
 #include "channel.h"
 #include "ogg.h"
 
-
 static int test=0;
 // ------------------------------------------
 void OGGStream::readHeader(Stream &, Channel *)
@@ -88,7 +87,6 @@ int OGGStream::readPacket(Stream &in, Channel *ch)
                 ch->info.bitrate += theora.bitrate;
                 ch->info.contentType = ChanInfo::T_OGM;
             }
-
 
             ch->headPack.type = ChanPacket::T_HEAD;
             ch->headPack.pos = ch->streamPos;
@@ -266,12 +264,10 @@ void OggVorbisSubStream::readIdent(Stream &in, ChanInfo &info)
     int brNom = in.readLong();
     int brLow = in.readLong();
 
-
     in.readChar();  // skip blocksize 0+1
 
     LOG_CHANNEL("OGG Vorbis Ident: ver=%d, chans=%d, rate=%d, brMax=%d, brNom=%d, brLow=%d",
         ver, chans, samplerate, brMax, brNom, brLow);
-
 
     bitrate = brNom/1000;
 
@@ -386,8 +382,6 @@ void OggPage::read(Stream &in)
         if (!gotOgg)
             LOG_CHANNEL("Skipping OGG packet");
     }
-
-
 
     memcpy(&data[0], "OggS", 4);
 

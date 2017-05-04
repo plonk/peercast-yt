@@ -116,7 +116,6 @@ void XML::Node::setBinaryContent(void *ptr, int size)
     ap[0] = 0;
 }
 
-
 // ----------------------------------
 void XML::Node::setContent(const char *n)
 {
@@ -143,7 +142,6 @@ void XML::Node::setAttributes(const char *n)
                 maxAttr++;
     }
 
-
     attr = new Attribute[maxAttr];
 
     attr[0].namePos = 0;
@@ -162,7 +160,6 @@ void XML::Node::setAttributes(const char *n)
 
     attrData[i-1]=0;
 
-
     while ((c=attrData[i])!=0)
     {
         if (!isWhiteSpace(c))
@@ -172,7 +169,6 @@ void XML::Node::setAttributes(const char *n)
 
             // get start of tag name
             attr[numAttr].namePos = i;
-
 
             // skip whitespaces until next '='
             // terminate name on next whitespace or '='
@@ -210,8 +206,6 @@ void XML::Node::setAttributes(const char *n)
                     break;
 
             attrData[i-1] = 0;  // null term. value
-
-
         }else{
             i++;
         }
@@ -274,7 +268,6 @@ void XML::Node::write(Stream &out, int level)
     for (i=0; i<level; i++)
         tabs[i] = ' ';
     tabs[i] = '\0';
-
 
     if (level)
         out.write(tabs, i);
@@ -341,7 +334,6 @@ XML::Node::~Node()
     }
 }
 
-
 // ----------------------------------
 XML::~XML()
 {
@@ -382,7 +374,6 @@ void XML::setRoot(Node *n)
     root=n;
 }
 
-
 // ----------------------------------
 XML::Node *XML::findNode(const char *n)
 {
@@ -391,7 +382,6 @@ XML::Node *XML::findNode(const char *n)
     else
         return NULL;
 }
-
 
 // ----------------------------------
 XML::Node *XML::Node::findNode(const char *name)

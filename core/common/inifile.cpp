@@ -22,7 +22,6 @@
 #include "inifile.h"
 #include "sys.h"
 
-
 // -----------------------------------------
 bool IniFile::openReadOnly(const char *fn)
 {
@@ -56,7 +55,6 @@ void IniFile::close()
     fStream.close();
 }
 
-
 // -----------------------------------------
 bool    IniFile::readNext()
 {
@@ -70,7 +68,6 @@ bool    IniFile::readNext()
     {
         return false;
     }
-
 
     // find end of value name and null terminate
     char *nend = strstr(currLine, "=");
@@ -118,7 +115,6 @@ bool    IniFile::getBoolValue()
 {
     if (!valueStr)
         return false;
-
 
     if ( (stricmp(valueStr, "yes")==0) ||
          (stricmp(valueStr, "y")==0) ||

@@ -18,11 +18,9 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-
 #include "stream.h"
 #include "common.h"
 #include "sys.h"
-
 
 // --------------------------------------------------
 void MemoryStream::convertFromBase64()
@@ -96,7 +94,6 @@ int FileStream::length()
         fseek(file, 0, SEEK_END);
         len = ftell(file);
         fseek(file, old, SEEK_SET);
-
     }
     return len;
 }
@@ -350,7 +347,6 @@ int Stream::readWord(char *in, int max)
     return i;
 }
 
-
 // --------------------------------------------------
 int Stream::readBase64(char *p, int max)
 {
@@ -370,7 +366,6 @@ int Stream::readBase64(char *p, int max)
     *p = 0;
     return cnt;
 }
-
 
 // -------------------------------------
 int Stream::readBits(int cnt)

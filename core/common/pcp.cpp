@@ -97,7 +97,6 @@ int PCPStream::readPacket(Stream &in, BroadcastState &bcs)
         MemoryStream mem(pack.data, sizeof(pack.data));
         AtomStream patom(mem);
 
-
         // send outward packets
         error = PCP_ERROR_WRITE;
         if (outData.numPending())
@@ -112,7 +111,6 @@ int PCPStream::readPacket(Stream &in, BroadcastState &bcs)
             error = PCP_ERROR_WRITE+PCP_ERROR_SKIP;
             throw StreamException("Send too slow");
         }
-
 
         error = PCP_ERROR_READ;
         // poll for new downward packet
@@ -161,7 +159,6 @@ void PCPStream::readEnd(Stream &, Channel *)
 {
 }
 
-
 // ------------------------------------------
 void PCPStream::readPushAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 {
@@ -187,7 +184,6 @@ void PCPStream::readPushAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
             atom.skip(c, d);
         }
     }
-
 
     if (bcs.forMe)
     {
@@ -288,7 +284,6 @@ void PCPStream::readPktAtoms(Channel *ch, AtomStream &atom, int numc, BroadcastS
 {
     ChanPacket pack;
     ID4 type;
-
 
     for (int i=0; i<numc; i++)
     {
@@ -426,12 +421,10 @@ void PCPStream::readHostAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
         }
     }
 
-
     hit.host = hit.rhost[0];
     hit.chanID = chanID;
 
     hit.numHops = bcs.numHops;
-
 
     if (hit.recv)
         chanMgr->addHit(hit);
@@ -453,7 +446,6 @@ void PCPStream::readChanAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
         newInfo = ch->info;
     else if (chl)
         newInfo = chl->info;
-
 
     for (int i = 0; i < numc; i++)
     {
@@ -615,9 +607,7 @@ int PCPStream::readBroadcastAtoms(AtomStream &atom, int numc, BroadcastState &bc
     if (destID.isSet())
         destID.toStr(destStr);
 
-
     LOG_DEBUG("PCP bcst: group=%d, hops=%d, ver=%d, from=%s, dest=%s", bcs.group, bcs.numHops, ver, fromStr, destStr);
-
     if (fromID.isSet())
         if (fromID.isSame(servMgr->sessionID))
         {
@@ -653,7 +643,6 @@ int PCPStream::readBroadcastAtoms(AtomStream &atom, int numc, BroadcastState &bc
     }
     return 0;
 }
-
 
 // ------------------------------------------
 int PCPStream::procAtom(AtomStream &atom, ID4 id, int numc, int dlen, BroadcastState &bcs)
@@ -725,5 +714,3 @@ int PCPStream::readAtom(AtomStream &atom, BroadcastState &bcs)
 
     return  procAtom(atom, id, numc, dlen, bcs);
 }
-
-

@@ -23,7 +23,6 @@
 // ------------------------------------------
 ASFInfo parseASFHeader(Stream &in);
 
-
 // ------------------------------------------
 void MMSStream::readEnd(Stream &, Channel *)
 {
@@ -121,9 +120,7 @@ ASFInfo parseASFHeader(Stream &in)
             unsigned int l = obj.readHead(in);
             obj.readData(in, l);
 
-
             MemoryStream data(obj.data, obj.lenLo);
-
 
             switch (obj.type)
             {
@@ -180,5 +177,3 @@ ASFInfo parseASFHeader(Stream &in)
 
     return asf;
 }
-
-

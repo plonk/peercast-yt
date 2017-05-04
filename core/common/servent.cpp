@@ -208,7 +208,6 @@ void Servent::reset()
     loginPassword.clear();
     loginMount.clear();
 
-
     priorityConnect = false;
     pushSock = NULL;
     sendHeader = true;

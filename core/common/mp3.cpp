@@ -19,7 +19,6 @@
 #include "channel.h"
 #include "mp3.h"
 
-
 // ------------------------------------------
 void MP3Stream::readEnd(Stream &, Channel *)
 {

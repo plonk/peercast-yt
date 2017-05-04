@@ -18,7 +18,6 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-
 #include "stats.h"
 #include "common.h"
 #include "sys.h"
@@ -90,6 +89,3 @@ bool Stats::writeVariable(Stream &out, const String &var)
 
     return true;
 }
-
-
-

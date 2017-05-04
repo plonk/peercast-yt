@@ -59,7 +59,6 @@ void Host::fromStrIP(const char *str, int p)
     unsigned int ipb[4];
     unsigned int ipp;
 
-
     if (strstr(str, ":"))
     {
         if (sscanf(str, "%03d.%03d.%03d.%03d:%d", &ipb[0], &ipb[1], &ipb[2], &ipb[3], &ipp) == 5)

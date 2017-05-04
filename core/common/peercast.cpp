@@ -3,8 +3,6 @@
 #include "channel.h"
 #include "servmgr.h"
 
-
-
 // ---------------------------------
 // globals
 
@@ -14,7 +12,6 @@ ServMgr *servMgr;
 
 PeercastInstance *peercastInst=NULL;
 PeercastApplication *peercastApp=NULL;
-
 
 // ---------------------------------
 void APICALL PeercastInstance::init()
@@ -151,7 +148,6 @@ void    APICALL PeercastInstance::callLocalURL(const char *url)
     if (sys && servMgr)
         sys->callLocalURL(url, servMgr->serverHost.port);
 }
-
 
 // --------------------------------------------------
 void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)

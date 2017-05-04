@@ -104,7 +104,6 @@ ServMgr::ServMgr()
     downloadURL[0] = 0;
     rootMsg.clear();
 
-
     restartServer=false;
 
     setFilterDefaults();
@@ -494,7 +493,6 @@ Servent *ServMgr::allocServent()
         LOG_DEBUG("allocated servent %d", serventNum);
     }else
         LOG_DEBUG("reused servent %d", s->serventIndex);
-
 
     s->reset();
 
@@ -926,11 +924,9 @@ void ServMgr::saveSettings(const char *fn)
         iniFile.writeIntValue("autoQuery", chanMgr->autoQuery);
         iniFile.writeIntValue("queryTTL", servMgr->queryTTL);
 
-
         iniFile.writeSection("Privacy");
         iniFile.writeStrValue("password", servMgr->password);
         iniFile.writeIntValue("maxUptime", chanMgr->maxUptime);
-
 
         for (int i=0; i<servMgr->numFilters; i++)
         {
@@ -961,8 +957,6 @@ void ServMgr::saveSettings(const char *fn)
             writeServerSettings(iniFile, allowServer2);
         iniFile.writeLine("[End]");
 
-
-
         iniFile.writeSection("Debug");
         iniFile.writeBoolValue("logDebug", (showLog&(1<<LogBuffer::T_DEBUG))!=0);
         iniFile.writeBoolValue("logErrors", (showLog&(1<<LogBuffer::T_ERROR))!=0);
@@ -970,7 +964,6 @@ void ServMgr::saveSettings(const char *fn)
         iniFile.writeBoolValue("logChannel", (showLog&(1<<LogBuffer::T_CHANNEL))!=0);
         iniFile.writeBoolValue("pauseLog", pauseLog);
         iniFile.writeIntValue("idleSleepTime", sys->idleSleepTime);
-
 
         if (servMgr->validBCID)
         {
@@ -1029,8 +1022,6 @@ void ServMgr::saveSettings(const char *fn)
             }
             c=c->next;
         }
-
-
 
 #if 0
         Servent *s = servents;
@@ -1477,7 +1468,6 @@ int ServMgr::findChannel(ChanInfo &info)
     char idStr[64];
     info.id.toStr(idStr);
 
-
     if (info.id.isSet())
     {
         // if we have an ID then try and connect to known hosts carrying channel.
@@ -1601,7 +1591,6 @@ bool ServMgr::start()
 {
     char idStr[64];
 
-
     const char *priv;
 #if PRIVATE_BROADCASTER
     priv = "(private)";
@@ -1617,7 +1606,6 @@ bool ServMgr::start()
     LOG_DEBUG("BroadcastID: %s", idStr);
 
     checkForceIP();
-
 
     serverThread.func = ServMgr::serverProc;
     if (!sys->startThread(&serverThread))
@@ -1651,7 +1639,6 @@ int ServMgr::clientProc(ThreadInfo *thread)
                     Host lh;
                     lh.fromStrName(servMgr->connectHost, DEFAULT_PORT);
 
-
                     if (!servMgr->findServent(lh.ip, lh.port, netID))
                     {
                         Servent *sv = servMgr->allocServent();
@@ -1671,7 +1658,6 @@ int ServMgr::clientProc(ThreadInfo *thread)
                         break;
                     if (servMgr->tryFull())
                         break;
-
 
                     ServHost sh = servMgr->getOutgoingServent(netID);
 
@@ -1736,10 +1722,8 @@ int ServMgr::broadcastPushRequest(ChanHit &hit, Host &to, GnuID &chanID, Servent
             atom.writeShort(PCP_PUSH_PORT, to.port);
             atom.writeBytes(PCP_PUSH_CHANID, chanID.id, 16);
 
-
     pack.len = pmem.pos;
     pack.type = ChanPacket::T_PCP;
-
 
     GnuID noID;
 
@@ -1918,7 +1902,6 @@ int ServMgr::serverProc(ThreadInfo *thread)
             serv->allow = servMgr->allowServer1;
             serv2->allow = servMgr->allowServer2;
 
-
             if ((!serv->sock) || (!serv2->sock))
             {
                 LOG_DEBUG("Starting servers");
@@ -2009,7 +1992,6 @@ ServHost::TYPE ServHost::getTypeFromStr(const char *s)
     return T_NONE;
 }
 
-
 // --------------------------------------------------
 bool    ServFilter::writeVariable(Stream &out, const String &var)
 {
@@ -2027,7 +2009,6 @@ bool    ServFilter::writeVariable(Stream &out, const String &var)
         host.IPtoStr(buf);
     else
         return false;
-
 
     out.writeString(buf);
     return true;
@@ -2050,11 +2031,9 @@ bool    BCID::writeVariable(Stream &out, const String &var)
     else
         return false;
 
-
     out.writeString(buf);
     return true;
 }
-
 
 // --------------------------------------------------
 bool ServMgr::writeVariable(Stream &out, const String &var)
