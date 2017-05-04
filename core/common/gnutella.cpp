@@ -98,8 +98,6 @@ void GnuPacket::initPong(Host &h, bool ownPong, GnuPacket &ping)
         pk.writeLong(0);                // cnt
         pk.writeLong(0);                // total
     }
-
-
 }
 // ---------------------------
 void GnuPacket::initPush(ChanHit &ch, Host &sh)
@@ -124,7 +122,6 @@ void GnuPacket::initPush(ChanHit &ch, Host &sh)
 #endif
 }
 
-
 // ---------------------------
 bool GnuPacket::initHit(Host &h, Channel *ch, GnuPacket *query, bool push, bool busy, bool stable, bool tracker, int maxttl)
 {
@@ -137,7 +134,6 @@ bool GnuPacket::initHit(Host &h, Channel *ch, GnuPacket *query, bool push, bool 
 
     ttl = maxttl;
 
-
     MemoryStream mem(data, MAX_DATA);
 
     mem.writeChar(1);           // num hits
@@ -148,7 +144,6 @@ bool GnuPacket::initHit(Host &h, Channel *ch, GnuPacket *query, bool push, bool 
         mem.writeLong(0);           // speed - route
     else
         mem.writeLong(1);           // broadcast
-
 
     //mem.writeLong(ch->index);             // index
     mem.writeLong(0);               // index
@@ -164,7 +159,6 @@ bool GnuPacket::initHit(Host &h, Channel *ch, GnuPacket *query, bool push, bool 
     xml.writeCompact(mem);
 
     mem.writeChar(0);                           // extra null
-
 
     // QHD
     mem.writeLong('PCST');              // vendor ID
@@ -200,7 +194,6 @@ bool GnuPacket::initHit(Host &h, Channel *ch, GnuPacket *query, bool push, bool 
             mem.writeChar(0);
     }
 
-
     // queryID/not used
     if (query)
         mem.write(query->id.id, 16);
@@ -216,13 +209,10 @@ bool GnuPacket::initHit(Host &h, Channel *ch, GnuPacket *query, bool push, bool 
 
 //  servMgr->addReplyID(id);
     return true;
-}
-
 
 // ---------------------------
 void GnuPacket::initFind(const char *str, XML *xml, int maxTTL)
 {
-
     func = GNU_FUNC_QUERY;
     ttl = maxTTL;
     hops = 0;
@@ -238,7 +228,6 @@ void GnuPacket::initFind(const char *str, XML *xml, int maxTTL)
         mem.write((void *)str, slen+1); // string
     }else
         mem.writeChar(0);       // null string
-
 
     if (xml)
         xml->writeCompact(mem);
@@ -275,7 +264,6 @@ void GnuStream::sendPacket(GnuPacket &p)
             default: stats.add(Stats::NUMOTHEROUT); break;
         }
 
-
         write(p.id.id, 16);
         writeChar(p.func);  // ping func
         writeChar(p.ttl);   // ttl
@@ -309,7 +297,6 @@ bool GnuStream::readPacket(GnuPacket &p)
         p.hops = readChar();
         p.len = readLong();
 
-
         if ((p.hops >= 1) && (p.hops <= 10))
             stats.add((Stats::STAT)((int)Stats::NUMHOPS1+p.hops-1));
 
@@ -324,7 +311,6 @@ bool GnuStream::readPacket(GnuPacket &p)
             case GNU_FUNC_PUSH: stats.add(Stats::NUMPUSHIN); break;
             default: stats.add(Stats::NUMOTHERIN); break;
         }
-
 
         if (p.len)
         {
@@ -350,7 +336,6 @@ bool GnuStream::readPacket(GnuPacket &p)
 // ---------------------------
 GnuStream::R_TYPE GnuStream::processPacket(GnuPacket &in, Servent *serv, GnuID &routeID)
 {
-
     R_TYPE ret = R_DISCARD;
 
     MemoryStream data(in.data, in.len);
@@ -361,8 +346,6 @@ GnuStream::R_TYPE GnuStream::processPacket(GnuPacket &in, Servent *serv, GnuID &
     in.hops++;
 
     routeID = in.id;
-
-
 
     switch(in.func)
     {
@@ -397,7 +380,6 @@ GnuStream::R_TYPE GnuStream::processPacket(GnuPacket &in, Servent *serv, GnuID &
 
                     ip = SWAP4(ip);
 
-
                     Host h;
                     h.ip = ip;
                     h.port = port;
@@ -413,7 +395,6 @@ GnuStream::R_TYPE GnuStream::processPacket(GnuPacket &in, Servent *serv, GnuID &
 
                     if (h.isValid())
                     {
-
                         #if 0
                         // accept if this pong is a reply from one of our own pings, otherwise route back
                         if (servMgr->isReplyID(in.id))
@@ -424,7 +405,6 @@ GnuStream::R_TYPE GnuStream::processPacket(GnuPacket &in, Servent *serv, GnuID &
                             ret = R_ROUTE;
                         #endif
                     }
-
                 }
             }
             break;
@@ -470,8 +450,6 @@ GnuStream::R_TYPE GnuStream::processPacket(GnuPacket &in, Servent *serv, GnuID &
                     LOG_NETWORK("query STR: %s : found %d", words, numHits);
                 }
 
-
-
                 for (int i=0; i<numHits; i++)
                 {
                     bool push = (servMgr->getFirewall()!=ServMgr::FW_OFF);
@@ -487,18 +465,15 @@ GnuStream::R_TYPE GnuStream::processPacket(GnuPacket &in, Servent *serv, GnuID &
             break;
         case GNU_FUNC_PUSH: // push
             {
-
                 GnuID pid;
                 data.read(pid.id, 16);
 
                 //LOG("push serv= %02x%02x%02x%02x", servMgr->id[0], servMgr->id[1], servMgr->id[2], servMgr->id[3]);
                 //LOG("pack = %02x%02x%02x%02x", id[0], id[1], id[2], id[3]);
 
-
                 int index = data.readLong();
                 int ip = data.readLong();
                 int port = data.readShort();
-
 
                 ip = SWAP4(ip);
 
@@ -544,7 +519,6 @@ GnuStream::R_TYPE GnuStream::processPacket(GnuPacket &in, Servent *serv, GnuID &
                 ChanHit hit;
                 if (readHit(data, hit, in.hops, in.id))
                 {
-
                     char flstr[64];
                     flstr[0]=0;
                     if (hit.firewalled) strcat(flstr, "Push, ");
@@ -580,7 +554,6 @@ GnuStream::R_TYPE GnuStream::processPacket(GnuPacket &in, Servent *serv, GnuID &
             break;
     }
 
-
     if ((in.ttl > 10) || (in.hops > 10) || (in.ttl==0))
         if ((ret == R_BROADCAST) || (ret == R_ROUTE))
             ret = R_DEAD;
@@ -612,7 +585,6 @@ bool GnuStream::readHit(Stream &data, ChanHit &ch, int hops, GnuID &id)
     {
         int index, bitrate, listeners;
 
-
         index = data.readLong();        // index
         bitrate = data.readShort();     // bitrate
         listeners = data.readShort();   // listeners
@@ -630,7 +602,6 @@ bool GnuStream::readHit(Stream &data, ChanHit &ch, int hops, GnuID &id)
         ch.rhost[0] = ch.host;
 
         ChanInfo info;
-
 
         {
             char xmlData[4000];
@@ -652,7 +623,6 @@ bool GnuStream::readHit(Stream &data, ChanHit &ch, int hops, GnuID &id)
                     LOG_NETWORK("got hit %s %s", idStr, info.name.cstr());
 
                     ch.upTime = n->findAttrInt("uptime");
-
                 }else
                     LOG_NETWORK("Missing Channel node");
             }else
@@ -675,9 +645,7 @@ bool GnuStream::readHit(Stream &data, ChanHit &ch, int hops, GnuID &id)
             if ((chp) && (numHits<100))
                 hits[numHits++] = chp;
         }
-
     }
-
 
     int vendor = data.readLong();   // vendor ID
 
@@ -689,7 +657,6 @@ bool GnuStream::readHit(Stream &data, ChanHit &ch, int hops, GnuID &id)
     pubLen -= 2;
     while (pubLen-->0)
         data.readChar();
-
 
     char agentStr[16];
     agentStr[0]=0;
@@ -718,10 +685,8 @@ bool GnuStream::readHit(Stream &data, ChanHit &ch, int hops, GnuID &id)
                 }
                 maxPreviewTime = sn->findAttrInt("preview");
             }
-
         }
     }
-
 
     // not used anymore
     GnuID queryID;
@@ -738,7 +703,6 @@ bool GnuStream::readHit(Stream &data, ChanHit &ch, int hops, GnuID &id)
 
         if (f1 & 64)
             hits[i]->tracker = (f2 & 64)!=0;
-
     }
 
     return dataValid;
