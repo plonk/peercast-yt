@@ -319,7 +319,7 @@ void Channel::sleepUntil(double time)
 // -----------------------------------
 void Channel::checkReadDelay(unsigned int len)
 {
-    if (readDelay)
+    if (readDelay && info.bitrate > 0)
     {
         unsigned int time = (len*1000)/((info.bitrate*1024)/8);
         sys->sleep(time);

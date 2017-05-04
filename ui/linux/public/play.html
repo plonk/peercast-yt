@@ -46,10 +46,21 @@
       </object>
     </div>
     {@else}
+    {@if page.channel.type == "MP3"}
+    <div style="margin: 5em auto; text-align: center">
+      <audio controls autoplay style="min-width: 640px">
+        <source src="http://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.mp3" type="audio/mpeg">
+        お使いのブラウザは MP3 音声の再生に対応していないようです。プレイリストから再生してください。
+        <!-- Your browser does not support the audio element. -->
+      </audio>
+    </div>
+    {@else}
     <div class="message" style="margin: 5em auto; text-align: center">
       Web 再生はタイプ{$page.channel.type}のチャンネルに対応していません。
       プレイリストから再生してください。</div>
-    {@end}{@end}
+    {@end}
+    {@end}
+    {@end}
 
 
     <div class="paper">

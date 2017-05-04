@@ -4,13 +4,16 @@
 #include "common.h"
 #include "mapper.h"
 #include "str.h"
+#include "_string.h"
 
 FileSystemMapper::FileSystemMapper(const std::string& aVirtualPath, const std::string& aDocumentRoot)
     : virtualPath(aVirtualPath)
 {
     char *dr = realpath(aDocumentRoot.c_str(), NULL);
     if (!dr)
-        LOG_ERROR("Document root %s inaccessible", aDocumentRoot.c_str());
+    {
+        throw GeneralException(String::format("Document root `%s` inaccessible", aDocumentRoot.c_str()));
+    }
     documentRoot = dr;
     free(dr);
 }

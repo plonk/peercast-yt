@@ -2453,45 +2453,47 @@ void Servent::sendPCPChannel()
         {
             Channel *ch = chanMgr->findChannelByID(chanID);
 
-            if (ch)
+            if (!ch)
             {
+                error = PCP_ERROR_QUIT + PCP_ERROR_OFFAIR;
+                break;
+            }
 
-                if (streamIndex != ch->streamIndex)
+            if (streamIndex != ch->streamIndex)
+            {
+                streamIndex = ch->streamIndex;
+                streamPos = ch->headPack.pos;
+                LOG_DEBUG("sendPCPStream got new stream index");
+            }
+
+            ChanPacket rawPack;
+
+            while (ch->rawData.findPacket(streamPos, rawPack))
+            {
+                if (rawPack.type == ChanPacket::T_HEAD)
                 {
-                    streamIndex = ch->streamIndex;
-                    streamPos = ch->headPack.pos;
-                    LOG_DEBUG("sendPCPStream got new stream index");
+                    atom.writeParent(PCP_CHAN, 2);
+                    atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
+                    atom.writeParent(PCP_CHAN_PKT, 3);
+                    atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_HEAD);
+                    atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
+                    atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
+                }else if (rawPack.type == ChanPacket::T_DATA)
+                {
+                    atom.writeParent(PCP_CHAN, 2);
+                    atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
+                    atom.writeParent(PCP_CHAN_PKT, 3);
+                    atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_DATA);
+                    atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
+                    atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
                 }
 
-                ChanPacket rawPack;
+                if (rawPack.pos < streamPos)
+                    LOG_DEBUG("pcp: skip back %d", rawPack.pos-streamPos);
 
-                while (ch->rawData.findPacket(streamPos, rawPack))
-                {
-                    if (rawPack.type == ChanPacket::T_HEAD)
-                    {
-                        atom.writeParent(PCP_CHAN, 2);
-                            atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
-                            atom.writeParent(PCP_CHAN_PKT, 3);
-                                atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_HEAD);
-                                atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
-                                atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
-                    }else if (rawPack.type == ChanPacket::T_DATA)
-                    {
-                        atom.writeParent(PCP_CHAN, 2);
-                            atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
-                            atom.writeParent(PCP_CHAN_PKT, 3);
-                                atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_DATA);
-                                atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
-                                atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
-                    }
+                //LOG_DEBUG("Sending %d-%d (%d, %d, %d)", rawPack.pos, rawPack.pos+rawPack.len, ch->streamPos, ch->rawData.getLatestPos(), ch->rawData.getOldestPos());
 
-                    if (rawPack.pos < streamPos)
-                        LOG_DEBUG("pcp: skip back %d", rawPack.pos-streamPos);
-
-                    //LOG_DEBUG("Sending %d-%d (%d, %d, %d)", rawPack.pos, rawPack.pos+rawPack.len, ch->streamPos, ch->rawData.getLatestPos(), ch->rawData.getOldestPos());
-
-                    streamPos = rawPack.pos + rawPack.len;
-                }
+                streamPos = rawPack.pos + rawPack.len;
             }
             bsock.flush();
 

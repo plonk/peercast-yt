@@ -33,7 +33,6 @@
 #include <string.h>
 #include <netdb.h>
 
-
 // --------------------------------------------------
 class UClientSocket : public ClientSocket
 {
@@ -71,12 +70,9 @@ public:
     static hostent  *resolveHost(const char *);
 
     void    checkTimeout(bool, bool);
-    void    checkTimeout2(bool, bool);
-
 
     unsigned int sockNum;
     struct sockaddr_in remoteAddr;
-
-
 };
+
 #endif

@@ -96,6 +96,8 @@
     "_Uptime_relayinfo"       : "稼動時間",
     "_Firewalled_relayinfo"   : "FW有",
 
+    "Channel not found."      : "チャンネルが見付かりません。",
+
     // broadcast.html
     "External Source"         : "外部ソース",
     "URL (Required)"          : "URL (必須)",

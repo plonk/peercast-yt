@@ -105,7 +105,10 @@ string PublicController::createChannelIndex()
 // ------------------------------------------------------------
 HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream, Host& remoteHost)
 {
-    if (req.path == "/public/")
+    if (req.path == "/public")
+    {
+        return HTTPResponse::redirectTo("/public/");
+    }else if (req.path == "/public/")
     {
         return HTTPResponse::redirectTo("/public/index.html");
     }else if (req.path == "/public/index.txt")
@@ -132,7 +135,6 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
 
             DynamicMemoryStream mem;
             FileStream file;
-            map<string,string> additionalHeaders;
 
             try
             {
@@ -144,7 +146,12 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
             }
             file.close();
 
-            return HTTPResponse::ok({{"Content-Type",type}}, mem.str());
+            std::string body = mem.str();
+            map<string,string> headers = {
+                {"Content-Type",type},
+                {"Content-Length",to_string(body.size())}
+            };
+            return HTTPResponse::ok(headers, body);
         }
     }
 }

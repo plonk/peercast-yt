@@ -286,8 +286,11 @@ void Servent::handshakeGET(HTTP &http)
             http.writeLine("");
             http.writeString(response.c_str());
         }
-    }else if (strncmp(fn, "/public/", strlen("/public/"))==0)
+    }else if (strcmp(fn, "/public")== 0 ||
+              strncmp(fn, "/public/", strlen("/public/"))==0)
     {
+        // 公開ディレクトリ
+
         http.readHeaders();
 
         if (!servMgr->publicDirectoryEnabled)
@@ -295,10 +298,17 @@ void Servent::handshakeGET(HTTP &http)
             throw HTTPException(HTTP_SC_FORBIDDEN, 403);
         }
 
-        PublicController publicController("public");
-
-        auto response = publicController(http.getRequest(), (Stream&)*sock, sock->host);
-        http.send(response);
+        try
+        {
+            std::string dir = peercastApp->getPath() + std::string("public");
+            PublicController publicController(dir);
+            HTTPResponse response = publicController(http.getRequest(), (Stream&)*sock, sock->host);
+            http.send(response);
+        } catch (GeneralException& e)
+        {
+            LOG_ERROR("Error: %s", e.msg);
+            throw HTTPException(HTTP_SC_SERVERERROR, 500);
+        }
     }else
     {
         // GET マッチなし
@@ -1797,6 +1807,25 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
 }
 
 // -----------------------------------
+ChanInfo Servent::createChannelInfo(GnuID broadcastID, const String& broadcastMsg, cgi::Query& query)
+{
+    ChanInfo info;
+
+    info.setContentType(ChanInfo::getTypeFromStr(query.get("type").c_str()));
+    info.name    = query.get("name");
+    info.genre   = query.get("genre");
+    info.desc    = query.get("desc");
+    info.url     = query.get("url");
+    info.bitrate = atoi(query.get("bitrate").c_str());
+    info.comment = query.get("comment").empty() ? broadcastMsg : query.get("comment");
+
+    info.id = broadcastID;
+    info.id.encode(NULL, info.name.cstr(), NULL, 0);
+
+    return info;
+}
+
+// -----------------------------------
 // HTTP Push 放送
 void Servent::handshakeHTTPPush(const std::string& args)
 {
@@ -1826,17 +1855,8 @@ void Servent::handshakeHTTPPush(const std::string& args)
         }
     }
 
-    ChanInfo info;
-    info.setContentType(ChanInfo::getTypeFromStr(query.get("type").c_str()));
-    info.name  = query.get("name");
-    info.genre = query.get("genre");
-    info.desc  = query.get("desc");
-    info.url   = query.get("url");
-    info.bitrate   = query.get("bitrate").empty() ? 0 : stoi(query.get("bitrate"));
-    info.comment   = query.get("comment").empty() ? chanMgr->broadcastMsg : query.get("comment");
-
-    info.id = chanMgr->broadcastID;
-    info.id.encode(NULL, info.name.cstr(), NULL, 0);
+    
+    ChanInfo info = createChannelInfo(chanMgr->broadcastID, chanMgr->broadcastMsg, query);
 
     Channel *c = chanMgr->findChannelByID(info.id);
     if (c)

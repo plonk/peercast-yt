@@ -203,7 +203,21 @@ void Template::writeGlobalVariable(Stream &s, const String &varName, int loop)
         r = writeObjectProperty(s, varName + strlen("this."), currentElement);
     }else if (varName.startsWith("page."))
     {
-        if (varName.startsWith("page.channel."))
+        if (varName == "page.channel.exist")
+        {
+            const char *idstr = getCGIarg(tmplArgs, "id=");
+            if (idstr)
+            {
+                GnuID id;
+                id.fromStr(idstr);
+                Channel *ch = chanMgr->findChannelByID(id);
+                if (ch)
+                    s.writeString("1");
+                else
+                    s.writeString("0");
+                r = true;
+            }
+        }if (varName.startsWith("page.channel."))
         {
             const char *idstr = getCGIarg(tmplArgs, "id=");
             if (idstr)
@@ -523,6 +537,12 @@ void    Template::readLoop(Stream &in, Stream *outp, int loop)
 
         if (c == '}')
         {
+            if (!inSelectedFragment() || !outp)
+            {
+                readTemplate(in, NULL, 0);
+                return;
+            }
+
             int cnt = getIntVariable(var, loop);
 
             if (cnt)
@@ -596,6 +616,12 @@ void    Template::readForeach(Stream &in, Stream *outp, int loop)
 
         if (c == '}')
         {
+            if (!inSelectedFragment() || !outp)
+            {
+                readTemplate(in, NULL, loop);
+                return;
+            }
+
             auto coll = evaluateCollectionVariable(var);
 
             if (coll.size() == 0)

@@ -28,6 +28,7 @@
 #include "channel.h"
 #include "http.h"
 #include "pcp.h"
+#include "cgi.h" // Query
 
 class HTML;
 
@@ -237,6 +238,7 @@ public:
     bool    acceptGIV(ClientSocket *);
     bool    sendPacket(ChanPacket &, GnuID &, GnuID &, GnuID &, Servent::TYPE);
 
+    ChanInfo createChannelInfo(GnuID broadcastID, const String& broadcastMsg, cgi::Query& query);
 
     TYPE                type;
     STATUS              status;

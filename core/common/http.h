@@ -238,9 +238,9 @@ class HTTP : public IndirectStream
 {
 public:
     HTTP(Stream &s)
-        : cmdLine("")
-        , arg(NULL)
+        : arg(NULL)
     {
+        cmdLine[0] = '\0';
         init(&s);
     }
 
