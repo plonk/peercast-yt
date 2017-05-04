@@ -212,6 +212,7 @@ bool GnuPacket::initHit(Host &h, Channel *ch, GnuPacket *query, bool push, bool 
 
 //  servMgr->addReplyID(id);
     return true;
+}
 
 // ---------------------------
 void GnuPacket::initFind(const char *str, XML *xml, int maxTTL)
