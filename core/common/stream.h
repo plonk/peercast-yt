@@ -97,7 +97,7 @@ public:
     }
     long    readLong()
     {
-        long v;
+        long v = 0;
         read(&v, 4);
         CHECK_ENDIAN4(v);
         return v;
