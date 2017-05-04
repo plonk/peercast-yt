@@ -731,8 +731,6 @@ void    Channel::startHTTPPush(ClientSocket *cs, bool isChunked)
     sock = cs;
     info.srcProtocol = ChanInfo::SP_HTTP;
 
-    streamIndex = ++chanMgr->icyIndex;
-
     sourceData = new HTTPPushSource(isChunked);
     startStream();
 }
@@ -745,8 +743,6 @@ void    Channel::startWMHTTPPush(ClientSocket *cs)
 
     sock = cs;
     info.srcProtocol = ChanInfo::SP_WMHTTP;
-
-    streamIndex = ++chanMgr->icyIndex;
 
     sourceData = new HTTPPushSource(false);
     startStream();
