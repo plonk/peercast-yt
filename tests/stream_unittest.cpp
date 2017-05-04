@@ -10,8 +10,6 @@ public:
     {
         readCount = 0;
         writeCount = 0;
-        totalReadBytes = 0;
-        totalWrittenBytes = 0;
     }
 
     int read(void *p, int len) override
@@ -19,7 +17,6 @@ public:
         readCount++;
         for (int i = 0; i < len; i++)
             ((char*)p)[i] = (i & 1) ? 'B' : 'A';
-        totalReadBytes += len;
         return len;
     }
 
@@ -27,11 +24,8 @@ public:
     {
         writeCount++;
         lastWriteData = std::string((char*)p, (char*)p+len);
-        totalWrittenBytes += len;
     }
 
-    int totalReadBytes;
-    int totalWrittenBytes;
     int readCount;
     int writeCount;
     std::string lastWriteData;
