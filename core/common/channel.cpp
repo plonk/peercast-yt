@@ -1329,6 +1329,12 @@ void Channel::getStreamPath(char *str)
 }
 
 // -----------------------------------
+std::string Channel::authSecret()
+{
+    return chanMgr->broadcastID.str() + ":" + info.id.str();
+}
+
+// -----------------------------------
 bool Channel::writeVariable(Stream &out, const String &var, int index)
 {
     char buf[1024];

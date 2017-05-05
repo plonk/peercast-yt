@@ -240,6 +240,8 @@ public:
     int          totalListeners();
     int          totalRelays();
 
+    std::string  authSecret();
+
     ::String            mount;
     ChanMeta            insertMeta;
     ChanPacket          headPack;
