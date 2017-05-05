@@ -21,7 +21,7 @@
         <param name="movie" value="http://releases.flowplayer.org/swf/flowplayer-3.2.18.swf" />
         <param name="allowfullscreen" value="true" />
         <param name="allowscriptaccess" value="always" />
-        <param name="flashvars" value='config={"canvas":{"backgroundColor":"#000","backgroundGradient":"none"},"clip":{"url":"http://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.flv"},"playlist":[{"url":"http://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.flv","scaling":"fit"}]}' />
+        <param name="flashvars" value='config={"canvas":{"backgroundColor":"#000","backgroundGradient":"none"},"clip":{"url":"http://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.flv?auth={$page.channel.authToken}"},"playlist":[{"url":"http://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.flv?auth={$page.channel.authToken}","scaling":"fit"}]}' />
       </object>
     </div>
     {@else}{@if page.channel.type == "WMV"}
