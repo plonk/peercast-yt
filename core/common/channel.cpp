@@ -48,6 +48,7 @@
 #include "httppush.h"
 
 #include "str.h"
+#include "md5.h"
 
 #include "version2.h"
 
@@ -1469,6 +1470,9 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
         if (chl)
             numHits = chl->numHits();
         sprintf(buf, "%d", numHits);
+    }else if (var == "authToken")
+    {
+        sprintf(buf, "%s", md5::hexdigest(authSecret()).c_str());
     }else
         return false;
 
