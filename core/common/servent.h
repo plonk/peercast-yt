@@ -240,6 +240,8 @@ public:
 
     ChanInfo createChannelInfo(GnuID broadcastID, const String& broadcastMsg, cgi::Query& query);
 
+    static bool hasValidAuthToken(const std::string& requestFilename);
+
     TYPE                type;
     STATUS              status;
 

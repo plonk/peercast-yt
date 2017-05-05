@@ -34,6 +34,7 @@
 #include "cgi.h"
 #include "template.h"
 #include "public.h"
+#include "md5.h"
 
 using namespace std;
 
@@ -140,6 +141,28 @@ void Servent::handshakeJRPC(HTTP &http)
     http.writeLine("");
 
     http.write(response.c_str(), response.size());
+}
+
+// -----------------------------------
+bool Servent::hasValidAuthToken(const std::string& requestFilename)
+{
+    auto vec = str::split(requestFilename, "?");
+
+    if (vec.size() != 2)
+        return false;
+
+    cgi::Query query(vec[1]);
+
+    auto token = query.get("auth");
+    auto chanid = str::upcase(vec[0].substr(0, 32));
+    auto validToken = md5::hexdigest(chanMgr->broadcastID.str() + ":" + chanid);
+
+    if (validToken == token)
+    {
+        return true;
+    }
+
+    return false;
 }
 
 // -----------------------------------
@@ -261,7 +284,7 @@ void Servent::handshakeGET(HTTP &http)
             if (!isAllowed(ALLOW_DIRECT) || !isFiltered(ServFilter::F_DIRECT))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-        triggerChannel(fn+8, ChanInfo::SP_HTTP, isPrivate());
+        triggerChannel(fn+8, ChanInfo::SP_HTTP, isPrivate() || hasValidAuthToken(fn+8));
     }else if (strncmp(fn, "/channel/", 9) == 0)
     {
         if (!sock->host.isLocalhost())
