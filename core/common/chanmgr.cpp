@@ -239,7 +239,9 @@ Channel *ChanMgr::findAndRelay(ChanInfo &info)
             return NULL;
         }
 
-        if (c->isPlaying() && (c->info.contentType != ChanInfo::T_UNKNOWN))
+        // if (c->isPlaying() && (c->info.contentType != ChanInfo::T_UNKNOWN))
+        //     break;
+        if (c->isPlaying()) // UNKNOWN でもかまわないことにする。
             break;
 
         sys->sleep(100);
