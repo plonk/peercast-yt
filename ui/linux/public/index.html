@@ -105,7 +105,9 @@
           </td>
           <td>
             {@if this.id != "00000000000000000000000000000000"}
-            <a target="_blank" href="/pls/{$this.id}?tip={$this.tip}"><img class="play-button" src="images/play.png"></a>
+            <a href="/public/play.html?id={$this.id}">
+              <img class="play-button" src="images/play.png">
+            </a>
             {@else}
             <img class="play-button" src="images/play_grey.png">
             {@end}
@@ -113,7 +115,7 @@
           <td style="width: 600px" class="channel-description">
             <span style="font-weight: bold">
               {@if this.url}
-              <a class="link channel-name" href="{$this.url}">{$this.name}</a>
+              <a class="link channel-name" href="{$this.url}">{!this.name}</a>
               {@else}
               {!this.name}
               {@end}
