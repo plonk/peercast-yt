@@ -114,8 +114,7 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
     }else if (req.path == "/public/index.txt")
     {
         return HTTPResponse::ok({{"Content-Type","text/plain"}}, createChannelIndex());
-    }else if (req.path == "/public/index.html" ||
-              req.path == "/public/play.html")
+    }else if (req.path == "/public/index.html")
     {
         FileStream file;
         DynamicMemoryStream mem;
@@ -124,6 +123,25 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
         file.openReadOnly(mapper.documentRoot + str::replace_prefix(req.path, "/public", ""));
         Template(req.queryString).prependScope(scope).readTemplate(file, &mem, 0);
         return HTTPResponse::ok({{"Content-Type","text/html"}}, mem.str());
+    }else if (req.path == "/public/play.html")
+    {
+        FileStream file;
+        DynamicMemoryStream mem;
+        HTTPRequestScope scope(req);
+
+        String id = cgi::Query(req.queryString).get("id").c_str();
+        ChanInfo info;
+        bool success = servMgr->getChannel(id.cstr(), info, true);
+
+        if (success)
+        {
+            file.openReadOnly(mapper.documentRoot + str::replace_prefix(req.path, "/public", ""));
+            Template(req.queryString).prependScope(scope).readTemplate(file, &mem, 0);
+            return HTTPResponse::ok({{"Content-Type","text/html"}}, mem.str());
+        }else
+        {
+            return HTTPResponse::notFound();
+        }
     }else
     {
         auto path = mapper.toLocalFilePath(req.path);
