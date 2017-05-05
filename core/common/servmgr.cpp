@@ -1464,6 +1464,18 @@ bool ServMgr::getChannel(char *str, ChanInfo &info, bool relay)
             {
                 ch->info.lastPlayStart = 0; // force reconnect
                 ch->info.lastPlayEnd = 0;
+                for (int i = 0; i < 100; i++)    // wait til it's playing for 10 seconds
+                {
+                    ch = chanMgr->findChannelByNameID(ch->info);
+
+                    if (!ch)
+                        return false;
+
+                    if (ch->isPlaying())
+                        break;
+
+                    sys->sleep(100);
+                }
             }else
                 return false;
         }
