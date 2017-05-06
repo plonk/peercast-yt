@@ -90,8 +90,7 @@
 
       </table>
 
-      <h2>連合放送局のチャンネル</h2>
-
+      <h2>フレンズのチャンネル</h2>
 
       <table width="100%" class="channel-list">
         <tr>
@@ -144,6 +143,29 @@
         </tr>
         {@end}
       </table>
+
+      <h2>リンク状態</h2>
+
+      <ul>
+      {@loop servMgr.numChannelFeeds}
+        {@if loop.channelFeed.isPublic}
+        <li style="list-style: none">
+          {@if loop.channelFeed.status == "OK"}
+            ✔
+          {@else}{@if loop.channelFeed.status == "ERROR"}
+            ❌
+          {@else}{@if loop.channelFeed.status == "UNKNOWN"}
+            ？
+          {@else}
+            {$loop.channelFeed.status}
+          {@end}{@end}{@end}
+          <a href="{$loop.channelFeed.directoryUrl}">
+            {$loop.channelFeed.directoryUrl}
+          </a>
+        </li>
+        {@end}
+      {@end}
+      </ul>
 
     </div>
   </body>
