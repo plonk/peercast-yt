@@ -168,7 +168,6 @@ public:
 
     void    handshakeICY(Channel::SRC_TYPE, bool);
     void    handshakeIncoming();
-    void    handshakePOST();
     void    handshakeHTTP(HTTP &, bool);
     void    handshakeGET(HTTP &http);
     void    handshakePOST(HTTP &http);
