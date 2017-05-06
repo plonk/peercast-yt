@@ -28,8 +28,4 @@ public:
     static unsigned short eucToUnicode(unsigned short);
 };
 
-
-
 #endif
-
-

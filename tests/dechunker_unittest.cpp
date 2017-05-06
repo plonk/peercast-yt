@@ -5,21 +5,6 @@
 
 class DechunkerFixture : public ::testing::Test {
 public:
-    DechunkerFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~DechunkerFixture()
-    {
-    }
 };
 
 TEST_F(DechunkerFixture, hexValue)

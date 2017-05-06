@@ -20,7 +20,6 @@
 #ifndef _SOCKET_H
 #define _SOCKET_H
 
-
 #include "common.h"
 #include "stream.h"
 
@@ -57,7 +56,6 @@ public:
     }
     virtual void    setBlocking(bool) = 0;
 
-
     static unsigned int getIP(const char *);
     static bool         getHostname(char *, unsigned int);
 
@@ -70,6 +68,5 @@ public:
 
     unsigned int    readTimeout, writeTimeout;
 };
-
 
 #endif

@@ -29,30 +29,42 @@ public:
         numRelays      = std::atoi(fields[7].c_str());
         bitrate        = std::atoi(fields[8].c_str());
         contentTypeStr = fields[9];
+        trackArtist    = fields[10];
+        trackAlbum     = fields[11];
+        trackName      = fields[12];
+        trackContact   = fields[13];
         encodedName    = fields[14];
         uptime         = fields[15];
+        status         = fields[16];
+        comment        = fields[17];
+        direct         = std::atoi(fields[18].c_str());
     }
 
     std::string chatUrl();
     std::string statsUrl();
 
-    std::string name;
-
-    // URLエンコードされたチャンネル名、このフィールドがあればチャット
-    // や統計のページがある。
-    std::string encodedName;
-
-    GnuID id;
-    int bitrate;
-    std::string contentTypeStr;
-    std::string desc, genre, url;
+    std::string name; // (再生不可) などが付くことがある。
+    GnuID       id;
     std::string tip;
-    std::string uptime;
-    int numDirects;
-    int numRelays;
-    //TrackInfo track;
+    std::string url;
+    std::string genre;
+    std::string desc;
+    int         numDirects;
+    int         numRelays;
+    int         bitrate;
+    std::string contentTypeStr;
+    std::string trackArtist;
+    std::string trackAlbum;
+    std::string trackName;
+    std::string trackContact;
+    std::string encodedName; // URLエンコードされたチャンネル名。
 
-    std::string feedUrl;
+    std::string uptime;
+    std::string status;
+    std::string comment;
+    int         direct;
+
+    std::string feedUrl; // チャットURL、統計URLを作成するために必要。
 };
 
 class ChannelFeed
@@ -65,14 +77,16 @@ public:
     };
 
     ChannelFeed()
-        : url(""),
-          status(Status::UNKNOWN)
+        : url("")
+        , status(Status::UNKNOWN)
+        , isPublic(false)
     {
     }
 
     ChannelFeed(std::string aUrl)
-        : url(aUrl),
-          status(Status::UNKNOWN)
+        : url(aUrl)
+        , status(Status::UNKNOWN)
+        , isPublic(false)
     {
     }
 
@@ -80,6 +94,7 @@ public:
 
     std::string url;
     Status status;
+    bool isPublic;
 };
 
 // 外部からチャンネルリストを取得して保持する。
@@ -93,6 +108,7 @@ public:
     std::vector<ChannelFeed> feeds();
     bool addFeed(std::string url);
     void clearFeeds();
+    void setFeedPublic(int index, bool isPublic);
 
     int totalListeners();
     int totalRelays();
@@ -103,6 +119,8 @@ public:
     bool writeFeedVariable(Stream& out, const String& varName, int index);
     bool writeVariable(Stream& out, const String& varName);
     bool writeVariable(Stream &, const String &, int);
+
+    std::vector<ChannelEntry> channels() { return m_channels; };
 
     std::string findTracker(GnuID id);
 

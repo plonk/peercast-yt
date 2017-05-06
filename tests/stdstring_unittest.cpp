@@ -6,21 +6,6 @@ using namespace std;
 
 class stdStringFixture : public ::testing::Test {
 public:
-    stdStringFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~stdStringFixture()
-    {
-    }
 };
 
 TEST(stdStringFixture, size)

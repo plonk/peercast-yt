@@ -4,21 +4,6 @@
 
 class CriticalSectionFixture : public ::testing::Test {
 public:
-    CriticalSectionFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~CriticalSectionFixture()
-    {
-    }
 };
 
 TEST_F(CriticalSectionFixture, smokeTest)

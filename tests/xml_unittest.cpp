@@ -5,21 +5,6 @@
 
 class XMLFixture : public ::testing::Test {
 public:
-    XMLFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~XMLFixture()
-    {
-    }
 };
 
 TEST_F(XMLFixture, read)

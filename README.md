@@ -4,12 +4,12 @@
 
 VPS等の Linux で動かすのに向いている PeerCast です。
 
-* PeerCastStation と(部分的に)互換の JSON RPC インターフェイス。(epcyp、ginger などで使えます)
-* FLVフォーマット、MKVフォーマットに対応。
+* PeerCastStation 互換の JSON RPC インターフェイス。(epcyp、ginger などで使えます)
+* FLVフォーマット、MKVフォーマットの配信に対応。
 * HTTP Push ストリームでの配信に対応。ffmpeg と直接接続できます。
+* WME、Expression Encoder、KotoEncoder からプッシュ配信できます。
 * HTML UI をメッセージカタログ化。各国語版で機能に違いがないようにしました。
-* YPブラウザ。YP4G 形式の index.txt を取得してチャンネルリストを表示します。
-* ネットワーク出力をバッファリングしているので、多少 IO 負荷が軽くなっているはずです。
+* YPブラウザ内蔵。YP4G 形式の index.txt を取得してチャンネルリストを表示します。
 * Ajax による画面更新。
 
 # 使用ライブラリ
@@ -18,21 +18,25 @@ VPS等の Linux で動かすのに向いている PeerCast です。
 
 # Linuxでのビルド
 
-## コンパイラ
+## 必要なもの
 
-JSON ライブラリが新しめのコンパイラを必要とします。GCC 4.9 以降あるい
-は Clang 3.4 以降あたり。
+GCC 4.9 以降あるいは Clang 3.4 以降などの C++11 に準拠したコンパイラを
+使ってください。
 
-## その他
-
-HTML の生成に ruby を使っているので、ruby が必要です。
+また、HTML の生成に ruby を使っているので、ruby が必要です。
 
 ## 手順
 
-`make -C ui/linux` とすると `ui/linux/peercast-linux.tar` ができます。
-適当なディレクトリに展開して、ディレクトリ内の `peercast` を実行してく
-ださい。設定ファイル `peercast.ini` は `peercast` と同じディレクトリに
-作られます。
+`ui/linux` ディレクトリに入って `make` してください。すると
+`peercast-yt-linux-amd64.tar.gz` ができます。
 
-make した後、`ui/linux` ディレクトリの `peercast` を実行することもでき
-ます。
+※ make した後、`ui/linux` ディレクトリの `peercast` を実行することも
+できます。
+
+# 実行
+
+`peercast-yt-linux-amd64.tar.gz` を適当な場所に展開して、ディレクトリ
+内の `peercast` を実行してください。
+
+設定ファイル `peercast.ini` は `peercast` と同じディレクトリに作られま
+す。

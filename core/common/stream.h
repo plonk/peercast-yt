@@ -80,7 +80,6 @@ public:
 
     virtual int     getPosition() { return 0; }
 
-
     // binary
     char    readChar()
     {
@@ -97,7 +96,7 @@ public:
     }
     long    readLong()
     {
-        long v;
+        long v = 0;
         read(&v, 4);
         CHECK_ENDIAN4(v);
         return v;
@@ -119,8 +118,6 @@ public:
         CHECK_ENDIAN3(v);
         return v;
     }
-
-
 
     long readTag()
     {
@@ -161,7 +158,6 @@ public:
 
     virtual bool    readReady(int timeoutMilliseconds = 0) { return true; }
     virtual int numPending() { return 0; }
-
 
     void writeID4(ID4 id)
     {
@@ -207,6 +203,14 @@ public:
     void    writeLine(const char *);
     void    writeLineF(const char *, ...) __attribute__ ((format (printf, 2, 3)));
     void    writeString(const char *);
+    void    writeString(const std::string& s)
+    {
+        write(s.data(), s.size());
+    }
+    void    writeString(const String& s)
+    {
+        write(s.c_str(), s.size());
+    }
     void    writeStringF(const char *, ...) __attribute__ ((format (printf, 2, 3)));
 
     bool    writeCRLF;
@@ -214,7 +218,6 @@ public:
     int     readBits(int);
 
     void    updateTotals(unsigned int, unsigned int);
-
 
     unsigned char   bitsBuffer;
     unsigned int    bitsPos;
@@ -299,16 +302,19 @@ public:
     Stat stat;
 };
 
-
 // -------------------------------------
 class FileStream : public Stream
 {
 public:
     FileStream() { file=NULL; }
+    ~FileStream() { close(); }
 
     void    openReadOnly(const char *);
+    void    openReadOnly(const std::string& fn) { openReadOnly(fn.c_str()); }
     void    openWriteReplace(const char *);
+    void    openWriteReplace(const std::string& fn) { openWriteReplace(fn.c_str()); }
     void    openWriteAppend(const char *);
+    void    openWriteAppend(const std::string& fn) { openWriteAppend(fn.c_str()); }
     bool    isOpen() { return file!=NULL; }
     int     length();
     int     pos();
@@ -324,6 +330,7 @@ public:
 
     FILE *file;
 };
+
 // -------------------------------------
 class MemoryStream : public Stream
 {
@@ -449,6 +456,7 @@ public:
 
     Stream *stream;
 };
+
 // --------------------------------------------------
 class WriteBufferedStream : public IndirectStream
 {
@@ -513,7 +521,5 @@ public:
 
     std::string buf;
 };
-
-
 #endif
 

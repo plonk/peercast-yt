@@ -4,22 +4,6 @@
 
 class ChanPacketBufferFixture : public ::testing::Test {
 public:
-    ChanPacketBufferFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~ChanPacketBufferFixture()
-    {
-    }
-
     ChanPacketBuffer data;
 };
 

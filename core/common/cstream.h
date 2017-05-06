@@ -30,7 +30,6 @@ class Channel;
 class ChanPacket;
 class Stream;
 
-
 // ----------------------------------
 class ChanPacket
 {

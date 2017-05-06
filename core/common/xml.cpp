@@ -61,6 +61,7 @@ void XML::Node::add(Node *n)
         child = n;
     }
 }
+
 // ---------------------------------
 inline char nibsToByte(char n1, char n2)
 {
@@ -94,6 +95,7 @@ int XML::Node::getBinaryContent(void *ptr, int size)
     }
     return i;
 }
+
 // ----------------------------------
 void XML::Node::setBinaryContent(void *ptr, int size)
 {
@@ -116,12 +118,12 @@ void XML::Node::setBinaryContent(void *ptr, int size)
     ap[0] = 0;
 }
 
-
 // ----------------------------------
 void XML::Node::setContent(const char *n)
 {
     contData = strdup(n);
 }
+
 // ----------------------------------
 void XML::Node::setAttributes(const char *n)
 {
@@ -143,7 +145,6 @@ void XML::Node::setAttributes(const char *n)
                 maxAttr++;
     }
 
-
     attr = new Attribute[maxAttr];
 
     attr[0].namePos = 0;
@@ -162,7 +163,6 @@ void XML::Node::setAttributes(const char *n)
 
     attrData[i-1]=0;
 
-
     while ((c=attrData[i])!=0)
     {
         if (!isWhiteSpace(c))
@@ -172,7 +172,6 @@ void XML::Node::setAttributes(const char *n)
 
             // get start of tag name
             attr[numAttr].namePos = i;
-
 
             // skip whitespaces until next '='
             // terminate name on next whitespace or '='
@@ -210,13 +209,12 @@ void XML::Node::setAttributes(const char *n)
                     break;
 
             attrData[i-1] = 0;  // null term. value
-
-
         }else{
             i++;
         }
     }
 }
+
 // ----------------------------------
 XML::Node::Node(const char *fmt, ...)
 {
@@ -238,6 +236,7 @@ void XML::Node::init()
     contData = NULL;
     userPtr = NULL;
 }
+
 // ----------------------------------
 int XML::Node::findAttrInt(const char *name)
 {
@@ -245,6 +244,7 @@ int XML::Node::findAttrInt(const char *name)
     if (!v) return 0;
     return atoi(v);
 }
+
 // ----------------------------------
 int XML::Node::findAttrID(const char *name)
 {
@@ -252,6 +252,7 @@ int XML::Node::findAttrID(const char *name)
     if (!v) return 0;
     return strToID(v);
 }
+
 // ----------------------------------
 char *XML::Node::findAttr(const char *name)
 {
@@ -264,6 +265,7 @@ char *XML::Node::findAttr(const char *name)
     }
     return NULL;
 }
+
 // ----------------------------------
 void XML::Node::write(Stream &out, int level)
 {
@@ -274,7 +276,6 @@ void XML::Node::write(Stream &out, int level)
     for (i=0; i<level; i++)
         tabs[i] = ' ';
     tabs[i] = '\0';
-
 
     if (level)
         out.write(tabs, i);
@@ -320,6 +321,7 @@ void XML::Node::write(Stream &out, int level)
     if (sibling)
         sibling->write(out, level);
 }
+
 // ----------------------------------
 XML::Node::~Node()
 {
@@ -341,7 +343,6 @@ XML::Node::~Node()
     }
 }
 
-
 // ----------------------------------
 XML::~XML()
 {
@@ -357,8 +358,8 @@ void XML::write(Stream &out)
 
     out.writeLine("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
     root->write(out, 1);
-
 }
+
 // ----------------------------------
 void XML::writeCompact(Stream &out)
 {
@@ -367,8 +368,8 @@ void XML::writeCompact(Stream &out)
 
     out.writeLine("<?xml ?>");
     root->write(out, 1);
-
 }
+
 // ----------------------------------
 void XML::writeHTML(Stream &out)
 {
@@ -384,7 +385,6 @@ void XML::setRoot(Node *n)
     root=n;
 }
 
-
 // ----------------------------------
 XML::Node *XML::findNode(const char *n)
 {
@@ -393,7 +393,6 @@ XML::Node *XML::findNode(const char *n)
     else
         return NULL;
 }
-
 
 // ----------------------------------
 XML::Node *XML::Node::findNode(const char *name)
@@ -491,12 +490,10 @@ void XML::read(Stream &in)
 
             tp = 0;
         } else {
-
             if (tp >= BUFFER_LEN)
                 throw StreamException("Content too big");
 
             buf[tp++] = c;
-
         }
     }
 }

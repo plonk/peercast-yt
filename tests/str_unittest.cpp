@@ -5,21 +5,6 @@ using namespace str;
 
 class strFixture : public ::testing::Test {
 public:
-    strFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~strFixture()
-    {
-    }
 };
 
 TEST_F(strFixture, group_digits)
@@ -77,4 +62,83 @@ TEST_F(strFixture, contains)
     ASSERT_TRUE(str::contains("", ""));
     ASSERT_TRUE(str::contains("abc", "abc"));
     ASSERT_FALSE(str::contains("", "abc"));
+}
+
+TEST_F(strFixture, replace_prefix)
+{
+    ASSERT_STREQ("", str::replace_prefix("", "", "").c_str());
+    ASSERT_STREQ("b", str::replace_prefix("", "", "b").c_str());
+    ASSERT_STREQ("", str::replace_prefix("", "a", "b").c_str());
+    ASSERT_STREQ("", str::replace_prefix("", "a", "").c_str());
+    ASSERT_STREQ("xbc", str::replace_prefix("abc", "a", "x").c_str());
+    ASSERT_STREQ("abc", str::replace_prefix("abc", "x", "x").c_str());
+    ASSERT_STREQ("xabc", str::replace_prefix("abc", "", "x").c_str());
+    ASSERT_STREQ("bc", str::replace_prefix("abc", "a", "").c_str());
+}
+
+TEST_F(strFixture, replace_suffix)
+{
+    ASSERT_STREQ("", str::replace_suffix("", "", "").c_str());
+    ASSERT_STREQ("b", str::replace_suffix("", "", "b").c_str());
+    ASSERT_STREQ("", str::replace_suffix("", "a", "b").c_str());
+    ASSERT_STREQ("", str::replace_suffix("", "a", "").c_str());
+    ASSERT_STREQ("abx", str::replace_suffix("abc", "c", "x").c_str());
+    ASSERT_STREQ("abc", str::replace_suffix("abc", "x", "x").c_str());
+    ASSERT_STREQ("abcx", str::replace_suffix("abc", "", "x").c_str());
+    ASSERT_STREQ("ab", str::replace_suffix("abc", "c", "").c_str());
+}
+
+TEST_F(strFixture, capitalize)
+{
+    ASSERT_STREQ("", str::capitalize("").c_str());
+    ASSERT_STREQ("A", str::capitalize("a").c_str());
+    ASSERT_STREQ("@", str::capitalize("@").c_str());
+    ASSERT_STREQ("Abc", str::capitalize("abc").c_str());
+    ASSERT_STREQ("Abc", str::capitalize("ABC").c_str());
+    ASSERT_STREQ("A@B", str::capitalize("a@b").c_str());
+    ASSERT_STREQ("Content-Type", str::capitalize("CONTENT-TYPE").c_str());
+    ASSERT_STREQ("Content-Type", str::capitalize("content-type").c_str());
+    ASSERT_STREQ("Content-Type", str::capitalize("Content-Type").c_str());
+    ASSERT_STREQ("あいうえお漢字αβγ", str::downcase("あいうえお漢字αβγ").c_str());
+}
+
+TEST_F(strFixture, upcase)
+{
+    ASSERT_STREQ("", str::upcase("").c_str());
+    ASSERT_STREQ("A", str::upcase("a").c_str());
+    ASSERT_STREQ("@", str::upcase("@").c_str());
+    ASSERT_STREQ("ABC", str::upcase("abc").c_str());
+    ASSERT_STREQ("ABC", str::upcase("ABC").c_str());
+    ASSERT_STREQ("A@B", str::upcase("a@b").c_str());
+    ASSERT_STREQ("CONTENT-TYPE", str::upcase("CONTENT-TYPE").c_str());
+    ASSERT_STREQ("CONTENT-TYPE", str::upcase("content-type").c_str());
+    ASSERT_STREQ("CONTENT-TYPE", str::upcase("Content-Type").c_str());
+    ASSERT_STREQ("あいうえお漢字αβγ", str::downcase("あいうえお漢字αβγ").c_str());
+}
+
+TEST_F(strFixture, downcase)
+{
+    ASSERT_STREQ("", str::downcase("").c_str());
+    ASSERT_STREQ("a", str::downcase("a").c_str());
+    ASSERT_STREQ("@", str::downcase("@").c_str());
+    ASSERT_STREQ("abc", str::downcase("abc").c_str());
+    ASSERT_STREQ("abc", str::downcase("ABC").c_str());
+    ASSERT_STREQ("a@b", str::downcase("a@b").c_str());
+    ASSERT_STREQ("content-type", str::downcase("CONTENT-TYPE").c_str());
+    ASSERT_STREQ("content-type", str::downcase("content-type").c_str());
+    ASSERT_STREQ("content-type", str::downcase("Content-Type").c_str());
+    ASSERT_STREQ("あいうえお漢字αβγ", str::downcase("あいうえお漢字αβγ").c_str());
+}
+
+TEST_F(strFixture, is_prefix_of)
+{
+    ASSERT_TRUE(str::is_prefix_of("", ""));
+    ASSERT_TRUE(str::is_prefix_of("", "a"));
+    ASSERT_TRUE(str::is_prefix_of("a", "a"));
+    ASSERT_TRUE(str::is_prefix_of("a", "abc"));
+    ASSERT_FALSE(str::is_prefix_of("b", ""));
+    ASSERT_FALSE(str::is_prefix_of("b", "a"));
+    ASSERT_FALSE(str::is_prefix_of("b", "abc"));
+    ASSERT_TRUE(str::is_prefix_of("abc", "abc"));
+    ASSERT_TRUE(str::is_prefix_of("あ", "あいうえお"));
 }

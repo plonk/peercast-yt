@@ -17,7 +17,6 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-
 #ifndef _SERVENT_H
 #define _SERVENT_H
 
@@ -27,8 +26,9 @@
 #include "gnutella.h"
 #include "channel.h"
 #include "http.h"
-#include "rtsp.h"
 #include "pcp.h"
+#include "cgi.h" // Query
+#include "playlist.h"
 
 class HTML;
 
@@ -75,13 +75,12 @@ public:
         S_FREE
     };
 
-    enum PROTOCOL
-    {
-        P_UNKNOWN,
-        P_GNUTELLA06,
-        P_PCP
-    };
-
+    // enum PROTOCOL
+    // {
+    //     P_UNKNOWN,
+    //     P_GNUTELLA06,
+    //     P_PCP
+    // };
 
     enum SORT
     {
@@ -114,9 +113,6 @@ public:
 
     void    checkFree();
 
-
-
-
     //  funcs for handling status/type
     void                setStatus(STATUS);
     static const char   *getTypeStr(Servent::TYPE t) { return typeMsgs[t]; }
@@ -133,8 +129,6 @@ public:
         }else
             return true;
     }
-
-
 
     // static funcs that do the actual work in the servent thread
     static THREAD_PROC  serverProc(ThreadInfo *);
@@ -169,9 +163,11 @@ public:
 
     void    handshakeICY(Channel::SRC_TYPE, bool);
     void    handshakeIncoming();
-    void    handshakePOST();
-    void    handshakeRTSP(RTSP &);
     void    handshakeHTTP(HTTP &, bool);
+    void    handshakeGET(HTTP &http);
+    void    handshakePOST(HTTP &http);
+    void    handshakeGIV(const char*);
+    void    handshakeSOURCE(char * in, bool isHTTP);
 
     void    handshakeHTTPPush(const std::string& args);
     void    handshakeWMHTTPPush(HTTP& http, const std::string& path);
@@ -190,7 +186,6 @@ public:
     ChanInfo findChannel(char *str, ChanInfo &);
 
     bool    writeVariable(Stream &, const String &);
-
 
     // the "mainloop" of servents
     void    processGnutella();
@@ -228,7 +223,6 @@ public:
     bool    isPrivate();
     bool    isLocal();
 
-
     Host    getHost();
 
     bool    outputPacket(GnuPacket &, bool);
@@ -236,6 +230,10 @@ public:
     bool    acceptGIV(ClientSocket *);
     bool    sendPacket(ChanPacket &, GnuID &, GnuID &, GnuID &, Servent::TYPE);
 
+    ChanInfo createChannelInfo(GnuID broadcastID, const String& broadcastMsg, cgi::Query& query);
+
+    static bool hasValidAuthToken(const std::string& requestFilename);
+    static PlayList::TYPE playListType(ChanInfo &info);
 
     TYPE                type;
     STATUS              status;
@@ -306,11 +304,9 @@ private:
     void CMD_net_add(char *cmd, HTTP& http, HTML& html, char jumpStr[]);
     void CMD_logout(char *cmd, HTTP& http, HTML& html, char jumpStr[]);
     void CMD_login(char *cmd, HTTP& http, HTML& html, char jumpStr[]);
-
 };
 
 extern char *nextCGIarg(char *cp, char *cmd, char *arg);
-
 
 #endif
 

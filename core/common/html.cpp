@@ -18,7 +18,6 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-
 #include <stdarg.h>
 #include <stdlib.h>
 #include "cgi.h"
@@ -29,6 +28,7 @@
 #include "stream.h"
 #include "version2.h"
 #include "template.h"
+#include "dmstream.h"
 
 // --------------------------------------
 HTML::HTML(const char *t, Stream &o)
@@ -67,6 +67,11 @@ void HTML::writeTemplate(const char *fileName, const char *args)
     FileStream file;
     try
     {
+        DynamicMemoryStream mem;
+        file.openReadOnly(fileName);
+        file.writeTo(mem, file.length());
+        mem.rewind();
+
         WriteBufferedStream bufferedOut(out);
         Template temp(args);
         if (args)
@@ -74,8 +79,7 @@ void HTML::writeTemplate(const char *fileName, const char *args)
             cgi::Query query(args);
             temp.selectedFragment = query.get("fragment");
         }
-        file.openReadOnly(fileName);
-        temp.readTemplate(file, &bufferedOut, 0);
+        temp.readTemplate(mem, &bufferedOut, 0);
     }catch (StreamException &e)
     {
         out->writeString(e.msg);

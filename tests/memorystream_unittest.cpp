@@ -5,9 +5,9 @@ class MemoryStreamFixture : public ::testing::Test {
 public:
     MemoryStreamFixture()
         : one_byte_mm(1),
-          data("hoge"),
           hoge_mm(data, 4)
     {
+        strcpy(data, "hoge");
     }
 
     void SetUp()
@@ -15,10 +15,6 @@ public:
         one_byte_mm.write("A", 1);
         one_byte_mm.rewind();
     }
-
-    // void TearDown( ) { }
-
-    // ~MemoryTestFixture( )  { }
 
     MemoryStream one_byte_mm;
     char data[5];

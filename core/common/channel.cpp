@@ -155,7 +155,6 @@ void Channel::setStatus(STATUS s)
         }
 
         peercastApp->channelUpdate(&info);
-
     }
 }
 
@@ -203,7 +202,6 @@ void Channel::reset()
     lastMetaUpdate = 0;
 
     srcType = SRC_NONE;
-
 
     startTime = 0;
     syncTime = 0;
@@ -322,7 +320,7 @@ void Channel::sleepUntil(double time)
 // -----------------------------------
 void Channel::checkReadDelay(unsigned int len)
 {
-    if (readDelay)
+    if (readDelay && info.bitrate > 0)
     {
         unsigned int time = (len*1000)/((info.bitrate*1024)/8);
         sys->sleep(time);
@@ -383,6 +381,7 @@ bool Channel::acceptGIV(ClientSocket *givSock)
     }else
         return false;
 }
+
 // -----------------------------------
 void Channel::connectFetch()
 {
@@ -789,6 +788,7 @@ static char *nextMetaPart(char *str, char delim)
     }
     return NULL;
 }
+
 // -----------------------------------
 static void copyStr(char *to, char *from, int max)
 {
@@ -818,7 +818,6 @@ void Channel::processMp3Metadata(char *str)
         {
             newInfo.track.title.setUnquote(arg, String::T_ASCII);
             newInfo.track.title.convertTo(String::T_UNICODE);
-
         }else if (strcmp(cmd, "StreamUrl")==0)
         {
             newInfo.track.contact.setUnquote(arg, String::T_ASCII);
@@ -853,7 +852,6 @@ XML::Node *ChanHit::createXML()
         sys->getTime()-time,
         tracker
         );
-
 }
 
 // -----------------------------------
@@ -910,12 +908,14 @@ void ChanMeta::fromXML(XML &xml)
 
     len = tout.pos;
 }
+
 // -----------------------------------
 void ChanMeta::fromMem(void *p, int l)
 {
     len = l;
     memcpy(data, p, len);
 }
+
 // -----------------------------------
 void ChanMeta::addMem(void *p, int l)
 {
@@ -925,6 +925,7 @@ void ChanMeta::addMem(void *p, int l)
         len += l;
     }
 }
+
 // -----------------------------------
 void Channel::broadcastTrackerUpdate(GnuID &svID, bool force)
 {
@@ -1009,7 +1010,7 @@ void Channel::updateInfo(const ChanInfo &newInfo)
         String newComment = info.comment;
         newComment.convertTo(String::T_UNICODE);
 
-        peercast::notifyMessage(ServMgr::NT_PEERCAST, info.name.str() + "氏曰く: " + newComment.str());
+        peercast::notifyMessage(ServMgr::NT_PEERCAST, info.name.str() + "「" + newComment.str() + "」");
     }
 
     if (isBroadcasting())
@@ -1053,6 +1054,7 @@ void Channel::updateInfo(const ChanInfo &newInfo)
 
     peercastApp->channelUpdate(&info);
 }
+
 // -----------------------------------
 ChannelStream *Channel::createSource()
 {
@@ -1203,7 +1205,6 @@ int Channel::readStream(Stream &in, ChannelStream *source)
                             broadcastTrackerUpdate(noID);
                         }
                         wasBroadcasting = true;
-
                     }else
                     {
                         if (!isReceiving())
@@ -1499,7 +1500,11 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
     {
         ChanHitList *chl = chanMgr->findHitListByID(info.id);
         sprintf(buf, "%d", (chl) ? chl->numHits() : 0);
-    }else
+    }else if (var == "authToken")
+        sprintf(buf, "%s", chanMgr->authToken(info.id).c_str());
+    else if (var == "plsExt")
+        sprintf(buf, "%s", info.getPlayListExt());
+    else
         return false;
 
     out.writeString(buf);

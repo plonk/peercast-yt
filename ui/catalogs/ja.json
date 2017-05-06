@@ -11,6 +11,7 @@
     "Notifications" : "通知",
     "_View Log_navbar" : "ログ表示",
     "_Logout_navbar" : "ログアウト",
+    "Message from the root server" : "ルートサーバーからのメッセージ",
 
     // bcid.html
     "New BCID"      : "新規BCID",
@@ -96,6 +97,8 @@
     "_Uptime_relayinfo"       : "稼動時間",
     "_Firewalled_relayinfo"   : "FW有",
 
+    "Channel not found."      : "チャンネルが見付かりません。",
+
     // broadcast.html
     "External Source"         : "外部ソース",
     "URL (Required)"          : "URL (必須)",
@@ -174,6 +177,8 @@
     "Save Settings"           : "設定を保存",
     "Channel Feeds"           : "チャンネルフィード",
     "URL of index.txt"        : "index.txtのURL",
+    "Public"                  : "公開",
+    "Public Directory"        : "公開ディレクトリ",
 
     // viewlog.html
     "Clear log"               : "ログをクリア",

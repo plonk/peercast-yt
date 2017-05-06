@@ -4,21 +4,6 @@
 
 class DynamicMemoryStreamFixture : public ::testing::Test {
 public:
-    DynamicMemoryStreamFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~DynamicMemoryStreamFixture()
-    {
-    }
 };
 
 TEST_F(DynamicMemoryStreamFixture, initialState)

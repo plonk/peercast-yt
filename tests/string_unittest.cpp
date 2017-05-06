@@ -40,7 +40,7 @@ TEST(StringTest, containsWorks) {
     ASSERT_FALSE(a.contains(abc));
 }
 
-TEST(StringTest, appendWorks) {
+TEST(StringTest, appendChar) {
     String buf;
     for (int i = 0; i < 500; i++) {
         buf.append('A');
@@ -49,6 +49,14 @@ TEST(StringTest, appendWorks) {
     // バッファーは 256 バイトあるので、NUL の分を考慮しても 255 文字
     // まで入りそうなものだが、入るのは 254 文字まで。
     ASSERT_EQ(254, strlen(buf.data));
+}
+
+TEST(StringTest, appendString) {
+    String s = "a";
+
+    s.append("bc");
+
+    ASSERT_STREQ("abc", s.cstr());
 }
 
 TEST(StringTest, prependWorks) {
@@ -134,15 +142,95 @@ TEST(StringTest, assignment)
     ASSERT_STREQ("hoge", t.cstr());
 }
 
-TEST(StringTest, str)
-{
-    ASSERT_STREQ("", String("").str().c_str());
-    ASSERT_STREQ("A", String("A").str().c_str());
-}
-
 TEST(StringTest, sjisToUtf8)
 {
     String tmp = "4\x93\xFA\x96\xDA"; // "4日目" in Shit_JIS
     tmp.convertTo(String::T_UNICODESAFE);
     ASSERT_STREQ("4日目", tmp.cstr());
+}
+
+TEST(StringTest, setUnquote)
+{
+    String s = "xyz";
+
+    s.setUnquote("\"abc\"");
+    ASSERT_STREQ("abc", s.cstr());
+
+    // 二文字に満たない場合は空になる。
+    s.setUnquote("a");
+    ASSERT_STREQ("", s.cstr());
+}
+
+TEST(StringTest, clear)
+{
+    String s = "abc";
+
+    ASSERT_STREQ("abc", s.cstr());
+    s.clear();
+
+    ASSERT_STREQ("", s.cstr());
+}
+
+TEST(StringTest, equalOperatorCString)
+{
+    String s;
+    const char* xs = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // 300 x's
+
+    s = xs;
+    ASSERT_STRNE(xs, s.cstr());
+    ASSERT_EQ(255, strlen(s.cstr()));
+}
+
+TEST(StringTest, equalOperatorStdString)
+{
+    String s;
+    const char* xs = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // 300 x's
+
+    s = std::string(xs);
+    ASSERT_STRNE(xs, s.cstr());
+    ASSERT_EQ(255, strlen(s.cstr()));
+}
+
+TEST(StringTest, cstr)
+{
+    String s = "abc";
+
+    ASSERT_STREQ("abc", s.cstr());
+    ASSERT_EQ(s.data, s.cstr());
+}
+
+TEST(StringTest, c_str)
+{
+    String s = "abc";
+
+    ASSERT_STREQ("abc", s.c_str());
+    ASSERT_EQ(s.data, s.c_str());
+}
+
+TEST(StringTest, str)
+{
+    ASSERT_STREQ("", String("").str().c_str());
+    ASSERT_STREQ("A", String("A").str().c_str());
+
+    String s = "abc";
+
+    ASSERT_STREQ("abc", s.str().c_str());
+    ASSERT_NE(s.data, s.str().c_str());
+}
+
+TEST(StringTest, size)
+{
+    ASSERT_EQ(0, String("").size());
+    ASSERT_EQ(3, String("abc").size());
+}
+
+TEST(StringTest, setFromString)
+{
+    String s;
+
+    s.setFromString("abc def");
+    ASSERT_STREQ("abc", s.data);
+
+    s.setFromString("\"abc def\"");
+    ASSERT_STREQ("abc def", s.data);
 }

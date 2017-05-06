@@ -4,29 +4,17 @@
 #include "servent.h"
 #include "dmstream.h"
 
+using namespace cgi;
+
 class ServentFixture : public ::testing::Test {
 public:
     ServentFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~ServentFixture()
-    {
-    }
+        : s(0) {}
+    Servent s;
 };
 
 TEST_F(ServentFixture, initialState)
 {
-    Servent s(0);
-
     ASSERT_EQ(Servent::T_NONE, s.type);
     ASSERT_EQ(Servent::S_NONE, s.status);
 
@@ -70,7 +58,7 @@ TEST_F(ServentFixture, initialState)
     // ASSERT_EQ(0, s.streamPos);  // 不定
     ASSERT_EQ(0, s.servPort);
 
-    ASSERT_EQ(Servent::P_UNKNOWN, s.outputProtocol);
+    ASSERT_EQ(ChanInfo::SP_UNKNOWN, s.outputProtocol);
 
     // GnuPacketBuffer     outPacketsNorm, outPacketsPri;
 
@@ -90,7 +78,6 @@ TEST_F(ServentFixture, initialState)
 
 TEST_F(ServentFixture, handshakeHTTP)
 {
-    Servent s(0);
     MockClientSocket* mock;
 
     s.sock = mock = new MockClientSocket();
@@ -107,7 +94,6 @@ TEST_F(ServentFixture, handshakeHTTP)
 
 TEST_F(ServentFixture, handshakeIncomingGetRoot)
 {
-    Servent s(0);
     MockClientSocket* mock;
 
     s.sock = mock = new MockClientSocket();
@@ -123,7 +109,6 @@ TEST_F(ServentFixture, handshakeIncomingGetRoot)
 // の放送要求だとして通してしまうが、良いのか？
 TEST_F(ServentFixture, handshakeIncomingBadRequest)
 {
-    Servent s(0);
     MockClientSocket* mock;
 
     s.sock = mock = new MockClientSocket();
@@ -134,13 +119,12 @@ TEST_F(ServentFixture, handshakeIncomingBadRequest)
 
 TEST_F(ServentFixture, handshakeIncomingHTMLRoot)
 {
-    Servent s(0);
     MockClientSocket* mock;
 
     s.sock = mock = new MockClientSocket();
     mock->incoming.str("GET /html/en/index.html HTTP/1.0\r\n\r\n");
 
-    ASSERT_NO_THROW(s.handshakeIncoming());
+    s.handshakeIncoming();
 
     std::string output = mock->outgoing.str();
 
@@ -153,7 +137,6 @@ TEST_F(ServentFixture, handshakeIncomingHTMLRoot)
 
 TEST_F(ServentFixture, handshakeIncomingJRPCGetUnauthorized)
 {
-    Servent s(0);
     MockClientSocket* mock;
 
     s.sock = mock = new MockClientSocket();
@@ -170,7 +153,6 @@ TEST_F(ServentFixture, handshakeIncomingJRPCGetUnauthorized)
 
 TEST_F(ServentFixture, handshakeIncomingJRPCGetAuthorized)
 {
-    Servent s(0);
     MockClientSocket* mock;
 
     strcpy(servMgr->password, "Passw0rd");
@@ -201,3 +183,67 @@ TEST_F(ServentFixture, handshakeIncomingJRPCGetAuthorized)
     delete mock;
 }
 
+TEST_F(ServentFixture, createChannelInfoNullCase)
+{
+    Query query("");
+    auto info = s.createChannelInfo(GnuID(), String(), query);
+
+    ASSERT_EQ(ChanInfo::T_UNKNOWN, info.contentType);
+    ASSERT_STREQ("", info.name.cstr());
+    ASSERT_STREQ("", info.genre.cstr());
+    ASSERT_STREQ("", info.desc.cstr());
+    ASSERT_STREQ("", info.url.cstr());
+    ASSERT_EQ(0, info.bitrate);
+    ASSERT_STREQ("", info.comment);
+}
+
+TEST_F(ServentFixture, createChannelInfoComment)
+{
+    Query query("");
+    auto info = s.createChannelInfo(GnuID(), "俺たちみんなトドだぜ (・ω・｀з)3", query);
+
+    ASSERT_STREQ("俺たちみんなトドだぜ (・ω・｀з)3", info.comment);
+}
+
+TEST_F(ServentFixture, createChannelInfoCommentOverride)
+{
+    Query query("comment=スレなし");
+    auto info = s.createChannelInfo(GnuID(), "俺たちみんなトドだぜ (・ω・｀з)3", query);
+
+    ASSERT_STREQ("スレなし", info.comment);
+}
+
+TEST_F(ServentFixture, createChannelInfoTypicalCase)
+{
+    Query query("name=予定地&genre=テスト&desc=てすと&url=http://example.com&comment=スレなし&bitrate=400&type=mkv");
+    auto info = s.createChannelInfo(GnuID(), String(), query);
+
+    ASSERT_EQ(ChanInfo::T_MKV, info.contentType);
+    ASSERT_STREQ("予定地", info.name.cstr());
+    ASSERT_STREQ("テスト", info.genre.cstr());
+    ASSERT_STREQ("てすと", info.desc.cstr());
+    ASSERT_STREQ("http://example.com", info.url.cstr());
+    ASSERT_EQ(400, info.bitrate);
+    ASSERT_STREQ("スレなし", info.comment);
+}
+
+TEST_F(ServentFixture, createChannelInfoNonnumericBitrate)
+{
+    Query query("bitrate=BITRATE");
+    ChanInfo info;
+
+    ASSERT_NO_THROW(info = s.createChannelInfo(GnuID(), String(), query));
+    ASSERT_EQ(0, info.bitrate);
+}
+
+TEST_F(ServentFixture, hasValidAuthToken)
+{
+    ASSERT_TRUE(s.hasValidAuthToken("01234567890123456789012345678901.flv?auth=44d5299e57ad9274fee7960a9fa60bfd"));
+    ASSERT_FALSE(s.hasValidAuthToken("01234567890123456789012345678901.flv?auth=00000000000000000000000000000000"));
+    ASSERT_FALSE(s.hasValidAuthToken("01234567890123456789012345678901.flv?"));
+    ASSERT_FALSE(s.hasValidAuthToken("01234567890123456789012345678901.flv"));
+    ASSERT_FALSE(s.hasValidAuthToken(""));
+    ASSERT_FALSE(s.hasValidAuthToken("ほげほげ.flv?auth=44d5299e57ad9274fee7960a9fa60bfd"));
+    ASSERT_FALSE(s.hasValidAuthToken("ほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげ.flv?auth=44d5299e57ad9274fee7960a9fa60bfd"));
+    ASSERT_FALSE(s.hasValidAuthToken("?auth=44d5299e57ad9274fee7960a9fa60bfd"));
+}

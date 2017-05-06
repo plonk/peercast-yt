@@ -76,7 +76,6 @@ public:
         T_ASX
     };
 
-
     enum PROTOCOL
     {
         SP_UNKNOWN,
@@ -87,7 +86,6 @@ public:
         SP_PCP,
         SP_WMHTTP
     };
-
 
     enum STATUS
     {
@@ -135,6 +133,7 @@ public:
     static const char   *getMIMEType(TYPE);
     static TYPE         getTypeFromStr(const char *str);
     static PROTOCOL     getProtocolFromStr(const char *str);
+    const char*         getPlayListExt();
 
     void setContentType(TYPE type);
 

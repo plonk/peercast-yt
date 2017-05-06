@@ -19,7 +19,6 @@
 #ifndef _NSV_H
 #define _NSV_H
 
-
 #include "channel.h"
 
 // ----------------------------------------------
@@ -30,6 +29,5 @@ public:
     int     readPacket(Stream &, Channel *) override;
     void    readEnd(Stream &, Channel *) override;
 };
-
 
 #endif

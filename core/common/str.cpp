@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstring>
 #include <vector>
+#include <cctype>
 
 namespace str
 {
@@ -182,6 +183,99 @@ std::string format(const char* fmt, ...)
 bool contains(const std::string& haystack, const std::string& needle)
 {
     return haystack.find(needle) != std::string::npos;
+}
+
+std::string replace_prefix(const std::string& s, const std::string& prefix, const std::string& replacement)
+{
+    if (s.size() < prefix.size()) return s;
+
+    if (s.substr(0, prefix.size()) == prefix)
+        return replacement + s.substr(prefix.size());
+    else
+        return s;
+}
+
+std::string replace_suffix(const std::string& s, const std::string& suffix, const std::string& replacement)
+{
+    if (s.size() < suffix.size()) return s;
+
+    if (s.substr(s.size() - suffix.size(), suffix.size()) == suffix)
+        return s.substr(0, s.size() - suffix.size()) + replacement;
+    else
+        return s;
+}
+
+std::string upcase(const std::string& input)
+{
+    std::string res;
+    for (auto c : input)
+    {
+        if (isalpha(c))
+            res += toupper(c);
+        else
+            res += c;
+    }
+    return res;
+}
+
+std::string downcase(const std::string& input)
+{
+    std::string res;
+    for (auto c : input)
+    {
+        if (isalpha(c))
+            res += tolower(c);
+        else
+            res += c;
+    }
+    return res;
+}
+
+std::string capitalize(const std::string& input)
+{
+    std::string res;
+    bool prevWasAlpha = false;
+
+    for (auto c : input)
+    {
+        if (isalpha(c))
+        {
+            if (prevWasAlpha)
+                res += tolower(c);
+            else
+            {
+                res += toupper(c);
+                prevWasAlpha = true;
+            }
+        }else
+        {
+            res += c;
+            prevWasAlpha = false;
+        }
+    }
+    return res;
+}
+
+bool is_prefix_of(const std::string& prefix, const std::string& string)
+{
+    if (string.size() < prefix.size())
+        return false;
+
+    return string.substr(0, prefix.size()) == prefix;
+}
+
+std::string join(const std::string& delimiter, std::vector<std::string>& vec)
+{
+    std::string res;
+
+    for (auto it = vec.begin(); it != vec.end(); ++it)
+    {
+        if (it != vec.begin())
+            res += delimiter;
+        res += *it;
+    }
+
+    return res;
 }
 
 } // namespace str

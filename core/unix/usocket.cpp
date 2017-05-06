@@ -21,7 +21,6 @@
 
 // TODO: fix socket closing
 
-
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -43,12 +42,10 @@
 #define MSG_NOSIGNAL 0
 #endif
 
-
 // --------------------------------------------------
 void UClientSocket::init()
 {
     LOG_DEBUG("LStartup:  OK");
-
 }
 
 // --------------------------------------------------
@@ -67,10 +64,10 @@ bool ClientSocket::getHostname(char *str, unsigned int ip)
     }else
         return false;
 }
+
 // --------------------------------------------------
 unsigned int ClientSocket::getIP(const char *name)
 {
-
     char szHostName[256];
 
     if (!name)
@@ -86,7 +83,6 @@ unsigned int ClientSocket::getIP(const char *name)
     if (!he)
         return 0;
 
-
     char* lpAddr = he->h_addr_list[0];
     if (lpAddr)
     {
@@ -97,6 +93,7 @@ unsigned int ClientSocket::getIP(const char *name)
     }
     return 0;
 }
+
 // --------------------------------------------------
 void UClientSocket::setLinger(int sec)
 {
@@ -115,6 +112,7 @@ void UClientSocket::setNagle(bool on)
      if (setsockopt(sockNum, IPPROTO_TCP, TCP_NODELAY, (void*) &nodelay, sizeof(nodelay)) < 0)
         throw SockException("Unable to set NODELAY");
 }
+
 // --------------------------------------------------
 void UClientSocket::setBlocking(bool block)
 {
@@ -131,7 +129,6 @@ void UClientSocket::setBlocking(bool block)
 // --------------------------------------------------
 void UClientSocket::setReuse(bool yes)
 {
-
     unsigned long op = yes ? 1 : 0;
     if (setsockopt(sockNum, SOL_SOCKET, SO_REUSEADDR, (char *)&op, sizeof(op)) < 0)
         throw SockException("Unable to set REUSE");
@@ -156,11 +153,10 @@ hostent *UClientSocket::resolveHost(const char *hostName)
     }
     return he;
 }
+
 // --------------------------------------------------
 void UClientSocket::open(Host &rh)
 {
-
-
     sockNum = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     if (sockNum == INVALID_SOCKET)
@@ -179,8 +175,8 @@ void UClientSocket::open(Host &rh)
     remoteAddr.sin_family = AF_INET;
     remoteAddr.sin_port = htons(host.port);
     remoteAddr.sin_addr.s_addr = htonl(host.ip);
-
 }
+
 // --------------------------------------------------
 void UClientSocket::checkTimeout(bool r, bool w)
 {
@@ -216,61 +212,16 @@ void UClientSocket::checkTimeout(bool r, bool w)
         else
             tp = NULL;
 
-
         int r=select (sockNum+1, &read_fds, &write_fds, NULL, tp);
 
         if (r == 0)
             throw TimeoutException();
         else if (r == SOCKET_ERROR)
             throw SockException("select failed.");
-
     }else{
         char str[64];
         snprintf(str, 64, "Closed: %s", strerror(err));
         throw SockException(str);
-    }
-}
-
-// --------------------------------------------------
-void UClientSocket::checkTimeout2(bool r, bool w)
-{
-    {
-        //LOG("checktimeout %d %d", (int)r, (int)w);
-
-        timeval timeout;
-        fd_set read_fds;
-        fd_set write_fds;
-
-        timeout.tv_sec = 0;
-        timeout.tv_usec = 0;
-
-        FD_ZERO (&write_fds);
-        if (w)
-        {
-            timeout.tv_sec = (int)this->writeTimeout/1000;
-            FD_SET (sockNum, &write_fds);
-        }
-
-        FD_ZERO (&read_fds);
-        if (r)
-        {
-            timeout.tv_sec = (int)this->readTimeout/1000;
-            FD_SET (sockNum, &read_fds);
-        }
-
-        timeval *tp;
-        if (timeout.tv_sec)
-            tp = &timeout;
-        else
-            tp = NULL;
-
-
-        int r=select (sockNum+1, &read_fds, &write_fds, NULL, tp);
-
-        if (r == 0)
-            throw TimeoutException();
-        else if (r == SOCKET_ERROR)
-            throw SockException("select failed.");
     }
 }
 
@@ -280,6 +231,7 @@ void UClientSocket::connect()
     if (::connect(sockNum, (struct sockaddr *)&remoteAddr, sizeof(remoteAddr)) == SOCKET_ERROR)
         checkTimeout(false, true);
 }
+
 // --------------------------------------------------
 int UClientSocket::read(void *p, int l)
 {
@@ -339,11 +291,9 @@ int UClientSocket::readUpto(void *p, int l)
     return bytesRead;
 }
 
-
 // --------------------------------------------------
 void UClientSocket::write(const void *p, int l)
 {
-    //LOG_DEBUG("UClientSocket: write %d bytes", l);
     while (l)
     {
         int r = send(sockNum, (char *)p, l, MSG_DONTWAIT|MSG_NOSIGNAL);
@@ -356,6 +306,7 @@ void UClientSocket::write(const void *p, int l)
             throw SockException("Closed on write");
         }else
         {
+            // LOG_DEBUG("UClientSocket: write %d bytes", r);
             stats.add(Stats::BYTESOUT, r);
             if (host.localIP())
                 stats.add(Stats::LOCALBYTESOUT, r);
@@ -365,7 +316,6 @@ void UClientSocket::write(const void *p, int l)
         }
     }
 }
-
 
 // --------------------------------------------------
 void UClientSocket::bind(Host &h)
@@ -391,19 +341,17 @@ void UClientSocket::bind(Host &h)
 
     host = h;
 }
+
 // --------------------------------------------------
 ClientSocket *UClientSocket::accept()
 {
-
     socklen_t fromSize = sizeof(sockaddr_in);
     sockaddr_in from;
 
     int conSock = ::accept(sockNum, (sockaddr *)&from, &fromSize);
 
-
     if (conSock ==  INVALID_SOCKET)
         return NULL;
-
 
     UClientSocket *cs = new UClientSocket();
     cs->sockNum = conSock;
@@ -431,6 +379,7 @@ Host UClientSocket::getLocalHost()
     else
         return Host(0, 0);
 }
+
 // --------------------------------------------------
 void UClientSocket::close()
 {
@@ -482,4 +431,3 @@ int UClientSocket::numPending()
 
     return (int)len;
 }
-

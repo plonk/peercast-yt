@@ -40,8 +40,5 @@ public:
     ::String        baseurl;
 };
 
-
-
-
 #endif
 

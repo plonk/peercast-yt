@@ -5,21 +5,6 @@ using json = nlohmann::json;
 
 class HostGraphFixture : public ::testing::Test {
 public:
-    HostGraphFixture()
-    {
-    }
-
-    void SetUp()
-    {
-    }
-
-    void TearDown()
-    {
-    }
-
-    ~HostGraphFixture()
-    {
-    }
 };
 
 TEST_F(HostGraphFixture, constructorNullChannel)
