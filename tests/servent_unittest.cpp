@@ -235,3 +235,15 @@ TEST_F(ServentFixture, createChannelInfoNonnumericBitrate)
     ASSERT_NO_THROW(info = s.createChannelInfo(GnuID(), String(), query));
     ASSERT_EQ(0, info.bitrate);
 }
+
+TEST_F(ServentFixture, hasValidAuthToken)
+{
+    ASSERT_TRUE(s.hasValidAuthToken("01234567890123456789012345678901.flv?auth=44d5299e57ad9274fee7960a9fa60bfd"));
+    ASSERT_FALSE(s.hasValidAuthToken("01234567890123456789012345678901.flv?auth=00000000000000000000000000000000"));
+    ASSERT_FALSE(s.hasValidAuthToken("01234567890123456789012345678901.flv?"));
+    ASSERT_FALSE(s.hasValidAuthToken("01234567890123456789012345678901.flv"));
+    ASSERT_FALSE(s.hasValidAuthToken(""));
+    ASSERT_FALSE(s.hasValidAuthToken("ほげほげ.flv?auth=44d5299e57ad9274fee7960a9fa60bfd"));
+    ASSERT_FALSE(s.hasValidAuthToken("ほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげ.flv?auth=44d5299e57ad9274fee7960a9fa60bfd"));
+    ASSERT_FALSE(s.hasValidAuthToken("?auth=44d5299e57ad9274fee7960a9fa60bfd"));
+}

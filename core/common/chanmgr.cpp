@@ -800,13 +800,13 @@ void ChanMgr::playChannel(ChanInfo &info)
 }
 
 // -----------------------------------
-std::string ChanMgr::authSecret(GnuID& id)
+std::string ChanMgr::authSecret(const GnuID& id)
 {
     return broadcastID.str() + ":" + id.str();
 }
 
 // --------------------------------------------------
-std::string ChanMgr::authToken(GnuID& id)
+std::string ChanMgr::authToken(const GnuID& id)
 {
     return md5::hexdigest(authSecret(id));
 }

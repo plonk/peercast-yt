@@ -56,7 +56,7 @@ void GnuID::encode(Host *h, const char *salt1, const char *salt2, unsigned char 
 }
 
 // ---------------------------
-void GnuID::toStr(char *str)
+void GnuID::toStr(char *str) const
 {
     str[0] = 0;
     for (int i=0; i<16; i++)
