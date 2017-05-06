@@ -155,7 +155,7 @@ bool Servent::hasValidAuthToken(const std::string& requestFilename)
 
     auto token = query.get("auth");
     auto chanid = str::upcase(vec[0].substr(0, 32));
-    auto validToken = md5::hexdigest(chanMgr->broadcastID.str() + ":" + chanid);
+    auto validToken = chanMgr->authToken(chanid);
 
     if (validToken == token)
     {
