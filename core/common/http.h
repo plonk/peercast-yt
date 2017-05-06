@@ -45,10 +45,7 @@ public:
 #define HTTP_SC_BADGATEWAY   "HTTP/1.0 502 Bad Gateway"
 #define HTTP_SC_SERVERERROR  "HTTP/1.0 500 Internal Server Error"
 
-#define RTSP_SC_OK           "RTSP/1.0 200 OK"
-
 #define HTTP_PROTO1          "HTTP/1."
-#define RTSP_PROTO1          "RTSP/1."
 
 #define HTTP_HS_SERVER       "Server:"
 #define HTTP_HS_AGENT        "User-Agent:"
