@@ -22,6 +22,8 @@
 #include "channel.h"
 #include "stream.h"
 
+class ChanInfo;
+
 // ----------------------------------
 class PlayList
 {
@@ -95,6 +97,8 @@ public:
             case T_RAM: writeRAM(s); break;
         }
     }
+
+    static PlayList::TYPE getPlayListType(ChanInfo::TYPE chanType);
 
     TYPE        type;
     int         numURLs, maxURLs;

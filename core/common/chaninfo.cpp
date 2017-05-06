@@ -20,6 +20,7 @@
 #include "chaninfo.h"
 #include "pcp.h"
 #include "chanmgr.h"
+#include "playlist.h"
 
 // -----------------------------------
 static void readXMLString(String &str, XML::Node *n, const char *arg)
@@ -752,4 +753,18 @@ bool TrackInfo::update(const TrackInfo &inf)
     }
 
     return changed;
+}
+
+// -----------------------------------
+const char* ChanInfo::getPlayListExt()
+{
+    switch (PlayList::getPlayListType(contentType))
+    {
+    case PlayList::T_ASX:
+        return ".asx";
+    case PlayList::T_RAM:
+        return ".ram";
+    case PlayList::T_PLS:
+        return ".m3u"; // or could be .pls ...
+    }
 }

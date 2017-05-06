@@ -610,17 +610,6 @@ void writePLSHeader(Stream &s, PlayList::TYPE type)
 }
 
 // -----------------------------------
-PlayList::TYPE Servent::playListType(ChanInfo &info)
-{
-    if ((info.contentType == ChanInfo::T_WMA) || (info.contentType == ChanInfo::T_WMV))
-        return PlayList::T_ASX;
-    else if (info.contentType == ChanInfo::T_OGM)
-        return PlayList::T_RAM;
-    else
-        return PlayList::T_PLS;
-}
-
-// -----------------------------------
 void Servent::handshakePLS(ChanInfo &info, bool doneHandshake)
 {
     char url[256];
@@ -631,7 +620,7 @@ void Servent::handshakePLS(ChanInfo &info, bool doneHandshake)
 
     if (getLocalURL(url))
     {
-        PlayList::TYPE type = playListType(info);
+        PlayList::TYPE type = PlayList::getPlayListType(info.contentType);
 
         writePLSHeader(*sock, type);
 
