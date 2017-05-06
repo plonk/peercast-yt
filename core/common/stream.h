@@ -80,7 +80,6 @@ public:
 
     virtual int     getPosition() { return 0; }
 
-
     // binary
     char    readChar()
     {
@@ -120,8 +119,6 @@ public:
         return v;
     }
 
-
-
     long readTag()
     {
         long v = readLong();
@@ -145,7 +142,6 @@ public:
 
     virtual bool    readReady(int timeoutMilliseconds = 0) { return true; }
     virtual int numPending() { return 0; }
-
 
     void writeID4(ID4 id)
     {
@@ -206,7 +202,6 @@ public:
     int     readBits(int);
 
     void    updateTotals(unsigned int, unsigned int);
-
 
     unsigned char   bitsBuffer;
     unsigned int    bitsPos;
@@ -291,7 +286,6 @@ public:
     Stat stat;
 };
 
-
 // -------------------------------------
 class FileStream : public Stream
 {
@@ -320,6 +314,7 @@ public:
 
     FILE *file;
 };
+
 // -------------------------------------
 class MemoryStream : public Stream
 {
@@ -445,6 +440,7 @@ public:
 
     Stream *stream;
 };
+
 // --------------------------------------------------
 class WriteBufferedStream : public IndirectStream
 {
@@ -509,7 +505,5 @@ public:
 
     std::string buf;
 };
-
-
 #endif
 

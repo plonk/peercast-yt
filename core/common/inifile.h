@@ -45,7 +45,6 @@ public:
     void        writeBoolValue(const char *, int);
     void        writeLine(const char *);
 
-
     FileStream  fStream;
     char        currLine[256];
     char        *nameStr, *valueStr;

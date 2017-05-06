@@ -21,6 +21,7 @@
 
 #include <sys/types.h>
 #include "channel.h"
+
 // ----------------------------------------------
 class OggPage;
 
@@ -38,7 +39,6 @@ public:
 
     int             bodyLen;
     unsigned char   body[MAX_BODYLEN];
-
 
     int             numPackets;
     unsigned int    packetSizes[MAX_PACKETS];
@@ -85,6 +85,7 @@ public:
     int             maxHeaders;
     unsigned int    serialNo;
 };
+
 // ----------------------------------------------
 class OggVorbisSubStream : public OggSubStream
 {
@@ -102,8 +103,8 @@ public:
     double  getTime(OggPage &);
 
     int samplerate;
-
 };
+
 // ----------------------------------------------
 class OggTheoraSubStream : public OggSubStream
 {
@@ -126,7 +127,6 @@ class OGGStream : public ChannelStream
 public:
     OGGStream()
     {}
-
 
     void    readHeader(Stream &, Channel *) override;
     int     readPacket(Stream &, Channel *) override;
@@ -158,11 +158,9 @@ public:
     bool            detectVorbis();
     bool            detectTheora();
 
-
     int64_t         granPos;
     int             headLen, bodyLen;
     unsigned char   data[MAX_HEADERLEN+MAX_BODYLEN];
 };
-
 
 #endif

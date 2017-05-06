@@ -56,7 +56,6 @@ public:
         value = 0;
     }
 
-
     bool    isMemberOf(Host &);
 
     bool    isSame(Host &h)
@@ -101,7 +100,6 @@ public:
     {
         return (ip != 0);
     }
-
 
     bool    isSameType(Host &h)
     {
@@ -153,7 +151,6 @@ public:
     void    fromStrName(const char *, int);
 
     bool    isLocalhost();
-
 
     union
     {

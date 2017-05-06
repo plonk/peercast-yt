@@ -57,6 +57,7 @@ public:
     unsigned long a[2];
 };
 }
+
 // ------------------------------------
 class Sys
 {
@@ -88,7 +89,6 @@ public:
     unsigned int    convertEndian(unsigned int v) { return v; }
 #endif
 
-
     void    sleepIdle();
 
     unsigned int idleSleepTime;
@@ -98,12 +98,10 @@ public:
     class LogBuffer *logBuf;
 };
 
-
 #ifdef WIN32
 #include <windows.h>
 
 typedef __int64 int64_t;
-
 
 // ------------------------------------
 class WEvent
@@ -162,7 +160,6 @@ public:
         InitializeCriticalSection(&cs);
     }
 
-
     void    on()
     {
         EnterCriticalSection(&cs);
@@ -177,7 +174,6 @@ public:
 };
 #endif
 
-
 #ifdef _UNIX
 // ------------------------------------
 #include <pthread.h>
@@ -188,7 +184,6 @@ public:
 #define _BIG_ENDIAN 1
 #endif
 
-
 typedef int (*THREAD_FUNC)(ThreadInfo *);
 #define THREAD_PROC int
 typedef pthread_t THREAD_HANDLE;
@@ -196,7 +191,6 @@ typedef pthread_t THREAD_HANDLE;
 // ------------------------------------
 #define stricmp strcasecmp
 #define strnicmp strncasecmp
-
 
 // ------------------------------------
 class WEvent
@@ -218,7 +212,6 @@ public:
     void    reset()
     {
     }
-
 };
 
 // ------------------------------------
@@ -246,7 +239,6 @@ public:
         pthread_mutex_destroy( &mutex );
     }
 
-
     void    on()
     {
         pthread_mutex_lock(&mutex);
@@ -256,9 +248,9 @@ public:
     {
         pthread_mutex_unlock(&mutex);
     }
-
 };
 #endif
+
 // ------------------------------------
 class ThreadInfo
 {
@@ -330,15 +322,12 @@ public:
     TYPE            *types;
     WLock           lock;
     static          const char *logTypes[];
-
 };
-
 
 // ------------------------------------
 extern Sys *sys;
 
 // ------------------------------------
-
 
 #if _BIG_ENDIAN
 #define CHECK_ENDIAN2(v) v=SWAP2(v)
@@ -350,7 +339,5 @@ extern Sys *sys;
 #define CHECK_ENDIAN4(v)
 #endif
 
-
 // ------------------------------------
 #endif
-

@@ -142,17 +142,13 @@ public:
         MAX_COOKIES = 32
     };
 
-
-
     void    init();
     bool    add(Cookie &);
     void    remove(Cookie &);
     bool    contains(Cookie &);
 
-
     Cookie  list[MAX_COOKIES];
     bool    neverExpire;
-
 };
 
 // --------------------------------------------

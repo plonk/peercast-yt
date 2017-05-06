@@ -17,7 +17,6 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-
 #ifndef _SERVENT_H
 #define _SERVENT_H
 
@@ -113,9 +112,6 @@ public:
 
     void    checkFree();
 
-
-
-
     //  funcs for handling status/type
     void                setStatus(STATUS);
     static const char   *getTypeStr(Servent::TYPE t) { return typeMsgs[t]; }
@@ -132,8 +128,6 @@ public:
         }else
             return true;
     }
-
-
 
     // static funcs that do the actual work in the servent thread
     static THREAD_PROC  serverProc(ThreadInfo *);
@@ -192,7 +186,6 @@ public:
 
     bool    writeVariable(Stream &, const String &);
 
-
     // the "mainloop" of servents
     void    processGnutella();
     void    processRoot();
@@ -228,7 +221,6 @@ public:
     void    abort();
     bool    isPrivate();
     bool    isLocal();
-
 
     Host    getHost();
 
@@ -311,7 +303,6 @@ private:
 };
 
 extern char *nextCGIarg(char *cp, char *cmd, char *arg);
-
 
 #endif
 

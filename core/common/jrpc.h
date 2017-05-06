@@ -255,7 +255,6 @@ public:
         throw method_not_found(m.get<std::string>());
     }
 
-
     json fetch(json::array_t params)
     {
         try
@@ -522,7 +521,6 @@ public:
 
         return channelStatus(c);
     }
-
 
     json getChannels(json::array_t)
     {
