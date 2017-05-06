@@ -42,7 +42,7 @@ TEST_F(ChanMgrFixture, initialState)
     // ASSERT_EQ(0, x->numFinds); // 初期化されない。
     ASSERT_EQ(String(), x->broadcastMsg);
     EXPECT_EQ(10, x->broadcastMsgInterval);
-    EXPECT_EQ(0, x->lastHit);
+    //EXPECT_EQ(0, x->lastHit); // 初期化されない。
     EXPECT_EQ(0, x->lastQuery);
     EXPECT_EQ(0, x->maxUptime);
     // EXPECT_EQ(true, x->searchActive); // 初期化されない。
