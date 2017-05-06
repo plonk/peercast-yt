@@ -68,6 +68,18 @@ TEST_F(strFixture, replace_prefix)
     ASSERT_STREQ("bc", str::replace_prefix("abc", "a", "").c_str());
 }
 
+TEST_F(strFixture, replace_suffix)
+{
+    ASSERT_STREQ("", str::replace_suffix("", "", "").c_str());
+    ASSERT_STREQ("b", str::replace_suffix("", "", "b").c_str());
+    ASSERT_STREQ("", str::replace_suffix("", "a", "b").c_str());
+    ASSERT_STREQ("", str::replace_suffix("", "a", "").c_str());
+    ASSERT_STREQ("abx", str::replace_suffix("abc", "c", "x").c_str());
+    ASSERT_STREQ("abc", str::replace_suffix("abc", "x", "x").c_str());
+    ASSERT_STREQ("abcx", str::replace_suffix("abc", "", "x").c_str());
+    ASSERT_STREQ("ab", str::replace_suffix("abc", "c", "").c_str());
+}
+
 TEST_F(strFixture, capitalize)
 {
     ASSERT_STREQ("", str::capitalize("").c_str());

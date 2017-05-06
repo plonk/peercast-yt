@@ -34,6 +34,7 @@
 #include "cgi.h"
 #include "template.h"
 #include "public.h"
+#include "md5.h"
 
 using namespace std;
 
@@ -143,6 +144,28 @@ void Servent::handshakeJRPC(HTTP &http)
 }
 
 // -----------------------------------
+bool Servent::hasValidAuthToken(const std::string& requestFilename)
+{
+    auto vec = str::split(requestFilename, "?");
+
+    if (vec.size() != 2)
+        return false;
+
+    cgi::Query query(vec[1]);
+
+    auto token = query.get("auth");
+    auto chanid = str::upcase(vec[0].substr(0, 32));
+    auto validToken = chanMgr->authToken(chanid);
+
+    if (validToken == token)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+// -----------------------------------
 void Servent::handshakeGET(HTTP &http)
 {
     char *fn = http.cmdLine + 4;
@@ -249,7 +272,7 @@ void Servent::handshakeGET(HTTP &http)
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
         ChanInfo info;
-        if (servMgr->getChannel(fn+5, info, isPrivate()))
+        if (servMgr->getChannel(fn+5, info, isPrivate() || hasValidAuthToken(fn+5)))
             handshakePLS(info, false);
         else
             throw HTTPException(HTTP_SC_NOTFOUND, 404);
@@ -261,7 +284,7 @@ void Servent::handshakeGET(HTTP &http)
             if (!isAllowed(ALLOW_DIRECT) || !isFiltered(ServFilter::F_DIRECT))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-        triggerChannel(fn+8, ChanInfo::SP_HTTP, isPrivate());
+        triggerChannel(fn+8, ChanInfo::SP_HTTP, isPrivate() || hasValidAuthToken(fn+8));
     }else if (strncmp(fn, "/channel/", 9) == 0)
     {
         if (!sock->host.isLocalhost())
@@ -597,14 +620,7 @@ void Servent::handshakePLS(ChanInfo &info, bool doneHandshake)
 
     if (getLocalURL(url))
     {
-        PlayList::TYPE type;
-
-        if ((info.contentType == ChanInfo::T_WMA) || (info.contentType == ChanInfo::T_WMV))
-            type = PlayList::T_ASX;
-        else if (info.contentType == ChanInfo::T_OGM)
-            type = PlayList::T_RAM;
-        else
-            type = PlayList::T_PLS;
+        PlayList::TYPE type = PlayList::getPlayListType(info.contentType);
 
         writePLSHeader(*sock, type);
 

@@ -3,6 +3,7 @@
 #include "playlist.h"
 #include "peercast.h"
 #include "version2.h" // PCP_BROADCAST_FLAGS
+#include "md5.h"
 
 // -----------------------------------
 void ChanMgr::startSearch(ChanInfo &info)
@@ -239,7 +240,9 @@ Channel *ChanMgr::findAndRelay(ChanInfo &info)
             return NULL;
         }
 
-        if (c->isPlaying() && (c->info.contentType != ChanInfo::T_UNKNOWN))
+        // if (c->isPlaying() && (c->info.contentType != ChanInfo::T_UNKNOWN))
+        //     break;
+        if (c->isPlaying()) // UNKNOWN でもかまわないことにする。
             break;
 
         sys->sleep(100);
@@ -794,4 +797,16 @@ void ChanMgr::playChannel(ChanInfo &info)
     LOG_DEBUG("Executing: %s", fname);
     sys->executeFile(fname);
     delete pls;
+}
+
+// -----------------------------------
+std::string ChanMgr::authSecret(const GnuID& id)
+{
+    return broadcastID.str() + ":" + id.str();
+}
+
+// --------------------------------------------------
+std::string ChanMgr::authToken(const GnuID& id)
+{
+    return md5::hexdigest(authSecret(id));
 }

@@ -176,6 +176,16 @@ std::string replace_prefix(const std::string& s, const std::string& prefix, cons
         return s;
 }
 
+std::string replace_suffix(const std::string& s, const std::string& suffix, const std::string& replacement)
+{
+    if (s.size() < suffix.size()) return s;
+
+    if (s.substr(s.size() - suffix.size(), suffix.size()) == suffix)
+        return s.substr(0, s.size() - suffix.size()) + replacement;
+    else
+        return s;
+}
+
 std::string upcase(const std::string& input)
 {
     std::string res;

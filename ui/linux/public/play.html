@@ -21,7 +21,7 @@
         <param name="movie" value="http://releases.flowplayer.org/swf/flowplayer-3.2.18.swf" />
         <param name="allowfullscreen" value="true" />
         <param name="allowscriptaccess" value="always" />
-        <param name="flashvars" value='config={"canvas":{"backgroundColor":"#000","backgroundGradient":"none"},"clip":{"url":"http://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.flv"},"playlist":[{"url":"http://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.flv","scaling":"fit"}]}' />
+        <param name="flashvars" value='config={"canvas":{"backgroundColor":"#000","backgroundGradient":"none"},"clip":{"url":"http://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.flv?auth={$page.channel.authToken}"},"playlist":[{"url":"http://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.flv?auth={$page.channel.authToken}","scaling":"fit"}]}' />
       </object>
     </div>
     {@else}{@if page.channel.type == "WMV"}
@@ -34,7 +34,7 @@
         standby="Loading MicrosoftR WindowsR Media Player components..."
         type="application/x-oleobject">
 
-        <param name="FileName" value="http://{$servMgr.serverIP}:{$servMgr.serverPort}/pls/{$page.channel.id}.asx" />
+        <param name="FileName" value="http://{$servMgr.serverIP}:{$servMgr.serverPort}/pls/{$page.channel.id}.asx?auth={$page.channel.authToken}" />
         <!-- 自動再生の有無 -->
         <param name="AutoStart" value="true" />
         <!-- コントロール表示の有無 -->
@@ -49,7 +49,7 @@
     {@if page.channel.type == "MP3"}
     <div style="margin: 5em auto; text-align: center">
       <audio controls autoplay style="min-width: 640px">
-        <source src="http://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.mp3" type="audio/mpeg">
+        <source src="http://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.mp3?auth={$page.channel.authToken}" type="audio/mpeg">
         お使いのブラウザは MP3 音声の再生に対応していないようです。プレイリストから再生してください。
         <!-- Your browser does not support the audio element. -->
       </audio>
@@ -62,11 +62,10 @@
     {@end}
     {@end}
 
-
     <div class="paper">
       {$page.channel.name} {$page.channel.desc} {$page.channel.comment} {$page.channel.bitrate} kbps
       <a target="_blank"
-         href="http://{$servMgr.serverIP}:{$servMgr.serverPort}/pls/{$page.channel.id}">
+         href="http://{$servMgr.serverIP}:{$servMgr.serverPort}/pls/{$page.channel.id}{$page.channel.plsExt}">
         プレイリスト
       </a>
       {@if page.channel.contactURL}

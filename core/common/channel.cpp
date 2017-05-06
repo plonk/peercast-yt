@@ -1463,7 +1463,11 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
         if (chl)
             numHits = chl->numHits();
         sprintf(buf, "%d", numHits);
-    }else
+    }else if (var == "authToken")
+        sprintf(buf, "%s", chanMgr->authToken(info.id).c_str());
+    else if (var == "plsExt")
+        sprintf(buf, "%s", info.getPlayListExt());
+    else
         return false;
 
     out.writeString(buf);

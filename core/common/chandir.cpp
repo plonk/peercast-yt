@@ -256,6 +256,8 @@ bool ChannelDirectory::writeFeedVariable(Stream& out, const String& varName, int
 
     if (varName == "url") {
         value = m_feeds[index].url;
+    } else if (varName == "directoryUrl") {
+        value = str::replace_suffix(m_feeds[index].url, "index.txt", "");
     } else if (varName == "status") {
         value = ChannelFeed::statusToString(m_feeds[index].status);
     } else if (varName == "isPublic") {

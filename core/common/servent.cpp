@@ -104,11 +104,19 @@ bool Servent::canStream(Channel *ch)
 
     if (!isPrivate())
     {
-        if  (servMgr->bitrateFull(ch->getBitrate())
-             || ((type == T_RELAY) && servMgr->relaysFull())
-             || ((type == T_DIRECT) && servMgr->directFull())
-             || !ch->isPlaying()
-             || ch->isFull())
+        if  (servMgr->bitrateFull(ch->getBitrate()))
+            return false;
+
+        if ((type == T_RELAY) && servMgr->relaysFull())
+            return false;
+
+        if ((type == T_DIRECT) && servMgr->directFull())
+            return false;
+
+        if (!ch->isPlaying())
+            return false;
+
+        if (ch->isFull())
             return false;
     }
 
