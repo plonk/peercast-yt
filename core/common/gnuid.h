@@ -40,7 +40,6 @@ public:
         return memcmp(id, gid.id, 16) == 0;
     }
 
-
     bool    isSet() const
     {
         for (int i=0; i<16; i++)

@@ -200,14 +200,12 @@ public:
         return type != T_NONE;
     }
 
-
     void    connectFetch();
     int     handshakeFetch();
 
     bool    isIdle() { return isActive() && (status==S_IDLE); }
 
     static THREAD_PROC stream(ThreadInfo *);
-
 
     void         setStatus(STATUS s);
     const char   *getSrcTypeStr() { return srcTypes[srcType]; }
@@ -251,13 +249,11 @@ public:
     ChannelStream       *sourceStream;
     unsigned int        streamIndex;
 
-
     ChanInfo            info;
     ChanHit             sourceHost;
     ChanHit             designatedHost;
 
     GnuID               remoteID;
-
 
     ::String            sourceURL;
 

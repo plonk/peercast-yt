@@ -27,6 +27,7 @@ static const char PCP_BROADCAST_FLAGS   = 0x01;
 static const char PCP_BROADCAST_FLAGS   = 0x00;
 #define PCP_FORCE_YP false
 #endif
+
 // ------------------------------------------------
 static const int PCP_CLIENT_VERSION     = 1218;
 static const int PCP_CLIENT_VERSION_VP  = 27;

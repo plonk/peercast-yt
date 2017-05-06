@@ -31,7 +31,6 @@ public:
         MAX_METAINT = 8192          // must be at least smaller than ChanPacket data len (ie. about half)
     };
 
-
     ChanMgr();
     ~ChanMgr();
 
@@ -92,8 +91,6 @@ public:
 
     int         pickHits(ChanHitSearch &);
 
-
-
     Channel         *channel;
     ChanHitList     *hitlist;
 
@@ -122,7 +119,6 @@ public:
     unsigned int    bufferTime;
 
     GnuID           currFindAndPlayChannel;
-
 };
 
 // ----------------------------------

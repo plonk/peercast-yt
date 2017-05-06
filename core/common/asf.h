@@ -19,7 +19,6 @@
 #ifndef _ASF_H
 #define _ASF_H
 
-
 #include "stream.h"
 
 // -----------------------------------
@@ -42,7 +41,6 @@ public:
         out.writeShort(data3);
         out.write(data4, 8);
     }
-
 
     void toString(String &s)
     {
@@ -136,7 +134,6 @@ public:
 
         in.read(data, dataLen);
     }
-
 
     void write(Stream &out)
     {

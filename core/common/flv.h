@@ -46,7 +46,6 @@ public:
     unsigned char data[13];
 };
 
-
 // -----------------------------------
 class FLVTag
 {
