@@ -91,6 +91,9 @@ public:
 
     int         pickHits(ChanHitSearch &);
 
+    std::string authSecret(GnuID& id);
+    std::string authToken(GnuID& id);
+
     Channel         *channel;
     ChanHitList     *hitlist;
 

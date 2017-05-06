@@ -3,6 +3,7 @@
 #include "playlist.h"
 #include "peercast.h"
 #include "version2.h" // PCP_BROADCAST_FLAGS
+#include "md5.h"
 
 // -----------------------------------
 void ChanMgr::startSearch(ChanInfo &info)
@@ -796,4 +797,16 @@ void ChanMgr::playChannel(ChanInfo &info)
     LOG_DEBUG("Executing: %s", fname);
     sys->executeFile(fname);
     delete pls;
+}
+
+// -----------------------------------
+std::string ChanMgr::authSecret(GnuID& id)
+{
+    return broadcastID.str() + ":" + id.str();
+}
+
+// --------------------------------------------------
+std::string ChanMgr::authToken(GnuID& id)
+{
+    return md5::hexdigest(authSecret(id));
 }

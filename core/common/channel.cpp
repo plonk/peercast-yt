@@ -48,7 +48,6 @@
 #include "httppush.h"
 
 #include "str.h"
-#include "md5.h"
 
 #include "version2.h"
 
@@ -1330,12 +1329,6 @@ void Channel::getStreamPath(char *str)
 }
 
 // -----------------------------------
-std::string Channel::authSecret()
-{
-    return chanMgr->broadcastID.str() + ":" + info.id.str();
-}
-
-// -----------------------------------
 bool Channel::writeVariable(Stream &out, const String &var, int index)
 {
     char buf[1024];
@@ -1472,7 +1465,7 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
         sprintf(buf, "%d", numHits);
     }else if (var == "authToken")
     {
-        sprintf(buf, "%s", md5::hexdigest(authSecret()).c_str());
+        sprintf(buf, "%s", chanMgr->authToken(info.id).c_str());
     }else
         return false;
 

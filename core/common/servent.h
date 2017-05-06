@@ -28,6 +28,7 @@
 #include "http.h"
 #include "pcp.h"
 #include "cgi.h" // Query
+#include "playlist.h"
 
 class HTML;
 
@@ -232,6 +233,7 @@ public:
     ChanInfo createChannelInfo(GnuID broadcastID, const String& broadcastMsg, cgi::Query& query);
 
     static bool hasValidAuthToken(const std::string& requestFilename);
+    static PlayList::TYPE playListType(ChanInfo &info);
 
     TYPE                type;
     STATUS              status;

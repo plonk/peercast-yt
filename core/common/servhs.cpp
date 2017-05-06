@@ -272,7 +272,7 @@ void Servent::handshakeGET(HTTP &http)
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
         ChanInfo info;
-        if (servMgr->getChannel(fn+5, info, isPrivate()))
+        if (servMgr->getChannel(fn+5, info, isPrivate() || hasValidAuthToken(fn+5)))
             handshakePLS(info, false);
         else
             throw HTTPException(HTTP_SC_NOTFOUND, 404);
