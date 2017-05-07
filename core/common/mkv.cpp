@@ -4,13 +4,14 @@
 #include "channel.h"
 #include "stream.h"
 #include "matroska.h"
+#include "dmstream.h"
 
 using namespace matroska;
 
 // data を type パケットとして送信する
 void MKVStream::sendPacket(ChanPacket::TYPE type, const byte_string& data, bool continuation, Channel* ch)
 {
-    LOG_DEBUG("MKV Sending %zu byte %s packet", data.size(), type==ChanPacket::T_HEAD?"HEAD":"DATA");
+    //LOG_DEBUG("MKV Sending %zu byte %s packet", data.size(), type==ChanPacket::T_HEAD?"HEAD":"DATA");
 
     if (data.size() > ChanPacket::MAX_DATALEN)
         throw StreamException("MKV packet too big");
@@ -34,7 +35,7 @@ bool MKVStream::hasKeyFrame(const byte_string& cluster)
 {
     MemoryStream in(const_cast<unsigned char*>(cluster.data()), cluster.size());
 
-    VInt id = VInt::read(in);
+    VInt id   = VInt::read(in);
     VInt size = VInt::read(in);
 
     int64_t payloadRemaining = (int64_t) size.uint(); // 負数が取れるように signed にする
@@ -42,7 +43,7 @@ bool MKVStream::hasKeyFrame(const byte_string& cluster)
         throw StreamException("MKV Parse error");
     while (payloadRemaining > 0) // for each element in Cluster
     {
-        VInt id = VInt::read(in);
+        VInt id   = VInt::read(in);
         VInt size = VInt::read(in);
         std::string blockData = static_cast<Stream*>(&in)->read((int) size.uint());
 
@@ -54,7 +55,10 @@ bool MKVStream::hasKeyFrame(const byte_string& cluster)
             if (trackno.uint() == m_videoTrackNumber)
             {
                 if (((uint8_t)blockData[trackno.bytes.size() + 2] & 0x80) != 0)
+                {
+                    m_hasKeyFrame = true;
                     return true; // キーフレームがある
+                }
             }
         }
         payloadRemaining -= id.bytes.size() + size.bytes.size() + size.uint();
@@ -68,8 +72,17 @@ bool MKVStream::hasKeyFrame(const byte_string& cluster)
 // をパケットの先頭にして送信する
 void MKVStream::sendCluster(const byte_string& cluster, Channel* ch)
 {
-    bool continuation = !hasKeyFrame(cluster);
-    LOG_DEBUG("sendCluster continuation = \e[33m%d\e[0m", continuation);
+    bool continuation;
+
+    if (hasKeyFrame(cluster))
+        continuation = false;
+    else
+    {
+        if (m_hasKeyFrame)
+            continuation = true;
+        else
+            continuation = false;
+    }
 
     // 15KB 以下の場合はそのまま送信
     if (cluster.size() <= 15*1024)
@@ -78,13 +91,12 @@ void MKVStream::sendCluster(const byte_string& cluster, Channel* ch)
         return;
     }
 
-    // ...........................
     MemoryStream in((void*) cluster.data(), cluster.size());
 
-    VInt id = VInt::read(in);
+    VInt id   = VInt::read(in);
     VInt size = VInt::read(in);
 
-    LOG_DEBUG("sendCluster Got %s size=%s", id.toName().c_str(), std::to_string(size.uint()).c_str());
+    //LOG_DEBUG("Got %s size=%s", id.toName().c_str(), std::to_string(size.uint()).c_str());
 
     byte_string buffer = id.bytes + size.bytes;
 
@@ -93,20 +105,17 @@ void MKVStream::sendCluster(const byte_string& cluster, Channel* ch)
         throw StreamException("MKV Parse error");
     while (payloadRemaining > 0) // for each element in Cluster
     {
-        LOG_DEBUG("buffer size = %d", (int)buffer.size());
-        LOG_DEBUG("payloadRemaining = %d", (int)payloadRemaining);
         VInt id = VInt::read(in);
         VInt size = VInt::read(in);
 
-        LOG_DEBUG("sendCluster Got %s size=%s", id.toName().c_str(), std::to_string(size.uint()).c_str());
+        //LOG_DEBUG("Got %s size=%s", id.toName().c_str(), std::to_string(size.uint()).c_str());
 
         if (buffer.size() > 0 &&
             buffer.size() + id.bytes.size() + size.bytes.size() + size.uint() > 15*1024)
         {
-            LOG_DEBUG("MKV case 1");
             MemoryStream mem((void*)buffer.data(), buffer.size());
             VInt id = VInt::read(mem);
-            LOG_DEBUG("Sending %s", id.toName().c_str());
+            //LOG_DEBUG("Sending %s", id.toName().c_str());
             sendPacket(ChanPacket::T_DATA, buffer, continuation, ch);
             continuation = true;
             buffer.clear();
@@ -114,7 +123,6 @@ void MKVStream::sendCluster(const byte_string& cluster, Channel* ch)
 
         if (id.bytes.size() + size.bytes.size() + size.uint() > 15*1024)
         {
-            LOG_DEBUG("MKV case 2");
             if (buffer.size() != 0) throw StreamException("Logic error");
             buffer = id.bytes + size.bytes;
             auto payload = static_cast<Stream*>(&in)->read((int) size.uint());
@@ -129,16 +137,13 @@ void MKVStream::sendCluster(const byte_string& cluster, Channel* ch)
             }
             buffer.clear();
         } else {
-            LOG_DEBUG("MKV case 3");
             buffer += id.bytes + size.bytes;
             auto payload = static_cast<Stream*>(&in)->read((int) size.uint());
             buffer.append(payload.begin(), payload.end());
             MemoryStream mem((void*)buffer.c_str(), buffer.size());
             mem.rewind();
             VInt id = VInt::read(mem);
-            LOG_DEBUG("Buffered %s", id.toName().c_str());
         }
-        LOG_DEBUG("%zu %zu %d", id.bytes.size(), id.bytes.size(), (int)size.uint());
         payloadRemaining -= id.bytes.size() + size.bytes.size() + size.uint();
     }
 
@@ -148,20 +153,58 @@ void MKVStream::sendCluster(const byte_string& cluster, Channel* ch)
     }
 }
 
+// Tracks 要素からビデオトラックのトラック番号を調べる。
+void MKVStream::readTracks(const std::string& data)
+{
+    DynamicMemoryStream mem;
+    mem.str(data);
+
+    while (!mem.eof())
+    {
+        VInt id   = VInt::read(mem);
+        VInt size = VInt::read(mem);
+        LOG_DEBUG("Got LEVEL2 %s size=%s", id.toName().c_str(), std::to_string(size.uint()).c_str());
+
+        if (id.toName() == "TrackEntry")
+        {
+            int end = mem.getPosition() + size.uint();
+            int trackno = -1;
+            int tracktype = -1;
+
+            while (mem.getPosition() < end)
+            {
+                VInt id   = VInt::read(mem);
+                VInt size = VInt::read(mem);
+
+                if (id.toName() == "TrackNumber")
+                    trackno = (uint8_t) mem.readChar();
+                else if (id.toName() == "TrackType")
+                    tracktype = (uint8_t) mem.readChar();
+                else
+                    mem.skip(size.uint());
+            }
+
+            if (tracktype == 1)
+            {
+                m_videoTrackNumber = trackno;
+                LOG_DEBUG("MKV video track number is %d", trackno);
+            }
+        }
+    }
+}
+
 void MKVStream::readHeader(Stream &in, Channel *ch)
 {
-    LOG_DEBUG("MKV readHeader");
     byte_string header;
 
     while (true)
     {
-        VInt id = VInt::read(in);
+        VInt id   = VInt::read(in);
         VInt size = VInt::read(in);
         LOG_DEBUG("Got LEVEL0 %s size=%s", id.toName().c_str(), std::to_string(size.uint()).c_str());
 
         header += id.bytes;
         header += size.bytes;
-
 
         if (id.toName() != "Segment")
         {
@@ -180,12 +223,15 @@ void MKVStream::readHeader(Stream &in, Channel *ch)
 
                 if (id.toName() != "Cluster")
                 {
-                    // Cluster 以外の要素は単にヘッドパケットに追加す
-                    // る
+                    // Cluster 以外の要素はヘッドパケットに追加する
                     header += id.bytes;
                     header += size.bytes;
 
                     auto data = in.read((int) size.uint());
+
+                    if (id.toName() == "Tracks")
+                        readTracks(data);
+
                     header.append(data.begin(), data.end());
                 } else
                 {
@@ -220,7 +266,6 @@ void MKVStream::checkBitrate(Stream &in, Channel *ch)
 // Cluster 要素を読む
 int MKVStream::readPacket(Stream &in, Channel *ch)
 {
-    LOG_DEBUG("MKV readPacket");
     checkBitrate(in, ch);
 
     VInt id = VInt::read(in);
