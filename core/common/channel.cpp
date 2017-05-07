@@ -1474,7 +1474,7 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
         String time;
         auto lastWritten = (double) sys->getTime() - rawData.lastWriteTime;
         if (lastWritten < 5)
-            time = "just now";
+            time = "< 5 sec";
         else
             time.setFromStopwatch(lastWritten);
         auto stat = rawData.getStatistics();
@@ -1482,16 +1482,16 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
         double byterate = (sourceData) ? sourceData->getSourceRateAvg() : 0.0;
         auto sum = std::accumulate(lens.begin(), lens.end(), 0);
 
-        s += str::format("Length: %s bytes (%.2f sec)<br>", str::group_digits(std::to_string(sum)).c_str(), sum / byterate);
-        s += str::format("Packets: %lu (c %d / nc %d)<br>", lens.size(), stat.continuations, stat.nonContinuations);
+        s += str::format("Length: %s bytes (%.2f sec)\n", str::group_digits(std::to_string(sum)).c_str(), sum / byterate);
+        s += str::format("Packets: %lu (c %d / nc %d)\n", lens.size(), stat.continuations, stat.nonContinuations);
         if (lens.size() > 0)
         {
             auto pmax = std::max_element(lens.begin(), lens.end());
             auto pmin = std::min_element(lens.begin(), lens.end());
-            s += str::format("Packet length min/avg/max: %u/%lu/%u<br>",
+            s += str::format("Packet length min/avg/max: %u/%lu/%u\n",
                              *pmin, sum/lens.size(), *pmax);
         }
-        s += str::format("Last written: %s>", time.str().c_str());
+        s += str::format("Last written: %s", time.str().c_str());
         // s += str::format("First/Safe/Last/Read/Write: %u/%u/%u/%u/%u",
         //                  rawData.firstPos, rawData.safePos, rawData.lastPos, rawData.readPos, rawData.writePos);
         strcpy(buf, s.c_str());
