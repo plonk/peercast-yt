@@ -140,6 +140,22 @@ public:
         return cnt;
     }
 
+    std::string read(int remaining)
+    {
+        std::string res;
+
+        uint8_t buffer[4096];
+
+        while (remaining > 0)
+        {
+            int readSize = std::min(remaining, 4096);
+            int r = read(buffer, readSize);
+            res += std::string(buffer, buffer + r);
+            remaining -= r;
+        }
+        return res;
+    }
+
     virtual bool    readReady(int timeoutMilliseconds = 0) { return true; }
     virtual int numPending() { return 0; }
 

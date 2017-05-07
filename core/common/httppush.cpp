@@ -51,3 +51,12 @@ int HTTPPushSource::getSourceRate()
     else
         return 0;
 }
+
+int HTTPPushSource::getSourceRateAvg()
+{
+    if (m_sock != nullptr)
+        return m_sock->stat.bytesInPerSecAvg();
+    else
+        return 0;
+}
+

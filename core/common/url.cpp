@@ -48,6 +48,15 @@ int URLSource::getSourceRate()
 }
 
 // ------------------------------------------------
+int URLSource::getSourceRateAvg()
+{
+    if (inputStream)
+        return inputStream->stat.bytesInPerSecAvg();
+    else
+        return 0;
+}
+
+// ------------------------------------------------
 ::String URLSource::streamURL(Channel *ch, const char *url)
 {
     String nextURL;

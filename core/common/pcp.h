@@ -101,6 +101,7 @@ static const ID4 PCP_CHAN_PKT_POS   = "pos";
 static const ID4 PCP_CHAN_PKT_HEAD  = "head";
 static const ID4 PCP_CHAN_PKT_DATA  = "data";
 static const ID4 PCP_CHAN_PKT_META  = "meta";
+static const ID4 PCP_CHAN_PKT_CONTINUATION = "cont";
 
 static const ID4 PCP_CHAN_INFO          = "info";
 static const ID4 PCP_CHAN_INFO_TYPE     = "type";

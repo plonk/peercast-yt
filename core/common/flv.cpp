@@ -18,13 +18,6 @@
 
 #include "channel.h"
 #include "flv.h"
-#include "string.h"
-#include "stdio.h"
-#ifdef _DEBUG
-#include "chkMemoryLeak.h"
-#define DEBUG_NEW new(__FILE__, __LINE__)
-#define new DEBUG_NEW
-#endif
 
 static String timestampToString(uint32_t timestamp)
 {
@@ -157,7 +150,17 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
 
 bool FLVTagBuffer::put(FLVTag& tag, Channel* ch)
 {
-    if (m_mem.pos + tag.packetSize > MAX_OUTGOING_PACKET_SIZE)
+    if (tag.isKeyFrame())
+    {
+        m_hasKeyFrame = true;
+
+        if (m_mem.pos > 0)
+        {
+            flush(ch);
+        }
+        sendImmediately(tag, ch);
+        return true;
+    } else if (m_mem.pos + tag.packetSize > MAX_OUTGOING_PACKET_SIZE)
     {
         if (m_mem.pos > 0)
         {
@@ -187,16 +190,25 @@ void FLVTagBuffer::sendImmediately(FLVTag& tag, Channel* ch)
     MemoryStream mem(tag.packet, tag.packetSize);
 
     int rlen = tag.packetSize;
+    bool firstTimeRound = true;
     while (rlen)
     {
         int rl = rlen;
         if (rl > MAX_OUTGOING_PACKET_SIZE)
+        {
             rl = MAX_OUTGOING_PACKET_SIZE;
+        }
 
         pack.type = ChanPacket::T_DATA;
         pack.pos = ch->streamPos;
         pack.len = rl;
-
+        if (m_hasKeyFrame)
+        {
+            if (firstTimeRound && tag.isKeyFrame())
+                pack.cont = false;
+            else
+                pack.cont = true;
+        }
         mem.read(pack.data, pack.len);
 
         ch->newPacket(pack);
@@ -204,6 +216,7 @@ void FLVTagBuffer::sendImmediately(FLVTag& tag, Channel* ch)
         ch->streamPos += pack.len;
 
         rlen -= rl;
+        firstTimeRound = false;
     }
 }
 
@@ -221,6 +234,9 @@ void FLVTagBuffer::flush(Channel* ch)
     pack.type = ChanPacket::T_DATA;
     pack.pos = ch->streamPos;
     pack.len = length;
+    // キーフレームでないタグだけがバッファリングされる。
+    if (m_hasKeyFrame)
+        pack.cont = true;
     m_mem.read(pack.data, length);
 
     ch->newPacket(pack);

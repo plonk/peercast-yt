@@ -15,6 +15,7 @@ public:
 
     void stream(Channel *) override;
     int getSourceRate() override;
+    int getSourceRateAvg() override;
 
     ClientSocket* m_sock;
     bool m_isChunked;

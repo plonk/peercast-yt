@@ -2108,6 +2108,12 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
         {
             ch->headPack.writeRaw(bsock);
             streamPos = ch->headPack.pos + ch->headPack.len;
+            // streamPos = ch->rawData.getOldestNonContinuationPos();
+            // streamPos = ch->rawData.getLatestNonContinuationPos();
+            // if (streamPos == 0)
+            //     streamPos = ch->rawData.getLatestPos();
+            // if (streamPos == 0)
+            //     streamPos = ch->headPack.pos + ch->headPack.len;
             LOG_DEBUG("Sent %d bytes header ", ch->headPack.len);
         }
 
@@ -2116,6 +2122,7 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
             unsigned int streamIndex = ch->streamIndex;
             unsigned int connectTime = sys->getTime();
             unsigned int lastWriteTime = connectTime;
+            bool         skipContinuation = true;
 
             while ((thread.active) && sock->active())
             {
@@ -2135,17 +2142,23 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
                     {
                         if (syncPos != rawPack.sync)
                             LOG_ERROR("Send skip: %d", rawPack.sync-syncPos);
-                        syncPos = rawPack.sync+1;
+                        syncPos = rawPack.sync + 1;
 
                         if ((rawPack.type == ChanPacket::T_DATA) || (rawPack.type == ChanPacket::T_HEAD))
                         {
-                            rawPack.writeRaw(bsock);
-                            lastWriteTime = sys->getTime();
+                            if (!skipContinuation || !rawPack.cont)
+                            {
+                                skipContinuation = false;
+                                rawPack.writeRaw(bsock);
+                                lastWriteTime = sys->getTime();
+                            }else{
+                                LOG_DEBUG("raw: skip continuation %s packet pos=%d", rawPack.type==ChanPacket::T_DATA?"DATA":"HEAD", rawPack.pos);
+                            }
                         }
 
                         if (rawPack.pos < streamPos)
-                            LOG_DEBUG("raw: skip back %d", rawPack.pos-streamPos);
-                        streamPos = rawPack.pos+rawPack.len;
+                            LOG_DEBUG("raw: skip back %d", rawPack.pos - streamPos);
+                        streamPos = rawPack.pos + rawPack.len;
                     }
                 }
 
@@ -2468,24 +2481,37 @@ void Servent::sendPCPChannel()
 
             ChanPacket rawPack;
 
+            // FIXME: ストリームインデックスの変更を確かめずにどんどん読み出して大丈夫？
             while (ch->rawData.findPacket(streamPos, rawPack))
             {
                 if (rawPack.type == ChanPacket::T_HEAD)
                 {
                     atom.writeParent(PCP_CHAN, 2);
-                    atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
-                    atom.writeParent(PCP_CHAN_PKT, 3);
-                    atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_HEAD);
-                    atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
-                    atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
+                        atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
+                        atom.writeParent(PCP_CHAN_PKT, 3);
+                            atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_HEAD);
+                            atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
+                            atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
                 }else if (rawPack.type == ChanPacket::T_DATA)
                 {
-                    atom.writeParent(PCP_CHAN, 2);
-                    atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
-                    atom.writeParent(PCP_CHAN_PKT, 3);
-                    atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_DATA);
-                    atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
-                    atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
+                    if (rawPack.cont)
+                    {
+                        atom.writeParent(PCP_CHAN, 2);
+                            atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
+                            atom.writeParent(PCP_CHAN_PKT, 4);
+                                atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_DATA);
+                                atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
+                                atom.writeChar(PCP_CHAN_PKT_CONTINUATION, true);
+                                atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
+                    }else
+                    {
+                        atom.writeParent(PCP_CHAN, 2);
+                            atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
+                            atom.writeParent(PCP_CHAN_PKT, 3);
+                                atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_DATA);
+                                atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
+                                atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
+                    }
                 }
 
                 if (rawPack.pos < streamPos)

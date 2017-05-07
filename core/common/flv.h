@@ -163,6 +163,15 @@ public:
         return "Unknown";
     }
 
+    bool isKeyFrame()
+    {
+        if (!data) return false;
+        if (type != T_VIDEO) return false;
+
+        uint8_t frameType = data[0] >> 4;
+        return frameType == 1 || frameType == 4;  // key frame or generated key frame
+    }
+
     int size;
     int packetSize;
     TYPE type;
@@ -177,7 +186,11 @@ public:
     static const int MAX_OUTGOING_PACKET_SIZE = 15 * 1024;
     static const int FLUSH_THRESHOLD          =  4 * 1024;
 
-    FLVTagBuffer() : m_mem(ChanPacket::MAX_DATALEN) {}
+    FLVTagBuffer()
+        : m_mem(ChanPacket::MAX_DATALEN)
+        , m_hasKeyFrame(false)
+    {}
+
     ~FLVTagBuffer()
     {
     }
@@ -186,6 +199,7 @@ public:
     void flush(Channel* ch);
 
     MemoryStream m_mem;
+    bool m_hasKeyFrame;
 
 private:
     void sendImmediately(FLVTag& tag, Channel* ch);

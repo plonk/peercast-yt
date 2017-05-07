@@ -161,6 +161,25 @@ std::string codepoint_to_utf8(uint32_t codepoint)
     return res;
 }
 
+#include <stdarg.h>
+std::string format(const char* fmt, ...)
+{
+    va_list ap, aq;
+    std::string res;
+
+    va_start(ap, fmt);
+    va_copy(aq, ap);
+    int size = vsnprintf(NULL, 0, fmt, ap);
+    char *data = new char[size + 1];
+    vsnprintf(data, size + 1, fmt, aq);
+    va_end(aq);
+    va_end(ap);
+
+    res = data;
+    delete[] data;
+    return res;
+}
+
 bool contains(const std::string& haystack, const std::string& needle)
 {
     return haystack.find(needle) != std::string::npos;

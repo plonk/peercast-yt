@@ -34,6 +34,7 @@ public:
     ::String        streamURL(Channel *, const char *);
     void            stream(Channel *) override;
     int             getSourceRate() override;
+    int             getSourceRateAvg() override;
 
     Stream          *inputStream;
     ::String        baseurl;

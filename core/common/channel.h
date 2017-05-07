@@ -98,6 +98,7 @@ public:
 
     virtual void stream(Channel *) = 0;
     virtual int getSourceRate() { return 0; }
+    virtual int getSourceRateAvg() { return this->getSourceRate(); }
 };
 
 // ------------------------------------------
@@ -108,6 +109,7 @@ public:
     PeercastSource() : m_channel(NULL) {}
     void    stream(Channel *) override;
     int     getSourceRate() override;
+    int     getSourceRateAvg() override;
     ChanHit pickFromHitList(Channel *ch, ChanHit &oldHit);
 
     Channel*        m_channel;

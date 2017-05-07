@@ -1,5 +1,5 @@
-#ifndef _VINT_H
-#define _VINT_H
+#ifndef _MATROSKA_H
+#define _MATROSKA_H
 
 #include <stdint.h>
 #include <string>
@@ -28,6 +28,10 @@ ID_TO_NAME = {
     { {0x11,0x4D,0x9B,0x74}, "SeekHead" },
     { {0xEC}, "Void" },
     { {0x16,0x54,0xAE,0x6B}, "Tracks" },
+    { {0xAE}, "TrackEntry" },
+    { {0xD7}, "TrackNumber" },
+    { {0x73,0xC5}, "TrackUID" },
+    { {0x83}, "TrackType" },
     { {0x12,0x54,0xC3,0x67}, "Tags" },
     { {0x15,0x49,0xA9,0x66}, "Info" },
     { {0xE7}, "Timecode" },
@@ -110,7 +114,7 @@ public:
             return "Unknown";
     }
 
-    std::basic_string<uint8_t> bytes;
+    const std::basic_string<uint8_t> bytes;
 };
 
 } // namespace matroska

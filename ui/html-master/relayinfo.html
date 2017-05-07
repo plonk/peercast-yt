@@ -13,85 +13,89 @@
   {@if page.channel.exist}
   <TABLE align=center border=0>
     <TBODY>
-      <TR align=middle bgColor=#cccccc class="normal">
+      <TR align=middle bgColor=#ccc class="normal">
         <TD colSpan=2><B>{#Channel Information}</B></TD>
       </TR>
-      <TR align=left bgColor=#eeeeee class="normal">
+      <TR align=left bgColor=#eee class="normal">
         <TD>{#Name}</TD>
         <TD>{$page.channel.name}</TD>
       </TR>
-      <TR align=left bgColor=#dddddd class="normal">
+      <TR align=left bgColor=#ddd class="normal">
         <TD>{#Genre}</TD>
         <TD>{$page.channel.genre}</TD>
       </TR>
-      <TR align=left bgColor=#eeeeee class="normal">
+      <TR align=left bgColor=#eee class="normal">
         <TD>{#Desc.}</TD>
         <TD>{$page.channel.desc}</TD>
       </TR>
-      <TR align=left bgColor=#dddddd class="normal">
+      <TR align=left bgColor=#ddd class="normal">
         <TD>{#URL}</TD>
         <TD style="word-break: break-all">
           <A href="/admin?cmd=redirect&amp;url={$page.channel.contactURL}"
              target=_blank>{$page.channel.contactURL}</A>
         </TD>
       </TR>
-      <TR align=left bgColor=#eeeeee class="normal">
+      <TR align=left bgColor=#eee class="normal">
         <TD>{#Comment}</TD>
         <TD>{$page.channel.comment}</TD>
       </TR>
-      <TR align=left bgColor=#dddddd class="normal">
+      <TR align=left bgColor=#ddd class="normal">
         <TD>{#ID}</TD>
         <TD>{$page.channel.id}</TD>
       </TR>
-      <TR align=left bgColor=#eeeeee class="normal">
+      <TR align=left bgColor=#eee class="normal">
         <TD>{#Type}</TD>
         <TD>{$page.channel.typeLong}</TD>
       </TR>
-      <TR align=left bgColor=#dddddd class="normal">
+      <TR align=left bgColor=#ddd class="normal">
         <TD>{#Bitrate}</TD>
         <TD>{$page.channel.bitrate} kb/s ({$page.channel.srcrate} kb/s)</TD>
       </TR>
-      <TR align=left bgColor=#eeeeee class="normal">
+      <TR align=left bgColor=#eee class="normal">
         <TD>{#Source}</TD>
         <TD>{$page.channel.sourceType} - {$page.channel.sourceProtocol}<BR>
           {$page.channel.sourceURL}</TD>
       </TR>
-      <TR align=left bgColor=#dddddd class="normal">
+      <TR align=left bgColor=#ddd class="normal">
         <TD>{#_Uptime_relayinfo}</TD>
         <TD>{$page.channel.uptime}</TD>
       </TR>
-      <TR align=left bgColor=#eeeeee class="normal">
+      <TR align=left bgColor=#eee class="normal">
         <TD>{#Status}</TD>
         <TD>{$page.channel.status}</TD>
       </TR>
-      <TR align=left bgColor=#dddddd class="normal">
+      <TR align=left bgColor=#ddd class="normal">
         <TD>{#Position}</TD>
         <TD>{$page.channel.streamPos}</TD>
       </TR>
-      <TR align=left bgColor=#eeeeee class="normal">
+      <TR align=left bgColor=#eee class="normal">
         <TD>{#Head}</TD>
         <TD>{$page.channel.headPos} ({$page.channel.headLen} {#bytes})</TD>
       </TR>
-      <TR align=left bgColor=#cccccc class="normal">
+      <TR align=left bgColor=#ddd class="normal">
+        <TD>{#Buffer}</TD>
+        <TD><pre style="margin-bottom: 0">{$page.channel.buffer}</pre></TD>
+      </TR>
+      <TR align=left bgColor=#ccc class="normal">
         <TD colSpan=2 align=middle><B>{#Current Track}</B></TD>
       </TR>
-      <TR align=left bgColor=#dddddd class="normal">
+      <TR align=left bgColor=#ddd class="normal">
         <TD>{#Artist}</TD>
         <TD>{$page.channel.track.artist}</TD>
       </TR>
-      <TR align=left bgColor=#eeeeee class="normal">
+      <TR align=left bgColor=#eee class="normal">
         <TD>{#Title}</TD>
         <TD>{$page.channel.track.title}</TD>
       </TR>
-      <TR align=left bgColor=#dddddd class="normal">
+      <TR align=left bgColor=#ddd class="normal">
         <TD>{#Album}</TD>
         <TD>{$page.channel.track.album}</TD>
       </TR>
-      <TR align=left bgColor=#eeeeee class="normal">
+      <TR align=left bgColor=#eee class="normal">
         <TD>{#Genre}</TD>
         <TD>{$page.channel.track.genre}</TD>
       </TR>
-      <TR align=left bgColor=#dddddd class="normal">
+      <TR align=left bgColor=#ddd class="normal">
         <TD>{#Contact}</TD>
         <TD>{$page.channel.track.contactURL}</TD>
       </TR>
@@ -100,7 +104,7 @@
   <BR><BR>
   <TABLE align=center border=0>
     <TBODY>
-      <TR align=middle bgColor=#cccccc class="normal">
+      <TR align=middle bgColor=#ccc class="normal">
         <TD colspan="2"><B>{#IP:Port}</B></TD>
         <TD><B>{#Hops}</B></TD>
         <TD><B>{#Listeners}</B></TD>
@@ -111,7 +115,7 @@
         <TD style="min-width: 7.5em"><B>{#Update}</B></TD>
       </TR>
       {@loop page.channel.numHits}
-      <tr class="normal" bgcolor={@if loop.indexEven}#eeeeee{@else}#dddddd{@end}>
+      <tr class="normal" bgcolor={@if loop.indexEven}#eee{@else}#ddd{@end}>
         <td align="left" style="{@if loop.hit.tracker}font-weight: bold;{@end}">
           <a href="/admin?cmd=bump&amp;id={$page.channel.id}&amp;ip={$loop.hit.rhost0}">
           {$loop.hit.rhost0}

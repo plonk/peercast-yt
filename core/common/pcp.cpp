@@ -310,6 +310,9 @@ void PCPStream::readPktAtoms(Channel *ch, AtomStream &atom, int numc, BroadcastS
         }else if (id == PCP_CHAN_PKT_POS)
         {
             pack.pos = atom.readInt();
+        }else if (id == PCP_CHAN_PKT_CONTINUATION)
+        {
+            pack.cont = atom.readChar();
         }else if (id == PCP_CHAN_PKT_DATA)
         {
             pack.len = d;
