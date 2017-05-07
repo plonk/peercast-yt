@@ -1092,17 +1092,16 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, char jumpStr[])
 
     if (servMgr->serverHost.port != newPort)
     {
-        char ipstr[64];
+        std::string ipstr;
         if (http.headers["HOST"] != "")
         {
             auto vec = str::split(http.headers["HOST"], ":");
-            strcpy(ipstr, (vec[0]+":"+std::to_string(newPort)).c_str());
+            ipstr =  vec[0]+":"+std::to_string(newPort);
         }else
         {
-            Host lh(ClientSocket::getIP(NULL), newPort);
-            lh.toStr(ipstr);
+            ipstr = Host(ClientSocket::getIP(NULL), newPort).str();
         }
-        sprintf(jumpStr, "http://%s/%s/settings.html", ipstr, servMgr->htmlPath);
+        sprintf(jumpStr, "http://%s/%s/settings.html", ipstr.c_str(), servMgr->htmlPath);
 
         servMgr->serverHost.port = newPort;
         servMgr->restartServer = true;
