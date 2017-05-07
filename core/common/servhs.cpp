@@ -1279,6 +1279,7 @@ void Servent::CMD_connect(char *cmd, HTTP& http, HTML& html, char jumpStr[])
 
 void Servent::CMD_shutdown(char *cmd, HTTP& http, HTML& html, char jumpStr[])
 {
+    http.send(HTTPResponse::ok({}, "Server is shutting down..."));
     servMgr->shutdownTimer = 1;
 }
 
