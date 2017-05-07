@@ -159,6 +159,8 @@ bool FLVTagBuffer::put(FLVTag& tag, Channel* ch)
 {
     if (tag.isKeyFrame())
     {
+        m_hasKeyFrame = true;
+
         if (m_mem.pos > 0)
         {
             flush(ch);
@@ -195,7 +197,7 @@ void FLVTagBuffer::sendImmediately(FLVTag& tag, Channel* ch)
     MemoryStream mem(tag.packet, tag.packetSize);
 
     int rlen = tag.packetSize;
-    bool firstTime = true;
+    bool firstTimeRound = true;
     while (rlen)
     {
         int rl = rlen;
@@ -207,11 +209,13 @@ void FLVTagBuffer::sendImmediately(FLVTag& tag, Channel* ch)
         pack.type = ChanPacket::T_DATA;
         pack.pos = ch->streamPos;
         pack.len = rl;
-        if (firstTime && tag.isKeyFrame())
-            pack.cont = false;
-        else
-            pack.cont = true;
-
+        if (m_hasKeyFrame)
+        {
+            if (firstTimeRound && tag.isKeyFrame())
+                pack.cont = false;
+            else
+                pack.cont = true;
+        }
         mem.read(pack.data, pack.len);
 
         ch->newPacket(pack);
@@ -219,7 +223,7 @@ void FLVTagBuffer::sendImmediately(FLVTag& tag, Channel* ch)
         ch->streamPos += pack.len;
 
         rlen -= rl;
-        firstTime = false;
+        firstTimeRound = false;
     }
 }
 
@@ -237,7 +241,9 @@ void FLVTagBuffer::flush(Channel* ch)
     pack.type = ChanPacket::T_DATA;
     pack.pos = ch->streamPos;
     pack.len = length;
-    pack.cont = true;
+    // キーフレームでないタグだけがバッファリングされる。
+    if (m_hasKeyFrame)
+        pack.cont = true;
     m_mem.read(pack.data, length);
 
     ch->newPacket(pack);
