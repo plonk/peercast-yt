@@ -1949,24 +1949,28 @@ int ServMgr::serverProc(ThreadInfo *thread)
             if ((!serv->sock) || (!serv2->sock))
             {
                 LOG_DEBUG("Starting servers");
-//              servMgr->forceLookup = true;
 
-                //if (servMgr->serverHost.ip != 0)
-                {
-                    if (servMgr->forceNormal)
-                        servMgr->setFirewall(ServMgr::FW_OFF);
-                    else
-                        servMgr->setFirewall(ServMgr::FW_UNKNOWN);
+                if (servMgr->forceNormal)
+                    servMgr->setFirewall(ServMgr::FW_OFF);
+                else
+                    servMgr->setFirewall(ServMgr::FW_UNKNOWN);
 
-                    Host h = servMgr->serverHost;
+                Host h = servMgr->serverHost;
 
-                    if (!serv->sock)
-                        serv->initServer(h);
+                if (!serv->sock)
+                    if (!serv->initServer(h))
+                    {
+                        LOG_ERROR("Failed to start server on port %d. Exitting...", h.port);
+                        sys->exit();
+                    }
 
-                    h.port++;
-                    if (!serv2->sock)
-                        serv2->initServer(h);
-                }
+                h.port++;
+                if (!serv2->sock)
+                    if (!serv2->initServer(h))
+                    {
+                        LOG_ERROR("Failed to start server on port %d. Exitting...", h.port);
+                        sys->exit();
+                    }
             }
         }else{
             // stop server
