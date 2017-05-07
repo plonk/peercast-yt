@@ -48,7 +48,39 @@ PeerCast プロトコルではチャンネルパケットの大きさには 16 K
 
 ## プロトコルの拡張
 
-(TODO)
+PCP はチャンネルパケットを `PCP_CHAN_PKT_DATA` アトム (アトム識別ID は
+"data") に入れて転送します。`PCP_CHAN_PKT_DATA` は `PCP_CHAN_PKT(pkt)`
+に入っており、後者はトップレベルの `PCP_CHAN(chan)` に入ります。以下は
+実際の chan アトムの例です。
+
+    chan {
+        id bytes(53 11 A5 9E ED 27 B0 16 02 0E 70 4A 42 CE C5 31)
+        pkt {
+            type id4("data")
+            pos  int(1080907)
+            data bytes(...)
+        }
+    }
+
+PeerCast YT では `PCP_CHAN_PKT_CONTINUATION(cont)` アトムを導入して、
+継続パケットに印を付けるようにしました。アトムは 1 バイトのデータ部を
+持っていて、これが 1 ならば cont が入っている pkt が継続パケットである
+ことを示します。
+
+    chan {
+        id bytes(53 11 A5 9E ED 27 B0 16 02 0E 70 4A 42 CE C5 31)
+        pkt {
+            type id4("data")
+            pos  int(1096267)
+            cont char(1)
+            data bytes(...)
+        }
+    }
+
+0 で非継続パケット(その位置からのストリームデータ部分の開始が可能であ
+る)を表わすこともできるのですが、後方互換性の関係上、cont アトムの無い
+パケットは非継続として扱わなければならないので、実際にはデータ部 0 の
+cont アトムを送るかわりに cont アトムを省略しています。
 
 ## 制限
 
