@@ -1098,7 +1098,9 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, char jumpStr[])
         sprintf(jumpStr, "http://%s/%s/settings.html", ipstr, servMgr->htmlPath);
 
         servMgr->serverHost.port = newPort;
-        servMgr->restartServer=true;
+        servMgr->restartServer = true;
+
+        sys->sleep(500); // give server time to restart itself
     }else
     {
         sprintf(jumpStr, "/%s/settings.html", servMgr->htmlPath);

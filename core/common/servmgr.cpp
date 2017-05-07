@@ -1936,7 +1936,7 @@ int ServMgr::serverProc(ThreadInfo *thread)
         {
             serv->abort();      // force close
             serv2->abort();     // force close
-            servMgr->quit();
+            //servMgr->quit();
 
             servMgr->restartServer = false;
         }
