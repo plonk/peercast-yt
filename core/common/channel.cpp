@@ -1341,6 +1341,25 @@ void Channel::getStreamPath(char *str)
 }
 
 // -----------------------------------
+std::string Channel::renderHexDump(const std::string& in)
+{
+    std::string res;
+    int i;
+    for (i = 0; i < in.size()/16; i++)
+    {
+        auto line = in.substr(i*16, 16);
+        res += str::hexdump(line) + "  " + str::ascii_dump(line) + "\n";
+    }
+    auto rem = in.size() - 16*(in.size()/16);
+    if (rem)
+    {
+        auto line = in.substr(16*(in.size()/16), rem);
+        res += str::format("%-47s  %s\n", str::hexdump(line).c_str(), str::ascii_dump(line).c_str());
+    }
+    return res;
+}
+
+// -----------------------------------
 bool Channel::writeVariable(Stream &out, const String &var, int index)
 {
     char buf[1024];
@@ -1496,7 +1515,11 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
         //                  rawData.firstPos, rawData.safePos, rawData.lastPos, rawData.readPos, rawData.writePos);
         strcpy(buf, s.c_str());
     }
-    else if (var == "numHits")
+    else if (var == "headDump")
+    {
+        out.writeString(renderHexDump(std::string(headPack.data, headPack.data + headPack.len)));
+        return true;
+    }else if (var == "numHits")
     {
         ChanHitList *chl = chanMgr->findHitListByID(info.id);
         sprintf(buf, "%d", (chl) ? chl->numHits() : 0);

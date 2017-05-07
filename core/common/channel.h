@@ -241,6 +241,7 @@ public:
     int          totalRelays();
 
     std::string  authSecret();
+    static std::string renderHexDump(const std::string& in);
 
     ::String            mount;
     ChanMeta            insertMeta;

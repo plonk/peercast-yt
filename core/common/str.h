@@ -7,6 +7,7 @@
 namespace str
 {
 
+    std::string ascii_dump(const std::string& in, const std::string& replacement = ".");
     std::string hexdump(const std::string& in);
     std::string inspect(const std::string str);
     std::string repeat(const std::string&, int n);

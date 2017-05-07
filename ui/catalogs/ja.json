@@ -99,6 +99,9 @@
 
     "Channel not found."      : "チャンネルが見付かりません。",
 
+    // head.html
+    "Head Packet"             : "ヘッドパケット",
+
     // broadcast.html
     "External Source"         : "外部ソース",
     "URL (Required)"          : "URL (必須)",

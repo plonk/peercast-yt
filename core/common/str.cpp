@@ -278,4 +278,18 @@ std::string join(const std::string& delimiter, std::vector<std::string>& vec)
     return res;
 }
 
+std::string ascii_dump(const std::string& in, const std::string& replacement)
+{
+    std::string res;
+
+    for (auto c : in)
+    {
+        if (std::isprint(c))
+            res += c;
+        else
+            res += replacement;
+    }
+    return res;
+}
+
 } // namespace str
