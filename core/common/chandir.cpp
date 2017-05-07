@@ -139,8 +139,7 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
         char line[1024];
 
         try {
-            while (true) {
-                rhttp.readLine(line, 1024);
+            while (rhttp.readLine(line, 1024)) {
                 text += line;
                 text += '\n';
             }
