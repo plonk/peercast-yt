@@ -1805,7 +1805,7 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
     if (vec.size() > 3) info.url   = vec[3];
 
     info.id = chanMgr->broadcastID;
-    info.id.encode(NULL, info.name.cstr(), NULL, 0);
+    info.id.encode(NULL, info.name.cstr(), info.genre.cstr(), info.bitrate);
 
     Channel *c = chanMgr->findChannelByID(info.id);
     if (c)
@@ -1839,7 +1839,7 @@ ChanInfo Servent::createChannelInfo(GnuID broadcastID, const String& broadcastMs
     info.comment = query.get("comment").empty() ? broadcastMsg : query.get("comment");
 
     info.id = broadcastID;
-    info.id.encode(NULL, info.name.cstr(), NULL, 0);
+    info.id.encode(NULL, info.name.cstr(), info.genre.cstr(), info.bitrate);
 
     return info;
 }
