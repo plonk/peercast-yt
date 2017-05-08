@@ -264,7 +264,7 @@ bool is_prefix_of(const std::string& prefix, const std::string& string)
     return string.substr(0, prefix.size()) == prefix;
 }
 
-std::string join(const std::string& delimiter, std::vector<std::string>& vec)
+std::string join(const std::string& delimiter, const std::vector<std::string>& vec)
 {
     std::string res;
 

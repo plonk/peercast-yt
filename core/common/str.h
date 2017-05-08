@@ -22,7 +22,7 @@ namespace str
     std::string downcase(const std::string& input);
     std::string capitalize(const std::string&);
     bool is_prefix_of(const std::string&, const std::string&);
-    std::string join(const std::string& delimiter, std::vector<std::string>& vec);
+    std::string join(const std::string& delimiter, const std::vector<std::string>& vec);
 
 }
 
