@@ -1371,7 +1371,7 @@ void Servent::CMD_keep(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 
     Channel *c = chanMgr->findChannelByID(id);
     if (c)
-        c->stayConnected = true;
+        c->stayConnected = !c->stayConnected;
 
     jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
 }
