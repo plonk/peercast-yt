@@ -1120,6 +1120,10 @@ ChannelStream *Channel::createSource()
                 LOG_CHANNEL("Channel is MKV");
                 source = new MKVStream();
                 break;
+            case ChanInfo::T_WEBM:
+                LOG_CHANNEL("Channel is WebM");
+                source = new MKVStream();
+                break;
             default:
                 LOG_CHANNEL("Channel is Raw");
                 source = new RawStream();
