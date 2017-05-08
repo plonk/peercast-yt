@@ -142,3 +142,12 @@ TEST_F(strFixture, is_prefix_of)
     ASSERT_TRUE(str::is_prefix_of("abc", "abc"));
     ASSERT_TRUE(str::is_prefix_of("あ", "あいうえお"));
 }
+
+TEST_F(strFixture, join)
+{
+    ASSERT_STREQ("", str::join("", {}).c_str());
+    ASSERT_STREQ("", str::join(",", {}).c_str());
+    ASSERT_STREQ("a,b", str::join(",", {"a", "b"}).c_str());
+    ASSERT_STREQ("ab", str::join("", {"a", "b"}).c_str());
+    ASSERT_STREQ("ab", str::join("", str::split("a,b", ",")).c_str());
+}
