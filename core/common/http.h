@@ -44,6 +44,7 @@ public:
 #define HTTP_SC_SWITCH       "HTTP/1.0 101 Switch protocols"
 #define HTTP_SC_BADGATEWAY   "HTTP/1.0 502 Bad Gateway"
 #define HTTP_SC_SERVERERROR  "HTTP/1.0 500 Internal Server Error"
+#define HTTP_SC_URITOOLONG   "HTTP/1.0 414 URI Too Long"
 
 #define HTTP_PROTO1          "HTTP/1."
 
