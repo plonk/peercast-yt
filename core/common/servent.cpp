@@ -116,7 +116,7 @@ bool Servent::canStream(Channel *ch)
         if (!ch->isPlaying())
             return false;
 
-        if (ch->isFull())
+        if ((type == T_RELAY) && ch->isFull())
             return false;
     }
 
