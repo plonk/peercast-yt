@@ -487,6 +487,7 @@ void PCPStream::readChanAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
             chl = chanMgr->findHitListByID(newInfo.id);
         }else
         {
+            // IM50,51 対策。
             LOG_ERROR("PCP unknown or misplaced atom: %s, %d, %d", id.getString().str(), c, d);
             throw StreamException("Protocol error");
 
