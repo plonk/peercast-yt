@@ -563,6 +563,9 @@ void Servent::handshakeIncoming()
 }
 
 // -----------------------------------
+// リレー接続、あるいはダイレクト接続に str で指定されたチャンネルのス
+// トリームを流す。relay が true ならば、チャンネルが無かったり受信中
+// でなくても、チャンネルを受信中の状態にしようとする。
 void Servent::triggerChannel(char *str, ChanInfo::PROTOCOL proto, bool relay)
 {
     ChanInfo info;
