@@ -85,7 +85,7 @@
     <div class="paper">
       {$page.channel.name} {$page.channel.desc} {$page.channel.comment} {$page.channel.bitrate} kbps
       <a target="_blank"
-         href="http://{$servMgr.serverIP}:{$servMgr.serverPort}/pls/{$page.channel.id}{$page.channel.plsExt}">
+         href="http://{$servMgr.serverIP}:{$servMgr.serverPort}/pls/{$page.channel.id}{$page.channel.plsExt}?auth={$page.channel.authToken}">
         プレイリスト
       </a>
       {@if page.channel.contactURL}
