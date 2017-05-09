@@ -2011,10 +2011,6 @@ void Servent::processStream(bool doneHandshake, ChanInfo &chanInfo)
 
         servMgr->totalStreams++;
 
-        // FIXME: これ使われることのないコピーを変更しているけど大丈夫？
-        Host host = sock->host;
-        host.port = 0;  // force to 0 so we ignore the incoming port
-
         Channel *ch = chanMgr->findChannelByID(chanID);
         if (!ch)
             throw StreamException("Channel not found");
