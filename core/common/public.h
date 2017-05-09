@@ -11,6 +11,7 @@ public:
     HTTPResponse operator()(const HTTPRequest&, Stream&, Host&);
     std::string MIMEType(const std::string& path);
     std::string createChannelIndex();
+    static std::string formatUptime(unsigned int totalSeconds);
 
     FileSystemMapper mapper;
 };

@@ -47,14 +47,17 @@ static string getTIP()
     return servMgr->serverHost.str();
 }
 
-static string formatUptime(unsigned int totalMinutes)
+// ------------------------------------------------------------
+string PublicController::formatUptime(unsigned int totalSeconds)
 {
+    auto totalMinutes = totalSeconds / 60;
     auto minutes = totalMinutes % 60;
     auto hours = totalMinutes / 60;
 
-    return to_string(hours) + ":" + to_string(minutes);
+    return str::format("%02d:%02d", hours, minutes);
 }
 
+// ------------------------------------------------------------
 static string getDirectPermission()
 {
     // TODO:
