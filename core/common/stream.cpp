@@ -268,8 +268,11 @@ void Stream::updateTotals(unsigned int in, unsigned int out)
 // -------------------------------------
 int Stream::readLine(char *in, int max)
 {
+    if (max <= 0)
+        return 0;
+
     int i=0;
-    max -= 2;
+    max--;
 
     while (max--)
     {
