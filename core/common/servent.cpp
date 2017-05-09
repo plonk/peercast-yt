@@ -105,19 +105,34 @@ bool Servent::canStream(Channel *ch)
     if (!isPrivate())
     {
         if  (servMgr->bitrateFull(ch->getBitrate()))
+        {
+            LOG_DEBUG("Unable to stream because there is not enough bandwidth left");
             return false;
+        }
 
         if ((type == T_RELAY) && servMgr->relaysFull())
+        {
+            LOG_DEBUG("Unable to stream because server already has max. number of relays");
             return false;
+        }
 
         if ((type == T_DIRECT) && servMgr->directFull())
+        {
+            LOG_DEBUG("Unable to stream because server already has max. number of directs");
             return false;
+        }
 
         if (!ch->isPlaying())
+        {
+            LOG_DEBUG("Unable to stream because channel is not playing");
             return false;
+        }
 
         if ((type == T_RELAY) && ch->isFull())
+        {
+            LOG_DEBUG("Unable to stream because channel already has max. number of relays");
             return false;
+        }
     }
 
     return true;
