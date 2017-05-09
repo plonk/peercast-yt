@@ -165,6 +165,7 @@ public:
     void    startURL(const char *);
     void    startHTTPPush(ClientSocket *, bool isChunked);
     void    startWMHTTPPush(ClientSocket *cs);
+    void    startPCPPush(ClientSocket *cs);
 
     ChannelStream   *createSource();
 

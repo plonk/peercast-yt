@@ -277,6 +277,21 @@ void    Channel::startGet()
 }
 
 // -----------------------------------
+#include "pcppost.h"
+void    Channel::startPCPPush(ClientSocket *cs)
+{
+    srcType = SRC_PEERCAST;
+    type = T_BROADCAST;
+    info.srcProtocol = ChanInfo::SP_PCP;
+
+    sock = cs;
+
+    sourceData = new PCPPostSource();
+
+    startStream();
+}
+
+// -----------------------------------
 void    Channel::startURL(const char *u)
 {
     sourceURL.set(u);

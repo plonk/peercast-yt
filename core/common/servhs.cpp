@@ -344,6 +344,50 @@ void Servent::handshakeGET(HTTP &http)
 }
 
 // -----------------------------------
+void Servent::handshakePCPPush(HTTP &http)
+{
+    if (!std::atoi(http.headers["X-PEERCAST-PCP"].c_str()))
+        throw HTTPException(HTTP_SC_BADREQUEST, 400);
+
+    if (http.headers["X-AUDIOCAST-NAME"] == "")
+        throw HTTPException(HTTP_SC_BADREQUEST, 400);
+
+    ChanInfo info;
+    info.name = http.headers["X-AUDIOCAST-NAME"];
+    info.genre = http.headers["X-AUDIOCAST-GENRE"];
+    info.bitrate = std::atoi(http.headers["X-AUDIOCAST-BITRATE"].c_str());
+    info.desc = http.headers["X-AUDIOCAST-DESCRIPTION"];
+    info.url = http.headers["X-AUDIOCAST-URL"];
+    info.id.fromStr(http.headers["X-PEERCAST-CHANNELID"].c_str());
+
+    Channel *c = chanMgr->findChannelByID(info.id);
+    if (c)
+    {
+        LOG_CHANNEL("PCP Push channel already active, closing old one");
+        c->thread.shutdown();
+    }
+
+    info.comment = chanMgr->broadcastMsg;
+    info.bcID    = chanMgr->broadcastID;
+
+    c = chanMgr->createChannel(info, NULL);
+
+    sock->writeString("HTTP/1.0 200 OK\r\n");
+    sock->writeString("Server: PeerCast/0.1218 (YT10)\r\n");
+    sock->writeString("Content-Type: application/x-peercast-pcp\r\n");
+    sock->writeString("\r\n");
+
+    AtomStream atom(*sock);
+    Host rhost = sock->host;
+
+    handshakeIncomingPCP(atom, rhost, remoteID, agent);
+    atom.writeInt(PCP_OK, 0);
+
+    c->startPCPPush(sock);
+    sock = NULL;
+}
+
+// -----------------------------------
 void Servent::handshakePOST(HTTP &http)
 {
     LOG_DEBUG("cmdLine: %s", http.cmdLine);
@@ -369,6 +413,18 @@ void Servent::handshakePOST(HTTP &http)
 
         if (handshakeHTTPBasicAuth(http))
             handshakeJRPC(http);
+    }else if (strcmp(path.c_str(), "/channel") == 0)
+    {
+        // PCP Push
+
+        if (!isAllowed(ALLOW_BROADCAST))
+            throw HTTPException(HTTP_SC_FORBIDDEN, 403);
+
+        if (!isPrivate())
+            throw HTTPException(HTTP_SC_FORBIDDEN, 403);
+
+        http.readHeaders();
+        handshakePCPPush(http);
     }else if (strcmp(path.c_str(), "/") == 0)
     {
         // HTTP Push

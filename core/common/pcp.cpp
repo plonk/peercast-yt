@@ -524,7 +524,10 @@ void PCPStream::readChanAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
         }
     }
 
-    if (ch && !ch->isBroadcasting())
+    // if (ch && !ch->isBroadcasting())
+    //     ch->updateInfo(newInfo);
+
+    if (ch)
         ch->updateInfo(newInfo);
 }
 
