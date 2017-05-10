@@ -6,7 +6,10 @@
 #include "str.h"
 #include "_string.h"
 
-FileSystemMapper::FileSystemMapper(const std::string& aVirtualPath, const std::string& aDocumentRoot)
+using namespace std;
+using namespace str;
+
+FileSystemMapper::FileSystemMapper(const string& aVirtualPath, const string& aDocumentRoot)
     : virtualPath(aVirtualPath)
 {
     char *dr = realpath(aDocumentRoot.c_str(), NULL);
@@ -18,34 +21,34 @@ FileSystemMapper::FileSystemMapper(const std::string& aVirtualPath, const std::s
     free(dr);
 }
 
-std::string FileSystemMapper::toLocalFilePath(const std::string& vpath)
+string FileSystemMapper::toLocalFilePath(const string& vpath)
 {
     return toLocalFilePath(vpath, {}).first;
 }
 
-std::pair<std::string,std::string> FileSystemMapper::resolvePath(const std::string& rawPath, const std::vector<std::string>& langs)
+pair<string,string> FileSystemMapper::resolvePath(const string& rawPath, const vector<string>& langs)
 {
     // if there's a language neutral version, return it
     if (realPath(rawPath) != "")
-        return std::make_pair(rawPath, "");
+        return make_pair(rawPath, "");
 
     // otherwise, try each of the extensions
     for (auto ext : langs)
     {
         auto r = realPath(rawPath + "." + ext);
         if (r != "")
-            return std::make_pair(r, ext);
+            return make_pair(r, ext);
     }
 
     // default to the English version if there is one
     auto r = realPath(rawPath + ".en");
     if (r != "")
-        return std::make_pair(r, "en");
+        return make_pair(r, "en");
 
-    return std::make_pair("", "");
+    return make_pair("", "");
 }
 
-std::string FileSystemMapper::realPath(const std::string& path)
+string FileSystemMapper::realPath(const string& path)
 {
     char resolvedPath[PATH_MAX];
     char *p = realpath(path.c_str(), resolvedPath);
@@ -56,28 +59,28 @@ std::string FileSystemMapper::realPath(const std::string& path)
         return resolvedPath;
 }
 
-std::pair<std::string,std::string> FileSystemMapper::toLocalFilePath(const std::string& vpath, const std::vector<std::string>& langs)
+pair<string,string> FileSystemMapper::toLocalFilePath(const string& vpath, const vector<string>& langs)
 {
-    if (virtualPath == vpath || !str::is_prefix_of(virtualPath + "/", vpath))
-        return std::make_pair<std::string,std::string>("", "");
+    if (virtualPath == vpath || !is_prefix_of(virtualPath + "/", vpath))
+        return make_pair("", "");
 
-    auto filePath = str::replace_prefix(vpath, virtualPath, documentRoot);
+    auto filePath = replace_prefix(vpath, virtualPath, documentRoot);
 
-    std::string resolvedPath, resolvedLang;
+    string resolvedPath, resolvedLang;
     tie(resolvedPath, resolvedLang) = resolvePath(filePath, langs);
 
     if (resolvedPath == "")
     {
         LOG_ERROR("Cannot resolve path %s", filePath.c_str());
-        return std::make_pair<std::string,std::string>("", "");
+        return make_pair("", "");
     }
 
     // ディレクトリトラバーサルチェック
-    if (documentRoot == resolvedPath || !str::is_prefix_of(documentRoot, resolvedPath))
+    if (documentRoot == resolvedPath || !is_prefix_of(documentRoot, resolvedPath))
     {
         LOG_ERROR("Possible directory traversal attack!");
-        return std::make_pair<std::string,std::string>("", "");
+        return make_pair("", "");
     }
 
-    return std::make_pair<std::string,std::string>(std::string(resolvedPath), std::string(resolvedLang));
+    return make_pair(resolvedPath, resolvedLang);
 }
