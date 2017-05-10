@@ -23,7 +23,7 @@
         <param name="allowscriptaccess" value="always" />
         <param name="flashvars" value='config={"canvas":{"backgroundColor":"#000","backgroundGradient":"none"},"clip":{"url":"http://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.flv?auth={$page.channel.authToken}"},"playlist":[{"url":"http://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.flv?auth={$page.channel.authToken}","scaling":"fit"}]}' />
 
-        お使いのブラウザは FLV 動画の再生に対応していないようです。プレイリストから再生してください。
+        {#Your browser doesn't seem to support playback of FLV videos.} {#Try the playlist link below.}
       </object>
     </div>
     {@else}{@if page.channel.type == "WMV"}
@@ -42,7 +42,7 @@
         <!-- コントロール表示の有無 -->
         <param name="ShowControls" value="true" />
 
-        お使いのブラウザは WMV 動画の再生に対応していないようです。プレイリストから再生してください。
+        {#Your browser doesn't seem to support playback of WMV videos.} {#Try the playlist link below.}
         <!-- IE 以外用 -->
         <!-- <embed name="wmplayer" width="640" height="480" pluginspage="http://www.microsoft.com/Windows/MediaPlayer/" type="application/x-mplayer2" src="mmsh://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.wmv" autostart="1" showcontrols="1"> -->
       </object>
@@ -52,7 +52,7 @@
     <div class="message" style="margin: 5em auto; text-align: center">
       <audio controls autoplay style="min-width: 640px">
         <source src="http://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.mp3?auth={$page.channel.authToken}" type="audio/mpeg">
-        お使いのブラウザは MP3 音声の再生に対応していないようです。プレイリストから再生してください。
+        {#Your browser doesn't seem to support playback of MP3 audio.} {#Try the playlist link below.}
         <!-- Your browser does not support the audio element. -->
       </audio>
     </div>
@@ -60,21 +60,21 @@
     <div class="message" style="margin: 5em auto; text-align: center">
       <video controls autoplay>
         <source src="http://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.mkv?auth={$page.channel.authToken}" type="video/webm">
-        お使いのブラウザは MKV 動画の再生に対応していないようです。プレイリストから再生してください。
+        {#Your browser doesn't seem to support playback of MKV videos.} {#Try the playlist link below.}
       </video>
-      <div>再生できない場合はプレイリストから再生してください。</div>
+      <div>{#Should the playback fail, try the playlist link below.}</div>
     </div>
     {@else}{@if page.channel.type == "WEBM"}
     <div class="message" style="margin: 5em auto; text-align: center">
       <video controls autoplay>
         <source src="http://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.webm?auth={$page.channel.authToken}" type="video/webm">
-        お使いのブラウザは WebM 動画の再生に対応していないようです。プレイリストから再生してください。
+        {#Your browser doesn't seem to support playback of WebM videos.} {#Try the playlist link below.}
       </video>
     </div>
     {@else}
     <div class="message" style="margin: 5em auto; text-align: center">
-      Web 再生はタイプ{$page.channel.type}のチャンネルに対応していません。
-      プレイリストから再生してください。
+      {#Playback of this type of stream is not supported.} ({$page.channel.type})
+      {#Try the playlist link below.}
     </div>
     {@end}
     {@end}
@@ -86,15 +86,15 @@
       {$page.channel.name} {$page.channel.desc} {$page.channel.comment} {$page.channel.bitrate} kbps
       <a target="_blank"
          href="http://{$servMgr.serverIP}:{$servMgr.serverPort}/pls/{$page.channel.id}{$page.channel.plsExt}?auth={$page.channel.authToken}">
-        プレイリスト
+        {#Playlist}
       </a>
       {@if page.channel.contactURL}
       <a target="_blank"
          href="{$page.channel.contactURL}">
-        コンタクト
+        {#Contact}
       </a>
       {@else}
-      コンタクト
+      {#Contact}
       {@end}
     </div>
   </body>
