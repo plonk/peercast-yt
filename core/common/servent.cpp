@@ -2119,12 +2119,9 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
         {
             ch->headPack.writeRaw(bsock);
             streamPos = ch->headPack.pos + ch->headPack.len;
-            // streamPos = ch->rawData.getOldestNonContinuationPos();
-            // streamPos = ch->rawData.getLatestNonContinuationPos();
-            // if (streamPos == 0)
-            //     streamPos = ch->rawData.getLatestPos();
-            // if (streamPos == 0)
-            //     streamPos = ch->headPack.pos + ch->headPack.len;
+            auto ncpos = ch->rawData.getLatestNonContinuationPos();
+            if (ncpos && streamPos < ncpos)
+                streamPos = ncpos;
             LOG_DEBUG("Sent %d bytes header ", ch->headPack.len);
         }
 
