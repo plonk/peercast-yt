@@ -202,7 +202,6 @@ public:
     void    triggerChannel(char *, ChanInfo::PROTOCOL, bool);
     void    sendPeercastChannel();
     void    sendRawChannel(bool, bool);
-//  void    sendRawMultiChannel(bool, bool);
     void    sendRawMetaChannel(int);
     void    sendPCPChannel();
     void    checkPCPComms(Channel *, AtomStream &);
