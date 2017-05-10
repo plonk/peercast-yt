@@ -108,6 +108,8 @@ string PublicController::createChannelIndex()
 // ------------------------------------------------------------
 HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream, Host& remoteHost)
 {
+    std::vector<std::string> acceptableLanguages = { "ja", "en" };
+
     if (req.path == "/public")
     {
         return HTTPResponse::redirectTo("/public/");
@@ -117,37 +119,40 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
     }else if (req.path == "/public/index.txt")
     {
         return HTTPResponse::ok({{"Content-Type","text/plain"}}, createChannelIndex());
-    }else if (req.path == "/public/index.html")
-    {
-        FileStream file;
-        DynamicMemoryStream mem;
-        HTTPRequestScope scope(req);
-
-        file.openReadOnly(mapper.documentRoot + str::replace_prefix(req.path, "/public", ""));
-        Template(req.queryString).prependScope(scope).readTemplate(file, &mem, 0);
-        return HTTPResponse::ok({{"Content-Type","text/html"}}, mem.str());
     }else if (req.path == "/public/play.html")
     {
-        FileStream file;
-        DynamicMemoryStream mem;
-        HTTPRequestScope scope(req);
-
         String id = cgi::Query(req.queryString).get("id").c_str();
         ChanInfo info;
         bool success = servMgr->getChannel(id.cstr(), info, true);
 
-        if (success)
-        {
-            file.openReadOnly(mapper.documentRoot + str::replace_prefix(req.path, "/public", ""));
-            Template(req.queryString).prependScope(scope).readTemplate(file, &mem, 0);
-            return HTTPResponse::ok({{"Content-Type","text/html"}}, mem.str());
-        }else
-        {
+        if (!success)
             return HTTPResponse::notFound();
-        }
+
+        std::string path, lang;
+        std::tie(path, lang) = mapper.toLocalFilePath(req.path, acceptableLanguages);
+
+        FileStream file;
+        DynamicMemoryStream mem;
+        HTTPRequestScope scope(req);
+
+        file.openReadOnly(path.c_str());
+        Template engine(req.queryString);
+        engine.prependScope(scope);
+        engine.readTemplate(file, &mem, 0);
+
+        std::map<std::string,std::string> headers;
+        headers["Content-Type"]     = "text/html";
+        if (lang != "")
+            headers["Content-Language"] = lang;
+        headers["Content-Length"]   = std::to_string(mem.getLength());
+        return HTTPResponse::ok(headers, mem.str());
     }else
     {
-        auto path = mapper.toLocalFilePath(req.path);
+        std::string path, lang;
+        std::tie(path, lang) = mapper.toLocalFilePath(req.path, acceptableLanguages);
+
+        LOG_DEBUG("Writing `%s` lang=%s", path.c_str(), lang.c_str());
+
         if (path.empty())
             return HTTPResponse::notFound();
         else
@@ -156,11 +161,21 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
 
             DynamicMemoryStream mem;
             FileStream file;
+            HTTPRequestScope scope(req);
 
             try
             {
-                file.openReadOnly(path.c_str());
-                file.writeTo(mem, file.length());
+                if (type == "text/html")
+                {
+                    file.openReadOnly(path.c_str());
+                    Template engine(req.queryString);
+                    engine.prependScope(scope);
+                    engine.readTemplate(file, &mem, 0);
+                }else
+                {
+                    file.openReadOnly(path.c_str());
+                    file.writeTo(mem, file.length());
+                }
             }catch (StreamException &)
             {
                 LOG_DEBUG("StreamException in %s", __FUNCTION__);
@@ -172,6 +187,8 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
                 {"Content-Type",type},
                 {"Content-Length",to_string(body.size())}
             };
+            if (lang != "")
+                headers["Content-Language"] = lang;
             return HTTPResponse::ok(headers, body);
         }
     }
