@@ -926,6 +926,7 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr)
     ServFilter *currFilter = servMgr->filters;
     servMgr->channelDirectory.clearFeeds();
     servMgr->publicDirectoryEnabled = false;
+    g_nagleEnabled = false;
 
     bool brRoot = false;
     bool getUpd = false;
@@ -940,7 +941,9 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr)
     while (cp=nextCGIarg(cp, curr, arg))
     {
         // server
-        if (strcmp(curr, "serveractive") == 0)
+        if (strcmp(curr, "servername") == 0)
+            servMgr->serverName = cgi::unescape(arg);
+        else if (strcmp(curr, "serveractive") == 0)
             servMgr->autoServe = getCGIargBOOL(arg);
         else if (strcmp(curr, "port") == 0)
             newPort = getCGIargINT(arg);
@@ -1053,6 +1056,8 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr)
             servMgr->refreshHTML = getCGIargINT(arg);
         else if (strcmp(curr, "public_directory") == 0)
             servMgr->publicDirectoryEnabled = true;
+        else if (strcmp(curr, "nagle") == 0)
+            g_nagleEnabled = true;
         else if (strcmp(curr, "auth") == 0)
         {
             if (strcmp(arg, "cookie") == 0)

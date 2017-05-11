@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>{$page.channel.name}</title>
+    <title>{$page.channel.name} - {#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$request.host}{@end}</title>
     <link rel="stylesheet" href="peercast.css">
     <meta charset="utf-8">
     <style>
