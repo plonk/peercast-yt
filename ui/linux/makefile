@@ -36,10 +36,10 @@ all: $(TARGET) build-html $(TAR)
 deps: $(DEPENDFILE)
 
 build-html:
-	make -C ..
+	$(MAKE) -C ..
 
 $(SRCHTMLTAR):
-	make -C .. html.tar
+	$(MAKE) -C .. html.tar
 
 $(HTML): $(SRCHTMLTAR)
 	rm -rf $(HTML)
@@ -47,7 +47,7 @@ $(HTML): $(SRCHTMLTAR)
 	touch $(HTML)
 
 $(SRCPUBLICTAR):
-	make -C .. public.tar
+	$(MAKE) -C .. public.tar
 
 $(PUBLIC): $(SRCPUBLICTAR)
 	rm -rf $(PUBLIC)
