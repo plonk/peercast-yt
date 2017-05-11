@@ -57,7 +57,7 @@ $(PUBLIC): $(SRCPUBLICTAR)
 $(TAR): $(TARGET) $(HTML) $(PUBLIC)
 	rm -rf peercast-yt
 	mkdir peercast-yt
-	cp -vR $(HTML) $(PUBLIC) $(TARGET) peercast-yt/
+	cp -R $(HTML) $(PUBLIC) $(TARGET) peercast-yt/
 	strip peercast-yt/$(TARGET)
 	tar cvzf $(TAR) peercast-yt
 
