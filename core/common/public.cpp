@@ -1,3 +1,6 @@
+#include <algorithm>
+#include <iterator>
+
 #include "public.h"
 #include "str.h"
 #include "dmstream.h"
@@ -104,11 +107,44 @@ string PublicController::createChannelIndex()
 
     return res;
 }
+// ------------------------------------------------------------
+vector<string>
+PublicController::acceptableLanguages(const string& acceptLanguage)
+{
+    if (acceptLanguage == "")
+        return {};
+
+    vector<string> res;
+    vector<pair<string,double> > tags;
+
+    for (auto tagSpec : str::split(acceptLanguage, ","))
+    {
+        auto ws = str::split(tagSpec, ";");
+        if (ws.size() == 1)
+            tags.push_back(make_pair(ws[0], 1.0));
+        else if (ws.size() > 1)
+            tags.push_back(make_pair(ws[0], atof(str::replace_prefix(ws[1], "q=", "").c_str())));
+        else
+            throw runtime_error("parse error");
+    }
+
+    auto sortfunc = [](pair<string,double>& a,
+                       pair<string,double>& b)
+    {
+        return a.second > b.second;
+    };
+
+    sort(tags.begin(), tags.end(), sortfunc);
+    transform(tags.begin(), tags.end(),
+                   back_inserter(res),
+                   [](pair<string,double>& x) { return x.first; });
+    return res;
+}
 
 // ------------------------------------------------------------
 HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream, Host& remoteHost)
 {
-    std::vector<std::string> acceptableLanguages = { "ja", "en" };
+    vector<string> langs = acceptableLanguages(req.getHeader("Accept-Language"));
 
     if (req.path == "/public")
     {
@@ -128,8 +164,8 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
         if (!success)
             return HTTPResponse::notFound();
 
-        std::string path, lang;
-        std::tie(path, lang) = mapper.toLocalFilePath(req.path, acceptableLanguages);
+        string path, lang;
+        tie(path, lang) = mapper.toLocalFilePath(req.path, langs);
 
         FileStream file;
         DynamicMemoryStream mem;
@@ -140,16 +176,16 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
         engine.prependScope(scope);
         engine.readTemplate(file, &mem, 0);
 
-        std::map<std::string,std::string> headers;
+        map<string,string> headers;
         headers["Content-Type"]     = "text/html";
         if (lang != "")
             headers["Content-Language"] = lang;
-        headers["Content-Length"]   = std::to_string(mem.getLength());
+        headers["Content-Length"]   = to_string(mem.getLength());
         return HTTPResponse::ok(headers, mem.str());
     }else
     {
-        std::string path, lang;
-        std::tie(path, lang) = mapper.toLocalFilePath(req.path, acceptableLanguages);
+        string path, lang;
+        tie(path, lang) = mapper.toLocalFilePath(req.path, langs);
 
         LOG_DEBUG("Writing `%s` lang=%s", path.c_str(), lang.c_str());
 
@@ -182,7 +218,7 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
             }
             file.close();
 
-            std::string body = mem.str();
+            string body = mem.str();
             map<string,string> headers = {
                 {"Content-Type",type},
                 {"Content-Length",to_string(body.size())}
