@@ -379,6 +379,8 @@ public:
     ChannelDirectory    channelDirectory;
     bool                publicDirectoryEnabled;
     FW_STATE            firewalled;
+
+    String              serverName;
 };
 
 // ----------------------------------

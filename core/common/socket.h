@@ -23,7 +23,7 @@
 #include "common.h"
 #include "stream.h"
 
-#define DISABLE_NAGLE 1
+extern bool g_nagleEnabled;
 
 // --------------------------------------------------
 class ClientSocket : public Stream
@@ -34,16 +34,17 @@ public:
     {
         readTimeout = 30000;
         writeTimeout = 5000;
+        nagleEnabled = g_nagleEnabled;
     }
 
     virtual ~ClientSocket() {}
 
     // required interface
-    virtual void            open(Host &) = 0;
-    virtual void            bind(Host &) = 0;
-    virtual void            connect() = 0;
-    virtual bool            active() = 0;
-    virtual ClientSocket    *accept() = 0;
+    virtual void            open(Host &)   = 0;
+    virtual void            bind(Host &)   = 0;
+    virtual void            connect()      = 0;
+    virtual bool            active()       = 0;
+    virtual ClientSocket    *accept()      = 0;
     virtual Host            getLocalHost() = 0;
 
     void    setReadTimeout(unsigned int t) override
@@ -67,6 +68,7 @@ public:
     Host            host;
 
     unsigned int    readTimeout, writeTimeout;
+    bool nagleEnabled;
 };
 
 #endif
