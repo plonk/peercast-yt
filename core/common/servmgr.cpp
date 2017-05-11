@@ -1456,10 +1456,6 @@ unsigned int ServMgr::numStreams(Servent::TYPE tp, bool all)
 // --------------------------------------------------
 bool ServMgr::getChannel(char *str, ChanInfo &info, bool relay)
 {
-    // remove file extension (only added for winamp)
-    //char *ext = strstr(str, ".");
-    //if (ext) *ext = 0;
-
     procConnectArgs(str, info);
 
     Channel *ch;
