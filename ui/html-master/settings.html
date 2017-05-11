@@ -19,13 +19,13 @@
                   <td colspan="2" class="normal"><div align="center"><strong>{#Basic Settings}</strong></div></td>
                 </tr>
                 <TR align=left bgColor=#ddd class="normal">
-                  <TD>{#Port}</TD>
+                  <TD style="width: 8.5em">{#Port}</TD>
                   <TD><INPUT size=10 value={$servMgr.serverPort1} name=port></TD>
                 </TR>
                 <TR align=left bgColor=#eee class="normal">
                   <TD>{#Password}</TD>
                   <TD>
-                    <INPUT name=passnew type=password size="10" maxlength="32" {@if servMgr.password}value={$servMgr.password}{@end}>
+                    <INPUT name=passnew type=password size="10" maxlength="32" {@if servMgr.password}value={$servMgr.password}{@end} style="width: 100%">
                   </TD>
                 </TR>
                 <TR align=left bgColor=#ddd class="normal">
