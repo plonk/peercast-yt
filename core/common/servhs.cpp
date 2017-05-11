@@ -784,8 +784,12 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
         String file = servMgr->htmlPath;
         file.append("/login.html");
         if (local)
-            handshakeLocalFile(file);
-        else
+        {
+            if (http.headers["X-REQUESTED-WITH"] == "XMLHttpRequest")
+                throw HTTPException(HTTP_SC_FORBIDDEN, 403);
+            else
+                handshakeLocalFile(file);
+        }else
             handshakeRemoteFile(file);
     }
 
