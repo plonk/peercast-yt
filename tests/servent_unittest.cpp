@@ -183,6 +183,47 @@ TEST_F(ServentFixture, handshakeIncomingJRPCGetAuthorized)
     delete mock;
 }
 
+//                  |<---------------------- 77 characters long  -------------------------------->|
+#define LONG_STRING "longURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURI" \
+    "longURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURI" \
+    "longURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURI" \
+    "longURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURI" \
+    "longURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURI" \
+    "longURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURI" \
+    "longURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURI" \
+    "longURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURI" \
+    "longURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURI" \
+    "longURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURI"
+
+// 8470 bytes
+#define LONG_LONG_STRING LONG_STRING \
+    LONG_STRING \
+    LONG_STRING \
+    LONG_STRING \
+    LONG_STRING \
+    LONG_STRING \
+    LONG_STRING \
+    LONG_STRING \
+    LONG_STRING \
+    LONG_STRING \
+    LONG_STRING
+
+// 8191 バイト以上のリクエストに対してエラーを返す。
+TEST_F(ServentFixture, handshakeIncomingLongURI)
+{
+    ASSERT_EQ(8470, strlen(LONG_LONG_STRING));
+
+    MockClientSocket* mock;
+
+    s.sock = mock = new MockClientSocket();
+    mock->incoming.str("GET /" LONG_LONG_STRING " HTTP/1.0\r\n"
+                       "\r\n");
+
+    ASSERT_THROW(s.handshakeIncoming(), HTTPException);
+
+    delete mock;
+}
+
 TEST_F(ServentFixture, createChannelInfoNullCase)
 {
     Query query("");

@@ -227,6 +227,7 @@ bool    Channel::checkIdle()
 }
 
 // -----------------------------------
+// チャンネルごとのリレー数制限に達しているか。
 bool    Channel::isFull()
 {
     return chanMgr->maxRelaysPerChannel ? localRelays() >= chanMgr->maxRelaysPerChannel : false;

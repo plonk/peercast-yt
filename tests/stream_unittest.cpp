@@ -282,6 +282,44 @@ TEST_F(StreamFixture, readLine)
     ASSERT_STREQ("abcdef", buf);
 }
 
+TEST_F(StreamFixture, readLine_max0)
+{
+    char buf[2] = "A";
+
+    mem.str("ab\r\n");
+    ASSERT_EQ(0, mem.readLine(buf, 0));
+    ASSERT_STREQ("A", buf);
+}
+
+TEST_F(StreamFixture, readLine_max1)
+{
+    char buf[2] = {'A', 'A'};
+
+    mem.str("ab\r\n");
+    ASSERT_EQ(0, mem.readLine(buf, 1));
+    ASSERT_STREQ("", buf);
+}
+
+TEST_F(StreamFixture, readLine_max2)
+{
+    char buf[3];
+
+    memset(buf, 'A', sizeof(buf));
+    mem.str("ab\r\n");
+    ASSERT_EQ(1, mem.readLine(buf, 2));
+    ASSERT_STREQ("a", buf);
+}
+
+TEST_F(StreamFixture, readLine_max3)
+{
+    char buf[3];
+
+    memset(buf, 'A', sizeof(buf));
+    mem.str("ab\r\n");
+    ASSERT_EQ(2, mem.readLine(buf, 3));
+    ASSERT_STREQ("ab", buf);
+}
+
 TEST_F(StreamFixture, readWord_nullcase)
 {
     char buf[1024] = "ABC";

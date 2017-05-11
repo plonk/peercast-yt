@@ -10,8 +10,8 @@ $(function () {
                         $(r).html(data);
                         setTimeout(callback, r.dataset.interval * 1000);
                     },
-                    error: function (req) {
-                        $(r).html(req.responseText);
+                    error: function (req, status, errorMessage) {
+                        // console.log([status, errorMessage]);
                         setTimeout(callback, r.dataset.interval * 1000);
                     },
                 });

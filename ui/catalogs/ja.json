@@ -197,5 +197,29 @@
     "Login"                   : "ログイン",
     "_Password_login"         : "パスワード",
 
+    // public/play.html
+    "Playlist"                : "プレイリスト",
+    "Your browser doesn't seem to support playback of FLV videos."
+                              : "お使いのブラウザは FLV 動画の再生に対応していないようです。",
+    "Try the playlist link below."
+                              : "プレイリストから再生してください。",
+    "Your browser doesn't seem to support playback of WMV videos."
+                              : "お使いのブラウザは WMV 動画の再生に対応していないようです。",
+    "Your browser doesn't seem to support playback of MP3 audio."
+                              : "お使いのブラウザは MP3 音声の再生に対応していないようです。",
+    "Your browser doesn't seem to support playback of MKV videos."
+                              : "お使いのブラウザは MKV 動画の再生に対応していないようです。",
+    "Should the playback fail, try the playlist link below."
+                              : "再生できない場合はプレイリストから再生してください。",
+    "Your browser doesn't seem to support playback of WebM videos."
+                              : "お使いのブラウザは WebM 動画の再生に対応していないようです。",
+    "Playback of this type of stream is not supported."
+                              : "このタイプのストリームの再生には対応していません。",
+
+    // public/index.html
+    "Local Channels"          : "ローカルチャンネル",
+    "Channels from Friendly Stations"
+                              : "連携局のチャンネル",
+    "Link Status"             : "リンク状態",
     "":""
 }

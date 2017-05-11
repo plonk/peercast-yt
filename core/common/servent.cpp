@@ -105,19 +105,34 @@ bool Servent::canStream(Channel *ch)
     if (!isPrivate())
     {
         if  (servMgr->bitrateFull(ch->getBitrate()))
+        {
+            LOG_DEBUG("Unable to stream because there is not enough bandwidth left");
             return false;
+        }
 
         if ((type == T_RELAY) && servMgr->relaysFull())
+        {
+            LOG_DEBUG("Unable to stream because server already has max. number of relays");
             return false;
+        }
 
         if ((type == T_DIRECT) && servMgr->directFull())
+        {
+            LOG_DEBUG("Unable to stream because server already has max. number of directs");
             return false;
+        }
 
         if (!ch->isPlaying())
+        {
+            LOG_DEBUG("Unable to stream because channel is not playing");
             return false;
+        }
 
-        if (ch->isFull())
+        if ((type == T_RELAY) && ch->isFull())
+        {
+            LOG_DEBUG("Unable to stream because channel already has max. number of relays");
             return false;
+        }
     }
 
     return true;
@@ -2011,10 +2026,6 @@ void Servent::processStream(bool doneHandshake, ChanInfo &chanInfo)
 
         servMgr->totalStreams++;
 
-        // FIXME: これ使われることのないコピーを変更しているけど大丈夫？
-        Host host = sock->host;
-        host.port = 0;  // force to 0 so we ignore the incoming port
-
         Channel *ch = chanMgr->findChannelByID(chanID);
         if (!ch)
             throw StreamException("Channel not found");
@@ -2108,12 +2119,9 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
         {
             ch->headPack.writeRaw(bsock);
             streamPos = ch->headPack.pos + ch->headPack.len;
-            // streamPos = ch->rawData.getOldestNonContinuationPos();
-            // streamPos = ch->rawData.getLatestNonContinuationPos();
-            // if (streamPos == 0)
-            //     streamPos = ch->rawData.getLatestPos();
-            // if (streamPos == 0)
-            //     streamPos = ch->headPack.pos + ch->headPack.len;
+            auto ncpos = ch->rawData.getLatestNonContinuationPos();
+            if (ncpos && streamPos < ncpos)
+                streamPos = ncpos;
             LOG_DEBUG("Sent %d bytes header ", ch->headPack.len);
         }
 
@@ -2175,85 +2183,6 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
         LOG_ERROR("Stream channel: %s", e.msg);
     }
 }
-
-#if 0
-// -----------------------------------
-void Servent::sendRawMultiChannel(bool sendHead, bool sendData)
-{
-    try
-    {
-        unsigned int chanStreamIndex[ChanMgr::MAX_CHANNELS];
-        unsigned int chanStreamPos[ChanMgr::MAX_CHANNELS];
-        GnuID chanIDs[ChanMgr::MAX_CHANNELS];
-        int numChanIDs=0;
-        for (int i=0; i<ChanMgr::MAX_CHANNELS; i++)
-        {
-            Channel *ch = &chanMgr->channels[i];
-            if (ch->isPlaying())
-                chanIDs[numChanIDs++]=ch->info.id;
-        }
-
-        setStatus(S_CONNECTED);
-
-        if (sendHead)
-        {
-            for (int i=0; i<numChanIDs; i++)
-            {
-                Channel *ch = chanMgr->findChannelByID(chanIDs[i]);
-                if (ch)
-                {
-                    LOG_DEBUG("Starting RawMulti stream: %s", ch->info.name.cstr());
-                    ch->headPack.writeRaw(*sock);
-                    chanStreamPos[i] = ch->headPack.pos + ch->headPack.len;
-                    chanStreamIndex[i] = ch->streamIndex;
-                    LOG_DEBUG("Sent %d bytes header", ch->headPack.len);
-                }
-            }
-        }
-
-        if (sendData)
-        {
-            unsigned int connectTime=sys->getTime();
-
-            while ((thread.active) && sock->active())
-            {
-                for (int i=1; i<numChanIDs; i++)
-                {
-                    Channel *ch = chanMgr->findChannelByID(chanIDs[i]);
-                    if (ch)
-                    {
-                        if (chanStreamIndex[i] != ch->streamIndex)
-                        {
-                            chanStreamIndex[i] = ch->streamIndex;
-                            chanStreamPos[i] = ch->headPack.pos;
-                            LOG_DEBUG("sendRawMulti got new stream index for chan %d", i);
-                        }
-
-                        ChanPacket rawPack;
-                        if (ch->rawData.findPacket(chanStreamPos[i], rawPack))
-                        {
-                            if ((rawPack.type == ChanPacket::T_DATA) || (rawPack.type == ChanPacket::T_HEAD))
-                                rawPack.writeRaw(*sock);
-
-                            if (rawPack.pos < chanStreamPos[i])
-                                LOG_DEBUG("raw: skip back %d", rawPack.pos-chanStreamPos[i]);
-                            chanStreamPos[i] = rawPack.pos+rawPack.len;
-
-                            //LOG("raw at %d: %d %d", streamPos, ch->rawData.getStreamPos(ch->rawData.firstPos), ch->rawData.getStreamPos(ch->rawData.lastPos));
-                        }
-                    }
-                    break;
-                }
-
-                sys->sleepIdle();
-            }
-        }
-    }catch (StreamException &e)
-    {
-        LOG_ERROR("Stream channel: %s", e.msg);
-    }
-}
-#endif
 
 // -----------------------------------
 void Servent::sendRawMetaChannel(int interval)

@@ -11,6 +11,7 @@ TARGET = peercast
 CORE = ../../core
 SRCHTMLTAR = ../html.tar
 HTML = html
+SRCPUBLICTAR = ../public.tar
 PUBLIC = public
 
 LIBOBJSTATIC = libpeercast.a
@@ -45,7 +46,15 @@ $(HTML): $(SRCHTMLTAR)
 	tar xf $(SRCHTMLTAR) $(HTML)
 	touch $(HTML)
 
-$(TAR): $(TARGET) $(HTML)
+$(SRCPUBLICTAR):
+	make -C .. public.tar
+
+$(PUBLIC): $(SRCPUBLICTAR)
+	rm -rf $(PUBLIC)
+	tar xf $(SRCPUBLICTAR) $(PUBLIC)
+	touch $(PUBLIC)
+
+$(TAR): $(TARGET) $(HTML) $(PUBLIC)
 	rm -rf peercast-yt
 	mkdir peercast-yt
 	cp -vR $(HTML) $(PUBLIC) $(TARGET) peercast-yt/

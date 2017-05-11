@@ -255,7 +255,7 @@ void LogBuffer::dumpHTML(Stream &out)
             sp %= maxLines;
         }
     }
-    delete escaped;
+    delete[] escaped;
 
     lock.off();
 }

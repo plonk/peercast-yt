@@ -542,12 +542,10 @@ void Servent::handshakeIncoming()
     setStatus(S_HANDSHAKE);
 
     char buf[8192];
-    sock->readLine(buf, sizeof(buf));
 
-    if (strlen(buf) == sizeof(buf)-1)
+    if (sock->readLine(buf, sizeof(buf)) >= sizeof(buf)-1)
     {
-        LOG_ERROR("Request line too long!");
-        throw HTTPException(HTTP_SC_BADREQUEST, 400);
+        throw HTTPException(HTTP_SC_URITOOLONG, 414);
     }
 
     bool isHTTP = (stristr(buf, HTTP_PROTO1) != NULL);
@@ -563,6 +561,9 @@ void Servent::handshakeIncoming()
 }
 
 // -----------------------------------
+// リレー接続、あるいはダイレクト接続に str で指定されたチャンネルのス
+// トリームを流す。relay が true ならば、チャンネルが無かったり受信中
+// でなくても、チャンネルを受信中の状態にしようとする。
 void Servent::triggerChannel(char *str, ChanInfo::PROTOCOL proto, bool relay)
 {
     ChanInfo info;
@@ -783,8 +784,12 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
         String file = servMgr->htmlPath;
         file.append("/login.html");
         if (local)
-            handshakeLocalFile(file);
-        else
+        {
+            if (http.headers["X-REQUESTED-WITH"] == "XMLHttpRequest")
+                throw HTTPException(HTTP_SC_FORBIDDEN, 403);
+            else
+                handshakeLocalFile(file);
+        }else
             handshakeRemoteFile(file);
     }
 
