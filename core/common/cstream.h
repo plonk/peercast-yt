@@ -88,6 +88,11 @@ public:
         NUM_SAFEPACKETS = 56
     };
 
+    ChanPacketBuffer()
+    {
+        init();
+    }
+
     void    init()
     {
         lock.on();
