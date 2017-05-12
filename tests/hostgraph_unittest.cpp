@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "jrpc.h"
+#include "defer.h"
 
 using json = nlohmann::json;
 
@@ -16,6 +17,7 @@ TEST_F(HostGraphFixture, simplestCase)
 {
     auto ch = new Channel();
     auto hitList = new ChanHitList();
+    Defer reclaim([=]() { delete ch; delete hitList; });
 
     JrpcApi::HostGraph graph(ch, hitList);
 
@@ -26,6 +28,7 @@ TEST_F(HostGraphFixture, withHitList)
 {
     auto ch = new Channel();
     auto hitList = new ChanHitList();
+    Defer reclaim([=]() { delete ch; delete hitList; });
     ChanHit hit;
 
     hit.init();

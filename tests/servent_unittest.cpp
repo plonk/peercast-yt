@@ -4,6 +4,8 @@
 #include "servent.h"
 #include "dmstream.h"
 
+#include "defer.h"
+
 using namespace cgi;
 
 class ServentFixture : public ::testing::Test {
@@ -79,6 +81,7 @@ TEST_F(ServentFixture, initialState)
 TEST_F(ServentFixture, handshakeHTTP)
 {
     MockClientSocket* mock;
+    Defer reclaim([&]() { delete mock; });
 
     s.sock = mock = new MockClientSocket();
 
@@ -95,6 +98,7 @@ TEST_F(ServentFixture, handshakeHTTP)
 TEST_F(ServentFixture, handshakeIncomingGetRoot)
 {
     MockClientSocket* mock;
+    Defer reclaim([&]() { delete mock; });
 
     s.sock = mock = new MockClientSocket();
     mock->incoming.str("GET / HTTP/1.0\r\n\r\n");
@@ -115,6 +119,8 @@ TEST_F(ServentFixture, handshakeIncomingBadRequest)
     mock->incoming.str("\r\n");
 
     ASSERT_THROW(s.handshakeIncoming(), StreamException);
+
+    delete mock;
 }
 
 TEST_F(ServentFixture, handshakeIncomingHTMLRoot)
@@ -133,6 +139,8 @@ TEST_F(ServentFixture, handshakeIncomingHTMLRoot)
     ASSERT_TRUE(str::contains(output, "Server: "));
     ASSERT_TRUE(str::contains(output, "Date: "));
     ASSERT_TRUE(str::contains(output, "Unable to open file"));
+
+    delete mock;
 }
 
 TEST_F(ServentFixture, handshakeIncomingJRPCGetUnauthorized)
@@ -147,6 +155,8 @@ TEST_F(ServentFixture, handshakeIncomingJRPCGetUnauthorized)
     std::string output = mock->outgoing.str();
 
     ASSERT_STREQ("HTTP/1.0 401 Unauthorized\r\nWWW-Authenticate: Basic realm=\"PeerCast Admin\"\r\n\r\n", output.c_str());
+
+    delete mock;
 }
 
 #include "servmgr.h"
