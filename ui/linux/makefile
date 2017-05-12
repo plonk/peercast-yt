@@ -36,10 +36,10 @@ all: $(TARGET) build-html $(TAR)
 deps: $(DEPENDFILE)
 
 build-html:
-	make -C ..
+	$(MAKE) -C ..
 
 $(SRCHTMLTAR):
-	make -C .. html.tar
+	$(MAKE) -C .. html.tar
 
 $(HTML): $(SRCHTMLTAR)
 	rm -rf $(HTML)
@@ -47,7 +47,7 @@ $(HTML): $(SRCHTMLTAR)
 	touch $(HTML)
 
 $(SRCPUBLICTAR):
-	make -C .. public.tar
+	$(MAKE) -C .. public.tar
 
 $(PUBLIC): $(SRCPUBLICTAR)
 	rm -rf $(PUBLIC)
@@ -57,7 +57,7 @@ $(PUBLIC): $(SRCPUBLICTAR)
 $(TAR): $(TARGET) $(HTML) $(PUBLIC)
 	rm -rf peercast-yt
 	mkdir peercast-yt
-	cp -vR $(HTML) $(PUBLIC) $(TARGET) peercast-yt/
+	cp -R $(HTML) $(PUBLIC) $(TARGET) peercast-yt/
 	strip peercast-yt/$(TARGET)
 	tar cvzf $(TAR) peercast-yt
 

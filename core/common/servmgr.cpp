@@ -29,6 +29,7 @@
 #include "version2.h"
 
 ThreadInfo ServMgr::serverThread, ServMgr::idleThread;
+bool g_nagleEnabled = false;
 
 // -----------------------------------
 ServMgr::ServMgr()
@@ -111,6 +112,8 @@ ServMgr::ServMgr()
     servents = NULL;
 
     chanLog="";
+
+    serverName = "";
 }
 
 // -----------------------------------
@@ -901,6 +904,7 @@ void ServMgr::saveSettings(const char *fn)
         char idStr[64];
 
         iniFile.writeSection("Server");
+        iniFile.writeStrValue("serverName", servMgr->serverName);
         iniFile.writeIntValue("serverPort", servMgr->serverHost.port);
         iniFile.writeBoolValue("autoServe", servMgr->autoServe);
         iniFile.writeStrValue("forceIP", servMgr->forceIP);
@@ -920,6 +924,7 @@ void ServMgr::saveSettings(const char *fn)
         iniFile.writeIntValue("maxServIn", servMgr->maxServIn);
         iniFile.writeStrValue("chanLog", servMgr->chanLog.cstr());
         iniFile.writeBoolValue("publicDirectory", servMgr->publicDirectoryEnabled);
+        iniFile.writeBoolValue("nagleEnabled", g_nagleEnabled);
 
         networkID.toStr(idStr);
         iniFile.writeStrValue("networkID", idStr);
@@ -1129,7 +1134,9 @@ void ServMgr::loadSettings(const char *fn)
         while (iniFile.readNext())
         {
             // server settings
-            if (iniFile.isName("serverPort"))
+            if (iniFile.isName("serverName"))
+                servMgr->serverName = iniFile.getStrValue();
+            else if (iniFile.isName("serverPort"))
                 servMgr->serverHost.port = iniFile.getIntValue();
             else if (iniFile.isName("autoServe"))
                 servMgr->autoServe = iniFile.getBoolValue();
@@ -1189,6 +1196,8 @@ void ServMgr::loadSettings(const char *fn)
                 servMgr->chanLog.set(iniFile.getStrValue(), String::T_ASCII);
             else if (iniFile.isName("publicDirectory"))
                 servMgr->publicDirectoryEnabled = iniFile.getBoolValue();
+            else if (iniFile.isName("nagleEnabled"))
+                g_nagleEnabled = iniFile.getBoolValue();
 
             else if (iniFile.isName("rootMsg"))
                 rootMsg.set(iniFile.getStrValue());
@@ -1447,10 +1456,6 @@ unsigned int ServMgr::numStreams(Servent::TYPE tp, bool all)
 // --------------------------------------------------
 bool ServMgr::getChannel(char *str, ChanInfo &info, bool relay)
 {
-    // remove file extension (only added for winamp)
-    //char *ext = strstr(str, ".");
-    //if (ext) *ext = 0;
-
     procConnectArgs(str, info);
 
     Channel *ch;
@@ -2107,6 +2112,8 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
         sprintf(buf, "%d", numHosts(ServHost::T_SERVENT));
     else if (var == "numServents")
         sprintf(buf, "%d", numServents());
+    else if (var == "serverName")
+        sprintf(buf, "%s", serverName.cstr());
     else if (var == "serverPort")
         sprintf(buf, "%d", serverHost.port);
     else if (var == "serverIP")
@@ -2242,6 +2249,9 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var == "publicDirectoryEnabled")
     {
         sprintf(buf, "%d", publicDirectoryEnabled);
+    }else if (var == "nagleEnabled")
+    {
+        sprintf(buf, "%d", g_nagleEnabled);
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);

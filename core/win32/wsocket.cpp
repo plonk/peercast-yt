@@ -159,9 +159,7 @@ void WSAClientSocket::open(Host &rh)
 		throw SockException("Can`t open socket");
 
 	setBlocking(false);
-#ifdef DISABLE_NAGLE
-	setNagle(false);
-#endif
+	setNagle(nagleEnabled);
 
 	host = rh;
 
@@ -419,9 +417,7 @@ ClientSocket *WSAClientSocket::accept()
 
 
 	cs->setBlocking(false);
-#ifdef DISABLE_NAGLE
-	cs->setNagle(false);
-#endif
+	cs->setNagle(nagleEnabled);
 
 	return cs;
 }

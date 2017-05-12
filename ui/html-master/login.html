@@ -1,23 +1,45 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
   <HEAD>
-    <title>{#PeerCast on} {$servMgr.serverIP}:{$servMgr.serverPort}</title>
+    <title>{#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$servMgr.serverIP}:{$servMgr.serverPort}{@end}</title>
     <META http-equiv=Content-Type content="text/html; charset=utf-8">
-    <BODY>
-      <DIV align=center>
-        <FORM action="/admin?" method=get>
-          <INPUT type=hidden value=login name=cmd>
-          <table width="100%" height="100%" border="0" cellpadding="0" cellspacing="0">
-            <tr>
-              <td align="center" valign="middle">
-                <TABLE border=0 align=center cellpadding="2">
+
+    <!-- 今のところ CSS ファイルにアクセスできない -->
+    <style>
+     .normal {
+       font-family: Verdana, Arial, Helvetica, sans-serif;
+       font-size: 12px;
+     }
+     a {
+       font-family: Verdana, Arial, Helvetica, sans-serif;
+       color: #0000FF;
+       text-decoration: none;
+
+     }
+     a:hover {
+       font-family: Verdana, Arial, Helvetica, sans-serif;
+       text-decoration: underline;
+
+     }
+    </style>
+  </HEAD>
+
+  <BODY class="normal">
+    <div><a href="/public/index.html">{#Public Directory}</a></div>
+    <DIV align=center>
+      <FORM action="/admin?" method=get>
+        <INPUT type=hidden value=login name=cmd>
+        <table width="100%" height="95%" border="0" cellpadding="0" cellspacing="0">
+          <tr>
+            <td align="center" valign="middle">
+              <TABLE border=0 align=center cellpadding="2">
                 <TBODY>
                   <TR align=left bgColor=#cccccc>
                     <TD colspan="2"><div align="center"><strong>PeerCast</strong></div></TD>
                   </TR>
                   <TR align=left bgColor=#dddddd>
                     <TD>{#_Password_login}</TD>
-                    <TD><INPUT type=password size=10 name=pass> </TD>
+                    <TD><INPUT type=password size=10 name=pass style="width: 30em"> </TD>
                   </TR>
                   <TR align=left bgColor=#eeeeee>
                     <TD colspan="2"><div align="center">
@@ -26,10 +48,10 @@
                     </TD>
                   </TR>
               </TABLE>
-              </td>
-            </tr>
-          </table>
-        </FORM>
-      </DIV>
-    </BODY>
+            </td>
+          </tr>
+        </table>
+      </FORM>
+    </DIV>
+  </BODY>
 </HTML>

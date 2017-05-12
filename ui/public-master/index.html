@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>PeerCast on {$request.host}</title>
+    <title>{#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$request.host}{@end}</title>
     <link href="peercast.css" rel="stylesheet" type="text/css">
     <style>
      body { background-color: #ddd; margin-top: 16px; margin-bottom: 16px;
@@ -43,6 +43,7 @@
     <div class="container">
       <center>
         <img width="370" src="images/peercast-logo.png">
+        <h1 style="color: #111; font-size: 28px">{$servMgr.serverName}</h1>
       </center>
       <hr>
 

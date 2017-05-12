@@ -138,6 +138,7 @@
     "Deutsch"                 : "ドイツ語",
     "Japanese"                : "日本語",
     "Server"                  : "サーバー",
+    "Nickname for this server" : "サーバーのニックネーム",
     "DJ Message"              : "DJメッセージ",
     //"ICY MetaInterval"      : "ICY MetaInterval",
     "Mode"                    : "モード",
@@ -182,6 +183,7 @@
     "URL of index.txt"        : "index.txtのURL",
     "Public"                  : "公開",
     "Public Directory"        : "公開ディレクトリ",
+    "Nagle's Algorithm"       : "Nagleアルゴリズム",
 
     // viewlog.html
     "Clear log"               : "ログをクリア",
