@@ -1,8 +1,8 @@
 #include <algorithm>
 #include <iterator>
-#include <memory>
 
 #include "dechunker.h"
+#include "defer.h"
 
 using namespace std;
 
@@ -82,13 +82,16 @@ void Dechunker::getNextChunk()
         throw StreamException("Closed on read");
     }
 
-    unique_ptr<char> buf(new char[size]);
-    int r = m_stream.read(buf.get(), size);
+    char *buf = new char[size];
+    Defer cleanup([=]() { delete[] buf; });
+    int r;
+
+    r = m_stream.read(buf, size);
     if (r != size)
     {
         throw StreamException("Premature end");
     }
-    copy(buf.get(), buf.get() + size, back_inserter(m_buffer));
+    copy(buf, buf + size, back_inserter(m_buffer));
 
     if (m_stream.readChar() != '\r' || m_stream.readChar() != '\n')
         throw StreamException("Protocol error");
