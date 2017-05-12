@@ -29,6 +29,8 @@
 #include "wsocket.h"
 #include "stats.h"
 
+#include "config.h"
+
 
 // --------------------------------------------------
 void WSAClientSocket::init()
@@ -159,7 +161,9 @@ void WSAClientSocket::open(Host &rh)
 		throw SockException("Can`t open socket");
 
 	setBlocking(false);
-	setNagle(nagleEnabled);
+#ifdef DISABLE_NAGLE
+	setNagle(false);
+#endif
 
 	host = rh;
 
@@ -417,7 +421,9 @@ ClientSocket *WSAClientSocket::accept()
 
 
 	cs->setBlocking(false);
-	cs->setNagle(nagleEnabled);
+#ifdef DISABLE_NAGLE
+	cs->setNagle(false);
+#endif
 
 	return cs;
 }

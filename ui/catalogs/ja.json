@@ -183,7 +183,6 @@
     "URL of index.txt"        : "index.txtのURL",
     "Public"                  : "公開",
     "Public Directory"        : "公開ディレクトリ",
-    "Nagle's Algorithm"       : "Nagleアルゴリズム",
 
     // viewlog.html
     "Clear log"               : "ログをクリア",

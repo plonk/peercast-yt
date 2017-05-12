@@ -22,8 +22,7 @@
 
 #include "common.h"
 #include "stream.h"
-
-extern bool g_nagleEnabled;
+#include "config.h"
 
 // --------------------------------------------------
 class ClientSocket : public Stream
@@ -34,7 +33,6 @@ public:
     {
         readTimeout = 30000;
         writeTimeout = 5000;
-        nagleEnabled = g_nagleEnabled;
     }
 
     virtual ~ClientSocket() {}
@@ -68,7 +66,6 @@ public:
     Host            host;
 
     unsigned int    readTimeout, writeTimeout;
-    bool nagleEnabled;
 };
 
 #endif
