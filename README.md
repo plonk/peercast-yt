@@ -4,13 +4,15 @@
 
 VPS等の Linux で動かすのに向いている PeerCast です。
 
+* Ajax による画面更新。
 * PeerCastStation 互換の JSON RPC インターフェイス。(epcyp、ginger などで使えます)
-* FLVフォーマット、MKVフォーマットの配信に対応。
-* HTTP Push ストリームでの配信に対応。ffmpeg と直接接続できます。
+* FLV、MKV、WebMフォーマットの配信に対応。
+* HTTP Push での配信に対応。ffmpeg と直接接続できます。
 * WME、Expression Encoder、KotoEncoder からプッシュ配信できます。
 * HTML UI をメッセージカタログ化。各国語版で機能に違いがないようにしました。
 * YPブラウザ内蔵。YP4G 形式の index.txt を取得してチャンネルリストを表示します。
-* Ajax による画面更新。
+* 公開ディレクトリ機能。チャンネルリストやストリームをWebに公開できます。
+* [継続パケット機能](docs/continuation-packets.md)。キーフレームからの再生ができます。
 
 # 使用ライブラリ
 
