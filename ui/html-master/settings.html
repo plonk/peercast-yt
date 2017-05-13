@@ -1,12 +1,6 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-  <!-- InstanceBegin template="/Templates/peercast.dwt" codeOutsideHTMLIsLocked="false" -->
-  <!-- InstanceBeginEditable name="title" -->
-  <title>{#_Settings_navbar} - {#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$servMgr.serverIP}:{$servMgr.serverPort}{@end}</title>
-  <!-- InstanceEndEditable -->
-  <!-- InstanceBeginEditable name="head" --><!-- InstanceEndEditable -->
-  <!-- InstanceBeginEditable name="content" -->
-  <DIV align=center></DIV>
+{^define LAYOUT layout.html}
+{^define TITLE}{#_Settings_navbar} - {#PeerCast on} {^SERVER_NAME}{^end}
+
   <FORM action=/admin method=get>
     <INPUT type=hidden value=apply name=cmd>
     <TABLE align=center border=0>
@@ -336,6 +330,3 @@
       </TBODY>
     </TABLE>
   </FORM>
-  <!-- InstanceEndEditable -->
-  <!-- InstanceEnd -->
-</html>

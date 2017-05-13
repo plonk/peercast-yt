@@ -1,15 +1,13 @@
-<!-- InstanceBegin template="/Templates/peercast.dwt" codeOutsideHTMLIsLocked="false" -->
-<!-- InstanceBeginEditable name="title" -->
-<title>{#_Broadcast_navbar} - {#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$servMgr.serverIP}:{$servMgr.serverPort}{@end}</title>
-<!-- InstanceEndEditable -->
+{^define LAYOUT layout.html}
+{^define TITLE}
+  {#_Broadcast_navbar} - {#PeerCast on} {^SERVER_NAME}
+{^end}
+{^define HEAD}
+  <script src="js/httppush.js"></script>
+  <script src="js/wmhttp.js"></script>
+  <script>SERVER = "{$servMgr.serverIP}:{$servMgr.serverPort}";</script>
+{^end}
 
-<!-- InstanceBeginEditable name="head" -->
-<script src="js/httppush.js"></script>
-<script src="js/wmhttp.js"></script>
-<script>SERVER = "{$servMgr.serverIP}:{$servMgr.serverPort}";</script>
-<!-- InstanceEndEditable -->
-
-<!-- InstanceBeginEditable name="content" -->
 <DIV style="margin-left: auto; margin-right: auto; text-align: left; display: inline-block; margin-bottom: 1em;">
   <ul>
     <li class="normal"><a href="#external">{#External Source}</a></li>
@@ -177,5 +175,3 @@
 <br>
 <br>
 <br>
-<!-- InstanceEndEditable -->
-<!-- InstanceEnd -->

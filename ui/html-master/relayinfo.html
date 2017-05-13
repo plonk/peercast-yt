@@ -1,13 +1,8 @@
-<!-- InstanceBegin template="/Templates/peercast.dwt" codeOutsideHTMLIsLocked="false" -->
+{^define LAYOUT layout.html}
+{^define TITLE}
+{#Channel Information} - {#PeerCast on} {^SERVER_NAME}
+{^end}
 
-<!-- InstanceBeginEditable name="title" -->
-<title>{#Channel Information} - {#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$servMgr.serverIP}:{$servMgr.serverPort}{@end}</title>
-<!-- InstanceEndEditable -->
-
-<!-- InstanceBeginEditable name="head" -->
-<!-- InstanceEndEditable -->
-
-<!-- InstanceBeginEditable name="content" -->
 <div class="reloader" data-url="?id={$page.channel.id}&amp;fragment=content" data-interval="{$servMgr.refreshHTML}">
   {@fragment content}
   {@if page.channel.exist}
@@ -140,6 +135,3 @@
   {@end}
   {@end}
 </div>
-<!-- InstanceEndEditable -->
-
-<!-- InstanceEnd -->

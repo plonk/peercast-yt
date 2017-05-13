@@ -1,10 +1,8 @@
-<!-- InstanceBegin template="/Templates/peercast.dwt" codeOutsideHTMLIsLocked="false" -->
-<!-- InstanceBeginEditable name="title" -->
-<title>{#_Connections_navbar} - {#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$servMgr.serverIP}:{$servMgr.serverPort}{@end}</title>
-<!-- InstanceEndEditable -->
-<!-- InstanceBeginEditable name="head" -->
-<!-- InstanceEndEditable -->
-<!-- InstanceBeginEditable name="content" -->
+{^define LAYOUT layout.html}
+{^define TITLE}
+{#_Connections_navbar} - {#PeerCast on} {^SERVER_NAME}
+{^end}
+
 <DIV class="reloader" data-url="connections.html?fragment=content" data-interval="{$servMgr.refreshHTML}">
   {@fragment content}
   <FORM action=/admin method=get>
@@ -34,6 +32,3 @@
   </FORM>
   {@end}
 </DIV>
-<!-- InstanceEndEditable -->
-<!-- InstanceEnd -->
-
