@@ -1,10 +1,8 @@
-<!doctype html>
-<html>
-  <!-- InstanceBegin template="/Templates/peercast.dwt" codeOutsideHTMLIsLocked="false" -->
-  <!-- InstanceBeginEditable name="title" -->
-  <title>{#Channels} - {#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$servMgr.serverIP}:{$servMgr.serverPort}{@end}</title>
-  <!-- InstanceEndEditable -->
-  <!-- InstanceBeginEditable name="head" -->
+{^define LAYOUT layout.html}
+{^define TITLE}
+  {#Channels} - {#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$servMgr.serverIP}:{$servMgr.serverPort}{@end}
+{^end}
+{^define HEAD}
   <style>
    input, select { font-size: 12px }
    .channel-list { font-family: Verdana, sans-serif; font-size: 11px; color: #222; line-height: 1.3em; max-width: 750px }
@@ -28,113 +26,110 @@
 
    .relay-list { max-width: 750px }
   </style>
-  <!-- InstanceEndEditable -->
-  <!-- InstanceBeginEditable name="content" -->
+{^end}
 
-  <div class="reloader" data-url="channels.html?fragment=relays" data-interval="{$servMgr.refreshHTML}">
-    {@fragment relays}
-    <TABLE width="95%" class="relay-list" align=center border=0>
-      <TBODY>
-        {@if chanMgr.numChannels}
-        <TR align=middle bgColor=#cccccc class="normal">
-          <TD width="1">&nbsp;</TD>
-          <TD><B>{#Channel}</B></TD>
-          <TD><B>{#Bitrate (kb/s)}</B></TD>
-          <TD><B>{#Stream}</B></TD>
-          <TD><B>{#Total Relays}</B></TD>
-          <TD><B>{#Local Relays}</B></TD>
-          <TD><B>{#Status}</B></TD>
-          <TD><B>{#Keep}</B></TD>
-        </TR>
-        {@end}
-        {@loop chanMgr.numChannels}
-        <tr class="normal" bgcolor={@if loop.indexEven}#eeeeee{@else}#dddddd{@end}>
-          <TD width="1" align="left"><a href="/pls/{$loop.channel.id}"><img src="images/play.png" border="0"></a></TD>
-          <TD align="left"><span class="normal"><b>{$loop.channel.name}</b></span><br>
-            <span class="normal">{$loop.channel.desc}</span><br>
-            <span class="normal"> <b><a href="relayinfo.html?id={$loop.channel.id}">{#Info}</a></b>
-              {@if loop.channel.contactURL} - <b><a href="{$loop.channel.contactURL}">{#WWW}</a></b>{@end}
-              - <b><a href="/admin?cmd=bump&amp;id={$loop.channel.id}">{#Bump}</a></b>
-              - <b><a href="/admin?cmd=stop&amp;id={$loop.channel.id}">{#Stop}</a></b>
-            </span></TD>
-          <TD class="normal" align="center">{$loop.channel.srcrate} / {$loop.channel.bitrate}</TD>
-          <TD class="normal" align="center"><a href="/stream/{$loop.channel.id}{$loop.channel.ext}">{$loop.channel.type}</a></TD>
-          <TD class="normal" align="center">{$loop.channel.totalListeners} / {$loop.channel.totalRelays}</TD>
-          <TD class="normal" align="center">{$loop.channel.localListeners} / {$loop.channel.localRelays}</TD>
-          <TD class="normal" align="center">{$loop.channel.status}</TD>
-          <TD class="normal" align="center"><a href="/admin?cmd=keep&amp;id={$loop.channel.id}">{$loop.channel.keep}</a></TD>
-        </TR>
-        {@end}
-      </TBODY>
-    </TABLE>
-    {@end}
-  </div>
-  <p align="center" class="normal" style="margin-top: 1em; margin-bottom: 2em">
-    <!--  <a href="" class="button">{#Clear}</a> -->
-    <a href="broadcast.html" class="button">{#_Broadcast_navbar}…</a>
-  </p>
-
-  <!-- index.txt の取得が5分ごとなので、あまり頻繁に更新しても仕方ない -->
-  <div class="reloader" data-url="channels.html?fragment=channels" data-interval="60">
-    {@fragment channels}
-    <table width="100%" class="channel-list">
-      <tr>
-        <td colspan="6" class="results">
-          <b>Results:</b>
-          {$servMgr.numExternalChannels} channels,
-          {$servMgr.channelDirectory.totalListeners} listeners,
-          {$servMgr.channelDirectory.totalRelays} relays. ({$servMgr.channelDirectory.lastUpdate})
-        </td>
-      </tr>
-      <tr>
-        <th>Rank</th><th><img src="images/small-icon.png"></th><th>Channel</th><th>Status</th><th>Bitrate</th><th>Type</th>
-      </tr>
-
-      {@foreach externalChannels}
-      <tr>
-        <td class="rank">
-          {$loop.indexBaseOne}
-        </td>
-        <td>
-          {@if this.id != "00000000000000000000000000000000"}
-          <a target="_blank" href="/pls/{$this.id}?tip={$this.tip}"><img class="play-button" src="images/play.png"></a>
-          {@else}
-          <img class="play-button" src="images/play_grey.png">
-          {@end}
-        </td>
-        <td style="width: 600px" class="channel-description">
-          <span style="font-weight: bold">
-            {@if this.url}
-            <a class="link channel-name" href="{$this.url}">{$this.name}</a>
-            {@else}
-            {!this.name}
-            {@end}
-          </span><br>
-          <div class="detail">
-            {@if this.genre}{!this.genre} - {@end}{!this.desc}
-          </div>
-        </td>
-        <td align=center nowrap>
-          <span class="listeners">
-            {$this.numDirects}/{$this.numRelays}
-          </span>
-          {@if this.encodedName}
-          <div class="icons">
-            <a href="{$this.chatUrl}"><img alt="Chat" src="images/chat.png"></a>
-            <a href="{$this.statsUrl}"><img alt="Stats" src="images/graph.png"></a>
-          </div>
-          {@end}
-        </td>
-        <td class="bitrate" align=center nowrap>
-          {$this.bitrate} kb/s
-        </td>
-        <td align=center>
-          {$this.contentTypeStr}
-        </td>
-      </tr>
+<div class="reloader" data-url="channels.html?fragment=relays" data-interval="{$servMgr.refreshHTML}">
+  {@fragment relays}
+  <TABLE width="95%" class="relay-list" align=center border=0>
+    <TBODY>
+      {@if chanMgr.numChannels}
+      <TR align=middle bgColor=#cccccc class="normal">
+        <TD width="1">&nbsp;</TD>
+        <TD><B>{#Channel}</B></TD>
+        <TD><B>{#Bitrate (kb/s)}</B></TD>
+        <TD><B>{#Stream}</B></TD>
+        <TD><B>{#Total Relays}</B></TD>
+        <TD><B>{#Local Relays}</B></TD>
+        <TD><B>{#Status}</B></TD>
+        <TD><B>{#Keep}</B></TD>
+      </TR>
       {@end}
-    </table>
-    {@end} <!-- fragment content -->
-  <!-- InstanceEndEditable -->
-  <!-- InstanceEnd -->
-</html>
+      {@loop chanMgr.numChannels}
+      <tr class="normal" bgcolor={@if loop.indexEven}#eeeeee{@else}#dddddd{@end}>
+        <TD width="1" align="left"><a href="/pls/{$loop.channel.id}"><img src="images/play.png" border="0"></a></TD>
+        <TD align="left"><span class="normal"><b>{$loop.channel.name}</b></span><br>
+          <span class="normal">{$loop.channel.desc}</span><br>
+          <span class="normal"> <b><a href="relayinfo.html?id={$loop.channel.id}">{#Info}</a></b>
+            {@if loop.channel.contactURL} - <b><a href="{$loop.channel.contactURL}">{#WWW}</a></b>{@end}
+            - <b><a href="/admin?cmd=bump&amp;id={$loop.channel.id}">{#Bump}</a></b>
+            - <b><a href="/admin?cmd=stop&amp;id={$loop.channel.id}">{#Stop}</a></b>
+          </span></TD>
+        <TD class="normal" align="center">{$loop.channel.srcrate} / {$loop.channel.bitrate}</TD>
+        <TD class="normal" align="center"><a href="/stream/{$loop.channel.id}{$loop.channel.ext}">{$loop.channel.type}</a></TD>
+        <TD class="normal" align="center">{$loop.channel.totalListeners} / {$loop.channel.totalRelays}</TD>
+        <TD class="normal" align="center">{$loop.channel.localListeners} / {$loop.channel.localRelays}</TD>
+        <TD class="normal" align="center">{$loop.channel.status}</TD>
+        <TD class="normal" align="center"><a href="/admin?cmd=keep&amp;id={$loop.channel.id}">{$loop.channel.keep}</a></TD>
+      </TR>
+      {@end}
+    </TBODY>
+  </TABLE>
+  {@end}
+</div>
+<p align="center" class="normal" style="margin-top: 1em; margin-bottom: 2em">
+  <!--  <a href="" class="button">{#Clear}</a> -->
+  <a href="broadcast.html" class="button">{#_Broadcast_navbar}…</a>
+</p>
+
+<!-- index.txt の取得が5分ごとなので、あまり頻繁に更新しても仕方ない -->
+<div class="reloader" data-url="channels.html?fragment=channels" data-interval="60">
+  {@fragment channels}
+  <table width="100%" class="channel-list">
+    <tr>
+      <td colspan="6" class="results">
+        <b>Results:</b>
+        {$servMgr.numExternalChannels} channels,
+        {$servMgr.channelDirectory.totalListeners} listeners,
+        {$servMgr.channelDirectory.totalRelays} relays. ({$servMgr.channelDirectory.lastUpdate})
+      </td>
+    </tr>
+    <tr>
+      <th>Rank</th><th><img src="images/small-icon.png"></th><th>Channel</th><th>Status</th><th>Bitrate</th><th>Type</th>
+    </tr>
+
+    {@foreach externalChannels}
+    <tr>
+      <td class="rank">
+        {$loop.indexBaseOne}
+      </td>
+      <td>
+        {@if this.id != "00000000000000000000000000000000"}
+        <a target="_blank" href="/pls/{$this.id}?tip={$this.tip}"><img class="play-button" src="images/play.png"></a>
+        {@else}
+        <img class="play-button" src="images/play_grey.png">
+        {@end}
+      </td>
+      <td style="width: 600px" class="channel-description">
+        <span style="font-weight: bold">
+          {@if this.url}
+          <a class="link channel-name" href="{$this.url}">{$this.name}</a>
+          {@else}
+          {!this.name}
+          {@end}
+        </span><br>
+        <div class="detail">
+          {@if this.genre}{!this.genre} - {@end}{!this.desc}
+        </div>
+      </td>
+      <td align=center nowrap>
+        <span class="listeners">
+          {$this.numDirects}/{$this.numRelays}
+        </span>
+        {@if this.encodedName}
+        <div class="icons">
+          <a href="{$this.chatUrl}"><img alt="Chat" src="images/chat.png"></a>
+          <a href="{$this.statsUrl}"><img alt="Stats" src="images/graph.png"></a>
+        </div>
+        {@end}
+      </td>
+      <td class="bitrate" align=center nowrap>
+        {$this.bitrate} kb/s
+      </td>
+      <td align=center>
+        {$this.contentTypeStr}
+      </td>
+    </tr>
+    {@end}
+  </table>
+  {@end} <!-- fragment content -->
+</div>

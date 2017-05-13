@@ -1,0 +1,70 @@
+#!/usr/bin/env ruby
+
+class FormatError < RuntimeError; end
+
+def make_env
+  {}
+end
+
+def tokenize(str)
+  str.scan(/\{\^[^}]+\}|[^{]+|\{/)
+end
+
+def process_tag(env, stmt, toks)
+  case stmt
+  when /\Adefine\s+(\w+)\s*\z/
+    env[$1] = eval_toks(env, toks)
+  when /\Adefine\s+(\w+)\s+(\S+)\s*\z/
+    env[$1] = $2
+  else
+    val = env[stmt.strip]
+    unless val
+      fail "undefined variable #{stmt.strip}"
+    end
+    return val
+  end
+  return ""
+end
+
+def eval_toks(env, toks)
+  res = ""
+  until toks.empty?
+    tok = toks.shift
+    case tok
+    when /\A\{\^/
+      if tok =~ /\A\{\^([^}]+)\}\z/
+        if $1 == "end"
+          return res
+        else
+          res += process_tag(env, $1, toks)
+        end
+      else
+        fail FormatError
+      end
+    else
+      res += tok
+    end
+  end
+  return res
+end
+
+def eval_instance(env, str)
+  toks = tokenize(str)
+  return eval_toks(env, toks)
+end
+
+def main
+  env = make_env
+  eval_instance(env, File.read("Templates/defs.html"))
+  html = eval_instance(env, ARGF.read)
+
+  if env['LAYOUT']
+    env['yield'] = html
+    html = eval_instance(env, File.read(File.join("Templates", env['LAYOUT'])))
+  end
+  print html
+end
+
+if __FILE__ == $0
+  main
+end

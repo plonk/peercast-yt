@@ -1,8 +1,5 @@
-<!-- InstanceBegin template="/Templates/peercast.dwt" codeOutsideHTMLIsLocked="false" -->
-<!-- InstanceBeginEditable name="title" -->
-<title>{#_Information_navbar} - {#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$servMgr.serverIP}:{$servMgr.serverPort}{@end}</title>
-<!-- InstanceEndEditable -->
-<!-- InstanceBeginEditable name="content" -->
+{^define LAYOUT layout.html}
+{^define TITLE}{#_Information_navbar} - {#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$servMgr.serverIP}:{$servMgr.serverPort}{@end}{^end}
 
 <p>
   {@if servMgr.disabled}
@@ -121,5 +118,3 @@
   </TABLE>
   {@end}
 </DIV>
-<!-- InstanceEndEditable -->
-<!-- InstanceEnd -->

@@ -1,15 +1,8 @@
-<!doctype html>
-<html>
-  <!-- InstanceBegin template="/Templates/peercast.dwt" codeOutsideHTMLIsLocked="false" -->
+{^define LAYOUT layout.html}
+{^define TITLE}
+{#Notifications} - {#PeerCast on} {^SERVER_NAME}
+{^end}
 
-  <!-- InstanceBeginEditable name="title" -->
-  <title>{#Notifications} - {#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$servMgr.serverIP}:{$servMgr.serverPort}{@end}</title>
-  <!-- InstanceEndEditable -->
-
-  <!-- InstanceBeginEditable name="head" -->
-  <!-- InstanceEndEditable -->
-
-  <!-- InstanceBeginEditable name="content" -->
   <div class="reloader" data-url="notifications.html?fragment=content" data-interval="{$servMgr.refreshHTML}">
     {@fragment content}
     <table width="100%" class="normal">
@@ -35,7 +28,3 @@
     </table>
     {@end}
   </div>
-  <!-- InstanceEndEditable -->
-
-  <!-- InstanceEnd -->
-</html>

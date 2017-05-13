@@ -1,17 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
   <head>
-    <!-- TemplateBeginEditable name="title" -->
-    <title>{#PeerCast on} {$servMgr.serverIP}:{$servMgr.serverPort}</title>
-    <!-- TemplateEndEditable -->
+    <title>{^TITLE}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <link href="peercast.css" rel="stylesheet" type="text/css">
     <script src="js/jquery-3.2.1.min.js"></script>
     <script src="js/reloader.js"></script>
-    <!-- TemplateBeginEditable name="head" --><!-- TemplateEndEditable -->
+    {^HEAD}
   </head>
-
   <body bgcolor="#DDDDDD">
+
     <div class="reloader" data-url="?fragment=notifications" data-interval="{$servMgr.refreshHTML}">
       {@fragment notifications}
       <script>
@@ -115,28 +113,29 @@
                   </tr>
                 </table>
               </div>
+
               <table class="navbar" width="100%" border="1" cellpadding="1" cellspacing="0">
                 <tr class="normal">
                   <td width="14.286%"><div align="center"><a href="index.html">{#_Information_navbar}</a></div></td>
                   <td width="14.286%"><div align="center"><a href="channels.html">{#Channels}</a></div></td>
                   <td width="14.286%"><div align="center"><a href="notifications.html">{#Notifications}</a></div></td>
-<!--
-                  <td width="14.286%"><div align="center"><a href="broadcast.html">{#_Broadcast_navbar}</a></div></td> -->
-
                   <td width="14.286%"><div align="center"><a href="connections.html">{#_Connections_navbar}</a></div></td>
                   <td width="14.286%"><div align="center"><a href="settings.html">{#_Settings_navbar}</a></div></td>
                   <td width="14.286%"><div align="center"><a href="viewlog.html">{#_View Log_navbar}</a></div></td>
                   <td width="14.286%"><div align="center"><a href="logout.html">{#_Logout_navbar}</a></div></td>
                 </tr>
               </table>
-              <!-- TemplateBeginEditable name="content" -->
-              <div align="left"><b>content</b></div>
-              <!-- TemplateEndEditable -->
+
+              {^yield}
+
               <hr size="1">
+              
               <div align="center" class="normal-small"> &copy; 2005 peercast.org</div>
-          </div></td>
+            </div>
+          </td>
         </tr>
       </table>
     </div>
+
   </body>
 </html>
