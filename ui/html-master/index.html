@@ -1,14 +1,12 @@
 {^define LAYOUT layout.html}
 {^define TITLE}{#_Information_navbar} - {#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$servMgr.serverIP}:{$servMgr.serverPort}{@end}{^end}
 
-<p>
-  {@if servMgr.disabled}
-  <div align="center" class="normal">
-    <p><strong><font color="#FF0000">Broadcasting has been disabled</font></strong></p>
-    <p><strong><font color="#FF0000">Please contact peercast.org</font></strong></p>
-  </div>
-  {@end}
-</p>
+{@if servMgr.disabled}
+<div align="center" class="normal">
+  <p><strong><font color="#FF0000">Broadcasting has been disabled</font></strong></p>
+  <p><strong><font color="#FF0000">Please contact peercast.org</font></strong></p>
+</div>
+{@end}
 
 <DIV align=center class="reloader" data-url="index.html?fragment=content" data-interval="{$servMgr.refreshHTML}">
   {@fragment content}

@@ -3,79 +3,79 @@
   {#Broadcast IDs} - {#PeerCast on} {^SERVER_NAME}
 {^end}
 
-              <table width="279" height="313" border=0 align=center>
-                <tr align=middle>
-                  <td width="185" height="301" colspan="2" valign=top><div align="center">
-                    <form action=/admin method=get>
-                      <input type=hidden value=add_bcid name=cmd>
-                      <table width="100%" align=center border=0>
-                        <tbody>
-                          <tr align=left bgcolor="#cccccc" class="normal">
-                            <td colspan="2"><div align="center"><b>{#New BCID}</b></div></td>
-                          </tr>
-                          <tr align=left class="normal">
-                            <td width="10%" bgcolor="#eeeeee">{#ID}</td>
-                            <td bgcolor="#eeeeee"><input name=id size="40"></td>
-                          </tr>
-                          <tr align=left class="normal">
-                            <td bgcolor="#dddddd">{#Name}</td>
-                            <td bgcolor="#dddddd"><input name=name size="32"></td>
-                          </tr>
-                          <tr align=left class="normal">
-                            <td bgcolor="#eeeeee">{#Email}</td>
-                            <td bgcolor="#eeeeee"><input name=email size="32"></td>
-                          </tr>
-                          <tr align=left class="normal">
-                            <td bgcolor="#dddddd">{#URL}</td>
-                            <td bgcolor="#dddddd"><input name=url size="32"></td>
-                          </tr>
-                          <tr align=left class="normal">
-                            <td colspan="2" bgcolor="#dddddd" align="center"><INPUT type=submit value="{#Add}" name=submit></td>
-                          </tr>
-                      </table>
-                    </form>
-                    <p>&nbsp;</p>
-                    <table width="100%" align=center border=0>
-                      <tbody>
-                        <tr align=middle bgcolor="#cccccc" class="normal">
-                          <td colspan=2><div align="center"><b>{#Current BCIDs}</b></div></td>
-                        </tr>
-                        {@loop servMgr.numValidBCID}
-                        <tr align=left class="normal">
-                          <td width="50%" bgcolor="#eeeeee">{#ID}</td>
-                          <td bgcolor="#eeeeee">{$loop.bcid.id}</td>
-                        </tr>
-                        <tr align=left class="normal">
-                          <td bgcolor="#dddddd">{#Name}</td>
-                          <td bgcolor="#dddddd">{$loop.bcid.name}</td>
-                        </tr>
-                        <tr align=left class="normal">
-                          <td bgcolor="#eeeeee">{#Email}</td>
-                          <td bgcolor="#eeeeee">{$loop.bcid.email}</td>
-                        </tr>
-                        <tr align=left class="normal">
-                          <td bgcolor="#dddddd">{#URL}</td>
-                          <td bgcolor="#dddddd">{$loop.bcid.url}</td>
-                        </tr>
-                        <tr align=left class="normal">
-                          <td bgcolor="#eeeeee">{#Valid}</td>
-                          <td bgcolor="#eeeeee">{$loop.bcid.valid}</td>
-                        </tr>
-                        <tr align=left class="normal">
-                          <td colspan="2" bgcolor="#dddddd" align="center">
-                            <a href="/admin?cmd=edit_bcid&amp;id={$loop.bcid.id}&amp;del">{#Delete}</a> |
-                            <a href="/admin?cmd=edit_bcid&amp;id={$loop.bcid.id}&amp;valid=1">{#Enable}</a> |
-                            <a href="/admin?cmd=edit_bcid&amp;id={$loop.bcid.id}&amp;valid=0">{#Disable}</a>
-                          </td>
-                        </tr>
-                        <tr align=left class="normal">
-                          <td colspan="2">&nbsp;</td>
-                        </tr>
-                        {@end}
-                      </tbody>
-                    </table>
+<table width="279" height="313" border=0 align=center>
+  <tr align=middle>
+    <td width="185" height="301" colspan="2" valign=top><div align="center">
+      <form action=/admin method=get>
+        <input type=hidden value=add_bcid name=cmd>
+        <table width="100%" align=center border=0>
+          <tbody>
+            <tr align=left bgcolor="#cccccc" class="normal">
+              <td colspan="2"><div align="center"><b>{#New BCID}</b></div></td>
+            </tr>
+            <tr align=left class="normal">
+              <td width="10%" bgcolor="#eeeeee">{#ID}</td>
+              <td bgcolor="#eeeeee"><input name=id size="40"></td>
+            </tr>
+            <tr align=left class="normal">
+              <td bgcolor="#dddddd">{#Name}</td>
+              <td bgcolor="#dddddd"><input name=name size="32"></td>
+            </tr>
+            <tr align=left class="normal">
+              <td bgcolor="#eeeeee">{#Email}</td>
+              <td bgcolor="#eeeeee"><input name=email size="32"></td>
+            </tr>
+            <tr align=left class="normal">
+              <td bgcolor="#dddddd">{#URL}</td>
+              <td bgcolor="#dddddd"><input name=url size="32"></td>
+            </tr>
+            <tr align=left class="normal">
+              <td colspan="2" bgcolor="#dddddd" align="center"><INPUT type=submit value="{#Add}" name=submit></td>
+            </tr>
+        </table>
+      </form>
+      <p>&nbsp;</p>
+      <table width="100%" align=center border=0>
+        <tbody>
+          <tr align=middle bgcolor="#cccccc" class="normal">
+            <td colspan=2><div align="center"><b>{#Current BCIDs}</b></div></td>
+          </tr>
+          {@loop servMgr.numValidBCID}
+          <tr align=left class="normal">
+            <td width="50%" bgcolor="#eeeeee">{#ID}</td>
+            <td bgcolor="#eeeeee">{$loop.bcid.id}</td>
+          </tr>
+          <tr align=left class="normal">
+            <td bgcolor="#dddddd">{#Name}</td>
+            <td bgcolor="#dddddd">{$loop.bcid.name}</td>
+          </tr>
+          <tr align=left class="normal">
+            <td bgcolor="#eeeeee">{#Email}</td>
+            <td bgcolor="#eeeeee">{$loop.bcid.email}</td>
+          </tr>
+          <tr align=left class="normal">
+            <td bgcolor="#dddddd">{#URL}</td>
+            <td bgcolor="#dddddd">{$loop.bcid.url}</td>
+          </tr>
+          <tr align=left class="normal">
+            <td bgcolor="#eeeeee">{#Valid}</td>
+            <td bgcolor="#eeeeee">{$loop.bcid.valid}</td>
+          </tr>
+          <tr align=left class="normal">
+            <td colspan="2" bgcolor="#dddddd" align="center">
+              <a href="/admin?cmd=edit_bcid&amp;id={$loop.bcid.id}&amp;del">{#Delete}</a> |
+              <a href="/admin?cmd=edit_bcid&amp;id={$loop.bcid.id}&amp;valid=1">{#Enable}</a> |
+              <a href="/admin?cmd=edit_bcid&amp;id={$loop.bcid.id}&amp;valid=0">{#Disable}</a>
+            </td>
+          </tr>
+          <tr align=left class="normal">
+            <td colspan="2">&nbsp;</td>
+          </tr>
+          {@end}
+        </tbody>
+      </table>
 
-                    <p>&nbsp;</p>
-                  </div></td>
-                </tr>
-              </table>
+      <p>&nbsp;</p>
+    </div></td>
+  </tr>
+</table>
