@@ -98,6 +98,7 @@ public:
 
     virtual void stream(Channel *) = 0;
     virtual int getSourceRate() { return 0; }
+    virtual int getSourceRateAvg() { return this->getSourceRate(); }
 };
 
 // ------------------------------------------
@@ -108,6 +109,7 @@ public:
     PeercastSource() : m_channel(NULL) {}
     void    stream(Channel *) override;
     int     getSourceRate() override;
+    int     getSourceRateAvg() override;
     ChanHit pickFromHitList(Channel *ch, ChanHit &oldHit);
 
     Channel*        m_channel;
@@ -200,14 +202,12 @@ public:
         return type != T_NONE;
     }
 
-
     void    connectFetch();
     int     handshakeFetch();
 
     bool    isIdle() { return isActive() && (status==S_IDLE); }
 
     static THREAD_PROC stream(ThreadInfo *);
-
 
     void         setStatus(STATUS s);
     const char   *getSrcTypeStr() { return srcTypes[srcType]; }
@@ -240,6 +240,9 @@ public:
     int          totalListeners();
     int          totalRelays();
 
+    std::string  authSecret();
+    static std::string renderHexDump(const std::string& in);
+
     ::String            mount;
     ChanMeta            insertMeta;
     ChanPacket          headPack;
@@ -249,13 +252,11 @@ public:
     ChannelStream       *sourceStream;
     unsigned int        streamIndex;
 
-
     ChanInfo            info;
     ChanHit             sourceHost;
     ChanHit             designatedHost;
 
     GnuID               remoteID;
-
 
     ::String            sourceURL;
 

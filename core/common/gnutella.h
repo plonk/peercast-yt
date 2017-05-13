@@ -93,12 +93,10 @@ class Servent;
 class Channel;
 class ChanHit;
 
-
 // --------------------------------
 class GnuPacket
 {
 public:
-
 
     // --------------------------------
     class Hash
@@ -117,7 +115,6 @@ public:
 
         unsigned int idChecksum;
         unsigned int dataChecksum;
-
     };
     // --------------------------------
 
@@ -142,6 +139,7 @@ public:
 
     char            data[MAX_DATA];
 };
+
 // --------------------------------
 class GnuPacketBuffer
 {
@@ -168,7 +166,6 @@ public:
             return &packets[readPtr%size];
         else
             return NULL;
-
     }
     void    next()
     {
@@ -205,7 +202,6 @@ public:
         return (numPending()*100) / size;
     }
 
-
     int sizeOfPending()
     {
         int tot=0;
@@ -236,8 +232,6 @@ public:
     GnuPacket   *packets;
     int         readPtr, writePtr;
 };
-
-
 
 // --------------------------------
 class GnuStream : public IndirectStream
@@ -275,13 +269,10 @@ public:
     static const char *getRouteStr(R_TYPE);
     bool    readHit(Stream &data, ChanHit &ch, int, GnuID &);
 
-
-
     void    ping(int);
 
     int     packetsIn, packetsOut;
     WLock   lock;
 };
-
 
 #endif

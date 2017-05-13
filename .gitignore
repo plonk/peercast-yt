@@ -1,9 +1,13 @@
 ui/linux/html/
+ui/linux/public/
+ui/linux/peercast-yt/
+ui/html/
+ui/public/
 peercast
 peercast.ini
 .deps
-html.tar
-peercast-linux.tar
+**/*.tar
+**/*.tar.gz
 ui/html/
 **/gmon.out
 **/*.o

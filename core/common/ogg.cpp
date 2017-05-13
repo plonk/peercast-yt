@@ -19,8 +19,8 @@
 #include "channel.h"
 #include "ogg.h"
 
-
 static int test=0;
+
 // ------------------------------------------
 void OGGStream::readHeader(Stream &, Channel *)
 {
@@ -55,7 +55,6 @@ int OGGStream::readPacket(Stream &in, Channel *ch)
 
     if (ogg.isEOS())
     {
-
         if (ogg.getSerialNo() == vorbis.serialNo)
         {
             LOG_CHANNEL("Vorbis stream: EOS");
@@ -70,7 +69,6 @@ int OGGStream::readPacket(Stream &in, Channel *ch)
 
     if (vorbis.needHeader() || theora.needHeader())
     {
-
         if (ogg.getSerialNo() == vorbis.serialNo)
             vorbis.readHeader(ch, ogg);
         else if (ogg.getSerialNo() == theora.serialNo)
@@ -78,10 +76,8 @@ int OGGStream::readPacket(Stream &in, Channel *ch)
         else
             throw StreamException("Bad OGG serial no.");
 
-
         if (!vorbis.needHeader() && !theora.needHeader())
         {
-
             ch->info.bitrate = 0;
 
             if (vorbis.isActive())
@@ -93,7 +89,6 @@ int OGGStream::readPacket(Stream &in, Channel *ch)
                 ch->info.contentType = ChanInfo::T_OGM;
             }
 
-
             ch->headPack.type = ChanPacket::T_HEAD;
             ch->headPack.pos = ch->streamPos;
 
@@ -104,11 +99,8 @@ int OGGStream::readPacket(Stream &in, Channel *ch)
             ch->newPacket(ch->headPack);
             LOG_CHANNEL("Got %d bytes of headers", ch->headPack.len);
         }
-
     }else
     {
-
-
         pack.init(ChanPacket::T_DATA, ogg.data, ogg.headLen+ogg.bodyLen, ch->streamPos);
         ch->newPacket(pack);
 
@@ -127,7 +119,6 @@ int OGGStream::readPacket(Stream &in, Channel *ch)
                 ch->sleepUntil(vorbis.getTime(ogg));
             }
         }
-
     }
     return 0;
 }
@@ -153,8 +144,8 @@ void OggSubStream::readHeader(Channel *ch, OggPage &ogg)
 
     if (pack.numPackets >= maxHeaders)
         procHeaders(ch);
-
 }
+
 // -----------------------------------
 void OggVorbisSubStream::procHeaders(Channel *ch)
 {
@@ -194,8 +185,8 @@ void OggVorbisSubStream::procHeaders(Channel *ch)
                 break;
         }
     }
-
 }
+
 // -----------------------------------
 double OggTheoraSubStream::getTime(OggPage &ogg)
 {
@@ -204,6 +195,7 @@ double OggTheoraSubStream::getTime(OggPage &ogg)
 
     return (iframe+pframe)*frameTime;
 }
+
 // -----------------------------------
 void OggTheoraSubStream::readInfo(Stream &in, ChanInfo &info)
 {
@@ -230,9 +222,8 @@ void OggTheoraSubStream::readInfo(Stream &in, ChanInfo &info)
     granposShift = in.readBits(5);
 
     LOG_CHANNEL("OGG Theora Info: %dx%dx%.1ffps %dkbps %dQ %dG", encWidth, encHeight, fps, bitrate, quality, granposShift);
-
-
 }
+
 // -----------------------------------
 void OggTheoraSubStream::procHeaders(Channel *ch)
 {
@@ -259,18 +250,13 @@ void OggTheoraSubStream::procHeaders(Channel *ch)
                 LOG_CHANNEL("OGG Theora Header: Unknown %d (%d bytes)", id[0] & 0xff, vin.len);
                 break;
         }
-
-
-
     }
-
 }
 
 // -----------------------------------
 double OggVorbisSubStream::getTime(OggPage &ogg)
 {
     return (double)ogg.granPos / (double)samplerate;
-
 }
 
 // -----------------------------------
@@ -283,21 +269,17 @@ void OggVorbisSubStream::readIdent(Stream &in, ChanInfo &info)
     int brNom = in.readLong();
     int brLow = in.readLong();
 
-
     in.readChar();  // skip blocksize 0+1
 
     LOG_CHANNEL("OGG Vorbis Ident: ver=%d, chans=%d, rate=%d, brMax=%d, brNom=%d, brLow=%d",
         ver, chans, samplerate, brMax, brNom, brLow);
-
 
     bitrate = brNom/1000;
 
     char frame = in.readChar();     // framing bit
     if (!frame)
         throw StreamException("Bad Indent frame");
-
 }
-
 
 // -----------------------------------
 void OggVorbisSubStream::readSetup(Stream &in)
@@ -312,6 +294,7 @@ void OggVorbisSubStream::readSetup(Stream &in)
 
     LOG_CHANNEL("Read %d bytes of Vorbis Setup", cnt);
 }
+
 // -----------------------------------
 void OggVorbisSubStream::readComment(Stream &in, ChanInfo &info)
 {
@@ -338,22 +321,18 @@ void OggVorbisSubStream::readComment(Stream &in, ChanInfo &info)
         {
             info.track.artist.set(arg+7, String::T_ASCII);
             info.track.artist.convertTo(String::T_UNICODE);
-
         }else if ((arg=stristr(argBuf, "TITLE=")))
         {
             info.track.title.set(arg+6, String::T_ASCII);
             info.track.title.convertTo(String::T_UNICODE);
-
         }else if ((arg=stristr(argBuf, "GENRE=")))
         {
             info.track.genre.set(arg+6, String::T_ASCII);
             info.track.genre.convertTo(String::T_UNICODE);
-
         }else if ((arg=stristr(argBuf, "CONTACT=")))
         {
             info.track.contact.set(arg+8, String::T_ASCII);
             info.track.contact.convertTo(String::T_UNICODE);
-
         }else if ((arg=stristr(argBuf, "ALBUM=")))
         {
             info.track.album.set(arg+6, String::T_ASCII);
@@ -366,7 +345,6 @@ void OggVorbisSubStream::readComment(Stream &in, ChanInfo &info)
         throw StreamException("Bad Comment frame");
 
 //  updateMeta();
-
 }
 
 // -----------------------------------
@@ -374,21 +352,25 @@ bool OggPage::isBOS()
 {
     return (data[5] & 0x02) != 0;
 }
+
 // -----------------------------------
 bool OggPage::isEOS()
 {
     return (data[5] & 0x04) != 0;
 }
+
 // -----------------------------------
 bool OggPage::isNewPacket()
 {
     return (data[5] & 0x01) == 0;
 }
+
 // -----------------------------------
 bool OggPage::isHeader()
 {
     return ((*(unsigned int *)&data[6]) || (*(unsigned int *)&data[10])) == 0;
 }
+
 // -----------------------------------
 unsigned int OggPage::getSerialNo()
 {
@@ -410,8 +392,6 @@ void OggPage::read(Stream &in)
         if (!gotOgg)
             LOG_CHANNEL("Skipping OGG packet");
     }
-
-
 
     memcpy(&data[0], "OggS", 4);
 
@@ -439,7 +419,6 @@ void OggPage::read(Stream &in)
     granPos <<= 32;
     granPos |= *(unsigned int *)&data[6];
 
-
     #if 0
         LOG_DEBUG("OGG Packet - page %d, id = %x - %s %s %s - %d:%d - %d segs, %d bytes",
             *(unsigned int *)&data[18],
@@ -453,13 +432,14 @@ void OggPage::read(Stream &in)
             headLen+bodyLen);
 
     #endif
-
 }
+
 // -----------------------------------
 bool OggPage::detectVorbis()
 {
     return memcmp(&data[headLen+1], "vorbis", 6) == 0;
 }
+
 // -----------------------------------
 bool OggPage::detectTheora()
 {
@@ -469,7 +449,6 @@ bool OggPage::detectTheora()
 // -----------------------------------
 void    OggPacket::addLacing(OggPage &ogg)
 {
-
     int numSegs = ogg.data[26];
     for (int i=0; i<numSegs; i++)
     {
@@ -485,5 +464,4 @@ void    OggPacket::addLacing(OggPage &ogg)
             packetSizes[numPackets]=0;
         }
     }
-
 }

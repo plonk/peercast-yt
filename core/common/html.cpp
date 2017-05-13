@@ -18,7 +18,6 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-
 #include <stdarg.h>
 #include <stdlib.h>
 #include "cgi.h"

@@ -18,11 +18,9 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-
 #include "stream.h"
 #include "common.h"
 #include "sys.h"
-
 
 // --------------------------------------------------
 void MemoryStream::convertFromBase64()
@@ -40,6 +38,7 @@ void MemoryStream::convertFromBase64()
     *out = 0;
     len = out-buf;
 }
+
 // -------------------------------------
 void FileStream::openReadOnly(const char *fn)
 {
@@ -50,6 +49,7 @@ void FileStream::openReadOnly(const char *fn)
     if (!file)
         throw StreamException("Unable to open file");
 }
+
 // -------------------------------------
 void FileStream::openWriteReplace(const char *fn)
 {
@@ -60,6 +60,7 @@ void FileStream::openWriteReplace(const char *fn)
     if (!file)
         throw StreamException("Unable to open file");
 }
+
 // -------------------------------------
 void FileStream::openWriteAppend(const char *fn)
 {
@@ -80,12 +81,14 @@ void FileStream::close()
         file = NULL;
     }
 }
+
 // -------------------------------------
 void FileStream::rewind()
 {
     if (file)
         fseek(file, 0, SEEK_SET);
 }
+
 // -------------------------------------
 int FileStream::length()
 {
@@ -96,7 +99,6 @@ int FileStream::length()
         fseek(file, 0, SEEK_END);
         len = ftell(file);
         fseek(file, old, SEEK_SET);
-
     }
     return len;
 }
@@ -109,6 +111,7 @@ bool FileStream::eof()
     else
         return true;
 }
+
 // -------------------------------------
 int FileStream::read(void *ptr, int len)
 {
@@ -139,8 +142,8 @@ void FileStream::write(const void *ptr, int len)
         return;
     fwrite(ptr, 1, len, file);
     updateTotals(0, len);
-
 }
+
 // -------------------------------------
 void FileStream::flush()
 {
@@ -148,6 +151,7 @@ void FileStream::flush()
         return;
     fflush(file);
 }
+
 // -------------------------------------
 int FileStream::pos()
 {
@@ -180,6 +184,7 @@ void Stream::writeTo(Stream &out, int len)
         len-=rlen;
     }
 }
+
 // -------------------------------------
 int Stream::writeUTF8(unsigned int code)
 {
@@ -207,7 +212,6 @@ int Stream::writeUTF8(unsigned int code)
         writeChar(code & 0x3F | 0x80);
         return 4;
     }
-
 }
 
 // -------------------------------------
@@ -222,7 +226,6 @@ void Stream::skip(int len)
         read(tmp, rlen);
         len-=rlen;
     }
-
 }
 
 // -------------------------------------
@@ -261,11 +264,15 @@ void Stream::updateTotals(unsigned int in, unsigned int out)
 {
     stat.update(in, out);
 }
+
 // -------------------------------------
 int Stream::readLine(char *in, int max)
 {
+    if (max <= 0)
+        return 0;
+
     int i=0;
-    max -= 2;
+    max--;
 
     while (max--)
     {
@@ -280,6 +287,7 @@ int Stream::readLine(char *in, int max)
     in[i] = 0;
     return i;
 }
+
 // -------------------------------------
 void Stream::write(const char *fmt, va_list ap)
 {
@@ -287,6 +295,7 @@ void Stream::write(const char *fmt, va_list ap)
     vsprintf(tmp, fmt, ap);
     write(tmp, strlen(tmp));
 }
+
 // -------------------------------------
 void Stream::writeStringF(const char *fmt, ...)
 {
@@ -295,11 +304,13 @@ void Stream::writeStringF(const char *fmt, ...)
     write(fmt, ap);
     va_end(ap);
 }
+
 // -------------------------------------
 void Stream::writeString(const char *str)
 {
     write(str, strlen(str));
 }
+
 // -------------------------------------
 void Stream::writeLineF(const char *fmt, ...)
 {
@@ -353,7 +364,6 @@ int Stream::readWord(char *in, int max)
     return i;
 }
 
-
 // --------------------------------------------------
 int Stream::readBase64(char *p, int max)
 {
@@ -373,7 +383,6 @@ int Stream::readBase64(char *p, int max)
     *p = 0;
     return cnt;
 }
-
 
 // -------------------------------------
 int Stream::readBits(int cnt)

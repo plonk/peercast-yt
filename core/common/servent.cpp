@@ -104,12 +104,35 @@ bool Servent::canStream(Channel *ch)
 
     if (!isPrivate())
     {
-        if  (servMgr->bitrateFull(ch->getBitrate())
-             || ((type == T_RELAY) && servMgr->relaysFull())
-             || ((type == T_DIRECT) && servMgr->directFull())
-             || !ch->isPlaying()
-             || ch->isFull())
+        if  (servMgr->bitrateFull(ch->getBitrate()))
+        {
+            LOG_DEBUG("Unable to stream because there is not enough bandwidth left");
             return false;
+        }
+
+        if ((type == T_RELAY) && servMgr->relaysFull())
+        {
+            LOG_DEBUG("Unable to stream because server already has max. number of relays");
+            return false;
+        }
+
+        if ((type == T_DIRECT) && servMgr->directFull())
+        {
+            LOG_DEBUG("Unable to stream because server already has max. number of directs");
+            return false;
+        }
+
+        if (!ch->isPlaying())
+        {
+            LOG_DEBUG("Unable to stream because channel is not playing");
+            return false;
+        }
+
+        if ((type == T_RELAY) && ch->isFull())
+        {
+            LOG_DEBUG("Unable to stream because channel already has max. number of relays");
+            return false;
+        }
     }
 
     return true;
@@ -207,7 +230,6 @@ void Servent::reset()
 
     loginPassword.clear();
     loginMount.clear();
-
 
     priorityConnect = false;
     pushSock = NULL;
@@ -1056,7 +1078,6 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                         sock->writeLineF("Content-Length: %d", ch->headPack.len);
                     sock->writeLine("Connection: Keep-Alive");
                 }
-
             } else if (outputProtocol == ChanInfo::SP_PCP)
             {
                 sock->writeLineF("%s %d", PCX_HS_POS, streamPos);
@@ -1325,7 +1346,6 @@ void Servent::processRoot()
                     Host h(ip, port);
                     if ((ip) && (port) && (h.globalIP()))
                     {
-
                         LOG_NETWORK("added pong: %d.%d.%d.%d:%d", ip>>24&0xff, ip>>16&0xff, ip>>8&0xff, ip&0xff, port);
                         servMgr->addHost(h, ServHost::T_SERVENT, sys->getTime());
                     }
@@ -1360,7 +1380,6 @@ int Servent::givProc(ThreadInfo *thread)
     {
         sv->handshakeGiv(sv->givID);
         sv->handshakeIncoming();
-
     }catch (StreamException &e)
     {
         LOG_ERROR("GIV: %s", e.msg);
@@ -1516,7 +1535,6 @@ void Servent::handshakeIncomingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
 
     for (int i=0; i<numc; i++)
     {
-
         int c, dlen;
         ID4 id = atom.read(c, dlen);
 
@@ -1647,7 +1665,6 @@ void Servent::processIncomingPCP(bool suggestOthers)
 
         if (suggestOthers)
         {
-
             ChanHit best;
             ChanHitSearch chs;
 
@@ -2009,10 +2026,6 @@ void Servent::processStream(bool doneHandshake, ChanInfo &chanInfo)
 
         servMgr->totalStreams++;
 
-        // FIXME: これ使われることのないコピーを変更しているけど大丈夫？
-        Host host = sock->host;
-        host.port = 0;  // force to 0 so we ignore the incoming port
-
         Channel *ch = chanMgr->findChannelByID(chanID);
         if (!ch)
             throw StreamException("Channel not found");
@@ -2058,7 +2071,6 @@ void Servent::processStream(bool doneHandshake, ChanInfo &chanInfo)
             LOG_DEBUG("send %d", cnt++);
             file.read(buf, sizeof(buf));
             sock->write(buf, sizeof(buf));
-
         }
         file.close();
         LOG_DEBUG("raw file sent");
@@ -2107,6 +2119,9 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
         {
             ch->headPack.writeRaw(bsock);
             streamPos = ch->headPack.pos + ch->headPack.len;
+            auto ncpos = ch->rawData.getLatestNonContinuationPos();
+            if (ncpos && streamPos < ncpos)
+                streamPos = ncpos;
             LOG_DEBUG("Sent %d bytes header ", ch->headPack.len);
         }
 
@@ -2115,6 +2130,7 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
             unsigned int streamIndex = ch->streamIndex;
             unsigned int connectTime = sys->getTime();
             unsigned int lastWriteTime = connectTime;
+            bool         skipContinuation = true;
 
             while ((thread.active) && sock->active())
             {
@@ -2134,17 +2150,23 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
                     {
                         if (syncPos != rawPack.sync)
                             LOG_ERROR("Send skip: %d", rawPack.sync-syncPos);
-                        syncPos = rawPack.sync+1;
+                        syncPos = rawPack.sync + 1;
 
                         if ((rawPack.type == ChanPacket::T_DATA) || (rawPack.type == ChanPacket::T_HEAD))
                         {
-                            rawPack.writeRaw(bsock);
-                            lastWriteTime = sys->getTime();
+                            if (!skipContinuation || !rawPack.cont)
+                            {
+                                skipContinuation = false;
+                                rawPack.writeRaw(bsock);
+                                lastWriteTime = sys->getTime();
+                            }else{
+                                LOG_DEBUG("raw: skip continuation %s packet pos=%d", rawPack.type==ChanPacket::T_DATA?"DATA":"HEAD", rawPack.pos);
+                            }
                         }
 
                         if (rawPack.pos < streamPos)
-                            LOG_DEBUG("raw: skip back %d", rawPack.pos-streamPos);
-                        streamPos = rawPack.pos+rawPack.len;
+                            LOG_DEBUG("raw: skip back %d", rawPack.pos - streamPos);
+                        streamPos = rawPack.pos + rawPack.len;
                     }
                 }
 
@@ -2161,86 +2183,6 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
         LOG_ERROR("Stream channel: %s", e.msg);
     }
 }
-
-#if 0
-// -----------------------------------
-void Servent::sendRawMultiChannel(bool sendHead, bool sendData)
-{
-    try
-    {
-        unsigned int chanStreamIndex[ChanMgr::MAX_CHANNELS];
-        unsigned int chanStreamPos[ChanMgr::MAX_CHANNELS];
-        GnuID chanIDs[ChanMgr::MAX_CHANNELS];
-        int numChanIDs=0;
-        for (int i=0; i<ChanMgr::MAX_CHANNELS; i++)
-        {
-            Channel *ch = &chanMgr->channels[i];
-            if (ch->isPlaying())
-                chanIDs[numChanIDs++]=ch->info.id;
-        }
-
-        setStatus(S_CONNECTED);
-
-        if (sendHead)
-        {
-            for (int i=0; i<numChanIDs; i++)
-            {
-                Channel *ch = chanMgr->findChannelByID(chanIDs[i]);
-                if (ch)
-                {
-                    LOG_DEBUG("Starting RawMulti stream: %s", ch->info.name.cstr());
-                    ch->headPack.writeRaw(*sock);
-                    chanStreamPos[i] = ch->headPack.pos + ch->headPack.len;
-                    chanStreamIndex[i] = ch->streamIndex;
-                    LOG_DEBUG("Sent %d bytes header", ch->headPack.len);
-
-                }
-            }
-        }
-
-        if (sendData)
-        {
-            unsigned int connectTime=sys->getTime();
-
-            while ((thread.active) && sock->active())
-            {
-                for (int i=1; i<numChanIDs; i++)
-                {
-                    Channel *ch = chanMgr->findChannelByID(chanIDs[i]);
-                    if (ch)
-                    {
-                        if (chanStreamIndex[i] != ch->streamIndex)
-                        {
-                            chanStreamIndex[i] = ch->streamIndex;
-                            chanStreamPos[i] = ch->headPack.pos;
-                            LOG_DEBUG("sendRawMulti got new stream index for chan %d", i);
-                        }
-
-                        ChanPacket rawPack;
-                        if (ch->rawData.findPacket(chanStreamPos[i], rawPack))
-                        {
-                            if ((rawPack.type == ChanPacket::T_DATA) || (rawPack.type == ChanPacket::T_HEAD))
-                                rawPack.writeRaw(*sock);
-
-                            if (rawPack.pos < chanStreamPos[i])
-                                LOG_DEBUG("raw: skip back %d", rawPack.pos-chanStreamPos[i]);
-                            chanStreamPos[i] = rawPack.pos+rawPack.len;
-
-                            //LOG("raw at %d: %d %d", streamPos, ch->rawData.getStreamPos(ch->rawData.firstPos), ch->rawData.getStreamPos(ch->rawData.lastPos));
-                        }
-                    }
-                    break;
-                }
-
-                sys->sleepIdle();
-            }
-        }
-    }catch (StreamException &e)
-    {
-        LOG_ERROR("Stream channel: %s", e.msg);
-    }
-}
-#endif
 
 // -----------------------------------
 void Servent::sendRawMetaChannel(int interval)
@@ -2468,24 +2410,37 @@ void Servent::sendPCPChannel()
 
             ChanPacket rawPack;
 
+            // FIXME: ストリームインデックスの変更を確かめずにどんどん読み出して大丈夫？
             while (ch->rawData.findPacket(streamPos, rawPack))
             {
                 if (rawPack.type == ChanPacket::T_HEAD)
                 {
                     atom.writeParent(PCP_CHAN, 2);
-                    atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
-                    atom.writeParent(PCP_CHAN_PKT, 3);
-                    atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_HEAD);
-                    atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
-                    atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
+                        atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
+                        atom.writeParent(PCP_CHAN_PKT, 3);
+                            atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_HEAD);
+                            atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
+                            atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
                 }else if (rawPack.type == ChanPacket::T_DATA)
                 {
-                    atom.writeParent(PCP_CHAN, 2);
-                    atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
-                    atom.writeParent(PCP_CHAN_PKT, 3);
-                    atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_DATA);
-                    atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
-                    atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
+                    if (rawPack.cont)
+                    {
+                        atom.writeParent(PCP_CHAN, 2);
+                            atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
+                            atom.writeParent(PCP_CHAN_PKT, 4);
+                                atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_DATA);
+                                atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
+                                atom.writeChar(PCP_CHAN_PKT_CONTINUATION, true);
+                                atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
+                    }else
+                    {
+                        atom.writeParent(PCP_CHAN, 2);
+                            atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
+                            atom.writeParent(PCP_CHAN_PKT, 3);
+                                atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_DATA);
+                                atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
+                                atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
+                    }
                 }
 
                 if (rawPack.pos < streamPos)

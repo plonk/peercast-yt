@@ -43,6 +43,7 @@ Sys::Sys()
     logBuf = new LogBuffer(1000, 100);
     numThreads=0;
 }
+
 // ------------------------------------------
 Sys::~Sys()
 {
@@ -54,6 +55,7 @@ void Sys::sleepIdle()
 {
     sleep(idleSleepTime);
 }
+
 // -----------------------------------
 char *trimstr(char *s1)
 {
@@ -63,7 +65,6 @@ char *trimstr(char *s1)
             s1++;
         else
             break;
-
     }
 
     char *s = s1;
@@ -104,6 +105,7 @@ char *stristr(const char *s1, const char *s2)
     }
     return NULL;
 }
+
 // -----------------------------------
 void LogBuffer::write(const char *str, TYPE t)
 {
@@ -164,13 +166,13 @@ bool cmpCGIarg(const char *str, const char *arg, const char *value)
 
     if (strnicmp(str, arg, strlen(arg)) == 0)
     {
-
         str += strlen(arg);
 
         return strncmp(str, value, strlen(value))==0;
     }else
         return false;
 }
+
 // -----------------------------------
 bool hasCGIarg(const char *str, const char *arg)
 {
@@ -253,10 +255,9 @@ void LogBuffer::dumpHTML(Stream &out)
             sp %= maxLines;
         }
     }
-    delete escaped;
+    delete[] escaped;
 
     lock.off();
-
 }
 
 // ---------------------------

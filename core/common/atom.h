@@ -77,14 +77,12 @@ public:
         io.write(p, l);
     }
 
-
     int writeStream(ID4 id, Stream &in, int l)
     {
         io.writeID4(id);
         io.writeInt(l);
         in.writeTo(io, l);
         return (sizeof(int)*2)+l;
-
     }
 
     void writeString(ID4 id, const char *p)
@@ -124,7 +122,6 @@ public:
             read(numc, data);
             skip(numc, data);
         }
-
     }
 
     int     readInt()
@@ -159,7 +156,6 @@ public:
         checkData(dlen);
         readBytes(s, max, dlen);
         s[max-1] = 0;
-
     }
 
     void    readBytes(void *s, int max, int dlen)
@@ -199,7 +195,6 @@ public:
     }
 
     bool    eof() { return io.eof(); }
-
 
     int     numChildren, numData;
     Stream  &io;

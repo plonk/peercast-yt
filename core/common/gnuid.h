@@ -35,11 +35,16 @@ public:
         fromStr(str.c_str());
     }
 
+    GnuID(const char* str)
+    {
+        clear();
+        fromStr(str);
+    }
+
     bool    isSame(const GnuID &gid) const
     {
         return memcmp(id, gid.id, 16) == 0;
     }
-
 
     bool    isSet() const
     {
@@ -55,12 +60,12 @@ public:
         storeTime = 0;
     }
 
-    operator std::string ()
+    operator std::string () const
     {
         return this->str();
     }
 
-    std::string str()
+    std::string str() const
     {
         char buf[33];
         toStr(buf);
@@ -70,7 +75,7 @@ public:
     void    generate(unsigned char = 0);
     void    encode(class Host *, const char *, const char *, unsigned char);
 
-    void    toStr(char *);
+    void    toStr(char *) const;
     void    fromStr(const char *);
 
     unsigned char   getFlags();

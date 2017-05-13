@@ -36,6 +36,7 @@ void PCPStream::init(GnuID &rid)
     outData.init();
     outData.accept = ChanPacket::T_PCP;
 }
+
 // ------------------------------------------
 void PCPStream::readVersion(Stream &in)
 {
@@ -48,6 +49,7 @@ void PCPStream::readVersion(Stream &in)
 
     LOG_DEBUG("PCP ver: %d", ver);
 }
+
 // ------------------------------------------
 void PCPStream::readHeader(Stream &in, Channel *)
 {
@@ -58,6 +60,7 @@ void PCPStream::readHeader(Stream &in, Channel *)
 
 //  readVersion(in);
 }
+
 // ------------------------------------------
 bool PCPStream::sendPacket(ChanPacket &pack, GnuID &destID)
 {
@@ -68,6 +71,7 @@ bool PCPStream::sendPacket(ChanPacket &pack, GnuID &destID)
 
     return outData.writePacket(pack);
 }
+
 // ------------------------------------------
 void PCPStream::flush(Stream &in)
 {
@@ -79,12 +83,14 @@ void PCPStream::flush(Stream &in)
         pack.writeRaw(in);
     }
 }
+
 // ------------------------------------------
 int PCPStream::readPacket(Stream &in, Channel *)
 {
     BroadcastState bcs;
     return readPacket(in, bcs);
 }
+
 // ------------------------------------------
 int PCPStream::readPacket(Stream &in, BroadcastState &bcs)
 {
@@ -96,7 +102,6 @@ int PCPStream::readPacket(Stream &in, BroadcastState &bcs)
         ChanPacket pack;
         MemoryStream mem(pack.data, sizeof(pack.data));
         AtomStream patom(mem);
-
 
         // send outward packets
         error = PCP_ERROR_WRITE;
@@ -112,7 +117,6 @@ int PCPStream::readPacket(Stream &in, BroadcastState &bcs)
             error = PCP_ERROR_WRITE+PCP_ERROR_SKIP;
             throw StreamException("Send too slow");
         }
-
 
         error = PCP_ERROR_READ;
         // poll for new downward packet
@@ -148,7 +152,6 @@ int PCPStream::readPacket(Stream &in, BroadcastState &bcs)
         }
 
         error = 0;
-
     }catch (StreamException &e)
     {
         LOG_ERROR("PCP readPacket: %s (%d)", e.msg, error);
@@ -161,7 +164,6 @@ int PCPStream::readPacket(Stream &in, BroadcastState &bcs)
 void PCPStream::readEnd(Stream &, Channel *)
 {
 }
-
 
 // ------------------------------------------
 void PCPStream::readPushAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
@@ -189,7 +191,6 @@ void PCPStream::readPushAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
         }
     }
 
-
     if (bcs.forMe)
     {
         char ipstr[64];
@@ -213,8 +214,8 @@ void PCPStream::readPushAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
             s->initGIV(host, chanID);
         }
     }
-
 }
+
 // ------------------------------------------
 void PCPStream::readRootAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 {
@@ -237,7 +238,6 @@ void PCPStream::readRootAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
             String loc;
             atom.readString(loc.data, sizeof(loc.data), d);
             url.append(loc);
-
         }else if (id == PCP_ROOT_CHECKVER)
         {
             unsigned int newVer = atom.readInt();
@@ -247,7 +247,6 @@ void PCPStream::readRootAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
                 peercast::notifyMessage(ServMgr::NT_UPGRADE, "There is a new version of PeerCast available, please click here to upgrade your client.");
             }
             LOG_DEBUG("PCP got version check: %d / %d", newVer, PCP_CLIENT_VERSION);
-
         }else if (id == PCP_ROOT_NEXT)
         {
             unsigned int time = atom.readInt();
@@ -261,13 +260,11 @@ void PCPStream::readRootAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
             {
                 nextRootPacket = 0;
             }
-
         }else if (id == PCP_ROOT_UPDATE)
         {
             atom.skip(c, d);
 
             chanMgr->broadcastTrackerUpdate(remoteID, true);
-
         }else if ((id == PCP_MESG_ASCII) || (id == PCP_MESG))           // PCP_MESG_ASCII to be depreciated
         {
             String newMsg;
@@ -295,7 +292,6 @@ void PCPStream::readPktAtoms(Channel *ch, AtomStream &atom, int numc, BroadcastS
     ChanPacket pack;
     ID4 type;
 
-
     for (int i=0; i<numc; i++)
     {
         int c, d;
@@ -311,12 +307,12 @@ void PCPStream::readPktAtoms(Channel *ch, AtomStream &atom, int numc, BroadcastS
                 pack.type = ChanPacket::T_DATA;
             else
                 pack.type = ChanPacket::T_UNKNOWN;
-
         }else if (id == PCP_CHAN_PKT_POS)
         {
             pack.pos = atom.readInt();
-
-
+        }else if (id == PCP_CHAN_PKT_CONTINUATION)
+        {
+            pack.cont = atom.readChar();
         }else if (id == PCP_CHAN_PKT_DATA)
         {
             pack.len = d;
@@ -331,11 +327,9 @@ void PCPStream::readPktAtoms(Channel *ch, AtomStream &atom, int numc, BroadcastS
 
     if (ch)
     {
-
         int diff = pack.pos - ch->streamPos;
         if (diff)
             LOG_DEBUG("PCP skipping %s%d (%u -> %u)", (diff>0)?"+":"", diff, ch->streamPos, pack.pos);
-
 
         if (pack.type == ChanPacket::T_HEAD)
         {
@@ -353,20 +347,18 @@ void PCPStream::readPktAtoms(Channel *ch, AtomStream &atom, int numc, BroadcastS
 
             ch->rawData.writePacket(pack, true);
             ch->streamPos = pack.pos+pack.len;
-
         }else if (pack.type == ChanPacket::T_DATA)
         {
             ch->rawData.writePacket(pack, true);
             ch->streamPos = pack.pos+pack.len;
         }
-
     }
 
     // update this parent packet stream position
     if ((pack.pos) && (!bcs.streamPos || (pack.pos < bcs.streamPos)))
         bcs.streamPos = pack.pos;
-
 }
+
 // -----------------------------------
 void PCPStream::readHostAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 {
@@ -423,8 +415,6 @@ void PCPStream::readHostAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
             hit.cin = (fl1 & PCP_HOST_FLAGS1_CIN) !=0;
             hit.tracker = (fl1 & PCP_HOST_FLAGS1_TRACKER) !=0;
             hit.firewalled = (fl1 & PCP_HOST_FLAGS1_PUSH) !=0;
-
-
         }else if (id == PCP_HOST_ID)
             atom.readBytes(hit.sessionID.id, 16);
         else if (id == PCP_HOST_CHANID)
@@ -442,12 +432,10 @@ void PCPStream::readHostAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
         }
     }
 
-
     hit.host = hit.rhost[0];
     hit.chanID = chanID;
 
     hit.numHops = bcs.numHops;
-
 
     if (hit.recv)
         chanMgr->addHit(hit);
@@ -469,7 +457,6 @@ void PCPStream::readChanAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
         newInfo = ch->info;
     else if (chl)
         newInfo = chl->info;
-
 
     for (int i = 0; i < numc; i++)
     {
@@ -498,9 +485,9 @@ void PCPStream::readChanAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 
             ch = chanMgr->findChannelByID(newInfo.id);
             chl = chanMgr->findHitListByID(newInfo.id);
-
         }else
         {
+            // IM50,51 対策。
             LOG_ERROR("PCP unknown or misplaced atom: %s, %d, %d", id.getString().str(), c, d);
             throw StreamException("Protocol error");
 
@@ -540,6 +527,7 @@ void PCPStream::readChanAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
     if (ch && !ch->isBroadcasting())
         ch->updateInfo(newInfo);
 }
+
 // ------------------------------------------
 int PCPStream::readBroadcastAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 {
@@ -568,12 +556,10 @@ int PCPStream::readBroadcastAtoms(AtomStream &atom, int numc, BroadcastState &bc
         {
             ttl = atom.readChar()-1;
             patom.writeChar(id, ttl);
-
         }else if (id == PCP_BCST_HOPS)
         {
             bcs.numHops = atom.readChar()+1;
             patom.writeChar(id, bcs.numHops);
-
         }else if (id == PCP_BCST_FROM)
         {
             atom.readBytes(fromID.id, 16);
@@ -595,7 +581,6 @@ int PCPStream::readBroadcastAtoms(AtomStream &atom, int numc, BroadcastState &bc
 
             destID.toStr(idstr1);
             servMgr->sessionID.toStr(idstr2);
-
         }else if (id == PCP_BCST_CHANID)
         {
             atom.readBytes(bcs.chanID.id, 16);
@@ -635,9 +620,7 @@ int PCPStream::readBroadcastAtoms(AtomStream &atom, int numc, BroadcastState &bc
     if (destID.isSet())
         destID.toStr(destStr);
 
-
     LOG_DEBUG("PCP bcst: group=%d, hops=%d, ver=%d, from=%s, dest=%s", bcs.group, bcs.numHops, ver, fromStr, destStr);
-
     if (fromID.isSet())
         if (fromID.isSame(servMgr->sessionID))
         {
@@ -670,13 +653,9 @@ int PCPStream::readBroadcastAtoms(AtomStream &atom, int numc, BroadcastState &bc
         {
             servMgr->broadcastPacket(pack, bcs.chanID, remoteID, destID, Servent::T_RELAY);
         }
-
-
-
     }
     return 0;
 }
-
 
 // ------------------------------------------
 int PCPStream::procAtom(AtomStream &atom, ID4 id, int numc, int dlen, BroadcastState &bcs)
@@ -748,5 +727,3 @@ int PCPStream::readAtom(AtomStream &atom, BroadcastState &bcs)
 
     return  procAtom(atom, id, numc, dlen, bcs);
 }
-
-

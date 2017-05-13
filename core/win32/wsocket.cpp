@@ -29,6 +29,8 @@
 #include "wsocket.h"
 #include "stats.h"
 
+#include "config.h"
+
 
 // --------------------------------------------------
 void WSAClientSocket::init()

@@ -2,7 +2,7 @@
 <html>
   <!-- InstanceBegin template="/Templates/peercast.dwt" codeOutsideHTMLIsLocked="false" -->
   <!-- InstanceBeginEditable name="title" -->
-  <title>{#_Settings_navbar} - {#PeerCast on} {$servMgr.serverIP}:{$servMgr.serverPort}</title>
+  <title>{#_Settings_navbar} - {#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$servMgr.serverIP}:{$servMgr.serverPort}{@end}</title>
   <!-- InstanceEndEditable -->
   <!-- InstanceBeginEditable name="head" --><!-- InstanceEndEditable -->
   <!-- InstanceBeginEditable name="content" -->
@@ -19,13 +19,13 @@
                   <td colspan="2" class="normal"><div align="center"><strong>{#Basic Settings}</strong></div></td>
                 </tr>
                 <TR align=left bgColor=#ddd class="normal">
-                  <TD>{#Port}</TD>
+                  <TD style="width: 8.5em">{#Port}</TD>
                   <TD><INPUT size=10 value={$servMgr.serverPort1} name=port></TD>
                 </TR>
                 <TR align=left bgColor=#eee class="normal">
                   <TD>{#Password}</TD>
                   <TD>
-                    <INPUT name=passnew type=password size="10" maxlength="32" {@if servMgr.password}value={$servMgr.password}{@end}>
+                    <INPUT name=passnew type=password size="10" maxlength="32" {@if servMgr.password}value={$servMgr.password}{@end} style="width: 100%">
                   </TD>
                 </TR>
                 <TR align=left bgColor=#ddd class="normal">
@@ -64,6 +64,12 @@
               <TBODY>
                 <TR align=middle bgColor=#ccc class="normal">
                   <TD colSpan=2><B>{#Server}</B></TD>
+                </TR>
+                <TR align=left bgColor=#ddd class="normal">
+                  <TD width="50%">{#Server Name}</TD>
+                  <TD>
+                    <INPUT value="{$servMgr.serverName}" name=servername placeholder="{#Nickname for this server}">
+                  </TD>
                 </TR>
                 <TR align=left bgColor=#eee class="normal">
                   <TD width="50%">{#DJ Message}</TD>
@@ -304,7 +310,11 @@
             <TABLE width="100%" align=center border=0>
               <TBODY>
                 <TR align=middle bgColor=#ccc class="normal">
-                  <TD colSpan=1><B>{#Channel Feeds}</B></TD>
+                  <TD colSpan=2><B>{#Channel Feeds}</B></TD>
+                </TR>
+                <TR align=middle bgColor=#eee class="normal">
+                  <TH>{#URL}</TH>
+                  <TH>{#Public}</TH>
                 </TR>
                 {@loop servMgr.numChannelFeedsPlusOne}
                 {@if loop.indexEven}
@@ -313,6 +323,9 @@
                   <TD>
                     <INPUT size=15 value="{$loop.channelFeed.url}" name="channel_feed_url" style="width: 100%" placeholder="{#URL of index.txt}">
                   </TD>
+                  <td align="center">
+                    <input type="checkbox" name="channel_feed_public{$loop.index}" {@if loop.channelFeed.isPublic}checked{@end}>
+                  </td>
                 </TR>
                 {@end}
               </TBODY>

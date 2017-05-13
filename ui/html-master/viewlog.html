@@ -3,7 +3,7 @@
 <html><!-- InstanceBegin template="/Templates/peercast.dwt" codeOutsideHTMLIsLocked="false" -->
   <head>
     <!-- InstanceBeginEditable name="title" -->
-    <title>{#_View Log_navbar} - {#PeerCast on} {$servMgr.serverIP}:{$servMgr.serverPort}</title>
+    <title>{#_View Log_navbar} - {#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$servMgr.serverIP}:{$servMgr.serverPort}{@end}</title>
     <!-- InstanceEndEditable -->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <link href="peercast.css" rel="stylesheet" type="text/css">

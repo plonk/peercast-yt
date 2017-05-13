@@ -44,11 +44,9 @@ public:
 #define HTTP_SC_SWITCH       "HTTP/1.0 101 Switch protocols"
 #define HTTP_SC_BADGATEWAY   "HTTP/1.0 502 Bad Gateway"
 #define HTTP_SC_SERVERERROR  "HTTP/1.0 500 Internal Server Error"
-
-#define RTSP_SC_OK           "RTSP/1.0 200 OK"
+#define HTTP_SC_URITOOLONG   "HTTP/1.0 414 URI Too Long"
 
 #define HTTP_PROTO1          "HTTP/1."
-#define RTSP_PROTO1          "RTSP/1."
 
 #define HTTP_HS_SERVER       "Server:"
 #define HTTP_HS_AGENT        "User-Agent:"
@@ -79,6 +77,7 @@ public:
 #define MIME_WMV             "video/x-ms-wmv"
 #define MIME_FLV             "video/x-flv"
 #define MIME_MKV             "video/x-matroska"
+#define MIME_WEBM            "video/webm"
 
 #define MIME_HTML            "text/html"
 #define MIME_XML             "text/xml"
@@ -145,17 +144,13 @@ public:
         MAX_COOKIES = 32
     };
 
-
-
     void    init();
     bool    add(Cookie &);
     void    remove(Cookie &);
     bool    contains(Cookie &);
 
-
     Cookie  list[MAX_COOKIES];
     bool    neverExpire;
-
 };
 
 // --------------------------------------------

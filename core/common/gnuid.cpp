@@ -53,12 +53,11 @@ void GnuID::encode(Host *h, const char *salt1, const char *salt2, unsigned char 
 
         id[i] = ipb;
     }
-
 }
-// ---------------------------
-void GnuID::toStr(char *str)
-{
 
+// ---------------------------
+void GnuID::toStr(char *str) const
+{
     str[0] = 0;
     for (int i=0; i<16; i++)
     {
@@ -68,8 +67,8 @@ void GnuID::toStr(char *str)
         sprintf(tmp, "%02X", ipb);
         strcat(str, tmp);
     }
-
 }
+
 // ---------------------------
 void GnuID::fromStr(const char *str)
 {
@@ -88,7 +87,6 @@ void GnuID::fromStr(const char *str)
         buf[1] = str[i*2+1];
         id[i] = (unsigned char)strtoul(buf, NULL, 16);
     }
-
 }
 
 // ---------------------------
@@ -116,11 +114,13 @@ GnuIDList::GnuIDList(int max)
     for (int i=0; i<maxID; i++)
         ids[i].clear();
 }
+
 // ---------------------------
 GnuIDList::~GnuIDList()
 {
     delete [] ids;
 }
+
 // ---------------------------
 bool GnuIDList::contains(GnuID &id)
 {
@@ -129,6 +129,7 @@ bool GnuIDList::contains(GnuID &id)
             return true;
     return false;
 }
+
 // ---------------------------
 int GnuIDList::numUsed()
 {
@@ -138,6 +139,7 @@ int GnuIDList::numUsed()
             cnt++;
     return cnt;
 }
+
 // ---------------------------
 unsigned int GnuIDList::getOldest()
 {
@@ -148,6 +150,7 @@ unsigned int GnuIDList::getOldest()
                 t = ids[i].storeTime;
     return t;
 }
+
 // ---------------------------
 void GnuIDList::add(GnuID &id)
 {
@@ -172,6 +175,7 @@ void GnuIDList::add(GnuID &id)
     ids[minIndex] = id;
     ids[minIndex].storeTime = sys->getTime();
 }
+
 // ---------------------------
 void GnuIDList::clear()
 {

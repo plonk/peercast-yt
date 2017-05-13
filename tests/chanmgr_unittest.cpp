@@ -2,6 +2,7 @@
 
 #include "channel.h"
 #include "version2.h"
+#include "md5.h"
 
 class ChanMgrFixture : public ::testing::Test {
 public:
@@ -41,7 +42,7 @@ TEST_F(ChanMgrFixture, initialState)
     // ASSERT_EQ(0, x->numFinds); // 初期化されない。
     ASSERT_EQ(String(), x->broadcastMsg);
     EXPECT_EQ(10, x->broadcastMsgInterval);
-    EXPECT_EQ(0, x->lastHit);
+    //EXPECT_EQ(0, x->lastHit); // 初期化されない。
     EXPECT_EQ(0, x->lastQuery);
     EXPECT_EQ(0, x->maxUptime);
     // EXPECT_EQ(true, x->searchActive); // 初期化されない。
@@ -76,4 +77,15 @@ TEST_F(ChanMgrFixture, createChannel)
     ASSERT_EQ(c, x->channel);
 
     x->deleteChannel(c);
+}
+
+TEST_F(ChanMgrFixture, authSecret)
+{
+    ASSERT_STREQ("00151515151515151515151515151515:01234567890123456789012345678901", x->authSecret("01234567890123456789012345678901").c_str());
+}
+
+TEST_F(ChanMgrFixture, authToken)
+{
+    ASSERT_STREQ("44d5299e57ad9274fee7960a9fa60bfd", x->authToken("01234567890123456789012345678901").c_str());
+    ASSERT_STREQ("44d5299e57ad9274fee7960a9fa60bfd", md5::hexdigest("00151515151515151515151515151515:01234567890123456789012345678901").c_str());
 }

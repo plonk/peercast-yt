@@ -46,13 +46,13 @@ void PlayList::readASX(Stream &in)
                         addURL(hr, "");
                         //LOG("asx url %s", hr);
                     }
-
                 }
             }
             n=n->sibling;
         }
     }
 }
+
 // -----------------------------------
 void PlayList::readSCPLS(Stream &in)
 {
@@ -67,6 +67,7 @@ void PlayList::readSCPLS(Stream &in)
         }
     }
 }
+
 // -----------------------------------
 void PlayList::readPLS(Stream &in)
 {
@@ -77,6 +78,7 @@ void PlayList::readPLS(Stream &in)
             addURL(tmp, "");
     }
 }
+
 // -----------------------------------
 void PlayList::writeSCPLS(Stream &out)
 {
@@ -92,12 +94,14 @@ void PlayList::writeSCPLS(Stream &out)
     }
     out.writeLine("Version=2");
 }
+
 // -----------------------------------
 void PlayList::writePLS(Stream &out)
 {
     for (int i=0; i<numURLs; i++)
         out.writeLineF("%s", urls[i].cstr());
 }
+
 // -----------------------------------
 void PlayList::writeRAM(Stream &out)
 {
@@ -128,6 +132,18 @@ void PlayList::addChannel(const char *path, ChanInfo &info)
     info.id.toStr(idStr);
     char *nid = info.id.isSet()?idStr:info.name.cstr();
 
-    sprintf(url.cstr(), "%s/stream/%s%s", path, nid, info.getTypeExt());
+    sprintf(url.cstr(), "%s/stream/%s%s?auth=%s",
+            path, nid, info.getTypeExt(), chanMgr->authToken(info.id).c_str());
     addURL(url.cstr(), info.name);
+}
+
+// -----------------------------------
+PlayList::TYPE PlayList::getPlayListType(ChanInfo::TYPE chanType)
+{
+    if ((chanType == ChanInfo::T_WMA) || (chanType == ChanInfo::T_WMV))
+        return PlayList::T_ASX;
+    else if (chanType == ChanInfo::T_OGM)
+        return PlayList::T_RAM;
+    else
+        return PlayList::T_PLS;
 }

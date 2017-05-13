@@ -21,14 +21,12 @@
 
 // ------------------------------------------------
 
-
 #include "id.h"
 #include "cstream.h"
 
 // ------------------------------------------------
 
 class Servent;
-
 
 // ------------------------------------------------
 
@@ -60,7 +58,6 @@ static const ID4 PCP_ROOT_URL       = "url";
 static const ID4 PCP_ROOT_UPDATE    = "upd";
 static const ID4 PCP_ROOT_NEXT      = "next";
 
-
 static const ID4 PCP_OS_LINUX       = "lnux";
 static const ID4 PCP_OS_WINDOWS     = "w32";
 static const ID4 PCP_OS_OSX         = "osx";
@@ -91,7 +88,6 @@ static const ID4 PCP_HOST_UPHOST_IP = "upip";
 static const ID4 PCP_HOST_UPHOST_PORT = "uppt";
 static const ID4 PCP_HOST_UPHOST_HOPS = "uphp";
 
-
 static const ID4 PCP_QUIT           = "quit";
 
 static const ID4 PCP_CHAN           = "chan";
@@ -105,6 +101,7 @@ static const ID4 PCP_CHAN_PKT_POS   = "pos";
 static const ID4 PCP_CHAN_PKT_HEAD  = "head";
 static const ID4 PCP_CHAN_PKT_DATA  = "data";
 static const ID4 PCP_CHAN_PKT_META  = "meta";
+static const ID4 PCP_CHAN_PKT_CONTINUATION = "cont";
 
 static const ID4 PCP_CHAN_INFO          = "info";
 static const ID4 PCP_CHAN_INFO_TYPE     = "type";
@@ -155,7 +152,6 @@ static const int PCP_BCST_GROUP_ROOT        = 1;
 static const int PCP_BCST_GROUP_TRACKERS    = 2;
 static const int PCP_BCST_GROUP_RELAYS      = 4;
 
-
 static const int PCP_ERROR_QUIT         = 1000;
 static const int PCP_ERROR_BCST         = 2000;
 static const int PCP_ERROR_READ         = 3000;
@@ -182,7 +178,6 @@ static const int PCP_HOST_FLAGS1_RECV       = 0x10;
 static const int PCP_HOST_FLAGS1_CIN        = 0x20;
 static const int PCP_HOST_FLAGS1_PRIVATE    = 0x40;
 
-
 // ----------------------------------------------
 class BroadcastState
 {
@@ -195,7 +190,6 @@ public:
     {
     }
 
-
     void initPacketSettings()
     {
         forMe = false;
@@ -204,7 +198,6 @@ public:
         bcID.clear();
         chanID.clear();
     }
-
 
     GnuID           chanID, bcID;
     int             numHops;
@@ -259,7 +252,6 @@ public:
     //int   error;
     GnuIDList   routeList;
     GnuID       remoteID;
-
 };
 
 #endif

@@ -53,8 +53,8 @@ public:
     virtual Sys *   APICALL createSys()=0;
 
     bool isQuitting;
-
 };
+
 // ------------------------------------------------------------
 // This is the interface from the core to the application.
 class PeercastApplication
@@ -76,7 +76,6 @@ public:
     virtual void    APICALL channelStop(ChanInfo *) {}
     virtual void    APICALL channelUpdate(ChanInfo *) {}
 };
-
 
 // ----------------------------------
 extern PeercastInstance *peercastInst;

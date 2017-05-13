@@ -19,7 +19,6 @@
 #ifndef _MMS_H
 #define _MMS_H
 
-
 #include "channel.h"
 
 // ----------------------------------------------
@@ -33,7 +32,6 @@ public:
 
     static void processChunk(Stream &in, Channel *ch, ASFChunk& chunk);
 };
-
 
 #endif
 

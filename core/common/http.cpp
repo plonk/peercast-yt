@@ -18,7 +18,6 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-
 #include <stdlib.h>
 #include <cctype>
 
@@ -114,23 +113,26 @@ bool    HTTP::nextHeader()
         arg = NULL;
         return false;
     }
-
 }
+
 //-----------------------------------------
 bool    HTTP::isHeader(const char *hs)
 {
     return stristr(cmdLine, hs) != NULL;
 }
+
 //-----------------------------------------
 bool    HTTP::isRequest(const char *rq)
 {
     return strncmp(cmdLine, rq, strlen(rq)) == 0;
 }
+
 //-----------------------------------------
 char *HTTP::getArgStr()
 {
     return arg;
 }
+
 //-----------------------------------------
 int HTTP::getArgInt()
 {
@@ -139,6 +141,7 @@ int HTTP::getArgInt()
     else
         return 0;
 }
+
 //-----------------------------------------
 void HTTP::getAuthUserPass(char *user, char *pass, size_t ulen, size_t plen)
 {
@@ -204,9 +207,9 @@ static const char* statusMessage(int statusCode)
     }
 }
 
+// -----------------------------------
 #include "cgi.h"
 #include "version2.h" // PCX_AGENT
-// -----------------------------------
 void HTTP::send(const HTTPResponse& response)
 {
     bool crlf = writeCRLF;
@@ -253,6 +256,7 @@ bool    CookieList::contains(Cookie &c)
 
     return false;
 }
+
 // -----------------------------------
 void    Cookie::logDebug(const char *str, int ind)
 {
@@ -285,6 +289,7 @@ bool    CookieList::add(Cookie &c)
     list[oldestIndex]=c;
     return true;
 }
+
 // -----------------------------------
 void    CookieList::remove(Cookie &c)
 {

@@ -161,6 +161,25 @@ std::string codepoint_to_utf8(uint32_t codepoint)
     return res;
 }
 
+#include <stdarg.h>
+std::string format(const char* fmt, ...)
+{
+    va_list ap, aq;
+    std::string res;
+
+    va_start(ap, fmt);
+    va_copy(aq, ap);
+    int size = vsnprintf(NULL, 0, fmt, ap);
+    char *data = new char[size + 1];
+    vsnprintf(data, size + 1, fmt, aq);
+    va_end(aq);
+    va_end(ap);
+
+    res = data;
+    delete[] data;
+    return res;
+}
+
 bool contains(const std::string& haystack, const std::string& needle)
 {
     return haystack.find(needle) != std::string::npos;
@@ -172,6 +191,16 @@ std::string replace_prefix(const std::string& s, const std::string& prefix, cons
 
     if (s.substr(0, prefix.size()) == prefix)
         return replacement + s.substr(prefix.size());
+    else
+        return s;
+}
+
+std::string replace_suffix(const std::string& s, const std::string& suffix, const std::string& replacement)
+{
+    if (s.size() < suffix.size()) return s;
+
+    if (s.substr(s.size() - suffix.size(), suffix.size()) == suffix)
+        return s.substr(0, s.size() - suffix.size()) + replacement;
     else
         return s;
 }
@@ -235,7 +264,7 @@ bool is_prefix_of(const std::string& prefix, const std::string& string)
     return string.substr(0, prefix.size()) == prefix;
 }
 
-std::string join(const std::string& delimiter, std::vector<std::string>& vec)
+std::string join(const std::string& delimiter, const std::vector<std::string>& vec)
 {
     std::string res;
 
@@ -246,6 +275,20 @@ std::string join(const std::string& delimiter, std::vector<std::string>& vec)
         res += *it;
     }
 
+    return res;
+}
+
+std::string ascii_dump(const std::string& in, const std::string& replacement)
+{
+    std::string res;
+
+    for (auto c : in)
+    {
+        if (std::isprint(c))
+            res += c;
+        else
+            res += replacement;
+    }
     return res;
 }
 

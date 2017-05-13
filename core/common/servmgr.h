@@ -83,6 +83,7 @@ public:
     Host            host;
     unsigned int    time;
 };
+
 // ----------------------------------
 class ServFilter
 {
@@ -244,7 +245,6 @@ public:
 
     bool    seenPacket(GnuPacket &);
 
-
     bool    needHosts()
     {
         return false;
@@ -379,6 +379,8 @@ public:
     ChannelDirectory    channelDirectory;
     bool                publicDirectoryEnabled;
     FW_STATE            firewalled;
+
+    String              serverName;
 };
 
 // ----------------------------------

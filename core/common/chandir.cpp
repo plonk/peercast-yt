@@ -139,8 +139,7 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
         char line[1024];
 
         try {
-            while (true) {
-                rhttp.readLine(line, 1024);
+            while (rhttp.readLine(line, 1024)) {
                 text += line;
                 text += '\n';
             }
@@ -256,6 +255,8 @@ bool ChannelDirectory::writeFeedVariable(Stream& out, const String& varName, int
 
     if (varName == "url") {
         value = m_feeds[index].url;
+    } else if (varName == "directoryUrl") {
+        value = str::replace_suffix(m_feeds[index].url, "index.txt", "");
     } else if (varName == "status") {
         value = ChannelFeed::statusToString(m_feeds[index].status);
     } else if (varName == "isPublic") {

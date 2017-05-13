@@ -21,8 +21,8 @@ int  DynamicMemoryStream::read(void *buf, int count)
 
     auto end = std::copy(m_buffer.begin() + m_pos,
                          m_buffer.begin() + std::min(m_pos + count, (int) m_buffer.size()),
-                         static_cast<uint8_t*>(buf));
-    auto bytesRead = end - static_cast<uint8_t*>(buf);
+                         static_cast<char*>(buf));
+    auto bytesRead = end - static_cast<char*>(buf);
     m_pos += bytesRead;
     return bytesRead;
 }
@@ -30,8 +30,8 @@ int  DynamicMemoryStream::read(void *buf, int count)
 void DynamicMemoryStream::write(const void *buf, int count)
 {
     checkSize(m_pos + count);
-    std::copy(static_cast<const uint8_t*>(buf),
-              static_cast<const uint8_t*>(buf) + count,
+    std::copy(static_cast<const char*>(buf),
+              static_cast<const char*>(buf) + count,
               m_buffer.begin() + m_pos);
     m_pos += count;
 }

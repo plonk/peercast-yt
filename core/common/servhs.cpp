@@ -34,6 +34,7 @@
 #include "cgi.h"
 #include "template.h"
 #include "public.h"
+#include "md5.h"
 
 using namespace std;
 
@@ -143,6 +144,28 @@ void Servent::handshakeJRPC(HTTP &http)
 }
 
 // -----------------------------------
+bool Servent::hasValidAuthToken(const std::string& requestFilename)
+{
+    auto vec = str::split(requestFilename, "?");
+
+    if (vec.size() != 2)
+        return false;
+
+    cgi::Query query(vec[1]);
+
+    auto token = query.get("auth");
+    auto chanid = str::upcase(vec[0].substr(0, 32));
+    auto validToken = chanMgr->authToken(chanid);
+
+    if (validToken == token)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+// -----------------------------------
 void Servent::handshakeGET(HTTP &http)
 {
     char *fn = http.cmdLine + 4;
@@ -249,7 +272,7 @@ void Servent::handshakeGET(HTTP &http)
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
         ChanInfo info;
-        if (servMgr->getChannel(fn+5, info, isPrivate()))
+        if (servMgr->getChannel(fn+5, info, isPrivate() || hasValidAuthToken(fn+5)))
             handshakePLS(info, false);
         else
             throw HTTPException(HTTP_SC_NOTFOUND, 404);
@@ -261,7 +284,7 @@ void Servent::handshakeGET(HTTP &http)
             if (!isAllowed(ALLOW_DIRECT) || !isFiltered(ServFilter::F_DIRECT))
                 throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-        triggerChannel(fn+8, ChanInfo::SP_HTTP, isPrivate());
+        triggerChannel(fn+8, ChanInfo::SP_HTTP, isPrivate() || hasValidAuthToken(fn+8));
     }else if (strncmp(fn, "/channel/", 9) == 0)
     {
         if (!sock->host.isLocalhost())
@@ -519,12 +542,10 @@ void Servent::handshakeIncoming()
     setStatus(S_HANDSHAKE);
 
     char buf[8192];
-    sock->readLine(buf, sizeof(buf));
 
-    if (strlen(buf) == sizeof(buf)-1)
+    if (sock->readLine(buf, sizeof(buf)) >= sizeof(buf)-1)
     {
-        LOG_ERROR("Request line too long!");
-        throw HTTPException(HTTP_SC_BADREQUEST, 400);
+        throw HTTPException(HTTP_SC_URITOOLONG, 414);
     }
 
     bool isHTTP = (stristr(buf, HTTP_PROTO1) != NULL);
@@ -540,6 +561,9 @@ void Servent::handshakeIncoming()
 }
 
 // -----------------------------------
+// リレー接続、あるいはダイレクト接続に str で指定されたチャンネルのス
+// トリームを流す。relay が true ならば、チャンネルが無かったり受信中
+// でなくても、チャンネルを受信中の状態にしようとする。
 void Servent::triggerChannel(char *str, ChanInfo::PROTOCOL proto, bool relay)
 {
     ChanInfo info;
@@ -597,15 +621,7 @@ void Servent::handshakePLS(ChanInfo &info, bool doneHandshake)
 
     if (getLocalURL(url))
     {
-
-        PlayList::TYPE type;
-
-        if ((info.contentType == ChanInfo::T_WMA) || (info.contentType == ChanInfo::T_WMV))
-            type = PlayList::T_ASX;
-        else if (info.contentType == ChanInfo::T_OGM)
-            type = PlayList::T_RAM;
-        else
-            type = PlayList::T_PLS;
+        PlayList::TYPE type = PlayList::getPlayListType(info.contentType);
 
         writePLSHeader(*sock, type);
 
@@ -642,7 +658,6 @@ bool Servent::getLocalURL(char *str)
 {
     if (!sock)
         throw StreamException("Not connected");
-
 
     char ipStr[64];
 
@@ -738,7 +753,6 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
                             cookie = gotCookie;
                             break;
                         }
-
                     }
                 }
                 break;
@@ -770,8 +784,12 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
         String file = servMgr->htmlPath;
         file.append("/login.html");
         if (local)
-            handshakeLocalFile(file);
-        else
+        {
+            if (http.headers["X-REQUESTED-WITH"] == "XMLHttpRequest")
+                throw HTTPException(HTTP_SC_FORBIDDEN, 403);
+            else
+                handshakeLocalFile(file);
+        }else
             handshakeRemoteFile(file);
     }
 
@@ -779,7 +797,7 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
 }
 
 // -----------------------------------
-void Servent::CMD_redirect(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_redirect(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     const char *j = getCGIarg(cmd, "url=");
 
@@ -810,33 +828,33 @@ void Servent::CMD_redirect(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     }
 }
 
-void Servent::CMD_viewxml(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_viewxml(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     handshakeXML();
 }
 
-void Servent::CMD_clearlog(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_clearlog(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     sys->logBuf->clear();
-    sprintf(jumpStr, "/%s/viewlog.html", servMgr->htmlPath);
+    jumpStr.sprintf("/%s/viewlog.html", servMgr->htmlPath);
 }
 
-void Servent::CMD_save(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_save(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     peercastInst->saveSettings();
 
-    sprintf(jumpStr, "/%s/settings.html", servMgr->htmlPath);
+    jumpStr.sprintf(jumpStr, "/%s/settings.html", servMgr->htmlPath);
 }
 
-void Servent::CMD_reg(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_reg(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     char idstr[128];
 
     chanMgr->broadcastID.toStr(idstr);
-    sprintf(jumpStr, "http://www.peercast.org/register/?id=%s", idstr);
+    jumpStr.sprintf("http://www.peercast.org/register/?id=%s", idstr);
 }
 
-void Servent::CMD_edit_bcid(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_edit_bcid(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
@@ -860,10 +878,10 @@ void Servent::CMD_edit_bcid(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     }
 
     peercastInst->saveSettings();
-    sprintf(jumpStr, "/%s/bcid.html", servMgr->htmlPath);
+    jumpStr.sprintf("/%s/bcid.html", servMgr->htmlPath);
 }
 
-void Servent::CMD_add_bcid(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_add_bcid(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
@@ -898,11 +916,11 @@ void Servent::CMD_add_bcid(char *cmd, HTTP& http, HTML& html, char jumpStr[])
         http.writeString("OK");
     }else
     {
-        sprintf(jumpStr, "/%s/bcid.html", servMgr->htmlPath);
+        jumpStr.sprintf("/%s/bcid.html", servMgr->htmlPath);
     }
 }
 
-void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     servMgr->numFilters = 0;
     ServFilter *currFilter = servMgr->filters;
@@ -922,7 +940,9 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     while (cp=nextCGIarg(cp, curr, arg))
     {
         // server
-        if (strcmp(curr, "serveractive") == 0)
+        if (strcmp(curr, "servername") == 0)
+            servMgr->serverName = cgi::unescape(arg);
+        else if (strcmp(curr, "serveractive") == 0)
             servMgr->autoServe = getCGIargBOOL(arg);
         else if (strcmp(curr, "port") == 0)
             newPort = getCGIargINT(arg);
@@ -1079,16 +1099,24 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, char jumpStr[])
 
     if (servMgr->serverHost.port != newPort)
     {
-        Host lh(ClientSocket::getIP(NULL), newPort);
-        char ipstr[64];
-        lh.toStr(ipstr);
-        sprintf(jumpStr, "http://%s/%s/settings.html", ipstr, servMgr->htmlPath);
+        std::string ipstr;
+        if (http.headers["HOST"] != "")
+        {
+            auto vec = str::split(http.headers["HOST"], ":");
+            ipstr =  vec[0]+":"+std::to_string(newPort);
+        }else
+        {
+            ipstr = Host(ClientSocket::getIP(NULL), newPort).str();
+        }
+        jumpStr.sprintf("http://%s/%s/settings.html", ipstr.c_str(), servMgr->htmlPath);
 
         servMgr->serverHost.port = newPort;
-        servMgr->restartServer=true;
+        servMgr->restartServer = true;
+
+        sys->sleep(500); // give server time to restart itself
     }else
     {
-        sprintf(jumpStr, "/%s/settings.html", servMgr->htmlPath);
+        jumpStr.sprintf("/%s/settings.html", servMgr->htmlPath);
     }
 
     peercastInst->saveSettings();
@@ -1099,7 +1127,7 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, char jumpStr[])
         servMgr->broadcastRootSettings(getUpd);
 }
 
-void Servent::CMD_fetch(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_fetch(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
@@ -1153,10 +1181,10 @@ void Servent::CMD_fetch(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     if (c)
         c->startURL(curl.cstr());
 
-    sprintf(jumpStr, "/%s/channels.html", servMgr->htmlPath);
+    jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
 }
 
-void Servent::CMD_stopserv(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_stopserv(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
@@ -1171,10 +1199,10 @@ void Servent::CMD_stopserv(char *cmd, HTTP& http, HTML& html, char jumpStr[])
                 s->abort();
         }
     }
-    sprintf(jumpStr, "/%s/connections.html", servMgr->htmlPath);
+    jumpStr.sprintf("/%s/connections.html", servMgr->htmlPath);
 }
 
-void Servent::CMD_hitlist(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_hitlist(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     bool stayConnected=hasCGIarg(cmd, "relay");
 
@@ -1208,11 +1236,11 @@ void Servent::CMD_hitlist(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     if (hasCGIarg(cmd, "relay"))
     {
         sys->sleep(500);
-        sprintf(jumpStr, "/%s/channels.html", servMgr->htmlPath);
+        jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
     }
 }
 
-void Servent::CMD_clear(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_clear(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
@@ -1228,18 +1256,18 @@ void Servent::CMD_clear(char *cmd, HTTP& http, HTML& html, char jumpStr[])
             stats.clearRange(Stats::PACKETSSTART, Stats::PACKETSEND);
     }
 
-    sprintf(jumpStr, "/%s/index.html", servMgr->htmlPath);
+    jumpStr.sprintf("/%s/index.html", servMgr->htmlPath);
 }
 
-void Servent::CMD_upgrade(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_upgrade(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     if (servMgr->downloadURL[0])
     {
-        sprintf(jumpStr, "/admin?cmd=redirect&url=%s", servMgr->downloadURL);
+        jumpStr.sprintf("/admin?cmd=redirect&url=%s", servMgr->downloadURL);
     }
 }
 
-void Servent::CMD_connect(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_connect(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     Servent *s = servMgr->servents;
     {
@@ -1252,15 +1280,16 @@ void Servent::CMD_connect(char *cmd, HTTP& http, HTML& html, char jumpStr[])
         }
         s=s->next;
     }
-    sprintf(jumpStr, "/%s/connections.html", servMgr->htmlPath);
+    jumpStr.sprintf("/%s/connections.html", servMgr->htmlPath);
 }
 
-void Servent::CMD_shutdown(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_shutdown(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
+    http.send(HTTPResponse::ok({}, "Server is shutting down..."));
     servMgr->shutdownTimer = 1;
 }
 
-void Servent::CMD_stop(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_stop(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
@@ -1278,10 +1307,10 @@ void Servent::CMD_stop(char *cmd, HTTP& http, HTML& html, char jumpStr[])
         c->thread.active = false;
 
     sys->sleep(500);
-    sprintf(jumpStr, "/%s/channels.html", servMgr->htmlPath);
+    jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
 }
 
-void Servent::CMD_bump(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_bump(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     cgi::Query query(cmd);
     GnuID id;
@@ -1327,14 +1356,14 @@ void Servent::CMD_bump(char *cmd, HTTP& http, HTML& html, char jumpStr[])
 
     try
     {
-        strcpy(jumpStr, http.headers.at("REFERER").c_str());
+        jumpStr.sprintf("%s", http.headers.at("REFERER").c_str());
     } catch (std::out_of_range&)
     {
-        sprintf(jumpStr, "/%s/channels.html", servMgr->htmlPath);
+        jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
     }
 }
 
-void Servent::CMD_keep(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_keep(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
@@ -1349,12 +1378,12 @@ void Servent::CMD_keep(char *cmd, HTTP& http, HTML& html, char jumpStr[])
 
     Channel *c = chanMgr->findChannelByID(id);
     if (c)
-        c->stayConnected = true;
+        c->stayConnected = !c->stayConnected;
 
-    sprintf(jumpStr, "/%s/channels.html", servMgr->htmlPath);
+    jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
 }
 
-void Servent::CMD_relay(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_relay(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
@@ -1381,10 +1410,10 @@ void Servent::CMD_relay(char *cmd, HTTP& http, HTML& html, char jumpStr[])
         c->startGet();
     }
 
-    sprintf(jumpStr, "/%s/channels.html", servMgr->htmlPath);
+    jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
 }
 
-void Servent::CMD_net_add(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_net_add(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
@@ -1405,13 +1434,13 @@ void Servent::CMD_net_add(char *cmd, HTTP& http, HTML& html, char jumpStr[])
     }
 }
 
-void Servent::CMD_logout(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_logout(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
-    strcpy(jumpStr, "/");
+    jumpStr.sprintf("%s", "/");
     servMgr->cookieList.remove(cookie);
 }
 
-void Servent::CMD_login(char *cmd, HTTP& http, HTML& html, char jumpStr[])
+void Servent::CMD_login(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     GnuID id;
     char idstr[64];
@@ -1432,7 +1461,7 @@ void Servent::CMD_login(char *cmd, HTTP& http, HTML& html, char jumpStr[])
 
 void Servent::handshakeCMD(char *cmd)
 {
-    char jumpStr[128] = "";
+    String jumpStr;
 
     HTTP http(*sock);
     HTML html("", *sock);
@@ -1509,7 +1538,7 @@ void Servent::handshakeCMD(char *cmd)
         {
             CMD_login(cmd, http, html, jumpStr);
         }else{
-            sprintf(jumpStr, "/%s/index.html", servMgr->htmlPath);
+            jumpStr.sprintf("/%s/index.html", servMgr->htmlPath);
         }
     }catch (HTTPException &e)
     {
@@ -1523,7 +1552,7 @@ void Servent::handshakeCMD(char *cmd)
         LOG_ERROR("html: %s", e.msg);
     }
 
-    if (strcmp(jumpStr, "")!=0)
+    if (jumpStr != "")
     {
         String jmp(jumpStr, String::T_HTML);
         jmp.convertTo(String::T_ASCII);
@@ -1623,7 +1652,6 @@ void Servent::handshakeXML()
             sh->host.toStr(ipstr);
 
             hc->add(new XML::Node("host ip=\"%s\" type=\"%s\" time=\"%d\"", ipstr, ServHost::getTypeStr(sh->type), sh->time));
-
         }
     }
     rn->add(hc);
@@ -1648,7 +1676,6 @@ void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd, size_t plen)
     {
         info.name.set(arg, String::T_ASCII);
         info.name.convertTo(String::T_UNICODE);
-
     }else if (http.isHeader("x-audiocast-url") || http.isHeader("icy-url") || http.isHeader("ice-url"))
         info.url.set(arg, String::T_ASCII);
     else if (http.isHeader("x-audiocast-bitrate") || (http.isHeader("icy-br")) || http.isHeader("ice-bitrate") || http.isHeader("icy-bitrate"))
@@ -1657,7 +1684,6 @@ void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd, size_t plen)
     {
         info.genre.set(arg, String::T_ASCII);
         info.genre.convertTo(String::T_UNICODE);
-
     }else if (http.isHeader("x-audiocast-description") || http.isHeader("ice-description"))
     {
         info.desc.set(arg, String::T_ASCII);
@@ -1786,7 +1812,7 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
     if (vec.size() > 3) info.url   = vec[3];
 
     info.id = chanMgr->broadcastID;
-    info.id.encode(NULL, info.name.cstr(), NULL, 0);
+    info.id.encode(NULL, info.name.cstr(), info.genre.cstr(), info.bitrate);
 
     Channel *c = chanMgr->findChannelByID(info.id);
     if (c)
@@ -1820,7 +1846,7 @@ ChanInfo Servent::createChannelInfo(GnuID broadcastID, const String& broadcastMs
     info.comment = query.get("comment").empty() ? broadcastMsg : query.get("comment");
 
     info.id = broadcastID;
-    info.id.encode(NULL, info.name.cstr(), NULL, 0);
+    info.id.encode(NULL, info.name.cstr(), info.genre.cstr(), info.bitrate);
 
     return info;
 }
@@ -1855,7 +1881,6 @@ void Servent::handshakeHTTPPush(const std::string& args)
         }
     }
 
-    
     ChanInfo info = createChannelInfo(chanMgr->broadcastID, chanMgr->broadcastMsg, query);
 
     Channel *c = chanMgr->findChannelByID(info.id);
@@ -2025,7 +2050,6 @@ void Servent::handshakeRemoteFile(const char *dirName)
             break;
         else
             mem.write(buf, len);
-
     }
     rsock->close();
 

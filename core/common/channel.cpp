@@ -22,6 +22,9 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <algorithm>
+#include <numeric> // accumulate
+
 #include "common.h"
 #include "socket.h"
 #include "channel.h"
@@ -152,7 +155,6 @@ void Channel::setStatus(STATUS s)
         }
 
         peercastApp->channelUpdate(&info);
-
     }
 }
 
@@ -201,7 +203,6 @@ void Channel::reset()
 
     srcType = SRC_NONE;
 
-
     startTime = 0;
     syncTime = 0;
 }
@@ -226,6 +227,7 @@ bool    Channel::checkIdle()
 }
 
 // -----------------------------------
+// チャンネルごとのリレー数制限に達しているか。
 bool    Channel::isFull()
 {
     return chanMgr->maxRelaysPerChannel ? localRelays() >= chanMgr->maxRelaysPerChannel : false;
@@ -380,6 +382,7 @@ bool Channel::acceptGIV(ClientSocket *givSock)
     }else
         return false;
 }
+
 // -----------------------------------
 void Channel::connectFetch()
 {
@@ -461,6 +464,15 @@ int PeercastSource::getSourceRate()
 {
     if (m_channel && m_channel->sock)
         return m_channel->sock->bytesInPerSec();
+    else
+        return 0;
+}
+
+// -----------------------------------
+int PeercastSource::getSourceRateAvg()
+{
+    if (m_channel && m_channel->sock)
+        return m_channel->sock->stat.bytesInPerSecAvg();
     else
         return 0;
 }
@@ -777,6 +789,7 @@ static char *nextMetaPart(char *str, char delim)
     }
     return NULL;
 }
+
 // -----------------------------------
 static void copyStr(char *to, char *from, int max)
 {
@@ -806,7 +819,6 @@ void Channel::processMp3Metadata(char *str)
         {
             newInfo.track.title.setUnquote(arg, String::T_ASCII);
             newInfo.track.title.convertTo(String::T_UNICODE);
-
         }else if (strcmp(cmd, "StreamUrl")==0)
         {
             newInfo.track.contact.setUnquote(arg, String::T_ASCII);
@@ -841,7 +853,6 @@ XML::Node *ChanHit::createXML()
         sys->getTime()-time,
         tracker
         );
-
 }
 
 // -----------------------------------
@@ -898,12 +909,14 @@ void ChanMeta::fromXML(XML &xml)
 
     len = tout.pos;
 }
+
 // -----------------------------------
 void ChanMeta::fromMem(void *p, int l)
 {
     len = l;
     memcpy(data, p, len);
 }
+
 // -----------------------------------
 void ChanMeta::addMem(void *p, int l)
 {
@@ -913,6 +926,7 @@ void ChanMeta::addMem(void *p, int l)
         len += l;
     }
 }
+
 // -----------------------------------
 void Channel::broadcastTrackerUpdate(GnuID &svID, bool force)
 {
@@ -1041,6 +1055,7 @@ void Channel::updateInfo(const ChanInfo &newInfo)
 
     peercastApp->channelUpdate(&info);
 }
+
 // -----------------------------------
 ChannelStream *Channel::createSource()
 {
@@ -1104,6 +1119,10 @@ ChannelStream *Channel::createSource()
                 break;
             case ChanInfo::T_MKV:
                 LOG_CHANNEL("Channel is MKV");
+                source = new MKVStream();
+                break;
+            case ChanInfo::T_WEBM:
+                LOG_CHANNEL("Channel is WebM");
                 source = new MKVStream();
                 break;
             default:
@@ -1191,7 +1210,6 @@ int Channel::readStream(Stream &in, ChannelStream *source)
                             broadcastTrackerUpdate(noID);
                         }
                         wasBroadcasting = true;
-
                     }else
                     {
                         if (!isReceiving())
@@ -1328,6 +1346,25 @@ void Channel::getStreamPath(char *str)
 }
 
 // -----------------------------------
+std::string Channel::renderHexDump(const std::string& in)
+{
+    std::string res;
+    int i;
+    for (i = 0; i < in.size()/16; i++)
+    {
+        auto line = in.substr(i*16, 16);
+        res += str::hexdump(line) + "  " + str::ascii_dump(line) + "\n";
+    }
+    auto rem = in.size() - 16*(in.size()/16);
+    if (rem)
+    {
+        auto line = in.substr(16*(in.size()/16), rem);
+        res += str::format("%-47s  %s\n", str::hexdump(line).c_str(), str::ascii_dump(line).c_str());
+    }
+    return res;
+}
+
+// -----------------------------------
 bool Channel::writeVariable(Stream &out, const String &var, int index)
 {
     char buf[1024];
@@ -1455,14 +1492,47 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
         strcpy(buf, str::group_digits(std::to_string(headPack.pos), ",").c_str());
     else if (var == "headLen")
         strcpy(buf, str::group_digits(std::to_string(headPack.len), ",").c_str());
-    else if (var == "numHits")
+    else if (var == "buffer")
+    {
+        std::string s;
+        String time;
+        auto lastWritten = (double) sys->getTime() - rawData.lastWriteTime;
+        if (lastWritten < 5)
+            time = "< 5 sec";
+        else
+            time.setFromStopwatch(lastWritten);
+        auto stat = rawData.getStatistics();
+        auto& lens = stat.packetLengths;
+        double byterate = (sourceData) ? sourceData->getSourceRateAvg() : 0.0;
+        auto sum = std::accumulate(lens.begin(), lens.end(), 0);
+
+        s += str::format("Length: %s bytes (%.2f sec)\n", str::group_digits(std::to_string(sum)).c_str(), sum / byterate);
+        s += str::format("Packets: %lu (c %d / nc %d)\n", lens.size(), stat.continuations, stat.nonContinuations);
+        if (lens.size() > 0)
+        {
+            auto pmax = std::max_element(lens.begin(), lens.end());
+            auto pmin = std::min_element(lens.begin(), lens.end());
+            s += str::format("Packet length min/avg/max: %u/%lu/%u\n",
+                             *pmin, sum/lens.size(), *pmax);
+        }
+        s += str::format("Last written: %s", time.str().c_str());
+        // s += str::format("First/Safe/Last/Read/Write: %u/%u/%u/%u/%u",
+        //                  rawData.firstPos, rawData.safePos, rawData.lastPos, rawData.readPos, rawData.writePos);
+        strcpy(buf, s.c_str());
+    }
+    else if (var == "headDump")
+    {
+        out.writeString(renderHexDump(std::string(headPack.data, headPack.data + headPack.len)));
+        return true;
+    }else if (var == "numHits")
     {
         ChanHitList *chl = chanMgr->findHitListByID(info.id);
-        int numHits = 0;
-        if (chl)
-            numHits = chl->numHits();
-        sprintf(buf, "%d", numHits);
-    }else
+        sprintf(buf, "%d", (chl) ? chl->numHits() : 0);
+    }else if (var == "authToken")
+        sprintf(buf, "%s", chanMgr->authToken(info.id).c_str());
+    else if (var == "plsExt")
+        sprintf(buf, "%s", info.getPlayListExt());
+    else
         return false;
 
     out.writeString(buf);

@@ -141,13 +141,11 @@ void Template::writeGlobalVariable(Stream &s, const String &varName, int loop)
         {
             ServFilter *sf = &servMgr->filters[loop];
             r = sf->writeVariable(s, varName+12);
-
         }else if (varName.startsWith("loop.bcid."))
         {
             BCID *bcid = servMgr->findValidBCID(loop);
             if (bcid)
                 r = bcid->writeVariable(s, varName+10);
-
         }else if (varName == "loop.indexEven")
         {
             s.writeStringF("%d", (loop&1)==0);
@@ -185,7 +183,6 @@ void Template::writeGlobalVariable(Stream &s, const String &varName, int loop)
                         }
                         ch=ch->next;
                     }
-
                 }
             }
         }else if (varName.startsWith("loop.externalChannel."))
@@ -563,7 +560,6 @@ void    Template::readLoop(Stream &in, Stream *outp, int loop)
             var.append(c);
         }
     }
-
 }
 
 // --------------------------------------

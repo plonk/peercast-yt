@@ -4,6 +4,8 @@
 #include "servent.h"
 #include "dmstream.h"
 
+#include "defer.h"
+
 using namespace cgi;
 
 class ServentFixture : public ::testing::Test {
@@ -79,6 +81,7 @@ TEST_F(ServentFixture, initialState)
 TEST_F(ServentFixture, handshakeHTTP)
 {
     MockClientSocket* mock;
+    Defer reclaim([&]() { delete mock; });
 
     s.sock = mock = new MockClientSocket();
 
@@ -95,6 +98,7 @@ TEST_F(ServentFixture, handshakeHTTP)
 TEST_F(ServentFixture, handshakeIncomingGetRoot)
 {
     MockClientSocket* mock;
+    Defer reclaim([&]() { delete mock; });
 
     s.sock = mock = new MockClientSocket();
     mock->incoming.str("GET / HTTP/1.0\r\n\r\n");
@@ -115,6 +119,8 @@ TEST_F(ServentFixture, handshakeIncomingBadRequest)
     mock->incoming.str("\r\n");
 
     ASSERT_THROW(s.handshakeIncoming(), StreamException);
+
+    delete mock;
 }
 
 TEST_F(ServentFixture, handshakeIncomingHTMLRoot)
@@ -133,6 +139,8 @@ TEST_F(ServentFixture, handshakeIncomingHTMLRoot)
     ASSERT_TRUE(str::contains(output, "Server: "));
     ASSERT_TRUE(str::contains(output, "Date: "));
     ASSERT_TRUE(str::contains(output, "Unable to open file"));
+
+    delete mock;
 }
 
 TEST_F(ServentFixture, handshakeIncomingJRPCGetUnauthorized)
@@ -147,6 +155,8 @@ TEST_F(ServentFixture, handshakeIncomingJRPCGetUnauthorized)
     std::string output = mock->outgoing.str();
 
     ASSERT_STREQ("HTTP/1.0 401 Unauthorized\r\nWWW-Authenticate: Basic realm=\"PeerCast Admin\"\r\n\r\n", output.c_str());
+
+    delete mock;
 }
 
 #include "servmgr.h"
@@ -179,6 +189,47 @@ TEST_F(ServentFixture, handshakeIncomingJRPCGetAuthorized)
 
     ASSERT_TRUE(str::contains(mock->outgoing.str(), "200 OK"));
     ASSERT_TRUE(str::contains(mock->outgoing.str(), "jsonrpc"));
+
+    delete mock;
+}
+
+//                  |<---------------------- 77 characters long  -------------------------------->|
+#define LONG_STRING "longURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURI" \
+    "longURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURI" \
+    "longURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURI" \
+    "longURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURI" \
+    "longURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURI" \
+    "longURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURI" \
+    "longURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURI" \
+    "longURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURI" \
+    "longURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURI" \
+    "longURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURIlongURI"
+
+// 8470 bytes
+#define LONG_LONG_STRING LONG_STRING \
+    LONG_STRING \
+    LONG_STRING \
+    LONG_STRING \
+    LONG_STRING \
+    LONG_STRING \
+    LONG_STRING \
+    LONG_STRING \
+    LONG_STRING \
+    LONG_STRING \
+    LONG_STRING
+
+// 8191 バイト以上のリクエストに対してエラーを返す。
+TEST_F(ServentFixture, handshakeIncomingLongURI)
+{
+    ASSERT_EQ(8470, strlen(LONG_LONG_STRING));
+
+    MockClientSocket* mock;
+
+    s.sock = mock = new MockClientSocket();
+    mock->incoming.str("GET /" LONG_LONG_STRING " HTTP/1.0\r\n"
+                       "\r\n");
+
+    ASSERT_THROW(s.handshakeIncoming(), HTTPException);
 
     delete mock;
 }
@@ -234,4 +285,16 @@ TEST_F(ServentFixture, createChannelInfoNonnumericBitrate)
 
     ASSERT_NO_THROW(info = s.createChannelInfo(GnuID(), String(), query));
     ASSERT_EQ(0, info.bitrate);
+}
+
+TEST_F(ServentFixture, hasValidAuthToken)
+{
+    ASSERT_TRUE(s.hasValidAuthToken("01234567890123456789012345678901.flv?auth=44d5299e57ad9274fee7960a9fa60bfd"));
+    ASSERT_FALSE(s.hasValidAuthToken("01234567890123456789012345678901.flv?auth=00000000000000000000000000000000"));
+    ASSERT_FALSE(s.hasValidAuthToken("01234567890123456789012345678901.flv?"));
+    ASSERT_FALSE(s.hasValidAuthToken("01234567890123456789012345678901.flv"));
+    ASSERT_FALSE(s.hasValidAuthToken(""));
+    ASSERT_FALSE(s.hasValidAuthToken("ほげほげ.flv?auth=44d5299e57ad9274fee7960a9fa60bfd"));
+    ASSERT_FALSE(s.hasValidAuthToken("ほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげ.flv?auth=44d5299e57ad9274fee7960a9fa60bfd"));
+    ASSERT_FALSE(s.hasValidAuthToken("?auth=44d5299e57ad9274fee7960a9fa60bfd"));
 }

@@ -163,7 +163,6 @@ void UClientSocket::open(Host &rh)
         throw SockException("Can`t open socket");
 
     setBlocking(false);
-
 #ifdef DISABLE_NAGLE
     setNagle(false);
 #endif
@@ -360,7 +359,6 @@ ClientSocket *UClientSocket::accept()
     cs->host.ip = ntohl(from.sin_addr.s_addr);
 
     cs->setBlocking(false);
-
 #ifdef DISABLE_NAGLE
     cs->setNagle(false);
 #endif

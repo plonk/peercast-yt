@@ -20,6 +20,7 @@
 #include "chaninfo.h"
 #include "pcp.h"
 #include "chanmgr.h"
+#include "playlist.h"
 
 // -----------------------------------
 static void readXMLString(String &str, XML::Node *n, const char *arg)
@@ -84,6 +85,7 @@ const char *ChanInfo::getTypeStr(TYPE t)
         case T_WMV: return "WMV";
         case T_FLV: return "FLV";
         case T_MKV: return "MKV";
+        case T_WEBM: return "WEBM";
 
         case T_PLS: return "PLS";
         case T_ASX: return "ASX";
@@ -148,6 +150,8 @@ const char *ChanInfo::getTypeExt(TYPE t)
             return ".flv";
         case ChanInfo::T_MKV:
             return ".mkv";
+        case ChanInfo::T_WEBM:
+            return ".webm";
         default:
             return "";
     }
@@ -180,6 +184,8 @@ const char *ChanInfo::getMIMEType(TYPE t)
             return MIME_FLV;
         case ChanInfo::T_MKV:
             return MIME_MKV;
+        case ChanInfo::T_WEBM:
+            return MIME_WEBM;
         default:
             return "application/octet-stream";
     }
@@ -206,6 +212,8 @@ ChanInfo::TYPE ChanInfo::getTypeFromStr(const char *str)
         return T_FLV;
     else if (stricmp(str, "MKV")==0)
         return T_MKV;
+    else if (stricmp(str, "WEBM")==0)
+        return T_WEBM;
     else if (stricmp(str, "PLS")==0)
         return T_PLS;
     else if (stricmp(str, "M3U")==0)
@@ -752,4 +760,18 @@ bool TrackInfo::update(const TrackInfo &inf)
     }
 
     return changed;
+}
+
+// -----------------------------------
+const char* ChanInfo::getPlayListExt()
+{
+    switch (PlayList::getPlayListType(contentType))
+    {
+    case PlayList::T_ASX:
+        return ".asx";
+    case PlayList::T_RAM:
+        return ".ram";
+    case PlayList::T_PLS:
+        return ".m3u"; // or could be .pls ...
+    }
 }

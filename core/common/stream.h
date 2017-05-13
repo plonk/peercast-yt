@@ -80,7 +80,6 @@ public:
 
     virtual int     getPosition() { return 0; }
 
-
     // binary
     char    readChar()
     {
@@ -97,7 +96,7 @@ public:
     }
     long    readLong()
     {
-        long v;
+        long v = 0;
         read(&v, 4);
         CHECK_ENDIAN4(v);
         return v;
@@ -120,8 +119,6 @@ public:
         return v;
     }
 
-
-
     long readTag()
     {
         long v = readLong();
@@ -143,9 +140,24 @@ public:
         return cnt;
     }
 
+    std::string read(int remaining)
+    {
+        std::string res;
+
+        uint8_t buffer[4096];
+
+        while (remaining > 0)
+        {
+            int readSize = std::min(remaining, 4096);
+            int r = read(buffer, readSize);
+            res += std::string(buffer, buffer + r);
+            remaining -= r;
+        }
+        return res;
+    }
+
     virtual bool    readReady(int timeoutMilliseconds = 0) { return true; }
     virtual int numPending() { return 0; }
-
 
     void writeID4(ID4 id)
     {
@@ -206,7 +218,6 @@ public:
     int     readBits(int);
 
     void    updateTotals(unsigned int, unsigned int);
-
 
     unsigned char   bitsBuffer;
     unsigned int    bitsPos;
@@ -291,7 +302,6 @@ public:
     Stat stat;
 };
 
-
 // -------------------------------------
 class FileStream : public Stream
 {
@@ -320,6 +330,7 @@ public:
 
     FILE *file;
 };
+
 // -------------------------------------
 class MemoryStream : public Stream
 {
@@ -445,6 +456,7 @@ public:
 
     Stream *stream;
 };
+
 // --------------------------------------------------
 class WriteBufferedStream : public IndirectStream
 {
@@ -509,7 +521,5 @@ public:
 
     std::string buf;
 };
-
-
 #endif
 

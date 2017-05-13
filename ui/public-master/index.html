@@ -1,0 +1,173 @@
+<!doctype html>
+<html>
+  <head>
+    <title>{#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$request.host}{@end}</title>
+    <link href="peercast.css" rel="stylesheet" type="text/css">
+    <style>
+     body { background-color: #ddd; margin-top: 16px; margin-bottom: 16px;
+            font-family: Verdana, sans-serif; font-size: 10px; }
+
+     input, select { font-size: 12px }
+     .channel-list { font-family: Verdana, sans-serif; font-size: 11px; color: #222; line-height: 1.3em; max-width: 750px }
+     .channel-list tr { background-color: #FFECC4 }
+     .channel-list th { font-size: 12px; text-decoration: underline; padding: 3px 5px; color: black }
+     .channel-list td { text-align: center; padding: 3px 5px; }
+     .channel-list td.channel-description { text-align: left  }
+     td.results { text-align: left }
+     .link { color: blue }
+     .em-link { color: blue; font-weight: bold }
+     .container { background-color: white;
+                  width: 700px; margin-left: auto; margin-right: auto;
+                  border: solid 1px black; padding: 5px;
+                  min-height: calc(100vh - 45px) }
+     .channel-name { font-size: 12px }
+     .detail { padding-left: 0.7em; padding-right: 0.3em }
+     .rank { font-size: 12px }
+     .listeners { padding-bottom: 3px }
+     .icons { margin-top: 2px }
+     .play-button { margin-left: 8px; margin-right: 8px }
+     .channel-list .bitrate { text-align: right }
+
+     .index-txt-badge { background-color: #ffa526;
+                        font-size: 12px;
+                        color: white;
+                        border-radius: 5px;
+                        padding: 5px;
+                        margin-right: 0.3em }
+     .index-url { font-family: monospace;
+                  width: 300px; padding: 4px; border: solid grey 1px; border-radius: 3px}
+  </style>
+  <meta charset="utf-8">
+  </head>
+  <body>
+    <div class="container">
+      <center>
+        <img width="370" src="images/peercast-logo.png">
+        <h1 style="color: #111; font-size: 28px">{$servMgr.serverName}</h1>
+      </center>
+      <hr>
+
+      <h2>{#Local Channels}
+        <div style="display: inline-block; float: right">
+          <a style="text-decoration: none" href="http://{$request.host}/public/index.txt">
+            <span class="index-txt-badge"><span style="font-size: 133%">&#x1f4e1;</span>&thinsp;<b>index</b></span>
+          </a>
+          <input class="index-url" type="text" value="http://{$request.host}/public/index.txt">
+        </div>
+      </h2>
+
+      <table width="100%" class="channel-list">
+        <tr>
+          <th>Rank</th><th><img src="images/small-icon.png"></th><th>Channel</th><th>Status</th><th>Bitrate</th><th>Type</th>
+        </tr>
+
+        {@foreach broadcastingChannels}
+        <tr>
+          <td class="rank">{$loop.indexBaseOne}</td>
+          <td>
+            <a href="/public/play.html?id={$this.channelId}">
+              <img class="play-button" src="images/play.png">
+            </a>
+          </td>
+          <td style="width: 600px" class="channel-description">
+            <span style="font-weight: bold">
+              {@if this.info.url}
+              <a class="link channel-name" href="{$this.info.url}">{$this.info.name}</a>
+              {@else}
+              {$this.info.name}
+              {@end}
+            </span><br>
+            <div class="detail">
+              {@if this.info.genre}{!this.info.genre} - {@end}{!this.info.desc}
+            </div>
+          </td>
+          <td align=center nowrap>
+            {$this.status.totalDirects} / {$this.status.totalRelays}
+          </td>
+          <td class="bitrate" align=center nowrap>{$this.info.bitrate} kb/s</td>
+          <td align=center>{$this.info.contentType}</td>
+        </tr>
+        {@end}
+
+      </table>
+
+      <h2>{#Channels from Friendly Stations}</h2>
+
+      <table width="100%" class="channel-list">
+        <tr>
+          <th>Rank</th><th><img src="images/small-icon.png"></th><th>Channel</th><th>Status</th><th>Bitrate</th><th>Type</th>
+        </tr>
+
+        {@foreach publicExternalChannels}
+        <tr>
+          <td class="rank">
+            {$loop.indexBaseOne}
+          </td>
+          <td>
+            {@if this.id != "00000000000000000000000000000000"}
+            <a href="/public/play.html?id={$this.id}">
+              <img class="play-button" src="images/play.png">
+            </a>
+            {@else}
+            <img class="play-button" src="images/play_grey.png">
+            {@end}
+          </td>
+          <td style="width: 600px" class="channel-description">
+            <span style="font-weight: bold">
+              {@if this.url}
+              <a class="link channel-name" href="{$this.url}">{!this.name}</a>
+              {@else}
+              {!this.name}
+              {@end}
+            </span><br>
+            <div class="detail">
+              {@if this.genre}{!this.genre} - {@end}{!this.desc}
+            </div>
+          </td>
+          <td align=center nowrap>
+            <span class="listeners">
+              {$this.numDirects}/{$this.numRelays}
+            </span>
+            {@if this.encodedName}
+            <div class="icons">
+              <a href="{$this.chatUrl}"><img alt="Chat" src="images/chat.png"></a>
+              <a href="{$this.statsUrl}"><img alt="Stats" src="images/graph.png"></a>
+            </div>
+            {@end}
+          </td>
+          <td class="bitrate" align=center nowrap>
+            {$this.bitrate} kb/s
+          </td>
+          <td align=center>
+            {$this.contentTypeStr}
+          </td>
+        </tr>
+        {@end}
+      </table>
+
+      <h2>{#Link Status}</h2>
+
+      <ul>
+      {@loop servMgr.numChannelFeeds}
+        {@if loop.channelFeed.isPublic}
+        <li style="list-style: none">
+          {@if loop.channelFeed.status == "OK"}
+            ✔
+          {@else}{@if loop.channelFeed.status == "ERROR"}
+            ❌
+          {@else}{@if loop.channelFeed.status == "UNKNOWN"}
+            ？
+          {@else}
+            {$loop.channelFeed.status}
+          {@end}{@end}{@end}
+          <a href="{$loop.channelFeed.directoryUrl}">
+            {$loop.channelFeed.directoryUrl}
+          </a>
+        </li>
+        {@end}
+      {@end}
+      </ul>
+
+    </div>
+  </body>
+</html>

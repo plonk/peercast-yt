@@ -212,6 +212,9 @@ int main(int argc, char* argv[])
                 setPidFile = true;
                 pidFileName.setFromString(argv[i]);
             }
+        } else {
+            printf("Invalid argument %s\n", argv[i]);
+            return 1;
         }
     }
 

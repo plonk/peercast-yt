@@ -24,6 +24,7 @@ bool Host::isLocalhost()
 {
     return loopbackIP() || (ip == ClientSocket::getIP(NULL));
 }
+
 // ------------------------------------------
 void Host::fromStrName(const char *str, int p)
 {
@@ -46,6 +47,7 @@ void Host::fromStrName(const char *str, int p)
 
     ip = ClientSocket::getIP(name);
 }
+
 // ------------------------------------------
 ::String Host::IPtoStr()
 {
@@ -53,12 +55,12 @@ void Host::fromStrName(const char *str, int p)
     this->IPtoStr(result.data);
     return result;
 }
+
 // ------------------------------------------
 void Host::fromStrIP(const char *str, int p)
 {
     unsigned int ipb[4];
     unsigned int ipp;
-
 
     if (strstr(str, ":"))
     {
@@ -79,6 +81,7 @@ void Host::fromStrIP(const char *str, int p)
             ip = 0;
     }
 }
+
 // -----------------------------------
 bool Host::isMemberOf(Host &h)
 {

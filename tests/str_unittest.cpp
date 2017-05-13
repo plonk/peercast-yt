@@ -46,6 +46,14 @@ TEST_F(strFixture, codepoint_to_utf8)
     ASSERT_STREQ("\xf0\x9f\x92\xa9", codepoint_to_utf8(0x1f4a9).c_str()); // PILE OF POO
 }
 
+TEST_F(strFixture, format)
+{
+    EXPECT_STREQ("a", format("a").c_str());
+    EXPECT_STREQ("a", format("%s", "a").c_str());
+    EXPECT_STREQ("1", format("%d", 1).c_str());
+    EXPECT_STREQ("12", format("%d%d", 1, 2).c_str());
+}
+
 TEST_F(strFixture, contains)
 {
     ASSERT_TRUE(str::contains("abc", "bc"));
@@ -66,6 +74,18 @@ TEST_F(strFixture, replace_prefix)
     ASSERT_STREQ("abc", str::replace_prefix("abc", "x", "x").c_str());
     ASSERT_STREQ("xabc", str::replace_prefix("abc", "", "x").c_str());
     ASSERT_STREQ("bc", str::replace_prefix("abc", "a", "").c_str());
+}
+
+TEST_F(strFixture, replace_suffix)
+{
+    ASSERT_STREQ("", str::replace_suffix("", "", "").c_str());
+    ASSERT_STREQ("b", str::replace_suffix("", "", "b").c_str());
+    ASSERT_STREQ("", str::replace_suffix("", "a", "b").c_str());
+    ASSERT_STREQ("", str::replace_suffix("", "a", "").c_str());
+    ASSERT_STREQ("abx", str::replace_suffix("abc", "c", "x").c_str());
+    ASSERT_STREQ("abc", str::replace_suffix("abc", "x", "x").c_str());
+    ASSERT_STREQ("abcx", str::replace_suffix("abc", "", "x").c_str());
+    ASSERT_STREQ("ab", str::replace_suffix("abc", "c", "").c_str());
 }
 
 TEST_F(strFixture, capitalize)
@@ -121,4 +141,13 @@ TEST_F(strFixture, is_prefix_of)
     ASSERT_FALSE(str::is_prefix_of("b", "abc"));
     ASSERT_TRUE(str::is_prefix_of("abc", "abc"));
     ASSERT_TRUE(str::is_prefix_of("あ", "あいうえお"));
+}
+
+TEST_F(strFixture, join)
+{
+    ASSERT_STREQ("", str::join("", {}).c_str());
+    ASSERT_STREQ("", str::join(",", {}).c_str());
+    ASSERT_STREQ("a,b", str::join(",", {"a", "b"}).c_str());
+    ASSERT_STREQ("ab", str::join("", {"a", "b"}).c_str());
+    ASSERT_STREQ("ab", str::join("", str::split("a,b", ",")).c_str());
 }

@@ -25,6 +25,7 @@
 #include "pcp.h"
 #include "servmgr.h"
 #include "version2.h"
+#include "critsec.h"
 
 // -----------------------------------
 void ChanPacket::init(TYPE t, const void *p, unsigned int l, unsigned int _pos)
@@ -61,6 +62,19 @@ void ChanPacket::writePeercast(Stream &out)
         out.writeShort(0);
         out.write(data, len);
     }
+}
+
+// -----------------------------------
+ChanPacket& ChanPacket::operator=(const ChanPacket& other)
+{
+    this->type = other.type;
+    this->len  = other.len;
+    this->pos  = other.pos;
+    this->sync = other.sync;
+    this->cont = other.cont;
+    memcpy(this->data, other.data, this->len);
+
+    return *this;
 }
 
 // -----------------------------------
@@ -153,6 +167,42 @@ unsigned int    ChanPacketBuffer::getLatestPos()
         return 0;
     else
         return getStreamPos(lastPos);
+}
+
+// ------------------------------------------------------------------
+unsigned int    ChanPacketBuffer::getLatestNonContinuationPos()
+{
+    if (writePos == 0)
+        return 0;
+
+    CriticalSection cs(lock);
+
+    for (int64_t i = lastPos; i >= firstPos; i--)
+    {
+        ChanPacket &p = packets[i%MAX_PACKETS];
+        if (!p.cont)
+            return p.pos;
+    }
+
+    return 0;
+}
+
+// ------------------------------------------------------------------
+unsigned int    ChanPacketBuffer::getOldestNonContinuationPos()
+{
+    if (writePos == 0)
+        return 0;
+
+    CriticalSection cs(lock);
+
+    for (int64_t i = firstPos; i <= lastPos; i++)
+    {
+        ChanPacket &p = packets[i%MAX_PACKETS];
+        if (!p.cont)
+            return p.pos;
+    }
+
+    return 0;
 }
 
 // ------------------------------------------------------------------

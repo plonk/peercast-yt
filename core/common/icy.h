@@ -28,7 +28,4 @@ public:
     void stream(Channel *) override;
 };
 
-
-
-
 #endif

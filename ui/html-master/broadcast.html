@@ -1,6 +1,6 @@
 <!-- InstanceBegin template="/Templates/peercast.dwt" codeOutsideHTMLIsLocked="false" -->
 <!-- InstanceBeginEditable name="title" -->
-<title>{#_Broadcast_navbar} - {#PeerCast on} {$servMgr.serverIP}:{$servMgr.serverPort}</title>
+<title>{#_Broadcast_navbar} - {#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$servMgr.serverIP}:{$servMgr.serverPort}{@end}</title>
 <!-- InstanceEndEditable -->
 
 <!-- InstanceBeginEditable name="head" -->
@@ -57,6 +57,7 @@
             <OPTION value=RAW>RAW</OPTION>
             <OPTION value=WMA>WMA</OPTION>
             <OPTION value=WMV>WMV</OPTION>
+            <OPTION value=WEBM>WEBM</OPTION>
           </SELECT>
         </TD>
       </TR>
@@ -98,6 +99,7 @@
           <OPTION value=RAW>RAW</OPTION>
           <OPTION value=WMA>WMA</OPTION>
           <OPTION value=WMV>WMV</OPTION>
+          <OPTION value=WEBM>WEBM</OPTION>
         </SELECT>
       </TD>
     </TR>
