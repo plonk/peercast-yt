@@ -189,6 +189,9 @@ void MKVStream::readTracks(const std::string& data)
                 m_videoTrackNumber = trackno;
                 LOG_DEBUG("MKV video track number is %d", trackno);
             }
+        }else
+        {
+            mem.skip(size.uint());
         }
     }
 }
