@@ -63,7 +63,7 @@ $(TAR): $(TARGET) $(HTML) $(PUBLIC)
 
 clean:
 	rm -f $(LINUXOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE) $(SRCHTMLTAR)
-	rm -rf $(HTML)
+	rm -rf $(HTML) $(PUBLIC)
 	rm -rf peercast-yt/
 
 $(COREOBJ): %.o : $(CORE)/common/%.cpp
