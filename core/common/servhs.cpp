@@ -1973,6 +1973,22 @@ void Servent::handshakeLocalFile(const char *fn)
 
     if (fileName.contains(".htm"))
     {
+        if (str::contains(fn, "play.html"))
+        {
+            auto vec = str::split(fn, "?");
+            if (vec.size() != 2)
+                throw HTTPException(HTTP_SC_BADREQUEST, 400);
+
+            String id = cgi::Query(vec[1]).get("id").c_str();
+
+            if (id.isEmpty())
+                throw HTTPException(HTTP_SC_BADREQUEST, 400);
+
+            ChanInfo info;
+            if (!servMgr->getChannel(id.cstr(), info, true))
+                throw HTTPException(HTTP_SC_NOTFOUND, 404);
+        }
+
         char *args = strstr(fileName.cstr(), "?");
         if (args)
             *args++ = 0;
