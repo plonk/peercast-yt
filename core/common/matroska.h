@@ -50,6 +50,7 @@ ID_TO_NAME = {
     { {0x4D,0xBB}, "Seek" },
     { {0x53,0xAB}, "SeekID" },
     { {0x53,0xAC}, "SeekPosition" },
+    { {0xBF}, "CRC-32" },
 };
 
 // UNKNOWN 値の対応要る？
