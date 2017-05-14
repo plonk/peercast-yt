@@ -12,6 +12,8 @@ public:
     MKVStream()
         : m_videoTrackNumber(1)
         , m_hasKeyFrame(false)
+        , m_timecodeScale(1000000)
+        , m_startTime(0)
     {
     }
     void readHeader(Stream &, Channel *) override;
@@ -23,9 +25,15 @@ public:
     void sendCluster(const matroska::byte_string& cluster, Channel* ch);
     void checkBitrate(Stream &in, Channel *ch);
     void readTracks(const std::string& data);
+    void readInfo(const std::string& data);
 
-    int m_videoTrackNumber;
-    bool m_hasKeyFrame;
+    void rateLimit(uint64_t timecode);
+    static uint64_t unpackUnsignedInt(const std::string& bytes);
+
+    int          m_videoTrackNumber;
+    bool         m_hasKeyFrame;
+    uint64_t     m_timecodeScale; // ナノ秒
+    unsigned int m_startTime;
 };
 
 #endif

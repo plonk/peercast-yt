@@ -27,7 +27,8 @@ void MKVStream::sendPacket(ChanPacket::TYPE type, const byte_string& data, bool 
         ch->headPack = pack;
 
     ch->newPacket(pack);
-    ch->checkReadDelay(pack.len);
+    // rateLimit で律速するので checkReadDelay は使わない。
+    //ch->checkReadDelay(pack.len);
     ch->streamPos += pack.len;
 }
 
@@ -66,6 +67,35 @@ bool MKVStream::hasKeyFrame(const byte_string& cluster)
     if (payloadRemaining != 0)
         throw StreamException("MKV Parse error");
     return false;
+}
+
+uint64_t MKVStream::unpackUnsignedInt(const std::string& bytes)
+{
+    if (bytes.size() == 0)
+        throw std::runtime_error("empty string");
+
+    uint64_t res = 0;
+
+    for (int i = 0; i < bytes.size(); i++)
+    {
+        res <<= 8;
+        res |= (uint8_t) bytes[i];
+    }
+
+    return res;
+}
+
+void MKVStream::rateLimit(uint64_t timecode)
+{
+    unsigned int secondsFromStart = timecode * m_timecodeScale / 1000000000;
+    unsigned int ctime = sys->getTime();
+
+    if (m_startTime + secondsFromStart > ctime) // if this is into the future
+    {
+        int diff = (m_startTime + secondsFromStart) - ctime;
+        LOG_DEBUG("rateLimit: diff = %d sec", diff);
+        sys->sleep(diff * 1000);
+    }
 }
 
 // 非継続パケットの頭出しができないクライアントのために、なるべく要素
@@ -108,24 +138,31 @@ void MKVStream::sendCluster(const byte_string& cluster, Channel* ch)
         VInt id = VInt::read(in);
         VInt size = VInt::read(in);
 
-        //LOG_DEBUG("Got %s size=%s", id.toName().c_str(), std::to_string(size.uint()).c_str());
+        LOG_DEBUG("Got %s size=%s", id.toName().c_str(), std::to_string(size.uint()).c_str());
 
         if (buffer.size() > 0 &&
             buffer.size() + id.bytes.size() + size.bytes.size() + size.uint() > 15*1024)
         {
-            MemoryStream mem((void*)buffer.data(), buffer.size());
-            VInt id = VInt::read(mem);
+            // MemoryStream mem((void*)buffer.data(), buffer.size());
+            // VInt id = VInt::read(mem);
             //LOG_DEBUG("Sending %s", id.toName().c_str());
             sendPacket(ChanPacket::T_DATA, buffer, continuation, ch);
             continuation = true;
             buffer.clear();
         }
 
+        std::string payload = in.Stream::read((int) size.uint());
+
+        if (id.toName() == "Timecode")
+        {
+            if (ch->readDelay)
+                rateLimit(unpackUnsignedInt(payload));
+        }
+
         if (id.bytes.size() + size.bytes.size() + size.uint() > 15*1024)
         {
             if (buffer.size() != 0) throw StreamException("Logic error");
             buffer = id.bytes + size.bytes;
-            auto payload = static_cast<Stream*>(&in)->read((int) size.uint());
             buffer.append(payload.begin(), payload.end());
             int pos = 0;
             while (pos < buffer.size())
@@ -138,7 +175,6 @@ void MKVStream::sendCluster(const byte_string& cluster, Channel* ch)
             buffer.clear();
         } else {
             buffer += id.bytes + size.bytes;
-            auto payload = static_cast<Stream*>(&in)->read((int) size.uint());
             buffer.append(payload.begin(), payload.end());
             MemoryStream mem((void*)buffer.c_str(), buffer.size());
             mem.rewind();
@@ -196,6 +232,29 @@ void MKVStream::readTracks(const std::string& data)
     }
 }
 
+// TimecodeScale の値を調べる。
+void MKVStream::readInfo(const std::string& data)
+{
+    DynamicMemoryStream in;
+    in.str(data);
+
+    while (true)
+    {
+        VInt id   = VInt::read(in);
+        VInt size = VInt::read(in);
+
+        if (id.toName() == "TimecodeScale")
+        {
+            auto data = in.Stream::read((int) size.uint());
+
+            auto scale = unpackUnsignedInt(data);
+            LOG_DEBUG("TimecodeScale = %d nanoseconds", (int) scale);
+            m_timecodeScale = scale;
+            return;
+        }
+    }
+}
+
 void MKVStream::readHeader(Stream &in, Channel *ch)
 {
     try{
@@ -237,10 +296,15 @@ void MKVStream::readHeader(Stream &in, Channel *ch)
                             readTracks(data);
 
                         header.append(data.begin(), data.end());
+
+                        if (id.toName() == "Info")
+                            readInfo(data);
                     } else
                     {
                         // ヘッダーパケットを送信
                         sendPacket(ChanPacket::T_HEAD, header, false, ch);
+
+                        m_startTime = sys->getTime();
 
                         // もうIDとサイズを読んでしまったので、最初のクラ
                         // スターを送信
