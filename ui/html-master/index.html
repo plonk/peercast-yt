@@ -1,5 +1,5 @@
 {^define LAYOUT layout.html}
-{^define TITLE}{#_Information_navbar} - {#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$servMgr.serverIP}:{$servMgr.serverPort}{@end}{^end}
+{^define TITLE}{#_Information_navbar} - {#PeerCast on} {^SERVER_NAME}{^end}
 
 {@if servMgr.disabled}
 <div align="center" class="normal">
