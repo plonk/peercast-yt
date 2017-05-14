@@ -16,6 +16,8 @@ def process_tag(env, stmt, toks)
     env[$1] = eval_toks(env, toks)
   when /\Adefine\s+(\w+)\s+(\S+)\s*\z/
     env[$1] = $2
+  when /\Ainclude\s+(\S+)\s*\z/
+    return eval_instance(env, File.read(File.join("Templates", $1)))
   else
     val = env[stmt.strip]
     unless val
