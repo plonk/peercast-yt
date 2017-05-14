@@ -198,60 +198,65 @@ void MKVStream::readTracks(const std::string& data)
 
 void MKVStream::readHeader(Stream &in, Channel *ch)
 {
-    byte_string header;
+    try{
+        byte_string header;
 
-    while (true)
-    {
-        VInt id   = VInt::read(in);
-        VInt size = VInt::read(in);
-        LOG_DEBUG("Got LEVEL0 %s size=%s", id.toName().c_str(), std::to_string(size.uint()).c_str());
-
-        header += id.bytes;
-        header += size.bytes;
-
-        if (id.toName() != "Segment")
+        while (true)
         {
-            // Segment 以外のレベル 0 要素は単にヘッドパケットに追加す
-            // る
-            auto data = in.read((int) size.uint());
-            header.append(data.begin(), data.end());
-        }else
-        {
-            // Segment 内のレベル 1 要素を読む
-            while (true)
+            VInt id   = VInt::read(in);
+            VInt size = VInt::read(in);
+            LOG_DEBUG("Got LEVEL0 %s size=%s", id.toName().c_str(), std::to_string(size.uint()).c_str());
+
+            header += id.bytes;
+            header += size.bytes;
+
+            if (id.toName() != "Segment")
             {
-                VInt id = VInt::read(in);
-                VInt size = VInt::read(in);
-                LOG_DEBUG("Got LEVEL1 %s size=%s", id.toName().c_str(), std::to_string(size.uint()).c_str());
-
-                if (id.toName() != "Cluster")
+                // Segment 以外のレベル 0 要素は単にヘッドパケットに追加す
+                // る
+                auto data = in.read((int) size.uint());
+                header.append(data.begin(), data.end());
+            }else
+            {
+                // Segment 内のレベル 1 要素を読む
+                while (true)
                 {
-                    // Cluster 以外の要素はヘッドパケットに追加する
-                    header += id.bytes;
-                    header += size.bytes;
+                    VInt id = VInt::read(in);
+                    VInt size = VInt::read(in);
+                    LOG_DEBUG("Got LEVEL1 %s size=%s", id.toName().c_str(), std::to_string(size.uint()).c_str());
 
-                    auto data = in.read((int) size.uint());
+                    if (id.toName() != "Cluster")
+                    {
+                        // Cluster 以外の要素はヘッドパケットに追加する
+                        header += id.bytes;
+                        header += size.bytes;
 
-                    if (id.toName() == "Tracks")
-                        readTracks(data);
+                        auto data = in.read((int) size.uint());
 
-                    header.append(data.begin(), data.end());
-                } else
-                {
-                    // ヘッダーパケットを送信
-                    sendPacket(ChanPacket::T_HEAD, header, false, ch);
+                        if (id.toName() == "Tracks")
+                            readTracks(data);
 
-                    // もうIDとサイズを読んでしまったので、最初のクラ
-                    // スターを送信
+                        header.append(data.begin(), data.end());
+                    } else
+                    {
+                        // ヘッダーパケットを送信
+                        sendPacket(ChanPacket::T_HEAD, header, false, ch);
 
-                    byte_string cluster = id.bytes + size.bytes;
-                    auto data = in.read((int) size.uint());
-                    cluster.append(data.begin(), data.end());
-                    sendCluster(cluster, ch);
-                    return;
+                        // もうIDとサイズを読んでしまったので、最初のクラ
+                        // スターを送信
+
+                        byte_string cluster = id.bytes + size.bytes;
+                        auto data = in.read((int) size.uint());
+                        cluster.append(data.begin(), data.end());
+                        sendCluster(cluster, ch);
+                        return;
+                    }
                 }
             }
         }
+    }catch (std::runtime_error& e)
+    {
+        throw StreamException(e.what());
     }
 }
 
@@ -269,23 +274,28 @@ void MKVStream::checkBitrate(Stream &in, Channel *ch)
 // Cluster 要素を読む
 int MKVStream::readPacket(Stream &in, Channel *ch)
 {
-    checkBitrate(in, ch);
+    try {
+        checkBitrate(in, ch);
 
-    VInt id = VInt::read(in);
-    VInt size = VInt::read(in);
+        VInt id = VInt::read(in);
+        VInt size = VInt::read(in);
 
-    if (id.toName() != "Cluster")
+        if (id.toName() != "Cluster")
+        {
+            LOG_ERROR("Cluster expected, but got %s", id.toName().c_str());
+            throw StreamException("Logic error");
+        }
+
+        byte_string cluster = id.bytes + size.bytes;
+        auto data = in.read((int) size.uint());
+        cluster.append(data.begin(), data.end());
+        sendCluster(cluster, ch);
+
+        return 0; // no error
+    }catch (std::runtime_error& e)
     {
-        LOG_ERROR("Cluster expected, but got %s", id.toName().c_str());
-        throw StreamException("Logic error");
+        throw StreamException(e.what());
     }
-
-    byte_string cluster = id.bytes + size.bytes;
-    auto data = in.read((int) size.uint());
-    cluster.append(data.begin(), data.end());
-    sendCluster(cluster, ch);
-
-    return 0; // no error
 }
 
 void MKVStream::readEnd(Stream &, Channel *)
