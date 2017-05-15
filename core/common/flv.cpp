@@ -129,9 +129,12 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
 
         m_buffer.flush(ch);
 
+        ch->rawData.init();
+        ch->streamIndex++;
+
         ch->headPack.type = ChanPacket::T_HEAD;
         ch->headPack.len = mem.pos;
-        ch->headPack.pos = ch->streamPos;
+        ch->headPack.pos = 0;
         ch->newPacket(ch->headPack);
 
         ch->streamPos += ch->headPack.len;
