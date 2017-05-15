@@ -138,7 +138,7 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
         ch->headPack.pos = 0;
         ch->newPacket(ch->headPack);
 
-        ch->streamPos += ch->headPack.len;
+        ch->streamPos = 0 + ch->headPack.len;
     }
     else {
         bool packet_sent;
