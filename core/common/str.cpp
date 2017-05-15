@@ -292,4 +292,13 @@ std::string ascii_dump(const std::string& in, const std::string& replacement)
     return res;
 }
 
+std::string extension_without_dot(const std::string& filename)
+{
+    auto i = filename.rfind('.');
+    if (i == std::string::npos)
+        return "";
+    else
+        return filename.substr(i + 1);
+}
+
 } // namespace str
