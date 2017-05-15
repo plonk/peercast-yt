@@ -114,13 +114,6 @@ void MKVStream::sendCluster(const byte_string& cluster, Channel* ch)
             continuation = false;
     }
 
-    // 15KB 以下の場合はそのまま送信
-    if (cluster.size() <= 15*1024)
-    {
-        sendPacket(ChanPacket::T_DATA, cluster, continuation, ch);
-        return;
-    }
-
     MemoryStream in((void*) cluster.data(), cluster.size());
 
     VInt id   = VInt::read(in);
