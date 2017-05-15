@@ -11,8 +11,6 @@ using namespace matroska;
 // data を type パケットとして送信する
 void MKVStream::sendPacket(ChanPacket::TYPE type, const byte_string& data, bool continuation, Channel* ch)
 {
-    //LOG_DEBUG("MKV Sending %zu byte %s packet", data.size(), type==ChanPacket::T_HEAD?"HEAD":"DATA");
-
     if (data.size() > ChanPacket::MAX_DATALEN)
         throw StreamException("MKV packet too big");
 
@@ -119,13 +117,13 @@ void MKVStream::sendCluster(const byte_string& cluster, Channel* ch)
     VInt id   = VInt::read(in);
     VInt size = VInt::read(in);
 
-    //LOG_DEBUG("Got %s size=%s", id.toName().c_str(), std::to_string(size.uint()).c_str());
-
     byte_string buffer = id.bytes + size.bytes;
 
     int64_t payloadRemaining = (int64_t) size.uint(); // 負数が取れるように signed にする
+
     if (payloadRemaining < 0)
         throw StreamException("MKV Parse error");
+
     while (payloadRemaining > 0) // for each element in Cluster
     {
         VInt id = VInt::read(in);
@@ -136,9 +134,6 @@ void MKVStream::sendCluster(const byte_string& cluster, Channel* ch)
         if (buffer.size() > 0 &&
             buffer.size() + id.bytes.size() + size.bytes.size() + size.uint() > 15*1024)
         {
-            // MemoryStream mem((void*)buffer.data(), buffer.size());
-            // VInt id = VInt::read(mem);
-            //LOG_DEBUG("Sending %s", id.toName().c_str());
             sendPacket(ChanPacket::T_DATA, buffer, continuation, ch);
             continuation = true;
             buffer.clear();
