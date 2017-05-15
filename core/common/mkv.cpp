@@ -85,6 +85,9 @@ uint64_t MKVStream::unpackUnsignedInt(const std::string& bytes)
 
 void MKVStream::rateLimit(uint64_t timecode)
 {
+    // Timecode は単調増加ではないが、少しのジッターはバッファーが吸収
+    // してくれるだろう。
+
     unsigned int secondsFromStart = timecode * m_timecodeScale / 1000000000;
     unsigned int ctime = sys->getTime();
 
