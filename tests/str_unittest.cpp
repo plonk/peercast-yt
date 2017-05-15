@@ -151,3 +151,12 @@ TEST_F(strFixture, join)
     ASSERT_STREQ("ab", str::join("", {"a", "b"}).c_str());
     ASSERT_STREQ("ab", str::join("", str::split("a,b", ",")).c_str());
 }
+
+TEST_F(strFixture, extension_without_dot)
+{
+    ASSERT_STREQ("",    str::extension_without_dot("").c_str());
+    ASSERT_STREQ("flv", str::extension_without_dot("test.flv").c_str());
+    ASSERT_STREQ("FLV", str::extension_without_dot("TEST.FLV").c_str());
+    ASSERT_STREQ("",    str::extension_without_dot("test.").c_str());
+    ASSERT_STREQ("gz",  str::extension_without_dot("hoge.tar.gz").c_str());
+}
