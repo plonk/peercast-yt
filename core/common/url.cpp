@@ -230,15 +230,7 @@ int URLSource::getSourceRateAvg()
             // if filetype is unknown, try and figure it out from file extension.
             //if ((info.srcType == ChanInfo::T_UNKNOWN) || (info.srcType == ChanInfo::T_PLAYLIST))
             {
-                const char *ext = fileName+strlen(fileName);
-                while (*--ext)
-                    if (*ext == '.')
-                    {
-                        ext++;
-                        break;
-                    }
-
-                fileType = ChanInfo::getTypeFromStr(ext);
+                fileType = ChanInfo::getTypeFromStr(str::extension_without_dot(fileName).c_str());
             }
 
             ch->readDelay = true;
