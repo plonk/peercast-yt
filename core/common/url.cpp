@@ -240,7 +240,7 @@ int URLSource::getSourceRateAvg()
             else if (fileType == ChanInfo::T_ASX)
                 pls = new PlayList(PlayList::T_ASX, 1000);
             else
-                ch->info.contentType = fileType;
+                ch->info.setContentType(fileType);
         }else
         {
             throw StreamException("Unsupported URL");
