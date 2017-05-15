@@ -38,6 +38,7 @@ void FLVStream::readHeader(Stream &in, Channel *ch)
 {
     metaBitrate = 0;
     fileHeader.read(in);
+    m_buffer.startTime = sys->getTime();
 }
 
 // ------------------------------------------
@@ -155,7 +156,7 @@ bool FLVTagBuffer::put(FLVTag& tag, Channel* ch)
 {
     if (tag.isKeyFrame())
     {
-        m_hasKeyFrame = true;
+        m_streamHasKeyFrames = true;
 
         if (m_mem.pos > 0)
         {
@@ -165,10 +166,7 @@ bool FLVTagBuffer::put(FLVTag& tag, Channel* ch)
         return true;
     } else if (m_mem.pos + tag.packetSize > MAX_OUTGOING_PACKET_SIZE)
     {
-        if (m_mem.pos > 0)
-        {
-            flush(ch);
-        }
+        flush(ch);
         sendImmediately(tag, ch);
         return true;
     } else if (m_mem.pos + tag.packetSize > FLUSH_THRESHOLD)
@@ -187,8 +185,31 @@ bool FLVTagBuffer::put(FLVTag& tag, Channel* ch)
     }
 }
 
+void FLVTagBuffer::rateLimit(uint32_t timestamp)
+{
+    int64_t diff = ((int64_t)startTime + timestamp/1000) - sys->getTime();
+    if (diff > 10)
+    {
+        // 10秒は長すぎるので、タイムスタンプがジャンプしてるっぽい。
+        // 基準時刻をリセット。
+        LOG_DEBUG("Timestamp way into the future. Resetting referece point.");
+        startTime = sys->getTime();
+    }else if (diff < -10)
+    {
+        LOG_DEBUG("Timestamp way back in the past. Resetting referece point.");
+        startTime = sys->getTime();
+    }else if (diff > 0)
+    {
+        //LOG_DEBUG("Sleeping %d s", (int)diff);
+        sys->sleep(diff * 1000);
+    }
+}
+
 void FLVTagBuffer::sendImmediately(FLVTag& tag, Channel* ch)
 {
+    if (ch->readDelay)
+        rateLimit(tag.getTimestamp());
+
     ChanPacket pack;
     MemoryStream mem(tag.packet, tag.packetSize);
 
@@ -205,7 +226,7 @@ void FLVTagBuffer::sendImmediately(FLVTag& tag, Channel* ch)
         pack.type = ChanPacket::T_DATA;
         pack.pos = ch->streamPos;
         pack.len = rl;
-        if (m_hasKeyFrame)
+        if (m_streamHasKeyFrames)
         {
             if (firstTimeRound && tag.isKeyFrame())
                 pack.cont = false;
@@ -215,7 +236,7 @@ void FLVTagBuffer::sendImmediately(FLVTag& tag, Channel* ch)
         mem.read(pack.data, pack.len);
 
         ch->newPacket(pack);
-        ch->checkReadDelay(pack.len);
+        //ch->checkReadDelay(pack.len);
         ch->streamPos += pack.len;
 
         rlen -= rl;
@@ -231,6 +252,13 @@ void FLVTagBuffer::flush(Channel* ch)
     int length = m_mem.pos;
 
     m_mem.rewind();
+    {
+        FLVTag flvTag;
+        flvTag.read(m_mem);
+        if (ch->readDelay)
+            rateLimit(flvTag.getTimestamp());
+        m_mem.rewind();
+    }
 
     ChanPacket pack;
 
@@ -238,12 +266,12 @@ void FLVTagBuffer::flush(Channel* ch)
     pack.pos = ch->streamPos;
     pack.len = length;
     // キーフレームでないタグだけがバッファリングされる。
-    if (m_hasKeyFrame)
+    if (m_streamHasKeyFrames)
         pack.cont = true;
     m_mem.read(pack.data, length);
 
     ch->newPacket(pack);
-    ch->checkReadDelay(pack.len);
+    //ch->checkReadDelay(pack.len);
     ch->streamPos += pack.len;
 
     m_mem.rewind();

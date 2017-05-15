@@ -188,7 +188,8 @@ public:
 
     FLVTagBuffer()
         : m_mem(ChanPacket::MAX_DATALEN)
-        , m_hasKeyFrame(false)
+        , m_streamHasKeyFrames(false)
+        , startTime(0)
     {}
 
     ~FLVTagBuffer()
@@ -197,9 +198,11 @@ public:
 
     bool put(FLVTag& tag, Channel* ch);
     void flush(Channel* ch);
+    void rateLimit(uint32_t timestamp);
 
     MemoryStream m_mem;
-    bool m_hasKeyFrame;
+    bool m_streamHasKeyFrames;
+    unsigned int startTime;
 
 private:
     void sendImmediately(FLVTag& tag, Channel* ch);
