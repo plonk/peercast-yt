@@ -14,6 +14,13 @@ void MKVStream::sendPacket(ChanPacket::TYPE type, const byte_string& data, bool 
     if (data.size() > ChanPacket::MAX_DATALEN)
         throw StreamException("MKV packet too big");
 
+    if (type == ChanPacket::T_HEAD)
+    {
+        ch->streamIndex++;
+        ch->rawData.init();
+        ch->streamPos = 0;
+    }
+
     ChanPacket pack;
     pack.type = type;
     pack.pos  = ch->streamPos;
