@@ -1357,10 +1357,10 @@ void Servent::CMD_bump(char *cmd, HTTP& http, HTML& html, String& jumpStr)
         c->bump = true;
     }
 
-    try
+    if (!http.getHeader("Referer").empty())
     {
-        jumpStr.sprintf("%s", http.headers.at("REFERER").c_str());
-    } catch (std::out_of_range&)
+        jumpStr.sprintf("%s", http.getHeader("Referer").c_str());
+    }else
     {
         jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
     }
