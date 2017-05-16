@@ -1256,7 +1256,10 @@ void Servent::CMD_clear(char *cmd, HTTP& http, HTML& html, String& jumpStr)
             stats.clearRange(Stats::PACKETSSTART, Stats::PACKETSEND);
     }
 
-    jumpStr.sprintf("/%s/index.html", servMgr->htmlPath);
+    if (!http.getHeader("Referer").empty())
+        jumpStr.sprintf("%s", http.getHeader("Referer").c_str());
+    else
+        jumpStr.sprintf("/%s/index.html", servMgr->htmlPath);
 }
 
 void Servent::CMD_upgrade(char *cmd, HTTP& http, HTML& html, String& jumpStr)
