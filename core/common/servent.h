@@ -281,28 +281,28 @@ public:
     Cookie              cookie;
 
 private:
-    void CMD_redirect(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_viewxml(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_clearlog(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_save(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_reg(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_edit_bcid(char *cmd, HTTP& http, HTML& html, String& jumpStr);
     void CMD_add_bcid(char *cmd, HTTP& http, HTML& html, String& jumpStr);
     void CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_fetch(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_stopserv(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_hitlist(char *cmd, HTTP& http, HTML& html, String& jumpStr);
+    void CMD_bump(char *cmd, HTTP& http, HTML& html, String& jumpStr);
     void CMD_clear(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_upgrade(char *cmd, HTTP& http, HTML& html, String& jumpStr);
+    void CMD_clearlog(char *cmd, HTTP& http, HTML& html, String& jumpStr);
     void CMD_connect(char *cmd, HTTP& http, HTML& html, String& jumpStr);
+    void CMD_edit_bcid(char *cmd, HTTP& http, HTML& html, String& jumpStr);
+    void CMD_fetch(char *cmd, HTTP& http, HTML& html, String& jumpStr);
+    void CMD_hitlist(char *cmd, HTTP& http, HTML& html, String& jumpStr);
+    void CMD_keep(char *cmd, HTTP& http, HTML& html, String& jumpStr);
+    void CMD_login(char *cmd, HTTP& http, HTML& html, String& jumpStr);
+    void CMD_logout(char *cmd, HTTP& http, HTML& html, String& jumpStr);
+    void CMD_net_add(char *cmd, HTTP& http, HTML& html, String& jumpStr);
+    void CMD_redirect(char *cmd, HTTP& http, HTML& html, String& jumpStr);
+    void CMD_reg(char *cmd, HTTP& http, HTML& html, String& jumpStr);
+    void CMD_relay(char *cmd, HTTP& http, HTML& html, String& jumpStr);
+    void CMD_save(char *cmd, HTTP& http, HTML& html, String& jumpStr);
     void CMD_shutdown(char *cmd, HTTP& http, HTML& html, String& jumpStr);
     void CMD_stop(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_bump(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_keep(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_relay(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_net_add(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_logout(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_login(char *cmd, HTTP& http, HTML& html, String& jumpStr);
+    void CMD_stopserv(char *cmd, HTTP& http, HTML& html, String& jumpStr);
+    void CMD_upgrade(char *cmd, HTTP& http, HTML& html, String& jumpStr);
+    void CMD_viewxml(char *cmd, HTTP& http, HTML& html, String& jumpStr);
 };
 
 extern char *nextCGIarg(char *cp, char *cmd, char *arg);
