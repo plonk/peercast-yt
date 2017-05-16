@@ -283,6 +283,15 @@ public:
         }
     }
 
+    std::string getHeader(const std::string& name) const
+    {
+        auto it = headers.find(str::upcase(name));
+        if (it == headers.end())
+            return "";
+        else
+            return it->second;
+    }
+
     void send(const HTTPResponse& response);
 
     char    cmdLine[8192], *arg;
