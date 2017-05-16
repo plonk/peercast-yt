@@ -1254,6 +1254,8 @@ void Servent::CMD_clear(char *cmd, HTTP& http, HTML& html, String& jumpStr)
             chanMgr->clearHitLists();
         else if (strcmp(curr, "packets") == 0)
             stats.clearRange(Stats::PACKETSSTART, Stats::PACKETSEND);
+        else if (strcmp(curr, "channels") == 0)
+            chanMgr->closeIdles();
     }
 
     if (!http.getHeader("Referer").empty())

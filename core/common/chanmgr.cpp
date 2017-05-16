@@ -39,6 +39,16 @@ int ChanMgr::numIdleChannels()
 }
 
 // -----------------------------------
+void ChanMgr::closeIdles()
+{
+    for (Channel *ch = channel; ch; ch = ch->next)
+    {
+        if (ch->isIdle())
+            ch->thread.shutdown();
+    }
+}
+
+// -----------------------------------
 void ChanMgr::closeOldestIdle()
 {
     unsigned int idleTime = (unsigned int)-1;
