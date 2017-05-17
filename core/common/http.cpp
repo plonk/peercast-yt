@@ -105,7 +105,7 @@ bool    HTTP::nextHeader()
             value = string(ap, end);
             for (int i = 0; i < name.size(); ++i)
                 name[i] = toupper(name[i]);
-            headers[name] = value;
+            headers.set(name, value);
         }
         return true;
     }else

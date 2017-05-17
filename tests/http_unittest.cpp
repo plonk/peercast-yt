@@ -72,8 +72,8 @@ TEST_F(HTTPFixture, nextHeader)
     ASSERT_EQ(2, http.headers.size());
     ASSERT_EQ(NULL, http.arg);
 
-    ASSERT_STREQ("localhost", http.headers["HOST"].c_str());
-    ASSERT_STREQ("close", http.headers["CONNECTION"].c_str());
+    ASSERT_STREQ("localhost", http.headers.get("Host").c_str());
+    ASSERT_STREQ("close", http.headers.get("Connection").c_str());
 }
 
 TEST_F(HTTPFixture, isHeader)

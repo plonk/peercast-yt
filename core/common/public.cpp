@@ -144,7 +144,7 @@ PublicController::acceptableLanguages(const string& acceptLanguage)
 // ------------------------------------------------------------
 HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream, Host& remoteHost)
 {
-    vector<string> langs = acceptableLanguages(req.getHeader("Accept-Language"));
+    vector<string> langs = acceptableLanguages(req.headers.get("Accept-Language"));
 
     if (req.path == "/public")
     {

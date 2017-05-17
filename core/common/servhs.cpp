@@ -106,14 +106,11 @@ int getCGIargINT(char *a)
 // -----------------------------------
 void Servent::handshakeJRPC(HTTP &http)
 {
-    int content_length;
+    int content_length = -1;
 
-    try {
-        string lenstr = http.headers.at("CONTENT-LENGTH");
+    string lenstr = http.headers.get("Content-Length");
+    if (!lenstr.empty())
         content_length = atoi(lenstr.c_str());
-    } catch (std::out_of_range) {
-        content_length = -1;
-    }
 
     if (content_length == -1)
         throw HTTPException("HTTP/1.0 411 Length required", 411);
@@ -383,7 +380,7 @@ void Servent::handshakePOST(HTTP &http)
     }else
     {
         http.readHeaders();
-        auto contentType = http.headers["CONTENT-TYPE"];
+        auto contentType = http.headers.get("Content-Type");
         if (contentType == "application/x-wms-pushsetup")
         {
             // WMHTTP
@@ -785,7 +782,7 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
         file.append("/login.html");
         if (local)
         {
-            if (http.headers["X-REQUESTED-WITH"] == "XMLHttpRequest")
+            if (http.headers.get("X-Requested-With") == "XMLHttpRequest")
                 throw HTTPException(HTTP_SC_FORBIDDEN, 403);
             else
                 handshakeLocalFile(file);
@@ -1100,9 +1097,9 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr)
     if (servMgr->serverHost.port != newPort)
     {
         std::string ipstr;
-        if (http.headers["HOST"] != "")
+        if (http.headers.get("Host") != "")
         {
-            auto vec = str::split(http.headers["HOST"], ":");
+            auto vec = str::split(http.headers.get("Host"), ":");
             ipstr =  vec[0]+":"+std::to_string(newPort);
         }else
         {
@@ -1258,8 +1255,8 @@ void Servent::CMD_clear(char *cmd, HTTP& http, HTML& html, String& jumpStr)
             chanMgr->closeIdles();
     }
 
-    if (!http.getHeader("Referer").empty())
-        jumpStr.sprintf("%s", http.getHeader("Referer").c_str());
+    if (!http.headers.get("Referer").empty())
+        jumpStr.sprintf("%s", http.headers.get("Referer").c_str());
     else
         jumpStr.sprintf("/%s/index.html", servMgr->htmlPath);
 }
@@ -1359,9 +1356,9 @@ void Servent::CMD_bump(char *cmd, HTTP& http, HTML& html, String& jumpStr)
         c->bump = true;
     }
 
-    if (!http.getHeader("Referer").empty())
+    if (!http.headers.get("Referer").empty())
     {
-        jumpStr.sprintf("%s", http.getHeader("Referer").c_str());
+        jumpStr.sprintf("%s", http.headers.get("Referer").c_str());
     }else
     {
         jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
@@ -1759,9 +1756,9 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
     // At this point, http has read all the headers.
 
     ASSERT(http.headers["CONTENT-TYPE"] == "application/x-wms-pushsetup");
-    LOG_DEBUG("%s", nlohmann::json(http.headers).dump().c_str());
+    LOG_DEBUG("%s", nlohmann::json(http.headers.m_headers).dump().c_str());
 
-    int size = std::atoi(http.headers["CONTENT-LENGTH"].c_str());
+    int size = std::atoi(http.headers.get("Content-Length").c_str());
 
     // エンコーダーの設定要求を読む。0 バイトの空の設定要求も合法。
     unique_ptr<char> buffer(new char[size + 1]);
@@ -1795,15 +1792,15 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
     LOG_DEBUG("Request line: %s", http.cmdLine);
 
     http.readHeaders();
-    LOG_DEBUG("Setup: %s", nlohmann::json(http.headers).dump().c_str());
+    LOG_DEBUG("Setup: %s", nlohmann::json(http.headers.m_headers).dump().c_str());
 
     ASSERT(http.headers["CONTENT-TYPE"] == "application/x-wms-pushstart");
 
     // -----------------------------------------
 
     // User-Agent ヘッダーがあれば agent をセット
-    if (http.headers["USER-AGENT"] != "")
-        this->agent = http.headers["USER-AGENT"];
+    if (http.headers.get("User-Agent") != "")
+        this->agent = http.headers.get("User-Agent");
 
     auto vec = str::split(cgi::unescape(path.substr(1)), ";");
     if (vec.size() == 0)
@@ -1881,7 +1878,7 @@ void Servent::handshakeHTTPPush(const std::string& args)
         throw HTTPException(HTTP_SC_BADREQUEST, 400);
     }
 
-    ChanInfo info = createChannelInfo(chanMgr->broadcastID, chanMgr->broadcastMsg, query, http.getHeader("Content-Type"));
+    ChanInfo info = createChannelInfo(chanMgr->broadcastID, chanMgr->broadcastMsg, query, http.headers.get("Content-Type"));
 
     Channel *c = chanMgr->findChannelByID(info.id);
     if (c)
@@ -1895,7 +1892,7 @@ void Servent::handshakeHTTPPush(const std::string& args)
     if (!c)
         throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-    bool chunked = (http.getHeader("Transfer-Encoding") == "chunked");
+    bool chunked = (http.headers.get("Transfer-Encoding") == "chunked");
     c->startHTTPPush(sock, chunked);
     sock = NULL;    // socket is taken over by channel, so don`t close it
 }

@@ -819,7 +819,7 @@ bool HTTPRequestScope::writeVariable(Stream& s, const String& varName, int loop)
 {
     if (varName == "request.host")
     {
-        if (m_request.getHeader("Host").empty())
+        if (m_request.headers.get("Host").empty())
         {
             servMgr->writeVariable(s, "serverIP");
             s.writeString(":");
@@ -827,7 +827,7 @@ bool HTTPRequestScope::writeVariable(Stream& s, const String& varName, int loop)
         }
         else
         {
-            s.writeString(m_request.getHeader("Host"));
+            s.writeString(m_request.headers.get("Host"));
             return true;
         }
     }
