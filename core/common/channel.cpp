@@ -791,17 +791,6 @@ static char *nextMetaPart(char *str, char delim)
 }
 
 // -----------------------------------
-static void copyStr(char *to, char *from, int max)
-{
-    char c;
-    while ((c=*from++) && (--max))
-        if (c != '\'')
-            *to++ = c;
-
-    *to = 0;
-}
-
-// -----------------------------------
 void Channel::processMp3Metadata(char *str)
 {
     ChanInfo newInfo = info;
