@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "servmgr.h"
-#include "dmstream.h"
+#include "sstream.h"
 
 class BCIDFixture : public ::testing::Test {
 public:

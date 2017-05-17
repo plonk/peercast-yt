@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "template.h"
-#include "dmstream.h"
+#include "sstream.h"
 
 class TemplateFixture : public ::testing::Test {
 public:

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "html.h"
-#include "dmstream.h"
+#include "sstream.h"
 #include "version2.h"
 
 class HTMLFixture : public ::testing::Test {

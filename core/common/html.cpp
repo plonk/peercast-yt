@@ -28,7 +28,7 @@
 #include "stream.h"
 #include "version2.h"
 #include "template.h"
-#include "dmstream.h"
+#include "sstream.h"
 
 // --------------------------------------
 HTML::HTML(const char *t, Stream &o)

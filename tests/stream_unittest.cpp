@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "stream.h"
-#include "dmstream.h"
+#include "sstream.h"
 
 class MockStream : public Stream
 {

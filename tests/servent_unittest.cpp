@@ -2,7 +2,7 @@
 #include "str.h"
 
 #include "servent.h"
-#include "dmstream.h"
+#include "sstream.h"
 
 #include "defer.h"
 

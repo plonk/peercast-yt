@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "dmstream.h"
+#include "sstream.h"
 
 class StringStreamFixture : public ::testing::Test {
 public:

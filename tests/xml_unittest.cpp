@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "dmstream.h"
+#include "sstream.h"
 #include "xml.h"
 
 class XMLFixture : public ::testing::Test {

@@ -24,7 +24,7 @@
 
 #include "servmgr.h"
 #include "stats.h"
-#include "dmstream.h"
+#include "sstream.h"
 #include "notif.h"
 #include "str.h"
 #include "jrpc.h"

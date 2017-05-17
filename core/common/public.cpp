@@ -3,7 +3,7 @@
 
 #include "public.h"
 #include "str.h"
-#include "dmstream.h"
+#include "sstream.h"
 #include "template.h"
 #include "jrpc.h"
 

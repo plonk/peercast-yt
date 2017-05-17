@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "dechunker.h"
-#include "dmstream.h"
+#include "sstream.h"
 
 class DechunkerFixture : public ::testing::Test {
 public:

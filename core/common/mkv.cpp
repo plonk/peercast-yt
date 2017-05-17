@@ -4,7 +4,7 @@
 #include "channel.h"
 #include "stream.h"
 #include "matroska.h"
-#include "dmstream.h"
+#include "sstream.h"
 
 using namespace matroska;
 

@@ -1,6 +1,6 @@
 #include "common.h"
 #include "socket.h"
-#include "dmstream.h"
+#include "sstream.h"
 
 class MockClientSocket : public ClientSocket
 {
