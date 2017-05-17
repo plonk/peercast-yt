@@ -25,7 +25,6 @@
 #include <ApplicationServices/ApplicationServices.h>
 #endif
 
-
 #include <sys/time.h>
 #include <pthread.h>
 #include <signal.h>
@@ -44,8 +43,8 @@ USys::USys()
     signal(SIGABRT, SIG_IGN);
 
     rndSeed = rnd();
-
 }
+
 // ---------------------------------
 double USys::getDTime()
 {
@@ -69,7 +68,6 @@ ClientSocket *USys::createSocket()
     return new UClientSocket();
 }
 
-
 // ---------------------------------
 void USys::endThread(ThreadInfo *info)
 {
@@ -86,14 +84,11 @@ void USys::waitThread(ThreadInfo *info, int timeout)
     //pthread_join(info->handle, NULL);
 }
 
-
-
 // ---------------------------------
 typedef void *(*THREAD_PTR)(void *);
 bool    USys::startThread(ThreadInfo *info)
 {
     info->active = true;
-
 
     LOG_DEBUG("New thread: %d", numThreads);
 
@@ -117,6 +112,7 @@ bool    USys::startThread(ThreadInfo *info)
         return true;
     }
 }
+
 // ---------------------------------
 void    USys::setThreadName(ThreadInfo *thread, const char* name)
 {
@@ -126,6 +122,7 @@ void    USys::setThreadName(ThreadInfo *thread, const char* name)
     pthread_setname_np(thread->handle, buf);
 #endif
 }
+
 // ---------------------------------
 void    USys::sleep(int ms)
 {
@@ -137,24 +134,32 @@ void USys::appMsg(long msg, long arg)
 {
     //SendMessage(mainWindow, WM_USER, (WPARAM)msg, (LPARAM)arg);
 }
-// ---------------------------------
+
 #ifndef __APPLE__
+
+// ---------------------------------
 void USys::getURL(const char *url)
 {
 }
+
 // ---------------------------------
 void USys::callLocalURL(const char *str, int port)
 {
 }
+
 // ---------------------------------
 void USys::executeFile( const char *file )
 {
 }
+
+// ---------------------------------
 void USys::exit()
 {
     ::exit(0);
 }
+
 #else
+
 // ---------------------------------
 void USys::openURL( const char* url )
 {
@@ -171,6 +176,7 @@ void USys::openURL( const char* url )
         CFRelease( urlString );
     }
 }
+
 // ---------------------------------
 void USys::callLocalURL(const char *str, int port)
 {
@@ -178,6 +184,7 @@ void USys::callLocalURL(const char *str, int port)
     sprintf(cmd, "http://localhost:%d/%s", port, str);
     openURL( cmd );
 }
+
 // ---------------------------------
 void USys::getURL(const char *url)
 {
@@ -186,6 +193,7 @@ void USys::getURL(const char *url)
         openURL( url );
     }
 }
+
 // ---------------------------------
 void USys::executeFile( const char *file )
 {
@@ -204,6 +212,7 @@ void USys::executeFile( const char *file )
         CFRelease( fileString );
     }
 }
+
 // ---------------------------------
 void USys::exit()
 {
@@ -213,4 +222,5 @@ void USys::exit()
     ::exit(0);
 #endif
 }
+
 #endif

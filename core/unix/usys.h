@@ -18,10 +18,9 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-
-
 #ifndef _USYS_H
 #define _USYS_H
+
 // ------------------------------------
 #include "socket.h"
 #include "sys.h"
@@ -55,7 +54,6 @@ private:
     void openURL( const char* url );
 #endif
 };
-
 
 // ------------------------------------
 #endif

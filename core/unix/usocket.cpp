@@ -242,7 +242,6 @@ int UClientSocket::read(void *p, int l)
         {
             // non-blocking sockets always fall through to here
             checkTimeout(true, false);
-
         }else if (r == 0)
         {
             throw SockException("Closed on read");
@@ -260,6 +259,7 @@ int UClientSocket::read(void *p, int l)
 
     return bytesRead;
 }
+
 // --------------------------------------------------
 int UClientSocket::readUpto(void *p, int l)
 {
@@ -271,7 +271,6 @@ int UClientSocket::readUpto(void *p, int l)
         {
             // non-blocking sockets always fall through to here
             checkTimeout(true, false);
-
         }else if (r == 0)
         {
             break;
