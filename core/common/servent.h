@@ -229,7 +229,7 @@ public:
     bool    acceptGIV(ClientSocket *);
     bool    sendPacket(ChanPacket &, GnuID &, GnuID &, GnuID &, Servent::TYPE);
 
-    ChanInfo createChannelInfo(GnuID broadcastID, const String& broadcastMsg, cgi::Query& query);
+    ChanInfo createChannelInfo(GnuID broadcastID, const String& broadcastMsg, cgi::Query& query, const std::string& contentType);
 
     static bool hasValidAuthToken(const std::string& requestFilename);
     static PlayList::TYPE playListType(ChanInfo &info);

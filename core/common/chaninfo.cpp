@@ -192,6 +192,37 @@ const char *ChanInfo::getMIMEType(TYPE t)
 }
 
 // -----------------------------------
+ChanInfo::TYPE ChanInfo::getTypeFromMIME(const std::string& mediaType)
+{
+    if (mediaType == MIME_XOGG)
+        return T_OGG;
+    else if (mediaType == MIME_XOGG)
+        return T_OGM;
+    else if (mediaType == MIME_MP3)
+        return T_MP3;
+    else if (mediaType == MIME_MOV)
+        return T_MOV;
+    else if (mediaType == MIME_MPG)
+        return T_MPG;
+    else if (mediaType == MIME_NSV)
+        return T_NSV;
+    else if (mediaType == MIME_ASX)
+        return T_ASX;
+    else if (mediaType == MIME_WMA)
+        return T_WMA;
+    else if (mediaType == MIME_WMV)
+        return T_WMV;
+    else if (mediaType == MIME_FLV)
+        return T_FLV;
+    else if (mediaType == MIME_MKV)
+        return T_MKV;
+    else if (mediaType == MIME_WEBM)
+        return T_WEBM;
+    else
+        return T_UNKNOWN;
+}
+
+// -----------------------------------
 ChanInfo::TYPE ChanInfo::getTypeFromStr(const char *str)
 {
     if (stricmp(str, "MP3")==0)

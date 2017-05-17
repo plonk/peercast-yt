@@ -133,6 +133,7 @@ public:
     static const char   *getTypeExt(TYPE);
     static const char   *getMIMEType(TYPE);
     static TYPE         getTypeFromStr(const char *str);
+    static TYPE         getTypeFromMIME(const std::string& mediaType);
     static PROTOCOL     getProtocolFromStr(const char *str);
     const char*         getPlayListExt();
 

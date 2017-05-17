@@ -237,7 +237,7 @@ TEST_F(ServentFixture, handshakeIncomingLongURI)
 TEST_F(ServentFixture, createChannelInfoNullCase)
 {
     Query query("");
-    auto info = s.createChannelInfo(GnuID(), String(), query);
+    auto info = s.createChannelInfo(GnuID(), String(), query, "");
 
     ASSERT_EQ(ChanInfo::T_UNKNOWN, info.contentType);
     ASSERT_STREQ("", info.name.cstr());
@@ -251,7 +251,7 @@ TEST_F(ServentFixture, createChannelInfoNullCase)
 TEST_F(ServentFixture, createChannelInfoComment)
 {
     Query query("");
-    auto info = s.createChannelInfo(GnuID(), "俺たちみんなトドだぜ (・ω・｀з)3", query);
+    auto info = s.createChannelInfo(GnuID(), "俺たちみんなトドだぜ (・ω・｀з)3", query, "");
 
     ASSERT_STREQ("俺たちみんなトドだぜ (・ω・｀з)3", info.comment);
 }
@@ -259,7 +259,7 @@ TEST_F(ServentFixture, createChannelInfoComment)
 TEST_F(ServentFixture, createChannelInfoCommentOverride)
 {
     Query query("comment=スレなし");
-    auto info = s.createChannelInfo(GnuID(), "俺たちみんなトドだぜ (・ω・｀з)3", query);
+    auto info = s.createChannelInfo(GnuID(), "俺たちみんなトドだぜ (・ω・｀з)3", query, "");
 
     ASSERT_STREQ("スレなし", info.comment);
 }
@@ -267,7 +267,7 @@ TEST_F(ServentFixture, createChannelInfoCommentOverride)
 TEST_F(ServentFixture, createChannelInfoTypicalCase)
 {
     Query query("name=予定地&genre=テスト&desc=てすと&url=http://example.com&comment=スレなし&bitrate=400&type=mkv");
-    auto info = s.createChannelInfo(GnuID(), String(), query);
+    auto info = s.createChannelInfo(GnuID(), String(), query, "");
 
     ASSERT_EQ(ChanInfo::T_MKV, info.contentType);
     ASSERT_STREQ("予定地", info.name.cstr());
@@ -283,7 +283,7 @@ TEST_F(ServentFixture, createChannelInfoNonnumericBitrate)
     Query query("bitrate=BITRATE");
     ChanInfo info;
 
-    ASSERT_NO_THROW(info = s.createChannelInfo(GnuID(), String(), query));
+    ASSERT_NO_THROW(info = s.createChannelInfo(GnuID(), String(), query, ""));
     ASSERT_EQ(0, info.bitrate);
 }
 
