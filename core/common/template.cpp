@@ -215,7 +215,7 @@ bool Template::writeLoopVariable(Stream &s, const String &varName, int loop)
 // --------------------------------------
 bool Template::writePageVariable(Stream &s, const String &varName, int loop)
 {
-    if (varName == "page.channel.exist")
+    if (varName.startsWith("page.channel."))
     {
         const char *idstr = getCGIarg(tmplArgs, "id=");
         if (idstr)
@@ -223,22 +223,18 @@ bool Template::writePageVariable(Stream &s, const String &varName, int loop)
             GnuID id;
             id.fromStr(idstr);
             Channel *ch = chanMgr->findChannelByID(id);
-            if (ch)
-                s.writeString("1");
-            else
-                s.writeString("0");
-            return true;
-        }
-    }else if (varName.startsWith("page.channel."))
-    {
-        const char *idstr = getCGIarg(tmplArgs, "id=");
-        if (idstr)
-        {
-            GnuID id;
-            id.fromStr(idstr);
-            Channel *ch = chanMgr->findChannelByID(id);
-            if (ch)
-                return ch->writeVariable(s, varName+13);
+            if (varName == "page.channel.exist")
+            {
+                if (ch)
+                    s.writeString("1");
+                else
+                    s.writeString("0");
+                return true;
+            }else
+            {
+                if (ch)
+                    return ch->writeVariable(s, varName+13);
+            }
         }
     }else
     {
