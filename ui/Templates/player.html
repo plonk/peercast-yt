@@ -8,7 +8,7 @@
       <param name="movie" value="http://releases.flowplayer.org/swf/flowplayer-3.2.18.swf" />
       <param name="allowfullscreen" value="true" />
       <param name="allowscriptaccess" value="always" />
-      <param name="flashvars" value='config={"canvas":{"backgroundColor":"#000","backgroundGradient":"none"},"clip":{"url":"http://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.flv?auth={$page.channel.authToken}"},"playlist":[{"url":"http://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.flv?auth={$page.channel.authToken}","scaling":"fit"}]}' />
+      <param name="flashvars" value='config={"canvas":{"backgroundColor":"#000","backgroundGradient":"none"},"clip":{"url":"/stream/{$page.channel.id}.flv?auth={$page.channel.authToken}"},"playlist":[{"url":"/stream/{$page.channel.id}.flv?auth={$page.channel.authToken}","scaling":"fit"}]}' />
 
       {#Your browser doesn't seem to support playback of FLV videos.} {#Try the playlist link below.}
     </object>
@@ -23,7 +23,7 @@
       standby="Loading MicrosoftR WindowsR Media Player components..."
       type="application/x-oleobject">
 
-      <param name="FileName" value="http://{$servMgr.serverIP}:{$servMgr.serverPort}/pls/{$page.channel.id}.asx?auth={$page.channel.authToken}" />
+      <param name="FileName" value="/pls/{$page.channel.id}.asx?auth={$page.channel.authToken}" />
       <!-- 自動再生の有無 -->
       <param name="AutoStart" value="true" />
       <!-- コントロール表示の有無 -->
@@ -38,7 +38,7 @@
 {@if page.channel.type == "MP3"}
   <div class="message" style="margin: 5em auto; text-align: center">
     <audio controls autoplay style="min-width: 640px">
-      <source src="http://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.mp3?auth={$page.channel.authToken}" type="audio/mpeg">
+      <source src="/stream/{$page.channel.id}.mp3?auth={$page.channel.authToken}" type="audio/mpeg">
       {#Your browser doesn't seem to support playback of MP3 audio.} {#Try the playlist link below.}
       <!-- Your browser does not support the audio element. -->
     </audio>
@@ -46,7 +46,7 @@
 {@else}{@if page.channel.type == "MKV"}
   <div class="message" style="margin: 5em auto; text-align: center">
     <video controls autoplay>
-      <source src="http://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.mkv?auth={$page.channel.authToken}" type="video/webm">
+      <source src="/stream/{$page.channel.id}.mkv?auth={$page.channel.authToken}" type="video/webm">
       {#Your browser doesn't seem to support playback of MKV videos.} {#Try the playlist link below.}
     </video>
     <div>{#Should the playback fail, try the playlist link below.}</div>
@@ -54,7 +54,7 @@
 {@else}{@if page.channel.type == "WEBM"}
   <div class="message" style="margin: 5em auto; text-align: center">
     <video controls autoplay>
-      <source src="http://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.webm?auth={$page.channel.authToken}" type="video/webm">
+      <source src="/stream/{$page.channel.id}.webm?auth={$page.channel.authToken}" type="video/webm">
       {#Your browser doesn't seem to support playback of WebM videos.} {#Try the playlist link below.}
     </video>
   </div>
