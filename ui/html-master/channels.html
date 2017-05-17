@@ -53,8 +53,14 @@
         </TD>
         <TD align="left"><span class="normal"><b>{$loop.channel.name}</b></span><br>
           <span class="normal">{$loop.channel.desc}</span><br>
-          <span class="normal"> <b><a href="relayinfo.html?id={$loop.channel.id}">{#Info}</a></b>
-            {@if loop.channel.contactURL} - <b><a href="{$loop.channel.contactURL}">{#WWW}</a></b>{@end}
+          <span class="normal">
+            <b><a href="relayinfo.html?id={$loop.channel.id}">{#Info}</a></b>
+            {@if loop.channel.contactURL}
+              - <b><a href="{$loop.channel.contactURL}">{#WWW}</a></b>
+            {@else}
+              - <b class="text-muted">{#WWW}</b>
+            {@end}
+            - <b><a href="/pls/{$loop.channel.id}{$loop.channel.plsExt}?auth={$loop.channel.authToken}">{#Playlist}</a></b>
             - <b><a href="/admin?cmd=bump&amp;id={$loop.channel.id}">{#Bump}</a></b>
             - <b><a href="/admin?cmd=stop&amp;id={$loop.channel.id}">{#Stop}</a></b>
           </span></TD>

@@ -79,3 +79,7 @@ a.button {
 	border: solid #ccc 1px;
 	padding: 3px;
 }
+
+.text-muted {
+	color: #777;
+}
