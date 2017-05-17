@@ -21,9 +21,9 @@ public:
     std::string str();
     void str(const std::string& data);
 
-    void checkSize(int);
+    void checkSize(size_t);
 
-    int m_pos;
+    size_t m_pos;
     std::string m_buffer;
 };
 

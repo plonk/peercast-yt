@@ -36,7 +36,7 @@ using namespace std;
 static json::object_t array_to_object(json::array_t arr)
 {
     json::object_t obj;
-    for (int i = 0; i < arr.size(); i++)
+    for (size_t i = 0; i < arr.size(); i++)
     {
         obj[to_string(i)] = arr[i];
     }
@@ -627,7 +627,7 @@ void    Template::readForeach(Stream &in, Stream *outp, int loop)
             {
                 auto outer = currentElement;
                 int start = in.getPosition();
-                for (int i = 0; i < coll.size(); i++)
+                for (size_t i = 0; i < coll.size(); i++)
                 {
                     in.seekTo(start);
                     currentElement = coll[i];

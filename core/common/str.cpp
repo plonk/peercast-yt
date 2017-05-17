@@ -14,7 +14,7 @@ std::string hexdump(const std::string& in)
 {
     std::string res;
 
-    for (int i = 0; i < in.size(); i++) {
+    for (size_t i = 0; i < in.size(); i++) {
         if (i != 0)
             res += ' ';
         char buf[3];
@@ -93,7 +93,7 @@ std::string group_digits(const std::string& in, const std::string& separator)
     std::reverse(integer.begin(), integer.end());
     std::string delim = separator;
     std::reverse(delim.begin(), delim.end());
-    for (int i = 0; i < end; i++)
+    for (size_t i = 0; i < end; i++)
     {
         if (i != 0 && i%3 == 0)
             res += delim;

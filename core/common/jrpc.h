@@ -213,7 +213,7 @@ public:
     {
         json result = json::array();
 
-        for (int i = 0; i < names.size(); i++)
+        for (size_t i = 0; i < names.size(); i++)
             result.push_back(nullptr);
 
         for (std::pair<std::string, json> pair : named_params.get<json::object_t>())
@@ -232,7 +232,7 @@ public:
     // method_not_found 例外を上げる。
     json dispatch(const json& m, const json& p)
     {
-        for (int i = 0; i < m_methods.size(); i++)
+        for (size_t i = 0; i < m_methods.size(); i++)
         {
             entry& info = m_methods[i];
 
@@ -841,7 +841,7 @@ public:
     {
         std::string res;
 
-        for (int i = 0; i < str.size(); ++i)
+        for (size_t i = 0; i < str.size(); ++i)
             res.push_back(std::tolower(str[i]));
 
         return res;

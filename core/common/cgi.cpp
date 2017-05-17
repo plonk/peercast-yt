@@ -376,7 +376,7 @@ std::string unescape_html(const std::string& input)
             if (s[0] != '#')
                 return false;
 
-            for (int i = 1; i < s.size(); i++)
+            for (size_t i = 1; i < s.size(); i++)
             {
                 if (!(s[i] >= '0' && s[i] <= '9'))
                     return false;
@@ -393,7 +393,7 @@ std::string unescape_html(const std::string& input)
             if (s[0] != '#' || !(s[1] == 'x' || s[1] == 'X'))
                 return false;
 
-            for (int i = 2; i < s.size(); i++)
+            for (size_t i = 2; i < s.size(); i++)
             {
                 if (!((s[i] >= '0' && s[i] <= '9') ||
                       (s[i] >= 'a' && s[i] <= 'f') ||

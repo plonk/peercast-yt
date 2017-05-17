@@ -30,7 +30,7 @@ public:
     void rateLimit(uint64_t timecode);
     static uint64_t unpackUnsignedInt(const std::string& bytes);
 
-    int          m_videoTrackNumber;
+    uint64_t     m_videoTrackNumber;
     bool         m_hasKeyFrame;
     uint64_t     m_timecodeScale; // ナノ秒
     unsigned int m_startTime;

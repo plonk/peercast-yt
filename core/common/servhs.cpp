@@ -540,7 +540,7 @@ void Servent::handshakeIncoming()
 
     char buf[8192];
 
-    if (sock->readLine(buf, sizeof(buf)) >= sizeof(buf)-1)
+    if ((size_t)sock->readLine(buf, sizeof(buf)) >= sizeof(buf)-1)
     {
         throw HTTPException(HTTP_SC_URITOOLONG, 414);
     }

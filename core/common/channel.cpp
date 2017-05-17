@@ -1338,7 +1338,7 @@ void Channel::getStreamPath(char *str)
 std::string Channel::renderHexDump(const std::string& in)
 {
     std::string res;
-    int i;
+    size_t i;
     for (i = 0; i < in.size()/16; i++)
     {
         auto line = in.substr(i*16, 16);

@@ -81,7 +81,7 @@ uint64_t MKVStream::unpackUnsignedInt(const std::string& bytes)
 
     uint64_t res = 0;
 
-    for (int i = 0; i < bytes.size(); i++)
+    for (size_t i = 0; i < bytes.size(); i++)
     {
         res <<= 8;
         res |= (uint8_t) bytes[i];
@@ -162,10 +162,10 @@ void MKVStream::sendCluster(const byte_string& cluster, Channel* ch)
             if (buffer.size() != 0) throw StreamException("Logic error");
             buffer = id.bytes + size.bytes;
             buffer.append(payload.begin(), payload.end());
-            int pos = 0;
+            size_t pos = 0;
             while (pos < buffer.size())
             {
-                int next = std::min(pos + 15*1024, (int)buffer.size());
+                int next = std::min(pos + 15*1024, buffer.size());
                 sendPacket(ChanPacket::T_DATA, buffer.substr(pos, next-pos), continuation, ch);
                 continuation = true;
                 pos = next;

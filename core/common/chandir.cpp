@@ -198,7 +198,7 @@ bool ChannelDirectory::writeChannelVariable(Stream& out, const String& varName, 
 {
     CriticalSection cs(m_lock);
 
-    if (!(index >= 0 && index < m_channels.size()))
+    if (!(index >= 0 && (size_t)index < m_channels.size()))
         return false;
 
     char buf[1024];
@@ -246,7 +246,7 @@ bool ChannelDirectory::writeFeedVariable(Stream& out, const String& varName, int
 {
     CriticalSection cs(m_lock);
 
-    if (!(index >= 0 && index < m_feeds.size())) {
+    if (!(index >= 0 && (size_t)index < m_feeds.size())) {
         // empty string
         return true;
     }
