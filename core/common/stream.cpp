@@ -66,10 +66,11 @@ void FileStream::openWriteAppend(const char *fn)
 {
     if (file)
         close();
-        file = fopen(fn, "ab");
 
-        if (!file)
-            throw StreamException("Unable to open file");
+    file = fopen(fn, "ab");
+
+    if (!file)
+        throw StreamException("Unable to open file");
 }
 
 // -------------------------------------
@@ -196,20 +197,20 @@ int Stream::writeUTF8(unsigned int code)
     if (code < 0x0800)
     {
         writeChar(code>>6 | 0xC0);
-        writeChar(code & 0x3F | 0x80);
+        writeChar((code & 0x3F) | 0x80);
         return 2;
     }else if (code < 0x10000)
     {
         writeChar(code>>12 | 0xE0);
-        writeChar(code>>6 & 0x3F | 0x80);
-        writeChar(code & 0x3F | 0x80);
+        writeChar((code>>6 & 0x3F) | 0x80);
+        writeChar((code & 0x3F) | 0x80);
         return 3;
     }else
     {
         writeChar(code>>18 | 0xF0);
-        writeChar(code>>12 & 0x3F | 0x80);
-        writeChar(code>>6 & 0x3F | 0x80);
-        writeChar(code & 0x3F | 0x80);
+        writeChar((code>>12 & 0x3F) | 0x80);
+        writeChar((code>>6 & 0x3F) | 0x80);
+        writeChar((code & 0x3F) | 0x80);
         return 4;
     }
 }

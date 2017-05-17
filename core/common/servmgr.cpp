@@ -479,7 +479,7 @@ Servent *ServMgr::findServentByIndex(int id)
     {
         if (cnt == id)
             return s;
-            cnt++;
+        cnt++;
         s=s->next;
     }
     return NULL;
