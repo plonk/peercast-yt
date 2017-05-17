@@ -25,6 +25,7 @@
 #include "xml.h"
 #include "asf.h"
 #include "cstream.h"
+#include "varwriter.h"
 
 // --------------------------------------------------
 struct MP3Header
@@ -116,7 +117,7 @@ public:
 };
 
 // ----------------------------------
-class Channel
+class Channel : public VariableWriter
 {
 public:
 
@@ -221,7 +222,7 @@ public:
     void         broadcastTrackerUpdate(GnuID &, bool = false);
     bool         sendPacketUp(ChanPacket &, GnuID &, GnuID &, GnuID &);
 
-    bool         writeVariable(Stream &, const String &, int);
+    bool         writeVariable(Stream &, const String &, int) override;
     bool         acceptGIV(ClientSocket *);
     void         updateInfo(const ChanInfo &);
     int          readStream(Stream &, ChannelStream *);

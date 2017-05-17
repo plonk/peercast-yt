@@ -24,6 +24,7 @@
 #include "sys.h"
 #include "stream.h"
 #include "json.hpp"
+#include "varwriter.h"
 
 using json = nlohmann::json;
 
@@ -32,7 +33,7 @@ class Template
 {
 public:
 
-    class Scope
+    class Scope : VariableWriter
     {
     public:
         virtual bool writeVariable(Stream &, const String &, int) = 0;
@@ -49,26 +50,11 @@ public:
         TMPL_FOREACH
     };
 
-    Template(const char* args = NULL)
-        : currentElement(json::object({}))
-    {
-        if (args)
-            tmplArgs = strdup(args);
-        else
-            tmplArgs = NULL;
-    }
+    Template(const char* args = NULL);
+    Template(const std::string& args);
+    ~Template();
 
-    Template(const std::string& args)
-        : currentElement(json::object({}))
-    {
-        tmplArgs = strdup(args.c_str());
-    }
-
-    ~Template()
-    {
-        if (tmplArgs)
-            free(tmplArgs);
-    }
+    void initVariableWriters();
 
     Template& prependScope(Scope& scope)
     {
@@ -116,6 +102,7 @@ public:
     json currentElement;
 
     std::list<Scope*> m_scopes;
+    std::map<std::string,VariableWriter*> m_variableWriters;
 };
 
 #include "http.h"

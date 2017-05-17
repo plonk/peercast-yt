@@ -310,7 +310,7 @@ ChanMgr::~ChanMgr()
 }
 
 // -----------------------------------
-bool ChanMgr::writeVariable(Stream &out, const String &var, int index)
+bool ChanMgr::writeVariable(Stream &out, const String &var)
 {
     char buf[1024];
     if (var == "numHitLists")

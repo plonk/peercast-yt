@@ -22,6 +22,7 @@
 
 #include "servent.h"
 #include "chandir.h"
+#include "varwriter.h"
 
 // ----------------------------------
 
@@ -30,14 +31,14 @@ const int MIN_TRACKER_RETRY = 10;
 const int MIN_RELAY_RETRY = 5;
 
 // ----------------------------------
-class BCID
+class BCID : public VariableWriter
 {
 public:
     BCID()
     :next(0), valid(true)
     {}
 
-    bool    writeVariable(Stream &, const String &);
+    bool    writeVariable(Stream &, const String &) override;
 
     GnuID   id;
     String  name, email, url;
@@ -85,7 +86,7 @@ public:
 };
 
 // ----------------------------------
-class ServFilter
+class ServFilter : public VariableWriter
 {
 public:
     enum
@@ -103,7 +104,7 @@ public:
         host.init();
     }
 
-    bool    writeVariable(Stream &, const String &);
+    bool    writeVariable(Stream &, const String &) override;
 
     Host host;
     unsigned int flags;
@@ -111,7 +112,7 @@ public:
 
 // ----------------------------------
 // ServMgr keeps track of Servents
-class ServMgr
+class ServMgr : public VariableWriter
 {
 public:
     enum NOTIFY_TYPE
@@ -162,7 +163,7 @@ public:
     Servent             *findOldestServent(Servent::TYPE, bool);
     Servent             *findServentByIndex(int);
 
-    bool                writeVariable(Stream &, const String &);
+    bool                writeVariable(Stream &, const String &) override;
     Servent             *allocServent();
 
     unsigned int        numUsed(int);

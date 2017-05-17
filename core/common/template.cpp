@@ -44,6 +44,41 @@ static json::object_t array_to_object(json::array_t arr)
 }
 
 // --------------------------------------
+void Template::initVariableWriters()
+{
+    m_variableWriters["servMgr"] = servMgr;
+    m_variableWriters["chanMgr"] = chanMgr;
+    m_variableWriters["stats"]   = &stats;
+    m_variableWriters["notificationBufer"] = &g_notificationBuffer;
+}
+
+// --------------------------------------
+Template::Template(const char* args)
+    : currentElement(json::object({}))
+{
+    if (args)
+        tmplArgs = strdup(args);
+    else
+        tmplArgs = NULL;
+    initVariableWriters();
+}
+
+// --------------------------------------
+Template::Template(const std::string& args)
+    : currentElement(json::object({}))
+{
+    tmplArgs = strdup(args.c_str());
+    initVariableWriters();
+}
+
+// --------------------------------------
+Template::~Template()
+{
+    if (tmplArgs)
+        free(tmplArgs);
+}
+
+// --------------------------------------
 bool Template::writeObjectProperty(Stream& s, const String& varName, json::object_t object)
 {
     // LOG_DEBUG("writeObjectProperty %s", varName.str().c_str());
@@ -105,13 +140,19 @@ void Template::writeVariable(Stream &s, const String &varName, int loop)
 void Template::writeGlobalVariable(Stream &s, const String &varName, int loop)
 {
     bool r = false;
-    if (varName.startsWith("servMgr."))
-        r = servMgr->writeVariable(s, varName+8);
-    else if (varName.startsWith("chanMgr."))
-        r = chanMgr->writeVariable(s, varName+8, loop);
-    else if (varName.startsWith("stats."))
-        r = stats.writeVariable(s, varName+6);
-    else if (varName.startsWith("sys."))
+
+    const std::string v = varName;
+    if (v.find('.') != std::string::npos)
+    {
+        const auto qual = v.substr(0, v.find('.'));
+        if (m_variableWriters.count(qual))
+        {
+            r = m_variableWriters[qual]->writeVariable(s, varName + qual.size() + 1);
+            goto End;
+        }
+    }
+
+    if (varName.startsWith("sys."))
     {
         if (varName == "sys.log.dumpHTML")
         {
@@ -123,8 +164,6 @@ void Template::writeGlobalVariable(Stream &s, const String &varName, int loop)
             r = true;
         }
     }
-    else if (varName.startsWith("notificationBuffer."))
-        r = g_notificationBuffer.writeVariable(s, varName + strlen("notificationBuffer."));
     else if (varName.startsWith("loop."))
     {
         if (varName.startsWith("loop.channel."))
@@ -246,6 +285,7 @@ void Template::writeGlobalVariable(Stream &s, const String &varName, int loop)
         r = true;
     }
 
+End:
     if (!r)
         s.writeString(varName);
 }

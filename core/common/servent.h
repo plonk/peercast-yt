@@ -29,6 +29,7 @@
 #include "pcp.h"
 #include "cgi.h" // Query
 #include "playlist.h"
+#include "varwriter.h"
 
 class HTML;
 
@@ -36,7 +37,7 @@ class AtomStream;
 
 // ----------------------------------
 // Servent handles the actual connection between clients
-class Servent
+class Servent : public VariableWriter
 {
 public:
 
@@ -185,7 +186,7 @@ public:
     bool    waitForChannelHeader(ChanInfo &);
     ChanInfo findChannel(char *str, ChanInfo &);
 
-    bool    writeVariable(Stream &, const String &);
+    bool    writeVariable(Stream &, const String &) override;
 
     // the "mainloop" of servents
     void    processGnutella();
