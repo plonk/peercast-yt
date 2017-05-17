@@ -228,7 +228,7 @@ int URLSource::getSourceRateAvg()
 
             ChanInfo::TYPE fileType = ChanInfo::T_UNKNOWN;
             // if filetype is unknown, try and figure it out from file extension.
-            //if ((info.srcType == ChanInfo::T_UNKNOWN) || (info.srcType == ChanInfo::T_PLAYLIST))
+            //if (ch->info.contentType == ChanInfo::T_UNKNOWN)
             {
                 fileType = ChanInfo::getTypeFromStr(str::extension_without_dot(fileName).c_str());
             }
