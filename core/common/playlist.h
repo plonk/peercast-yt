@@ -32,7 +32,7 @@ public:
     enum TYPE
     {
         T_NONE,
-        T_SCPLS,
+        T_SCPLS, // SHOUTcast playlist
         T_PLS,
         T_ASX,
         T_RAM,
