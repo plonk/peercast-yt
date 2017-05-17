@@ -73,6 +73,8 @@ public:
     // 変数
     void    writeVariable(Stream &, const String &, int);
     void    writeGlobalVariable(Stream &, const String &, int);
+    bool    writeLoopVariable(Stream &s, const String &varName, int loop);
+    bool    writePageVariable(Stream &s, const String &varName, int loop);
     int     getIntVariable(const String &, int);
     bool    getBoolVariable(const String &, int);
 

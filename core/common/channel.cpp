@@ -1354,7 +1354,7 @@ std::string Channel::renderHexDump(const std::string& in)
 }
 
 // -----------------------------------
-bool Channel::writeVariable(Stream &out, const String &var, int index)
+bool Channel::writeVariable(Stream &out, const String &var)
 {
     char buf[1024];
 
