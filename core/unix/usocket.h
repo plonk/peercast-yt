@@ -71,7 +71,7 @@ public:
 
     void    checkTimeout(bool, bool);
 
-    unsigned int sockNum;
+    int sockNum;
     struct sockaddr_in remoteAddr;
 };
 
