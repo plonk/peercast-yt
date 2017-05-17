@@ -57,7 +57,7 @@ TEST_F(HTMLFixture, addHead)
 }
 
 
-// タイトルはフォーマット文字列として解釈されてはいoけない。
+// タイトルはフォーマット文字列として解釈されてはいけない。
 TEST_F(HTMLFixture, addHead2)
 {
     StringStream mem2;
