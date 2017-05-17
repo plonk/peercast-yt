@@ -2,7 +2,10 @@ CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRAN
 LDFLAGS = -pthread
 LIBS = 
 
-TAR = peercast-yt-linux-amd64.tar.gz
+OS = $(shell uname -s | tr A-Z a-z)
+ARCH = $(shell uname -p | tr A-Z a-z)
+
+TAR = peercast-yt-$(OS)-$(ARCH).tar.gz
 AR = ar
 
 INCLUDES = -I../../core -I../../core/common
