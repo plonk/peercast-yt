@@ -30,14 +30,15 @@ GCC 4.9 以降あるいは Clang 3.4 以降などの C++11 に準拠したコン
 ## 手順
 
 `ui/linux` ディレクトリに入って `make` してください。すると
-`peercast-yt-linux-amd64.tar.gz` ができます。
+`peercast-yt-linux-x86_64.tar.gz` (CPUアーキテクチャによって名前が変わ
+ります) ができます。
 
 ※ make した後、`ui/linux` ディレクトリの `peercast` を実行することも
 できます。
 
 # 実行
 
-`peercast-yt-linux-amd64.tar.gz` を適当な場所に展開して、ディレクトリ
+`peercast-yt-linux-x86_64.tar.gz` を適当な場所に展開して、ディレクトリ
 内の `peercast` を実行してください。
 
 設定ファイル `peercast.ini` は `peercast` と同じディレクトリに作られま
