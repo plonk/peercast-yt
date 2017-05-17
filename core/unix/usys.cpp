@@ -81,7 +81,12 @@ void USys::endThread(ThreadInfo *info)
 // ---------------------------------
 void USys::waitThread(ThreadInfo *info, int timeout)
 {
-    //pthread_join(info->handle, NULL);
+#ifdef _GNU_SOURCE
+    struct timespec abstime = { getTime() + timeout/1000, (timeout%1000)*1000*1000 };
+    pthread_timedjoin_np(info->handle, NULL, &abstime);
+#else
+    pthread_join(info->handle, NULL);
+#endif
 }
 
 // ---------------------------------
