@@ -804,5 +804,10 @@ const char* ChanInfo::getPlayListExt()
         return ".ram";
     case PlayList::T_PLS:
         return ".m3u"; // or could be .pls ...
+    case PlayList::T_SCPLS:
+        return ".pls";
+    case PlayList::T_NONE:
+    default:
+        return "";
     }
 }

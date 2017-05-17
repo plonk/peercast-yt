@@ -165,3 +165,24 @@ TEST_F(ChanInfoFixture, setContentType)
     ASSERT_STREQ("video/x-matroska", info.MIMEType.cstr());
     ASSERT_STREQ(".mkv", info.streamExt.cstr());
 }
+
+TEST_F(ChanInfoFixture, getPlayListExt)
+{
+    info.setContentType(ChanInfo::T_MP3);
+    ASSERT_STREQ(".m3u", info.getPlayListExt());
+
+    info.setContentType(ChanInfo::T_OGG);
+    ASSERT_STREQ(".m3u", info.getPlayListExt());
+
+    info.setContentType(ChanInfo::T_OGM);
+    ASSERT_STREQ(".ram", info.getPlayListExt());
+
+    info.setContentType(ChanInfo::T_WMV);
+    ASSERT_STREQ(".asx", info.getPlayListExt());
+
+    info.setContentType(ChanInfo::T_FLV);
+    ASSERT_STREQ(".m3u", info.getPlayListExt());
+
+    info.setContentType(ChanInfo::T_MKV);
+    ASSERT_STREQ(".m3u", info.getPlayListExt());
+}
