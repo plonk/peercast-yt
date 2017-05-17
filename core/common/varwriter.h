@@ -1,8 +1,8 @@
 #ifndef _VARWRITER_H
 #define _VARWRITER_H
 
-#include "stream.h"
-
+class String;
+class Stream;
 // ----------------------------------
 class VariableWriter
 {
