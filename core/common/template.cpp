@@ -295,7 +295,7 @@ End:
 // --------------------------------------
 string Template::getStringVariable(const string& varName, int loop)
 {
-    DynamicMemoryStream mem;
+    StringStream mem;
 
     writeVariable(mem, varName.c_str(), loop);
 
@@ -305,7 +305,7 @@ string Template::getStringVariable(const string& varName, int loop)
 // --------------------------------------
 int Template::getIntVariable(const String &varName, int loop)
 {
-    DynamicMemoryStream mem;
+    StringStream mem;
 
     writeVariable(mem, varName, loop);
 
@@ -315,7 +315,7 @@ int Template::getIntVariable(const String &varName, int loop)
 // --------------------------------------
 bool Template::getBoolVariable(const String &varName, int loop)
 {
-    DynamicMemoryStream mem;
+    StringStream mem;
 
     writeVariable(mem, varName, loop);
 
@@ -742,7 +742,7 @@ void    Template::readVariable(Stream &in, Stream *outp, int loop)
         {
             if (inSelectedFragment() && outp)
             {
-                DynamicMemoryStream mem;
+                StringStream mem;
 
                 writeVariable(mem, var, loop);
                 outp->writeString(cgi::escape_html(mem.str()).c_str());
@@ -766,7 +766,7 @@ void    Template::readVariableJavaScript(Stream &in, Stream *outp, int loop)
         {
             if (inSelectedFragment() && outp)
             {
-                DynamicMemoryStream mem;
+                StringStream mem;
 
                 writeVariable(mem, var, loop);
                 outp->writeString(cgi::escape_javascript(mem.str()).c_str());

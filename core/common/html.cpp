@@ -67,7 +67,7 @@ void HTML::writeTemplate(const char *fileName, const char *args)
     FileStream file;
     try
     {
-        DynamicMemoryStream mem;
+        StringStream mem;
         file.openReadOnly(fileName);
         file.writeTo(mem, file.length());
         mem.rewind();

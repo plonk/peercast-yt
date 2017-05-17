@@ -49,5 +49,5 @@ public:
         outgoing.write(p, len);
     }
 
-    DynamicMemoryStream incoming, outgoing;
+    StringStream incoming, outgoing;
 };

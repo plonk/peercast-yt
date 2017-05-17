@@ -58,7 +58,7 @@ public:
     }
 
     MockStream s;
-    DynamicMemoryStream mem;
+    StringStream mem;
 };
 
 TEST_F(StreamFixture, readUpto)
@@ -83,7 +83,7 @@ TEST_F(StreamFixture, seekTo)
 
 TEST_F(StreamFixture, writeTo)
 {
-    DynamicMemoryStream mem;
+    StringStream mem;
     ASSERT_EQ(0, s.readCount);
     s.writeTo(mem, 1);
     ASSERT_EQ(1, s.readCount);

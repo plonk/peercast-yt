@@ -5,10 +5,10 @@
 #include "stream.h"
 #include <string>
 
-class DynamicMemoryStream : public Stream
+class StringStream : public Stream
 {
 public:
-    DynamicMemoryStream();
+    StringStream();
 
     int  read(void *, int) override;
     void write(const void *, int) override;

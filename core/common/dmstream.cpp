@@ -2,19 +2,19 @@
 #include <algorithm>
 #include <string>
 
-DynamicMemoryStream::DynamicMemoryStream()
+StringStream::StringStream()
     : m_pos(0)
 {
 }
 
-void  DynamicMemoryStream::checkSize(size_t size)
+void  StringStream::checkSize(size_t size)
 {
     if (size > m_buffer.size())
         while (m_buffer.size() < size)
             m_buffer.push_back(0);
 }
 
-int  DynamicMemoryStream::read(void *buf, int count)
+int  StringStream::read(void *buf, int count)
 {
     if (m_pos == m_buffer.size())
         throw StreamException("End of stream");
@@ -27,7 +27,7 @@ int  DynamicMemoryStream::read(void *buf, int count)
     return bytesRead;
 }
 
-void DynamicMemoryStream::write(const void *buf, int count)
+void StringStream::write(const void *buf, int count)
 {
     if (count < 0)
         throw GeneralException("Bad argument");
@@ -39,38 +39,38 @@ void DynamicMemoryStream::write(const void *buf, int count)
     m_pos += count;
 }
 
-bool DynamicMemoryStream::eof()
+bool StringStream::eof()
 {
     return m_pos == m_buffer.size();
 }
 
-void DynamicMemoryStream::rewind()
+void StringStream::rewind()
 {
     m_pos = 0;
 }
 
-void DynamicMemoryStream::seekTo(int newPos)
+void StringStream::seekTo(int newPos)
 {
     checkSize(newPos);
     m_pos = newPos;
 }
 
-int  DynamicMemoryStream::getPosition()
+int  StringStream::getPosition()
 {
     return m_pos;
 }
 
-int  DynamicMemoryStream::getLength()
+int  StringStream::getLength()
 {
     return m_buffer.size();
 }
 
-std::string DynamicMemoryStream::str()
+std::string StringStream::str()
 {
     return std::string(m_buffer.begin(), m_buffer.end());
 }
 
-void DynamicMemoryStream::str(const std::string& data)
+void StringStream::str(const std::string& data)
 {
     m_buffer = data;
     m_pos = 0;

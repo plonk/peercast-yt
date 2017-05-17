@@ -190,7 +190,7 @@ void MKVStream::sendCluster(const byte_string& cluster, Channel* ch)
 // Tracks 要素からビデオトラックのトラック番号を調べる。
 void MKVStream::readTracks(const std::string& data)
 {
-    DynamicMemoryStream mem;
+    StringStream mem;
     mem.str(data);
 
     while (!mem.eof())
@@ -233,7 +233,7 @@ void MKVStream::readTracks(const std::string& data)
 // TimecodeScale の値を調べる。
 void MKVStream::readInfo(const std::string& data)
 {
-    DynamicMemoryStream in;
+    StringStream in;
     in.str(data);
 
     while (true)

@@ -9,7 +9,7 @@ public:
 
 TEST_F(XMLFixture, read)
 {
-    DynamicMemoryStream mem;
+    StringStream mem;
     mem.writeString("<br/>");
     mem.rewind();
 
@@ -25,7 +25,7 @@ TEST_F(XMLFixture, read)
 // タグ名はフォーマット文字列として解釈されてはならない。
 TEST_F(XMLFixture, readCrash)
 {
-    DynamicMemoryStream mem;
+    StringStream mem;
     mem.writeString("<%s%s%s%s%s%s%s%s%s%s%s%s/>");
     mem.rewind();
 

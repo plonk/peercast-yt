@@ -6,7 +6,7 @@
 class ServFilterFixture : public ::testing::Test {
 public:
     ServFilter filter;
-    DynamicMemoryStream mem;
+    StringStream mem;
 };
 
 TEST_F(ServFilterFixture, initialState)

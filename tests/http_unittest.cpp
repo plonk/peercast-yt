@@ -9,7 +9,7 @@ public:
         : http(mem)
     {
     }
-    DynamicMemoryStream mem;
+    StringStream mem;
     HTTP http;
 };
 

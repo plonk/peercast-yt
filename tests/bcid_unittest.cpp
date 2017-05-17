@@ -21,7 +21,7 @@ public:
     {
     }
 
-    DynamicMemoryStream mem;
+    StringStream mem;
     BCID bcid;
 };
 

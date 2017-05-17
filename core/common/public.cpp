@@ -168,7 +168,7 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
         tie(path, lang) = mapper.toLocalFilePath(req.path, langs);
 
         FileStream file;
-        DynamicMemoryStream mem;
+        StringStream mem;
         HTTPRequestScope scope(req);
 
         file.openReadOnly(path.c_str());
@@ -195,7 +195,7 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
         {
             auto type = MIMEType(path);
 
-            DynamicMemoryStream mem;
+            StringStream mem;
             FileStream file;
             HTTPRequestScope scope(req);
 

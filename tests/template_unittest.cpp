@@ -15,7 +15,7 @@ public:
 
 TEST_F(TemplateFixture, readVariable)
 {
-    DynamicMemoryStream in, out;
+    StringStream in, out;
 
     in.writeString("servMgr.version}");
     in.rewind();
@@ -25,7 +25,7 @@ TEST_F(TemplateFixture, readVariable)
 
 TEST_F(TemplateFixture, writeVariable)
 {
-    DynamicMemoryStream out;
+    StringStream out;
 
     temp.writeVariable(out, "servMgr.version", 0);
     ASSERT_STREQ("v0.1218", out.str().substr(0,7).c_str());
@@ -33,7 +33,7 @@ TEST_F(TemplateFixture, writeVariable)
 
 TEST_F(TemplateFixture, writeVariableUndefined)
 {
-    DynamicMemoryStream out;
+    StringStream out;
 
     temp.writeVariable(out, "hoge.fuga.piyo", 0);
     ASSERT_STREQ("hoge.fuga.piyo", out.str().c_str());
@@ -52,7 +52,7 @@ TEST_F(TemplateFixture, getBoolVariable)
 
 TEST_F(TemplateFixture, readTemplate)
 {
-    DynamicMemoryStream in, out;
+    StringStream in, out;
     bool res;
 
     in.writeString("hoge");
@@ -125,7 +125,7 @@ TEST_F(TemplateFixture, evalCondition3)
 
 TEST_F(TemplateFixture, readIfTrue)
 {
-    DynamicMemoryStream in, out;
+    StringStream in, out;
 
     in.writeString("TRUE}T{@else}F{@end}");
     in.rewind();
@@ -135,7 +135,7 @@ TEST_F(TemplateFixture, readIfTrue)
 
 TEST_F(TemplateFixture, readIfFalse)
 {
-    DynamicMemoryStream in, out;
+    StringStream in, out;
 
     in.writeString("FALSE}T{@else}F{@end}");
     in.rewind();
@@ -145,7 +145,7 @@ TEST_F(TemplateFixture, readIfFalse)
 
 TEST_F(TemplateFixture, readIfTrueWithoutElse)
 {
-    DynamicMemoryStream in, out;
+    StringStream in, out;
 
     in.writeString("TRUE}T{@end}");
     in.rewind();
@@ -155,7 +155,7 @@ TEST_F(TemplateFixture, readIfTrueWithoutElse)
 
 TEST_F(TemplateFixture, readIfFalseWithoutElse)
 {
-    DynamicMemoryStream in, out;
+    StringStream in, out;
 
     in.writeString("FALSE}T{@end}");
     in.rewind();
@@ -165,7 +165,7 @@ TEST_F(TemplateFixture, readIfFalseWithoutElse)
 
 TEST_F(TemplateFixture, fragment)
 {
-    DynamicMemoryStream in, out;
+    StringStream in, out;
     bool res;
 
     in.writeString("hoge{@fragment a}fuga{@end}piyo");
@@ -177,7 +177,7 @@ TEST_F(TemplateFixture, fragment)
 
 TEST_F(TemplateFixture, fragment2)
 {
-    DynamicMemoryStream in, out;
+    StringStream in, out;
     bool res;
 
     in.writeString("hoge{@fragment a}fuga{@end}piyo");
@@ -190,7 +190,7 @@ TEST_F(TemplateFixture, fragment2)
 
 TEST_F(TemplateFixture, fragment3)
 {
-    DynamicMemoryStream in, out;
+    StringStream in, out;
     bool res;
 
     in.writeString("hoge{@fragment a}fuga{@end}piyo");
@@ -203,7 +203,7 @@ TEST_F(TemplateFixture, fragment3)
 
 TEST_F(TemplateFixture, variableInFragment)
 {
-    DynamicMemoryStream in, out;
+    StringStream in, out;
     bool res;
 
     in.writeString("{@fragment a}{$TRUE}{@end}{@fragment b}{$FALSE}{@end}");
@@ -215,7 +215,7 @@ TEST_F(TemplateFixture, variableInFragment)
 
 TEST_F(TemplateFixture, variableInFragment2)
 {
-    DynamicMemoryStream in, out;
+    StringStream in, out;
     bool res;
 
     in.writeString("{@fragment a}{$TRUE}{@end}{@fragment b}{$FALSE}{@end}");
@@ -228,7 +228,7 @@ TEST_F(TemplateFixture, variableInFragment2)
 
 TEST_F(TemplateFixture, variableInFragment3)
 {
-    DynamicMemoryStream in, out;
+    StringStream in, out;
     bool res;
 
     in.writeString("{@fragment a}{$TRUE}{@end}{$FALSE}");

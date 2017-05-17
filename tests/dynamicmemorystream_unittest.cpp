@@ -2,13 +2,13 @@
 
 #include "dmstream.h"
 
-class DynamicMemoryStreamFixture : public ::testing::Test {
+class StringStreamFixture : public ::testing::Test {
 public:
 };
 
-TEST_F(DynamicMemoryStreamFixture, initialState)
+TEST_F(StringStreamFixture, initialState)
 {
-    DynamicMemoryStream s;
+    StringStream s;
 
     ASSERT_EQ(0, s.getPosition());
     ASSERT_EQ(0, s.getLength());
@@ -17,27 +17,27 @@ TEST_F(DynamicMemoryStreamFixture, initialState)
     ASSERT_THROW(s.read(NULL, 0), StreamException);
 }
 
-TEST_F(DynamicMemoryStreamFixture, writeAdvancesPositionAndLength)
+TEST_F(StringStreamFixture, writeAdvancesPositionAndLength)
 {
-    DynamicMemoryStream s;
+    StringStream s;
 
     s.write("hoge", 4);
     ASSERT_EQ(4, s.getPosition());
     ASSERT_EQ(4, s.getLength());
 }
 
-TEST_F(DynamicMemoryStreamFixture, writeAdvancesPositionAndLengthNullCase)
+TEST_F(StringStreamFixture, writeAdvancesPositionAndLengthNullCase)
 {
-    DynamicMemoryStream s;
+    StringStream s;
 
     s.write("", 0);
     ASSERT_EQ(0, s.getPosition());
     ASSERT_EQ(0, s.getLength());
 }
 
-TEST_F(DynamicMemoryStreamFixture, rewindResetsPosition)
+TEST_F(StringStreamFixture, rewindResetsPosition)
 {
-    DynamicMemoryStream s;
+    StringStream s;
 
     s.write("hoge", 4);
     ASSERT_EQ(4, s.getPosition());
@@ -47,9 +47,9 @@ TEST_F(DynamicMemoryStreamFixture, rewindResetsPosition)
     ASSERT_EQ(false, s.eof());
 }
 
-TEST_F(DynamicMemoryStreamFixture, whatIsWrittenCanBeRead)
+TEST_F(StringStreamFixture, whatIsWrittenCanBeRead)
 {
-    DynamicMemoryStream s;
+    StringStream s;
 
     char buf[5] = "";
 
@@ -60,9 +60,9 @@ TEST_F(DynamicMemoryStreamFixture, whatIsWrittenCanBeRead)
     ASSERT_STREQ("hoge", buf);
 }
 
-TEST_F(DynamicMemoryStreamFixture, seekToChangesPosition)
+TEST_F(StringStreamFixture, seekToChangesPosition)
 {
-    DynamicMemoryStream s;
+    StringStream s;
 
     s.write("hoge", 4);
     s.seekTo(1);
@@ -73,9 +73,9 @@ TEST_F(DynamicMemoryStreamFixture, seekToChangesPosition)
     ASSERT_STREQ("oge", buf);
 }
 
-TEST_F(DynamicMemoryStreamFixture, seekToChangesLength)
+TEST_F(StringStreamFixture, seekToChangesLength)
 {
-    DynamicMemoryStream s;
+    StringStream s;
 
     s.seekTo(1000);
     ASSERT_EQ(1000, s.getLength());
@@ -90,9 +90,9 @@ TEST_F(DynamicMemoryStreamFixture, seekToChangesLength)
     ASSERT_EQ(0, buf[999]);
 }
 
-TEST_F(DynamicMemoryStreamFixture, strGet)
+TEST_F(StringStreamFixture, strGet)
 {
-    DynamicMemoryStream s;
+    StringStream s;
 
     s.writeString("hoge");
     ASSERT_EQ(4, s.getPosition());
@@ -103,9 +103,9 @@ TEST_F(DynamicMemoryStreamFixture, strGet)
     ASSERT_EQ(4, s.getLength());
 }
 
-TEST_F(DynamicMemoryStreamFixture, strSet)
+TEST_F(StringStreamFixture, strSet)
 {
-    DynamicMemoryStream s;
+    StringStream s;
 
     s.writeString("hoge");
     ASSERT_EQ(4, s.getPosition());
