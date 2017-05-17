@@ -154,6 +154,27 @@ public:
 };
 
 // --------------------------------------------
+class HTTPHeaders
+{
+public:
+    void set(const std::string& name, const std::string& value)
+    {
+        m_headers[str::upcase(name)] = value;
+    }
+
+    std::string get(const std::string& name) const
+    {
+        auto it = m_headers.find(str::upcase(name));
+        if (it == m_headers.end())
+            return "";
+        else
+            return it->second;
+    }
+
+    std::map<std::string,std::string> m_headers;
+};
+
+// --------------------------------------------
 class HTTPRequest
 {
 public:
