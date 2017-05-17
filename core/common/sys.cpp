@@ -57,6 +57,22 @@ void Sys::sleepIdle()
 }
 
 // -----------------------------------
+bool Sys::writeVariable(Stream& s, const String& varName)
+{
+    if (varName == "log.dumpHTML")
+    {
+        logBuf->dumpHTML(s);
+        return true;
+    }else if (varName == "time")
+    {
+        s.writeString(std::to_string(sys->getTime()).c_str());
+        return true;
+    }
+
+    return false;
+}
+
+// -----------------------------------
 char *trimstr(char *s1)
 {
     while (*s1)

@@ -50,6 +50,7 @@ void Template::initVariableWriters()
     m_variableWriters["chanMgr"] = chanMgr;
     m_variableWriters["stats"]   = &stats;
     m_variableWriters["notificationBufer"] = &g_notificationBuffer;
+    m_variableWriters["sys"]     = sys;
 }
 
 // --------------------------------------
@@ -152,19 +153,7 @@ void Template::writeGlobalVariable(Stream &s, const String &varName, int loop)
         }
     }
 
-    if (varName.startsWith("sys."))
-    {
-        if (varName == "sys.log.dumpHTML")
-        {
-            sys->logBuf->dumpHTML(s);
-            r = true;
-        }else if (varName == "sys.time")
-        {
-            s.writeString(to_string(sys->getTime()).c_str());
-            r = true;
-        }
-    }
-    else if (varName.startsWith("loop."))
+    if (varName.startsWith("loop."))
     {
         if (varName.startsWith("loop.channel."))
         {

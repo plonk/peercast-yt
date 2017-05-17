@@ -34,6 +34,7 @@ extern char *trimstr(char *s);
 #define MAX_CGI_LEN 512
 
 #include "_string.h"
+#include "varwriter.h"
 
 // ------------------------------------
 namespace peercast {
@@ -59,7 +60,7 @@ public:
 }
 
 // ------------------------------------
-class Sys
+class Sys : public VariableWriter
 {
 public:
     Sys();
@@ -90,6 +91,8 @@ public:
 #endif
 
     void    sleepIdle();
+
+    bool writeVariable(Stream&, const String&) override;
 
     unsigned int idleSleepTime;
     unsigned int rndSeed;
