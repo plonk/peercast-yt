@@ -30,6 +30,11 @@ int  Dechunker::read(void *buf, int size)
     if (m_eof)
         throw StreamException("Closed on read");
 
+    if (aSize < 0)
+        throw GeneralException("Bad argument");
+
+    size_t size = aSize;
+
     char *p = (char*) buf;
 
     while (true)

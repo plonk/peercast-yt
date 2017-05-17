@@ -29,6 +29,9 @@ int  DynamicMemoryStream::read(void *buf, int count)
 
 void DynamicMemoryStream::write(const void *buf, int count)
 {
+    if (count < 0)
+        throw GeneralException("Bad argument");
+
     checkSize(m_pos + count);
     std::copy(static_cast<const char*>(buf),
               static_cast<const char*>(buf) + count,

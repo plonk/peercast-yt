@@ -362,7 +362,7 @@ void ChannelDirectory::clearFeeds()
 void ChannelDirectory::setFeedPublic(int index, bool isPublic)
 {
     CriticalSection cs(m_lock);
-    if (index < m_feeds.size())
+    if (index >= 0 && (size_t)index < m_feeds.size())
         m_feeds[index].isPublic = isPublic;
     else
         LOG_DEBUG("setFeedPublic: index %d out of range", index);
