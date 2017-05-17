@@ -44,12 +44,14 @@
       </TR>
       <TR align=left bgColor=#ddd class="normal">
         <TD>{#Bitrate}</TD>
-        <TD>{$page.channel.bitrate} kb/s ({$page.channel.srcrate} kb/s)</TD>
+        <TD>{$page.channel.bitrate} kb/s
+        </TD>
       </TR>
       <TR align=left bgColor=#eee class="normal">
         <TD>{#Source}</TD>
-        <TD>{$page.channel.sourceType} - {$page.channel.sourceProtocol}<BR>
-          {$page.channel.sourceURL}</TD>
+        <TD>{$page.channel.sourceType} - {$page.channel.sourceProtocol} - {$page.channel.srcrate} kb/s<BR>
+          {$page.channel.sourceURL}
+        </TD>
       </TR>
       <TR align=left bgColor=#ddd class="normal">
         <TD>{#_Uptime_relayinfo}</TD>
