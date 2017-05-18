@@ -489,7 +489,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
         // Push リレー
 
         handshakeGIV(http.cmdLine);
-    }else if (http.isRequest(PCX_PCP_CONNECT))
+    }else if (http.isRequest(PCX_PCP_CONNECT)) // "pcp"
     {
         // CIN
 

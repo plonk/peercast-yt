@@ -250,7 +250,7 @@ public:
 
     GnuID               remoteID;
     GnuID               chanID;
-    GnuID               givID;
+    GnuID               givID; // GIV するチャンネルのID
 
     ThreadInfo          thread;
 

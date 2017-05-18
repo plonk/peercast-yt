@@ -1879,6 +1879,7 @@ int ServMgr::idleProc(ThreadInfo *thread)
 
         if (servMgr->isRoot)
         {
+            // 1時間着信がなかったら終了する。…なぜ？
             if ((servMgr->lastIncoming) && ((ctime-servMgr->lastIncoming) > 60*60))
             {
                 peercastInst->saveSettings();
