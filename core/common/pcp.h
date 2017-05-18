@@ -183,7 +183,7 @@ class BroadcastState
 {
 public:
     BroadcastState()
-    :numHops(0)
+    : numHops(0)
     , forMe(false)
     , streamPos(0)
     , group(0)

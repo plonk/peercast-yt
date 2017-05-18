@@ -1642,10 +1642,10 @@ void Servent::processIncomingPCP(bool suggestOthers)
 
     handshakeIncomingPCP(atom, rhost, remoteID, agent);
 
-    bool alreadyConnected = (servMgr->findConnection(Servent::T_COUT, remoteID)!=NULL)
-                            || (servMgr->findConnection(Servent::T_CIN, remoteID)!=NULL);
-    bool unavailable = servMgr->controlInFull();
-    bool offair = !servMgr->isRoot && !chanMgr->isBroadcasting();
+    bool alreadyConnected = (servMgr->findConnection(Servent::T_COUT, remoteID)!=NULL) ||
+                            (servMgr->findConnection(Servent::T_CIN,  remoteID)!=NULL);
+    bool unavailable      = servMgr->controlInFull();
+    bool offair           = !servMgr->isRoot && !chanMgr->isBroadcasting();
 
     char rstr[64];
     rhost.toStr(rstr);
@@ -1718,11 +1718,11 @@ void Servent::processIncomingPCP(bool suggestOthers)
                 best.writeAtoms(atom, noID);
                 cnt++;
             }
+
             if (cnt)
             {
                 LOG_DEBUG("Sent %d tracker(s) to %s", cnt, rstr);
-            }
-            else if (rhost.port)
+            }else if (rhost.port)
             {
                 // send push request to best firewalled tracker on other network
                 chs.init();
