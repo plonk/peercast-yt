@@ -202,6 +202,16 @@ void Servent::handshakeGET(HTTP &http)
             throw HTTPException(HTTP_SC_UNAUTHORIZED, 401);
 
         handshakeRemoteFile(dirName);
+    }else if (strcmp(fn, "/html/index.html") == 0)
+    {
+        // PeerCastStation が "/" を "/html/index.html" に 301 Moved
+        // でリダイレクトするので、ブラウザによっては無期限にキャッシュされる。
+        // "/" に再リダイレクトしてキャッシュを無効化する。
+
+        http.readHeaders();
+        http.writeLine(HTTP_SC_FOUND);
+        http.writeLineF("Location: /");
+        http.writeLine("");
     }else if (strncmp(fn, "/html/", 6) == 0)
     {
         // HTML UI
