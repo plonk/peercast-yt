@@ -412,11 +412,24 @@ std::string unescape_html(const std::string& input)
         {
             it++;
             std::string ref;
-            while (it != input.end() && *it != ';')
+            while (it != input.end() &&
+                   ((*it >= '0' && *it <= '9') ||
+                    (*it >= 'a' && *it <= 'z') ||
+                    (*it >= 'A' && *it <= 'Z') ||
+                    *it == '#'))
+            {
                 ref += *it++;
+            }
 
             if (it == input.end())
-                return res + ref;
+                return res + "&" + ref;
+
+            if (*it != ';')
+            {
+                res += '&';
+                res += ref;
+                continue;
+            }
 
             it++; // skip semicolon
 
