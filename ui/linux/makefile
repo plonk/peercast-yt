@@ -78,6 +78,7 @@ clean:
 	rm -f $(LINUXOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE) $(SRCHTMLTAR) $(SRCPUBLICTAR)
 	rm -rf $(HTML) $(PUBLIC) $(ASSETS)
 	rm -rf peercast-yt/
+	rm -f $(TAR)
 
 $(COREOBJ): %.o : $(CORE)/common/%.cpp
 	$(CC) $(CPPFLAGS) -c $< -o $@
