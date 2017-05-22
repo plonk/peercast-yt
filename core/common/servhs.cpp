@@ -1467,7 +1467,10 @@ void Servent::CMD_login(char *cmd, HTTP& http, HTML& html, String& jumpStr)
         http.writeLineF("%s id=%s; path=/; expires=\"Mon, 01-Jan-3000 00:00:00 GMT\";", HTTP_HS_SETCOOKIE, idstr);
     else
         http.writeLineF("%s id=%s; path=/;", HTTP_HS_SETCOOKIE, idstr);
-    http.writeLineF("Location: /%s/index.html", servMgr->htmlPath);
+    if (!http.headers.get("Referer").empty())
+        http.writeLineF("Location: %s", http.headers.get("Referer").c_str());
+    else
+        http.writeLineF("Location: /%s/index.html", servMgr->htmlPath);
     http.writeLine("");
 }
 
