@@ -16,6 +16,8 @@ SRCHTMLTAR = ../html.tar
 HTML = html
 SRCPUBLICTAR = ../public.tar
 PUBLIC = public
+SRCASSETSTAR = ../assets.tar
+ASSETS = assets
 
 LIBOBJSTATIC = libpeercast.a
 
@@ -57,16 +59,24 @@ $(PUBLIC): $(SRCPUBLICTAR)
 	tar xf $(SRCPUBLICTAR) $(PUBLIC)
 	touch $(PUBLIC)
 
-$(TAR): $(TARGET) $(HTML) $(PUBLIC)
+$(SRCASSETSTAR):
+	$(MAKE) -C .. assets.tar
+
+$(ASSETS): $(SRCASSETSTAR)
+	rm -rf $(ASSETS)
+	tar xf $(SRCASSETSTAR) $(ASSETS)
+	touch $(ASSETS)
+
+$(TAR): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS)
 	rm -rf peercast-yt
 	mkdir peercast-yt
-	cp -R $(HTML) $(PUBLIC) $(TARGET) peercast-yt/
+	cp -R $(HTML) $(PUBLIC) $(TARGET) $(ASSETS) peercast-yt/
 	strip peercast-yt/$(TARGET)
 	tar cvzf $(TAR) peercast-yt
 
 clean:
-	rm -f $(LINUXOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE) $(SRCHTMLTAR)
-	rm -rf $(HTML) $(PUBLIC)
+	rm -f $(LINUXOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE) $(SRCHTMLTAR) $(SRCPUBLICTAR)
+	rm -rf $(HTML) $(PUBLIC) $(ASSETS)
 	rm -rf peercast-yt/
 
 $(COREOBJ): %.o : $(CORE)/common/%.cpp

@@ -330,10 +330,22 @@ void Servent::handshakeGET(HTTP &http)
 
         try
         {
-            std::string dir = peercastApp->getPath() + std::string("public");
-            PublicController publicController(dir);
-            HTTPResponse response = publicController(http.getRequest(), (Stream&)*sock, sock->host);
-            http.send(response);
+            PublicController controller(peercastApp->getPath() + std::string("public"));
+            http.send(controller(http.getRequest(), *sock, sock->host));
+        } catch (GeneralException& e)
+        {
+            LOG_ERROR("Error: %s", e.msg);
+            throw HTTPException(HTTP_SC_SERVERERROR, 500);
+        }
+    }else if (str::is_prefix_of("/assets/", fn))
+    {
+        // html と public の共有アセット。
+
+        http.readHeaders();
+        try
+        {
+            AssetsController controller(peercastApp->getPath() + std::string("assets"));
+            http.send(controller(http.getRequest(), *sock, sock->host));
         } catch (GeneralException& e)
         {
             LOG_ERROR("Error: %s", e.msg);

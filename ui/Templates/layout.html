@@ -4,7 +4,7 @@
     <title>{^TITLE}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <link href="peercast.css" rel="stylesheet" type="text/css">
-    <script src="js/jquery-3.2.1.min.js"></script>
+    <script src="assets/js/jquery-3.2.1.min.js"></script>
     <script src="js/reloader.js"></script>
     {^HEAD}
   </head>
@@ -31,14 +31,14 @@
           }
           else if (Notification.permission === "granted") {
             for (var i = 0; i < notifications.length; i++) {
-              spawnNotification(notifications[i].message, "images/small-logo.png", notifications[i].type);
+              spawnNotification(notifications[i].message, "/assets/images/small-logo.png", notifications[i].type);
             }
           }
           else if (Notification.permission !== 'denied') {
             Notification.requestPermission(function (permission) {
               if (permission === "granted") {
                 for (var i = 0; i < notifications.length; i++) {
-                  spawnNotification(notifications[i].message, "images/small-logo.png", notifications[i].type);
+                  spawnNotification(notifications[i].message, "/assets/images/small-logo.png", notifications[i].type);
                 }
               }
             });
@@ -73,7 +73,7 @@
                           <td valign="middle" nowrap>
                             <table border="0" align="center" cellpadding="1" cellspacing="0">
                               <tr>
-                                <td rowspan="2" valign="middle"><img src="images/small-logo.png" alt="www.peercast.org" border="0"></td>
+                                <td rowspan="2" valign="middle"><img src="/assets/images/small-logo.png" alt="www.peercast.org" border="0"></td>
                                 <td valign="bottom" style="padding: 0; padding-left: 2px">
                                   <span class="titlelinksBig">Peercast</span>
                                 </td>

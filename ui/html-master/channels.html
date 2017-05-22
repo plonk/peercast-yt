@@ -48,7 +48,7 @@
       <tr class="normal" bgcolor={@if loop.indexEven}#eeeeee{@else}#dddddd{@end}>
         <TD width="1" align="left">
           <a href="play.html?id={$loop.channel.id}">
-            <img src="images/play.png" border="0">
+            <img src="/assets/images/play.png" border="0">
           </a>
         </TD>
         <TD align="left"><span class="normal"><b>{$loop.channel.name}</b></span><br>
@@ -94,7 +94,7 @@
       </td>
     </tr>
     <tr>
-      <th>Rank</th><th><img src="images/small-icon.png"></th><th>Channel</th><th>Status</th><th>Bitrate</th><th>Type</th>
+      <th>Rank</th><th><img src="/assets/images/small-icon.png"></th><th>Channel</th><th>Status</th><th>Bitrate</th><th>Type</th>
     </tr>
 
     {@foreach externalChannels}
@@ -105,10 +105,10 @@
       <td>
         {@if this.id != "00000000000000000000000000000000"}
         <a href="play.html?id={$this.id}">
-          <img class="play-button" src="images/play.png">
+          <img class="play-button" src="/assets/images/play.png">
         </a>
         {@else}
-        <img class="play-button" src="images/play_grey.png">
+        <img class="play-button" src="/assets/images/play_grey.png">
         {@end}
       </td>
       <td style="width: 600px" class="channel-description">
@@ -129,8 +129,8 @@
         </span>
         {@if this.encodedName}
         <div class="icons">
-          <a href="{$this.chatUrl}"><img alt="Chat" src="images/chat.png"></a>
-          <a href="{$this.statsUrl}"><img alt="Stats" src="images/graph.png"></a>
+          <a href="{$this.chatUrl}"><img alt="Chat" src="/assets/images/chat.png"></a>
+          <a href="{$this.statsUrl}"><img alt="Stats" src="/assets/images/graph.png"></a>
         </div>
         {@end}
       </td>
