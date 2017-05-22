@@ -197,7 +197,7 @@
     "Login"                   : "ログイン",
     "_Password_login"         : "パスワード",
 
-    // public/play.html
+    // player.html
     "Playlist"                : "プレイリスト",
     "Your browser doesn't seem to support playback of FLV videos."
                               : "お使いのブラウザは FLV 動画の再生に対応していないようです。",
@@ -215,6 +215,7 @@
                               : "お使いのブラウザは WebM 動画の再生に対応していないようです。",
     "Playback of this type of stream is not supported."
                               : "このタイプのストリームの再生には対応していません。",
+    "Player"                  : "プレーヤー",
 
     // public/index.html
     "Local Channels"          : "ローカルチャンネル",
