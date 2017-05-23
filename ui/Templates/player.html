@@ -10,6 +10,7 @@
        var videoElement = document.getElementById('videoElement');
        var flvPlayer = flvjs.createPlayer({
          type: 'flv',
+         isLive: true,
          url: '/stream/{$page.channel.id}.flv'
        });
        flvPlayer.attachMediaElement(videoElement);
