@@ -41,5 +41,6 @@ GCC 4.9 以降あるいは Clang 3.4 以降などの C++11 に準拠したコン
 `peercast-yt-linux-x86_64.tar.gz` を適当な場所に展開して、ディレクトリ
 内の `peercast` を実行してください。
 
+ウェブブラウザで `http://localhost:7144/` を開くと操作できます。なお、
 設定ファイル `peercast.ini` は `peercast` と同じディレクトリに作られま
 す。
