@@ -5,7 +5,7 @@ LIBS =
 OS = $(shell uname -s | tr A-Z a-z)
 ARCH = $(shell uname -p | tr A-Z a-z)
 
-TAR = peercast-yt-$(OS)-$(ARCH).tar.gz
+DISTARCHIVE = peercast-yt-$(OS)-$(ARCH).tar.gz
 AR = ar
 
 INCLUDES = -I../../core -I../../core/common
@@ -33,22 +33,19 @@ LINUXOBJ = $(notdir $(LINUXSOURCE:.cpp=.o))
 
 DEPENDFILE = .deps
 
-.PHONY: all clean build-html deps
+.PHONY: all clean build-html deps $(SRCHTMLTAR) $(SRCPUBLICTAR) $(SRCASSETSTAR)
 
 # Here follow the generic build rules.
-all: $(TARGET) build-html $(TAR)
+all: $(TARGET) $(LIBOBJSTATIC) $(DISTARCHIVE)
 
 deps: $(DEPENDFILE)
-
-build-html:
-	$(MAKE) -C ..
 
 $(SRCHTMLTAR):
 	$(MAKE) -C .. html.tar
 
 $(HTML): $(SRCHTMLTAR)
 	rm -rf $(HTML)
-	tar xf $(SRCHTMLTAR) $(HTML)
+	tar xf $(SRCHTMLTAR)
 	touch $(HTML)
 
 $(SRCPUBLICTAR):
@@ -56,7 +53,7 @@ $(SRCPUBLICTAR):
 
 $(PUBLIC): $(SRCPUBLICTAR)
 	rm -rf $(PUBLIC)
-	tar xf $(SRCPUBLICTAR) $(PUBLIC)
+	tar xf $(SRCPUBLICTAR)
 	touch $(PUBLIC)
 
 $(SRCASSETSTAR):
@@ -64,27 +61,28 @@ $(SRCASSETSTAR):
 
 $(ASSETS): $(SRCASSETSTAR)
 	rm -rf $(ASSETS)
-	tar xf $(SRCASSETSTAR) $(ASSETS)
+	tar xf $(SRCASSETSTAR)
 	touch $(ASSETS)
 
-$(TAR): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS)
+$(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS)
 	rm -rf peercast-yt
 	mkdir peercast-yt
 	cp -R $(HTML) $(PUBLIC) $(TARGET) $(ASSETS) peercast-yt/
 	strip peercast-yt/$(TARGET)
-	tar cvzf $(TAR) peercast-yt
+	tar czf $(DISTARCHIVE) peercast-yt
 
 clean:
-	rm -f $(LINUXOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE) $(SRCHTMLTAR) $(SRCPUBLICTAR)
+	$(MAKE) -C .. clean
+	rm -f $(LINUXOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE)
 	rm -rf $(HTML) $(PUBLIC) $(ASSETS)
 	rm -rf peercast-yt/
-	rm -f $(TAR)
+	rm -f $(DISTARCHIVE)
 
 $(COREOBJ): %.o : $(CORE)/common/%.cpp
-	$(CC) $(CPPFLAGS) -c $< -o $@
+	$(CXX) $(CPPFLAGS) -c $< -o $@
 
 $(SYSOBJ): %.o : $(CORE)/unix/%.cpp
-	$(CC) $(CPPFLAGS) -c $< -o $@
+	$(CXX) $(CPPFLAGS) -c $< -o $@
 
 $(DEPENDFILE): $(CORESOURCE) $(LINUXSOURCE)
 	$(CXX) $(CPPFLAGS) -MM $(CORESOURCE) $(SYSSOURCE) $(LINUXSOURCE) > $(DEPENDFILE)
