@@ -1,6 +1,6 @@
 CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT $(INCLUDES)
 LDFLAGS = -pthread
-LIBS = 
+LIBS = -lrtmp
 
 OS = $(shell uname -s | tr A-Z a-z)
 ARCH = $(shell uname -p | tr A-Z a-z)

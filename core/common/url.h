@@ -36,6 +36,8 @@ public:
     int             getSourceRate() override;
     int             getSourceRateAvg() override;
 
+    static ChanInfo::PROTOCOL getSourceProtocol(char*& fileName);
+
     Stream          *inputStream;
     ::String        baseurl;
 };

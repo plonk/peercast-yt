@@ -26,7 +26,7 @@ CPPFLAGS += -D_UNIX -I$(GTEST_DIR)/include -I../core/common -I../core/unix
 CXXFLAGS += -g -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT
 
 LDFLAGS = -pthread
-LIBS = 
+LIBS = -lrtmp
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
