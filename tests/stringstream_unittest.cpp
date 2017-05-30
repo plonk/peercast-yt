@@ -17,6 +17,14 @@ TEST_F(StringStreamFixture, initialState)
     ASSERT_THROW(s.read(NULL, 0), StreamException);
 }
 
+TEST_F(StringStreamFixture, initializeFromString)
+{
+    StringStream s("hoge");
+
+    ASSERT_EQ(0, s.getPosition());
+    ASSERT_EQ(4, s.getLength());
+}
+
 TEST_F(StringStreamFixture, writeAdvancesPositionAndLength)
 {
     StringStream s;

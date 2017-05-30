@@ -9,6 +9,7 @@ class StringStream : public Stream
 {
 public:
     StringStream();
+    StringStream(const std::string&);
 
     int  read(void *, int) override;
     void write(const void *, int) override;
