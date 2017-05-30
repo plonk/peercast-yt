@@ -521,3 +521,23 @@ TEST_F(StreamFixture, lastBytesOut)
     s.updateTotals(0, 1);
     ASSERT_EQ(0, s.lastBytesOut());
 }
+
+TEST_F(StreamFixture, readLineStdString)
+{
+    mem.str("abc");
+    ASSERT_THROW(mem.readLine(), StreamException);
+
+    mem.str("abc\ndef");
+    ASSERT_EQ("abc", mem.readLine());
+
+    mem.str("abc\r\ndef");
+    ASSERT_EQ("abc", mem.readLine());
+
+    // CR では停止しない
+    mem.str("abc\rdef");
+    ASSERT_THROW(mem.readLine(), StreamException);
+
+    // 行中の CR は削除される
+    mem.str("abc\rdef\r\n");
+    ASSERT_EQ("abcdef", mem.readLine());
+}

@@ -290,6 +290,25 @@ int Stream::readLine(char *in, int max)
 }
 
 // -------------------------------------
+std::string Stream::readLine()
+{
+    std::string res;
+
+    while (true)
+    {
+        char c;
+        read(&c, 1);
+        if (c == '\n')
+            break;
+        if (c == '\r')
+            continue;
+        res.push_back(c);
+    }
+
+    return res;
+}
+
+// -------------------------------------
 void Stream::write(const char *fmt, va_list ap)
 {
     char tmp[4096];
