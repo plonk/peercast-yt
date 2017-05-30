@@ -30,7 +30,7 @@ pair<string,string> FileSystemMapper::resolvePath(const string& rawPath, const v
 {
     // if there's a language neutral version, return it
     if (realPath(rawPath) != "")
-        return make_pair(rawPath, "");
+        return make_pair(realPath(rawPath), "");
 
     // otherwise, try each of the extensions
     for (auto ext : langs)
