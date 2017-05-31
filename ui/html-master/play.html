@@ -8,11 +8,45 @@
       .paper { background-color: #eee; max-width: 750px; margin: 1em auto 1em auto; padding: 0.5em }
      object { color: white; font-size: 14px; }
      .message { color: white; font-size: 14px; }
+
+     video { max-width: calc(100vw - 400px) }
+
+     #bbs-view {
+       background-color: white;
+       width: 320px;
+       height: 480px;
+       float: right;
+       margin-left: 1em;
+       padding: 5px;
+       border-radius: 5px;
+       overflow-y: scroll;
+       line-height: 1.33em;
+     }
+
+     .thread-link {
+       color: blue;
+       cursor: pointer;
+     }
+
+     dl.thread dd {
+       margin-left: 1.5em;
+       margin-bottom: 1em;
+     }
     </style>
+    <script src="/assets/js/jquery-3.2.1.min.js"></script>
+    <script src="bbs.js"></script>
   </head>
   <body class="normal" style="background-color: #222">
 
+    <script>
+      var CONTACT_URL = "{\page.channel.contactURL}";
+    </script>
+    <div id="bbs-view">
+    </div>
+
     {^include player.html}
+
+    <br clear=all>
 
     <div class="paper">
       {$page.channel.name} {$page.channel.desc} {$page.channel.comment} {$page.channel.bitrate} kbps
