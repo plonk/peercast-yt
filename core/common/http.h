@@ -157,6 +157,22 @@ public:
 class HTTPHeaders
 {
 public:
+    HTTPHeaders() {}
+
+    HTTPHeaders(const std::initializer_list<std::pair<std::string,std::string> >& aHeaders)
+    {
+        for (auto pair : aHeaders)
+            m_headers[pair.first] = pair.second;
+    }
+
+    HTTPHeaders(const std::map<std::string,std::string>& aHeaders)
+        : m_headers(aHeaders)
+    {
+    }
+
+    std::map<std::string,std::string>::const_iterator begin() const { return m_headers.cbegin(); }
+    std::map<std::string,std::string>::const_iterator end() const { return m_headers.cend(); }
+
     void set(const std::string& name, const std::string& value)
     {
         m_headers[str::upcase(name)] = value;
@@ -217,14 +233,14 @@ class HTTPResponse
 {
 public:
 
-    HTTPResponse(int aStatusCode, const std::map<std::string,std::string>& aHeaders)
+    HTTPResponse(int aStatusCode, const HTTPHeaders& aHeaders)
         : statusCode(aStatusCode)
         , headers(aHeaders)
         , stream(NULL)
     {
     }
 
-    static HTTPResponse ok(const std::map<std::string,std::string>& aHeaders, const std::string& body)
+    static HTTPResponse ok(const HTTPHeaders& aHeaders, const std::string& body)
     {
         HTTPResponse res(200, aHeaders);
         res.body = body;
@@ -246,7 +262,7 @@ public:
 
     std::string body;
     int statusCode;
-    std::map<std::string,std::string> headers;
+    HTTPHeaders headers;
     Stream* stream;
 };
 
