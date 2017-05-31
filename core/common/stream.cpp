@@ -51,6 +51,17 @@ void FileStream::openReadOnly(const char *fn)
 }
 
 // -------------------------------------
+void FileStream::openReadOnly(int fd)
+{
+    if (file)
+        close();
+    file = fdopen(fd, "rb");
+
+    if (!file)
+        throw StreamException("Unable to open file");
+}
+
+// -------------------------------------
 void FileStream::openWriteReplace(const char *fn)
 {
     if (file)
