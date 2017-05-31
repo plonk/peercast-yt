@@ -163,6 +163,135 @@ bool Servent::hasValidAuthToken(const std::string& requestFilename)
 }
 
 // -----------------------------------
+#include <unistd.h>
+#include "env.h"
+
+#include <sys/types.h>
+#include <sys/wait.h>
+
+#include "regexp.h"
+
+void Servent::invokeCGIScript(HTTP &http, const char* fn)
+{
+    HTTPRequest req = http.getRequest();
+    FileSystemMapper fs("/cgi-bin", (std::string) peercastApp->getPath() + "cgi-bin");
+    std::string filePath = fs.toLocalFilePath(req.path);
+    Environment env;
+
+    env.set("SCRIPT_NAME", req.path);
+    env.set("SCRIPT_FILENAME", filePath);
+    env.set("GATEWAY_INTERFACE", "CGI/1.1");
+    env.set("DOCUMENT_ROOT", peercastApp->getPath());
+    env.set("QUERY_STRING", req.queryString);
+    env.set("REQUEST_METHOD", "GET");
+    // env.set("REQUEST_SCHEME", "");
+    env.set("REQUEST_URI", req.url);
+    // env.set("REMOTE_ADDR", "");
+    // env.set("REMOTE_PORT", "");
+    // env.set("SERVER_ADDR", "");
+    // env.set("SERVER_ADMIN", "");
+    // env.set("SERVER_NAME", "");
+    // env.set("SERVER_PORT", "");
+    env.set("SERVER_PROTOCOL", "HTTP/1.0");
+    env.set("SERVER_SOFTWARE", PCX_AGENT);
+    env.set("PATH", getenv("PATH"));
+
+    if (filePath.empty())
+        throw HTTPException(HTTP_SC_NOTFOUND, 404);
+
+    int pipefd[2];
+    if (pipe(pipefd) == -1)
+    {
+        char buf[1024];
+        strerror_r(errno, buf, sizeof(buf));
+        LOG_ERROR("pipe: %s", buf);
+
+        throw HTTPException(HTTP_SC_SERVERERROR, 500);
+    }
+
+    pid_t pid = fork();
+    if (pid == 0)
+    {
+        // 子プロセス。
+
+        // パイプの読み出し側を閉じる。
+        close(pipefd[0]);
+
+        // 書き込み側を標準出力として複製する。
+        close(1);
+        dup(pipefd[1]);
+
+        close(pipefd[1]);
+
+        int r = execle(filePath.c_str(),
+                       filePath.c_str(), NULL,
+                       env.env());
+        if (r == -1)
+        {
+            char buf[1024];
+            strerror_r(errno, buf, sizeof(buf));
+            LOG_ERROR("execle: %s", buf);
+            _exit(1);
+        }
+    }else
+    {
+        // 親プロセス。
+
+        // 書き込み側を閉じる。
+        close(pipefd[1]);
+
+        FileStream stream;
+        stream.openReadOnly(pipefd[0]);
+
+        HTTPHeaders headers;
+        Regexp headerPattern("\\A([A-Za-z\\-]+):\\s*(.*)\\z");
+        std::string line;
+        int statusCode = 200;
+        while ((line = stream.readLine()) != "")
+        {
+            auto caps = headerPattern.exec(line);
+            if (caps.size() == 0)
+            {
+                LOG_ERROR("Invalid header: %s", line.c_str());
+                continue;
+            }
+            if (str::capitalize(caps[1]) == "Status")
+                statusCode = atoi(caps[2].c_str());
+            else
+                headers.set(caps[1], caps[2]);
+        }
+        if (headers.get("Location") != "")
+            statusCode = 302; // Found
+
+        std::string body;
+        try
+        {
+            while (true)
+                body += stream.readChar();
+        } catch (StreamException&) {}
+
+        int status;
+        waitpid(pid, &status, 0);
+        if (WIFEXITED(status))
+        {
+            LOG_DEBUG("child process (PID %d) exited normally (status %d)", pid, WEXITSTATUS(status));
+            if (WEXITSTATUS(status) != 0)
+                throw HTTPException(HTTP_SC_SERVERERROR, 500);
+        }
+        else
+        {
+            LOG_ERROR("child process (PID %d) terminated abnormally", pid);
+            throw HTTPException(HTTP_SC_SERVERERROR, 500);
+        }
+
+        HTTPResponse res(statusCode, headers);
+        res.body = body;
+
+        http.send(res);
+    }
+}
+
+// -----------------------------------
 void Servent::handshakeGET(HTTP &http)
 {
     char *fn = http.cmdLine + 4;
@@ -351,6 +480,14 @@ void Servent::handshakeGET(HTTP &http)
             LOG_ERROR("Error: %s", e.msg);
             throw HTTPException(HTTP_SC_SERVERERROR, 500);
         }
+    }else if (str::is_prefix_of("/cgi-bin/", fn))
+    {
+        // CGI スクリプトの実行
+
+        http.readHeaders();
+        // FIXME: どういう認証をすればいいのかよくわからない
+
+        invokeCGIScript(http, fn);
     }else
     {
         // GET マッチなし
