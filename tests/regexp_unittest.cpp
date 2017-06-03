@@ -1,6 +1,6 @@
-#include "regexp.h"
-
 #include <gtest/gtest.h>
+
+#include "regexp.h"
 
 class RegexpFixture : public ::testing::Test {
 public:

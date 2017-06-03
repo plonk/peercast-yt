@@ -6,7 +6,7 @@
 
 namespace onig
 {
-#include <oniguruma.h>
+#include "onigmo.h"
 }
 
 class Regexp
