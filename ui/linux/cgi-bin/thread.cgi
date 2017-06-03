@@ -14,6 +14,12 @@ if cgi["category"].empty? || cgi["board_num"].empty? || cgi["id"].empty?
   exit
 end
 
+if cgi["first"] == ""
+  first = 1
+else
+  first = cgi['first'].to_i
+end
+
 board = Board.new(cgi["category"], cgi["board_num"].to_i)
 thread = board.thread(cgi["id"].to_i)
 
@@ -26,7 +32,7 @@ if thread.nil?
   exit
 end
 
-posts = thread.posts(1..Float::INFINITY).map do |post|
+posts = thread.posts(first..Float::INFINITY).map do |post|
   {
     "no" => post.no,
     "name" => post.name,
@@ -39,5 +45,8 @@ end
 puts "Content-Type: text/json; charset=UTF-8\n\n"
 print({
   "status" => "ok",
+  "id" => thread.id,
+  "title" => thread.title,
+  "last" => thread.last,
   "posts" => posts
 }.to_json)

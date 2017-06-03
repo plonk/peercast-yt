@@ -24,6 +24,13 @@ else
   exit
 end
 
+settings = board.settings
+if settings.has_key?("ERROR")
+  title = "板設定取得エラー"
+else
+  title = board.settings["BBS_TITLE"]
+end
+
 threads = board.threads.map do |thread|
   {
     "id" => thread.id,
@@ -34,6 +41,7 @@ end
 
 data = {
   "status" => "ok",
+  "title" => title,
   "threads" => threads,
   "category" => board.category,
   "board_num" => board.board_num
