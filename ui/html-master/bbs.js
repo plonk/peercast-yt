@@ -67,12 +67,12 @@ function boardLinkCallback(category, board_num) {
     $.getJSON("/cgi-bin/board.cgi?category="+category+"&board_num="+board_num).done(function (board) {
         console.log(board);
 
-        $('#bbs-title').html("<b>"+board.title+"</b>");
+        $('#bbs-title').html("<b>"+h(board.title)+"</b>");
 
         var buf = "";
         for (var i = 0; i < board.threads.length; i++) {
             var t = board.threads[i];
-            buf += "<span class='thread-link' data-thread-id="+t.id+">"+t.title+" ("+t.last+")</span><br>";
+            buf += "<span class='thread-link' data-thread-id="+t.id+">"+h(t.title)+" ("+t.last+")</span><br>";
         }
         $('#bbs-view').html(buf);
 
@@ -84,9 +84,17 @@ function boardLinkCallback(category, board_num) {
     });
 }
 
-// unimplemented
 function h(str) {
-    return str;
+    var table = {
+        '&': "&amp;",
+        '<': "&lt;",
+        '>': "&gt;",
+        '\"': "&quot;",
+        '\'': "&#39;",
+    };
+    return str.replace(/[&<>"']/g, function (char) {
+        return table[char];
+    });
 }
 
 $(function(){
