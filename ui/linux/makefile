@@ -31,6 +31,8 @@ SYSOBJ = $(notdir $(SYSSOURCE:.cpp=.o))
 LINUXSOURCE = main.cpp
 LINUXOBJ = $(notdir $(LINUXSOURCE:.cpp=.o))
 
+LIBONIGMO = ../../Onigmo/.libs/libonigmo.a
+
 DEPENDFILE = .deps
 
 .PHONY: all clean build-html deps $(SRCHTMLTAR) $(SRCPUBLICTAR) $(SRCASSETSTAR)
@@ -72,6 +74,7 @@ $(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS)
 	tar czf $(DISTARCHIVE) peercast-yt
 
 clean:
+	$(MAKE) -C ../../Onigmo clean
 	$(MAKE) -C .. clean
 	rm -f $(LINUXOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE)
 	rm -rf $(HTML) $(PUBLIC) $(ASSETS)
@@ -90,7 +93,12 @@ $(DEPENDFILE): $(CORESOURCE) $(LINUXSOURCE)
 $(LIBOBJSTATIC): $(COREOBJ) $(SYSOBJ)
 	$(AR) rcs $(LIBOBJSTATIC) $(COREOBJ) $(SYSOBJ)
 
-$(TARGET): $(LINUXOBJ) $(LIBOBJSTATIC)
+$(TARGET): $(LINUXOBJ) $(LIBOBJSTATIC) $(LIBONIGMO)
 	$(CXX) $(LDFLAGS) -o $@ $(LINUXOBJ) $(LIBOBJSTATIC) $(LIBS)
+
+$(LIBONIGMO):
+	$(MAKE) -C ../../Onigmo clean
+	cd ../../Onigmo; ./configure
+	$(MAKE) -C ../../Onigmo
 
 -include $(DEPENDFILE)
