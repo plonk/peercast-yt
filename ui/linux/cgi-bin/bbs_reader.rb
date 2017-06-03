@@ -1,6 +1,15 @@
 require 'net/http'
 require 'uri'
 
+# Ruby 2.0 の為の Enumerable#to_h ポリフィル。
+unless Enumerable.instance_methods(false).include?(:to_h)
+  module Enumerable
+    def to_h
+      Hash[*to_a.flatten]
+    end
+  end
+end
+
 module Bbs
 
 class HTTPError < StandardError
