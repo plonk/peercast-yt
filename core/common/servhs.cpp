@@ -484,10 +484,11 @@ void Servent::handshakeGET(HTTP &http)
     {
         // CGI スクリプトの実行
 
-        http.readHeaders();
-        // FIXME: どういう認証をすればいいのかよくわからない
+        if (!isAllowed(ALLOW_HTML))
+            throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-        invokeCGIScript(http, fn);
+        if (handshakeAuth(http, fn, true))
+            invokeCGIScript(http, fn);
     }else
     {
         // GET マッチなし
