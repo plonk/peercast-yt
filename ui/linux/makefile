@@ -97,8 +97,7 @@ $(TARGET): $(LINUXOBJ) $(LIBOBJSTATIC) $(LIBONIGMO)
 	$(CXX) $(LDFLAGS) -o $@ $(LINUXOBJ) $(LIBOBJSTATIC) $(LIBS)
 
 $(LIBONIGMO):
-	$(MAKE) -C ../../Onigmo clean
 	cd ../../Onigmo; ./configure
-	$(MAKE) -C ../../Onigmo
+	$(MAKE) -C ../../Onigmo clean all
 
 -include $(DEPENDFILE)
