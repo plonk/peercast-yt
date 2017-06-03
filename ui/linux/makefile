@@ -1,6 +1,6 @@
 CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT $(INCLUDES)
 LDFLAGS = -pthread
-LIBS = -lonig
+LIBS = -L../../Onigmo/.libs -Wl,-Bstatic -lonigmo -Wl,-Bdynamic
 
 OS = $(shell uname -s | tr A-Z a-z)
 ARCH = $(shell uname -p | tr A-Z a-z)
@@ -8,7 +8,7 @@ ARCH = $(shell uname -p | tr A-Z a-z)
 DISTARCHIVE = peercast-yt-$(OS)-$(ARCH).tar.gz
 AR = ar
 
-INCLUDES = -I../../core -I../../core/common
+INCLUDES = -I../../core -I../../core/common -I../../Onigmo
 
 TARGET = peercast
 CORE = ../../core

@@ -15,11 +15,6 @@ VPS等の Linux で動かすのに向いている PeerCast です。
 * 公開ディレクトリ機能。チャンネルリストやストリームをWebに公開できます。
 * [継続パケット機能](docs/continuation-packets.md)。キーフレームからの再生ができます。
 
-# 使用外部ライブラリ
-
-* [Oniguruma](https://github.com/kkos/oniguruma)。APT 系のディストリ
-  ビューションでは libonig-dev パッケージを入れればよいと思います。
-
 # Linuxでのビルド
 
 ## 必要なもの
