@@ -336,15 +336,13 @@ void Stream::writeLineF(const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-
     write(fmt, ap);
+    va_end(ap);
 
     if (writeCRLF)
         write("\r\n", 2);
     else
         write("\n", 1);
-
-    va_end(ap);
 }
 
 // -------------------------------------
