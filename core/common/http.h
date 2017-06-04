@@ -204,6 +204,14 @@ public:
 class HTTPRequest
 {
 public:
+    HTTPRequest()
+        : method("")
+        , url("")
+        , protocolVersion("")
+        , headers()
+    {
+    }
+
     HTTPRequest(const std::string& aMethod, const std::string& aUrl, const std::string& aProtocolVersion,
         HTTPHeaders& aHeaders)
         : method(aMethod)
