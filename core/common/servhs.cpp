@@ -173,7 +173,13 @@ bool Servent::hasValidAuthToken(const std::string& requestFilename)
 
 void Servent::invokeCGIScript(HTTP &http, const char* fn)
 {
-    HTTPRequest req = http.getRequest();
+    HTTPRequest req;
+    try {
+        req = http.getRequest();
+    } catch (GeneralException& e) // request not ready
+    {
+        throw HTTPException(HTTP_SC_BADREQUEST, 400);
+    }
     FileSystemMapper fs("/cgi-bin", (std::string) peercastApp->getPath() + "cgi-bin");
     std::string filePath = fs.toLocalFilePath(req.path);
     Environment env;
