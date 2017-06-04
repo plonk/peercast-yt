@@ -228,10 +228,18 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
                        env.env());
         if (r == -1)
         {
-            char buf[1024];
-            strerror_r(errno, buf, sizeof(buf));
-            LOG_ERROR("execle: %s", buf);
-            _exit(1);
+            // char buf[1024];
+            // strerror_r(errno, buf, sizeof(buf));
+
+            char *buf = strerror(errno);
+            LOG_ERROR("execle: %s: %s", filePath.c_str(), buf);
+
+            printf("Status: 500 Internal Server Error\n");
+            printf("Content-Type: text/plain\n\n");
+
+            printf("execle: %s: %s", filePath.c_str(), buf);
+            fflush(stdout);
+            _exit(0);
         }
     }else
     {
@@ -244,24 +252,29 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
         stream.openReadOnly(pipefd[0]);
 
         HTTPHeaders headers;
-        Regexp headerPattern("\\A([A-Za-z\\-]+):\\s*(.*)\\z");
-        std::string line;
         int statusCode = 200;
-        while ((line = stream.readLine()) != "")
-        {
-            auto caps = headerPattern.exec(line);
-            if (caps.size() == 0)
+        try {
+            Regexp headerPattern("\\A([A-Za-z\\-]+):\\s*(.*)\\z");
+            std::string line;
+            while ((line = stream.readLine()) != "")
             {
-                LOG_ERROR("Invalid header: %s", line.c_str());
-                continue;
+                auto caps = headerPattern.exec(line);
+                if (caps.size() == 0)
+                {
+                    LOG_ERROR("Invalid header: \"%s\"", line.c_str());
+                    continue;
+                }
+                if (str::capitalize(caps[1]) == "Status")
+                    statusCode = atoi(caps[2].c_str());
+                else
+                    headers.set(caps[1], caps[2]);
             }
-            if (str::capitalize(caps[1]) == "Status")
-                statusCode = atoi(caps[2].c_str());
-            else
-                headers.set(caps[1], caps[2]);
+            if (headers.get("Location") != "")
+                statusCode = 302; // Found
+        } catch (StreamException&)
+        {
+            throw HTTPException(HTTP_SC_SERVERERROR, 500);
         }
-        if (headers.get("Location") != "")
-            statusCode = 302; // Found
 
         std::string body;
         try
