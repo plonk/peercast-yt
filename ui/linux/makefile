@@ -18,6 +18,7 @@ SRCPUBLICTAR = ../public.tar
 PUBLIC = public
 SRCASSETSTAR = ../assets.tar
 ASSETS = assets
+CGIBIN = cgi-bin
 
 LIBOBJSTATIC = libpeercast.a
 
@@ -69,7 +70,7 @@ $(ASSETS): $(SRCASSETSTAR)
 $(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS)
 	rm -rf peercast-yt
 	mkdir peercast-yt
-	cp -R $(HTML) $(PUBLIC) $(TARGET) $(ASSETS) ../../licenses ../../core/LICENSE peercast-yt/
+	cp -R $(HTML) $(PUBLIC) $(TARGET) $(ASSETS) $(CGIBIN) ../../licenses ../../core/LICENSE peercast-yt/
 	strip peercast-yt/$(TARGET)
 	tar czf $(DISTARCHIVE) peercast-yt
 
