@@ -105,6 +105,8 @@
       {@else}
       {#Contact}
       {@end}
+      -
+      <a href="/admin?cmd=bump&amp;id={$page.channel.id}">{#Bump}</a>
       {@if page.channel.type == "FLV"}
         -
         {@if page.player != "flash"}
