@@ -48,10 +48,16 @@ function threadLinkCallback(category, board_num, board_title, thread_id) {
         var posts = thread.posts;
         var buf = "";
 
-        $('#bbs-title').html("<span class='board-link' data-category='"+category+"' data-board_num='"+board_num+"'>"+h(board_title)+"</span> &raquo; <b>"+h(thread.title)+"</b>");
+        var board_url = "http://jbbs.shitaraba.net/"+category+"/"+board_num+"/";
+        var thread_url = "http://jbbs.shitaraba.net/bbs/read.cgi/"+category+"/"+board_num+"/"+thread_id;
+        $('#bbs-title').html("<a class='board-link' href='"+board_url+"' data-category='"+category+"' data-board_num='"+board_num+"'>"+h(board_title)+"</a> &raquo; <b>"+"<a target='_blank' href='"+thread_url+"/l5#form_write'>"+h(thread.title)+"</a></b>");
 
-        $('.board-link').on('click', function () {
-            boardLinkCallback($(this).data('category'), +($(this).data('board_num')));
+        $('.board-link').on('click', function (e) {
+            if (e.button === 0) {
+                console.log(e.button);
+                e.preventDefault();
+                boardLinkCallback($(this).data('category'), +($(this).data('board_num')));
+            }
         });
 
         buf += "<dl class='thread'>";
@@ -67,17 +73,22 @@ function boardLinkCallback(category, board_num) {
     $.getJSON("/cgi-bin/board.cgi?category="+category+"&board_num="+board_num).done(function (board) {
         console.log(board);
 
-        $('#bbs-title').html("<b>"+h(board.title)+"</b>");
+        var board_url = "http://jbbs.shitaraba.net/"+category+"/"+board_num+"/";
+        $('#bbs-title').html("<a target='_blank' href='"+board_url+"'><b>"+h(board.title)+"</b></a>");
 
         var buf = "";
         for (var i = 0; i < board.threads.length; i++) {
             var t = board.threads[i];
-            buf += "<span class='thread-link' data-thread-id="+t.id+">"+h(t.title)+" ("+t.last+")</span><br>";
+            var thread_url = "http://jbbs.shitaraba.net/bbs/read.cgi/"+category+"/"+board_num+"/"+t.id+"/l50";
+            buf += "<a href='"+thread_url+"' class='thread-link' data-thread-id="+t.id+">"+h(t.title)+" ("+t.last+")</a><br>";
         }
         $('#bbs-view').html(buf);
 
-        $('.thread-link').on('click', function () {
-            threadLinkCallback(board.category, board.board_num, board.title, $(this).data("thread-id"));
+        $('.thread-link').on('click', function (e) {
+            if (e.button === 0) {
+                threadLinkCallback(board.category, board.board_num, board.title, $(this).data("thread-id"));
+                e.preventDefault();
+            }
         });
     }).fail(function () {
         console.log('fail');
