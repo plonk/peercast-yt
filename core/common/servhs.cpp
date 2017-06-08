@@ -868,14 +868,22 @@ bool Servent::handshakeHTTPBasicAuth(HTTP &http)
     }
 
     if (sock->host.isLocalhost())
+    {
+        LOG_DEBUG("HTTP Basic Auth: host is localhost");
         return true;
+    }
 
     if (strlen(servMgr->password) != 0 && strcmp(pass, servMgr->password) == 0)
+    {
+        LOG_DEBUG("HTTP Basic Auth: password matches");
         return true;
+    }
 
     http.writeLine(HTTP_SC_UNAUTHORIZED);
     http.writeLine("WWW-Authenticate: Basic realm=\"PeerCast Admin\"");
     http.writeLine("");
+
+    LOG_DEBUG("HTTP Basic Auth: rejected");
     return false;
 }
 
