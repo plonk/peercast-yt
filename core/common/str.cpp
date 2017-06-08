@@ -130,7 +130,7 @@ std::vector<std::string> split(const std::string& in, const std::string& separat
 std::string codepoint_to_utf8(uint32_t codepoint)
 {
     std::string res;
-    if (codepoint >= 0 && codepoint <= 0x7f) {
+    if (/* codepoint >= 0 && */ codepoint <= 0x7f) {
         res += (char) codepoint;
     } else if (codepoint >= 0x80 && codepoint <= 0x7ff) {
         res += (char) (0xb0 | (codepoint >> 6));

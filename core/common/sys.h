@@ -225,14 +225,15 @@ private:
 public:
     WLock()
     {
-        const pthread_mutexattr_t mattr =
-        {
+        pthread_mutexattr_t mattr;
+
+        pthread_mutexattr_init(&mattr);
+
 #ifdef __APPLE__
-            PTHREAD_MUTEX_RECURSIVE
+        pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
 #else
-            PTHREAD_MUTEX_RECURSIVE_NP
+        pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE_NP);
 #endif
-         };
 
         pthread_mutex_init( &mutex, &mattr );
     }

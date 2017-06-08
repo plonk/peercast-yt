@@ -202,7 +202,7 @@ void PCPStream::readPushAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
         {
             Channel *ch = chanMgr->findChannelByID(chanID);
             if (ch)
-                if (ch->isBroadcasting() || !ch->isFull() && !servMgr->relaysFull() && ch->info.id.isSame(chanID))
+                if (ch->isBroadcasting() || (!ch->isFull() && !servMgr->relaysFull() && ch->info.id.isSame(chanID)))
                     s = servMgr->allocServent();
         }else{
             s = servMgr->allocServent();
