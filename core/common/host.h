@@ -92,7 +92,6 @@ public:
 
     bool    loopbackIP()
     {
-//      return ((ipByte[3] == 127) && (ipByte[2] == 0) && (ipByte[1] == 0) && (ipByte[0] == 1));
         return ((ip3() == 127) && (ip2() == 0) && (ip1() == 0) && (ip0() == 1));
     }
 
