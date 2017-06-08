@@ -298,3 +298,98 @@ TEST_F(ServentFixture, hasValidAuthToken)
     ASSERT_FALSE(s.hasValidAuthToken("ほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげ.flv?auth=44d5299e57ad9274fee7960a9fa60bfd"));
     ASSERT_FALSE(s.hasValidAuthToken("?auth=44d5299e57ad9274fee7960a9fa60bfd"));
 }
+
+TEST_F(ServentFixture, handshakeHTTPBasicAuth_nonlocal_correctpass)
+{
+    MockClientSocket* mock;
+    Defer reclaim([&]() { delete mock; });
+
+    s.sock = mock = new MockClientSocket();
+
+    ASSERT_EQ(0, s.sock->host.ip);
+    ASSERT_FALSE(s.sock->host.isLocalhost());
+
+    strcpy(servMgr->password, "Passw0rd");
+
+    HTTP http(*mock);
+    http.initRequest("GET / HTTP/1.0");
+    mock->incoming.str("Authorization: BASIC OlBhc3N3MHJk\r\n\r\n");
+
+    ASSERT_TRUE(s.handshakeHTTPBasicAuth(http));
+}
+
+TEST_F(ServentFixture, handshakeHTTPBasicAuth_nonlocal_wrongpass)
+{
+    MockClientSocket* mock;
+    Defer reclaim([&]() { delete mock; });
+
+    s.sock = mock = new MockClientSocket();
+
+    ASSERT_EQ(0, s.sock->host.ip);
+    ASSERT_FALSE(s.sock->host.isLocalhost());
+
+    strcpy(servMgr->password, "hoge");
+
+    HTTP http(*mock);
+    http.initRequest("GET / HTTP/1.0");
+    mock->incoming.str("Authorization: BASIC OlBhc3N3MHJk\r\n\r\n");
+
+    ASSERT_FALSE(s.handshakeHTTPBasicAuth(http));
+}
+
+TEST_F(ServentFixture, handshakeHTTPBasicAuth_local_correctpass)
+{
+    MockClientSocket* mock;
+    Defer reclaim([&]() { delete mock; });
+
+    s.sock = mock = new MockClientSocket();
+
+   s.sock->host.ip = 127 << 24 | 1;
+    ASSERT_TRUE(s.sock->host.isLocalhost());
+
+    strcpy(servMgr->password, "Passw0rd");
+
+    HTTP http(*mock);
+    http.initRequest("GET / HTTP/1.0");
+    mock->incoming.str("Authorization: BASIC OlBhc3N3MHJk\r\n\r\n");
+
+    ASSERT_TRUE(s.handshakeHTTPBasicAuth(http));
+}
+
+TEST_F(ServentFixture, handshakeHTTPBasicAuth_local_wrongpass)
+{
+    MockClientSocket* mock;
+    Defer reclaim([&]() { delete mock; });
+
+    s.sock = mock = new MockClientSocket();
+
+   s.sock->host.ip = 127 << 24 | 1;
+    ASSERT_TRUE(s.sock->host.isLocalhost());
+
+    strcpy(servMgr->password, "hoge");
+
+    HTTP http(*mock);
+    http.initRequest("GET / HTTP/1.0");
+    mock->incoming.str("Authorization: BASIC OlBhc3N3MHJk\r\n\r\n");
+
+    ASSERT_TRUE(s.handshakeHTTPBasicAuth(http));
+}
+
+TEST_F(ServentFixture, handshakeHTTPBasicAuth_noauthorizationheader)
+{
+    MockClientSocket* mock;
+    Defer reclaim([&]() { delete mock; });
+
+    s.sock = mock = new MockClientSocket();
+
+    ASSERT_FALSE(s.sock->host.isLocalhost());
+
+    strcpy(servMgr->password, "Passw0rd");
+
+    HTTP http(*mock);
+    http.initRequest("GET / HTTP/1.0");
+    mock->incoming.str("\r\n");
+
+    ASSERT_FALSE(s.handshakeHTTPBasicAuth(http));
+    ASSERT_EQ("HTTP/1.0 401 Unauthorized\r\nWWW-Authenticate: Basic realm=\"PeerCast Admin\"\r\n\r\n", mock->outgoing.str());
+}
