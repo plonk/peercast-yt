@@ -143,10 +143,10 @@ public:
         if (packetSize < 8)
             throw std::runtime_error("no timestamp data");
 
-        packet[7] = (timestamp >> 24) && 0xff;
-        packet[4] = (timestamp >> 16) && 0xff;
-        packet[5] = (timestamp >> 8) && 0xff;
-        packet[6] = (timestamp >> 0) && 0xff;
+        packet[7] = (timestamp >> 24) & 0xff;
+        packet[4] = (timestamp >> 16) & 0xff;
+        packet[5] = (timestamp >> 8) & 0xff;
+        packet[6] = (timestamp >> 0) & 0xff;
     }
 
     const char *getTagType()
