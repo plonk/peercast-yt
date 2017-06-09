@@ -6,31 +6,31 @@
   <table align=center border=0>
     <tbody>
       <tr align=middle>
-        <td colspan="2" vAlign=top>
+        <td colspan="2" valign=top>
           <div align="center">
             <table width="50%" border="0">
               <tr bgcolor="#ccc">
                 <td colspan="2" class="normal"><div align="center"><strong>{#Basic Settings}</strong></div></td>
               </tr>
-              <tr align=left bgColor=#ddd class="normal">
+              <tr align=left bgcolor=#ddd class="normal">
                 <td style="width: 8.5em">{#Port}</td>
                 <td><input size=10 value={$servMgr.serverPort1} name=port></td>
               </tr>
-              <tr align=left bgColor=#eee class="normal">
+              <tr align=left bgcolor=#eee class="normal">
                 <td>{#Password}</td>
                 <td>
                   <input name=passnew type=password size="10" maxlength="32" {@if servMgr.password}value={$servMgr.password}{@end} style="width: 100%">
                 </td>
               </tr>
-              <tr align=left bgColor=#ddd class="normal">
+              <tr align=left bgcolor=#ddd class="normal">
                 <td>{#Max. Relays}</td>
                 <td><input size=5 value={$servMgr.maxRelays} name=maxrelays></td>
               </tr>
-              <tr align=left bgColor=#eee class="normal">
+              <tr align=left bgcolor=#eee class="normal">
                 <td>{#Max. Direct streams}</td>
                 <td><input size=5 value={$servMgr.maxDirect} name=maxdirect></td>
               </tr>
-              <tr align=left bgColor=#ddd class="normal">
+              <tr align=left bgcolor=#ddd class="normal">
                 <td>{#Language}</td>
                 <td>
                   <select name="htmlPath" size="1" id="htmlPath">
@@ -46,73 +46,73 @@
         </td>
       </tr>
       <tr align=middle>
-        <td colspan="2" vAlign=top>
+        <td colspan="2" valign=top>
           <div align="center">
             <input type=submit value="{#Save Settings}" name=submit>
           </div>
         </td>
       </tr>
       <tr align=middle>
-        <td vAlign=top>
+        <td valign=top>
           <table width="100%" align=center border=0>
             <tbody>
-              <tr align=middle bgColor=#ccc class="normal">
-                <td colSpan=2><b>{#Server}</b></td>
+              <tr align=middle bgcolor=#ccc class="normal">
+                <td colspan=2><b>{#Server}</b></td>
               </tr>
-              <tr align=left bgColor=#ddd class="normal">
+              <tr align=left bgcolor=#ddd class="normal">
                 <td width="50%">{#Server Name}</td>
                 <td>
                   <input value="{$servMgr.serverName}" name=servername placeholder="{#Nickname for this server}">
                 </td>
               </tr>
-              <tr align=left bgColor=#eee class="normal">
+              <tr align=left bgcolor=#eee class="normal">
                 <td width="50%">{#DJ Message}</td>
                 <td><input {@if chanMgr.djMessage}value="{$chanMgr.djMessage}"{@end} name=djmsg>
                 </td>
               </tr>
-              <tr align=left bgColor=#ddd class="normal">
+              <tr align=left bgcolor=#ddd class="normal">
                 <td>{#ICY MetaInterval}</td>
                 <td><input size=5 value={$chanMgr.icyMetaInterval} name=icymeta>
                 </td>
               </tr>
-              <tr align=left bgColor=#eee class="normal">
+              <tr align=left bgcolor=#eee class="normal">
                 <td>{#Mode}</td>
                 <td>
-                  <label><input type=radio {@if !servMgr.isRoot}CHECKED{@end} value=0 name=root>
+                  <label><input type=radio {@if !servMgr.isRoot}checked{@end} value=0 name=root>
                     <i>{#Normal}</i></label><br>
-                    <label><input name=root type=radio value=1 {@if servMgr.isRoot}CHECKED{@end}>
+                    <label><input name=root type=radio value=1 {@if servMgr.isRoot}checked{@end}>
                       <i>{#Root}</i></label></td>
               </tr>
-              <tr align=left bgColor=#ddd class="normal">
+              <tr align=left bgcolor=#ddd class="normal">
                 <td>{#Refresh HTML (sec)}</td>
                 <td><input size=10 value={$servMgr.refreshHTML} name=refresh></td>
               </tr>
             </tbody>
           </table>
         </td>
-        <td vAlign=top>
+        <td valign=top>
           <table width="100%" align=center border=0>
             <tbody>
-              <tr align=middle bgColor=#ccc class="normal">
-                <td colSpan=2><b>{#Network}</b></td>
+              <tr align=middle bgcolor=#ccc class="normal">
+                <td colspan=2><b>{#Network}</b></td>
               </tr>
-              <tr align=left bgColor=#eee class="normal">
+              <tr align=left bgcolor=#eee class="normal">
                 <td>{#YP Address}</td>
                 <td><input {@if servMgr.ypAddress}value={$servMgr.ypAddress}{@end} name=yp></td>
               </tr>
-              <tr align=left bgColor=#ddd class="normal">
+              <tr align=left bgcolor=#ddd class="normal">
                 <td>{#Max. Output (Kbits/s)}</td>
                 <td><input size=5 value={$servMgr.maxBitrateOut} name=maxup></td>
               </tr>
-              <tr align=left bgColor=#eee class="normal">
+              <tr align=left bgcolor=#eee class="normal">
                 <td width="50%">{#Max. Relays Per Channel}</td>
                 <td><input size=5 value={$chanMgr.maxRelaysPerChannel} name=maxrelaypc></td>
               </tr>
-              <tr align=left bgColor=#ddd class="normal">
+              <tr align=left bgcolor=#ddd class="normal">
                 <td width="50%">{#Max. Controls In}</td>
                 <td><input size=5 value={$servMgr.maxControlsIn} name=maxcin></td>
               </tr>
-              <tr align=left bgColor=#eee class="normal">
+              <tr align=left bgcolor=#eee class="normal">
                 <td>{#Max. Connections In} </td>
                 <td><input name=maxsin id="maxsin" value={$servMgr.maxServIn} size=5></td>
               </tr>
@@ -121,13 +121,13 @@
         </td>
       </tr>
       <tr align=middle>
-        <td vAlign=top>
+        <td valign=top>
           <table width="100%" align=center border=0>
             <tbody>
-              <tr align=middle bgColor=#ccc class="normal">
-                <td colSpan=5><b>{#Filters}</b></td>
+              <tr align=middle bgcolor=#ccc class="normal">
+                <td colspan=5><b>{#Filters}</b></td>
               </tr>
-              <tr align=left bgColor=#eee class="normal">
+              <tr align=left bgcolor=#eee class="normal">
                 <td><b>{#IP Mask}</b></td>
                 <td><b>{#Network}</b></td>
                 <td><b>{#Direct}</b></td>
@@ -135,56 +135,56 @@
                 <td><b>{#Ban}</b></td>
               </tr>
               {@loop servMgr.numFilters}
-              {@if loop.indexEven} <tr align=middle bgColor=#eee> {@else} <tr align=middle bgColor=#ddd class="normal"> {@end}
+              {@if loop.indexEven} <tr align=middle bgcolor=#eee> {@else} <tr align=middle bgcolor=#ddd class="normal"> {@end}
                 <td><input size=15 value="{$loop.filter.ip}" name=filt_ip>
                 </td>
-                <td><input type=checkbox {@if loop.filter.network}CHECKED{@end} value=1 name=filt_nw{$loop.index}>
+                <td><input type=checkbox {@if loop.filter.network}checked{@end} value=1 name=filt_nw{$loop.index}>
                 </td>
-                <td><input type=checkbox {@if loop.filter.direct}CHECKED{@end} value=1 name=filt_di{$loop.index}>
+                <td><input type=checkbox {@if loop.filter.direct}checked{@end} value=1 name=filt_di{$loop.index}>
                 </td>
-                <td><input type=checkbox {@if loop.filter.private}CHECKED{@end} value=1 name=filt_pr{$loop.index}>
+                <td><input type=checkbox {@if loop.filter.private}checked{@end} value=1 name=filt_pr{$loop.index}>
                 </td>
-                <td><input type=checkbox {@if loop.filter.banned}CHECKED{@end} value=1 name=filt_bn{$loop.index}>
+                <td><input type=checkbox {@if loop.filter.banned}checked{@end} value=1 name=filt_bn{$loop.index}>
                 </td>
               </tr>
               {@end}
             </tbody>
           </table>
         </td>
-        <td vAlign=top>
+        <td valign=top>
           <table width="100%" align=center border=0>
             <tbody>
-              <tr align=middle bgColor=#ccc class="normal">
-                <td colSpan=3><b>{#Security}</b></td>
+              <tr align=middle bgcolor=#ccc class="normal">
+                <td colspan=3><b>{#Security}</b></td>
               </tr>
-              <tr align=left bgColor=#eee class="normal">
+              <tr align=left bgcolor=#eee class="normal">
                 <td><b>{#Allow on port:}</b></td>
                 <td><b>{$servMgr.serverPort1}<b></b></b></td>
                 <td><b>{$servMgr.serverPort2}<b></b></b></td>
               </tr>
-              <tr align=left bgColor=#ddd class="normal">
+              <tr align=left bgcolor=#ddd class="normal">
                 <td>HTML</td>
-                <td><input type=checkbox {@if servMgr.allow.HTML1}CHECKED{@end} value=1 name=allowHTML1>
+                <td><input type=checkbox {@if servMgr.allow.HTML1}checked{@end} value=1 name=allowHTML1>
                 </td>
-                <td><input type=checkbox {@if servMgr.allow.HTML2}CHECKED{@end} value=1 name=allowHTML2>
+                <td><input type=checkbox {@if servMgr.allow.HTML2}checked{@end} value=1 name=allowHTML2>
                 </td>
               </tr>
-              <tr align=left bgColor=#eee class="normal">
+              <tr align=left bgcolor=#eee class="normal">
                 <td>{#Broadcasting}</td>
-                <td><input type=checkbox {@if servMgr.allow.broadcasting1}CHECKED{@end} value=1 name=allowBroadcast1>
+                <td><input type=checkbox {@if servMgr.allow.broadcasting1}checked{@end} value=1 name=allowBroadcast1>
                 </td>
-                <td><input type=checkbox {@if servMgr.allow.broadcasting2}CHECKED{@end} value=1 name=allowBroadcast2>
+                <td><input type=checkbox {@if servMgr.allow.broadcasting2}checked{@end} value=1 name=allowBroadcast2>
                 </td>
               </tr>
-              <tr align=left bgColor=#ddd class="normal">
+              <tr align=left bgcolor=#ddd class="normal">
                 <td>{#Network}</td>
-                <td><input type=checkbox {@if servMgr.allow.network1}CHECKED{@end} value=1 name=allowNetwork1>
+                <td><input type=checkbox {@if servMgr.allow.network1}checked{@end} value=1 name=allowNetwork1>
                 </td>
                 <td></td>
               </tr>
-              <tr align=left bgColor=#eee class="normal">
+              <tr align=left bgcolor=#eee class="normal">
                 <td>{#Direct}</td>
-                <td><input type=checkbox {@if servMgr.allow.direct1}CHECKED{@end} value=1 name=allowDirect1>
+                <td><input type=checkbox {@if servMgr.allow.direct1}checked{@end} value=1 name=allowDirect1>
                 </td>
                 <td> </td>
               </tr>
@@ -193,55 +193,55 @@
         </td>
       </tr>
       <tr align=middle>
-        <td vAlign=top>
+        <td valign=top>
           <table width="100%" align=center border=0>
             <tbody>
-              <tr align=middle bgColor=#ccc class="normal">
-                <td colSpan=2><b>{#Authentication}</b></td>
+              <tr align=middle bgcolor=#ccc class="normal">
+                <td colspan=2><b>{#Authentication}</b></td>
               </tr>
-              <tr align=left bgColor=#eee class="normal">
+              <tr align=left bgcolor=#eee class="normal">
                 <td>{#HTML Authentication}</td>
                 <td>
-                  <label><input type=radio {@if servMgr.auth.useCookies}CHECKED{@end} value=cookie name=auth>
+                  <label><input type=radio {@if servMgr.auth.useCookies}checked{@end} value=cookie name=auth>
                     <i>{#Cookies}</i></label><br>
-                    <label><input type=radio {@if servMgr.auth.useHTTP}CHECKED{@end} value=http name=auth>
+                    <label><input type=radio {@if servMgr.auth.useHTTP}checked{@end} value=http name=auth>
                       <i>{#Basic HTTP}</i></label></td>
               </tr>
-              <tr align=left bgColor=#ddd class="normal">
+              <tr align=left bgcolor=#ddd class="normal">
                 <td>{#Cookies Expire}</td>
                 <td>
-                  <label><input type=radio {@if servMgr.auth.useSessionCookies}CHECKED{@end} value=session name=expire>
+                  <label><input type=radio {@if servMgr.auth.useSessionCookies}checked{@end} value=session name=expire>
                     <i>{#End of session}</i></label><br>
-                    <label><input type=radio {@if !servMgr.auth.useSessionCookies}CHECKED{@end} value=never name=expire>
+                    <label><input type=radio {@if !servMgr.auth.useSessionCookies}checked{@end} value=never name=expire>
                       <i>{#Never}</i></label></td>
               </tr>
             </tbody>
           </table>
         </td>
-        <td vAlign=top>
+        <td valign=top>
           <table width="100%" align=center border=0>
             <tbody>
-              <tr align=middle bgColor=#ccc class="normal">
-                <td colSpan=2><b>{#Log}</b></td>
+              <tr align=middle bgcolor=#ccc class="normal">
+                <td colspan=2><b>{#Log}</b></td>
               </tr>
-              <tr align=left bgColor=#eee class="normal">
+              <tr align=left bgcolor=#eee class="normal">
                 <td width="50%">{#Debug}</td>
-                <td><input type=checkbox {@if servMgr.log.debug}CHECKED{@end} value=1 name=logDebug>
+                <td><input type=checkbox {@if servMgr.log.debug}checked{@end} value=1 name=logDebug>
                 </td>
               </tr>
-              <tr align=left bgColor=#ddd class="normal">
+              <tr align=left bgcolor=#ddd class="normal">
                 <td>{#Errors}</td>
-                <td><input type=checkbox {@if servMgr.log.errors}CHECKED{@end} value=1 name=logErrors>
+                <td><input type=checkbox {@if servMgr.log.errors}checked{@end} value=1 name=logErrors>
                 </td>
               </tr>
-              <tr align=left bgColor=#eee class="normal">
+              <tr align=left bgcolor=#eee class="normal">
                 <td>{#Network}</td>
-                <td><input type=checkbox {@if servMgr.log.gnet}CHECKED{@end} value=1 name=logNetwork>
+                <td><input type=checkbox {@if servMgr.log.gnet}checked{@end} value=1 name=logNetwork>
                 </td>
               </tr>
-              <tr align=left bgColor=#ddd class="normal">
+              <tr align=left bgcolor=#ddd class="normal">
                 <td>{#Channels}</td>
-                <td><input type=checkbox {@if servMgr.log.channel}CHECKED{@end} value=1 name=logChannel>
+                <td><input type=checkbox {@if servMgr.log.channel}checked{@end} value=1 name=logChannel>
                 </td>
               </tr>
             </tbody>
@@ -250,13 +250,13 @@
       </tr>
 
       <tr align=middle>
-        <td vAlign=top>
+        <td valign=top>
           <table width="100%" align=center border=0>
             <tbody>
-              <tr align=middle bgColor=#ccc class="normal">
-                <td colSpan=2><b>{#Public Directory}</b></td>
+              <tr align=middle bgcolor=#ccc class="normal">
+                <td colspan=2><b>{#Public Directory}</b></td>
               </tr>
-              <tr align=left bgColor=#eee class="normal">
+              <tr align=left bgcolor=#eee class="normal">
                 <td>{#Enable}</td>
                 <td>
                   <label>
@@ -269,19 +269,19 @@
           </table>
         </td>
 
-        <td vAlign=top>
+        <td valign=top>
           <table width="100%" align=center border=0>
             <tbody>
-              <tr align=middle bgColor=#ccc class="normal">
-                <td colSpan=2><b>{#Channel Feeds}</b></td>
+              <tr align=middle bgcolor=#ccc class="normal">
+                <td colspan=2><b>{#Channel Feeds}</b></td>
               </tr>
-              <tr align=middle bgColor=#eee class="normal">
+              <tr align=middle bgcolor=#eee class="normal">
                 <th>{#URL}</th>
                 <th>{#Public}</th>
               </tr>
               {@loop servMgr.numChannelFeedsPlusOne}
               {@if loop.indexEven}
-              <tr bgColor=#ddd> {@else} <tr bgColor=#eee class="normal">
+              <tr bgcolor=#ddd> {@else} <tr bgcolor=#eee class="normal">
                 {@end}
                 <td>
                   <input size=15 value="{$loop.channelFeed.url}" name="channel_feed_url" style="width: 100%" placeholder="{#URL of index.txt}">
@@ -300,34 +300,34 @@
           {@if servMgr.isRoot}
           <table width="100%" align=center border=0>
             <tbody>
-              <tr align=middle bgColor=#ccc class="normal">
-                <td colSpan=2><b>{#Root Mode}</b></td>
+              <tr align=middle bgcolor=#ccc class="normal">
+                <td colspan=2><b>{#Root Mode}</b></td>
               </tr>
-              <tr align=left bgColor=#eee class="normal">
+              <tr align=left bgcolor=#eee class="normal">
                 <td>{#Host Update (sec)}</td>
                 <td><input size=5 {@if chanMgr.hostUpdateInterval}value={$chanMgr.hostUpdateInterval}{@end} name=huint></td>
               </tr>
-              <tr align=left bgColor=#ddd class="normal">
+              <tr align=left bgcolor=#ddd class="normal">
                 <td>{#Message}</td>
                 <td><input type=text {@if servMgr.rootMsg}value="{$servMgr.rootMsg}"{@end} name=pcmsg></td>
               </tr>
-              <tr align=left bgColor=#eee class="normal">
+              <tr align=left bgcolor=#eee class="normal">
                 <td width="50%">{#Get Update}</td>
                 <td><input type=checkbox value=1 name=getupd></td>
               </tr>
-              <tr align=left bgColor=#ddd class="normal">
+              <tr align=left bgcolor=#ddd class="normal">
                 <td width="50%">{#Send}</td>
                 <td><input type=checkbox value=1 name=brroot></td>
               </tr>
-              <tr align=left bgColor=#eee class="normal">
+              <tr align=left bgcolor=#eee class="normal">
                 <td>{#Min. PGNU In}</td>
                 <td><input size=5 value={$servMgr.minPGNUIn} name=minpgnu></td>
               </tr>
-              <tr align=left bgColor=#ddd class="normal">
+              <tr align=left bgcolor=#ddd class="normal">
                 <td>{#Max. PGNU In}</td>
                 <td><input size=5 value={$servMgr.maxPGNUIn} name=maxpgnu></td>
               </tr>
-              <tr align=left bgColor=#eee class="normal">
+              <tr align=left bgcolor=#eee class="normal">
                 <td>{#Broadcast IDs}</td>
                 <td><a href="bcid.html">{#View}</a></td>
               </tr>
