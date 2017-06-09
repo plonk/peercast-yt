@@ -1835,14 +1835,8 @@ int ServMgr::idleProc(ThreadInfo *thread)
 {
     sys->setThreadName(thread, "IDLE");
 
-    //unsigned int lastPasvFind=0;
-    //unsigned int lastBroadcast=0;
-
     // nothing much to do for the first couple of seconds, so just hang around.
     sys->sleep(2000);
-
-    //unsigned int lastBWcheck=0;
-    //unsigned int bytesIn=0, bytesOut=0;
 
     unsigned int lastBroadcastConnect = 0;
     unsigned int lastRootBroadcast = 0;
