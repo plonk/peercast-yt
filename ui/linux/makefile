@@ -69,7 +69,7 @@ clean:
 	$(MAKE) -C ../../Onigmo clean
 	$(MAKE) -C .. clean
 	rm -f $(LINUXOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE)
-	rm -rf $(HTML) $(PUBLIC) $(ASSETS)
+	rm -rf $(HTML) $(PUBLIC)
 	rm -rf peercast-yt/
 	rm -f $(DISTARCHIVE)
 
