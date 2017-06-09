@@ -63,6 +63,48 @@
 
       </table>
 
+      <h2>Channels Found</h2>
+
+      <table width="100%" class="channel-list">
+        <tr>
+          <th>{#Rank}</th>
+          <th><img src="/assets/images/small-icon.png" alt="{#Small icon of a megaphone}"></th>
+          <th>{#Channel}</th>
+          <th>{#Status}</th>
+          <th>{#Bitrate}</th>
+          <th>{#Type}</th>
+        </tr>
+
+        {@foreach channelsFound}
+        <tr>
+          <td class="rank">{$loop.indexBaseOne}</td>
+          <td>
+            <a href="/public/play.html?id={$this.id}">
+              <img class="play-button" src="/assets/images/play.png">
+            </a>
+          </td>
+          <td style="width: 600px" class="channel-description">
+            <span style="font-weight: bold">
+              {@if this.url}
+              <a class="link channel-name" href="{$this.url}">{$this.name}</a>
+              {@else}
+              {$this.name}
+              {@end}
+            </span><br>
+            <div class="detail">
+              {@if this.genre}{!this.genre} - {@end}{!this.desc}
+            </div>
+          </td>
+          <td align=center nowrap>
+            {$this.hit_stat.listeners} / {$this.hit_stat.relays}
+          </td>
+          <td class="bitrate" align=center nowrap>{$this.bitrate} kb/s</td>
+          <td align=center>{$this.type}</td>
+        </tr>
+        {@end}
+
+      </table>
+
       <h2>{#Channels from Friendly Stations}</h2>
 
       <table width="100%" class="channel-list">
