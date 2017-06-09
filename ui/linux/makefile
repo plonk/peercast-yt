@@ -16,7 +16,6 @@ SRCHTMLTAR = ../html.tar
 HTML = html
 SRCPUBLICTAR = ../public.tar
 PUBLIC = public
-SRCASSETSTAR = ../assets.tar
 ASSETS = assets
 CGIBIN = cgi-bin
 
@@ -36,7 +35,7 @@ LIBONIGMO = ../../Onigmo/.libs/libonigmo.a
 
 DEPENDFILE = .deps
 
-.PHONY: all clean build-html deps $(SRCHTMLTAR) $(SRCPUBLICTAR) $(SRCASSETSTAR)
+.PHONY: all clean build-html deps $(SRCHTMLTAR) $(SRCPUBLICTAR)
 
 # Here follow the generic build rules.
 all: $(TARGET) $(LIBOBJSTATIC) $(DISTARCHIVE)
@@ -58,14 +57,6 @@ $(PUBLIC): $(SRCPUBLICTAR)
 	rm -rf $(PUBLIC)
 	tar xf $(SRCPUBLICTAR)
 	touch $(PUBLIC)
-
-$(SRCASSETSTAR):
-	$(MAKE) -C .. assets.tar
-
-$(ASSETS): $(SRCASSETSTAR)
-	rm -rf $(ASSETS)
-	tar xf $(SRCASSETSTAR)
-	touch $(ASSETS)
 
 $(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS)
 	rm -rf peercast-yt
