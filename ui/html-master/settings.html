@@ -87,16 +87,6 @@
                 <TD>{#Refresh HTML (sec)}</TD>
                 <TD><INPUT size=10 value={$servMgr.refreshHTML} name=refresh></TD>
               </TR>
-              <TR align=left bgColor=#eee class="normal">
-                <TD>{#Public Directory}</TD>
-                <TD>
-                  <label>
-                    <INPUT type="checkbox" name="public_directory" {@if servMgr.publicDirectoryEnabled}checked{@end}>
-                    <i>{#Enable}</i>
-                  </label>
-                  <a href="/public/">{#View}</a>
-                </TD>
-              </TR>
             </TBODY>
           </TABLE>
         </TD>
@@ -261,6 +251,52 @@
 
       <TR align=middle>
         <TD vAlign=top>
+          <TABLE width="100%" align=center border=0>
+            <TBODY>
+              <TR align=middle bgColor=#ccc class="normal">
+                <TD colSpan=2><B>{#Public Directory}</B></TD>
+              </TR>
+              <TR align=left bgColor=#eee class="normal">
+                <TD>{#Enable}</TD>
+                <TD>
+                  <label>
+                    <INPUT type="checkbox" name="public_directory" {@if servMgr.publicDirectoryEnabled}checked{@end}>
+                  </label>
+                  <a href="/public/">{#View}</a>
+                </TD>
+              </TR>
+            </tbody>
+          </table>
+        </td>
+
+        <TD vAlign=top>
+          <TABLE width="100%" align=center border=0>
+            <TBODY>
+              <TR align=middle bgColor=#ccc class="normal">
+                <TD colSpan=2><B>{#Channel Feeds}</B></TD>
+              </TR>
+              <TR align=middle bgColor=#eee class="normal">
+                <TH>{#URL}</TH>
+                <TH>{#Public}</TH>
+              </TR>
+              {@loop servMgr.numChannelFeedsPlusOne}
+              {@if loop.indexEven}
+              <TR bgColor=#ddd> {@else} <TR bgColor=#eee class="normal">
+                {@end}
+                <TD>
+                  <INPUT size=15 value="{$loop.channelFeed.url}" name="channel_feed_url" style="width: 100%" placeholder="{#URL of index.txt}">
+                </TD>
+                <td align="center">
+                  <input type="checkbox" name="channel_feed_public{$loop.index}" {@if loop.channelFeed.isPublic}checked{@end}>
+                </td>
+              </TR>
+              {@end}
+            </TBODY>
+          </TABLE>
+        </TD>
+      </TR>
+      <tr>
+        <td>
           {@if servMgr.isRoot}
           <TABLE width="100%" align=center border=0>
             <TBODY>
@@ -298,35 +334,10 @@
             </TBODY>
           </TABLE>
           {@end}
-        </TD>
+        </td>
 
-        <TD vAlign=top>
-          <TABLE width="100%" align=center border=0>
-            <TBODY>
-              <TR align=middle bgColor=#ccc class="normal">
-                <TD colSpan=2><B>{#Channel Feeds}</B></TD>
-              </TR>
-              <TR align=middle bgColor=#eee class="normal">
-                <TH>{#URL}</TH>
-                <TH>{#Public}</TH>
-              </TR>
-              {@loop servMgr.numChannelFeedsPlusOne}
-              {@if loop.indexEven}
-              <TR bgColor=#ddd> {@else} <TR bgColor=#eee class="normal">
-              {@end}
-                <TD>
-                  <INPUT size=15 value="{$loop.channelFeed.url}" name="channel_feed_url" style="width: 100%" placeholder="{#URL of index.txt}">
-                </TD>
-                <td align="center">
-                  <input type="checkbox" name="channel_feed_public{$loop.index}" {@if loop.channelFeed.isPublic}checked{@end}>
-                </td>
-              </TR>
-              {@end}
-            </TBODY>
-          </TABLE>
-        </TD>
-
-      </TR>
+        <td></td>
+      </tr>
     </TBODY>
   </TABLE>
 </FORM>
