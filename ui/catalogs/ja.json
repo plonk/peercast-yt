@@ -217,10 +217,17 @@
                               : "このタイプのストリームの再生には対応していません。",
     "Player"                  : "プレーヤー",
 
+    // play.html
+    "Show Chat"               : "チャット表示",
+    "Request Flash-based player" : "Flashベースのプレーヤーにチェンジ",
+    "Request HTML5 player"    : "HTML5プレーヤーにチェンジ",
+
     // public/index.html
     "Local Channels"          : "ローカルチャンネル",
     "Channels from Friendly Stations"
                               : "連携局のチャンネル",
     "Link Status"             : "リンク状態",
+    "Small icon of a megaphone" : "メガホンの小さなアイコン",
+    "Rank" : "順位",
     "":""
 }

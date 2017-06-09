@@ -9,7 +9,7 @@
   <body>
     <div class="container">
       <center>
-        <img width="370" src="/assets/images/peercast-logo.png">
+        <img width="370" alt="PeerCast - p2p broadcasting for everyone" src="/assets/images/peercast-logo.png">
         <h1 style="color: #111; font-size: 28px">{$servMgr.serverName}</h1>
       </center>
       <hr>
@@ -25,12 +25,12 @@
 
       <table width="100%" class="channel-list">
         <tr>
-          <th>Rank</th>
-          <th><img src="/assets/images/small-icon.png" alt="Small icon of a megaphone"></th>
-          <th>Channel</th>
-          <th>Status</th>
-          <th>Bitrate</th>
-          <th>Type</th>
+          <th>{#Rank}</th>
+          <th><img src="/assets/images/small-icon.png" alt="{#Small icon of a megaphone}"></th>
+          <th>{#Channel}</th>
+          <th>{#Status}</th>
+          <th>{#Bitrate}</th>
+          <th>{#Type}</th>
         </tr>
 
         {@foreach broadcastingChannels}
@@ -67,14 +67,14 @@
 
       <table width="100%" class="channel-list">
         <tr>
-          <th>Rank</th>
+          <th>{#Rank}</th>
           <th>
-            <img src="/assets/images/small-icon.png" alt="Small icon of a megaphone">
+            <img src="/assets/images/small-icon.png" alt="{#Small icon of a megaphone}">
           </th>
-          <th>Channel</th>
-          <th>Status</th>
-          <th>Bitrate</th>
-          <th>Type</th>
+          <th>{#Channel}</th>
+          <th>{#Status}</th>
+          <th>{#Bitrate}</th>
+          <th>{#Type}</th>
         </tr>
 
         {@foreach publicExternalChannels}

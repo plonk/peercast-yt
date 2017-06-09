@@ -79,15 +79,15 @@
       {@if page.channel.type == "FLV"}
         -
         {@if page.player != "flash"}
-        <a href="?id={$page.channel.id}&amp;player=flash" title="Request Flash-based player">Flash</a>
+        <a href="?id={$page.channel.id}&amp;player=flash" title="{#Request Flash-based player}">Flash</a>
         {@else}
-        <a href="?id={$page.channel.id}" title="Request HTML5 player">HTML5</a>
+        <a href="?id={$page.channel.id}" title="{#Request HTML5 player}">HTML5</a>
         {@end}
       {@end}
       </div>
 
       <div style="float: right">
-        <label><input type="checkbox" id="chat-visibility" checked style="display: inline"> チャット表示</label>
+        <label><input type="checkbox" id="chat-visibility" checked style="display: inline"> {#Show Chat}</label>
         <span id="bbs-title">n/a</span>
       </div>
       <br clear=all>
