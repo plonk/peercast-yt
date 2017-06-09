@@ -1851,7 +1851,7 @@ int ServMgr::idleProc(ThreadInfo *thread)
 
         if (!servMgr->forceIP.isEmpty())
         {
-            if ((ctime-lastForceIPCheck) > 60)
+            if ((ctime - lastForceIPCheck) > 60)
             {
                 if (servMgr->checkForceIP())
                 {
@@ -1864,7 +1864,7 @@ int ServMgr::idleProc(ThreadInfo *thread)
 
         if (chanMgr->isBroadcasting())
         {
-            if ((ctime-lastBroadcastConnect) > 30)
+            if ((ctime - lastBroadcastConnect) > 30)
             {
                 servMgr->connectBroadcaster();
                 lastBroadcastConnect = ctime;
@@ -1880,7 +1880,7 @@ int ServMgr::idleProc(ThreadInfo *thread)
                 sys->exit();
             }
 
-            if ((ctime-lastRootBroadcast) > chanMgr->hostUpdateInterval)
+            if ((ctime - lastRootBroadcast) > chanMgr->hostUpdateInterval)
             {
                 servMgr->broadcastRootSettings(true);
                 lastRootBroadcast = ctime;
