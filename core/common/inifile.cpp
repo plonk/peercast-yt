@@ -58,14 +58,14 @@ void IniFile::close()
 }
 
 // -----------------------------------------
-bool    IniFile::readNext()
+bool    IniFileBase::readNext()
 {
-    if (fStream.eof())
+    if (stream.eof())
         return false;
 
     try
     {
-        fStream.readLine(currLine, 256);
+        stream.readLine(currLine, 256);
     }catch (StreamException &)
     {
         return false;
@@ -87,19 +87,19 @@ bool    IniFile::readNext()
 }
 
 // -----------------------------------------
-bool IniFile::isName(const char *str)
+bool IniFileBase::isName(const char *str)
 {
     return stricmp(getName(), str)==0;
 }
 
 // -----------------------------------------
-char *  IniFile::getName()
+char *  IniFileBase::getName()
 {
     return nameStr;
 }
 
 // -----------------------------------------
-int     IniFile::getIntValue()
+int     IniFileBase::getIntValue()
 {
     if (valueStr)
         return atoi(valueStr);
@@ -108,7 +108,7 @@ int     IniFile::getIntValue()
 }
 
 // -----------------------------------------
-const char *    IniFile::getStrValue()
+const char *    IniFileBase::getStrValue()
 {
     if (valueStr)
         return valueStr;
@@ -117,7 +117,7 @@ const char *    IniFile::getStrValue()
 }
 
 // -----------------------------------------
-bool    IniFile::getBoolValue()
+bool    IniFileBase::getBoolValue()
 {
     if (!valueStr)
         return false;
@@ -131,36 +131,36 @@ bool    IniFile::getBoolValue()
 }
 
 // -----------------------------------------
-void    IniFile::writeIntValue(const char *name, int iv)
+void    IniFileBase::writeIntValue(const char *name, int iv)
 {
-    sprintf(currLine, "%s = %d", name, iv);
-    fStream.writeLine(currLine);
+    snprintf(currLine, sizeof(currLine), "%s = %d", name, iv);
+    stream.writeLine(currLine);
 }
 
 // -----------------------------------------
-void    IniFile::writeStrValue(const char *name, const char *sv)
+void    IniFileBase::writeStrValue(const char *name, const char *sv)
 {
-    sprintf(currLine, "%s = %s", name, sv);
-    fStream.writeLine(currLine);
+    snprintf(currLine, sizeof(currLine), "%s = %s", name, sv);
+    stream.writeLine(currLine);
 }
 
 // -----------------------------------------
-void    IniFile::writeSection(const char *name)
+void    IniFileBase::writeSection(const char *name)
 {
-    fStream.writeLine("");
-    sprintf(currLine, "[%s]", name);
-    fStream.writeLine(currLine);
+    stream.writeLine("");
+    snprintf(currLine, sizeof(currLine), "[%s]", name);
+    stream.writeLine(currLine);
 }
 
 // -----------------------------------------
-void    IniFile::writeBoolValue(const char *name, int v)
+void    IniFileBase::writeBoolValue(const char *name, int v)
 {
-    sprintf(currLine, "%s = %s", name, (v!=0)?"Yes":"No");
-    fStream.writeLine(currLine);
+    snprintf(currLine, sizeof(currLine), "%s = %s", name, (v!=0)?"Yes":"No");
+    stream.writeLine(currLine);
 }
 
 // -----------------------------------------
-void    IniFile::writeLine(const char *str)
+void    IniFileBase::writeLine(const char *str)
 {
-    fStream.writeLine(str);
+    stream.writeLine(str);
 }

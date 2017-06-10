@@ -23,13 +23,16 @@
 #include "stream.h"
 
 // -----------------------------------------
-class IniFile
+class IniFileBase
 {
 public:
-    ~IniFile() { close(); }
-    bool        openReadOnly(const char *);
-    bool        openWriteReplace(const char *);
-    void        close();
+    IniFileBase(Stream& aStream)
+        : stream(aStream)
+        , currLine("")
+        , nameStr(NULL)
+        , valueStr(NULL)
+    {
+    }
 
     bool        readNext();
 
@@ -45,9 +48,26 @@ public:
     void        writeBoolValue(const char *, int);
     void        writeLine(const char *);
 
-    FileStream  fStream;
+    Stream&     stream;
     char        currLine[256];
     char        *nameStr, *valueStr;
+};
+
+// -----------------------------------------
+class IniFile : public IniFileBase
+{
+public:
+    IniFile()
+        : IniFileBase(fStream)
+    {
+    }
+    ~IniFile() { close(); }
+
+    bool        openReadOnly(const char *);
+    bool        openWriteReplace(const char *);
+    void        close();
+
+    FileStream  fStream;
 };
 
 #endif
