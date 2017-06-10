@@ -95,7 +95,7 @@ TEST_F(ChanHitFixture, pickNearestIP)
 
         hit->pickNearestIP(host);
 
-        char ip[16];
+        char ip[32];
         hit->host.toStr(ip);
 
         ASSERT_STREQ("192.168.0.2:8145", ip);
@@ -107,7 +107,7 @@ TEST_F(ChanHitFixture, pickNearestIP)
 
         hit->pickNearestIP(host);
 
-        char ip[16];
+        char ip[32];
         hit->host.toStr(ip);
 
         ASSERT_STREQ("210.210.210.210:8145", ip);
