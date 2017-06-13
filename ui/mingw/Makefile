@@ -16,7 +16,7 @@ AR = ar
 
 INCLUDES = -I../../core -I../../core/common
 
-TARGET = peercast
+TARGET = peercast.exe
 CORE = ../../core
 SRCHTMLTAR = ../html.tar
 HTML = html
