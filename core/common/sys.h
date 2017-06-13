@@ -37,6 +37,13 @@ extern char *trimstr(char *s);
 #include "varwriter.h"
 
 // ------------------------------------
+#if !defined(stricmp) || !defined(strnicmp)
+#include <strings.h>
+#define stricmp strcasecmp
+#define strnicmp strncasecmp
+#endif
+
+// ------------------------------------
 namespace peercast {
 class Random {
 public:
@@ -190,10 +197,6 @@ public:
 typedef int (*THREAD_FUNC)(ThreadInfo *);
 #define THREAD_PROC int
 typedef pthread_t THREAD_HANDLE;
-
-// ------------------------------------
-#define stricmp strcasecmp
-#define strnicmp strncasecmp
 
 // ------------------------------------
 class WEvent
