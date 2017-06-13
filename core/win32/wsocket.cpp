@@ -65,7 +65,7 @@ bool ClientSocket::getHostname(char *str,unsigned int ip)
 }
 
 // --------------------------------------------------
-unsigned int ClientSocket::getIP(char *name)
+unsigned int ClientSocket::getIP(const char *name)
 {
 
 	char szHostName[256];
