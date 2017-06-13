@@ -29,15 +29,6 @@
 #include "str.h"
 #include "jrpc.h"
 
-#ifndef strdup
-static char *strdup(const char *s)
-{
-  char *res = (char*) malloc(strlen(s)+1);
-  strcpy(res, s);
-  return res;
-}
-#endif
-
 using json = nlohmann::json;
 using namespace std;
 
