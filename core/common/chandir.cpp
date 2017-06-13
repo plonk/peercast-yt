@@ -178,13 +178,13 @@ bool ChannelDirectory::update()
         success = getFeed(feed.url, channels);
 
         if (success) {
-            feed.status = ChannelFeed::Status::OK;
+            feed.status = ChannelFeed::Status::kOk;
             LOG_DEBUG("Got %zu channels from %s", channels.size(), feed.url.c_str());
             for (auto ch : channels) {
                 m_channels.push_back(ch);
             }
         } else {
-            feed.status = ChannelFeed::Status::ERROR;
+            feed.status = ChannelFeed::Status::kError;
             LOG_ERROR("Failed to get channels from %s", feed.url.c_str());
         }
     }
@@ -381,11 +381,11 @@ std::string ChannelDirectory::findTracker(GnuID id)
 std::string ChannelFeed::statusToString(ChannelFeed::Status s)
 {
     switch (s) {
-    case Status::UNKNOWN:
+    case Status::kUnknown:
         return "UNKNOWN";
-    case Status::OK:
+    case Status::kOk:
         return "OK";
-    case Status::ERROR:
+    case Status::kError:
         return "ERROR";
     }
     throw std::logic_error("should be unreachable");
