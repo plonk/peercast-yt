@@ -1,4 +1,4 @@
-CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT $(INCLUDES)
+CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT -DHAVE_STRDUP $(INCLUDES)
 LDFLAGS = -pthread
 LIBS = -L../../Onigmo/.libs -Wl,-Bstatic -lonigmo -Wl,-Bdynamic
 
