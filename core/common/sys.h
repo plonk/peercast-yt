@@ -167,7 +167,6 @@ public:
 typedef int (WINAPI *THREAD_FUNC)(ThreadInfo *);
 typedef unsigned int THREAD_HANDLE;
 #define THREAD_PROC int WINAPI
-#define vsnprintf _vsnprintf
 
 // ------------------------------------
 class WLock
