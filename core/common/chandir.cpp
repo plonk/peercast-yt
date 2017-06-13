@@ -143,7 +143,7 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
                 text += line;
                 text += '\n';
             }
-        } catch (SockException& e) {
+        } catch (EOFException& e) {
             // end of body reached.
         }
 
