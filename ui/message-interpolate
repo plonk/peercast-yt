@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+Encoding.default_external = "UTF-8"
+
 require 'json'
 require 'optparse'
 
