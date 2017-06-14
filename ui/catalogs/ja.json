@@ -184,7 +184,7 @@
     "Public"                  : "公開",
     "Public Directory"        : "公開ディレクトリ",
     "Genre Prefix"            : "ジャンル接頭辞",
-
+    "Channels must have their genre string beginning with this prefix to be on this server." : "チャンネル掲載に必要な数文字の接頭辞。",
     // viewlog.html
     "Clear log"               : "ログをクリア",
     "View tail"               : "最下部を表示",
