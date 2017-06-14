@@ -1239,6 +1239,8 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr)
             servMgr->refreshHTML = getCGIargINT(arg);
         else if (strcmp(curr, "public_directory") == 0)
             servMgr->publicDirectoryEnabled = true;
+        else if (strcmp(curr, "genreprefix") == 0)
+            servMgr->genrePrefix = arg;
         else if (strcmp(curr, "auth") == 0)
         {
             if (strcmp(arg, "cookie") == 0)

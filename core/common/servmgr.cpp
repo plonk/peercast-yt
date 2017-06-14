@@ -923,6 +923,7 @@ void ServMgr::saveSettings(const char *fn)
         iniFile.writeIntValue("maxServIn", servMgr->maxServIn);
         iniFile.writeStrValue("chanLog", servMgr->chanLog.cstr());
         iniFile.writeBoolValue("publicDirectory", servMgr->publicDirectoryEnabled);
+        iniFile.writeStrValue("genrePrefix", servMgr->genrePrefix.c_str());
 
         networkID.toStr(idStr);
         iniFile.writeStrValue("networkID", idStr);
@@ -1213,6 +1214,9 @@ void ServMgr::loadSettings(const char *fn)
                     servMgr->cookieList.neverExpire = true;
                 else if (stricmp(t, "session")==0)
                     servMgr->cookieList.neverExpire = false;
+            }else if (iniFile.isName("genrePrefix"))
+            {
+                servMgr->genrePrefix = iniFile.getStrValue();
             }
 
             // privacy settings
@@ -2240,6 +2244,9 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var == "publicDirectoryEnabled")
     {
         sprintf(buf, "%d", publicDirectoryEnabled);
+    }else if (var == "genrePrefix")
+    {
+        snprintf(buf, sizeof(buf), genrePrefix.c_str());
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);

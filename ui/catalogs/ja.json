@@ -183,6 +183,7 @@
     "URL of index.txt"        : "index.txtのURL",
     "Public"                  : "公開",
     "Public Directory"        : "公開ディレクトリ",
+    "Genre Prefix"            : "ジャンル接頭辞",
 
     // viewlog.html
     "Clear log"               : "ログをクリア",
@@ -229,5 +230,6 @@
     "Link Status"             : "リンク状態",
     "Small icon of a megaphone" : "メガホンの小さなアイコン",
     "Rank" : "順位",
+    "Yellow Pages"            : "イエローページ",
     "":""
 }

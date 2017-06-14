@@ -382,6 +382,8 @@ public:
     FW_STATE            firewalled;
 
     String              serverName;
+
+    std::string         genrePrefix;
 };
 
 // ----------------------------------
