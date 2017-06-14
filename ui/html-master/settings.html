@@ -13,21 +13,21 @@
             </tr>
             <tr class="normal">
               <td style="width: 8.5em">{#Port}</td>
-              <td><input size=10 value={$servMgr.serverPort1} name=port></td>
+              <td><input size=10 value="{$servMgr.serverPort1}" name=port></td>
             </tr>
             <tr class="normal">
               <td>{#Password}</td>
               <td>
-                <input name=passnew type=password size="10" maxlength="32" {@if servMgr.password}value={$servMgr.password}{@end} style="width: 100%">
+                <input name=passnew type=password size="10" maxlength="32" {@if servMgr.password}value="{$servMgr.password}"{@end} style="width: 100%">
               </td>
             </tr>
             <tr class="normal">
               <td>{#Max. Relays}</td>
-              <td><input size=5 value={$servMgr.maxRelays} name=maxrelays></td>
+              <td><input size=5 value="{$servMgr.maxRelays}" name=maxrelays></td>
             </tr>
             <tr class="normal">
               <td>{#Max. Direct streams}</td>
-              <td><input size=5 value={$servMgr.maxDirect} name=maxdirect></td>
+              <td><input size=5 value="{$servMgr.maxDirect}" name=maxdirect></td>
             </tr>
             <tr class="normal">
               <td>{#Language}</td>
@@ -70,7 +70,7 @@
           </tr>
           <tr class="normal">
             <td>{#ICY MetaInterval}</td>
-            <td><input size=5 value={$chanMgr.icyMetaInterval} name=icymeta>
+            <td><input size=5 value="{$chanMgr.icyMetaInterval}" name=icymeta>
             </td>
           </tr>
           <tr class="normal">
@@ -83,7 +83,7 @@
           </tr>
           <tr class="normal">
             <td>{#Refresh HTML (sec)}</td>
-            <td><input size=10 value={$servMgr.refreshHTML} name=refresh></td>
+            <td><input size=10 value="{$servMgr.refreshHTML}" name=refresh></td>
           </tr>
         </table>
       </td>
@@ -94,23 +94,23 @@
           </tr>
           <tr class="normal">
             <td>{#YP Address}</td>
-            <td><input {@if servMgr.ypAddress}value={$servMgr.ypAddress}{@end} name=yp></td>
+            <td><input {@if servMgr.ypAddress}value="{$servMgr.ypAddress}"{@end} name=yp></td>
           </tr>
           <tr class="normal">
             <td>{#Max. Output (Kbits/s)}</td>
-            <td><input size=5 value={$servMgr.maxBitrateOut} name=maxup></td>
+            <td><input size=5 value="{$servMgr.maxBitrateOut}" name=maxup></td>
           </tr>
           <tr class="normal">
             <td width="50%">{#Max. Relays Per Channel}</td>
-            <td><input size=5 value={$chanMgr.maxRelaysPerChannel} name=maxrelaypc></td>
+            <td><input size=5 value="{$chanMgr.maxRelaysPerChannel}" name=maxrelaypc></td>
           </tr>
           <tr class="normal">
             <td width="50%">{#Max. Controls In}</td>
-            <td><input size=5 value={$servMgr.maxControlsIn} name=maxcin></td>
+            <td><input size=5 value="{$servMgr.maxControlsIn}" name=maxcin></td>
           </tr>
           <tr class="normal">
             <td>{#Max. Connections In} </td>
-            <td><input name=maxsin id="maxsin" value={$servMgr.maxServIn} size=5></td>
+            <td><input name=maxsin id="maxsin" value="{$servMgr.maxServIn}" size=5></td>
           </tr>
         </table>
       </td>
@@ -132,13 +132,13 @@
           <tr align=middle class="normal">
             <td><input size=15 value="{$loop.filter.ip}" name=filt_ip>
             </td>
-            <td><input type=checkbox {@if loop.filter.network}checked{@end} value=1 name=filt_nw{$loop.index}>
+            <td><input type=checkbox {@if loop.filter.network}checked{@end} value=1 name="filt_nw{$loop.index}">
             </td>
-            <td><input type=checkbox {@if loop.filter.direct}checked{@end} value=1 name=filt_di{$loop.index}>
+            <td><input type=checkbox {@if loop.filter.direct}checked{@end} value=1 name="filt_di{$loop.index}">
             </td>
-            <td><input type=checkbox {@if loop.filter.private}checked{@end} value=1 name=filt_pr{$loop.index}>
+            <td><input type=checkbox {@if loop.filter.private}checked{@end} value=1 name="filt_pr{$loop.index}">
             </td>
-            <td><input type=checkbox {@if loop.filter.banned}checked{@end} value=1 name=filt_bn{$loop.index}>
+            <td><input type=checkbox {@if loop.filter.banned}checked{@end} value=1 name="filt_bn{$loop.index}">
             </td>
           </tr>
           {@end}
@@ -294,7 +294,7 @@
           </tr>
           <tr class="normal">
             <td>{#Host Update (sec)}</td>
-            <td><input size=5 {@if chanMgr.hostUpdateInterval}value={$chanMgr.hostUpdateInterval}{@end} name=huint></td>
+            <td><input size=5 {@if chanMgr.hostUpdateInterval}value="{$chanMgr.hostUpdateInterval}"{@end} name=huint></td>
           </tr>
           <tr class="normal">
             <td>{#Message}</td>
@@ -310,11 +310,11 @@
           </tr>
           <tr class="normal">
             <td>{#Min. PGNU In}</td>
-            <td><input size=5 value={$servMgr.minPGNUIn} name=minpgnu></td>
+            <td><input size=5 value="{$servMgr.minPGNUIn}" name=minpgnu></td>
           </tr>
           <tr class="normal">
             <td>{#Max. PGNU In}</td>
-            <td><input size=5 value={$servMgr.maxPGNUIn} name=maxpgnu></td>
+            <td><input size=5 value="{$servMgr.maxPGNUIn}" name=maxpgnu></td>
           </tr>
           <tr class="normal">
             <td>{#Broadcast IDs}</td>
