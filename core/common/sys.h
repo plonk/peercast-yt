@@ -165,7 +165,7 @@ public:
 
 // ------------------------------------
 typedef int (WINAPI *THREAD_FUNC)(ThreadInfo *);
-typedef unsigned int THREAD_HANDLE;
+typedef uintptr_t THREAD_HANDLE;
 #define THREAD_PROC int WINAPI
 
 // ------------------------------------
