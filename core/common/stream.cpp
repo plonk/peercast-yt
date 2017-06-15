@@ -44,7 +44,7 @@ void FileStream::openReadOnly(const char *fn)
 {
     if (file)
         close();
-    file = fopen(fn, "rb");
+    fopen_s(&file, fn, "rb");
 
     if (!file)
         throw StreamException("Unable to open file");
@@ -66,7 +66,7 @@ void FileStream::openWriteReplace(const char *fn)
 {
     if (file)
         close();
-    file = fopen(fn, "wb");
+    fopen_s(&file, fn, "wb");
 
     if (!file)
         throw StreamException("Unable to open file");
@@ -78,7 +78,7 @@ void FileStream::openWriteAppend(const char *fn)
     if (file)
         close();
 
-    file = fopen(fn, "ab");
+    fopen_s(&file, fn, "ab");
 
     if (!file)
         throw StreamException("Unable to open file");
