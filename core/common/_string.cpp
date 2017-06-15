@@ -54,7 +54,8 @@ static int base64chartoval(char input)
 void String::setFromTime(unsigned int t)
 {
     time_t t2 = t;
-    char *p = ctime(&t2);
+    char p[26];
+    ctime_s(p, _countof(p), &t2);
     if (p)
         strcpy_s(data, _countof(data), p);
     else
