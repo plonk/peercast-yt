@@ -122,7 +122,7 @@ void Servent::handshakeJRPC(HTTP &http)
     try {
         http.stream->read(body.get(), content_length);
         body.get()[content_length] = '\0';
-    }catch (SockException&)
+    }catch (EOFException&)
     {
         // body too short
         throw HTTPException(HTTP_SC_BADREQUEST, 400);
