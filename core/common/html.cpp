@@ -92,7 +92,6 @@ void HTML::writeTemplate(const char *fileName, const char *args)
 // --------------------------------------
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 static time_t mtime(const char *path)
 {
