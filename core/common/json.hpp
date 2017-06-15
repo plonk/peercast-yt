@@ -7195,7 +7195,7 @@ class basic_json
         }
 
         // second case: adding offset would result in overflow
-        if ((size > (std::numeric_limits<size_t>::max() - offset)))
+        if ((size > ((std::numeric_limits<size_t>::max)() - offset)))
         {
             JSON_THROW(std::out_of_range("len+offset out of range"));
         }
