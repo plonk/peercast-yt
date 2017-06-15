@@ -990,7 +990,7 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 
             chanMgr->icyMetaInterval = iv;
         }else if (strcmp(curr, "passnew") == 0)
-            strcpy(servMgr->password, arg);
+            strcpy_s(servMgr->password, _countof(servMgr->password), arg);
         else if (strcmp(curr, "root") == 0)
             servMgr->isRoot = getCGIargBOOL(arg);
         else if (strcmp(curr, "brroot") == 0)
@@ -1003,7 +1003,7 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr)
             servMgr->forceIP = arg;
         else if (strcmp(curr, "htmlPath") == 0)
         {
-            strcpy(servMgr->htmlPath, "html/");
+            strcpy_s(servMgr->htmlPath, _countof(servMgr->htmlPath), "html/");
             strcat(servMgr->htmlPath, arg);
         }else if (strcmp(curr, "djmsg") == 0)
         {
@@ -1745,7 +1745,7 @@ void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd, size_t plen)
     {
         if (pwd)
             if (strlen(arg) < 64)
-                strcpy(pwd, arg);
+                strcpy_s(pwd, 64, arg);
     }else if (http.isHeader("content-type"))
     {
         if (stristr(arg, MIME_OGG))

@@ -1366,7 +1366,7 @@ bool Channel::writeVariable(Stream &out, const String &var)
     {
         utf8 = info.name;
         utf8.convertTo(String::T_UNICODESAFE);
-        strcpy(buf, utf8.cstr());
+        strcpy_s(buf, _countof(buf), utf8.cstr());
     }else if (var == "bitrate")
     {
         snprintf(buf, _countof(buf), "%d", info.bitrate);
@@ -1377,22 +1377,22 @@ bool Channel::writeVariable(Stream &out, const String &var)
             unsigned int tot = sourceData->getSourceRate();
             snprintf(buf, _countof(buf), "%.0f", BYTES_TO_KBPS(tot));
         }else
-            strcpy(buf, "0");
+            strcpy_s(buf, _countof(buf), "0");
     }else if (var == "genre")
     {
         utf8 = info.genre;
         utf8.convertTo(String::T_UNICODE);
-        strcpy(buf, utf8.cstr());
+        strcpy_s(buf, _countof(buf), utf8.cstr());
     }else if (var == "desc")
     {
         utf8 = info.desc;
         utf8.convertTo(String::T_UNICODE);
-        strcpy(buf, utf8.cstr());
+        strcpy_s(buf, _countof(buf), utf8.cstr());
     }else if (var == "comment")
     {
         utf8 = info.comment;
         utf8.convertTo(String::T_UNICODE);
-        strcpy(buf, utf8.cstr());
+        strcpy_s(buf, _countof(buf), utf8.cstr());
     }else if (var == "uptime")
     {
         String uptime;
@@ -1400,10 +1400,10 @@ bool Channel::writeVariable(Stream &out, const String &var)
             uptime.setFromStopwatch(sys->getTime()-info.lastPlayStart);
         else
             uptime.set("-");
-        strcpy(buf, uptime.cstr());
+        strcpy_s(buf, _countof(buf), uptime.cstr());
     }
     else if (var == "type")
-        strcpy(buf, info.getTypeStr());
+        strcpy_s(buf, _countof(buf), info.getTypeStr());
     else if (var == "typeLong")
     {
         std::string s = std::string() + info.getTypeStr() + " (" + info.getMIMEType() + "; " + info.getTypeExt() + ")";
@@ -1415,7 +1415,7 @@ bool Channel::writeVariable(Stream &out, const String &var)
         if (info.streamExt == "")
             s += " [no sext]";
 
-        strcpy(buf, s.c_str());
+        strcpy_s(buf, _countof(buf), s.c_str());
     }
     else if (var == "ext")
         snprintf(buf, _countof(buf), "%s", info.getTypeExt());
@@ -1447,21 +1447,21 @@ bool Channel::writeVariable(Stream &out, const String &var)
             utf8 = info.track.contact;
 
         utf8.convertTo(String::T_UNICODE);
-        strcpy(buf, utf8.cstr());
+        strcpy_s(buf, _countof(buf), utf8.cstr());
     }else if (var == "contactURL")
         snprintf(buf, _countof(buf), "%s", info.url.cstr());
     else if (var == "streamPos")
-        strcpy(buf, str::group_digits(std::to_string(streamPos), ",").c_str());
+        strcpy_s(buf, _countof(buf), str::group_digits(std::to_string(streamPos), ",").c_str());
     else if (var == "sourceType")
-        strcpy(buf, getSrcTypeStr());
+        strcpy_s(buf, _countof(buf), getSrcTypeStr());
     else if (var == "sourceProtocol")
-        strcpy(buf, ChanInfo::getProtocolStr(info.srcProtocol));
+        strcpy_s(buf, _countof(buf), ChanInfo::getProtocolStr(info.srcProtocol));
     else if (var == "sourceURL")
     {
         if (sourceURL.isEmpty())
         {
             if (srcType == SRC_HTTPPUSH)
-                strcpy(buf, sock->host.str().c_str());
+                strcpy_s(buf, _countof(buf), sock->host.str().c_str());
             else
             {
                 std::string s;
@@ -1471,16 +1471,16 @@ bool Channel::writeVariable(Stream &out, const String &var)
                     s += " recv. from ";
                     s += sourceHost.uphost.str();
                 }
-                strcpy(buf, s.c_str());
+                strcpy_s(buf, _countof(buf), s.c_str());
             }
         }
         else
-            strcpy(buf, sourceURL.cstr());
+            strcpy_s(buf, _countof(buf), sourceURL.cstr());
     }
     else if (var == "headPos")
-        strcpy(buf, str::group_digits(std::to_string(headPack.pos), ",").c_str());
+        strcpy_s(buf, _countof(buf), str::group_digits(std::to_string(headPack.pos), ",").c_str());
     else if (var == "headLen")
-        strcpy(buf, str::group_digits(std::to_string(headPack.len), ",").c_str());
+        strcpy_s(buf, _countof(buf), str::group_digits(std::to_string(headPack.len), ",").c_str());
     else if (var == "buffer")
     {
         std::string s;
@@ -1507,7 +1507,7 @@ bool Channel::writeVariable(Stream &out, const String &var)
         s += str::format("Last written: %s", time.str().c_str());
         // s += str::format("First/Safe/Last/Read/Write: %u/%u/%u/%u/%u",
         //                  rawData.firstPos, rawData.safePos, rawData.lastPos, rawData.readPos, rawData.writePos);
-        strcpy(buf, s.c_str());
+        strcpy_s(buf, _countof(buf), s.c_str());
     }
     else if (var == "headDump")
     {

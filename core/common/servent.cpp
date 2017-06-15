@@ -2563,13 +2563,13 @@ bool    Servent::writeVariable(Stream &s, const String &var)
     char buf[1024];
 
     if (var == "type")
-        strcpy(buf, getTypeStr());
+        strcpy_s(buf, _countof(buf), getTypeStr());
     else if (var == "status")
-        strcpy(buf, getStatusStr());
+        strcpy_s(buf, _countof(buf), getStatusStr());
     else if (var == "address")
         getHost().toStr(buf);
     else if (var == "agent")
-        strcpy(buf, agent.cstr());
+        strcpy_s(buf, _countof(buf), agent.cstr());
     else if (var == "bitrate")
     {
         if (sock)
@@ -2577,7 +2577,7 @@ bool    Servent::writeVariable(Stream &s, const String &var)
             unsigned int tot = sock->bytesInPerSec() + sock->bytesOutPerSec();
             snprintf(buf, _countof(buf), "%.1f", BYTES_TO_KBPS(tot));
         }else
-            strcpy(buf, "0.0");
+            strcpy_s(buf, _countof(buf), "0.0");
     }else if (var == "bitrateAvg")
     {
         if (sock)
@@ -2585,7 +2585,7 @@ bool    Servent::writeVariable(Stream &s, const String &var)
             unsigned int tot = sock->stat.bytesInPerSecAvg() + sock->stat.bytesOutPerSecAvg();
             snprintf(buf, _countof(buf), "%.1f", BYTES_TO_KBPS(tot));
         }else
-            strcpy(buf, "0.0");
+            strcpy_s(buf, _countof(buf), "0.0");
     }else if (var == "uptime")
     {
         String uptime;
@@ -2593,7 +2593,7 @@ bool    Servent::writeVariable(Stream &s, const String &var)
             uptime.setFromStopwatch(sys->getTime()-lastConnect);
         else
             uptime.set("-");
-        strcpy(buf, uptime.cstr());
+        strcpy_s(buf, _countof(buf), uptime.cstr());
     }else if (var.startsWith("gnet."))
     {
         float ctime = (float)(sys->getTime()-lastConnect);
@@ -2620,9 +2620,9 @@ bool    Servent::writeVariable(Stream &s, const String &var)
             tstr.setFromStopwatch(tim);
 
             if (nr)
-                strcpy(buf, tstr.cstr());
+                strcpy_s(buf, _countof(buf), tstr.cstr());
             else
-                strcpy(buf, "-");
+                strcpy_s(buf, _countof(buf), "-");
         }
         else
             return false;

@@ -56,9 +56,9 @@ void String::setFromTime(unsigned int t)
     time_t t2 = t;
     char *p = ctime(&t2);
     if (p)
-        strcpy(data, p);
+        strcpy_s(data, _countof(data), p);
     else
-        strcpy(data, "-");
+        strcpy_s(data, _countof(data), "-");
     type = T_ASCII;
 }
 
@@ -453,7 +453,7 @@ void String::convertTo(TYPE t)
         {
             case T_UNKNOWN:
             case T_ASCII:
-                strcpy(data, tmp.data);
+                strcpy_s(data, _countof(data), tmp.data);
                 break;
             case T_UNICODE:
                 UNKNOWN2UNICODE(tmp.data, false);
@@ -532,7 +532,7 @@ void String::prepend(const char *s)
 // -----------------------------------
 String& String::operator = (const String& other)
 {
-    strcpy(this->data, other.data);
+    strcpy_s(this->data, _countof(this->data), other.data);
     this->type = other.type;
 
     return *this;
@@ -551,7 +551,7 @@ String& String::operator = (const char* cstr)
 // -----------------------------------
 String& String::operator = (const std::string& rhs)
 {
-    strcpy(data, rhs.substr(0, MAX_LEN - 1).c_str());
+    strcpy_s(data, _countof(data), rhs.substr(0, MAX_LEN - 1).c_str());
     this->type = T_ASCII;
 
     return *this;

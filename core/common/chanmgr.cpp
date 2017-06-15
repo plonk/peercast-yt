@@ -319,7 +319,7 @@ bool ChanMgr::writeVariable(Stream &out, const String &var)
     else if (var == "numChannels")
         snprintf(buf, _countof(buf), "%d", numChannels());
     else if (var == "djMessage")
-        strcpy(buf, broadcastMsg.cstr());
+        strcpy_s(buf, _countof(buf), broadcastMsg.cstr());
     else if (var == "icyMetaInterval")
         snprintf(buf, _countof(buf), "%d", icyMetaInterval);
     else if (var == "maxRelaysPerChannel")

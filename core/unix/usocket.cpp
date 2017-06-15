@@ -59,7 +59,7 @@ bool ClientSocket::getHostname(char *str, unsigned int ip)
 
     if (he)
     {
-        strcpy(str, he->h_name);
+        strcpy_s(str, strlen(he->h_name) + 1, he->h_name);
         return true;
     }else
         return false;

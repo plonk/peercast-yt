@@ -196,7 +196,7 @@ bool    ChanHit::writeVariable(Stream &out, const String &var)
     {
         String timeStr;
         timeStr.setFromStopwatch(upTime);
-        strcpy(buf, timeStr.cstr());
+        strcpy_s(buf, _countof(buf), timeStr.cstr());
     }else if (var == "update")
     {
         String timeStr;
@@ -204,7 +204,7 @@ bool    ChanHit::writeVariable(Stream &out, const String &var)
             timeStr.setFromStopwatch(sys->getTime()-time);
         else
             timeStr.set("-");
-        strcpy(buf, timeStr.cstr());
+        strcpy_s(buf, _countof(buf), timeStr.cstr());
     }else if (var == "isFirewalled")
         snprintf(buf, _countof(buf), "%d", firewalled?1:0);
     else if (var == "version")
