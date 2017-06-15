@@ -65,7 +65,7 @@ public:
     unsigned int    uphostHops;
 
     unsigned int    versionVP;
-    char            versionExPrefix[2];
+    char            versionExPrefix[3];
     unsigned int    versionExNumber;
 
     std::string versionString();

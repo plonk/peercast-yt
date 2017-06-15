@@ -36,7 +36,7 @@ static inline int strToID(char *str)
         int i;
         char s[8];
     };
-    strncpy(s, str, 4);
+    strncpy_s(s, 5, str, _TRUNCATE);
     return i;
 }
 

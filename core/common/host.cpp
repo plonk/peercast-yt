@@ -36,7 +36,7 @@ void Host::fromStrName(const char *str, int p)
     }
 
     char name[128];
-    strncpy(name, str, sizeof(name)-1);
+    strncpy_s(name, _countof(name), str, _TRUNCATE);
     port = p;
     char *pp = strstr(name, ":");
     if (pp)

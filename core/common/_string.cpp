@@ -489,8 +489,7 @@ void String::setUnquote(const char *p, TYPE t)
     if (slen > 2)
     {
         if (slen >= MAX_LEN) slen = MAX_LEN;
-        strncpy(data, p+1, slen-2);
-        data[slen-2] = 0;
+        strncpy_s(data, slen-1, p+1, _TRUNCATE);
     }else
         clear();
     type = t;
@@ -541,8 +540,7 @@ String& String::operator = (const String& other)
 // -----------------------------------
 String& String::operator = (const char* cstr)
 {
-    strncpy(this->data, cstr, MAX_LEN - 1);
-    this->data[MAX_LEN - 1] = '\0';
+    strncpy_s(this->data, MAX_LEN, cstr, _TRUNCATE);
     this->type = T_ASCII;
 
     return *this;
@@ -560,8 +558,7 @@ String& String::operator = (const std::string& rhs)
 // -----------------------------------
 void String::set(const char *p, TYPE t)
 {
-    strncpy(data, p, MAX_LEN-1);
-    data[MAX_LEN-1] = 0;
+    strncpy_s(data, MAX_LEN, p, _TRUNCATE);
     type = t;
 }
 
