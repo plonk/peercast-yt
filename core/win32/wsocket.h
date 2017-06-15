@@ -52,7 +52,7 @@ public:
     void    setNagle(bool);
     void    setLinger(int);
 
-    static  HOSTENT     *resolveHost(const char *);
+    static struct in_addr *resolveHost(const char *);
 
     void    checkTimeout(bool,bool);
     void    checkTimeout2(bool,bool);

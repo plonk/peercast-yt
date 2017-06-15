@@ -24,6 +24,7 @@
 #include "winsock2.h"
 #include <windows.h>
 #include <stdio.h>
+#include <WS2tcpip.h>
 #include "wsocket.h"
 #include "stats.h"
 
@@ -51,11 +52,17 @@ bool ClientSocket::getHostname(char *str,unsigned int ip)
 
     ip = htonl(ip);
 
-    he = gethostbyaddr((char *)&ip,sizeof(ip),AF_INET);
+    struct sockaddr_in sa;
+    sa.sin_family = AF_INET;
+    sa.sin_addr.s_addr = ip;
 
-    if (he)
+    char h_name[NI_MAXHOST];
+
+    int error = getnameinfo((struct sockaddr *)&sa, sizeof(struct sockaddr), h_name, NI_MAXHOST, NULL, 0, 0);
+
+    if (error == 0)
     {
-        strcpy_s(str, strlen(he->h_name) + 1, he->h_name);
+        strcpy_s(str, strlen(h_name) + 1, h_name);
         return true;
     }else
         return false;
@@ -74,21 +81,14 @@ unsigned int ClientSocket::getIP(const char *name)
             return 0;
     }
 
-    HOSTENT *he = WSAClientSocket::resolveHost(name);
+    struct in_addr *inAddr = WSAClientSocket::resolveHost(name);
 
-    if (!he)
-        return 0;
-
-    LPSTR lpAddr = he->h_addr_list[0];
-    if (lpAddr)
+    if (inAddr)
     {
-        struct in_addr  inAddr;
-        memmove(&inAddr, lpAddr, 4);
-
-        return inAddr.S_un.S_un_b.s_b1<<24 |
-               inAddr.S_un.S_un_b.s_b2<<16 |
-               inAddr.S_un.S_un_b.s_b3<<8 |
-               inAddr.S_un.S_un_b.s_b4;
+        return inAddr->S_un.S_un_b.s_b1<<24 |
+               inAddr->S_un.S_un_b.s_b2<<16 |
+               inAddr->S_un.S_un_b.s_b3<<8 |
+               inAddr->S_un.S_un_b.s_b4;
     }
     return 0;
 }
@@ -130,23 +130,23 @@ void WSAClientSocket::setReuse(bool yes)
 }
 
 // --------------------------------------------------
-HOSTENT *WSAClientSocket::resolveHost(const char *hostName)
+struct in_addr *WSAClientSocket::resolveHost(const char *hostName)
 {
-    HOSTENT *he;
+    struct in_addr *inAddr;
+    struct addrinfo hints, *result;
 
-    if ((he = gethostbyname(hostName)) == NULL)
-    {
-        // if failed, try using gethostbyaddr instead
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_family = AF_INET;
 
-        unsigned long ip = inet_addr(hostName);
+    if (getaddrinfo(hostName, NULL, &hints, &result) == 0)
+        inAddr = &((struct sockaddr_in *)result->ai_addr)->sin_addr;
+    else
+        inAddr = NULL;
 
-        if (ip == INADDR_NONE)
-            return NULL;
+    freeaddrinfo(result);
 
-        if ((he = gethostbyaddr((char *)&ip,sizeof(ip),AF_INET)) == NULL)
-            return NULL;
-    }
-    return he;
+    return inAddr;
 }
 
 // --------------------------------------------------
@@ -247,11 +247,11 @@ void WSAClientSocket::checkTimeout2(bool r, bool w)
     else
         tp = NULL;
 
-    int r = select(NULL, &read_fds, &write_fds, NULL, tp);
+    int r2 = select(NULL, &read_fds, &write_fds, NULL, tp);
 
-    if (r == 0)
+    if (r2 == 0)
         throw TimeoutException();
-    else if (r == SOCKET_ERROR)
+    else if (r2 == SOCKET_ERROR)
         throw SockException("select failed.");
 }
 
