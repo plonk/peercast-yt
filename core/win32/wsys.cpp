@@ -46,7 +46,7 @@ double WSys::getDTime()
 {
    struct _timeb timebuffer;
 
-   _ftime( &timebuffer );
+   _ftime_s( &timebuffer );
 
    return (double)timebuffer.time+(((double)timebuffer.millitm)/1000);
 }
