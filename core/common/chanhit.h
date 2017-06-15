@@ -60,7 +60,7 @@ public:
     bool            relay;
     bool            cin;
 
-    // ä¸Šæµãƒ›ã‚¹ãƒˆã®æƒ…å ±ã€‚
+    // ã—¬ƒzƒXƒg‚Ìî•ñB
     Host            uphost;
     unsigned int    uphostHops;
 

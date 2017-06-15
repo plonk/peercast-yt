@@ -28,7 +28,7 @@
 
 using json = nlohmann::json;
 
-// HTML ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆã‚·ã‚¹ãƒ†ãƒ 
+// HTML ƒeƒ“ƒvƒŒ[ƒgƒVƒXƒeƒ€
 class Template
 {
 public:
@@ -70,7 +70,7 @@ public:
             return selectedFragment == currentFragment;
     }
 
-    // å¤‰æ•°
+    // •Ï”
     void    writeVariable(Stream &, const String &, int);
     void    writeGlobalVariable(Stream &, const String &, int);
     bool    writeLoopVariable(Stream &s, const String &varName, int loop);
@@ -78,7 +78,7 @@ public:
     int     getIntVariable(const String &, int);
     bool    getBoolVariable(const String &, int);
 
-    // ãƒ‡ã‚£ãƒ¬ã‚¯ãƒ†ã‚£ãƒ–ã®å®Ÿè¡Œ
+    // ƒfƒBƒŒƒNƒeƒBƒu‚ÌÀs
     int     readCmd(Stream &, Stream *, int);
     void    readIf(Stream &, Stream *, int);
     void    readLoop(Stream &, Stream *, int);
@@ -109,7 +109,7 @@ public:
 
 #include "http.h"
 
-// HTTP ãƒªã‚¯ã‚¨ã‚¹ãƒˆã‚’å¤‰æ•°ã¨ã—ã¦ã‚¨ã‚¯ã‚¹ãƒãƒ¼ãƒˆã™ã‚‹ã‚¹ã‚³ãƒ¼ãƒ—
+// HTTP ƒŠƒNƒGƒXƒg‚ğ•Ï”‚Æ‚µ‚ÄƒGƒNƒXƒ|[ƒg‚·‚éƒXƒR[ƒv
 class HTTPRequestScope : public Template::Scope
 {
 public:

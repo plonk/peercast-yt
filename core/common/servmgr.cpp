@@ -1877,7 +1877,7 @@ int ServMgr::idleProc(ThreadInfo *thread)
 
         if (servMgr->isRoot)
         {
-            // 1æ™‚é–“ç€ä¿¡ãŒãªã‹ã£ãŸã‚‰çµ‚äº†ã™ã‚‹ã€‚â€¦ãªãœï¼Ÿ
+            // 1ŽžŠÔ’…M‚ª‚È‚©‚Á‚½‚çI—¹‚·‚éBc‚È‚ºH
             if ((servMgr->lastIncoming) && (((int64_t)ctime - servMgr->lastIncoming) > 60*60))
             {
                 peercastInst->saveSettings();
@@ -1891,10 +1891,10 @@ int ServMgr::idleProc(ThreadInfo *thread)
             }
         }
 
-        // ãƒ‡ãƒƒãƒ‰ãƒ’ãƒƒãƒˆã‚’ã‚¯ãƒªã‚¢ã™ã‚‹ã€‚ã‚ªãƒªã‚¸ãƒŠãƒ«ã¯ãƒˆãƒ©ãƒƒã‚«ãƒ¼ã‚’ã‚¯ãƒªã‚¢ã™
-        // ã‚‹ãŒã€é–‹ããƒãƒ£ãƒ³ãƒãƒ«ãŒã“ã®ã‚µãƒ¼ãƒãƒ¼ã«è¨­å®šã•ã‚Œã¦ã„ã‚‹ YP ã«æŽ²
-        // è¼‰ã•ã‚Œã¦ã„ã‚‹ã¨ã¯é™ã‚‰ãªã„ã®ã§ã€ãƒˆãƒ©ãƒƒã‚«ãƒ¼ãŒæ¶ˆãˆã‚‹ã¨å†ã³é–‹ã
-        // ã“ã¨ãŒã§ããªã„ã®ã§ã€ãƒˆãƒ©ãƒƒã‚«ãƒ¼ã‚’æ®‹ã™ã€‚
+        // ƒfƒbƒhƒqƒbƒg‚ðƒNƒŠƒA‚·‚éBƒIƒŠƒWƒiƒ‹‚Íƒgƒ‰ƒbƒJ[‚ðƒNƒŠƒA‚·
+        // ‚é‚ªAŠJ‚­ƒ`ƒƒƒ“ƒlƒ‹‚ª‚±‚ÌƒT[ƒo[‚ÉÝ’è‚³‚ê‚Ä‚¢‚é YP ‚ÉŒf
+        // Ú‚³‚ê‚Ä‚¢‚é‚Æ‚ÍŒÀ‚ç‚È‚¢‚Ì‚ÅAƒgƒ‰ƒbƒJ[‚ªÁ‚¦‚é‚ÆÄ‚ÑŠJ‚­
+        // ‚±‚Æ‚ª‚Å‚«‚È‚¢‚Ì‚ÅAƒgƒ‰ƒbƒJ[‚ðŽc‚·B
         chanMgr->clearDeadHits(false);
 
         if (servMgr->shutdownTimer)
@@ -1910,7 +1910,7 @@ int ServMgr::idleProc(ThreadInfo *thread)
         if (chanMgr->numIdleChannels() > ChanMgr::MAX_IDLE_CHANNELS)
             chanMgr->closeOldestIdle();
 
-        // ãƒãƒ£ãƒ³ãƒãƒ«ä¸€è¦§ã‚’å–å¾—ã™ã‚‹ã€‚
+        // ƒ`ƒƒƒ“ƒlƒ‹ˆê——‚ðŽæ“¾‚·‚éB
         servMgr->channelDirectory.update();
 
         sys->sleep(500);

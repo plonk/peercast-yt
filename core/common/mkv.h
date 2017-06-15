@@ -32,7 +32,7 @@ public:
 
     uint64_t     m_videoTrackNumber;
     bool         m_hasKeyFrame;
-    uint64_t     m_timecodeScale; // ãƒŠãƒŽç§’
+    uint64_t     m_timecodeScale; // ƒiƒm•b
     unsigned int m_startTime;
 };
 

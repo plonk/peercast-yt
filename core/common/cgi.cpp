@@ -5,7 +5,7 @@
 
 namespace cgi {
 
-// URL繧ｨ繧ｹ繧ｱ繝ｼ繝励☆繧九�
+// URLエスケープする。
 std::string escape(const std::string& in)
 {
     std::string res;

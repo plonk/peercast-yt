@@ -98,8 +98,8 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
         LOG_ERROR("Invalid FLV tag!");
     }
 
-    // ãƒ¡ã‚¿æƒ…å ±ã‹ã‚‰ã®ãƒ“ãƒƒãƒˆãƒ¬ãƒ¼ãƒˆãŒç„¡ã„å ´åˆã€ã‚¹ãƒˆãƒªãƒ¼ãƒ ã‹ã‚‰ã®å®Ÿæ¸¬å€¤ãŒ
-    // ç¾åœ¨ã®å…¬ç§°å€¤ã‚’è¶…ãˆã¦ã„ã‚Œã°å…¬ç§°å€¤ã‚’æ›´æ–°ã™ã‚‹ã€‚
+    // ƒƒ^î•ñ‚©‚ç‚ÌƒrƒbƒgƒŒ[ƒg‚ª–³‚¢ê‡AƒXƒgƒŠ[ƒ€‚©‚ç‚ÌÀ‘ª’l‚ª
+    // Œ»İ‚ÌŒöÌ’l‚ğ’´‚¦‚Ä‚¢‚ê‚ÎŒöÌ’l‚ğXV‚·‚éB
     if (metaBitrate == 0) {
         ChanInfo info = ch->info;
 
@@ -121,9 +121,9 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
         if (avcHeader.type == FLVTag::T_VIDEO) mem.write(avcHeader.packet, avcHeader.packetSize);
         if (aacHeader.type == FLVTag::T_AUDIO) mem.write(aacHeader.packet, aacHeader.packetSize);
 
-        // ãƒ¡ã‚¿æƒ…å ±ã‹ã‚‰ã®ãƒ“ãƒƒãƒˆãƒ¬ãƒ¼ãƒˆãŒã‚ã‚Œã°ãã®å€¤ã‚’è¨­å®šã€‚ç„¡ã‘ã‚Œã°ã€
-        // å‰å›ã®ã‚¨ãƒ³ã‚³ãƒ¼ãƒ‰ã‚»ãƒƒã‚·ãƒ§ãƒ³ã‹ã‚‰ã®å€¤ã‚’ã‚¯ãƒªã‚¢ã™ã‚‹ãŸã‚ã« 0 ã‚’è¨­
-        // å®šã™ã‚‹ã€‚
+        // ƒƒ^î•ñ‚©‚ç‚ÌƒrƒbƒgƒŒ[ƒg‚ª‚ ‚ê‚Î‚»‚Ì’l‚ğİ’èB–³‚¯‚ê‚ÎA
+        // ‘O‰ñ‚ÌƒGƒ“ƒR[ƒhƒZƒbƒVƒ‡ƒ“‚©‚ç‚Ì’l‚ğƒNƒŠƒA‚·‚é‚½‚ß‚É 0 ‚ğİ
+        // ’è‚·‚éB
         ChanInfo info = ch->info;
         info.bitrate = metaBitrate;
         ch->updateInfo(info);
@@ -190,8 +190,8 @@ void FLVTagBuffer::rateLimit(uint32_t timestamp)
     int64_t diff = ((int64_t)startTime + timestamp/1000) - sys->getTime();
     if (diff > 10)
     {
-        // 10ç§’ã¯é•·ã™ãã‚‹ã®ã§ã€ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—ãŒã‚¸ãƒ£ãƒ³ãƒ—ã—ã¦ã‚‹ã£ã½ã„ã€‚
-        // åŸºæº–æ™‚åˆ»ã‚’ãƒªã‚»ãƒƒãƒˆã€‚
+        // 10•b‚Í’·‚·‚¬‚é‚Ì‚ÅAƒ^ƒCƒ€ƒXƒ^ƒ“ƒv‚ªƒWƒƒƒ“ƒv‚µ‚Ä‚é‚Á‚Û‚¢B
+        // Šî€‚ğƒŠƒZƒbƒgB
         LOG_DEBUG("Timestamp way into the future. Resetting referece point.");
         startTime = sys->getTime();
     }else if (diff < -10)
@@ -265,7 +265,7 @@ void FLVTagBuffer::flush(Channel* ch)
     pack.type = ChanPacket::T_DATA;
     pack.pos = ch->streamPos;
     pack.len = length;
-    // ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã§ãªã„ã‚¿ã‚°ã ã‘ãŒãƒãƒƒãƒ•ã‚¡ãƒªãƒ³ã‚°ã•ã‚Œã‚‹ã€‚
+    // ƒL[ƒtƒŒ[ƒ€‚Å‚È‚¢ƒ^ƒO‚¾‚¯‚ªƒoƒbƒtƒ@ƒŠƒ“ƒO‚³‚ê‚éB
     if (m_streamHasKeyFrames)
         pack.cont = true;
     m_mem.read(pack.data, length);

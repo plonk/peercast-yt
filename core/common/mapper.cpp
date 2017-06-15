@@ -85,7 +85,7 @@ pair<string,string> FileSystemMapper::toLocalFilePath(const string& vpath, const
         return make_pair("", "");
     }
 
-    // ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªãƒˆãƒ©ãƒãƒ¼ã‚µãƒ«ãƒã‚§ãƒƒã‚¯
+    // ƒfƒBƒŒƒNƒgƒŠƒgƒ‰ƒo[ƒTƒ‹ƒ`ƒFƒbƒN
     if (documentRoot == resolvedPath || !is_prefix_of(documentRoot, resolvedPath))
     {
         LOG_ERROR("Possible directory traversal attack!");

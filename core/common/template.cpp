@@ -286,7 +286,7 @@ void Template::writeGlobalVariable(Stream &s, const String &varName, int loop)
         r = true;
     }
 
-    // å¤‰æ•°ãŒè¦‹ä»˜ã‹ã‚‰ãªã‹ã£ãŸå ´åˆã¯å¤‰æ•°åã‚’æ›¸ãå‡ºã™
+    // •Ï”‚ªŒ©•t‚©‚ç‚È‚©‚Á‚½ê‡‚Í•Ï”–¼‚ð‘‚«o‚·
 End:
     if (!r)
         s.writeString(varName);
@@ -373,8 +373,8 @@ string Template::evalStringLiteral(const string& input)
     {
         if (s[0] == '\\')
         {
-            // ãƒãƒƒã‚¯ã‚¹ãƒ©ãƒƒã‚·ãƒ¥ãŒæœ€å¾Œã®æ–‡å­—ã§ã¯ãªã„ã“ã¨ã¯ã‚ã‹ã£ã¦ã„ã‚‹
-            // ã®ã§æœ«ç«¯ãƒã‚§ãƒƒã‚¯ã¯ã—ãªã„ã€‚
+            // ƒoƒbƒNƒXƒ‰ƒbƒVƒ…‚ªÅŒã‚Ì•¶Žš‚Å‚Í‚È‚¢‚±‚Æ‚Í‚í‚©‚Á‚Ä‚¢‚é
+            // ‚Ì‚Å––’[ƒ`ƒFƒbƒN‚Í‚µ‚È‚¢B
             res += s[0];
             res += s[1];
             s.erase(0,2);
@@ -612,14 +612,14 @@ json::array_t Template::evaluateCollectionVariable(String& varName)
         JrpcApi api;
         LOG_DEBUG("%s", api.getChannelsFound({}).dump().c_str());
         json::array_t cs = api.getChannelsFound({});
-        // ã‚¸ãƒ£ãƒ³ãƒ«æŽ¥é ­è¾žã§å§‹ã¾ã‚‰ãªã„ãƒãƒ£ãƒ³ãƒãƒ«ã¯æŽ²è¼‰ã—ãªã„ã€‚
+        // ƒWƒƒƒ“ƒ‹Ú“ªŽ«‚ÅŽn‚Ü‚ç‚È‚¢ƒ`ƒƒƒ“ƒlƒ‹‚ÍŒfÚ‚µ‚È‚¢B
         cs.erase(std::remove_if(cs.begin(), cs.end(),
                                 [] (json c) { return !str::is_prefix_of(servMgr->genrePrefix, c["genre"]); }),
                  cs.end());
         return cs;
     }else if (varName == "broadcastingChannels")
     {
-        // ã“ã®ã‚µãƒ¼ãƒãƒ¼ã‹ã‚‰é…ä¿¡ä¸­ã®ãƒãƒ£ãƒ³ãƒãƒ«ã‚’ãƒªã‚¹ãƒŠãƒ¼æ•°é™é †ã§ã‚½ãƒ¼ãƒˆã€‚
+        // ‚±‚ÌƒT[ƒo[‚©‚ç”zM’†‚Ìƒ`ƒƒƒ“ƒlƒ‹‚ðƒŠƒXƒi[”~‡‚Åƒ\[ƒgB
         JrpcApi api;
         json::array_t channels = api.getChannels({});
         auto newend = std::remove_if(channels.begin(), channels.end(),
@@ -807,11 +807,11 @@ void    Template::readVariableRaw(Stream &in, Stream *outp, int loop)
 
 // --------------------------------------
 
-// in ã®ç¾åœ¨ã®ä½ç½®ã‹ã‚‰ 1 ãƒ–ãƒ­ãƒƒã‚¯åˆ†ã®ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆã‚’å‡¦ç†ã—ã€outp ãŒ
-// NULL ã§ãªã‘ã‚Œã° *outp ã«å‡ºåŠ›ã™ã‚‹ã€‚{@loop} å†…ã‚’å‡¦ç†ã—ã¦ã„ã‚‹å ´åˆã¯ã€0
-// ã‹ã‚‰å§‹ã¾ã‚‹ãƒ«ãƒ¼ãƒ—ã‚«ã‚¦ãƒ³ã‚¿ãƒ¼ã®å€¤ãŒ loop ã«è¨­å®šã•ã‚Œã‚‹ã€‚EOF ã‚ã‚‹ã„ã¯
-// {@end} ã«å½“ãŸã£ãŸå ´åˆã¯ false ã‚’è¿”ã—ã€{@else} ã«å½“ãŸã£ãŸå ´åˆã¯ true
-// ã‚’è¿”ã™ã€‚
+// in ‚ÌŒ»Ý‚ÌˆÊ’u‚©‚ç 1 ƒuƒƒbƒN•ª‚Ìƒeƒ“ƒvƒŒ[ƒg‚ðˆ—‚µAoutp ‚ª
+// NULL ‚Å‚È‚¯‚ê‚Î *outp ‚Éo—Í‚·‚éB{@loop} “à‚ðˆ—‚µ‚Ä‚¢‚éê‡‚ÍA0
+// ‚©‚çŽn‚Ü‚éƒ‹[ƒvƒJƒEƒ“ƒ^[‚Ì’l‚ª loop ‚ÉÝ’è‚³‚ê‚éBEOF ‚ ‚é‚¢‚Í
+// {@end} ‚É“–‚½‚Á‚½ê‡‚Í false ‚ð•Ô‚µA{@else} ‚É“–‚½‚Á‚½ê‡‚Í true
+// ‚ð•Ô‚·B
 bool Template::readTemplate(Stream &in, Stream *outp, int loop)
 {
     Stream *p = inSelectedFragment() ? outp : NULL;
@@ -845,7 +845,7 @@ bool Template::readTemplate(Stream &in, Stream *outp, int loop)
             }
             else
             {
-                // ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆã«é–¢ä¿‚ã®ãªã„æ³¢æ‹¬å¼§ã¯ãã®ã¾ã¾è¡¨ç¤ºã™ã‚‹
+                // ƒeƒ“ƒvƒŒ[ƒg‚ÉŠÖŒW‚Ì‚È‚¢”gŠ‡ŒÊ‚Í‚»‚Ì‚Ü‚Ü•\Ž¦‚·‚é
                 if (p)
                 {
                     p->writeChar('{');

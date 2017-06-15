@@ -11,7 +11,7 @@ class NotificationBuffer;
 // global
 extern NotificationBuffer g_notificationBuffer;
 
-// é€šçŸ¥ã¨é€šçŸ¥ãƒãƒƒãƒ•ã‚¡ãƒ¼ã€‚
+// ’Ê’m‚Æ’Ê’mƒoƒbƒtƒ@[B
 
 class Notification
 {

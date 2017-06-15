@@ -30,7 +30,7 @@ ChannelEntry::textToChannelEntries(const std::string& text, const std::string& a
 
         while ((q = strstr(p, "<>")) != nullptr) {
             fields.push_back(string(p, q));
-            p = q + 2; // <>ã‚’ã‚¹ã‚­ãƒƒãƒ—
+            p = q + 2; // <>‚ğƒXƒLƒbƒv
         }
         fields.push_back(p);
 
@@ -85,9 +85,9 @@ int ChannelDirectory::numFeeds()
     return m_feeds.size();
 }
 
-// index.txt ã‚’æŒ‡ã™ URL ã§ã‚ã‚‹ url ã‹ã‚‰ãƒãƒ£ãƒ³ãƒãƒ«ãƒªã‚¹ãƒˆã‚’èª­ã¿è¾¼ã¿ã€out
-// ã«æ ¼ç´ã™ã‚‹ã€‚æˆåŠŸã—ãŸå ´åˆã¯ true ãŒè¿”ã‚‹ã€‚å¤±æ•—ã—ãŸå ´åˆã¯ false ãŒè¿”ã‚Šã€
-// out ã¯å¤‰æ›´ã•ã‚Œãªã„ã€‚
+// index.txt ‚ğw‚· URL ‚Å‚ ‚é url ‚©‚çƒ`ƒƒƒ“ƒlƒ‹ƒŠƒXƒg‚ğ“Ç‚İ‚İAout
+// ‚ÉŠi”[‚·‚éB¬Œ÷‚µ‚½ê‡‚Í true ‚ª•Ô‚éB¸”s‚µ‚½ê‡‚Í false ‚ª•Ô‚èA
+// out ‚Í•ÏX‚³‚ê‚È‚¢B
 static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
 {
     URI feed(url);
@@ -193,7 +193,7 @@ bool ChannelDirectory::update()
     return true;
 }
 
-// indexç•ªç›®ã®ãƒãƒ£ãƒ³ãƒãƒ«è©³ç´°ã®ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã‚’å‡ºåŠ›ã™ã‚‹ã€‚æˆåŠŸã—ãŸã‚‰ true ã‚’è¿”ã™ã€‚
+// index”Ô–Ú‚Ìƒ`ƒƒƒ“ƒlƒ‹Ú×‚ÌƒtƒB[ƒ‹ƒh‚ğo—Í‚·‚éB¬Œ÷‚µ‚½‚ç true ‚ğ•Ô‚·B
 bool ChannelDirectory::writeChannelVariable(Stream& out, const String& varName, int index)
 {
     CriticalSection cs(m_lock);

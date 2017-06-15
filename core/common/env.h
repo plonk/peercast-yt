@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-// 環境変数のビルダークラス。
+// ���ϐ��̃r���_�[�N���X�B
 class Environment
 {
 public:
@@ -22,8 +22,8 @@ public:
     std::vector<std::string> m_vars;
 
     char const ** m_env;
-    // 環境はオブジェクト内部に作成され、ポインターが返される。オブジェ
-    // クトに変更が加えられるとデータは無効化される。
+    // ���̓I�u�W�F�N�g�����ɍ쐬����A�|�C���^�[���Ԃ����B�I�u�W�F
+    // �N�g�ɕύX����������ƃf�[�^�͖����������B
     char const ** env();
 };
 

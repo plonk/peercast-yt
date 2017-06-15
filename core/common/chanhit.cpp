@@ -239,7 +239,7 @@ std::string ChanHit::versionString()
 }
 
 // -----------------------------------
-// 選択されたホストの情報を簡潔に文字列化する。
+// �I�����ꂽ�z�X�g�̏����Ȍ��ɕ����񉻂���B
 std::string ChanHit::str(bool withPort)
 {
     auto res = host.str(withPort);

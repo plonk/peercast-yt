@@ -276,7 +276,7 @@ void PCPStream::readRootAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
                 LOG_DEBUG("PCP got new root mesg: %s", servMgr->rootMsg.cstr());
                 if (servMgr->rootMsg != "")
                     peercast::notifyMessage(ServMgr::NT_PEERCAST,
-                                            (std::string(servMgr->rootHost.str()) + "ã€Œ" + servMgr->rootMsg.cstr() + "ã€").c_str());
+                                            (std::string(servMgr->rootHost.str()) + "u" + servMgr->rootMsg.cstr() + "v").c_str());
             }
         }else
         {
@@ -487,7 +487,7 @@ void PCPStream::readChanAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
             chl = chanMgr->findHitListByID(newInfo.id);
         }else
         {
-            // IM50,51 å¯¾ç­–ã€‚
+            // IM50,51 ‘ÎôB
             LOG_ERROR("PCP unknown or misplaced atom: %s, %d, %d", id.getString().str(), c, d);
             throw StreamException("Protocol error");
 

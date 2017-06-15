@@ -53,7 +53,7 @@ ID_TO_NAME = {
     { {0xBF}, "CRC-32" },
 };
 
-// UNKNOWN 値の対応要る？
+// UNKNOWN �l�̑Ή��v��H
 class VInt
 {
 public:

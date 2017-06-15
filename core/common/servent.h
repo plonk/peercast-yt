@@ -251,7 +251,7 @@ public:
 
     GnuID               remoteID;
     GnuID               chanID;
-    GnuID               givID; // GIV ã™ã‚‹ãƒãƒ£ãƒ³ãƒãƒ«ã®ID
+    GnuID               givID; // GIV ‚·‚éƒ`ƒƒƒ“ƒlƒ‹‚ÌID
 
     ThreadInfo          thread;
 

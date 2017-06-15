@@ -8,7 +8,7 @@
 
 using namespace matroska;
 
-// data ã‚’ type ãƒ‘ã‚±ãƒƒãƒˆã¨ã—ã¦é€ä¿¡ã™ã‚‹
+// data ‚ğ type ƒpƒPƒbƒg‚Æ‚µ‚Ä‘—M‚·‚é
 void MKVStream::sendPacket(ChanPacket::TYPE type, const byte_string& data, bool continuation, Channel* ch)
 {
     if (data.size() > ChanPacket::MAX_DATALEN)
@@ -32,7 +32,7 @@ void MKVStream::sendPacket(ChanPacket::TYPE type, const byte_string& data, bool 
         ch->headPack = pack;
 
     ch->newPacket(pack);
-    // rateLimit ã§å¾‹é€Ÿã™ã‚‹ã®ã§ checkReadDelay ã¯ä½¿ã‚ãªã„ã€‚
+    // rateLimit ‚Å—¥‘¬‚·‚é‚Ì‚Å checkReadDelay ‚Íg‚í‚È‚¢B
     //ch->checkReadDelay(pack.len);
     ch->streamPos += pack.len;
 }
@@ -44,7 +44,7 @@ bool MKVStream::hasKeyFrame(const byte_string& cluster)
     VInt id   = VInt::read(in);
     VInt size = VInt::read(in);
 
-    int64_t payloadRemaining = (int64_t) size.uint(); // è² æ•°ãŒå–ã‚Œã‚‹ã‚ˆã†ã« signed ã«ã™ã‚‹
+    int64_t payloadRemaining = (int64_t) size.uint(); // •‰”‚ªæ‚ê‚é‚æ‚¤‚É signed ‚É‚·‚é
     if (payloadRemaining < 0)
         throw StreamException("MKV Parse error");
     while (payloadRemaining > 0) // for each element in Cluster
@@ -63,7 +63,7 @@ bool MKVStream::hasKeyFrame(const byte_string& cluster)
                 if (((uint8_t)blockData[trackno.bytes.size() + 2] & 0x80) != 0)
                 {
                     m_hasKeyFrame = true;
-                    return true; // ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ãŒã‚ã‚‹
+                    return true; // ƒL[ƒtƒŒ[ƒ€‚ª‚ ‚é
                 }
             }
         }
@@ -92,8 +92,8 @@ uint64_t MKVStream::unpackUnsignedInt(const std::string& bytes)
 
 void MKVStream::rateLimit(uint64_t timecode)
 {
-    // Timecode ã¯å˜èª¿å¢—åŠ ã§ã¯ãªã„ãŒã€å°‘ã—ã®ã‚¸ãƒƒã‚¿ãƒ¼ã¯ãƒãƒƒãƒ•ã‚¡ãƒ¼ãŒå¸å
-    // ã—ã¦ãã‚Œã‚‹ã ã‚ã†ã€‚
+    // Timecode ‚Í’P’²‘‰Á‚Å‚Í‚È‚¢‚ªA­‚µ‚ÌƒWƒbƒ^[‚Íƒoƒbƒtƒ@[‚ª‹zû
+    // ‚µ‚Ä‚­‚ê‚é‚¾‚ë‚¤B
 
     unsigned int secondsFromStart = timecode * m_timecodeScale / 1000000000;
     unsigned int ctime = sys->getTime();
@@ -106,8 +106,8 @@ void MKVStream::rateLimit(uint64_t timecode)
     }
 }
 
-// éç¶™ç¶šãƒ‘ã‚±ãƒƒãƒˆã®é ­å‡ºã—ãŒã§ããªã„ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã®ãŸã‚ã«ã€ãªã‚‹ã¹ãè¦ç´ 
-// ã‚’ãƒ‘ã‚±ãƒƒãƒˆã®å…ˆé ­ã«ã—ã¦é€ä¿¡ã™ã‚‹
+// ”ñŒp‘±ƒpƒPƒbƒg‚Ì“ªo‚µ‚ª‚Å‚«‚È‚¢ƒNƒ‰ƒCƒAƒ“ƒg‚Ì‚½‚ß‚ÉA‚È‚é‚×‚­—v‘f
+// ‚ğƒpƒPƒbƒg‚Ìæ“ª‚É‚µ‚Ä‘—M‚·‚é
 void MKVStream::sendCluster(const byte_string& cluster, Channel* ch)
 {
     bool continuation;
@@ -129,7 +129,7 @@ void MKVStream::sendCluster(const byte_string& cluster, Channel* ch)
 
     byte_string buffer = id.bytes + size.bytes;
 
-    int64_t payloadRemaining = (int64_t) size.uint(); // è² æ•°ãŒå–ã‚Œã‚‹ã‚ˆã†ã« signed ã«ã™ã‚‹
+    int64_t payloadRemaining = (int64_t) size.uint(); // •‰”‚ªæ‚ê‚é‚æ‚¤‚É signed ‚É‚·‚é
 
     if (payloadRemaining < 0)
         throw StreamException("MKV Parse error");
@@ -187,7 +187,7 @@ void MKVStream::sendCluster(const byte_string& cluster, Channel* ch)
     }
 }
 
-// Tracks è¦ç´ ã‹ã‚‰ãƒ“ãƒ‡ã‚ªãƒˆãƒ©ãƒƒã‚¯ã®ãƒˆãƒ©ãƒƒã‚¯ç•ªå·ã‚’èª¿ã¹ã‚‹ã€‚
+// Tracks —v‘f‚©‚çƒrƒfƒIƒgƒ‰ƒbƒN‚Ìƒgƒ‰ƒbƒN”Ô†‚ğ’²‚×‚éB
 void MKVStream::readTracks(const std::string& data)
 {
     StringStream mem;
@@ -230,7 +230,7 @@ void MKVStream::readTracks(const std::string& data)
     }
 }
 
-// TimecodeScale ã®å€¤ã‚’èª¿ã¹ã‚‹ã€‚
+// TimecodeScale ‚Ì’l‚ğ’²‚×‚éB
 void MKVStream::readInfo(const std::string& data)
 {
     StringStream in;
@@ -269,13 +269,13 @@ void MKVStream::readHeader(Stream &in, Channel *ch)
 
             if (id.toName() != "Segment")
             {
-                // Segment ä»¥å¤–ã®ãƒ¬ãƒ™ãƒ« 0 è¦ç´ ã¯å˜ã«ãƒ˜ãƒƒãƒ‰ãƒ‘ã‚±ãƒƒãƒˆã«è¿½åŠ ã™
-                // ã‚‹
+                // Segment ˆÈŠO‚ÌƒŒƒxƒ‹ 0 —v‘f‚Í’P‚ÉƒwƒbƒhƒpƒPƒbƒg‚É’Ç‰Á‚·
+                // ‚é
                 auto data = in.read((int) size.uint());
                 header.append(data.begin(), data.end());
             }else
             {
-                // Segment å†…ã®ãƒ¬ãƒ™ãƒ« 1 è¦ç´ ã‚’èª­ã‚€
+                // Segment “à‚ÌƒŒƒxƒ‹ 1 —v‘f‚ğ“Ç‚Ş
                 while (true)
                 {
                     VInt id = VInt::read(in);
@@ -284,7 +284,7 @@ void MKVStream::readHeader(Stream &in, Channel *ch)
 
                     if (id.toName() != "Cluster")
                     {
-                        // Cluster ä»¥å¤–ã®è¦ç´ ã¯ãƒ˜ãƒƒãƒ‰ãƒ‘ã‚±ãƒƒãƒˆã«è¿½åŠ ã™ã‚‹
+                        // Cluster ˆÈŠO‚Ì—v‘f‚ÍƒwƒbƒhƒpƒPƒbƒg‚É’Ç‰Á‚·‚é
                         header += id.bytes;
                         header += size.bytes;
 
@@ -299,13 +299,13 @@ void MKVStream::readHeader(Stream &in, Channel *ch)
                             readInfo(data);
                     } else
                     {
-                        // ãƒ˜ãƒƒãƒ€ãƒ¼ãƒ‘ã‚±ãƒƒãƒˆã‚’é€ä¿¡
+                        // ƒwƒbƒ_[ƒpƒPƒbƒg‚ğ‘—M
                         sendPacket(ChanPacket::T_HEAD, header, false, ch);
 
                         m_startTime = sys->getTime();
 
-                        // ã‚‚ã†IDã¨ã‚µã‚¤ã‚ºã‚’èª­ã‚“ã§ã—ã¾ã£ãŸã®ã§ã€æœ€åˆã®ã‚¯ãƒ©
-                        // ã‚¹ã‚¿ãƒ¼ã‚’é€ä¿¡
+                        // ‚à‚¤ID‚ÆƒTƒCƒY‚ğ“Ç‚ñ‚Å‚µ‚Ü‚Á‚½‚Ì‚ÅAÅ‰‚ÌƒNƒ‰
+                        // ƒXƒ^[‚ğ‘—M
 
                         byte_string cluster = id.bytes + size.bytes;
                         auto data = in.read((int) size.uint());
@@ -322,7 +322,7 @@ void MKVStream::readHeader(Stream &in, Channel *ch)
     }
 }
 
-// ãƒ“ãƒƒãƒˆãƒ¬ãƒ¼ãƒˆã®è¨ˆæ¸¬ã€æ›´æ–°
+// ƒrƒbƒgƒŒ[ƒg‚ÌŒv‘ªAXV
 void MKVStream::checkBitrate(Stream &in, Channel *ch)
 {
     ChanInfo info = ch->info;
@@ -333,7 +333,7 @@ void MKVStream::checkBitrate(Stream &in, Channel *ch)
     }
 }
 
-// Cluster è¦ç´ ã‚’èª­ã‚€
+// Cluster —v‘f‚ğ“Ç‚Ş
 int MKVStream::readPacket(Stream &in, Channel *ch)
 {
     try {

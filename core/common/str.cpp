@@ -28,7 +28,7 @@ static std::string inspect(char c)
 {
     int d = static_cast<unsigned char>(c);
 
-    // FIXME: UTF8 ã‚’é€šã™ç‚ºã«ã—ã¦ã„ã‚‹ã€‚
+    // FIXME: UTF8 ‚ğ’Ê‚·ˆ×‚É‚µ‚Ä‚¢‚éB
     if (d >= 0x80)
         return string() + (char) d;
 

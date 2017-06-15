@@ -39,7 +39,7 @@ public:
 
     HTML(const char *, Stream &);
 
-    // HTML 繝倥Ν繝代�ｼ
+    // HTML ヘルパー
     void    startNode(const char *, const char * = NULL);
     void    addLink(const char *, const char *, bool = false);
     void    startTag(const char *, const char * = NULL, ...) __attribute__ ((format (printf, 3, 4)));
@@ -53,7 +53,7 @@ public:
     void    startHTML();
     void    startBody();
 
-    // HTTP 繝ｬ繧ｹ繝昴Φ繧ｹ
+    // HTTP レスポンス
     void    writeOK(const char *content,
                     const std::map<std::string,std::string>& = {});
     void    locateTo(const char *);

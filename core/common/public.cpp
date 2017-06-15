@@ -68,7 +68,7 @@ static string getDirectPermission()
 }
 
 // ------------------------------------------------------------
-// ã“ã®ã‚µãƒ¼ãƒãƒ¼ã‹ã‚‰é…ä¿¡ã—ã¦ã„ã‚‹ãƒãƒ£ãƒ³ãƒãƒ«ã® index.txt ã‚’ä½œã‚‹
+// ‚±‚ÌƒT[ƒo[‚©‚ç”zM‚µ‚Ä‚¢‚éƒ`ƒƒƒ“ƒlƒ‹‚Ì index.txt ‚ðì‚é
 string PublicController::createChannelIndex()
 {
     string res;

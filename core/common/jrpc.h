@@ -47,7 +47,7 @@ public:
             if (ch == nullptr)
                 throw std::invalid_argument("hitList");
 
-            // è‡ªåˆ†ã‚’è¿½åŠ ã™ã‚‹ã€‚
+            // ©•ª‚ğ’Ç‰Á‚·‚éB
             {
                 Host uphost;
                 ChanHit self;
@@ -85,7 +85,7 @@ public:
                 m_children[p->uphost].push_back(h);
             }
 
-            // // ä¸Šæµã®é …ç›®ãŒè¦‹ä»˜ã‹ã‚‰ãªã„ãƒãƒ¼ãƒ‰ã¯ãƒ«ãƒ¼ãƒˆã«ã™ã‚‹ã€‚
+            // // ã—¬‚Ì€–Ú‚ªŒ©•t‚©‚ç‚È‚¢ƒm[ƒh‚Íƒ‹[ƒg‚É‚·‚éB
             // for (auto it = m_children.begin(); it != m_children.end(); ++it)
             // {
             //     try
@@ -227,9 +227,9 @@ public:
         return result;
     }
 
-    // dispatchãƒ¡ã‚½ãƒƒãƒ‰ã‚’å®Ÿè£…ã€‚ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®æ•°ã‚„å‹ãŒåˆã‚ãªã„å ´åˆã¯
-    // invalid_params ä¾‹å¤–ã€ãƒ¡ã‚½ãƒƒãƒ‰ãŒå­˜åœ¨ã—ãªã„å ´åˆã¯
-    // method_not_found ä¾‹å¤–ã‚’ä¸Šã’ã‚‹ã€‚
+    // dispatchƒƒ\ƒbƒh‚ğÀ‘•Bƒpƒ‰ƒ[ƒ^‚Ì”‚âŒ^‚ª‡‚í‚È‚¢ê‡‚Í
+    // invalid_params —áŠOAƒƒ\ƒbƒh‚ª‘¶İ‚µ‚È‚¢ê‡‚Í
+    // method_not_found —áŠO‚ğã‚°‚éB
     json dispatch(const json& m, const json& p)
     {
         for (size_t i = 0; i < m_methods.size(); i++)
@@ -283,8 +283,8 @@ public:
             }
             info.bcID = chanMgr->broadcastID;
 
-            // ã‚½ãƒ¼ã‚¹ã«æ¥ç¶šã§ããªã‹ã£ãŸå ´åˆã‚‚ãƒãƒ£ãƒ³ãƒãƒ«ã‚’åŒå®šã—ãŸã„ã®
-            // ã§ã€äº‹å‰ã«ãƒãƒ£ãƒ³ãƒãƒ«IDã‚’è¨­å®šã™ã‚‹ã€‚
+            // ƒ\[ƒX‚ÉÚ‘±‚Å‚«‚È‚©‚Á‚½ê‡‚àƒ`ƒƒƒ“ƒlƒ‹‚ğ“¯’è‚µ‚½‚¢‚Ì
+            // ‚ÅA–‘O‚Éƒ`ƒƒƒ“ƒlƒ‹ID‚ğİ’è‚·‚éB
             info.id = chanMgr->broadcastID;
             info.id.encode(NULL, info.name, info.genre, info.bitrate);
 
@@ -347,10 +347,10 @@ public:
         };
     }
 
-    // PeerCastStation ã§ã¯ Receiving, Searching, Error, Idle ã®ã©ã‚Œã‹
-    // ãŒè¿”ã‚‹ã€‚peercast ã§ã¯ NONE, WAIT, CONNECT, REQUEST, CLOSE,
+    // PeerCastStation ‚Å‚Í Receiving, Searching, Error, Idle ‚Ì‚Ç‚ê‚©
+    // ‚ª•Ô‚éBpeercast ‚Å‚Í NONE, WAIT, CONNECT, REQUEST, CLOSE,
     // RECEIVE, BROADCAST, ABORT, SEARCH, NOHOSTS, IDLE, ERROR,
-    // NOTFOUND ã®ã©ã‚Œã‹ã€‚
+    // NOTFOUND ‚Ì‚Ç‚ê‚©B
     json to_json(Channel::STATUS status)
     {
         switch (status)
@@ -398,8 +398,8 @@ public:
         };
     }
 
-    // ãƒãƒ£ãƒ³ãƒãƒ«ã«é–¢ã—ã¦ç‰¹å®šã®æ¥ç¶šã‚’åœæ­¢ã™ã‚‹ã€‚æˆåŠŸã™ã‚Œã° trueã€å¤±æ•—ã™
-    // ã‚Œã° false ã‚’è¿”ã™ã€‚
+    // ƒ`ƒƒƒ“ƒlƒ‹‚ÉŠÖ‚µ‚Ä“Á’è‚ÌÚ‘±‚ğ’â~‚·‚éB¬Œ÷‚·‚ê‚Î trueA¸”s‚·
+    // ‚ê‚Î false ‚ğ•Ô‚·B
     json stopChannelConnection(json::array_t params)
     {
         GnuID id = params[0].get<std::string>();
@@ -451,7 +451,7 @@ public:
             { "contentPosition", c->streamPos },
             { "agentName", nullptr },
             { "remoteEndPoint", remoteEndPoint },
-            { "remoteHostStatus", json::array() }, // ä½•ã‚’å…¥ã‚ŒãŸã‚‰ã„ã„ã®ã‹ã‚ã‹ã‚‰ãªã„ã€‚
+            { "remoteHostStatus", json::array() }, // ‰½‚ğ“ü‚ê‚½‚ç‚¢‚¢‚Ì‚©‚í‚©‚ç‚È‚¢B
             { "remoteName", remoteName },
         };
         result.push_back(sourceConnection);
@@ -483,7 +483,7 @@ public:
                 { "contentPosition", nullptr },
                 { "agentName", s->agent.cstr() },
                 { "remoteEndPoint", remoteEndPoint },
-                { "remoteHostStatus", json::array() }, // ä½•ã‚’å…¥ã‚ŒãŸã‚‰ã„ã„ã®ã‹ã‚ã‹ã‚‰ãªã„ã€‚
+                { "remoteHostStatus", json::array() }, // ‰½‚ğ“ü‚ê‚½‚ç‚¢‚¢‚Ì‚©‚í‚©‚ç‚È‚¢B
                 { "remoteName", remoteEndPoint },
             };
 
@@ -546,7 +546,7 @@ public:
             { "push", (bool) h->firewalled },
             { "relay", (bool) h->relay },
             { "direct", (bool) h->direct },
-            { "cin", (bool) h->cin }, // ã“ã‚Œrootãƒ¢ãƒ¼ãƒ‰ã§å‹•ã„ã¦ã‚‹ã‹ã£ã¦ã“ã¨ï¼Ÿ
+            { "cin", (bool) h->cin }, // ‚±‚êrootƒ‚[ƒh‚Å“®‚¢‚Ä‚é‚©‚Á‚Ä‚±‚ÆH
             { "stable", (bool) h->stable },
             { "version", h->version },
             { "update", sys->getTime() - h->time },
@@ -618,8 +618,8 @@ public:
         return result;
     }
 
-    // é…ä¿¡ä¸­ã®ãƒãƒ£ãƒ³ãƒãƒ«ã¨ãƒ«ãƒ¼ãƒˆã‚µãƒ¼ãƒãƒ¼ã¨ã®æ¥ç¶šçŠ¶æ…‹ã€‚
-    // è¿”ã‚Šå€¤: "Idle" | "Connecting" | "Connected" | "Error"
+    // ”zM’†‚Ìƒ`ƒƒƒ“ƒlƒ‹‚Æƒ‹[ƒgƒT[ƒo[‚Æ‚ÌÚ‘±ó‘ÔB
+    // •Ô‚è’l: "Idle" | "Connecting" | "Connected" | "Error"
     json::string_t announcingChannelStatus(Channel* c)
     {
         return "Connected";
@@ -680,10 +680,10 @@ public:
         servMgr->setMaxRelays((int) settings["maxRelays"]);
         chanMgr->maxRelaysPerChannel = (int) settings["maxRelaysPerChannel"];
         servMgr->maxDirect = (int) settings["maxDirects"];
-        // maxDirectsPerChannel ã¯ç„¡è¦–ã€‚
+        // maxDirectsPerChannel ‚Í–³‹B
         servMgr->maxBitrateOut = (int) settings["maxUpstreamRate"];
-        // maxUpstreamRatePerChannel ã¯ç„¡è¦–ã€‚
-        // channelCleaner, portMapper ã¯ç„¡è¦–ã€‚
+        // maxUpstreamRatePerChannel ‚Í–³‹B
+        // channelCleaner, portMapper ‚Í–³‹B
         return nullptr;
     }
 
@@ -696,7 +696,7 @@ public:
             { "maxDirectsPerChannel", 0 },
             { "maxUpstreamRate", servMgr->maxBitrateOut },
             { "maxUpstreamRatePerChannel", 0 },
-            // channelCleaner ã¯ç„¡è¦–ã€‚
+            // channelCleaner ‚Í–³‹B
         };
 
         return j;

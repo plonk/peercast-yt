@@ -18,13 +18,13 @@ int Dechunker::hexValue(char c)
         return -1;
 }
 
-// 読み込めた分だけ返してもいいのかなぁ…？read の仕様がわからない。
-// MemoryStream だと要求されただけのデータがなかったら 0 を返して
-// いるが、FileStream だと読めた分だけ読んでいる。
+// �ǂݍ��߂��������Ԃ��Ă������̂��Ȃ��c�Hread �̎d�l���킩��Ȃ��B
+// MemoryStream ���Ɨv�����ꂽ�����̃f�[�^���Ȃ������� 0 ��Ԃ���
+// ���邪�AFileStream ���Ɠǂ߂��������ǂ�ł���B
 //
-// きっちり size バイト読めるまでブロックして欲しい。UClientSocket
-// はそういう作りになってるな。上流はClientSocketが本番環境だから、
-// それでいこう。
+// �������� size �o�C�g�ǂ߂�܂Ńu���b�N���ė~�����BUClientSocket
+// �͂����������ɂȂ��Ă�ȁB�㗬��ClientSocket���{�Ԋ�������A
+// ����ł������B
 int  Dechunker::read(void *buf, int aSize)
 {
     if (m_eof)
@@ -61,7 +61,7 @@ void Dechunker::getNextChunk()
 {
     size_t size = 0;
 
-    // チャンクサイズを読み込む。
+    // �`�����N�T�C�Y��ǂݍ��ށB
     while (true)
     {
         char c = m_stream.readChar();

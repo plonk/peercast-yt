@@ -45,7 +45,7 @@ public:
     std::string chatUrl();
     std::string statsUrl();
 
-    std::string name; // (å†ç”Ÿä¸å¯) ãªã©ãŒä»˜ãã“ã¨ãŒã‚ã‚‹ã€‚
+    std::string name; // (Ä¶•s‰Â) ‚È‚Ç‚ª•t‚­‚±‚Æ‚ª‚ ‚éB
     GnuID       id;
     std::string tip;
     std::string url;
@@ -59,14 +59,14 @@ public:
     std::string trackAlbum;
     std::string trackName;
     std::string trackContact;
-    std::string encodedName; // URLã‚¨ãƒ³ã‚³ãƒ¼ãƒ‰ã•ã‚ŒãŸãƒãƒ£ãƒ³ãƒãƒ«åã€‚
+    std::string encodedName; // URLƒGƒ“ƒR[ƒh‚³‚ê‚½ƒ`ƒƒƒ“ƒlƒ‹–¼B
 
     std::string uptime;
     std::string status;
     std::string comment;
     int         direct;
 
-    std::string feedUrl; // ãƒãƒ£ãƒƒãƒˆURLã€çµ±è¨ˆURLã‚’ä½œæˆã™ã‚‹ãŸã‚ã«å¿…è¦ã€‚
+    std::string feedUrl; // ƒ`ƒƒƒbƒgURLA“ŒvURL‚ğì¬‚·‚é‚½‚ß‚É•K—vB
 };
 
 class ChannelFeed
@@ -99,7 +99,7 @@ public:
     bool isPublic;
 };
 
-// å¤–éƒ¨ã‹ã‚‰ãƒãƒ£ãƒ³ãƒãƒ«ãƒªã‚¹ãƒˆã‚’å–å¾—ã—ã¦ä¿æŒã™ã‚‹ã€‚
+// ŠO•”‚©‚çƒ`ƒƒƒ“ƒlƒ‹ƒŠƒXƒg‚ğæ“¾‚µ‚Ä•Û‚·‚éB
 class ChannelDirectory : public VariableWriter
 {
 public:

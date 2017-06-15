@@ -3,8 +3,8 @@
 
 #include "sys.h"
 
-// ã‚¯ãƒªãƒ†ã‚£ã‚«ãƒ«ã‚»ã‚¯ã‚·ãƒ§ãƒ³ã‚’ãƒžãƒ¼ã‚¯ã™ã‚‹ã€‚ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ãƒ¼ã§ãƒ­ãƒƒã‚¯ã‚’å–å¾—
-// ã—ã€ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã§é–‹æ”¾ã™ã‚‹ã€‚
+// ƒNƒŠƒeƒBƒJƒ‹ƒZƒNƒVƒ‡ƒ“‚ðƒ}[ƒN‚·‚éBƒRƒ“ƒXƒgƒ‰ƒNƒ^[‚ÅƒƒbƒN‚ðŽæ“¾
+// ‚µAƒfƒXƒgƒ‰ƒNƒ^‚ÅŠJ•ú‚·‚éB
 class CriticalSection
 {
 public:
