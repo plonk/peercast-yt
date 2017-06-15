@@ -307,7 +307,7 @@ int ChannelDirectory::totalListeners()
     int res = 0;
 
     for (ChannelEntry& e : m_channels) {
-        res += std::max(0, e.numDirects);
+        res += (std::max)(0, e.numDirects);
     }
     return res;
 }
@@ -318,7 +318,7 @@ int ChannelDirectory::totalRelays()
     int res = 0;
 
     for (ChannelEntry& e : m_channels) {
-        res += std::max(0, e.numRelays);
+        res += (std::max)(0, e.numRelays);
     }
     return res;
 }

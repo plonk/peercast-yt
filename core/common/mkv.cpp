@@ -165,7 +165,7 @@ void MKVStream::sendCluster(const byte_string& cluster, Channel* ch)
             size_t pos = 0;
             while (pos < buffer.size())
             {
-                int next = std::min(pos + 15*1024, buffer.size());
+                int next = (std::min)(pos + 15*1024, buffer.size());
                 sendPacket(ChanPacket::T_DATA, buffer.substr(pos, next-pos), continuation, ch);
                 continuation = true;
                 pos = next;

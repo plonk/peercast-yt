@@ -36,7 +36,7 @@ void GnuID::encode(Host *h, const char *salt1, const char *salt2, unsigned char 
     }
 
     int s1 = 0, s2 = 0;
-    int n = (std::max(salt1?strlen(salt1):0, salt2?strlen(salt2):0)/16 + 1) * 16;
+    int n = ((std::max)(salt1?strlen(salt1):0, salt2?strlen(salt2):0)/16 + 1) * 16;
     for (int i = 0; i < n; i++)
     {
         unsigned char ipb = id[i%16];

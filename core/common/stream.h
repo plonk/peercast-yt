@@ -150,7 +150,7 @@ public:
 
         while (remaining > 0)
         {
-            int readSize = std::min(remaining, 4096);
+            int readSize = (std::min)(remaining, 4096);
             int r = read(buffer, readSize);
             res += std::string(buffer, buffer + r);
             remaining -= r;

@@ -26,7 +26,7 @@ int  StringStream::read(void *buf, int count)
         throw StreamException("End of stream");
 
     auto end = std::copy(m_buffer.begin() + m_pos,
-                         m_buffer.begin() + std::min(m_pos + count, m_buffer.size()),
+                         m_buffer.begin() + (std::min)(m_pos + count, m_buffer.size()),
                          static_cast<char*>(buf));
     auto bytesRead = end - static_cast<char*>(buf);
     m_pos += bytesRead;
