@@ -187,11 +187,11 @@ bool    ChanHit::writeVariable(Stream &out, const String &var)
     else if (var == "rhost1")
         rhost[1].toStr(buf);
     else if (var == "numHops")
-        sprintf(buf, "%d", numHops);
+        snprintf(buf, _countof(buf), "%d", numHops);
     else if (var == "numListeners")
-        sprintf(buf, "%d", numListeners);
+        snprintf(buf, _countof(buf), "%d", numListeners);
     else if (var == "numRelays")
-        sprintf(buf, "%d", numRelays);
+        snprintf(buf, _countof(buf), "%d", numRelays);
     else if (var == "uptime")
     {
         String timeStr;
@@ -206,17 +206,17 @@ bool    ChanHit::writeVariable(Stream &out, const String &var)
             timeStr.set("-");
         strcpy(buf, timeStr.cstr());
     }else if (var == "isFirewalled")
-        sprintf(buf, "%d", firewalled?1:0);
+        snprintf(buf, _countof(buf), "%d", firewalled?1:0);
     else if (var == "version")
     {
         std::string ver = versionString();
         if (ver.empty())
-            sprintf(buf, "-");
+            snprintf(buf, _countof(buf), "-");
         else
-            sprintf(buf, "%s", ver.c_str());
+            snprintf(buf, _countof(buf), "%s", ver.c_str());
     }
     else if (var == "tracker")
-        sprintf(buf, "%d", tracker);
+        snprintf(buf, _countof(buf), "%d", tracker);
     else
         return false;
 

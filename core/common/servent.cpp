@@ -2287,7 +2287,7 @@ void Servent::sendRawMetaChannel(int interval)
                                     title.convertTo(String::T_META);
                                     url.convertTo(String::T_META);
 
-                                    sprintf(tmp, "StreamTitle='%s';StreamUrl='%s';", title.cstr(), url.cstr());
+                                    snprintf(tmp, _countof(tmp), "StreamTitle='%s';StreamUrl='%s';", title.cstr(), url.cstr());
                                     int len = ((strlen(tmp) + 15+1) / 16);
                                     sock->writeChar(len);
                                     sock->write(tmp, len*16);
@@ -2575,7 +2575,7 @@ bool    Servent::writeVariable(Stream &s, const String &var)
         if (sock)
         {
             unsigned int tot = sock->bytesInPerSec() + sock->bytesOutPerSec();
-            sprintf(buf, "%.1f", BYTES_TO_KBPS(tot));
+            snprintf(buf, _countof(buf), "%.1f", BYTES_TO_KBPS(tot));
         }else
             strcpy(buf, "0.0");
     }else if (var == "bitrateAvg")
@@ -2583,7 +2583,7 @@ bool    Servent::writeVariable(Stream &s, const String &var)
         if (sock)
         {
             unsigned int tot = sock->stat.bytesInPerSecAvg() + sock->stat.bytesOutPerSecAvg();
-            sprintf(buf, "%.1f", BYTES_TO_KBPS(tot));
+            snprintf(buf, _countof(buf), "%.1f", BYTES_TO_KBPS(tot));
         }else
             strcpy(buf, "0.0");
     }else if (var == "uptime")
@@ -2598,19 +2598,19 @@ bool    Servent::writeVariable(Stream &s, const String &var)
     {
         float ctime = (float)(sys->getTime()-lastConnect);
         if (var == "gnet.packetsIn")
-            sprintf(buf, "%d", gnuStream.packetsIn);
+            snprintf(buf, _countof(buf), "%d", gnuStream.packetsIn);
         else if (var == "gnet.packetsInPerSec")
-            sprintf(buf, "%.1f", ctime>0?((float)gnuStream.packetsIn)/ctime:0);
+            snprintf(buf, _countof(buf), "%.1f", ctime>0?((float)gnuStream.packetsIn)/ctime:0);
         else if (var == "gnet.packetsOut")
-            sprintf(buf, "%d", gnuStream.packetsOut);
+            snprintf(buf, _countof(buf), "%d", gnuStream.packetsOut);
         else if (var == "gnet.packetsOutPerSec")
-            sprintf(buf, "%.1f", ctime>0?((float)gnuStream.packetsOut)/ctime:0);
+            snprintf(buf, _countof(buf), "%.1f", ctime>0?((float)gnuStream.packetsOut)/ctime:0);
         else if (var == "gnet.normQueue")
-            sprintf(buf, "%d", outPacketsNorm.numPending());
+            snprintf(buf, _countof(buf), "%d", outPacketsNorm.numPending());
         else if (var == "gnet.priQueue")
-            sprintf(buf, "%d", outPacketsPri.numPending());
+            snprintf(buf, _countof(buf), "%d", outPacketsPri.numPending());
         else if (var == "gnet.flowControl")
-            sprintf(buf, "%d", flowControl?1:0);
+            snprintf(buf, _countof(buf), "%d", flowControl?1:0);
         else if (var == "gnet.routeTime")
         {
             int nr = seenIDs.numUsed();

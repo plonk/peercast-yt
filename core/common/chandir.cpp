@@ -205,35 +205,35 @@ bool ChannelDirectory::writeChannelVariable(Stream& out, const String& varName, 
     ChannelEntry& ch = m_channels[index];
 
     if (varName == "name") {
-        sprintf(buf, "%s", ch.name.c_str());
+        snprintf(buf, _countof(buf), "%s", ch.name.c_str());
     } else if (varName == "id") {
         ch.id.toStr(buf);
     } else if (varName == "bitrate") {
-        sprintf(buf, "%d", ch.bitrate);
+        snprintf(buf, _countof(buf), "%d", ch.bitrate);
     } else if (varName == "contentTypeStr") {
-        sprintf(buf, "%s", ch.contentTypeStr.c_str());
+        snprintf(buf, _countof(buf), "%s", ch.contentTypeStr.c_str());
     } else if (varName == "desc") {
-        sprintf(buf, "%s", ch.desc.c_str());
+        snprintf(buf, _countof(buf), "%s", ch.desc.c_str());
     } else if (varName == "genre") {
-        sprintf(buf, "%s", ch.genre.c_str());
+        snprintf(buf, _countof(buf), "%s", ch.genre.c_str());
     } else if (varName == "url") {
-        sprintf(buf, "%s", ch.url.c_str());
+        snprintf(buf, _countof(buf), "%s", ch.url.c_str());
     } else if (varName == "tip") {
-        sprintf(buf, "%s", ch.tip.c_str());
+        snprintf(buf, _countof(buf), "%s", ch.tip.c_str());
     } else if (varName == "encodedName") {
-        sprintf(buf, "%s", ch.encodedName.c_str());
+        snprintf(buf, _countof(buf), "%s", ch.encodedName.c_str());
     } else if (varName == "uptime") {
-        sprintf(buf, "%s", ch.uptime.c_str());
+        snprintf(buf, _countof(buf), "%s", ch.uptime.c_str());
     } else if (varName == "numDirects") {
-        sprintf(buf, "%d", ch.numDirects);
+        snprintf(buf, _countof(buf), "%d", ch.numDirects);
     } else if (varName == "numRelays") {
-        sprintf(buf, "%d", ch.numRelays);
+        snprintf(buf, _countof(buf), "%d", ch.numRelays);
     } else if (varName == "chatUrl") {
-        sprintf(buf, "%s", ch.chatUrl().c_str());
+        snprintf(buf, _countof(buf), "%s", ch.chatUrl().c_str());
     } else if (varName == "statsUrl") {
-        sprintf(buf, "%s", ch.statsUrl().c_str());
+        snprintf(buf, _countof(buf), "%s", ch.statsUrl().c_str());
     } else if (varName == "isPlayable") {
-        sprintf(buf, "%d", ch.id.isSet());
+        snprintf(buf, _countof(buf), "%d", ch.id.isSet());
     } else {
         return false;
     }

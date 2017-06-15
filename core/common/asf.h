@@ -44,7 +44,7 @@ public:
 
     void toString(String &s)
     {
-        sprintf(s.data, "%X-%X-%X-%02X%02X%02X%02X%02X%02X%02X%02X",
+        snprintf(s.data, _countof(s.data), "%X-%X-%X-%02X%02X%02X%02X%02X%02X%02X%02X",
             data1, data2, data3,
             data4[0], data4[1], data4[2], data4[3],
             data4[4], data4[5], data4[6], data4[7]);

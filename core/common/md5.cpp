@@ -307,7 +307,7 @@ std::string hexdigest(std::string str)
     char charbuf[33];
     for (int i = 0; i < 16; i++)
     {
-        std::sprintf(charbuf + i*2, "%02x", outbuf[i]);
+        std::snprintf(charbuf + i*2, _countof(charbuf) - i * 2, "%02x", outbuf[i]);
     }
 
     return charbuf;

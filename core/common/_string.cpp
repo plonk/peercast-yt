@@ -73,15 +73,15 @@ void String::setFromStopwatch(unsigned int t)
     day = (t/86400);
 
     if (day)
-        std::sprintf(data, "%d day, %d hour", day, hour);
+        std::snprintf(data, _countof(data), "%d day, %d hour", day, hour);
     else if (hour)
-        std::sprintf(data, "%d hour, %d min", hour, min);
+        std::snprintf(data, _countof(data), "%d hour, %d min", hour, min);
     else if (min)
-        std::sprintf(data, "%d min, %d sec", min, sec);
+        std::snprintf(data, _countof(data), "%d min, %d sec", min, sec);
     else if (sec)
-        std::sprintf(data, "%d sec", sec);
+        std::snprintf(data, _countof(data), "%d sec", sec);
     else
-        std::sprintf(data, "-");
+        std::snprintf(data, _countof(data), "-");
 
     type = T_ASCII;
 }
@@ -263,7 +263,7 @@ void String::ASCII2HTML(const char *in)
             *op++ = c;
         }else
         {
-            std::sprintf(op, "&#x%02X;", (int)c);
+            std::snprintf(op, MAX_LEN - (op - data), "&#x%02X;", (int)c);
             op += 6;
         }
         if (op >= oe)
@@ -289,7 +289,7 @@ void String::ASCII2ESC(const char *in, bool safe)
             if (safe)
                 *op++ = '%';
             *op = 0;
-            std::sprintf(op, "%02X", (int)c);
+            std::snprintf(op, MAX_LEN - (op - data), "%02X", (int)c);
             op += 2;
         }
         if (op >= oe)

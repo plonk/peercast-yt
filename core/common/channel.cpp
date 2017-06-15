@@ -1331,7 +1331,7 @@ void Channel::getStreamPath(char *str)
 
     getIDStr(idStr);
 
-    sprintf(str, "/stream/%s%s", idStr, info.getTypeExt());
+    snprintf(str, 288, "/stream/%s%s", idStr, info.getTypeExt());
 }
 
 // -----------------------------------
@@ -1369,13 +1369,13 @@ bool Channel::writeVariable(Stream &out, const String &var)
         strcpy(buf, utf8.cstr());
     }else if (var == "bitrate")
     {
-        sprintf(buf, "%d", info.bitrate);
+        snprintf(buf, _countof(buf), "%d", info.bitrate);
     }else if (var == "srcrate")
     {
         if (sourceData)
         {
             unsigned int tot = sourceData->getSourceRate();
-            sprintf(buf, "%.0f", BYTES_TO_KBPS(tot));
+            snprintf(buf, _countof(buf), "%.0f", BYTES_TO_KBPS(tot));
         }else
             strcpy(buf, "0");
     }else if (var == "genre")
@@ -1418,19 +1418,19 @@ bool Channel::writeVariable(Stream &out, const String &var)
         strcpy(buf, s.c_str());
     }
     else if (var == "ext")
-        sprintf(buf, "%s", info.getTypeExt());
+        snprintf(buf, _countof(buf), "%s", info.getTypeExt());
     else if (var == "localRelays")
-        sprintf(buf, "%d", localRelays());
+        snprintf(buf, _countof(buf), "%d", localRelays());
     else if (var == "localListeners")
-        sprintf(buf, "%d", localListeners());
+        snprintf(buf, _countof(buf), "%d", localListeners());
     else if (var == "totalRelays")
-        sprintf(buf, "%d", totalRelays());
+        snprintf(buf, _countof(buf), "%d", totalRelays());
     else if (var == "totalListeners")
-        sprintf(buf, "%d", totalListeners());
+        snprintf(buf, _countof(buf), "%d", totalListeners());
     else if (var == "status")
-        sprintf(buf, "%s", getStatusStr());
+        snprintf(buf, _countof(buf), "%s", getStatusStr());
     else if (var == "keep")
-        sprintf(buf, "%s", stayConnected?"Yes":"No");
+        snprintf(buf, _countof(buf), "%s", stayConnected?"Yes":"No");
     else if (var == "id")
         info.id.toStr(buf);
     else if (var.startsWith("track."))
@@ -1449,7 +1449,7 @@ bool Channel::writeVariable(Stream &out, const String &var)
         utf8.convertTo(String::T_UNICODE);
         strcpy(buf, utf8.cstr());
     }else if (var == "contactURL")
-        sprintf(buf, "%s", info.url.cstr());
+        snprintf(buf, _countof(buf), "%s", info.url.cstr());
     else if (var == "streamPos")
         strcpy(buf, str::group_digits(std::to_string(streamPos), ",").c_str());
     else if (var == "sourceType")
@@ -1516,11 +1516,11 @@ bool Channel::writeVariable(Stream &out, const String &var)
     }else if (var == "numHits")
     {
         ChanHitList *chl = chanMgr->findHitListByID(info.id);
-        sprintf(buf, "%d", (chl) ? chl->numHits() : 0);
+        snprintf(buf, _countof(buf), "%d", (chl) ? chl->numHits() : 0);
     }else if (var == "authToken")
-        sprintf(buf, "%s", chanMgr->authToken(info.id).c_str());
+        snprintf(buf, _countof(buf), "%s", chanMgr->authToken(info.id).c_str());
     else if (var == "plsExt")
-        sprintf(buf, "%s", info.getPlayListExt());
+        snprintf(buf, _countof(buf), "%s", info.getPlayListExt());
     else
         return false;
 

@@ -108,7 +108,7 @@ std::string rfc1123Time(time_t t)
     gmtime_s(&tm, &t);
 #endif
     strftime(fmt, sizeof(fmt), "%%s, %d %%s %Y %H:%M:%S GMT", &tm);
-    std::snprintf(buf, sizeof(buf), fmt, daysOfWeek[tm.tm_wday], monthNames[tm.tm_mon]);
+    std::snprintf(buf, _countof(buf), fmt, daysOfWeek[tm.tm_wday], monthNames[tm.tm_mon]);
 
     return buf;
 }
@@ -517,7 +517,7 @@ std::string escape_javascript(const std::string& input)
             char buf[3];
 
             res += "\\x";
-            sprintf(buf, "%02hhX", c);
+            snprintf(buf, _countof(buf), "%02hhX", c);
             res += buf;
         } else
             res += c;

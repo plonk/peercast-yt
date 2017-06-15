@@ -186,7 +186,7 @@ void USys::openURL( const char* url )
 void USys::callLocalURL(const char *str, int port)
 {
     char cmd[512];
-    sprintf(cmd, "http://localhost:%d/%s", port, str);
+    snprintf(cmd, _countof(cmd), "http://localhost:%d/%s", port, str);
     openURL( cmd );
 }
 

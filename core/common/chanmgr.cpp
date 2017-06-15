@@ -314,18 +314,18 @@ bool ChanMgr::writeVariable(Stream &out, const String &var)
 {
     char buf[1024];
     if (var == "numHitLists")
-        sprintf(buf, "%d", numHitLists());
+        snprintf(buf, _countof(buf), "%d", numHitLists());
 
     else if (var == "numChannels")
-        sprintf(buf, "%d", numChannels());
+        snprintf(buf, _countof(buf), "%d", numChannels());
     else if (var == "djMessage")
         strcpy(buf, broadcastMsg.cstr());
     else if (var == "icyMetaInterval")
-        sprintf(buf, "%d", icyMetaInterval);
+        snprintf(buf, _countof(buf), "%d", icyMetaInterval);
     else if (var == "maxRelaysPerChannel")
-        sprintf(buf, "%d", maxRelaysPerChannel);
+        snprintf(buf, _countof(buf), "%d", maxRelaysPerChannel);
     else if (var == "hostUpdateInterval")
-        sprintf(buf, "%d", hostUpdateInterval);
+        snprintf(buf, _countof(buf), "%d", hostUpdateInterval);
     else if (var == "broadcastID")
         broadcastID.toStr(buf);
     else
@@ -774,7 +774,7 @@ void ChanMgr::playChannel(ChanInfo &info)
 {
     char str[128], fname[256], idStr[128];
 
-    sprintf(str, "http://localhost:%d", servMgr->serverHost.port);
+    snprintf(str, _countof(str), "http://localhost:%d", servMgr->serverHost.port);
     info.id.toStr(idStr);
 
     PlayList::TYPE type;
@@ -784,15 +784,15 @@ void ChanMgr::playChannel(ChanInfo &info)
         type = PlayList::T_ASX;
         // WMP seems to have a bug where it doesn`t re-read asx files if they have the same name
         // so we prepend the channel id to make it unique - NOTE: should be deleted afterwards.
-        sprintf(fname, "%s/%s.asx", peercastApp->getPath(), idStr);
+        snprintf(fname, _countof(fname), "%s/%s.asx", peercastApp->getPath(), idStr);
     }else if (info.contentType == ChanInfo::T_OGM)
     {
         type = PlayList::T_RAM;
-        sprintf(fname, "%s/play.ram", peercastApp->getPath());
+        snprintf(fname, _countof(fname), "%s/play.ram", peercastApp->getPath());
     }else
     {
         type = PlayList::T_SCPLS;
-        sprintf(fname, "%s/play.pls", peercastApp->getPath());
+        snprintf(fname, _countof(fname), "%s/play.pls", peercastApp->getPath());
     }
 
     PlayList *pls = new PlayList(type, 1);

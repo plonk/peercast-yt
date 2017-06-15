@@ -37,7 +37,7 @@ class GeneralException : public std::exception
 public:
     GeneralException(const char *m, int e = 0)
     {
-        snprintf(msg, sizeof(msg), "%s", m);
+        snprintf(msg, _countof(msg), "%s", m);
         err = e;
     }
 

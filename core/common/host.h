@@ -108,14 +108,14 @@ public:
 
     void    IPtoStr(char *str)
     {
-        sprintf(str, "%d.%d.%d.%d", (ip>>24)&0xff, (ip>>16)&0xff, (ip>>8)&0xff, (ip)&0xff);
+        snprintf(str, 16, "%d.%d.%d.%d", (ip>>24)&0xff, (ip>>16)&0xff, (ip>>8)&0xff, (ip)&0xff);
     }
 
     ::String IPtoStr();
 
     void    toStr(char *str)
     {
-        sprintf(str, "%d.%d.%d.%d:%d", (ip>>24)&0xff, (ip>>16)&0xff, (ip>>8)&0xff, (ip)&0xff, port);
+        snprintf(str, 22, "%d.%d.%d.%d:%d", (ip>>24)&0xff, (ip>>16)&0xff, (ip>>8)&0xff, (ip)&0xff, port);
     }
 
     std::string str(bool withPort = true)
