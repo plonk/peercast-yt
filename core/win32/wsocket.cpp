@@ -48,8 +48,6 @@ void WSAClientSocket::init()
 // --------------------------------------------------
 bool ClientSocket::getHostname(char *str,unsigned int ip)
 {
-    HOSTENT *he;
-
     ip = htonl(ip);
 
     struct sockaddr_in sa;
