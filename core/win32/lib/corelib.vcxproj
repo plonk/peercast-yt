@@ -1,0 +1,232 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{8970094E-C51A-468A-B7EB-E73D31576D06}</ProjectGuid>
+    <RootNamespace>corelib</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\common\asf.h" />
+    <ClInclude Include="..\..\common\atom.h" />
+    <ClInclude Include="..\..\common\cgi.h" />
+    <ClInclude Include="..\..\common\chandir.h" />
+    <ClInclude Include="..\..\common\chanhit.h" />
+    <ClInclude Include="..\..\common\chaninfo.h" />
+    <ClInclude Include="..\..\common\chanmgr.h" />
+    <ClInclude Include="..\..\common\channel.h" />
+    <ClInclude Include="..\..\common\common.h" />
+    <ClInclude Include="..\..\common\config.h" />
+    <ClInclude Include="..\..\common\critsec.h" />
+    <ClInclude Include="..\..\common\cstream.h" />
+    <ClInclude Include="..\..\common\dechunker.h" />
+    <ClInclude Include="..\..\common\defer.h" />
+    <ClInclude Include="..\..\common\env.h" />
+    <ClInclude Include="..\..\common\flv.h" />
+    <ClInclude Include="..\..\common\gnuid.h" />
+    <ClInclude Include="..\..\common\gnutella.h" />
+    <ClInclude Include="..\..\common\host.h" />
+    <ClInclude Include="..\..\common\html.h" />
+    <ClInclude Include="..\..\common\http.h" />
+    <ClInclude Include="..\..\common\httppush.h" />
+    <ClInclude Include="..\..\common\icy.h" />
+    <ClInclude Include="..\..\common\id.h" />
+    <ClInclude Include="..\..\common\inifile.h" />
+    <ClInclude Include="..\..\common\jis.h" />
+    <ClInclude Include="..\..\common\jrpc.h" />
+    <ClInclude Include="..\..\common\json.hpp" />
+    <ClInclude Include="..\..\common\LUrlParser.h" />
+    <ClInclude Include="..\..\common\mapper.h" />
+    <ClInclude Include="..\..\common\matroska.h" />
+    <ClInclude Include="..\..\common\md5.h" />
+    <ClInclude Include="..\..\common\mkv.h" />
+    <ClInclude Include="..\..\common\mms.h" />
+    <ClInclude Include="..\..\common\mp3.h" />
+    <ClInclude Include="..\..\common\notif.h" />
+    <ClInclude Include="..\..\common\nsv.h" />
+    <ClInclude Include="..\..\common\ogg.h" />
+    <ClInclude Include="..\..\common\pcp.h" />
+    <ClInclude Include="..\..\common\peercast.h" />
+    <ClInclude Include="..\..\common\playlist.h" />
+    <ClInclude Include="..\..\common\public.h" />
+    <ClInclude Include="..\..\common\regexp.h" />
+    <ClInclude Include="..\..\common\servent.h" />
+    <ClInclude Include="..\..\common\servmgr.h" />
+    <ClInclude Include="..\..\common\socket.h" />
+    <ClInclude Include="..\..\common\sstream.h" />
+    <ClInclude Include="..\..\common\stats.h" />
+    <ClInclude Include="..\..\common\str.h" />
+    <ClInclude Include="..\..\common\stream.h" />
+    <ClInclude Include="..\..\common\sys.h" />
+    <ClInclude Include="..\..\common\template.h" />
+    <ClInclude Include="..\..\common\uri.h" />
+    <ClInclude Include="..\..\common\url.h" />
+    <ClInclude Include="..\..\common\varwriter.h" />
+    <ClInclude Include="..\..\common\version2.h" />
+    <ClInclude Include="..\..\common\wmhttp.h" />
+    <ClInclude Include="..\..\common\xml.h" />
+    <ClInclude Include="..\..\common\_string.h" />
+    <ClInclude Include="..\wsocket.h" />
+    <ClInclude Include="..\wsys.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\common\cgi.cpp" />
+    <ClCompile Include="..\..\common\chandir.cpp" />
+    <ClCompile Include="..\..\common\chanhit.cpp" />
+    <ClCompile Include="..\..\common\chaninfo.cpp" />
+    <ClCompile Include="..\..\common\chanmgr.cpp" />
+    <ClCompile Include="..\..\common\channel.cpp" />
+    <ClCompile Include="..\..\common\cstream.cpp" />
+    <ClCompile Include="..\..\common\dechunker.cpp" />
+    <ClCompile Include="..\..\common\env.cpp" />
+    <ClCompile Include="..\..\common\flv.cpp" />
+    <ClCompile Include="..\..\common\gnuid.cpp" />
+    <ClCompile Include="..\..\common\gnutella.cpp" />
+    <ClCompile Include="..\..\common\host.cpp" />
+    <ClCompile Include="..\..\common\html.cpp" />
+    <ClCompile Include="..\..\common\http.cpp" />
+    <ClCompile Include="..\..\common\httppush.cpp" />
+    <ClCompile Include="..\..\common\icy.cpp" />
+    <ClCompile Include="..\..\common\inifile.cpp" />
+    <ClCompile Include="..\..\common\jis.cpp" />
+    <ClCompile Include="..\..\common\jrpc.cpp" />
+    <ClCompile Include="..\..\common\LUrlParser.cpp" />
+    <ClCompile Include="..\..\common\mapper.cpp" />
+    <ClCompile Include="..\..\common\md5.cpp" />
+    <ClCompile Include="..\..\common\mkv.cpp" />
+    <ClCompile Include="..\..\common\mms.cpp" />
+    <ClCompile Include="..\..\common\mp3.cpp" />
+    <ClCompile Include="..\..\common\notif.cpp" />
+    <ClCompile Include="..\..\common\nsv.cpp" />
+    <ClCompile Include="..\..\common\ogg.cpp" />
+    <ClCompile Include="..\..\common\pcp.cpp" />
+    <ClCompile Include="..\..\common\peercast.cpp" />
+    <ClCompile Include="..\..\common\playlist.cpp" />
+    <ClCompile Include="..\..\common\public.cpp" />
+    <ClCompile Include="..\..\common\regexp.cpp" />
+    <ClCompile Include="..\..\common\servent.cpp" />
+    <ClCompile Include="..\..\common\servhs.cpp" />
+    <ClCompile Include="..\..\common\servmgr.cpp" />
+    <ClCompile Include="..\..\common\socket.cpp" />
+    <ClCompile Include="..\..\common\sstream.cpp" />
+    <ClCompile Include="..\..\common\stats.cpp" />
+    <ClCompile Include="..\..\common\str.cpp" />
+    <ClCompile Include="..\..\common\stream.cpp" />
+    <ClCompile Include="..\..\common\sys.cpp" />
+    <ClCompile Include="..\..\common\template.cpp" />
+    <ClCompile Include="..\..\common\uri.cpp" />
+    <ClCompile Include="..\..\common\url.cpp" />
+    <ClCompile Include="..\..\common\wmhttp.cpp" />
+    <ClCompile Include="..\..\common\xml.cpp" />
+    <ClCompile Include="..\..\common\_string.cpp" />
+    <ClCompile Include="..\wsocket.cpp" />
+    <ClCompile Include="..\wsys.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
