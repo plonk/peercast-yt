@@ -1004,7 +1004,7 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr)
         else if (strcmp(curr, "htmlPath") == 0)
         {
             strcpy_s(servMgr->htmlPath, _countof(servMgr->htmlPath), "html/");
-            strcat(servMgr->htmlPath, arg);
+            strcat_s(servMgr->htmlPath, _countof(servMgr->htmlPath), arg);
         }else if (strcmp(curr, "djmsg") == 0)
         {
             String msg;

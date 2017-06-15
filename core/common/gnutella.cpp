@@ -526,8 +526,8 @@ GnuStream::R_TYPE GnuStream::processPacket(GnuPacket &in, Servent *serv, GnuID &
                 {
                     char flstr[64];
                     flstr[0]=0;
-                    if (hit.firewalled) strcat(flstr, "Push, ");
-                    if (hit.tracker) strcat(flstr, "Tracker, ");
+                    if (hit.firewalled) strcat_s(flstr, _countof(flstr), "Push, ");
+                    if (hit.tracker) strcat_s(flstr, _countof(flstr), "Tracker, ");
 
 #if 0
                     if ((spd == 0) && (!isBroadcastHit))

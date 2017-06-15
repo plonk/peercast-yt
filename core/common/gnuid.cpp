@@ -74,7 +74,7 @@ void GnuID::toStr(char *str) const
         unsigned char ipb = id[i];
 
         snprintf(tmp, _countof(tmp), "%02X", ipb);
-        strcat(str, tmp);
+        strcat_s(str, 33, tmp);
     }
 }
 

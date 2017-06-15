@@ -507,7 +507,7 @@ void String::clear()
 void String::append(const char *s)
 {
     if ((strlen(s)+strlen(data)) < (MAX_LEN-1))
-        strcat(data, s);
+        strcat_s(data, _countof(data), s);
 }
 
 // -----------------------------------
