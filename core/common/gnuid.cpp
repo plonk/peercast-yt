@@ -15,6 +15,7 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
+#include <algorithm>
 #include "gnuid.h" // Host std::string
 #include "sys.h" // sys
 
