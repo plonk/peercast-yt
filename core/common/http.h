@@ -262,6 +262,16 @@ public:
         return res;
     }
 
+    static HTTPResponse serverError(const std::string& message = "")
+    {
+        HTTPResponse res(500, {{"Conetnt-Type", "text/html"}});
+        if (!message.empty())
+            res.body = message;
+        else
+            res.body = "Internal server error";
+        return res;
+    }
+
     static HTTPResponse redirectTo(const std::string& url)
     {
         HTTPResponse res(302, {{"Location",url}});

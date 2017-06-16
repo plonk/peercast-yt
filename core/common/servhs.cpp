@@ -163,12 +163,8 @@ bool Servent::hasValidAuthToken(const std::string& requestFilename)
 }
 
 // -----------------------------------
-#include <unistd.h>
+#include "subprog.h"
 #include "env.h"
-
-#include <sys/types.h>
-#include <sys/wait.h>
-
 #include "regexp.h"
 
 void Servent::invokeCGIScript(HTTP &http, const char* fn)
@@ -205,108 +201,64 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
     if (filePath.empty())
         throw HTTPException(HTTP_SC_NOTFOUND, 404);
 
-    int pipefd[2];
-    if (pipe(pipefd) == -1)
-    {
-        char buf[1024];
-        strerror_r(errno, buf, sizeof(buf));
-        LOG_ERROR("pipe: %s", buf);
+    Subprogram script(filePath, env.env());
 
+    script.start();
+    Stream& stream = script.inputStream();
+
+    HTTPHeaders headers;
+    int statusCode = 200;
+    try {
+        Regexp headerPattern("\\A([A-Za-z\\-]+):\\s*(.*)\\z");
+        std::string line;
+        while ((line = stream.readLine()) != "")
+        {
+            auto caps = headerPattern.exec(line);
+            if (caps.size() == 0)
+            {
+                LOG_ERROR("Invalid header: \"%s\"", line.c_str());
+                continue;
+            }
+            if (str::capitalize(caps[1]) == "Status")
+                statusCode = atoi(caps[2].c_str());
+            else
+                headers.set(caps[1], caps[2]);
+        }
+        if (headers.get("Location") != "")
+            statusCode = 302; // Found
+    } catch (StreamException&)
+    {
         throw HTTPException(HTTP_SC_SERVERERROR, 500);
     }
 
-    pid_t pid = fork();
-    if (pid == 0)
+    std::string body;
+    try
     {
-        // 子プロセス。
+        while (true)
+            body += stream.readChar();
+    } catch (StreamException&) {}
 
-        // パイプの読み出し側を閉じる。
-        close(pipefd[0]);
+    int status;
+    bool normal = script.wait(&status);
 
-        // 書き込み側を標準出力として複製する。
-        close(1);
-        dup(pipefd[1]);
-
-        close(pipefd[1]);
-
-        int r = execle(filePath.c_str(),
-                       filePath.c_str(), NULL,
-                       env.env());
-        if (r == -1)
-        {
-            // char buf[1024];
-            // strerror_r(errno, buf, sizeof(buf));
-
-            char *buf = strerror(errno);
-            LOG_ERROR("execle: %s: %s", filePath.c_str(), buf);
-
-            printf("Status: 500 Internal Server Error\n");
-            printf("Content-Type: text/plain\n\n");
-
-            printf("execle: %s: %s", filePath.c_str(), buf);
-            fflush(stdout);
-            _exit(0);
-        }
+    if (!normal)
+    {
+        LOG_ERROR("child process (PID %d) terminated abnormally", script.pid());
+        http.send(HTTPResponse::serverError(
+                      str::format("child process (PID %d) terminated abnormally", script.pid())));
     }else
     {
-        // 親プロセス。
-
-        // 書き込み側を閉じる。
-        close(pipefd[1]);
-
-        FileStream stream;
-        stream.openReadOnly(pipefd[0]);
-
-        HTTPHeaders headers;
-        int statusCode = 200;
-        try {
-            Regexp headerPattern("\\A([A-Za-z\\-]+):\\s*(.*)\\z");
-            std::string line;
-            while ((line = stream.readLine()) != "")
-            {
-                auto caps = headerPattern.exec(line);
-                if (caps.size() == 0)
-                {
-                    LOG_ERROR("Invalid header: \"%s\"", line.c_str());
-                    continue;
-                }
-                if (str::capitalize(caps[1]) == "Status")
-                    statusCode = atoi(caps[2].c_str());
-                else
-                    headers.set(caps[1], caps[2]);
-            }
-            if (headers.get("Location") != "")
-                statusCode = 302; // Found
-        } catch (StreamException&)
+        LOG_DEBUG("child process (PID %d) exited normally (status %d)", script.pid(), status);
+        if (status != 0)
         {
-            throw HTTPException(HTTP_SC_SERVERERROR, 500);
+            http.send(HTTPResponse::serverError(
+                          str::format("child process (PID %d) exited with status %d", script.pid(), status)));
+        }else
+        {
+            HTTPResponse res(statusCode, headers);
+            res.body = body;
+            http.send(res);
         }
-
-        std::string body;
-        try
-        {
-            while (true)
-                body += stream.readChar();
-        } catch (StreamException&) {}
-
-        int status;
-        waitpid(pid, &status, 0);
-        if (WIFEXITED(status))
-        {
-            LOG_DEBUG("child process (PID %d) exited normally (status %d)", pid, WEXITSTATUS(status));
-            if (WEXITSTATUS(status) != 0)
-                throw HTTPException(HTTP_SC_SERVERERROR, 500);
-        }
-        else
-        {
-            LOG_ERROR("child process (PID %d) terminated abnormally", pid);
-            throw HTTPException(HTTP_SC_SERVERERROR, 500);
-        }
-
-        HTTPResponse res(statusCode, headers);
-        res.body = body;
-
-        http.send(res);
     }
 }
 
