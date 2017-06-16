@@ -2246,7 +2246,7 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
         sprintf(buf, "%d", publicDirectoryEnabled);
     }else if (var == "genrePrefix")
     {
-        snprintf(buf, sizeof(buf), genrePrefix.c_str());
+        snprintf(buf, sizeof(buf), "%s", genrePrefix.c_str());
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);
