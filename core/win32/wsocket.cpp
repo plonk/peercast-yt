@@ -247,11 +247,11 @@ void WSAClientSocket::checkTimeout2(bool r, bool w)
     else
         tp = NULL;
 
-    int r = select(NULL, &read_fds, &write_fds, NULL, tp);
+    int ret = select(NULL, &read_fds, &write_fds, NULL, tp);
 
-    if (r == 0)
+    if (ret == 0)
         throw TimeoutException();
-    else if (r == SOCKET_ERROR)
+    else if (ret == SOCKET_ERROR)
         throw SockException("select failed.");
 }
 
