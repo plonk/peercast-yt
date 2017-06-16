@@ -5,8 +5,8 @@
 # され、libmingwex.a 内の定義と衝突するので未定義にする。
 
 CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -DWIN32 -D_REENTRANT -D__USE_MINGW_ANSI_STDIO=0 $(INCLUDES)
-LDFLAGS = -static-libgcc -static-libstdc++ -pthread
-LIBS = -lws2_32
+LDFLAGS = -static-libgcc -static-libstdc++ -pthread -L../../Onigmo/.libs
+LIBS = -Wl,-Bstatic -lonigmo -Wl,-Bdynamic -lws2_32
 
 OS = $(shell uname -s | tr A-Z a-z)
 ARCH = $(shell uname -p | tr A-Z a-z)
@@ -14,7 +14,7 @@ ARCH = $(shell uname -p | tr A-Z a-z)
 DISTARCHIVE = peercast-yt-$(OS)-$(ARCH).tar.gz
 AR = ar
 
-INCLUDES = -I../../core -I../../core/common
+INCLUDES = -I../../core -I../../core/common -I../../Onigmo
 
 TARGET = peercast.exe
 CORE = ../../core
