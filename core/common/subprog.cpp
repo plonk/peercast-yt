@@ -99,7 +99,7 @@ bool Subprogram::start()
 
         int r = execle(m_name.c_str(),
                        m_name.c_str(), NULL,
-                       m_env.env();
+                       m_env.env());
         if (r == -1)
         {
             // char buf[1024];
