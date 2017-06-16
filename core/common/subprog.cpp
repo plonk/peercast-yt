@@ -1,36 +1,77 @@
+#ifdef _UNIX
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#endif
+
+#ifdef WIN32
+#include <io.h>
+#include <fcntl.h>
+#endif
 
 #include "subprog.h"
 #include "env.h"
 
-Subprogram::Subprogram(const std::string& name, const char **env)
+Subprogram::Subprogram(const std::string& name, Environment& env)
     : m_name(name)
     , m_pid(-1)
+    , m_env(env)
 {
-    size_t len = 0;
-    while (env[len])
-        len++;
-
-    m_env = (char**) calloc(len + 1, sizeof(char *));
-
-    for (int i = 0; i < len; i++)
-    {
-        m_env[i] = (char*) malloc(strlen(env[i]) + 1);
-        strcpy(m_env[i], env[i]);
-    }
 }
 
 Subprogram::~Subprogram()
 {
-    for (int i = 0; m_env[i]; i++)
-        free(m_env[i]);
-
-    free(m_env);
 }
 
 // プログラムの実行を開始。
+#ifdef WIN32
+bool Subprogram::start()
+{
+    SECURITY_ATTRIBUTES sa;
+
+    sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+    sa.bInheritHandle = TRUE;
+    sa.lpSecurityDescriptor = NULL;
+
+    HANDLE stdoutRead;
+    HANDLE stdoutWrite;
+
+    CreatePipe(&stdoutRead, &stdoutWrite, &sa, 0);
+    SetHandleInformation(stdoutRead, HANDLE_FLAG_INHERIT, 0);
+
+    PROCESS_INFORMATION procInfo;
+    STARTUPINFO startupInfo;
+    bool success;
+
+    ZeroMemory(&procInfo, sizeof(PROCESS_INFORMATION));
+    ZeroMemory(&startupInfo, sizeof(STARTUPINFO));
+    startupInfo.cb = sizeof(STARTUPINFO);
+    startupInfo.hStdError = stdoutWrite;
+    startupInfo.hStdOutput = stdoutWrite;
+    startupInfo.dwFlags |= STARTF_USESTDHANDLES;
+    // 標準入力のハンドル指定しなくていいのかな？
+
+    success = CreateProcess(NULL,
+                            (char*) ("ruby " + m_name).c_str(),
+                            NULL,
+                            NULL,
+                            TRUE,
+                            0,
+                            (PVOID) m_env.windowsEnvironmentBlock().c_str(),
+                            NULL,
+                            &startupInfo,
+                            &procInfo);
+
+    m_processHandle = procInfo.hProcess;
+
+    int fd = _open_osfhandle((intptr_t) stdoutRead, _O_RDONLY);
+    m_inputStream.openReadOnly(fd);
+
+    CloseHandle(stdoutWrite);
+    CloseHandle(procInfo.hThread);
+}
+#endif
+#ifdef _UNIX
 bool Subprogram::start()
 {
     int pipefd[2];
@@ -58,7 +99,7 @@ bool Subprogram::start()
 
         int r = execle(m_name.c_str(),
                        m_name.c_str(), NULL,
-                       m_env);
+                       m_env.env();
         if (r == -1)
         {
             // char buf[1024];
@@ -82,9 +123,18 @@ bool Subprogram::start()
     }
     return true;
 }
+#endif
 
 // プログラムにより終了ステータスが返された場合は true を返し、ステー
 // タスが *status にセットされる。
+#ifdef WIN32
+bool Subprogram::wait(int* status)
+{
+    *status = 0;
+    return true;
+}
+#endif
+#ifdef _UNIX
 bool Subprogram::wait(int* status)
 {
     int r;
@@ -100,6 +150,7 @@ bool Subprogram::wait(int* status)
         return false;
     }
 }
+#endif
 
 // プログラムの出力を読み出すストリーム。
 Stream& Subprogram::inputStream()

@@ -3,11 +3,16 @@
 
 #include <string>
 #include "stream.h"
+#include "env.h"
+
+#ifdef WIN32
+#include <windows.h>
+#endif
 
 class Subprogram
 {
 public:
-    Subprogram(const std::string& name, const char **);
+    Subprogram(const std::string& name, Environment& env);
     ~Subprogram();
 
     bool    start();
@@ -15,10 +20,14 @@ public:
     Stream& inputStream();
     int     pid();
 
-    std::string m_name;
-    char**      m_env;
-    FileStream  m_inputStream;
-    int         m_pid;
+    std::string  m_name;
+    Environment& m_env;
+    FileStream   m_inputStream;
+    int          m_pid;
+
+#ifdef WIN32
+    HANDLE m_processHandle;
+#endif
 };
 
 #endif

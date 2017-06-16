@@ -88,3 +88,16 @@ char const ** Environment::env()
     m_env[m_vars.size()] = NULL;
     return m_env;
 }
+
+std::string Environment::windowsEnvironmentBlock()
+{
+    std::string buf;
+
+    for (auto& entry : m_vars)
+    {
+        buf += entry;
+        buf += '\0';
+    }
+    buf += '\0';
+    return buf;
+}

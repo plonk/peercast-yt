@@ -186,24 +186,22 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
     env.set("DOCUMENT_ROOT", peercastApp->getPath());
     env.set("QUERY_STRING", req.queryString);
     env.set("REQUEST_METHOD", "GET");
-    // env.set("REQUEST_SCHEME", "");
     env.set("REQUEST_URI", req.url);
-    // env.set("REMOTE_ADDR", "");
-    // env.set("REMOTE_PORT", "");
-    // env.set("SERVER_ADDR", "");
-    // env.set("SERVER_ADMIN", "");
-    // env.set("SERVER_NAME", "");
-    // env.set("SERVER_PORT", "");
     env.set("SERVER_PROTOCOL", "HTTP/1.0");
     env.set("SERVER_SOFTWARE", PCX_AGENT);
+
     env.set("PATH", getenv("PATH"));
+    // Windows で Ruby が名前引きをするのに必要なので SYSTEMROOT を通す。
+    if (getenv("SYSTEMROOT"))
+        env.set("SYSTEMROOT", getenv("SYSTEMROOT"));
 
     if (filePath.empty())
         throw HTTPException(HTTP_SC_NOTFOUND, 404);
 
-    Subprogram script(filePath, env.env());
+    Subprogram script(filePath, env);
 
     script.start();
+    LOG_DEBUG("script started (pid = %d)", script.pid());
     Stream& stream = script.inputStream();
 
     HTTPHeaders headers;
@@ -213,6 +211,7 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
         std::string line;
         while ((line = stream.readLine()) != "")
         {
+            LOG_DEBUG("Line: %s", line.c_str());
             auto caps = headerPattern.exec(line);
             if (caps.size() == 0)
             {
@@ -228,6 +227,7 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
             statusCode = 302; // Found
     } catch (StreamException&)
     {
+        LOG_ERROR("CGI script did not finish the headers");
         throw HTTPException(HTTP_SC_SERVERERROR, 500);
     }
 
