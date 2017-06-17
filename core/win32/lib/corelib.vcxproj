@@ -220,7 +220,6 @@
     <ClCompile Include="..\..\common\servent.cpp" />
     <ClCompile Include="..\..\common\servhs.cpp" />
     <ClCompile Include="..\..\common\servmgr.cpp" />
-    <ClCompile Include="..\..\common\socket.cpp" />
     <ClCompile Include="..\..\common\sstream.cpp" />
     <ClCompile Include="..\..\common\stats.cpp" />
     <ClCompile Include="..\..\common\str.cpp" />
