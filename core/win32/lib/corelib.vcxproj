@@ -169,6 +169,7 @@
     <ClInclude Include="..\..\common\stats.h" />
     <ClInclude Include="..\..\common\str.h" />
     <ClInclude Include="..\..\common\stream.h" />
+    <ClInclude Include="..\..\common\subprog.h" />
     <ClInclude Include="..\..\common\sys.h" />
     <ClInclude Include="..\..\common\template.h" />
     <ClInclude Include="..\..\common\uri.h" />
@@ -224,6 +225,7 @@
     <ClCompile Include="..\..\common\stats.cpp" />
     <ClCompile Include="..\..\common\str.cpp" />
     <ClCompile Include="..\..\common\stream.cpp" />
+    <ClCompile Include="..\..\common\subprog.cpp" />
     <ClCompile Include="..\..\common\sys.cpp" />
     <ClCompile Include="..\..\common\template.cpp" />
     <ClCompile Include="..\..\common\uri.cpp" />

@@ -206,6 +206,9 @@
     <ClInclude Include="..\wsys.h">
       <Filter>Win32 Includes</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\subprog.h">
+      <Filter>Core Includes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\common\cgi.cpp">
@@ -360,6 +363,9 @@
     </ClCompile>
     <ClCompile Include="..\wsys.cpp">
       <Filter>Win32 Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\subprog.cpp">
+      <Filter>Core Source</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
