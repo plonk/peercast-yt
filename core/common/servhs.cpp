@@ -190,10 +190,18 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
     env.set("SERVER_PROTOCOL", "HTTP/1.0");
     env.set("SERVER_SOFTWARE", PCX_AGENT);
 
-    env.set("PATH", getenv("PATH"));
+    char *env_val;
+    size_t env_len;
+
+    _dupenv_s(&env_val, &env_len, "PATH");
+    env.set("PATH", env_val);
+    free(env_val);
+
+    _dupenv_s(&env_val, &env_len, "SYSTEMROOT");
     // Windows で Ruby が名前引きをするのに必要なので SYSTEMROOT を通す。
-    if (getenv("SYSTEMROOT"))
-        env.set("SYSTEMROOT", getenv("SYSTEMROOT"));
+    if (env_val)
+        env.set("SYSTEMROOT", env_val);
+    free(env_val);
 
     if (filePath.empty())
         throw HTTPException(HTTP_SC_NOTFOUND, 404);
