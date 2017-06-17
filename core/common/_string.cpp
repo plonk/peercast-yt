@@ -150,14 +150,14 @@ int String::base64WordToChars(char *out, const char *input)
     else
         *out++ = 0;
 
-    return out-start;
+    return static_cast<int>(out-start);
 }
 
 // -----------------------------------
 void String::BASE642ASCII(const char *input)
 {
     char *out = data;
-    int len = strlen(input);
+    size_t len = strlen(input);
 
     while (len >= 4)
     {
@@ -486,7 +486,7 @@ void String::convertTo(TYPE t)
 // -----------------------------------
 void String::setUnquote(const char *p, TYPE t)
 {
-    int slen = strlen(p);
+    size_t slen = strlen(p);
     if (slen > 2)
     {
         if (slen >= MAX_LEN) slen = MAX_LEN;

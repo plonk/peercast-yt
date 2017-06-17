@@ -43,8 +43,8 @@ static void termArgs(char *str)
 {
     if (str)
     {
-        int slen = strlen(str);
-        for (int i=0; i<slen; i++)
+        size_t slen = strlen(str);
+        for (size_t i=0; i<slen; i++)
             if (str[i]=='&') str[i] = 0;
     }
 }
@@ -137,7 +137,7 @@ void Servent::handshakeJRPC(HTTP &http)
     http.writeLineF("%s %s", HTTP_HS_CONTENT, "application/json");
     http.writeLine("");
 
-    http.write(response.c_str(), response.size());
+    http.write(response.c_str(), static_cast<int>(response.size()));
 }
 
 // -----------------------------------
@@ -172,7 +172,7 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
     HTTPRequest req;
     try {
         req = http.getRequest();
-    } catch (GeneralException& e) // request not ready
+    } catch (GeneralException&) // request not ready
     {
         throw HTTPException(HTTP_SC_BADREQUEST, 400);
     }
@@ -345,8 +345,8 @@ void Servent::handshakeGET(HTTP &http)
 
         if (pwdArg && songArg)
         {
-            int slen = strlen(fn);
-            for (int i=0; i<slen; i++)
+            size_t slen = strlen(fn);
+            for (size_t i=0; i<slen; i++)
                 if (fn[i]=='&') fn[i] = 0;
 
             Channel *c=chanMgr->channel;

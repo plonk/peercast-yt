@@ -388,7 +388,7 @@ ClientSocket *WSAClientSocket::accept()
     int fromSize = sizeof(sockaddr_in);
     sockaddr_in from;
 
-    int conSock = ::accept(sockNum,(sockaddr *)&from,&fromSize);
+    SOCKET conSock = ::accept(sockNum,(sockaddr *)&from,&fromSize);
 
     if (conSock ==  INVALID_SOCKET)
         return NULL;
@@ -444,5 +444,5 @@ bool    WSAClientSocket::readReady(int timeoutMilliseconds)
     FD_ZERO(&read_fds);
     FD_SET(sockNum, &read_fds);
 
-    return select(sockNum+1, &read_fds, NULL, NULL, &timeout) == 1;
+    return select(static_cast<int>(sockNum)+1, &read_fds, NULL, NULL, &timeout) == 1;
 }

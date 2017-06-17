@@ -83,7 +83,7 @@ std::vector<std::string> Environment::keys() const
 char const ** Environment::env()
 {
     m_env = (decltype(m_env)) realloc(m_env, (m_vars.size()+1) * sizeof(char *));
-    for (int i = 0; i < m_vars.size(); i++)
+    for (size_t i = 0; i < m_vars.size(); i++)
         m_env[i] = m_vars[i].c_str();
     m_env[m_vars.size()] = NULL;
     return m_env;

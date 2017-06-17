@@ -58,7 +58,7 @@ public:
     void    checkTimeout2(bool,bool);
 
     unsigned int writeCnt;
-    unsigned int sockNum;
+    SOCKET sockNum;
     struct sockaddr_in remoteAddr;
 };
 

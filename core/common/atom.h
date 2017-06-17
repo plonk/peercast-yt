@@ -87,7 +87,7 @@ public:
 
     void writeString(ID4 id, const char *p)
     {
-        writeBytes(id, p, strlen(p)+1);
+        writeBytes(id, p, static_cast<int>(strlen(p))+1);
     }
 
     ID4 read(int &numc, int &dlen)

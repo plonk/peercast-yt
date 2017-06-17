@@ -47,7 +47,7 @@ int  Dechunker::read(void *buf, int aSize)
                 m_buffer.pop_front();
                 size--;
             }
-            int r = p - (char*)buf;
+            int r = static_cast<int>(p - (char*)buf);
             updateTotals(r, 0);
             return r;
         } else {
@@ -59,7 +59,7 @@ int  Dechunker::read(void *buf, int aSize)
 
 void Dechunker::getNextChunk()
 {
-    size_t size = 0;
+    int size = 0;
 
     // チャンクサイズを読み込む。
     while (true)

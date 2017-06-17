@@ -291,11 +291,11 @@ public:
             else {
                 if (strcmp(key, "audiodatarate") == 0) {
                     in.readChar();
-                    bitrate += readDouble(in);
+                    bitrate += static_cast<int>(readDouble(in));
                 }
                 else if (strcmp(key, "videodatarate") == 0) {
                     in.readChar();
-                    bitrate += readDouble(in);
+                    bitrate += static_cast<int>(readDouble(in));
                 }
                 else {
                     read(in);

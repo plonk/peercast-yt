@@ -42,11 +42,11 @@ std::vector<std::string> Regexp::exec(const std::string str)
     start = (decltype(start)) str.c_str();
     range = end;
 
-    r = onig_search(m_reg,
+    r = static_cast<int>(onig_search(m_reg,
                     (OnigUChar*) str.c_str(), end,
                     start, range,
                     region,
-                    ONIG_OPTION_NONE);
+                    ONIG_OPTION_NONE));
 
     if (r >= 0) {
         std::vector<std::string> res;

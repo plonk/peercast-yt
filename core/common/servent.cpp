@@ -2288,7 +2288,7 @@ void Servent::sendRawMetaChannel(int interval)
                                     url.convertTo(String::T_META);
 
                                     snprintf(tmp, _countof(tmp), "StreamTitle='%s';StreamUrl='%s';", title.cstr(), url.cstr());
-                                    int len = ((strlen(tmp) + 15+1) / 16);
+                                    int len = ((static_cast<int>(strlen(tmp)) + 15+1) / 16);
                                     sock->writeChar(len);
                                     sock->write(tmp, len*16);
 

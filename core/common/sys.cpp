@@ -127,11 +127,11 @@ void LogBuffer::write(const char *str, TYPE t)
 {
     lock.on();
 
-    unsigned int len = strlen(str);
+    size_t len = strlen(str);
     int cnt=0;
     while (len)
     {
-        unsigned int rlen = len;
+        size_t rlen = len;
         if (rlen > lineLen)
             rlen = lineLen;
 

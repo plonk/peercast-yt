@@ -56,7 +56,7 @@ unsigned int WSys::getTime()
 {
     time_t ltime;
     time( &ltime );
-    return ltime;
+    return static_cast<unsigned>(ltime);
 }
 
 // ---------------------------------

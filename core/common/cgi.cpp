@@ -444,10 +444,10 @@ std::string unescape_html(const std::string& input)
                 continue;
             } else if (isDecimal(ref))
             {
-                codepoint = std::stoll(ref.substr(1));
+                codepoint = static_cast<uint32_t>(std::stoll(ref.substr(1)));
             } else if (isHexadecimal(ref))
             {
-                codepoint = std::stoll(ref.substr(2), 0, 16);
+                codepoint = static_cast<uint32_t>(std::stoll(ref.substr(2), 0, 16));
             } else
             {
                 try

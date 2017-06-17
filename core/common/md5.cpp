@@ -301,7 +301,7 @@ std::string hexdigest(std::string str)
     unsigned char outbuf[16];
 
     MD5_Init(&ctx);
-    MD5_Update(&ctx, str.data(), str.size());
+    MD5_Update(&ctx, str.data(), static_cast<unsigned long>(str.size()));
     MD5_Final(outbuf, &ctx);
 
     char charbuf[33];

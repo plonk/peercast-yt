@@ -28,7 +28,7 @@ int  StringStream::read(void *buf, int count)
     auto end = std::copy(m_buffer.begin() + m_pos,
                          m_buffer.begin() + (std::min)(m_pos + count, m_buffer.size()),
                          static_cast<char*>(buf));
-    auto bytesRead = end - static_cast<char*>(buf);
+    int bytesRead = static_cast<int>(end - static_cast<char*>(buf));
     m_pos += bytesRead;
     return bytesRead;
 }
@@ -63,12 +63,12 @@ void StringStream::seekTo(int newPos)
 
 int  StringStream::getPosition()
 {
-    return m_pos;
+    return static_cast<int>(m_pos);
 }
 
 int  StringStream::getLength()
 {
-    return m_buffer.size();
+    return static_cast<int>(m_buffer.size());
 }
 
 std::string StringStream::str()

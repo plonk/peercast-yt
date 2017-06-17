@@ -678,7 +678,7 @@ void    Template::readForeach(Stream &in, Stream *outp, int loop)
                 {
                     in.seekTo(start);
                     currentElement = coll[i];
-                    readTemplate(in, outp, i); // loop
+                    readTemplate(in, outp, static_cast<int>(i)); // loop
                 }
                 currentElement = outer;
             }

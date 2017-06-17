@@ -201,7 +201,7 @@ void FLVTagBuffer::rateLimit(uint32_t timestamp)
     }else if (diff > 0)
     {
         //LOG_DEBUG("Sleeping %d s", (int)diff);
-        sys->sleep(diff * 1000);
+        sys->sleep(static_cast<int>(diff) * 1000);
     }
 }
 

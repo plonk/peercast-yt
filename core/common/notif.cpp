@@ -52,7 +52,7 @@ int NotificationBuffer::numNotifications()
 {
     CriticalSection cs(lock);
 
-    return notifications.size();
+    return static_cast<int>(notifications.size());
 }
 
 NotificationBuffer::Entry NotificationBuffer::getNotification(int index)

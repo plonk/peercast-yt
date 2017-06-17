@@ -76,13 +76,13 @@ ChannelDirectory::ChannelDirectory()
 int ChannelDirectory::numChannels()
 {
     CriticalSection cs(m_lock);
-    return m_channels.size();
+    return static_cast<int>(m_channels.size());
 }
 
 int ChannelDirectory::numFeeds()
 {
     CriticalSection cs(m_lock);
-    return m_feeds.size();
+    return static_cast<int>(m_feeds.size());
 }
 
 // index.txt を指す URL である url からチャンネルリストを読み込み、out
@@ -143,7 +143,7 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
                 text += line;
                 text += '\n';
             }
-        } catch (EOFException& e) {
+        } catch (EOFException&) {
             // end of body reached.
         }
 

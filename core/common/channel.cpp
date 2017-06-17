@@ -1489,7 +1489,7 @@ bool Channel::writeVariable(Stream &out, const String &var)
         if (lastWritten < 5)
             time = "< 5 sec";
         else
-            time.setFromStopwatch(lastWritten);
+            time.setFromStopwatch(static_cast<unsigned>(lastWritten));
         auto stat = rawData.getStatistics();
         auto& lens = stat.packetLengths;
         double byterate = (sourceData) ? sourceData->getSourceRateAvg() : 0.0;
