@@ -10,9 +10,6 @@ using namespace std;
 using namespace str;
 
 #ifdef WIN32
-extern "C" {
-    char *_fullpath(char*, const char*, size_t);
-}
 #  ifndef PATH_MAX
 #    define PATH_MAX 4096
 #  endif
