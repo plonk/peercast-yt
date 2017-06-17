@@ -25,6 +25,8 @@ public:
     // 環境はオブジェクト内部に作成され、ポインターが返される。オブジェ
     // クトに変更が加えられるとデータは無効化される。
     char const ** env();
+
+    std::string windowsEnvironmentBlock();
 };
 
 #endif

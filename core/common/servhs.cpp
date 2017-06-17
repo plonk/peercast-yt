@@ -122,7 +122,7 @@ void Servent::handshakeJRPC(HTTP &http)
     try {
         http.stream->read(body.get(), content_length);
         body.get()[content_length] = '\0';
-    }catch (SockException&)
+    }catch (EOFException&)
     {
         // body too short
         throw HTTPException(HTTP_SC_BADREQUEST, 400);
@@ -160,6 +160,106 @@ bool Servent::hasValidAuthToken(const std::string& requestFilename)
     }
 
     return false;
+}
+
+// -----------------------------------
+#include "subprog.h"
+#include "env.h"
+#include "regexp.h"
+
+void Servent::invokeCGIScript(HTTP &http, const char* fn)
+{
+    HTTPRequest req;
+    try {
+        req = http.getRequest();
+    } catch (GeneralException& e) // request not ready
+    {
+        throw HTTPException(HTTP_SC_BADREQUEST, 400);
+    }
+    FileSystemMapper fs("/cgi-bin", (std::string) peercastApp->getPath() + "cgi-bin");
+    std::string filePath = fs.toLocalFilePath(req.path);
+    Environment env;
+
+    env.set("SCRIPT_NAME", req.path);
+    env.set("SCRIPT_FILENAME", filePath);
+    env.set("GATEWAY_INTERFACE", "CGI/1.1");
+    env.set("DOCUMENT_ROOT", peercastApp->getPath());
+    env.set("QUERY_STRING", req.queryString);
+    env.set("REQUEST_METHOD", "GET");
+    env.set("REQUEST_URI", req.url);
+    env.set("SERVER_PROTOCOL", "HTTP/1.0");
+    env.set("SERVER_SOFTWARE", PCX_AGENT);
+
+    env.set("PATH", getenv("PATH"));
+    // Windows で Ruby が名前引きをするのに必要なので SYSTEMROOT を通す。
+    if (getenv("SYSTEMROOT"))
+        env.set("SYSTEMROOT", getenv("SYSTEMROOT"));
+
+    if (filePath.empty())
+        throw HTTPException(HTTP_SC_NOTFOUND, 404);
+
+    Subprogram script(filePath, env);
+
+    script.start();
+    LOG_DEBUG("script started (pid = %d)", script.pid());
+    Stream& stream = script.inputStream();
+
+    HTTPHeaders headers;
+    int statusCode = 200;
+    try {
+        Regexp headerPattern("\\A([A-Za-z\\-]+):\\s*(.*)\\z");
+        std::string line;
+        while ((line = stream.readLine()) != "")
+        {
+            LOG_DEBUG("Line: %s", line.c_str());
+            auto caps = headerPattern.exec(line);
+            if (caps.size() == 0)
+            {
+                LOG_ERROR("Invalid header: \"%s\"", line.c_str());
+                continue;
+            }
+            if (str::capitalize(caps[1]) == "Status")
+                statusCode = atoi(caps[2].c_str());
+            else
+                headers.set(caps[1], caps[2]);
+        }
+        if (headers.get("Location") != "")
+            statusCode = 302; // Found
+    } catch (StreamException&)
+    {
+        LOG_ERROR("CGI script did not finish the headers");
+        throw HTTPException(HTTP_SC_SERVERERROR, 500);
+    }
+
+    std::string body;
+    try
+    {
+        while (true)
+            body += stream.readChar();
+    } catch (StreamException&) {}
+
+    int status;
+    bool normal = script.wait(&status);
+
+    if (!normal)
+    {
+        LOG_ERROR("child process (PID %d) terminated abnormally", script.pid());
+        http.send(HTTPResponse::serverError(
+                      str::format("child process (PID %d) terminated abnormally", script.pid())));
+    }else
+    {
+        LOG_DEBUG("child process (PID %d) exited normally (status %d)", script.pid(), status);
+        if (status != 0)
+        {
+            http.send(HTTPResponse::serverError(
+                          str::format("child process (PID %d) exited with status %d", script.pid(), status)));
+        }else
+        {
+            HTTPResponse res(statusCode, headers);
+            res.body = body;
+            http.send(res);
+        }
+    }
 }
 
 // -----------------------------------
