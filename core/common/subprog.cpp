@@ -69,6 +69,8 @@ bool Subprogram::start()
 
     CloseHandle(stdoutWrite);
     CloseHandle(procInfo.hThread);
+
+    return true;
 }
 #endif
 #ifdef _UNIX
