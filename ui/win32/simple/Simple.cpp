@@ -474,16 +474,26 @@ void	APICALL MyPeercastApp::channelUpdate(ChanInfo *info)
 			if (ServMgr::NT_TRACKINFO & peercastInst->getNotifyMask())
 			{
 				trackTitle=tmp;
+				String name,track;
+				name = info->name;
+				track = tmp;
+				name.convertTo(String::T_SJIS);
+				track.convertTo(String::T_SJIS);
 				clearChannelPopup();
-				channelPopup(info->name.cstr(),trackTitle.cstr());
+				channelPopup(name.cstr(),track.cstr());
 			}
 		} else if (!info->comment.isSame(channelComment))
 		{
 			if (ServMgr::NT_BROADCASTERS & peercastInst->getNotifyMask())
 			{
 				channelComment = info->comment;
+				String name,comment;
+				name = info->name;
+				comment = info->comment;
+				name.convertTo(String::T_SJIS);
+				comment.convertTo(String::T_SJIS);
 				clearChannelPopup();
-				channelPopup(info->name.cstr(),channelComment.cstr());
+				channelPopup(name.cstr(),comment.cstr());
 			}
 		}
 
