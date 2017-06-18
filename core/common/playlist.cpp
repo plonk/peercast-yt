@@ -116,7 +116,7 @@ void PlayList::writeASX(Stream &out)
     for (int i=0; i<numURLs; i++)
     {
         out.writeLine("<ENTRY>");
-        out.writeLineF("<REF href=\"mmsh%s\" />", urls[i].cstr() + 4);
+        out.writeLineF("<REF href=\"%s\" />", urls[i].cstr());
         out.writeLine("</ENTRY>");
     }
     out.writeLine("</ASX>");

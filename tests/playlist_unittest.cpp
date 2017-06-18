@@ -90,7 +90,7 @@ TEST_F(PlayListFixture, write_asx)
     asx.write(mem);
     ASSERT_STREQ("<ASX Version=\"3.0\">\r\n"
                  "<ENTRY>\r\n"
-                 "<REF href=\"mmsh://127.0.0.1:7144/stream/01234567890123456789012345678901.wmv?auth=44d5299e57ad9274fee7960a9fa60bfd\" />\r\n"
+                 "<REF href=\"http://127.0.0.1:7144/stream/01234567890123456789012345678901.wmv?auth=44d5299e57ad9274fee7960a9fa60bfd\" />\r\n"
                  "</ENTRY>\r\n"
                  "</ASX>\r\n",
                  mem.str().c_str());
