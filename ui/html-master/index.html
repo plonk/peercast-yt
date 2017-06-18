@@ -13,103 +13,101 @@
   <TABLE align=center border=0>
     <TBODY>
       <TR align=middle>
-        <TD vAlign=top> <TABLE width="100%" align=center border=0>
-          <TBODY>
-            <TR align=middle bgColor=#ccc>
+        <TD vAlign=top>
+          <TABLE class="table-panel" width="100%" align=center border=0>
+            <TR align=middle>
               <TD colSpan=2 class="normal"><B>{#Information}</B></TD>
             </TR>
-            <TR align=left bgColor=#eee class="normal">
+            <TR align=left>
               <TD>{#Server IP}</TD>
-              <TD bgcolor="#eee">{$servMgr.serverIP}</TD>
+              <TD>{$servMgr.serverIP}</TD>
             </TR>
-            <TR align=left bgColor=#ddd class="normal">
+            <TR align=left>
               <TD>{#Uptime}</TD>
               <TD>{$servMgr.uptime}</TD>
             </TR>
-            <TR align=left bgColor=#eee class="normal">
+            <TR align=left>
               <TD>{#Channel cache}</TD>
               <TD>{$chanMgr.numHitLists} - <a href="/admin?cmd=clear&amp;hitlists=1">{#Clear}</a></TD>
             </TR>
-            <TR align=left bgColor=#ddd class="normal">
+            <TR align=left>
               <TD>{#Firewalled}</TD>
               <TD>{@if servMgr.firewallKnown} {@if servMgr.isFirewalled}
                 {#Yes} {@else} {#No} {@end} {@else} {#Unknown} {@end} </TD>
             </TR>
-            <TR align=left bgColor=#eee class="normal">
+            <TR align=left>
               <TD>{#XML stats}</TD>
-              <TD bgcolor="#eee"><A href="/admin?cmd=viewxml">{#View}</A></TD>
+              <TD><A href="/admin?cmd=viewxml">{#View}</A></TD>
             </TR>
-            <tr align=left bgColor=#ddd class="normal">
+            <tr align=left>
               <td>{#YP Address}</td>
               <td>{$servMgr.ypAddress}</td>
             </tr>
-            <TR align=left bgColor=#eee class="normal">
+            <TR align=left>
               <TD>{#Host options}</TD>
               <TD>{@if servMgr.isRoot}{#Root}{@end} {@if servMgr.isPrivate}{#Licensed}{@end} {@if servMgr.forceYP}{#ForceYP}{@end}</TD>
             </TR>
-          </TBODY>
-        </TABLE>
-        <table width="100%" class="normal">
-          <tr bgcolor="#ccc">
-            <th colspan="2">{#Channel Feeds}</th>
-          </tr>
+          </TABLE>
+          <table class="table-panel" width="100%" class="normal">
+            <tr>
+              <th colspan="2">{#Channel Feeds}</th>
+            </tr>
 
-          {@loop servMgr.numChannelFeeds}
-          <tr bgcolor="{@if loop.indexEven}#ddd{@else}#eee{@end}">
-            <td>{$loop.channelFeed.url}</td>
-            <td align="center">{$loop.channelFeed.status}</td>
-          </tr>
-          {@end}
-        </table>
+            {@loop servMgr.numChannelFeeds}
+            <tr>
+              <td>{$loop.channelFeed.url}</td>
+              <td align="center">{$loop.channelFeed.status}</td>
+            </tr>
+            {@end}
+          </table>
         </TD>
-        <TD vAlign=top> <TABLE width="100%" align=center border=0>
-          <TBODY>
-            <TR align=middle bgcolor="#ccc">
+        <TD vAlign=top>
+          <TABLE class="table-panel" width="100%" align=center border=0>
+            <TR align=middle>
               <TD colSpan=4 class="normal"><B>{#Bandwidth}</B></TD>
             </TR>
             <TR align=left class="normal">
-              <TD bgcolor="#eee"></TD>
-              <TH bgcolor="#eee" style="text-align: center; width: 2.5em">{#In}</TH>
-              <TH bgcolor="#eee" style="text-align: center; width: 2.5em">{#Out}</TH>
+              <TD></TD>
+              <TH>{#In}</TH>
+              <TH>{#Out}</TH>
             </TR>
             <TR align=left class="normal">
-              <TD bgcolor="#eee">{#Internet (Kbit/s)}</TD>
-              <TD bgcolor="#eee" class="numeric">{$stats.wanInPerSec}</TD>
-              <TD bgcolor="#eee" class="numeric">{$stats.wanOutPerSec}</TD>
+              <TD>{#Internet (Kbit/s)}</TD>
+              <TD>{$stats.wanInPerSec}</TD>
+              <TD>{$stats.wanOutPerSec}</TD>
             </TR>
             <TR align=left class="normal">
-              <TD bgcolor="#ddd">{#Total (Kbit/s)}</TD>
-              <TD bgcolor="#ddd" class="numeric">{$stats.totalInPerSec}</TD>
-              <TD bgcolor="#ddd" class="numeric">{$stats.totalOutPerSec}</TD>
+              <TD>{#Total (Kbit/s)}</TD>
+              <TD>{$stats.totalInPerSec}</TD>
+              <TD>{$stats.totalOutPerSec}</TD>
             </TR>
-          </TBODY>
-        </TABLE>
-        <table width="100%" border="0">
-          <tr bgcolor="#ccc">
-            <td colspan="2"><div align="center" class="normal"><strong>{#Connections}</strong></div></td>
-          </tr>
-          <tr bgcolor="#ddd">
-            <td width="66%" bgcolor="#ddd" class="normal">{#Direct}
-            </td>
-            <td width="34%" class="normal">{$servMgr.numDirect}</td>
-          </tr>
-          <tr bgcolor="#eee">
-            <td bgcolor="#eee" class="normal">{#Relay}</td>
-            <td class="normal">{$servMgr.numRelays}</td>
-          </tr>
-          <tr bgcolor="#ddd">
-            <td class="normal">{#CIN / COUT}</td>
-            <td bgcolor="#ddd" class="normal">{$servMgr.numCIN} / {$servMgr.numCOUT}</td>
-          </tr>
-          <tr bgcolor="#eee">
-            <td class="normal">{#Incoming}</td>
-            <td bgcolor="#ddd" class="normal">{$servMgr.numIncoming}</td>
-          </tr>
-          <tr bgcolor="#ddd">
-            <td class="normal">{#Port} {$servMgr.serverPort1} / {$servMgr.serverPort2}</td>
-            <td class="normal">{$servMgr.numActive1} / {$servMgr.numActive2}</td>
-          </tr>
-        </table>
+          </TABLE>
+          <table class="table-panel" width="100%" border="0">
+            <tr>
+              <td colspan="2"><div align="center" class="normal"><strong>{#Connections}</strong></div></td>
+            </tr>
+            <tr>
+              <td width="66%">{#Direct}
+              </td>
+              <td width="34%" class="normal">{$servMgr.numDirect}</td>
+            </tr>
+            <tr>
+              <td>{#Relay}</td>
+              <td class="normal">{$servMgr.numRelays}</td>
+            </tr>
+            <tr>
+              <td class="normal">{#CIN / COUT}</td>
+              <td>{$servMgr.numCIN} / {$servMgr.numCOUT}</td>
+            </tr>
+            <tr>
+              <td class="normal">{#Incoming}</td>
+              <td>{$servMgr.numIncoming}</td>
+            </tr>
+            <tr>
+              <td class="normal">{#Port} {$servMgr.serverPort1} / {$servMgr.serverPort2}</td>
+              <td class="normal">{$servMgr.numActive1} / {$servMgr.numActive2}</td>
+            </tr>
+          </table>
         </TD>
       </TR>
     </TBODY>

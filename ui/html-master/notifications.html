@@ -5,15 +5,15 @@
 
 <div class="reloader" data-url="notifications.html?fragment=content" data-interval="{$servMgr.refreshHTML}">
   {@fragment content}
-  <table width="100%" class="normal">
-    <tr bgcolor="#ccc">
+  <table width="100%" class="table-panel">
+    <tr>
       <th style="width: 14em">{#Time}</th>
       <th style="width: 3em">{#Type}</th>
       <th>{#Message}</th>
     </tr>
 
     {@loop notificationBuffer.numNotifications}
-    <tr bgcolor="{@if loop.indexEven}#ddd{@else}#eee{@end}">
+    <tr>
       <td>
         {$loop.notification.time}
       </td>
