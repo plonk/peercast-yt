@@ -190,7 +190,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 				p++;
 			}
 			if (*p)
-				strncpy_s(tmpURL,_countof(tmpURL),p,sizeof(tmpURL)-1);
+				strncpy_s(tmpURL,_countof(tmpURL),p,_TRUNCATE);
 		}
 	}
 
@@ -423,13 +423,12 @@ void channelPopup(const char *title, const char *msg)
 	both.append(")");
 
 	trayIcon.uFlags = NIF_ICON|NIF_TIP;
-	strncpy_s(trayIcon.szTip,_countof(trayIcon.szTip), both.cstr(),sizeof(trayIcon.szTip)-1);
-	trayIcon.szTip[sizeof(trayIcon.szTip)-1]=0;
+	strncpy_s(trayIcon.szTip,_countof(trayIcon.szTip), both.cstr(),_TRUNCATE);
 
 	trayIcon.uFlags |= 16;
 	trayIcon.uTimeoutOrVersion = 10000;
-	strncpy_s(trayIcon.szInfo,_countof(trayIcon.szInfo),msg,sizeof(trayIcon.szInfo)-1);
-	strncpy_s(trayIcon.szInfoTitle,_countof(trayIcon.szInfoTitle),title,sizeof(trayIcon.szInfoTitle)-1);
+	strncpy_s(trayIcon.szInfo,_countof(trayIcon.szInfo),msg,_TRUNCATE);
+	strncpy_s(trayIcon.szInfoTitle,_countof(trayIcon.szInfoTitle),title,_TRUNCATE);
 		
 	Shell_NotifyIcon(NIM_MODIFY, (NOTIFYICONDATA*)&trayIcon);
 }
@@ -438,8 +437,8 @@ void clearChannelPopup()
 {
 	trayIcon.uFlags = NIF_ICON|16;
 	trayIcon.uTimeoutOrVersion = 10000;
-    strncpy_s(trayIcon.szInfo,_countof(trayIcon.szInfo),"",sizeof(trayIcon.szInfo)-1);
-	strncpy_s(trayIcon.szInfoTitle,_countof(trayIcon.szInfoTitle),"",sizeof(trayIcon.szInfoTitle)-1);
+    strncpy_s(trayIcon.szInfo,_countof(trayIcon.szInfo),"",_TRUNCATE);
+	strncpy_s(trayIcon.szInfoTitle,_countof(trayIcon.szInfoTitle),"",_TRUNCATE);
 	Shell_NotifyIcon(NIM_MODIFY, (NOTIFYICONDATA*)&trayIcon);
 }
 
@@ -537,8 +536,8 @@ void	APICALL MyPeercastApp::notifyMessage(ServMgr::NOTIFY_TYPE type, const char 
 	{
 		trayIcon.uFlags |= 16;
 		trayIcon.uTimeoutOrVersion = 10000;
-		strncpy_s(trayIcon.szInfo,_countof(trayIcon.szInfo),msg,sizeof(trayIcon.szInfo)-1);
-		strncpy_s(trayIcon.szInfoTitle,_countof(trayIcon.szInfoTitle),title,sizeof(trayIcon.szInfoTitle)-1);
+		strncpy_s(trayIcon.szInfo,_countof(trayIcon.szInfo),msg,_TRUNCATE);
+		strncpy_s(trayIcon.szInfoTitle,_countof(trayIcon.szInfoTitle),title,_TRUNCATE);
 	    Shell_NotifyIcon(NIM_MODIFY, (NOTIFYICONDATA*)&trayIcon);
 	}
 }
@@ -571,7 +570,6 @@ void addRelayedChannelsMenu(HMENU cm)
 		{
 			char str[128],name[64];
 			strncpy_s(name,_countof(name),c->info.name,32);
-			name[32]=0;
 			if (strlen(c->info.name) > 32)
 				strcat_s(name,_countof(name),"...");
 
@@ -616,7 +614,6 @@ void addAllChannelsMenu(HMENU cm)
 	{
 		char str[128],name[64];
 		strncpy_s(name,_countof(name),ch->info.name,32);
-		name[32]=0;
 		if (strlen(ch->info.name) > 32)
 			strcat_s(name,_countof(name),"...");
 

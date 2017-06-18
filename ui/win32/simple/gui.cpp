@@ -243,7 +243,6 @@ THREAD_PROC showConnections(ThreadInfo *thread)
 				if (c->isActive())
 				{
 					strncpy_s(cname,_countof(cname),c->getName(),16);
-					cname[16] = 0;
 					ADDCHAN(c,"%s - %d kb/s - %s",cname,c->getBitrate(),c->getStatusStr());
 				}
 				c=c->next;
@@ -274,7 +273,6 @@ THREAD_PROC showConnections(ThreadInfo *thread)
 						if (chl->info.match(chanMgr->searchInfo))
 						{
 							strncpy_s(cname,_countof(cname),chl->info.name.cstr(),16);
-							cname[16] = 0;
 							ADDHIT(chl,"%s - %d kb/s - %d/%d",cname,chl->info.bitrate,chl->numListeners(),chl->numHits());
 						}
 					}
