@@ -585,3 +585,9 @@ String String::format(const char* fmt, ...)
 
     return result;
 }
+
+// -----------------------------------
+bool String::isValidURL()
+{
+    return (strnicmp(data, "http://", 7) == 0) || (strnicmp(data, "mailto:", 7) == 0);
+}
