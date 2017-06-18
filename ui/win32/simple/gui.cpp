@@ -82,7 +82,7 @@ void setEditStr(int id, char *str)
 void setEditInt(int id, int v)
 {
 	char str[128];
-	sprintf(str,"%d",v);
+	snprintf(str,_countof(str),"%d",v);
 	SendDlgItemMessage(guiWnd, id,WM_SETTEXT, 0, (LONG)str);
 }
 
@@ -137,7 +137,7 @@ void ADDLOG(const char *str,int id,bool sel,void *data, LogBuffer::TYPE type)
 void ADDLOG2(const char *fmt,va_list ap,int id,bool sel,void *data, LogBuffer::TYPE type)
 {
 	char str[4096];
-	vsprintf(str,fmt,ap);
+	vsnprintf(str,_countof(str),fmt,ap);
 
 	ADDLOG(str,id,sel,data,type);
 }
@@ -242,7 +242,7 @@ THREAD_PROC showConnections(ThreadInfo *thread)
 			{
 				if (c->isActive())
 				{
-					strncpy(cname,c->getName(),16);
+					strncpy_s(cname,_countof(cname),c->getName(),16);
 					cname[16] = 0;
 					ADDCHAN(c,"%s - %d kb/s - %s",cname,c->getBitrate(),c->getStatusStr());
 				}
@@ -273,7 +273,7 @@ THREAD_PROC showConnections(ThreadInfo *thread)
 					{
 						if (chl->info.match(chanMgr->searchInfo))
 						{
-							strncpy(cname,chl->info.name.cstr(),16);
+							strncpy_s(cname,_countof(cname),chl->info.name.cstr(),16);
 							cname[16] = 0;
 							ADDHIT(chl,"%s - %d kb/s - %d/%d",cname,chl->info.bitrate,chl->numListeners(),chl->numHits());
 						}
@@ -514,7 +514,7 @@ LRESULT CALLBACK GUIProc (HWND hwnd, UINT message,
 						if (sh.isValid())
 						{
 							char cmd[256];
-							sprintf(cmd,"http://localhost:%d/admin?page=broadcast",sh.port);
+							snprintf(cmd,_countof(cmd),"http://localhost:%d/admin?page=broadcast",sh.port);
 							ShellExecute(hwnd, NULL, cmd, NULL, NULL, SW_SHOWNORMAL);
 		
 						}else{
