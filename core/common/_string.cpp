@@ -22,6 +22,10 @@
 #include "jis.h"
 #include "stream.h"
 
+#ifdef WIN32
+#include "utf8.h" //JP-Patch
+#endif
+
 // -----------------------------------
 #define isSJIS(a, b) ((a >= 0x81 && a <= 0x9f || a >= 0xe0 && a <= 0xfc) && (b >= 0x40 && b <= 0x7e || b >= 0x80 && b <= 0xfc))
 #define isEUC(a) (a >= 0xa1 && a <= 0xfe)
@@ -477,6 +481,11 @@ void String::convertTo(TYPE t)
             case T_METASAFE:
                 ASCII2META(tmp.data, true);
                 break;
+#ifdef WIN32
+            case T_SJIS: //JP-EX
+                ASCII2SJIS(tmp.data);
+                break;
+#endif
         }
 
         type = t;
@@ -591,3 +600,19 @@ bool String::isValidURL()
 {
     return (strnicmp(data, "http://", 7) == 0) || (strnicmp(data, "mailto:", 7) == 0);
 }
+
+#ifdef WIN32
+// -----------------------------------
+void String::ASCII2SJIS(const char *in) //JP-EX
+{
+    char *op = data;
+    char *p;
+    if (utf8_decode(in, &p) < 0)
+    {
+        strcpy_s(op, MAX_LEN, in);
+        return;
+    }
+    strcpy_s(op, MAX_LEN, p);
+    free(p);
+}
+#endif

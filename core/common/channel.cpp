@@ -538,7 +538,15 @@ static std::string chName(ChanInfo& info)
     if (info.name.str().empty())
         return info.id.str().substr(0,7) + "...";
     else
+    {
+#ifdef WIN32
+        String newName = info.name;
+        newName.convertTo(String::T_SJIS);
+        return newName.str();
+#else
         return info.name.str();
+#endif
+    }
 }
 
 // -----------------------------------
@@ -996,11 +1004,22 @@ void Channel::updateInfo(const ChanInfo &newInfo)
 
     if (!oldComment.isSame(info.comment))
     {
+#ifdef WIN32
+        // UTF8 かも知れない文字列を Shift_JIS に変換したい。
+        String newName = info.name;
+        newName.convertTo(String::T_SJIS);
+
+        String newComment = info.comment;
+        newComment.convertTo(String::T_SJIS);
+
+        peercast::notifyMessage(ServMgr::NT_PEERCAST, newName.str() + "「" + newComment.str() + "」");
+#else
         // Shift_JIS かも知れない文字列を UTF8 に変換したい。
         String newComment = info.comment;
         newComment.convertTo(String::T_UNICODE);
 
         peercast::notifyMessage(ServMgr::NT_PEERCAST, info.name.str() + "「" + newComment.str() + "」");
+#endif
     }
 
     if (isBroadcasting())
@@ -1202,7 +1221,15 @@ int Channel::readStream(Stream &in, ChannelStream *source)
                     }else
                     {
                         if (!isReceiving())
+                        {
+#ifdef WIN32
+                            String newName = info.name;
+                            newName.convertTo(String::T_SJIS);
+                            peercast::notifyMessage(ServMgr::NT_PEERCAST, newName.str() + "を受信中です。");
+#else
                             peercast::notifyMessage(ServMgr::NT_PEERCAST, info.name.str() + "を受信中です。");
+#endif
+                        }
                         setStatus(Channel::S_RECEIVING);
                     }
                     source->updateStatus(this);
