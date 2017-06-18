@@ -114,7 +114,9 @@ void ADDLOG(const char *str,int id,bool sel,void *data, LogBuffer::TYPE type)
 			SendDlgItemMessage(guiWnd, id, LB_DELETESTRING, 0, 0);
 			num--;
 		}
-		int idx = static_cast<int>(SendDlgItemMessage(guiWnd, id, LB_ADDSTRING, 0, (LPARAM)(LPSTR)str));
+		String sjis = str;
+		sjis.convertTo(String::T_SJIS);
+		int idx = static_cast<int>(SendDlgItemMessage(guiWnd, id, LB_ADDSTRING, 0, (LPARAM)(LPSTR)sjis.cstr()));
 		SendDlgItemMessage(guiWnd, id, LB_SETITEMDATA, idx, (LPARAM)data);
 
 		if (sel)
