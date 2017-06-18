@@ -248,7 +248,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 				{
 					COPYDATASTRUCT copy;
 					copy.dwData = WM_PLAYCHANNEL;
-					copy.cbData = strlen(chanURL)+1;			// plus null term
+					copy.cbData = static_cast<DWORD>(strlen(chanURL))+1;			// plus null term
 					copy.lpData = chanURL;
 					SendMessage(oldWin,WM_COPYDATA,NULL,(LPARAM)&copy);
 				}else{
@@ -312,7 +312,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	peercastInst->quit();
 
 
-	return msg.wParam;
+	return static_cast<int>(msg.wParam);
 }
 
 
@@ -632,7 +632,7 @@ void addAllChannelsMenu(HMENU cm)
 		if (ch)
 			fl |= (ch->isPlaying()?MF_CHECKED:0);
 
-		InsertMenu(cm,0,fl,(UINT)opMenu,str);
+		InsertMenu(cm,0,fl,(UINT_PTR)opMenu,str);
 		
 		numActive++;
 
@@ -914,7 +914,7 @@ LRESULT CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message)
 	{
 		case WM_INITDIALOG:
-			SendDlgItemMessage(hDlg,IDC_ABOUTVER,WM_SETTEXT,0,(LONG)PCX_AGENT);
+			SendDlgItemMessage(hDlg,IDC_ABOUTVER,WM_SETTEXT,0,(LPARAM)PCX_AGENT);
 			return TRUE;
 
 		case WM_COMMAND:
@@ -949,14 +949,14 @@ LRESULT CALLBACK ChanInfoProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 				strcat_s(str,_countof(str)," - ");
 				strcat_s(str,_countof(str),chanInfo.track.title.cstr());
 				
-				SendDlgItemMessage(hDlg,IDC_EDIT_NAME,WM_SETTEXT,0,(LONG)chanInfo.name.cstr());
-				SendDlgItemMessage(hDlg,IDC_EDIT_PLAYING,WM_SETTEXT,0,(LONG)str);
-				SendDlgItemMessage(hDlg,IDC_EDIT_MESSAGE,WM_SETTEXT,0,(LONG)chanInfo.comment.cstr());
-				SendDlgItemMessage(hDlg,IDC_EDIT_DESC,WM_SETTEXT,0,(LONG)chanInfo.desc.cstr());
-				SendDlgItemMessage(hDlg,IDC_EDIT_GENRE,WM_SETTEXT,0,(LONG)chanInfo.genre.cstr());
+				SendDlgItemMessage(hDlg,IDC_EDIT_NAME,WM_SETTEXT,0,(LPARAM)chanInfo.name.cstr());
+				SendDlgItemMessage(hDlg,IDC_EDIT_PLAYING,WM_SETTEXT,0,(LPARAM)str);
+				SendDlgItemMessage(hDlg,IDC_EDIT_MESSAGE,WM_SETTEXT,0,(LPARAM)chanInfo.comment.cstr());
+				SendDlgItemMessage(hDlg,IDC_EDIT_DESC,WM_SETTEXT,0,(LPARAM)chanInfo.desc.cstr());
+				SendDlgItemMessage(hDlg,IDC_EDIT_GENRE,WM_SETTEXT,0,(LPARAM)chanInfo.genre.cstr());
 
 				snprintf(str,_countof(str),"%d kb/s %s",chanInfo.bitrate,ChanInfo::getTypeStr(chanInfo.contentType));
-				SendDlgItemMessage(hDlg,IDC_FORMAT,WM_SETTEXT,0,(LONG)str);
+				SendDlgItemMessage(hDlg,IDC_FORMAT,WM_SETTEXT,0,(LPARAM)str);
 
 
 				if (!chanInfo.url.isValidURL())
@@ -965,11 +965,11 @@ LRESULT CALLBACK ChanInfoProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 				Channel *ch = chanMgr->findChannelByID(chanInfo.id);
 				if (ch)
 				{
-					SendDlgItemMessage(hDlg,IDC_EDIT_STATUS,WM_SETTEXT,0,(LONG)ch->getStatusStr());
+					SendDlgItemMessage(hDlg,IDC_EDIT_STATUS,WM_SETTEXT,0,(LPARAM)ch->getStatusStr());
 					SendDlgItemMessage(hDlg, IDC_KEEP,BM_SETCHECK, ch->stayConnected, 0);
 				}else
 				{
-					SendDlgItemMessage(hDlg,IDC_EDIT_STATUS,WM_SETTEXT,0,(LONG)"OK");
+					SendDlgItemMessage(hDlg,IDC_EDIT_STATUS,WM_SETTEXT,0,(LPARAM)"OK");
 					EnableWindow(GetDlgItem(hDlg,IDC_KEEP),false);
 				}
 
