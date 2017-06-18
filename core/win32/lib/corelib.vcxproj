@@ -151,7 +151,6 @@
     <ClInclude Include="..\..\common\httppush.h" />
     <ClInclude Include="..\..\common\icy.h" />
     <ClInclude Include="..\..\common\id.h" />
-    <ClInclude Include="..\..\common\identify_encoding.h" />
     <ClInclude Include="..\..\common\inifile.h" />
     <ClInclude Include="..\..\common\jis.h" />
     <ClInclude Include="..\..\common\jrpc.h" />
@@ -183,7 +182,6 @@
     <ClInclude Include="..\..\common\template.h" />
     <ClInclude Include="..\..\common\uri.h" />
     <ClInclude Include="..\..\common\url.h" />
-    <ClInclude Include="..\..\common\utf8.h" />
     <ClInclude Include="..\..\common\varwriter.h" />
     <ClInclude Include="..\..\common\version2.h" />
     <ClInclude Include="..\..\common\wmhttp.h" />
@@ -210,7 +208,6 @@
     <ClCompile Include="..\..\common\http.cpp" />
     <ClCompile Include="..\..\common\httppush.cpp" />
     <ClCompile Include="..\..\common\icy.cpp" />
-    <ClCompile Include="..\..\common\identify_encoding.c" />
     <ClCompile Include="..\..\common\inifile.cpp" />
     <ClCompile Include="..\..\common\jis.cpp" />
     <ClCompile Include="..\..\common\jrpc.cpp" />
@@ -240,7 +237,6 @@
     <ClCompile Include="..\..\common\template.cpp" />
     <ClCompile Include="..\..\common\uri.cpp" />
     <ClCompile Include="..\..\common\url.cpp" />
-    <ClCompile Include="..\..\common\utf8.c" />
     <ClCompile Include="..\..\common\wmhttp.cpp" />
     <ClCompile Include="..\..\common\xml.cpp" />
     <ClCompile Include="..\..\common\_string.cpp" />

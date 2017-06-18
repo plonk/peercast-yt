@@ -209,12 +209,6 @@
     <ClInclude Include="..\..\common\subprog.h">
       <Filter>Core Includes</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\utf8.h">
-      <Filter>Win32 Includes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\identify_encoding.h">
-      <Filter>Win32 Includes</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\common\cgi.cpp">
@@ -369,12 +363,6 @@
     </ClCompile>
     <ClCompile Include="..\..\common\subprog.cpp">
       <Filter>Core Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\common\utf8.c">
-      <Filter>Win32 Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\common\identify_encoding.c">
-      <Filter>Win32 Source</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

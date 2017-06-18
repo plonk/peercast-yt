@@ -135,11 +135,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\core\common\identify_encoding.c" />
+    <ClCompile Include="..\..\..\core\common\utf8.c" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="Simple.cpp" />
     <ClCompile Include="StdAfx.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\core\common\identify_encoding.h" />
+    <ClInclude Include="..\..\..\core\common\utf8.h" />
     <ClInclude Include="gui.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Simple.h" />
