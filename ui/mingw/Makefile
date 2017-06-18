@@ -6,7 +6,7 @@
 
 CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -U__STRICT_ANSI__ -DWIN32 -D_REENTRANT -D__USE_MINGW_ANSI_STDIO=0 $(INCLUDES)
 LDFLAGS = -static-libgcc -static-libstdc++ -pthread -L../../Onigmo/.libs
-LIBS = -Wl,-Bstatic -lonigmo -Wl,-Bdynamic -lws2_32
+LIBS = -Wl,-Bstatic -lonigmo -Wl,-Bdynamic -lws2_32 -lShlwapi
 
 OS = $(shell uname -s | tr A-Z a-z)
 ARCH = $(shell uname -p | tr A-Z a-z)
