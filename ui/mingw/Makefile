@@ -1,10 +1,10 @@
-# WIN32: g++ �� WIN32 ���`���Ȃ����A�\�[�X�R�[�h�� WIN32 �� Windows
-# �����o���Ă���̂ł����Œ�`����B
+# WIN32: g++ は WIN32 を定義しないが、ソースコードは WIN32 で Windows
+# を検出しているのでここで定義する。
 
-# __USE_MINGW_ANSI_STDIO: ��`����Ă���� vsnprintf �� stdio.h �Œ�`
-# ����Alibmingwex.a ���̒�`�ƏՓ˂���̂Ŗ���`�ɂ���B
+# __USE_MINGW_ANSI_STDIO: 定義されていると vsnprintf が stdio.h で定義
+# され、libmingwex.a 内の定義と衝突するので未定義にする。
 
-CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -DWIN32 -D_REENTRANT -D__USE_MINGW_ANSI_STDIO=0 $(INCLUDES)
+CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -U__STRICT_ANSI__ -DWIN32 -D_REENTRANT -D__USE_MINGW_ANSI_STDIO=0 $(INCLUDES)
 LDFLAGS = -static-libgcc -static-libstdc++ -pthread -L../../Onigmo/.libs
 LIBS = -Wl,-Bstatic -lonigmo -Wl,-Bdynamic -lws2_32
 
