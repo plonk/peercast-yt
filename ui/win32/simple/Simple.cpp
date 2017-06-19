@@ -726,6 +726,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						SendMessage(hWnd,WM_SHOWMENU,1,0);
 					SetForegroundWindow(hWnd);    
 					break;
+				case WM_LBUTTONDBLCLK:
+					createGUI(hWnd);
+					break;
 			}
 			break;
 
