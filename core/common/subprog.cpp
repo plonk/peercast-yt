@@ -76,7 +76,7 @@ bool Subprogram::start()
                             NULL,
                             NULL,
                             TRUE,
-                            0,
+                            CREATE_NO_WINDOW,
                             (PVOID) m_env.windowsEnvironmentBlock().c_str(),
                             NULL,
                             &startupInfo,
