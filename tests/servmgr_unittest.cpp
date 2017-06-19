@@ -36,7 +36,7 @@ TEST_F(ServMgrFixture, initialState)
     // Host                serverHost;
     ASSERT_STREQ("127.0.0.1:7144", m.serverHost.str().c_str());
     // String              rootHost;
-    ASSERT_STREQ("yp.peercast.org", m.rootHost.cstr());
+    ASSERT_STREQ("bayonet.ddo.jp:7146", m.rootHost.cstr());
     // char                downloadURL[128];
     ASSERT_STREQ("", m.downloadURL);
     // String              rootMsg;
@@ -50,7 +50,7 @@ TEST_F(ServMgrFixture, initialState)
     // unsigned int        firewallTimeout;
     ASSERT_EQ(30, m.firewallTimeout);
     // int                 showLog;
-    ASSERT_EQ(0, m.showLog);
+    ASSERT_EQ(4, m.showLog); // ERROR
     // int                 shutdownTimer;
     ASSERT_EQ(0, m.shutdownTimer);
     // bool                pauseLog;
