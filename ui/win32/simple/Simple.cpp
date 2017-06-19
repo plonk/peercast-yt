@@ -954,9 +954,9 @@ LRESULT CALLBACK ChanInfoProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 		case WM_INITDIALOG:
 			{
 				char str[1024];
-				strcpy_s(str,_countof(str),chanInfo.track.artist.cstr());
+				strcpy_s(str,_countof(str),chanInfo.track.artist);
 				strcat_s(str,_countof(str)," - ");
-				strcat_s(str,_countof(str),chanInfo.track.title.cstr());
+				strcat_s(str,_countof(str),chanInfo.track.title);
 
 				String name = chanInfo.name;
 				String track = str;
