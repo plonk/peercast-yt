@@ -4,12 +4,12 @@
 # __USE_MINGW_ANSI_STDIO: 定義されていると vsnprintf が stdio.h で定義
 # され、libmingwex.a 内の定義と衝突するので未定義にする。
 
-CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -U__STRICT_ANSI__ -DWIN32 -D_REENTRANT -D__USE_MINGW_ANSI_STDIO=0 $(INCLUDES)
+CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -U__STRICT_ANSI__ -DWIN32 -D_REENTRANT $(INCLUDES)
 LDFLAGS = -static-libgcc -static-libstdc++ -pthread -L../../Onigmo/.libs
 LIBS = -Wl,-Bstatic -lonigmo -Wl,-Bdynamic -lws2_32 -lShlwapi
 
 OS = $(shell uname -s | tr A-Z a-z)
-ARCH = $(shell uname -p | tr A-Z a-z)
+ARCH = $(shell uname -m | tr A-Z a-z)
 
 DISTARCHIVE = peercast-yt-$(OS)-$(ARCH).tar.gz
 AR = ar
@@ -22,8 +22,8 @@ SRCHTMLTAR = ../html.tar
 HTML = html
 SRCPUBLICTAR = ../public.tar
 PUBLIC = public
-SRCASSETSTAR = ../assets.tar
-ASSETS = assets
+ASSETS = ../linux/assets
+CGIBIN = ../linux/cgi-bin
 
 LIBOBJSTATIC = libpeercast.a
 
@@ -74,7 +74,7 @@ $(ASSETS): $(SRCASSETSTAR)
 $(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS)
 	rm -rf peercast-yt
 	mkdir peercast-yt
-	cp -R $(HTML) $(PUBLIC) $(TARGET) $(ASSETS) ../../licenses ../../core/LICENSE peercast-yt/
+	cp -R $(HTML) $(PUBLIC) $(TARGET) $(ASSETS) $(CGIBIN) ../../licenses ../../core/LICENSE peercast-yt/
 	strip peercast-yt/$(TARGET)
 	tar czf $(DISTARCHIVE) peercast-yt
 
@@ -97,7 +97,7 @@ $(MISSINGOBJ): %.o : ../../missing/%.cpp
 $(DEPENDFILE): $(CORESOURCE) $(LINUXSOURCE)
 	$(CXX) $(CPPFLAGS) -MM $(CORESOURCE) $(SYSSOURCE) $(LINUXSOURCE) $(MISSINGSOURCE)> $(DEPENDFILE)
 
-$(LIBOBJSTATIC): $(COREOBJ) $(SYSOBJ)
+$(LIBOBJSTATIC): $(COREOBJ) $(SYSOBJ) $(MISSINGOBJ)
 	$(AR) rcs $(LIBOBJSTATIC) $(COREOBJ) $(SYSOBJ) $(MISSINGOBJ)
 
 $(TARGET): $(LINUXOBJ) $(LIBOBJSTATIC)
