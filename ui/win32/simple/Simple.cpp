@@ -623,7 +623,9 @@ void addAllChannelsMenu(HMENU cm)
 	while(ch)
 	{
 		char str[128],name[64];
-		strncpy_s(name,_countof(name),ch->info.name,32);
+		String sjis = ch->info.name;
+		sjis.convertTo(String::T_SJIS);
+		strncpy_s(name,_countof(name),sjis.cstr(),32);
 		if (strlen(ch->info.name) > 32)
 			strcat_s(name,_countof(name),"...");
 
