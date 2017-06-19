@@ -19,14 +19,32 @@ Subprogram::Subprogram(const std::string& name, Environment& env)
 {
 }
 
+#ifdef _UNIX
 Subprogram::~Subprogram()
 {
 }
+#endif
+#ifdef WIN32
+Subprogram::~Subprogram()
+{
+    BOOL success;
+
+    success = CloseHandle(m_processHandle);
+    if (success)
+        LOG_DEBUG("Process handle closed.");
+    else
+        LOG_DEBUG("Failed to close process handle.");
+}
+#endif
 
 // プログラムの実行を開始。
 #ifdef WIN32
+extern "C" {
+    extern DWORD WINAPI GetProcessId(HANDLE Process);
+}
 bool Subprogram::start()
 {
+
     SECURITY_ATTRIBUTES sa;
 
     sa.nLength = sizeof(SECURITY_ATTRIBUTES);
@@ -63,6 +81,7 @@ bool Subprogram::start()
                             &procInfo);
 
     m_processHandle = procInfo.hProcess;
+    m_pid = GetProcessId(procInfo.hProcess);
 
     int fd = _open_osfhandle((intptr_t) stdoutRead, _O_RDONLY);
     m_inputStream.openReadOnly(fd);
@@ -130,8 +149,24 @@ bool Subprogram::start()
 #ifdef WIN32
 bool Subprogram::wait(int* status)
 {
-    *status = 0;
-    return true;
+    DWORD res;
+    DWORD exitCode;
+
+    res = WaitForSingleObject(m_processHandle, 10 * 1000);
+    if (res == WAIT_TIMEOUT)
+        LOG_ERROR("Process wait timeout.");
+    else if (res == WAIT_FAILED)
+        LOG_ERROR("Process wait failed.");
+
+    if (!GetExitCodeProcess(m_processHandle, &exitCode))
+    {
+        LOG_ERROR("Failed to get exit code of child process.");
+        return false;
+    }else
+    {
+        *status = exitCode;
+        return true;
+    }
 }
 #endif
 #ifdef _UNIX
