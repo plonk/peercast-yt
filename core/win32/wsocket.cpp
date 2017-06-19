@@ -204,7 +204,7 @@ void WSAClientSocket::checkTimeout(bool r, bool w)
         else
             tp = NULL;
 
-        int r = select(NULL, &read_fds, &write_fds, NULL, tp);
+        int r = select(0/*IGNORED*/, &read_fds, &write_fds, NULL, tp);
 
         if (r == 0)
             throw TimeoutException();
@@ -247,7 +247,7 @@ void WSAClientSocket::checkTimeout2(bool r, bool w)
     else
         tp = NULL;
 
-    int ret = select(NULL, &read_fds, &write_fds, NULL, tp);
+    int ret = select(0/*IGNORED*/, &read_fds, &write_fds, NULL, tp);
 
     if (ret == 0)
         throw TimeoutException();
@@ -364,7 +364,7 @@ void WSAClientSocket::bind(Host &h)
 {
     struct sockaddr_in localAddr;
 
-    if ((sockNum = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
+    if ((sockNum = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET)
         throw SockException("Can`t open socket");
 
     setBlocking(false);
@@ -390,7 +390,7 @@ ClientSocket *WSAClientSocket::accept()
     int fromSize = sizeof(sockaddr_in);
     sockaddr_in from;
 
-    int conSock = ::accept(sockNum,(sockaddr *)&from,&fromSize);
+    SOCKET conSock = ::accept(sockNum,(sockaddr *)&from,&fromSize);
 
     if (conSock ==  INVALID_SOCKET)
         return NULL;
