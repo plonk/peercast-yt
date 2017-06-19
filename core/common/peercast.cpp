@@ -258,7 +258,9 @@ namespace peercast {
 
 void notifyMessage(ServMgr::NOTIFY_TYPE type, const std::string& message)
 {
-    Notification notif(sys->getTime(), type, message);
+    String messageUNI = message.c_str();
+    messageUNI.convertTo(String::T_UNICODE);
+    Notification notif(sys->getTime(), type, messageUNI.str());
     g_notificationBuffer.addNotification(notif);
     peercastApp->notifyMessage(type, message.c_str());
 }
