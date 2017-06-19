@@ -870,7 +870,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					break;
 				}
 				case ID_POPUP_YELLOWPAGES:
-					sys->getURL("http://yp.peercast.org/");
+					sys->getURL("http://bayonet.ddo.jp/sp/");
 					break;
 
 				case ID_POPUP_ADVANCED_VIEWLOG:
@@ -889,7 +889,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					break;
 				case ID_POPUP_ADVANCED_RELAYEDCHANNELS:
 				case ID_POPUP_FAVORITES_EDIT:
-					showHTML("relays.html");
+					showHTML("channels.html");
 					break;
 				case ID_POPUP_ADVANCED_BROADCAST:
 					showHTML("broadcast.html");
@@ -901,7 +901,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					showHTML("connections.html");
 					break;
 				case ID_POPUP_HELP:
-					sys->getURL("http://www.peercast.org/help.php");
+					sys->getURL("https://github.com/shinji3/peercast-yt");
 					break;
 
 				case ID_POPUP_EXIT_CONFIRM:
@@ -937,7 +937,7 @@ LRESULT CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 					EndDialog(hDlg, LOWORD(wParam));
 					return TRUE;
 				case IDC_BUTTON1:
-					sys->getURL("http://www.peercast.org");
+					sys->getURL("https://github.com/shinji3/peercast-yt");
 					EndDialog(hDlg, LOWORD(wParam));
 					return TRUE;
 
