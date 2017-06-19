@@ -66,11 +66,6 @@ $(PUBLIC): $(SRCPUBLICTAR)
 $(SRCASSETSTAR):
 	$(MAKE) -C .. assets.tar
 
-$(ASSETS): $(SRCASSETSTAR)
-	rm -rf $(ASSETS)
-	tar xf $(SRCASSETSTAR)
-	touch $(ASSETS)
-
 $(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS)
 	rm -rf peercast-yt
 	mkdir peercast-yt
