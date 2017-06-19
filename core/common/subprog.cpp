@@ -75,7 +75,7 @@ bool Subprogram::start()
     // 標準入力のハンドル指定しなくていいのかな？
 
     success = CreateProcess(NULL,
-                            (char*) ("ruby " + m_name).c_str(),
+                            (char*) ("ruby \"" + m_name + "\"").c_str(),
                             NULL,
                             NULL,
                             TRUE,
