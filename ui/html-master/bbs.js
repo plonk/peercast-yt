@@ -91,7 +91,7 @@ function boardLinkCallback(category, board_num) {
             }
         });
     }).fail(function () {
-        console.log('fail');
+        $('#bbs-view').text("エラー: /cgi-bin/board.cgiの実行に失敗しました。");
     });
 }
 
