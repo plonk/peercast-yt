@@ -97,7 +97,7 @@ ServMgr::ServMgr()
     totalStreams = 0;
     firewallTimeout = 30;
     pauseLog = false;
-    showLog = 0;
+    showLog = (1<<LogBuffer::T_ERROR);
 
     shutdownTimer = 0;
 
