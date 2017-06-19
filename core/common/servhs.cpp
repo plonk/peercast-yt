@@ -208,8 +208,14 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
 
     Subprogram script(filePath, env);
 
-    script.start();
-    LOG_DEBUG("script started (pid = %d)", script.pid());
+    bool success = script.start();
+    if (success)
+        LOG_DEBUG("script started (pid = %d)", script.pid());
+    else
+    {
+        LOG_ERROR("failed to start script `%s`", filePath.c_str());
+        throw HTTPException(HTTP_SC_SERVERERROR, 500);
+    }
     Stream& stream = script.inputStream();
 
     HTTPHeaders headers;

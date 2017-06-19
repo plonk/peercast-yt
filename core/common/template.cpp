@@ -49,7 +49,7 @@ void Template::initVariableWriters()
     m_variableWriters["servMgr"] = servMgr;
     m_variableWriters["chanMgr"] = chanMgr;
     m_variableWriters["stats"]   = &stats;
-    m_variableWriters["notificationBufer"] = &g_notificationBuffer;
+    m_variableWriters["notificationBuffer"] = &g_notificationBuffer;
     m_variableWriters["sys"]     = sys;
 }
 

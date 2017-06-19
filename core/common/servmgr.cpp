@@ -79,7 +79,7 @@ ServMgr::ServMgr()
     strcpy_s(connectHost, _countof(connectHost), "connect1.peercast.org");
     strcpy_s(htmlPath, _countof(htmlPath), "html/en");
 
-    rootHost = "yp.peercast.org";
+    rootHost = "bayonet.ddo.jp:7146";
 
     serverHost.fromStrIP("127.0.0.1", DEFAULT_PORT);
 
@@ -97,7 +97,7 @@ ServMgr::ServMgr()
     totalStreams = 0;
     firewallTimeout = 30;
     pauseLog = false;
-    showLog = 0;
+    showLog = (1<<LogBuffer::T_ERROR);
 
     shutdownTimer = 0;
 

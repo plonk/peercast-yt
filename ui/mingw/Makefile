@@ -1,15 +1,15 @@
-# WIN32: g++ ‚Í WIN32 ‚ð’è‹`‚µ‚È‚¢‚ªAƒ\[ƒXƒR[ƒh‚Í WIN32 ‚Å Windows
-# ‚ðŒŸo‚µ‚Ä‚¢‚é‚Ì‚Å‚±‚±‚Å’è‹`‚·‚éB
+# WIN32: g++ ã¯ WIN32 ã‚’å®šç¾©ã—ãªã„ãŒã€ã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰ã¯ WIN32 ã§ Windows
+# ã‚’æ¤œå‡ºã—ã¦ã„ã‚‹ã®ã§ã“ã“ã§å®šç¾©ã™ã‚‹ã€‚
 
-# __USE_MINGW_ANSI_STDIO: ’è‹`‚³‚ê‚Ä‚¢‚é‚Æ vsnprintf ‚ª stdio.h ‚Å’è‹`
-# ‚³‚êAlibmingwex.a “à‚Ì’è‹`‚ÆÕ“Ë‚·‚é‚Ì‚Å–¢’è‹`‚É‚·‚éB
+# __USE_MINGW_ANSI_STDIO: å®šç¾©ã•ã‚Œã¦ã„ã‚‹ã¨ vsnprintf ãŒ stdio.h ã§å®šç¾©
+# ã•ã‚Œã€libmingwex.a å†…ã®å®šç¾©ã¨è¡çªã™ã‚‹ã®ã§æœªå®šç¾©ã«ã™ã‚‹ã€‚
 
-CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -DWIN32 -D_REENTRANT -D__USE_MINGW_ANSI_STDIO=0 $(INCLUDES)
+CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -U__STRICT_ANSI__ -DWIN32 -D_REENTRANT $(INCLUDES)
 LDFLAGS = -static-libgcc -static-libstdc++ -pthread -L../../Onigmo/.libs
-LIBS = -Wl,-Bstatic -lonigmo -Wl,-Bdynamic -lws2_32
+LIBS = -Wl,-Bstatic -lonigmo -Wl,-Bdynamic -lws2_32 -lShlwapi
 
 OS = $(shell uname -s | tr A-Z a-z)
-ARCH = $(shell uname -p | tr A-Z a-z)
+ARCH = $(shell uname -m | tr A-Z a-z)
 
 DISTARCHIVE = peercast-yt-$(OS)-$(ARCH).tar.gz
 AR = ar
@@ -22,8 +22,8 @@ SRCHTMLTAR = ../html.tar
 HTML = html
 SRCPUBLICTAR = ../public.tar
 PUBLIC = public
-SRCASSETSTAR = ../assets.tar
-ASSETS = assets
+ASSETS = ../linux/assets
+CGIBIN = ../linux/cgi-bin
 
 LIBOBJSTATIC = libpeercast.a
 
@@ -66,15 +66,10 @@ $(PUBLIC): $(SRCPUBLICTAR)
 $(SRCASSETSTAR):
 	$(MAKE) -C .. assets.tar
 
-$(ASSETS): $(SRCASSETSTAR)
-	rm -rf $(ASSETS)
-	tar xf $(SRCASSETSTAR)
-	touch $(ASSETS)
-
 $(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS)
 	rm -rf peercast-yt
 	mkdir peercast-yt
-	cp -R $(HTML) $(PUBLIC) $(TARGET) $(ASSETS) ../../licenses ../../core/LICENSE peercast-yt/
+	cp -R $(HTML) $(PUBLIC) $(TARGET) $(ASSETS) $(CGIBIN) ../../licenses ../../core/LICENSE peercast-yt/
 	strip peercast-yt/$(TARGET)
 	tar czf $(DISTARCHIVE) peercast-yt
 
@@ -97,7 +92,7 @@ $(MISSINGOBJ): %.o : ../../missing/%.cpp
 $(DEPENDFILE): $(CORESOURCE) $(LINUXSOURCE)
 	$(CXX) $(CPPFLAGS) -MM $(CORESOURCE) $(SYSSOURCE) $(LINUXSOURCE) $(MISSINGSOURCE)> $(DEPENDFILE)
 
-$(LIBOBJSTATIC): $(COREOBJ) $(SYSOBJ)
+$(LIBOBJSTATIC): $(COREOBJ) $(SYSOBJ) $(MISSINGOBJ)
 	$(AR) rcs $(LIBOBJSTATIC) $(COREOBJ) $(SYSOBJ) $(MISSINGOBJ)
 
 $(TARGET): $(LINUXOBJ) $(LIBOBJSTATIC)

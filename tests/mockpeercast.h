@@ -7,7 +7,7 @@
 class MockPeercastInstance : public PeercastInstance
 {
 public:
-    Sys* createSys() override
+    Sys* APICALL createSys() override
     {
         return new MockSys();
     }

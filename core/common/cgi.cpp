@@ -102,7 +102,7 @@ std::string rfc1123Time(time_t t)
     char fmt[30], buf[30];
     tm tm;
 
-#if _POSIX_C_SOURCE >= 1 || _XOPEN_SOURCE || _BSD_SOURCE || _SVID_SOURCE || _POSIX_SOURCE
+#if !defined(WIN32) && (_POSIX_C_SOURCE >= 1 || _XOPEN_SOURCE || _BSD_SOURCE || _SVID_SOURCE || _POSIX_SOURCE)
     gmtime_r(&t, &tm);
 #else
     gmtime_s(&tm, &t);

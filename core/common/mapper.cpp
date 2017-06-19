@@ -9,23 +9,15 @@
 using namespace std;
 using namespace str;
 
-#ifdef WIN32
-#  ifndef PATH_MAX
-#    define PATH_MAX 4096
-#  endif
-#  define realpath(N,R) _fullpath((R),(N),PATH_MAX)
-#endif
-
 FileSystemMapper::FileSystemMapper(const string& aVirtualPath, const string& aDocumentRoot)
     : virtualPath(aVirtualPath)
 {
-    char *dr = realpath(aDocumentRoot.c_str(), NULL);
-    if (!dr)
+    auto dr = realPath(aDocumentRoot);
+    if (dr.empty())
     {
         throw GeneralException(String::format("Document root `%s` inaccessible", aDocumentRoot.c_str()));
     }
     documentRoot = dr;
-    free(dr);
 }
 
 string FileSystemMapper::toLocalFilePath(const string& vpath)
@@ -55,6 +47,8 @@ pair<string,string> FileSystemMapper::resolvePath(const string& rawPath, const v
     return make_pair("", "");
 }
 
+// path を絶対パスに直す。path が指すファイルが存在しない場合は空文字列を返す。
+#ifdef _UNIX
 string FileSystemMapper::realPath(const string& path)
 {
     char resolvedPath[PATH_MAX];
@@ -65,6 +59,26 @@ string FileSystemMapper::realPath(const string& path)
     else
         return resolvedPath;
 }
+#endif
+#ifdef WIN32
+#include <windows.h>
+#include "Shlwapi.h"
+string FileSystemMapper::realPath(const string& path)
+{
+    char resolvedPath[4096];
+    char* ret = _fullpath(resolvedPath, path.c_str(), 4096);
+    if (ret == NULL)
+    {
+        LOG_ERROR("_fullpath: Failed to resolve `%s`", path.c_str());
+        return "";
+    }
+
+    if (PathFileExists(resolvedPath))
+        return resolvedPath;
+    else
+        return "";
+}
+#endif
 
 pair<string,string> FileSystemMapper::toLocalFilePath(const string& vpath, const vector<string>& langs)
 {
