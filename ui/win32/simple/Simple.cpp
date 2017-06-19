@@ -626,7 +626,7 @@ void addAllChannelsMenu(HMENU cm)
 		String sjis = ch->info.name;
 		sjis.convertTo(String::T_SJIS);
 		strncpy_s(name,_countof(name),sjis.cstr(),32);
-		if (strlen(ch->info.name) > 32)
+		if (strlen(sjis.cstr()) > 32)
 			strcat_s(name,_countof(name),"...");
 
 		snprintf(str,_countof(str),"%s  (%d kb/s %s)",name,ch->info.bitrate,ChanInfo::getTypeStr(ch->info.contentType));
@@ -957,12 +957,24 @@ LRESULT CALLBACK ChanInfoProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 				strcpy_s(str,_countof(str),chanInfo.track.artist.cstr());
 				strcat_s(str,_countof(str)," - ");
 				strcat_s(str,_countof(str),chanInfo.track.title.cstr());
-				
-				SendDlgItemMessage(hDlg,IDC_EDIT_NAME,WM_SETTEXT,0,(LPARAM)chanInfo.name.cstr());
-				SendDlgItemMessage(hDlg,IDC_EDIT_PLAYING,WM_SETTEXT,0,(LPARAM)str);
-				SendDlgItemMessage(hDlg,IDC_EDIT_MESSAGE,WM_SETTEXT,0,(LPARAM)chanInfo.comment.cstr());
-				SendDlgItemMessage(hDlg,IDC_EDIT_DESC,WM_SETTEXT,0,(LPARAM)chanInfo.desc.cstr());
-				SendDlgItemMessage(hDlg,IDC_EDIT_GENRE,WM_SETTEXT,0,(LPARAM)chanInfo.genre.cstr());
+
+				String name = chanInfo.name;
+				String track = str;
+				String comment = chanInfo.comment;
+				String desc = chanInfo.desc;
+				String genre = chanInfo.genre;
+
+				name.convertTo(String::T_SJIS);
+				track.convertTo(String::T_SJIS);
+				comment.convertTo(String::T_SJIS);
+				desc.convertTo(String::T_SJIS);
+				genre.convertTo(String::T_SJIS);
+
+				SendDlgItemMessage(hDlg,IDC_EDIT_NAME,WM_SETTEXT,0,(LPARAM)name.cstr());
+				SendDlgItemMessage(hDlg,IDC_EDIT_PLAYING,WM_SETTEXT,0,(LPARAM)track.cstr());
+				SendDlgItemMessage(hDlg,IDC_EDIT_MESSAGE,WM_SETTEXT,0,(LPARAM)comment.cstr());
+				SendDlgItemMessage(hDlg,IDC_EDIT_DESC,WM_SETTEXT,0,(LPARAM)desc.cstr());
+				SendDlgItemMessage(hDlg,IDC_EDIT_GENRE,WM_SETTEXT,0,(LPARAM)genre.cstr());
 
 				snprintf(str,_countof(str),"%d kb/s %s",chanInfo.bitrate,ChanInfo::getTypeStr(chanInfo.contentType));
 				SendDlgItemMessage(hDlg,IDC_FORMAT,WM_SETTEXT,0,(LPARAM)str);
