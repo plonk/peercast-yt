@@ -16,6 +16,9 @@ Subprogram::Subprogram(const std::string& name, Environment& env)
     : m_name(name)
     , m_pid(-1)
     , m_env(env)
+#ifdef WIN32
+    , m_processHandle(INVALID_HANDLE_VALUE)
+#endif
 {
 }
 
@@ -27,13 +30,16 @@ Subprogram::~Subprogram()
 #ifdef WIN32
 Subprogram::~Subprogram()
 {
-    BOOL success;
+    if (m_processHandle != INVALID_HANDLE_VALUE)
+    {
+        BOOL success;
 
-    success = CloseHandle(m_processHandle);
-    if (success)
-        LOG_DEBUG("Process handle closed.");
-    else
-        LOG_DEBUG("Failed to close process handle.");
+        success = CloseHandle(m_processHandle);
+        if (success)
+            LOG_DEBUG("Process handle closed.");
+        else
+            LOG_DEBUG("Failed to close process handle.");
+    }
 }
 #endif
 
@@ -44,7 +50,6 @@ extern "C" {
 }
 bool Subprogram::start()
 {
-
     SECURITY_ATTRIBUTES sa;
 
     sa.nLength = sizeof(SECURITY_ATTRIBUTES);
@@ -80,6 +85,9 @@ bool Subprogram::start()
                             &startupInfo,
                             &procInfo);
 
+    if (!success)
+        return false;
+
     m_processHandle = procInfo.hProcess;
     m_pid = GetProcessId(procInfo.hProcess);
 
@@ -88,6 +96,7 @@ bool Subprogram::start()
 
     CloseHandle(stdoutWrite);
     CloseHandle(procInfo.hThread);
+    return true;
 }
 #endif
 #ifdef _UNIX
