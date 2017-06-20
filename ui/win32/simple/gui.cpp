@@ -114,9 +114,7 @@ void ADDLOG(const char *str,int id,bool sel,void *data, LogBuffer::TYPE type)
 			SendDlgItemMessage(guiWnd, id, LB_DELETESTRING, 0, 0);
 			num--;
 		}
-		String sjis = str;
-		sjis.convertTo(String::T_SJIS);
-		int idx = static_cast<int>(SendDlgItemMessage(guiWnd, id, LB_ADDSTRING, 0, (LPARAM)(LPSTR)sjis.cstr()));
+		int idx = static_cast<int>(SendDlgItemMessage(guiWnd, id, LB_ADDSTRING, 0, (LPARAM)(LPSTR)str));
 		SendDlgItemMessage(guiWnd, id, LB_SETITEMDATA, idx, (LPARAM)data);
 
 		if (sel)
@@ -232,8 +230,6 @@ THREAD_PROC showConnections(ThreadInfo *thread)
 
 
 
-		char cname[64];
-
 		{
 			sel = static_cast<int>(SendDlgItemMessage(guiWnd, chanID,LB_GETCURSEL, 0, 0));
 			top = static_cast<int>(SendDlgItemMessage(guiWnd, chanID,LB_GETTOPINDEX, 0, 0));
@@ -244,8 +240,9 @@ THREAD_PROC showConnections(ThreadInfo *thread)
 			{
 				if (c->isActive())
 				{
-					strncpy_s(cname,_countof(cname),c->getName(),_TRUNCATE);
-					ADDCHAN(c,"%s - %d kb/s - %s",cname,c->getBitrate(),c->getStatusStr());
+					String cname = c->info.name;
+					cname.convertTo(String::T_SJIS);
+					ADDCHAN(c,"%s - %d kb/s - %s",cname.cstr(),c->getBitrate(),c->getStatusStr());
 				}
 				c=c->next;
 			}
@@ -274,8 +271,9 @@ THREAD_PROC showConnections(ThreadInfo *thread)
 					{
 						if (chl->info.match(chanMgr->searchInfo))
 						{
-							strncpy_s(cname,_countof(cname),chl->info.name.cstr(),_TRUNCATE);
-							ADDHIT(chl,"%s - %d kb/s - %d/%d",cname,chl->info.bitrate,chl->numListeners(),chl->numHits());
+							String cname = chl->info.name;
+							cname.convertTo(String::T_SJIS);
+							ADDHIT(chl,"%s - %d kb/s - %d/%d",cname.cstr(),chl->info.bitrate,chl->numListeners(),chl->numHits());
 						}
 					}
 					chl = chl->next;
