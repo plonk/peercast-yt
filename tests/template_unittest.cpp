@@ -46,7 +46,7 @@ TEST_F(TemplateFixture, getIntVariable)
 
 TEST_F(TemplateFixture, getBoolVariable)
 {
-    ASSERT_EQ(false, temp.getIntVariable("servMgr.version", 0));
+    ASSERT_FALSE(temp.getIntVariable("servMgr.version", 0));
 }
 
 
