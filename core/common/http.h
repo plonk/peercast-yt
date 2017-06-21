@@ -78,6 +78,7 @@ public:
 #define MIME_FLV             "video/x-flv"
 #define MIME_MKV             "video/x-matroska"
 #define MIME_WEBM            "video/webm"
+#define MIME_TS              "video/MP2T"
 
 #define MIME_HTML            "text/html"
 #define MIME_XML             "text/xml"
