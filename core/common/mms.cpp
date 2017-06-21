@@ -171,16 +171,18 @@ ASFInfo parseASFHeader(Stream &in, Stream &mem)
                     {
                         MSID noErrorCorrectionObjID =
                             { 0X20FB5700, 0X5B55, 0X11CF,{ 0XA8, 0XFD, 0X00, 0X80, 0X5F, 0X5C, 0X44, 0X2B } };
-                        int pos = mem.getPosition();
-                        mem.seekTo(in.getPosition() - data.len + data.pos + 2);
+                        int mem_pos = mem.getPosition();
+                        int pos = in.getPosition() - data.len + data.pos + 2;
+                        mem.seekTo(pos);
                         noErrorCorrectionObjID.write(mem);
-                        mem.seekTo(in.getPosition() - data.len + data.pos + 48);
+                        pos += 46;
+                        mem.seekTo(pos);
                         if (!mem.readLong())
                         {
-                            mem.seekTo(in.getPosition() - data.len + data.pos + 48);
+                            mem.seekTo(pos);
                             mem.writeLong(16000);
                         }
-                        mem.seekTo(pos);
+                        mem.seekTo(mem_pos);
                     }
                     break;
                 }
