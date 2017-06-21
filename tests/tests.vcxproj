@@ -141,6 +141,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>../googletest-release-1.8.0/googletest/msvc/gtest/$(Configuration)/gtest/</OutDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>../googletest-release-1.8.0/googletest/msvc/$(Platform)/$(Configuration)/gtest/</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>../googletest-release-1.8.0/googletest/msvc/$(Platform)/$(Configuration)/gtest/</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -151,7 +157,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>../googletest-release-1.8.0/googletest/msvc/gtest/$(Configuration);../$(Configuration);../Onigmo/build_x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../googletest-release-1.8.0/googletest/msvc/$(Platform)/$(Configuration);../$(Platform)/$(Configuration);../Onigmo/build_x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>gtestd.lib;corelib.lib;onigmo_s.lib;ws2_32.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -201,7 +207,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>../googletest-release-1.8.0/googletest/msvc/gtest/$(Configuration);../$(Configuration);../Onigmo/build_x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../googletest-release-1.8.0/googletest/msvc/$(Platform)/$(Configuration);../$(Platform)/$(Configuration);../Onigmo/build_x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>gtest.lib;corelib.lib;onigmo_s.lib;ws2_32.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
