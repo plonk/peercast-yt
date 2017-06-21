@@ -21,7 +21,7 @@
 #include "asf.h"
 
 // ------------------------------------------
-ASFInfo parseASFHeader(Stream &in);
+ASFInfo parseASFHeader(Stream &in, Stream &mem);
 
 // ------------------------------------------
 void MMSStream::readEnd(Stream &, Channel *)
@@ -48,7 +48,7 @@ void MMSStream::processChunk(Stream &in, Channel *ch, ASFChunk& chunk)
             ASFObject asfHead;
             asfHead.readHead(asfm);
 
-            ASFInfo asf = parseASFHeader(asfm);
+            ASFInfo asf = parseASFHeader(asfm, mem);
             LOG_DEBUG("ASF Info: pnum=%d, psize=%d, br=%d", asf.numPackets, asf.packetSize, asf.bitrate);
             for (int i=0; i<ASFInfo::MAX_STREAMS; i++)
             {
@@ -102,7 +102,7 @@ int MMSStream::readPacket(Stream &in, Channel *ch)
 }
 
 // -----------------------------------
-ASFInfo parseASFHeader(Stream &in)
+ASFInfo parseASFHeader(Stream &in, Stream &mem)
 {
     ASFInfo asf;
 
@@ -167,6 +167,15 @@ ASFInfo parseASFHeader(Stream &in)
                     s.read(data);
                     asf.streams[s.id].id = s.id;
                     asf.streams[s.id].type = s.type;
+                    if (s.type == ASFStream::T_AUDIO)
+                    {
+                        unsigned char asf_no_error_correction[16] =
+                            {0x00, 0x57, 0xfb, 0x20, 0x55, 0x5B, 0xCF, 0x11, 0xa8, 0xfd, 0x00, 0x80, 0x5f, 0x5c, 0x44, 0x2b};
+                        int pos = mem.getPosition();
+                        mem.seekTo(in.getPosition() - data.len + data.pos + 2);
+                        mem.write(asf_no_error_correction, 16);
+                        mem.seekTo(pos);
+                    }
                     break;
                 }
             }
