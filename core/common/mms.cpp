@@ -174,6 +174,12 @@ ASFInfo parseASFHeader(Stream &in, Stream &mem)
                         int pos = mem.getPosition();
                         mem.seekTo(in.getPosition() - data.len + data.pos + 2);
                         noErrorCorrectionObjID.write(mem);
+                        mem.seekTo(in.getPosition() - data.len + data.pos + 48);
+                        if (!mem.readLong())
+                        {
+                            mem.seekTo(in.getPosition() - data.len + data.pos + 48);
+                            mem.writeLong(16000);
+                        }
                         mem.seekTo(pos);
                     }
                     break;
