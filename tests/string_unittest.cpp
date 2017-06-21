@@ -46,8 +46,8 @@ TEST(StringTest, appendChar) {
         buf.append('A');
     }
 
-    // バッファーは 256 バイトあるので、NUL の分を考慮しても 255 文字
-    // まで入りそうなものだが、入るのは 254 文字まで。
+    // �o�b�t�@�[�� 256 �o�C�g����̂ŁANUL �̕����l�����Ă� 255 ����
+    // �܂œ��肻���Ȃ��̂����A����̂� 254 �����܂ŁB
     ASSERT_EQ(254, strlen(buf.data));
 }
 
@@ -84,7 +84,7 @@ TEST(StringTest, ASCII2HTMLWorks) {
     str.ASCII2HTML("AAA");
     ASSERT_STREQ("AAA", str);
 
-    // 英数字以外は16進の文字実体参照としてエスケープされる。
+    // �p�����ȊO��16�i�̕������̎Q�ƂƂ��ăG�X�P�[�v�����B
     str.ASCII2HTML("   ");
     ASSERT_STREQ("&#x20;&#x20;&#x20;", str);
 
@@ -144,9 +144,9 @@ TEST(StringTest, assignment)
 
 TEST(StringTest, sjisToUtf8)
 {
-    String tmp = "4\x93\xFA\x96\xDA"; // "4日目" in Shit_JIS
+    String tmp = "4\x93\xFA\x96\xDA"; // "4����" in Shit_JIS
     tmp.convertTo(String::T_UNICODESAFE);
-    ASSERT_STREQ("4日目", tmp.cstr());
+    ASSERT_STREQ("4����", tmp.cstr());
 }
 
 TEST(StringTest, setUnquote)
@@ -156,7 +156,7 @@ TEST(StringTest, setUnquote)
     s.setUnquote("\"abc\"");
     ASSERT_STREQ("abc", s.cstr());
 
-    // 二文字に満たない場合は空になる。
+    // �񕶎��ɖ����Ȃ��ꍇ�͋�ɂȂ�B
     s.setUnquote("a");
     ASSERT_STREQ("", s.cstr());
 }

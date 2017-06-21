@@ -31,7 +31,7 @@ TEST_F(EnvironmentFixture, initialState)
 
 TEST_F(EnvironmentFixture, constructor)
 {
-    extern char** environ; // ã“ã®ãƒ—ãƒ­ã‚»ã‚¹ã®ç’°å¢ƒ
+    extern char** environ; // ‚±‚ÌƒvƒƒZƒX‚ÌŠÂ‹«
     Environment e(environ);
 
     EXPECT_NE(0, e.size());

@@ -81,7 +81,7 @@ TEST_F(ServMgrFixture, initialState)
     // unsigned int        refreshHTML;
     ASSERT_EQ(5, m.refreshHTML);
     // unsigned int        relayBroadcast;
-    //ASSERT_EQ(0, m.relayBroadcast); // ‰∏çÂÆö
+    //ASSERT_EQ(0, m.relayBroadcast); // ïsíË
     // unsigned int        notifyMask;
     ASSERT_EQ(0xffff, m.notifyMask);
     // BCID                *validBCID;

@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-// GnuID::generate() ãŒ sys->rnd() ã«ä¾å­˜ã—ã¦ã„ã‚‹ã€‚
+// GnuID::generate() ‚ª sys->rnd() ‚ÉˆË‘¶‚µ‚Ä‚¢‚éB
 
 class GnuIDFixture : public ::testing::Test {
 public:
@@ -25,13 +25,13 @@ public:
     }
 
     GnuID id;
-    char buf[80]; // æœ€ä½ 33 ãƒã‚¤ãƒˆå¿…è¦ã€‚
+    char buf[80]; // Å’á 33 ƒoƒCƒg•K—vB
 };
 
 TEST_F(GnuIDFixture, initialState)
 {
-    // GnuID ã¯ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã§åˆæœŸåŒ–ã•ã‚Œãªã„ã®ã§ã€ä¸å®šå€¤ãŒå…¥ã£ã¦ã„ã‚‹ã€‚
-    // ã‚ªãƒ¼ãƒ«0ã®IDãŒæ¬²ã—ã‘ã‚Œã°æ˜ç¤ºçš„ã« clear ãƒ¡ã‚½ãƒƒãƒ‰ã§ã‚¯ãƒªã‚¢ã™ã‚‹ã€‚
+    // GnuID ‚ÍƒRƒ“ƒXƒgƒ‰ƒNƒ^‚Å‰Šú‰»‚³‚ê‚È‚¢‚Ì‚ÅA•s’è’l‚ª“ü‚Á‚Ä‚¢‚éB
+    // ƒI[ƒ‹0‚ÌID‚ª—~‚µ‚¯‚ê‚Î–¾¦“I‚É clear ƒƒ\ƒbƒh‚ÅƒNƒŠƒA‚·‚éB
     // id.toStr(buf);
     // EXPECT_TRUE(id.isSet());
     // EXPECT_STRNE("00000000000000000000000000000000", buf);
@@ -132,9 +132,9 @@ TEST_F(GnuIDFixture, encode_differentSalts)
 
 TEST_F(GnuIDFixture, encode_prefixSharingSalts)
 {
-    id.encode(NULL, "ãƒŠã‚¬ã‚¤ãƒŠãƒã‚¨", NULL, 0);
+    id.encode(NULL, "ƒiƒKƒCƒiƒ}ƒG", NULL, 0);
 
     GnuID id2;
-    id2.encode(NULL, "ãƒŠã‚¬ã‚¤ãƒŠãƒã‚¨(ç«‹ã¦ç›´ã—)", NULL, 0);
+    id2.encode(NULL, "ƒiƒKƒCƒiƒ}ƒG(—§‚Ä’¼‚µ)", NULL, 0);
     ASSERT_FALSE(id.isSame(id2));
 }

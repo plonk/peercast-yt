@@ -23,7 +23,7 @@ public:
     ChanHit* hit;
 };
 
-// åˆæœŸçŠ¶æ…‹ã‚’ç¢ºã‹ã‚ã‚‹ã ã‘ã€‚
+// ‰Šúó‘Ô‚ğŠm‚©‚ß‚é‚¾‚¯B
 TEST_F(ChanHitFixture, initialState)
 {
     ASSERT_EQ(0, hit->host.ip);
@@ -197,11 +197,11 @@ TEST_F(ChanHitFixture, writeVariable)
     // TEST_VARIABLE("canRelay", "1");
 }
 
-// æ¡ä»¶å¤‰æ•°: chanID.isSet()     +0 +24
+// ğŒ•Ï”: chanID.isSet()     +0 +24
 //           versionExNumber==0 +0 +20
 //           uphost.ip==0       +0 +36
-// 2^3 = 8 é€šã‚Šã®ãƒ‘ã‚¹ãŒã‚ã‚‹ã€‚
-// å¸¸ã«é€ä¿¡ã•ã‚Œã‚‹ã‚µã‚¤ã‚ºã¯ 8 + 24 + 12+10 + 12+10 + 12*5 + 9 + 12*2 = 169 ãƒã‚¤ãƒˆ
+// 2^3 = 8 ’Ê‚è‚ÌƒpƒX‚ª‚ ‚éB
+// í‚É‘—M‚³‚ê‚éƒTƒCƒY‚Í 8 + 24 + 12+10 + 12+10 + 12*5 + 9 + 12*2 = 169 ƒoƒCƒg
 TEST_F(ChanHitFixture, writeAtom000)
 {
     MemoryStream mem(1024);
@@ -214,7 +214,7 @@ TEST_F(ChanHitFixture, writeAtom000)
     ASSERT_FALSE(chid.isSet());
     hit->writeAtoms(writer, chid);
     ASSERT_EQ(169, mem.pos);
-    // ASSERT_EQ(157, mem.pos); // ã‚ªãƒªã‚¸ãƒŠãƒ«ã®0.1218ã§ã¯157ãƒã‚¤ãƒˆã«ãªã‚‹ã€‚
+    // ASSERT_EQ(157, mem.pos); // ƒIƒŠƒWƒiƒ‹‚Ì0.1218‚Å‚Í157ƒoƒCƒg‚É‚È‚éB
 }
 
 TEST_F(ChanHitFixture, writeAtom001)
@@ -260,11 +260,11 @@ TEST_F(ChanHitFixture, initLocal)
 
     int numl = 1;
     int numr = 2;
-    int nums = 3; // ä½¿ã‚ã‚Œã¦ã„ãªã„ã€‚
+    int nums = 3; // g‚í‚ê‚Ä‚¢‚È‚¢B
     int uptm = 4;
     bool connected = true;
     bool isFull = true;
-    unsigned int bitrate = 5; // ä½¿ã‚ã‚Œã¦ã„ãªã„ã€‚
+    unsigned int bitrate = 5; // g‚í‚ê‚Ä‚¢‚È‚¢B
     Channel* ch = &channel;
     unsigned int oldp = 6;
     unsigned int newp = 7;

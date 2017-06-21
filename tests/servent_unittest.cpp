@@ -56,8 +56,8 @@ TEST_F(ServentFixture, initialState)
     // WLock               lock;
 
     ASSERT_EQ(true, s.sendHeader);
-    // ASSERT_EQ(0, s.syncPos); // ä¸å®š
-    // ASSERT_EQ(0, s.streamPos);  // ä¸å®š
+    // ASSERT_EQ(0, s.syncPos); // •s’è
+    // ASSERT_EQ(0, s.streamPos);  // •s’è
     ASSERT_EQ(0, s.servPort);
 
     ASSERT_EQ(ChanInfo::SP_UNKNOWN, s.outputProtocol);
@@ -109,8 +109,8 @@ TEST_F(ServentFixture, handshakeIncomingGetRoot)
                  mock->outgoing.str().c_str());
 }
 
-// servMgr->password ãŒè¨­å®šã•ã‚Œã¦ã„ãªã„æ™‚ã« ShoutCast ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã‹ã‚‰
-// ã®æ”¾é€è¦æ±‚ã ã¨ã—ã¦é€šã—ã¦ã—ã¾ã†ãŒã€è‰¯ã„ã®ã‹ï¼Ÿ
+// servMgr->password ‚ªÝ’è‚³‚ê‚Ä‚¢‚È‚¢Žž‚É ShoutCast ƒNƒ‰ƒCƒAƒ“ƒg‚©‚ç
+// ‚Ì•ú‘——v‹‚¾‚Æ‚µ‚Ä’Ê‚µ‚Ä‚µ‚Ü‚¤‚ªA—Ç‚¢‚Ì‚©H
 TEST_F(ServentFixture, handshakeIncomingBadRequest)
 {
     MockClientSocket* mock;
@@ -134,7 +134,7 @@ TEST_F(ServentFixture, handshakeIncomingHTMLRoot)
 
     std::string output = mock->outgoing.str();
 
-    // ãƒ•ã‚¡ã‚¤ãƒ«ãŒç„¡ã„ã®ã« OK ã¯ãŠã‹ã—ããªã„ã‹â€¦
+    // ƒtƒ@ƒCƒ‹‚ª–³‚¢‚Ì‚É OK ‚Í‚¨‚©‚µ‚­‚È‚¢‚©c
     ASSERT_TRUE(str::contains(output, "200 OK"));
     ASSERT_TRUE(str::contains(output, "Server: "));
     ASSERT_TRUE(str::contains(output, "Date: "));
@@ -165,7 +165,7 @@ TEST_F(ServentFixture, handshakeIncomingJRPCGetAuthorized)
 {
     MockClientSocket* mock;
 
-    strcpy(servMgr->password, "Passw0rd");
+    strcpy_s(servMgr->password, _countof(servMgr->password), "Passw0rd");
 
     // --------------------------------------------
     s.sock = mock = new MockClientSocket();
@@ -218,7 +218,7 @@ TEST_F(ServentFixture, handshakeIncomingJRPCGetAuthorized)
     LONG_STRING \
     LONG_STRING
 
-// 8191 ãƒã‚¤ãƒˆä»¥ä¸Šã®ãƒªã‚¯ã‚¨ã‚¹ãƒˆã«å¯¾ã—ã¦ã‚¨ãƒ©ãƒ¼ã‚’è¿”ã™ã€‚
+// 8191 ƒoƒCƒgˆÈã‚ÌƒŠƒNƒGƒXƒg‚É‘Î‚µ‚ÄƒGƒ‰[‚ð•Ô‚·B
 TEST_F(ServentFixture, handshakeIncomingLongURI)
 {
     ASSERT_EQ(8470, strlen(LONG_LONG_STRING));
@@ -251,31 +251,31 @@ TEST_F(ServentFixture, createChannelInfoNullCase)
 TEST_F(ServentFixture, createChannelInfoComment)
 {
     Query query("");
-    auto info = s.createChannelInfo(GnuID(), "ä¿ºãŸã¡ã¿ã‚“ãªãƒˆãƒ‰ã ãœ (ãƒ»Ï‰ãƒ»ï½€Ð·)3", query, "");
+    auto info = s.createChannelInfo(GnuID(), "‰´‚½‚¿‚Ý‚ñ‚Èƒgƒh‚¾‚º (EƒÖEM„x)3", query, "");
 
-    ASSERT_STREQ("ä¿ºãŸã¡ã¿ã‚“ãªãƒˆãƒ‰ã ãœ (ãƒ»Ï‰ãƒ»ï½€Ð·)3", info.comment);
+    ASSERT_STREQ("‰´‚½‚¿‚Ý‚ñ‚Èƒgƒh‚¾‚º (EƒÖEM„x)3", info.comment);
 }
 
 TEST_F(ServentFixture, createChannelInfoCommentOverride)
 {
-    Query query("comment=ã‚¹ãƒ¬ãªã—");
-    auto info = s.createChannelInfo(GnuID(), "ä¿ºãŸã¡ã¿ã‚“ãªãƒˆãƒ‰ã ãœ (ãƒ»Ï‰ãƒ»ï½€Ð·)3", query, "");
+    Query query("comment=ƒXƒŒ‚È‚µ");
+    auto info = s.createChannelInfo(GnuID(), "‰´‚½‚¿‚Ý‚ñ‚Èƒgƒh‚¾‚º (EƒÖEM„x)3", query, "");
 
-    ASSERT_STREQ("ã‚¹ãƒ¬ãªã—", info.comment);
+    ASSERT_STREQ("ƒXƒŒ‚È‚µ", info.comment);
 }
 
 TEST_F(ServentFixture, createChannelInfoTypicalCase)
 {
-    Query query("name=äºˆå®šåœ°&genre=ãƒ†ã‚¹ãƒˆ&desc=ã¦ã™ã¨&url=http://example.com&comment=ã‚¹ãƒ¬ãªã—&bitrate=400&type=mkv");
+    Query query("name=—\’è’n&genre=ƒeƒXƒg&desc=‚Ä‚·‚Æ&url=http://example.com&comment=ƒXƒŒ‚È‚µ&bitrate=400&type=mkv");
     auto info = s.createChannelInfo(GnuID(), String(), query, "");
 
     ASSERT_EQ(ChanInfo::T_MKV, info.contentType);
-    ASSERT_STREQ("äºˆå®šåœ°", info.name.cstr());
-    ASSERT_STREQ("ãƒ†ã‚¹ãƒˆ", info.genre.cstr());
-    ASSERT_STREQ("ã¦ã™ã¨", info.desc.cstr());
+    ASSERT_STREQ("—\’è’n", info.name.cstr());
+    ASSERT_STREQ("ƒeƒXƒg", info.genre.cstr());
+    ASSERT_STREQ("‚Ä‚·‚Æ", info.desc.cstr());
     ASSERT_STREQ("http://example.com", info.url.cstr());
     ASSERT_EQ(400, info.bitrate);
-    ASSERT_STREQ("ã‚¹ãƒ¬ãªã—", info.comment);
+    ASSERT_STREQ("ƒXƒŒ‚È‚µ", info.comment);
 }
 
 TEST_F(ServentFixture, createChannelInfoNonnumericBitrate)
@@ -294,8 +294,8 @@ TEST_F(ServentFixture, hasValidAuthToken)
     ASSERT_FALSE(s.hasValidAuthToken("01234567890123456789012345678901.flv?"));
     ASSERT_FALSE(s.hasValidAuthToken("01234567890123456789012345678901.flv"));
     ASSERT_FALSE(s.hasValidAuthToken(""));
-    ASSERT_FALSE(s.hasValidAuthToken("ã»ã’ã»ã’.flv?auth=44d5299e57ad9274fee7960a9fa60bfd"));
-    ASSERT_FALSE(s.hasValidAuthToken("ã»ã’ã»ã’ã»ã’ã»ã’ã»ã’ã»ã’ã»ã’ã»ã’ã»ã’ã»ã’ã»ã’ã»ã’ã»ã’ã»ã’ã»ã’ã»ã’ã»ã’ã»ã’ã»ã’ã»ã’ã»ã’ã»ã’.flv?auth=44d5299e57ad9274fee7960a9fa60bfd"));
+    ASSERT_FALSE(s.hasValidAuthToken("‚Ù‚°‚Ù‚°.flv?auth=44d5299e57ad9274fee7960a9fa60bfd"));
+    ASSERT_FALSE(s.hasValidAuthToken("‚Ù‚°‚Ù‚°‚Ù‚°‚Ù‚°‚Ù‚°‚Ù‚°‚Ù‚°‚Ù‚°‚Ù‚°‚Ù‚°‚Ù‚°‚Ù‚°‚Ù‚°‚Ù‚°‚Ù‚°‚Ù‚°‚Ù‚°‚Ù‚°‚Ù‚°‚Ù‚°‚Ù‚°‚Ù‚°.flv?auth=44d5299e57ad9274fee7960a9fa60bfd"));
     ASSERT_FALSE(s.hasValidAuthToken("?auth=44d5299e57ad9274fee7960a9fa60bfd"));
 }
 
@@ -309,7 +309,7 @@ TEST_F(ServentFixture, handshakeHTTPBasicAuth_nonlocal_correctpass)
     ASSERT_EQ(0, s.sock->host.ip);
     ASSERT_FALSE(s.sock->host.isLocalhost());
 
-    strcpy(servMgr->password, "Passw0rd");
+    strcpy_s(servMgr->password, _countof(servMgr->password), "Passw0rd");
 
     HTTP http(*mock);
     http.initRequest("GET / HTTP/1.0");
@@ -328,7 +328,7 @@ TEST_F(ServentFixture, handshakeHTTPBasicAuth_nonlocal_wrongpass)
     ASSERT_EQ(0, s.sock->host.ip);
     ASSERT_FALSE(s.sock->host.isLocalhost());
 
-    strcpy(servMgr->password, "hoge");
+    strcpy_s(servMgr->password, _countof(servMgr->password), "hoge");
 
     HTTP http(*mock);
     http.initRequest("GET / HTTP/1.0");
@@ -347,7 +347,7 @@ TEST_F(ServentFixture, handshakeHTTPBasicAuth_local_correctpass)
    s.sock->host.ip = 127 << 24 | 1;
     ASSERT_TRUE(s.sock->host.isLocalhost());
 
-    strcpy(servMgr->password, "Passw0rd");
+    strcpy_s(servMgr->password, _countof(servMgr->password), "Passw0rd");
 
     HTTP http(*mock);
     http.initRequest("GET / HTTP/1.0");
@@ -366,7 +366,7 @@ TEST_F(ServentFixture, handshakeHTTPBasicAuth_local_wrongpass)
    s.sock->host.ip = 127 << 24 | 1;
     ASSERT_TRUE(s.sock->host.isLocalhost());
 
-    strcpy(servMgr->password, "hoge");
+    strcpy_s(servMgr->password, _countof(servMgr->password), "hoge");
 
     HTTP http(*mock);
     http.initRequest("GET / HTTP/1.0");
@@ -384,7 +384,7 @@ TEST_F(ServentFixture, handshakeHTTPBasicAuth_noauthorizationheader)
 
     ASSERT_FALSE(s.sock->host.isLocalhost());
 
-    strcpy(servMgr->password, "Passw0rd");
+    strcpy_s(servMgr->password, _countof(servMgr->password), "Passw0rd");
 
     HTTP http(*mock);
     http.initRequest("GET / HTTP/1.0");

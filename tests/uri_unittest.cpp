@@ -1,4 +1,4 @@
-// URI クラスのテスト。
+// URI �N���X�̃e�X�g�B
 
 #include <gtest/gtest.h>
 #include "uri.h"
@@ -15,8 +15,8 @@ TEST_F(URIFixture, httpScheme)
     ASSERT_TRUE(u.isValid());
     ASSERT_STREQ("http", u.scheme().c_str());
     ASSERT_STREQ("www.example.com", u.host().c_str());
-    ASSERT_EQ(80, u.port()); // ポート指定がない場合はスキームのデフォルトポート。
-    ASSERT_STREQ("/", u.path().c_str()); // パスが省略されている場合は "/" になる。
+    ASSERT_EQ(80, u.port()); // �|�[�g�w�肪�Ȃ��ꍇ�̓X�L�[���̃f�t�H���g�|�[�g�B
+    ASSERT_STREQ("/", u.path().c_str()); // �p�X���ȗ�����Ă���ꍇ�� "/" �ɂȂ�B
 }
 
 TEST_F(URIFixture, httpSchemeWithPortQueryAndFragment)
@@ -28,7 +28,7 @@ TEST_F(URIFixture, httpSchemeWithPortQueryAndFragment)
     ASSERT_STREQ("localhost", u.host().c_str());
     ASSERT_EQ(7144, u.port());
     ASSERT_STREQ("/html/en/index.html", u.path().c_str());
-    ASSERT_STREQ("name=%E4%BA%88%E5%AE%9A%E5%9C%B0", u.query().c_str()); // 自動的に unescape はされない。
+    ASSERT_STREQ("name=%E4%BA%88%E5%AE%9A%E5%9C%B0", u.query().c_str()); // �����I�� unescape �͂���Ȃ��B
     ASSERT_STREQ("top", u.fragment().c_str());
 }
 
@@ -67,14 +67,14 @@ TEST_F(URIFixture, emptyURI)
 //     ASSERT_STREQ("", u.host().c_str());
 // }
 
-// mailtoスキームには対応しない。
+// mailto�X�L�[���ɂ͑Ή����Ȃ��B
 TEST_F(URIFixture, mailtoScheme)
 {
     URI u("mailto:webmaster@example.com");
     ASSERT_FALSE(u.isValid());
 }
 
-// 相対URLは使えない。
+// ����URL�͎g���Ȃ��B
 TEST_F(URIFixture, relativeURI)
 {
     ASSERT_NO_THROW(URI("/index.html"));

@@ -47,6 +47,6 @@ TEST_F(BroadcastStateFixture, initPacketSettings)
     ASSERT_FALSE(bcs.bcID.isSet());
     ASSERT_EQ(0, bcs.numHops);
     ASSERT_FALSE(bcs.forMe);
-    ASSERT_EQ(1234, bcs.streamPos); // ã“ã‚Œã¯ã‚¯ãƒªã‚¢ã•ã‚Œãªã„ã€‚
+    ASSERT_EQ(1234, bcs.streamPos); // ‚±‚ê‚ÍƒNƒŠƒA‚³‚ê‚È‚¢B
     ASSERT_EQ(0, bcs.group);
 }

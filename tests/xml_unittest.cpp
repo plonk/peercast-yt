@@ -22,7 +22,7 @@ TEST_F(XMLFixture, read)
     ASSERT_STREQ("br", xml.root->getName());
 }
 
-// タグ名はフォーマット文字列として解釈されてはならない。
+// �^�O���̓t�H�[�}�b�g������Ƃ��ĉ��߂���Ă͂Ȃ�Ȃ��B
 TEST_F(XMLFixture, readCrash)
 {
     StringStream mem;

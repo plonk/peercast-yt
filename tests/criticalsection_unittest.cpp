@@ -20,7 +20,7 @@ TEST_F(CriticalSectionFixture, recursive)
 {
     WLock lock;
 
-    // ãƒ‡ãƒƒãƒ‰ãƒ­ãƒƒã‚¯ã—ãªã„ã€‚
+    // ƒfƒbƒhƒƒbƒN‚µ‚È‚¢B
     ASSERT_NO_THROW(
         {
             CriticalSection cs(lock);

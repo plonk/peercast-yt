@@ -39,13 +39,13 @@ TEST_F(ChanMgrFixture, initialState)
     ASSERT_TRUE(id.isSame(x->searchInfo.bcID));
     // ...
 
-    // ASSERT_EQ(0, x->numFinds); // åˆæœŸåŒ–ã•ã‚Œãªã„ã€‚
+    // ASSERT_EQ(0, x->numFinds); // ‰Šú‰»‚³‚ê‚È‚¢B
     ASSERT_EQ(String(), x->broadcastMsg);
     EXPECT_EQ(10, x->broadcastMsgInterval);
-    //EXPECT_EQ(0, x->lastHit); // åˆæœŸåŒ–ã•ã‚Œãªã„ã€‚
+    //EXPECT_EQ(0, x->lastHit); // ‰Šú‰»‚³‚ê‚È‚¢B
     EXPECT_EQ(0, x->lastQuery);
     EXPECT_EQ(0, x->maxUptime);
-    // EXPECT_EQ(true, x->searchActive); // åˆæœŸåŒ–ã•ã‚Œãªã„ã€‚
+    // EXPECT_EQ(true, x->searchActive); // ‰Šú‰»‚³‚ê‚È‚¢B
     EXPECT_EQ(600, x->deadHitAge);
     EXPECT_EQ(8192, x->icyMetaInterval);
     EXPECT_EQ(0, x->maxRelaysPerChannel);

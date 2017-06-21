@@ -26,8 +26,8 @@ TEST(GlobalFunctionsTest, trimstr_tab)
     ASSERT_STREQ("word", trimstr(str));
 }
 
-// 空白だけからなる文字列を渡すと、文字列の先頭より以前のメモリにアク
-// セスするバグがあった。
+// �󔒂�������Ȃ镶�����n���ƁA������̐擪���ȑO�̃������ɃA�N
+// �Z�X����o�O���������B
 TEST(GlobalFunctionsTest, trimstr_letsTryToSmashStack)
 {
     char changeMe[2] = { 'A','\t' };

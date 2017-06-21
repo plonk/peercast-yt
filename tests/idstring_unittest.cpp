@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 #include "id.h"
 
-// ID4ã®æ–‡å­—åˆ—è¡¨ç¾ã‚’ä¿å¾…ã™ã‚‹ãŸã‚ã®ã‚¯ãƒ©ã‚¹ã€‚Stringã‚ˆã‚Šã‚‚ãƒ¡ãƒ¢ãƒªãƒ¼ãƒ»ãƒ•ãƒƒãƒˆ
-// ãƒ—ãƒªãƒ³ãƒˆãŒå°ã•ã„ã€‚
+// ID4‚Ì•¶Žš—ñ•\Œ»‚ð•Û‘Ò‚·‚é‚½‚ß‚ÌƒNƒ‰ƒXBString‚æ‚è‚àƒƒ‚ƒŠ[Eƒtƒbƒg
+// ƒvƒŠƒ“ƒg‚ª¬‚³‚¢B
 
 class IDStringFixture : public ::testing::Test {
 public:

@@ -88,7 +88,7 @@ TEST_F(StringStreamFixture, seekToChangesLength)
     s.seekTo(1000);
     ASSERT_EQ(1000, s.getLength());
 
-    char buf[1000];
+    unsigned char buf[1000];
     buf[0] = 0xff;
     buf[999] = 0xff;
 

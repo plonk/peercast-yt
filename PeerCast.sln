@@ -1,11 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.12
+VisualStudioVersion = 15.0.26430.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "corelib", "core\win32\lib\corelib.vcxproj", "{8970094E-C51A-468A-B7EB-E73D31576D06}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "simple", "ui\win32\simple\simple.vcxproj", "{DCECF24D-B173-4F72-9C37-FF4119632D25}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8970094E-C51A-468A-B7EB-E73D31576D06} = {8970094E-C51A-468A-B7EB-E73D31576D06}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tests", "tests\tests.vcxproj", "{F4C9F0E7-0885-4F40-ADDD-15110F953D24}"
 	ProjectSection(ProjectDependencies) = postProject
 		{8970094E-C51A-468A-B7EB-E73D31576D06} = {8970094E-C51A-468A-B7EB-E73D31576D06}
 	EndProjectSection
@@ -34,6 +39,14 @@ Global
 		{DCECF24D-B173-4F72-9C37-FF4119632D25}.Release|x64.Build.0 = Release|x64
 		{DCECF24D-B173-4F72-9C37-FF4119632D25}.Release|x86.ActiveCfg = Release|Win32
 		{DCECF24D-B173-4F72-9C37-FF4119632D25}.Release|x86.Build.0 = Release|Win32
+		{F4C9F0E7-0885-4F40-ADDD-15110F953D24}.Debug|x64.ActiveCfg = Debug|x64
+		{F4C9F0E7-0885-4F40-ADDD-15110F953D24}.Debug|x64.Build.0 = Debug|x64
+		{F4C9F0E7-0885-4F40-ADDD-15110F953D24}.Debug|x86.ActiveCfg = Debug|Win32
+		{F4C9F0E7-0885-4F40-ADDD-15110F953D24}.Debug|x86.Build.0 = Debug|Win32
+		{F4C9F0E7-0885-4F40-ADDD-15110F953D24}.Release|x64.ActiveCfg = Release|x64
+		{F4C9F0E7-0885-4F40-ADDD-15110F953D24}.Release|x64.Build.0 = Release|x64
+		{F4C9F0E7-0885-4F40-ADDD-15110F953D24}.Release|x86.ActiveCfg = Release|Win32
+		{F4C9F0E7-0885-4F40-ADDD-15110F953D24}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

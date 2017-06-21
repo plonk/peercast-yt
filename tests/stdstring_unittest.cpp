@@ -13,7 +13,7 @@ TEST(stdStringFixture, size)
     const char *p = "a\0b";
     ASSERT_EQ(3, string(p, p + 3).size());
 
-    // char* ã‹ã‚‰åˆæœŸåŒ–ã™ã‚‹å ´åˆã¯ \0 ã§åˆ‡ã‚Œã‚‹ã€‚
+    // char* ‚©‚ç‰Šú‰»‚·‚éê‡‚Í \0 ‚ÅØ‚ê‚éB
     ASSERT_EQ(1, string(p).size());
 }
 
@@ -29,7 +29,7 @@ TEST(stdStringFixture, substr)
 {
     string s = "0123456789";
 
-    // 2ã¤ç›®ã®å¼•æ•°ã¯ä½ç½®ã§ã¯ãªãé•·ã•ã€‚
+    // 2‚Â–Ú‚Ìˆø”‚ÍˆÊ’u‚Å‚Í‚È‚­’·‚³B
     ASSERT_STREQ("23", s.substr(2, 2).c_str());
 }
 

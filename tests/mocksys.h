@@ -43,7 +43,7 @@ public:
         return 123456789;
     }
 
-    // URLã‚’ãƒ–ãƒ©ã‚¦ã‚¶ã‚„ãƒ¡ãƒ¼ãƒ©ã§é–‹ãã€‚
+    // URL‚ğƒuƒ‰ƒEƒU‚âƒ[ƒ‰‚ÅŠJ‚­B
     void getURL(const char*) override
     {
     }
@@ -57,12 +57,12 @@ public:
         return false;
     }
 
-    // ãƒ­ãƒ¼ã‚«ãƒ«ã‚µãƒ¼ãƒãƒ¼ã®URLã‚’é–‹ãã€‚
+    // ƒ[ƒJƒ‹ƒT[ƒo[‚ÌURL‚ğŠJ‚­B
     void callLocalURL(const char*, int) override
     {
     }
 
-    // ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ãã€‚
+    // ƒtƒ@ƒCƒ‹‚ğŠJ‚­B
     void executeFile(const char*) override
     {
     }
