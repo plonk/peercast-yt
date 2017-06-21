@@ -169,11 +169,11 @@ ASFInfo parseASFHeader(Stream &in, Stream &mem)
                     asf.streams[s.id].type = s.type;
                     if (s.type == ASFStream::T_AUDIO)
                     {
-                        unsigned char asf_no_error_correction[16] =
-                            {0x00, 0x57, 0xfb, 0x20, 0x55, 0x5B, 0xCF, 0x11, 0xa8, 0xfd, 0x00, 0x80, 0x5f, 0x5c, 0x44, 0x2b};
+                        MSID noErrorCorrectionObjID =
+                            { 0X20FB5700, 0X5B55, 0X11CF,{ 0XA8, 0XFD, 0X00, 0X80, 0X5F, 0X5C, 0X44, 0X2B } };
                         int pos = mem.getPosition();
                         mem.seekTo(in.getPosition() - data.len + data.pos + 2);
-                        mem.write(asf_no_error_correction, 16);
+                        noErrorCorrectionObjID.write(mem);
                         mem.seekTo(pos);
                     }
                     break;
