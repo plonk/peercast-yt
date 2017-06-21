@@ -149,8 +149,7 @@ int URLSource::getSourceRateAvg()
                 //http.writeLine("Pragma: no-cache, rate=1.000000, stream-time=0, stream-offset=4294967295:4294967295, request-context=22605256, max-duration=0");
                 http.writeLine("Pragma: xPlayStrm=1");
                 http.writeLine("Pragma: xClientGUID={c77e7400-738a-11d2-9add-0020af0a3278}");
-                http.writeLine("Pragma: stream-switch-count=2");
-                http.writeLine("Pragma: stream-switch-entry=ffff:1:0 ffff:2:0");
+                http.writeLine("Pragma: stream-switch");
             }else
             {
                 http.writeLineF("%s %s", HTTP_HS_AGENT, PCX_AGENT);
