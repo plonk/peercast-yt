@@ -23,9 +23,9 @@ public:
 
 TEST_F(FileSystemMapperFixture, realPath)
 {
-    ASSERT_EQ("/", FileSystemMapper::realPath("/"));
-    ASSERT_EQ("/tmp", FileSystemMapper::realPath("/tmp"));
-    ASSERT_EQ("/root", FileSystemMapper::realPath("/root"));
-    ASSERT_EQ("/root", FileSystemMapper::realPath("/tmp/../root"));
+    ASSERT_EQ("C:\\", FileSystemMapper::realPath("/"));
+    ASSERT_EQ("", FileSystemMapper::realPath("/tmp"));
+    ASSERT_EQ("", FileSystemMapper::realPath("/root"));
+    ASSERT_EQ("", FileSystemMapper::realPath("/tmp/../root"));
     ASSERT_EQ("", FileSystemMapper::realPath("/nonexistent"));
 }

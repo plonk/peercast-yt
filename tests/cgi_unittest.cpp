@@ -53,7 +53,7 @@ TEST_F(cgiFixture, unescape_html)
     ASSERT_STREQ("<a&b>", unescape_html("&lt;a&b&gt;").c_str());
     ASSERT_STREQ("&gt", unescape_html("&gt").c_str());
     ASSERT_STREQ("&YY;", unescape_html("&YY;").c_str());
-    ASSERT_STREQ("‚ ", unescape_html("&#12354;").c_str());
+    ASSERT_STREQ("\xE3\x81\x82", unescape_html("&#12354;").c_str());
     ASSERT_STREQ("\xf0\x9f\x92\xa9", unescape_html("&#x1f4a9;").c_str());
     ASSERT_STREQ("\xf0\x9f\x92\xa9", unescape_html("&#X1F4A9;").c_str());
 }

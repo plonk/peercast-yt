@@ -235,14 +235,14 @@ TEST_F(StreamFixture, writeUTF8_2)
 {
     mem.writeUTF8(0x3b1);
     ASSERT_EQ(2, mem.getLength());
-    ASSERT_STREQ("ƒ¿", mem.str().c_str());
+    ASSERT_STREQ("\xCE\xB1", mem.str().c_str());
 }
 
 TEST_F(StreamFixture, writeUTF8_3)
 {
     mem.writeUTF8(0x3042);
     ASSERT_EQ(3, mem.getLength());
-    ASSERT_STREQ("‚ ", mem.str().c_str());
+    ASSERT_STREQ("\xE3\x81\x82", mem.str().c_str());
 }
 
 TEST_F(StreamFixture, writeUTF8_4)

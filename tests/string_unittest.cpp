@@ -146,7 +146,7 @@ TEST(StringTest, sjisToUtf8)
 {
     String tmp = "4\x93\xFA\x96\xDA"; // "4“ú–Ú" in Shit_JIS
     tmp.convertTo(String::T_UNICODESAFE);
-    ASSERT_STREQ("4“ú–Ú", tmp.cstr());
+    ASSERT_STREQ("4\xE6\x97\xA5\xE7\x9B\xAE", tmp.cstr());
 }
 
 TEST(StringTest, setUnquote)

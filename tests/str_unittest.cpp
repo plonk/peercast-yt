@@ -42,7 +42,7 @@ TEST_F(strFixture, split)
 TEST_F(strFixture, codepoint_to_utf8)
 {
     ASSERT_STREQ(" ", codepoint_to_utf8(0x20).c_str());
-    ASSERT_STREQ("‚ ", codepoint_to_utf8(12354).c_str());
+    ASSERT_STREQ("\xE3\x81\x82", codepoint_to_utf8(12354).c_str());
     ASSERT_STREQ("\xf0\x9f\x92\xa9", codepoint_to_utf8(0x1f4a9).c_str()); // PILE OF POO
 }
 
