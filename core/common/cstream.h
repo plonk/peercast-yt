@@ -84,7 +84,7 @@ class ChanPacketBuffer
 {
 public:
     enum {
-        MAX_PACKETS = 64,
+        MAX_PACKETS = 56,
         NUM_SAFEPACKETS = 56
     };
 
