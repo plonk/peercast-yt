@@ -210,7 +210,7 @@ std::string upcase(const std::string& input)
     std::string res;
     for (auto c : input)
     {
-        if (isalpha(c))
+        if (isalpha(static_cast<unsigned char>(c)))
             res += toupper(c);
         else
             res += c;
@@ -223,7 +223,7 @@ std::string downcase(const std::string& input)
     std::string res;
     for (auto c : input)
     {
-        if (isalpha(c))
+        if (isalpha(static_cast<unsigned char>(c)))
             res += tolower(c);
         else
             res += c;
@@ -238,7 +238,7 @@ std::string capitalize(const std::string& input)
 
     for (auto c : input)
     {
-        if (isalpha(c))
+        if (isalpha(static_cast<unsigned char>(c)))
         {
             if (prevWasAlpha)
                 res += tolower(c);
