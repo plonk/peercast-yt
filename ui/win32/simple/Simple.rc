@@ -246,7 +246,7 @@ BEGIN
     LTEXT           "PeerCast",IDC_ABOUTVER,43,9,103,8,SS_NOPREFIX
     LTEXT           "Copyright (C) 2005-2007",IDC_STATIC,43,22,119,8
     PUSHBUTTON      "OK",IDOK,134,40,24,12,WS_GROUP
-    PUSHBUTTON      "www.peercast.org",IDC_BUTTON1,42,40,66,12
+    PUSHBUTTON      "View On GitHub",IDC_BUTTON1,42,40,66,12
 END
 
 
