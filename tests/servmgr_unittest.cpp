@@ -97,7 +97,7 @@ TEST_F(ServMgrFixture, initialState)
     // AUTH_TYPE           authType;
     ASSERT_EQ(ServMgr::AUTH_COOKIE, m.authType);
     // char                htmlPath[128];
-    ASSERT_STREQ("html/en", m.htmlPath);
+    ASSERT_STREQ("html/ja", m.htmlPath);
     // int                 serventNum;
     ASSERT_EQ(0, m.serventNum);
     // String              chanLog;

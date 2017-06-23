@@ -91,7 +91,7 @@ TEST_F(ServentFixture, handshakeHTTP)
 
     s.handshakeHTTP(http, true);
 
-    ASSERT_STREQ("HTTP/1.0 302 Found\r\nLocation: /html/en/index.html\r\n\r\n",
+    ASSERT_STREQ("HTTP/1.0 302 Found\r\nLocation: /html/ja/index.html\r\n\r\n",
                  mock->outgoing.str().c_str());
 }
 
@@ -105,7 +105,7 @@ TEST_F(ServentFixture, handshakeIncomingGetRoot)
 
     s.handshakeIncoming();
 
-    ASSERT_STREQ("HTTP/1.0 302 Found\r\nLocation: /html/en/index.html\r\n\r\n",
+    ASSERT_STREQ("HTTP/1.0 302 Found\r\nLocation: /html/ja/index.html\r\n\r\n",
                  mock->outgoing.str().c_str());
 }
 
@@ -128,7 +128,7 @@ TEST_F(ServentFixture, handshakeIncomingHTMLRoot)
     MockClientSocket* mock;
 
     s.sock = mock = new MockClientSocket();
-    mock->incoming.str("GET /html/en/index.html HTTP/1.0\r\n\r\n");
+    mock->incoming.str("GET /html/ja/index.html HTTP/1.0\r\n\r\n");
 
     s.handshakeIncoming();
 
