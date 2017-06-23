@@ -28,6 +28,19 @@
 #include "critsec.h"
 
 // -----------------------------------
+void ChanPacket::init(ChanPacketv &p)
+{
+    if (p.len > MAX_DATALEN)
+        throw StreamException("Packet data too large");
+    type = p.type;
+    len  = p.len;
+    pos  = p.pos;
+    sync = p.sync;
+    cont = p.cont;
+    memcpy(data, p.data, len);
+}
+
+// -----------------------------------
 void ChanPacket::init(TYPE t, const void *p, unsigned int l, unsigned int _pos)
 {
     type = t;
@@ -110,7 +123,7 @@ int ChanPacketBuffer::copyFrom(ChanPacketBuffer &buf, unsigned int reqPos)
 
     for (unsigned int i = buf.firstPos; i <= buf.lastPos; i++)
     {
-        ChanPacket *src = &buf.packets[i%MAX_PACKETS];
+        ChanPacketv *src = &buf.packets[i%MAX_PACKETS];
         if (src->type & accept)
         {
             if (src->pos >= reqPos)
@@ -145,10 +158,10 @@ bool ChanPacketBuffer::findPacket(unsigned int spos, ChanPacket &pack)
     // ケットも送らないか。
     for (unsigned int i = firstPos; i <= lastPos; i++)
     {
-        ChanPacket &p = packets[i%MAX_PACKETS];
+        ChanPacketv &p = packets[i%MAX_PACKETS];
         if (p.pos >= spos)
         {
-            pack = p;
+            pack.init(p);
             lock.off();
             return true;
         }
@@ -179,7 +192,7 @@ unsigned int    ChanPacketBuffer::getLatestNonContinuationPos()
 
     for (int64_t i = lastPos; i >= firstPos; i--)
     {
-        ChanPacket &p = packets[i%MAX_PACKETS];
+        ChanPacketv &p = packets[i%MAX_PACKETS];
         if (!p.cont)
             return p.pos;
     }
@@ -197,7 +210,7 @@ unsigned int    ChanPacketBuffer::getOldestNonContinuationPos()
 
     for (int64_t i = firstPos; i <= lastPos; i++)
     {
-        ChanPacket &p = packets[i%MAX_PACKETS];
+        ChanPacketv &p = packets[i%MAX_PACKETS];
         if (!p.cont)
             return p.pos;
     }
@@ -257,7 +270,7 @@ bool ChanPacketBuffer::writePacket(ChanPacket &pack, bool updateReadPos)
         lock.on();
 
         pack.sync = writePos;
-        packets[writePos%MAX_PACKETS] = pack;
+        packets[writePos%MAX_PACKETS].init(pack);
         lastPos = writePos;
         writePos++;
 
@@ -298,7 +311,7 @@ void    ChanPacketBuffer::readPacket(ChanPacket &pack)
             throw TimeoutException();
     }
     lock.on();
-    pack = packets[readPos%MAX_PACKETS];
+    pack.init(packets[readPos%MAX_PACKETS]);
     readPos++;
     lock.off();
 

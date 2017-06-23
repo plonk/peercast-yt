@@ -28,6 +28,7 @@
 
 class Channel;
 class ChanPacket;
+class ChanPacketv;
 class Stream;
 
 // ----------------------------------
@@ -63,6 +64,7 @@ public:
         cont = false;
     }
 
+    void    init(ChanPacketv &p);
     void    init(TYPE type, const void *data, unsigned int length, unsigned int position);
 
     void    writeRaw(Stream &);
@@ -80,11 +82,88 @@ public:
 };
 
 // ----------------------------------
+class ChanPacketv
+{
+public:
+    enum {BSIZE = 0x100};
+
+    ChanPacketv()
+    {
+        init();
+    }
+
+    ~ChanPacketv()
+    {
+        free();
+    }
+
+    void free()
+    {
+        if (data) {
+            delete [] data;
+            data = NULL;
+            datasize = 0;
+        }
+    }
+
+    void reset()
+    {
+        free();
+        init();
+    }
+
+    void    init()
+    {
+        type     = ChanPacket::T_UNKNOWN;
+        len      = 0;
+        pos      = 0;
+        sync     = 0;
+        cont     = false;
+        data     = NULL;
+        datasize = 0;
+    }
+
+    void init(ChanPacket &p)
+    {
+        if (data && (datasize < p.len || datasize > p.len + BSIZE * 4)) {
+            free();
+            data = NULL;
+            datasize = 0;
+        }
+        type = p.type;
+        len  = p.len;
+        pos  = p.pos;
+        sync = p.sync;
+        cont = p.cont;
+        if (!data) {
+            datasize = (len & ~(BSIZE - 1)) + BSIZE;
+            data = new char[datasize];
+        }
+        memcpy(data, p.data, len);
+    }
+
+    void init(ChanPacketv &p)
+    {
+        ChanPacket tp;
+        tp.init(p);
+        init(tp);
+    }
+
+    ChanPacket::TYPE type;
+    unsigned int     len;
+    unsigned int     pos;
+    unsigned int     sync;
+    bool             cont; // true if this is a continuation packet
+    char             *data;
+    unsigned int     datasize;
+};
+
+// ----------------------------------
 class ChanPacketBuffer
 {
 public:
     enum {
-        MAX_PACKETS = 56,
+        MAX_PACKETS = 64,
         NUM_SAFEPACKETS = 56
     };
 
@@ -147,7 +226,7 @@ public:
         return { lens, cs, ncs };
     }
 
-    ChanPacket              packets[MAX_PACKETS];
+    ChanPacketv             packets[MAX_PACKETS];
     volatile unsigned int   lastPos, firstPos, safePos;
     volatile unsigned int   readPos, writePos;
     unsigned int            accept;
