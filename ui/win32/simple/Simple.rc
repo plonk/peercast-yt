@@ -55,14 +55,10 @@ BEGIN
         POPUP "高度"
         BEGIN
             MENUITEM "情報",                        ID_POPUP_ADVANCED_INFORMATION
-
-            MENUITEM "リレーチャンネル",            ID_POPUP_ADVANCED_RELAYEDCHANNELS
-
+            MENUITEM "チャンネル",                  ID_POPUP_ADVANCED_RELAYEDCHANNELS
             MENUITEM "配信",                        ID_POPUP_ADVANCED_BROADCAST
-
-            MENUITEM "コネクション",                ID_POPUP_CONNECTIONS
-            MENUITEM "ログ",                        ID_POPUP_ADVANCED_VIEWLOG
-
+            MENUITEM "接続",                        ID_POPUP_CONNECTIONS
+            MENUITEM "ログ表示",                    ID_POPUP_ADVANCED_VIEWLOG
             MENUITEM "設定",                        ID_POPUP_SETTINGS
             MENUITEM "GUIを開く",                   ID_POPUP_ADVANCED_SHOWGUI
 
@@ -133,7 +129,7 @@ BEGIN
     RTEXT           "最大リレー数 :",IDC_STATIC,194,36,40,8
     EDITTEXT        IDC_MAXRELAYS,241,33,40,14,ES_AUTOHSCROLL | ES_NUMBER
     PUSHBUTTON      "切断",IDC_BUTTON6,47,179,43,13
-    LTEXT           "Peercast-VP",IDC_STATIC,21,14,39,8
+    LTEXT           "Peercast-YT",IDC_STATIC,21,14,39,8
 END
 
 IDD_CHANINFO DIALOGEX 0, 0, 184, 207
