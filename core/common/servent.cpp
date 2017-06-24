@@ -570,8 +570,8 @@ void Servent::handshakeOut()
         {
             agent.set(arg);
 
-            if (strnicmp(arg, "PeerCast/", 9)==0)
-                versionValid = (stricmp(arg+9, MIN_CONNECTVER)>=0);
+            if (Sys::strnicmp(arg, "PeerCast/", 9)==0)
+                versionValid = (Sys::stricmp(arg+9, MIN_CONNECTVER)>=0);
         }else if (http.isHeader(PCX_HS_NETWORKID))
             clientID.fromStr(arg);
     }
@@ -615,10 +615,10 @@ void Servent::handshakeIn()
         {
             agent.set(arg);
 
-            if (strnicmp(arg, "PeerCast/", 9)==0)
+            if (Sys::strnicmp(arg, "PeerCast/", 9)==0)
             {
-                versionValid = (stricmp(arg+9, MIN_CONNECTVER)>=0);
-                diffRootVer = stricmp(arg+9, MIN_ROOTVER)<0;
+                versionValid = (Sys::stricmp(arg+9, MIN_CONNECTVER)>=0);
+                diffRootVer = Sys::stricmp(arg+9, MIN_ROOTVER)<0;
             }
         }else if (http.isHeader(PCX_HS_NETWORKID))
         {
@@ -634,13 +634,13 @@ void Servent::handshakeIn()
                 throw StreamException("Servent loopback");
         }else if (http.isHeader(PCX_HS_OS))
         {
-            if (stricmp(arg, PCX_OS_LINUX)==0)
+            if (Sys::stricmp(arg, PCX_OS_LINUX)==0)
                 osType = 1;
-            else if (stricmp(arg, PCX_OS_WIN32)==0)
+            else if (Sys::stricmp(arg, PCX_OS_WIN32)==0)
                 osType = 2;
-            else if (stricmp(arg, PCX_OS_MACOSX)==0)
+            else if (Sys::stricmp(arg, PCX_OS_MACOSX)==0)
                 osType = 3;
-            else if (stricmp(arg, PCX_OS_WINAMP2)==0)
+            else if (Sys::stricmp(arg, PCX_OS_WINAMP2)==0)
                 osType = 4;
         }
     }

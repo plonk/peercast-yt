@@ -260,7 +260,7 @@ char *XML::Node::findAttr(const char *name)
     for (int i=1; i<numAttr; i++)
     {
         char *an = getAttrName(i);
-        if (strnicmp(an, name, nlen)==0)
+        if (Sys::strnicmp(an, name, nlen)==0)
             return getAttrValue(i);
     }
     return NULL;
@@ -397,7 +397,7 @@ XML::Node *XML::findNode(const char *n)
 // ----------------------------------
 XML::Node *XML::Node::findNode(const char *name)
 {
-    if (stricmp(getName(), name)==0)
+    if (Sys::stricmp(getName(), name)==0)
         return this;
 
     XML::Node *c = child;
@@ -454,7 +454,7 @@ void XML::read(Stream &in)
                 // do nothing
             }else if (buf[0] == '?')            // doc type
             {
-                if (strnicmp(&buf[1], "xml ", 4))
+                if (Sys::strnicmp(&buf[1], "xml ", 4))
                     throw StreamException("Not XML document");
             }else if (buf[0] == '/')            // end tag
             {

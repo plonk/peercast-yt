@@ -193,7 +193,7 @@ void USys::callLocalURL(const char *str, int port)
 // ---------------------------------
 void USys::getURL(const char *url)
 {
-    if (strnicmp(url, "http://", 7) || strnicmp(url, "mailto:", 7))
+    if (Sys::strnicmp(url, "http://", 7) || Sys::strnicmp(url, "mailto:", 7)) // XXX: ==0 が抜けてる？
     {
         openURL( url );
     }

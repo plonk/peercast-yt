@@ -42,7 +42,7 @@ TEST(GlobalFunctionsTest, stristr)
 {
     const char *str = "abABcdCD";
 
-    ASSERT_EQ(str, stristr("ab", str));
-    ASSERT_STREQ("ABcdCD", stristr("ab", str + 2));
-    ASSERT_EQ(NULL, stristr("ab", str + 4));
+    ASSERT_EQ(str, stristr(str, "ab"));
+    ASSERT_STREQ("ABcdCD", stristr(str + 2, "ab"));
+    ASSERT_EQ(NULL, stristr(str + 4, "ab"));
 }

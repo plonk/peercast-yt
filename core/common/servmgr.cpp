@@ -1203,16 +1203,16 @@ void ServMgr::loadSettings(const char *fn)
             else if (iniFile.isName("authType"))
             {
                 const char *t = iniFile.getStrValue();
-                if (stricmp(t, "cookie")==0)
+                if (Sys::stricmp(t, "cookie")==0)
                     servMgr->authType = ServMgr::AUTH_COOKIE;
-                else if (stricmp(t, "http-basic")==0)
+                else if (Sys::stricmp(t, "http-basic")==0)
                     servMgr->authType = ServMgr::AUTH_HTTPBASIC;
             }else if (iniFile.isName("cookiesExpire"))
             {
                 const char *t = iniFile.getStrValue();
-                if (stricmp(t, "never")==0)
+                if (Sys::stricmp(t, "never")==0)
                     servMgr->cookieList.neverExpire = true;
-                else if (stricmp(t, "session")==0)
+                else if (Sys::stricmp(t, "session")==0)
                     servMgr->cookieList.neverExpire = false;
             }else if (iniFile.isName("genrePrefix"))
             {
@@ -2027,15 +2027,15 @@ const char *ServHost::getTypeStr(TYPE t)
 // --------------------------------------------------
 ServHost::TYPE ServHost::getTypeFromStr(const char *s)
 {
-    if (stricmp(s, "NONE")==0)
+    if (Sys::stricmp(s, "NONE")==0)
         return T_NONE;
-    else if (stricmp(s, "SERVENT")==0)
+    else if (Sys::stricmp(s, "SERVENT")==0)
         return T_SERVENT;
-    else if (stricmp(s, "STREAM")==0)
+    else if (Sys::stricmp(s, "STREAM")==0)
         return T_STREAM;
-    else if (stricmp(s, "CHANNEL")==0)
+    else if (Sys::stricmp(s, "CHANNEL")==0)
         return T_CHANNEL;
-    else if (stricmp(s, "TRACKER")==0)
+    else if (Sys::stricmp(s, "TRACKER")==0)
         return T_TRACKER;
 
     return T_NONE;

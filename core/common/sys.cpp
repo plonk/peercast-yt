@@ -180,7 +180,7 @@ bool cmpCGIarg(const char *str, const char *arg, const char *value)
     if ((!str) || (!strlen(value)))
         return false;
 
-    if (strnicmp(str, arg, strlen(arg)) == 0)
+    if (Sys::strnicmp(str, arg, strlen(arg)) == 0)
     {
         str += strlen(arg);
 
@@ -290,4 +290,25 @@ char* Sys::strdup(const char *src)
     char *res = (char*) malloc(len+1);
     memcpy(res, src, len+1);
     return res;
+}
+
+// ---------------------------
+int Sys::stricmp(const char* s1, const char* s2)
+{
+    while (*s1 && *s2 && TOUPPER(*s1) == TOUPPER(*s2))
+        s1++, s2++;
+
+    return TOUPPER(*s1) - TOUPPER(*s2);
+}
+
+// ---------------------------
+int Sys::strnicmp(const char* s1, const char* s2, size_t n)
+{
+    while (*s1 && *s2 && n > 0 && TOUPPER(*s1) == TOUPPER(*s2))
+        s1++, s2++, n--;
+
+    if (n == 0)
+        return 0;
+    else
+        return TOUPPER(*s1) - TOUPPER(*s2);
 }
