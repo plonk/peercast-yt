@@ -47,10 +47,6 @@ extern char *trimstr(char *s);
 #define strnicmp strncasecmp
 #endif
 
-#if !defined(HAVE_STRDUP)
-extern char *strdup(const char *s);
-#endif
-
 // ------------------------------------
 namespace peercast {
 class Random {

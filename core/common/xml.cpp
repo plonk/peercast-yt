@@ -121,7 +121,7 @@ void XML::Node::setBinaryContent(void *ptr, int size)
 // ----------------------------------
 void XML::Node::setContent(const char *n)
 {
-    contData = strdup(n);
+    contData = Sys::strdup(n);
 }
 
 // ----------------------------------
@@ -129,7 +129,7 @@ void XML::Node::setAttributes(const char *n)
 {
     char c;
 
-    attrData = strdup(n);
+    attrData = Sys::strdup(n);
 
     // count maximum amount of attributes
     int maxAttr = 1;        // 1 for tag name
