@@ -180,23 +180,23 @@ void ChanHit::writeAtoms(AtomStream &atom, GnuID &chanID)
 // -----------------------------------
 bool    ChanHit::writeVariable(Stream &out, const String &var)
 {
-    char buf[1024];
+    std::string buf;
 
     if (var == "rhost0")
-        rhost[0].toStr(buf);
+        buf = rhost[0].str();
     else if (var == "rhost1")
-        rhost[1].toStr(buf);
+        buf = rhost[1].str();
     else if (var == "numHops")
-        sprintf(buf, "%d", numHops);
+        buf = std::to_string(numHops);
     else if (var == "numListeners")
-        sprintf(buf, "%d", numListeners);
+        buf = std::to_string(numListeners);
     else if (var == "numRelays")
-        sprintf(buf, "%d", numRelays);
+        buf = std::to_string(numRelays);
     else if (var == "uptime")
     {
         String timeStr;
         timeStr.setFromStopwatch(upTime);
-        strcpy(buf, timeStr.cstr());
+        buf = timeStr.c_str();
     }else if (var == "update")
     {
         String timeStr;
@@ -204,19 +204,19 @@ bool    ChanHit::writeVariable(Stream &out, const String &var)
             timeStr.setFromStopwatch(sys->getTime()-time);
         else
             timeStr.set("-");
-        strcpy(buf, timeStr.cstr());
+        buf = timeStr.c_str();
     }else if (var == "isFirewalled")
-        sprintf(buf, "%d", firewalled?1:0);
+        buf = firewalled ? "1" : "0";
     else if (var == "version")
     {
         std::string ver = versionString();
         if (ver.empty())
-            sprintf(buf, "-");
+            buf = "-";
         else
-            sprintf(buf, "%s", ver.c_str());
+            buf = ver;
     }
     else if (var == "tracker")
-        sprintf(buf, "%d", tracker);
+        buf = std::to_string(tracker);
     else
         return false;
 
