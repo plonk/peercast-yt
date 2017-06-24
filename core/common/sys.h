@@ -109,6 +109,8 @@ public:
 
     bool writeVariable(Stream&, const String&) override;
 
+    static char *strdup(const char *s);
+
     unsigned int idleSleepTime;
     unsigned int rndSeed;
     unsigned int numThreads;

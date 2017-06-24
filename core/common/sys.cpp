@@ -282,3 +282,12 @@ void    ThreadInfo::shutdown()
     active = false;
     //sys->waitThread(this);
 }
+
+// ---------------------------
+char* Sys::strdup(const char *src)
+{
+    size_t len = strlen(src);
+    char *res = (char*) malloc(len+1);
+    memcpy(res, src, len+1);
+    return res;
+}
