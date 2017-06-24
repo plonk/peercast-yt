@@ -37,3 +37,12 @@ TEST(GlobalFunctionsTest, trimstr_letsTryToSmashStack)
     ASSERT_EQ('A', changeMe[0]);
     ASSERT_EQ('\t', changeMe[1]);
 }
+
+TEST(GlobalFunctionsTest, stristr)
+{
+    const char *str = "abABcdCD";
+
+    ASSERT_EQ(str, stristr("ab", str));
+    ASSERT_STREQ("ABcdCD", stristr("ab", str + 2));
+    ASSERT_EQ(NULL, stristr("ab", str + 4));
+}
