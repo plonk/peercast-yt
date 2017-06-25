@@ -126,6 +126,7 @@ public:
     bool                isActive() { return id.isSet(); }
     bool                isPrivate() { return bcID.getFlags() & 1; }
     const char          *getTypeStr();
+    std::string         getTypeStringLong();
     const char          *getTypeExt();
     const char          *getMIMEType();
     static const char   *getTypeStr(TYPE);

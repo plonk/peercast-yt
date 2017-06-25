@@ -218,6 +218,8 @@ public:
     int          getBitrate() { return info.bitrate; }
     void         getIDStr(char *s) { info.id.toStr(s); }
     void         getStreamPath(char *);
+    std::string  getSourceString();
+    std::string  getBufferString();
 
     void         broadcastTrackerUpdate(GnuID &, bool = false);
     bool         sendPacketUp(ChanPacket &, GnuID &, GnuID &, GnuID &);

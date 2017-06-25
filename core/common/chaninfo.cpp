@@ -46,6 +46,22 @@ const char *ChanInfo::getTypeStr()
 }
 
 // -----------------------------------
+std::string ChanInfo::getTypeStringLong()
+{
+    std::string buf = std::string(getTypeStr()) +
+        " (" + getMIMEType() + "; " + getTypeExt() + ")";
+
+    if (contentTypeStr == "")
+        buf += " [contentTypeStr empty]"; // これが起こるのは何かがおかしい
+    if (MIMEType == "")
+        buf += " [no styp]";
+    if (streamExt == "")
+        buf += " [no sext]";
+
+    return buf;
+}
+
+// -----------------------------------
 const char *ChanInfo::getTypeExt()
 {
     if (streamExt.isEmpty()) {
