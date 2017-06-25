@@ -49,7 +49,7 @@ void HTTP::readRequest()
 //-----------------------------------------
 void HTTP::initRequest(const char *r)
 {
-    strcpy(cmdLine, r);
+    Sys::strcpy_truncate(cmdLine, sizeof(cmdLine), r);
     parseRequestLine();
 }
 

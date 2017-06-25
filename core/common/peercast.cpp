@@ -148,7 +148,7 @@ int     APICALL PeercastInstance::getServerPort()
 void    APICALL PeercastInstance::setServerPassword(const char *pwd)
 {
     if (servMgr)
-        strcpy(servMgr->password, pwd);
+        Sys::strcpy_truncate(servMgr->password, sizeof(servMgr->password), pwd);
 }
 
 // --------------------------------------------------
