@@ -77,3 +77,12 @@ TEST_F(SysFixture, strnicmp)
     ASSERT_NE(0, Sys::strnicmp("a", "b", 1));
     ASSERT_NE(0, Sys::strnicmp("a", "b", 100));
 }
+
+TEST_F(SysFixture, strcpy_truncate)
+{
+    char dest[10] = "fuga";
+
+    ASSERT_STREQ("hoge", Sys::strcpy_truncate(dest, 10, "hoge"));
+    ASSERT_STREQ("f", Sys::strcpy_truncate(dest, 2, "fuga"));
+    ASSERT_STREQ("", Sys::strcpy_truncate(dest, 1, "piyo"));
+}

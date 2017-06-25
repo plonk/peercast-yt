@@ -312,3 +312,24 @@ int Sys::strnicmp(const char* s1, const char* s2, size_t n)
     else
         return TOUPPER(*s1) - TOUPPER(*s2);
 }
+
+// ---------------------------
+char* Sys::strcpy_truncate(char* dest, size_t destsize, const char* src)
+{
+    if (destsize == 0)
+    {
+        LOG_ERROR("strcpy_truncate: destsize == 0");
+        return dest;
+    }
+
+    if (destsize < strlen(src) + 1)
+    {
+        LOG_ERROR("strcpy_truncate: destsize[%d bytes] not large enough to hold src[%d bytes]",
+                  (int)destsize, (int)strlen(src));
+    }
+
+    strncpy(dest, src, destsize);
+    dest[destsize - 1] = '\0';
+
+    return dest;
+}

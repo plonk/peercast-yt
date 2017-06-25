@@ -94,9 +94,10 @@ public:
 
     bool writeVariable(Stream&, const String&) override;
 
-    static char *strdup(const char *s);
-    static int stricmp(const char* s1, const char* s2);
-    static int strnicmp(const char* s1, const char* s2, size_t n);
+    static char* strdup(const char *s);
+    static int   stricmp(const char* s1, const char* s2);
+    static int   strnicmp(const char* s1, const char* s2, size_t n);
+    static char* strcpy_truncate(char* dest, size_t destsize, const char* src);
 
     unsigned int idleSleepTime;
     unsigned int rndSeed;
