@@ -275,9 +275,7 @@ public:
 
 #ifdef WIN32
     typedef int (WINAPI *THREAD_FUNC)(ThreadInfo *);
-#endif
-
-#ifdef _UNIX
+#else
     typedef int (*THREAD_FUNC)(ThreadInfo *);
 #endif
 
