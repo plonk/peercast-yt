@@ -164,7 +164,6 @@ public:
 };
 
 // ------------------------------------
-typedef int (WINAPI *THREAD_FUNC)(ThreadInfo *);
 typedef uintptr_t THREAD_HANDLE;
 #define THREAD_PROC int WINAPI
 
@@ -206,7 +205,6 @@ public:
 #define _BIG_ENDIAN 1
 #endif
 
-typedef int (*THREAD_FUNC)(ThreadInfo *);
 #define THREAD_PROC int
 typedef pthread_t THREAD_HANDLE;
 
@@ -274,7 +272,14 @@ public:
 class ThreadInfo
 {
 public:
-    //typedef int  (__stdcall *THREAD_FUNC)(ThreadInfo *);
+
+#ifdef WIN32
+    typedef int (WINAPI *THREAD_FUNC)(ThreadInfo *);
+#endif
+
+#ifdef _UNIX
+    typedef int (*THREAD_FUNC)(ThreadInfo *);
+#endif
 
     ThreadInfo()
     {
