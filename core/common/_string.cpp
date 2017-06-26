@@ -598,7 +598,7 @@ String String::format(const char* fmt, ...)
 // -----------------------------------
 bool String::isValidURL()
 {
-    return (strnicmp(data, "http://", 7) == 0) || (strnicmp(data, "mailto:", 7) == 0);
+    return (Sys::strnicmp(data, "http://", 7) == 0) || (Sys::strnicmp(data, "mailto:", 7) == 0);
 }
 
 #ifdef WIN32

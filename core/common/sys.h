@@ -154,14 +154,10 @@ public:
 };
 
 // ------------------------------------
-typedef int (WINAPI *THREAD_FUNC)(ThreadInfo *);
 typedef uintptr_t THREAD_HANDLE;
 #define THREAD_PROC int WINAPI
 
 #define fdopen _fdopen
-#define strdup _strdup
-#define stricmp _stricmp
-#define strnicmp _strnicmp
 
 // ------------------------------------
 class WLock

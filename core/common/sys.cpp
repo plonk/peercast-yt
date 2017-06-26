@@ -327,8 +327,7 @@ char* Sys::strcpy_truncate(char* dest, size_t destsize, const char* src)
                   (int)destsize, (int)strlen(src));
     }
 
-    strncpy(dest, src, destsize);
-    dest[destsize - 1] = '\0';
+    strncpy_s(dest, destsize, src, _TRUNCATE);
 
     return dest;
 }

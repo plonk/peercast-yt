@@ -1410,7 +1410,7 @@ std::string Channel::getBufferString()
 {
     std::string buf;
     String time;
-    auto lastWritten = (double)sys->getTime() - rawData.lastWriteTime;
+    auto lastWritten = sys->getTime() - rawData.lastWriteTime;
 
     if (lastWritten < 5)
         time = "< 5 sec";

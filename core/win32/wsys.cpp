@@ -121,7 +121,7 @@ void WSys::callLocalURL(const char *str,int port)
 void WSys::getURL(const char *url)
 {
     if (mainWindow)
-        if (Sys::strnicmp(url,"http://",7) || Sys::strnicmp(url,"mailto:",7)) // XXX: ==0 ãŒæŠœã‘ã¦ã‚‹ï¼Ÿ
+        if (Sys::strnicmp(url,"http://",7) || Sys::strnicmp(url,"mailto:",7)) // XXX: ==0 ‚ª”²‚¯‚Ä‚éH
             ShellExecute(mainWindow, NULL, url, NULL, NULL, SW_SHOWNORMAL);
 }
 

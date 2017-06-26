@@ -316,7 +316,7 @@ TEST_F(ServMgrFixture, writeVariable)
     ASSERT_STREQ("0", mem.str().c_str());
 
     mem.str("");
-    ASSERT_TRUE(m.writeVariable(mem, "lang.en"));
+    ASSERT_TRUE(m.writeVariable(mem, "lang.ja"));
     ASSERT_STREQ("1", mem.str().c_str());
 
     mem.str("");

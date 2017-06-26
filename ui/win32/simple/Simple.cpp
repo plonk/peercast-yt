@@ -209,9 +209,9 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	}
 
 	
-	if (strnicmp(tmpURL,"peercast://",11)==0)
+	if (Sys::strnicmp(tmpURL,"peercast://",11)==0)
 	{
-		if (strnicmp(tmpURL+11,"pls/",4)==0)
+		if (Sys::strnicmp(tmpURL+11,"pls/",4)==0)
 			chanURL = tmpURL+11+4;
 		else
 			chanURL = tmpURL+11;
@@ -595,12 +595,12 @@ typedef int (*COMPARE_FUNC)(const void *,const void *);
 
 static int compareHitLists(ChanHitList **c2, ChanHitList **c1)
 {
-	return stricmp(c1[0]->info.name.cstr(),c2[0]->info.name.cstr());
+	return Sys::stricmp(c1[0]->info.name.cstr(),c2[0]->info.name.cstr());
 }
 
 static int compareChannels(Channel **c2, Channel **c1)
 {
-	return stricmp(c1[0]->info.name.cstr(),c2[0]->info.name.cstr());
+	return Sys::stricmp(c1[0]->info.name.cstr(),c2[0]->info.name.cstr());
 }
 
 // 

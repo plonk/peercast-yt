@@ -52,7 +52,7 @@ std::string ChanInfo::getTypeStringLong()
         " (" + getMIMEType() + "; " + getTypeExt() + ")";
 
     if (contentTypeStr == "")
-        buf += " [contentTypeStr empty]"; // ã“ã‚ŒãŒèµ·ã“ã‚‹ã®ã¯ä½•ã‹ãŒãŠã‹ã—ã„
+        buf += " [contentTypeStr empty]"; // ‚±‚ê‚ª‹N‚±‚é‚Ì‚Í‰½‚©‚ª‚¨‚©‚µ‚¢
     if (MIMEType == "")
         buf += " [no styp]";
     if (streamExt == "")
