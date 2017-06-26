@@ -268,6 +268,8 @@ ChanInfo::TYPE ChanInfo::getTypeFromStr(const char *str)
         return T_MKV;
     else if (Sys::stricmp(str, "WEBM")==0)
         return T_WEBM;
+    else if (Sys::stricmp(str, "TS")==0)
+        return T_TS;
     else if (Sys::stricmp(str, "PLS")==0)
         return T_PLS;
     else if (Sys::stricmp(str, "M3U")==0)
