@@ -103,7 +103,7 @@ Channel *ChanMgr::findChannelByName(const char *n)
     while (ch)
     {
         if (ch->isActive())
-            if (stricmp(ch->info.name, n) == 0)
+            if (Sys::stricmp(ch->info.name, n) == 0)
                 return ch;
         ch = ch->next;
     }

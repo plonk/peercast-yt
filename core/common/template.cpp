@@ -58,7 +58,7 @@ Template::Template(const char* args)
     : currentElement(json::object({}))
 {
     if (args)
-        tmplArgs = strdup(args);
+        tmplArgs = Sys::strdup(args);
     else
         tmplArgs = NULL;
     initVariableWriters();
@@ -68,7 +68,7 @@ Template::Template(const char* args)
 Template::Template(const std::string& args)
     : currentElement(json::object({}))
 {
-    tmplArgs = strdup(args.c_str());
+    tmplArgs = Sys::strdup(args.c_str());
     initVariableWriters();
 }
 

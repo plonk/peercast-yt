@@ -1104,7 +1104,7 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 
             chanMgr->icyMetaInterval = iv;
         }else if (strcmp(curr, "passnew") == 0)
-            strcpy_s(servMgr->password, _countof(servMgr->password), arg);
+            Sys::strcpy_truncate(servMgr->password, sizeof(servMgr->password), arg);
         else if (strcmp(curr, "root") == 0)
             servMgr->isRoot = getCGIargBOOL(arg);
         else if (strcmp(curr, "brroot") == 0)

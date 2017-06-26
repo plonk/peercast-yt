@@ -393,3 +393,68 @@ TEST_F(ServentFixture, handshakeHTTPBasicAuth_noauthorizationheader)
     ASSERT_FALSE(s.handshakeHTTPBasicAuth(http));
     ASSERT_EQ("HTTP/1.0 401 Unauthorized\r\nWWW-Authenticate: Basic realm=\"PeerCast Admin\"\r\n\r\n", mock->outgoing.str());
 }
+
+TEST_F(ServentFixture, writeVariable)
+{
+    StringStream mem;
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "type"));
+    ASSERT_STREQ("NONE", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "status"));
+    ASSERT_STREQ("NONE", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "address"));
+    ASSERT_STREQ("0.0.0.0:0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "agent"));
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "bitrate"));
+    ASSERT_STREQ("0.0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "bitrateAvg"));
+    ASSERT_STREQ("0.0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "uptime"));
+    ASSERT_STREQ("-", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "gnet.packetsIn"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "gnet.packetsInPerSec"));
+    ASSERT_STREQ("0.0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "gnet.packetsOut"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "gnet.packetsOutPerSec"));
+    ASSERT_STREQ("0.0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "gnet.normQueue"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "gnet.priQueue"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "gnet.flowControl"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "gnet.routeTime"));
+    ASSERT_STREQ("-", mem.str().c_str());
+}

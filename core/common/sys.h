@@ -37,21 +37,6 @@ extern char *trimstr(char *s);
 #include "varwriter.h"
 
 // ------------------------------------
-#if !defined(HAVE_STRICMP)
-#include <strings.h>
-#define stricmp strcasecmp
-#endif
-
-#if !defined(HAVE_STRNICMP)
-#include <strings.h>
-#define strnicmp strncasecmp
-#endif
-
-#if !defined(HAVE_STRDUP)
-extern char *strdup(const char *s);
-#endif
-
-// ------------------------------------
 namespace peercast {
 class Random {
 public:
@@ -109,6 +94,11 @@ public:
 
     bool writeVariable(Stream&, const String&) override;
 
+    static char* strdup(const char *s);
+    static int   stricmp(const char* s1, const char* s2);
+    static int   strnicmp(const char* s1, const char* s2, size_t n);
+    static char* strcpy_truncate(char* dest, size_t destsize, const char* src);
+
     unsigned int idleSleepTime;
     unsigned int rndSeed;
     unsigned int numThreads;
@@ -164,6 +154,7 @@ public:
 };
 
 // ------------------------------------
+typedef int (WINAPI *THREAD_FUNC)(ThreadInfo *);
 typedef uintptr_t THREAD_HANDLE;
 #define THREAD_PROC int WINAPI
 

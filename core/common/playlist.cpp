@@ -35,7 +35,7 @@ void PlayList::readASX(Stream &in)
         XML::Node *n = xml.root->child;
         while (n)
         {
-            if (stricmp("entry", n->getName())==0)
+            if (Sys::stricmp("entry", n->getName())==0)
             {
                 XML::Node *rf = n->findNode("ref");
                 if (rf)
@@ -59,7 +59,7 @@ void PlayList::readSCPLS(Stream &in)
     char tmp[256];
     while (in.readLine(tmp, sizeof(tmp)))
     {
-        if (strnicmp(tmp, "file", 4)==0)
+        if (Sys::strnicmp(tmp, "file", 4)==0)
         {
             char *p = strstr(tmp, "=");
             if (p)

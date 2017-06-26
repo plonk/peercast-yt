@@ -1381,45 +1381,106 @@ std::string Channel::renderHexDump(const std::string& in)
 }
 
 // -----------------------------------
+std::string Channel::getSourceString()
+{
+    std::string buf;
+
+    if (sourceURL.isEmpty())
+    {
+        if (srcType == SRC_HTTPPUSH)
+            buf = sock->host.str();
+        else
+        {
+            buf = sourceHost.str(true);
+            if (sourceHost.uphost.ip)
+            {
+                buf += " recv. from ";
+                buf += sourceHost.uphost.str();
+            }
+        }
+    }
+    else
+        buf = sourceURL.c_str();
+
+    return buf;
+}
+
+// -----------------------------------
+std::string Channel::getBufferString()
+{
+    std::string buf;
+    String time;
+    auto lastWritten = (double)sys->getTime() - rawData.lastWriteTime;
+
+    if (lastWritten < 5)
+        time = "< 5 sec";
+    else
+        time.setFromStopwatch(lastWritten);
+
+    auto stat = rawData.getStatistics();
+    auto& lens = stat.packetLengths;
+    double byterate = (sourceData) ? sourceData->getSourceRateAvg() : 0.0;
+    auto sum = std::accumulate(lens.begin(), lens.end(), 0);
+
+    buf = str::format("Length: %s bytes (%.2f sec)\n",
+                      str::group_digits(std::to_string(sum)).c_str(),
+                      sum / byterate);
+    buf += str::format("Packets: %lu (c %d / nc %d)\n",
+                       lens.size(),
+                       stat.continuations,
+                       stat.nonContinuations);
+
+    if (lens.size() > 0)
+    {
+        auto pmax = std::max_element(lens.begin(), lens.end());
+        auto pmin = std::min_element(lens.begin(), lens.end());
+        buf += str::format("Packet length min/avg/max: %u/%lu/%u\n",
+                           *pmin, sum/lens.size(), *pmax);
+    }
+    buf += str::format("Last written: %s", time.str().c_str());
+
+    return buf;
+}
+
+// -----------------------------------
 bool Channel::writeVariable(Stream &out, const String &var)
 {
-    char buf[1024];
+    using namespace std;
 
-    buf[0]=0;
-
+    string buf;
     String utf8;
 
     if (var == "name")
     {
         utf8 = info.name;
         utf8.convertTo(String::T_UNICODESAFE);
-        strcpy_s(buf, _countof(buf), utf8.cstr());
+        buf = utf8.c_str();
     }else if (var == "bitrate")
     {
-        snprintf(buf, _countof(buf), "%d", info.bitrate);
+        buf = to_string(info.bitrate);
     }else if (var == "srcrate")
     {
         if (sourceData)
         {
             unsigned int tot = sourceData->getSourceRate();
-            snprintf(buf, _countof(buf), "%.0f", BYTES_TO_KBPS(tot));
+            buf = str::format("%.0f", BYTES_TO_KBPS(tot));
         }else
-            strcpy_s(buf, _countof(buf), "0");
+            buf = "0";
     }else if (var == "genre")
     {
         utf8 = info.genre;
         utf8.convertTo(String::T_UNICODE);
-        strcpy_s(buf, _countof(buf), utf8.cstr());
+        buf = utf8.c_str();
     }else if (var == "desc")
     {
         utf8 = info.desc;
         utf8.convertTo(String::T_UNICODE);
-        strcpy_s(buf, _countof(buf), utf8.cstr());
+        buf = utf8.c_str();
     }else if (var == "comment")
     {
         utf8 = info.comment;
         utf8.convertTo(String::T_UNICODE);
-        strcpy_s(buf, _countof(buf), utf8.cstr());
+        buf = utf8.c_str();
     }else if (var == "uptime")
     {
         String uptime;
@@ -1427,39 +1488,28 @@ bool Channel::writeVariable(Stream &out, const String &var)
             uptime.setFromStopwatch(sys->getTime()-info.lastPlayStart);
         else
             uptime.set("-");
-        strcpy_s(buf, _countof(buf), uptime.cstr());
+        buf = uptime.c_str();
     }
     else if (var == "type")
-        strcpy_s(buf, _countof(buf), info.getTypeStr());
+        buf = info.getTypeStr();
     else if (var == "typeLong")
-    {
-        std::string s = std::string() + info.getTypeStr() + " (" + info.getMIMEType() + "; " + info.getTypeExt() + ")";
-
-        if (info.contentTypeStr == "")
-            s += " [contentTypeStr empty]"; // ‚±‚ê‚ª‹N‚±‚é‚Ì‚Í‰½‚©‚ª‚¨‚©‚µ‚¢
-        if (info.MIMEType == "")
-            s += " [no styp]";
-        if (info.streamExt == "")
-            s += " [no sext]";
-
-        strcpy_s(buf, _countof(buf), s.c_str());
-    }
+        buf = info.getTypeStringLong();
     else if (var == "ext")
-        snprintf(buf, _countof(buf), "%s", info.getTypeExt());
+        buf = info.getTypeExt();
     else if (var == "localRelays")
-        snprintf(buf, _countof(buf), "%d", localRelays());
+        buf = to_string(localRelays());
     else if (var == "localListeners")
-        snprintf(buf, _countof(buf), "%d", localListeners());
+        buf = to_string(localListeners());
     else if (var == "totalRelays")
-        snprintf(buf, _countof(buf), "%d", totalRelays());
+        buf = to_string(totalRelays());
     else if (var == "totalListeners")
-        snprintf(buf, _countof(buf), "%d", totalListeners());
+        buf = to_string(totalListeners());
     else if (var == "status")
-        snprintf(buf, _countof(buf), "%s", getStatusStr());
+        buf = getStatusStr();
     else if (var == "keep")
-        snprintf(buf, _countof(buf), "%s", stayConnected?"Yes":"No");
+        buf = stayConnected?"Yes":"No";
     else if (var == "id")
-        info.id.toStr(buf);
+        buf = info.id.str();
     else if (var.startsWith("track."))
     {
         if (var == "track.title")
@@ -1474,68 +1524,23 @@ bool Channel::writeVariable(Stream &out, const String &var)
             utf8 = info.track.contact;
 
         utf8.convertTo(String::T_UNICODE);
-        strcpy_s(buf, _countof(buf), utf8.cstr());
+        buf = utf8.c_str();
     }else if (var == "contactURL")
-        snprintf(buf, _countof(buf), "%s", info.url.cstr());
+        buf = info.url.cstr();
     else if (var == "streamPos")
-        strcpy_s(buf, _countof(buf), str::group_digits(std::to_string(streamPos), ",").c_str());
+        buf = str::group_digits(std::to_string(streamPos), ",");
     else if (var == "sourceType")
-        strcpy_s(buf, _countof(buf), getSrcTypeStr());
+        buf = getSrcTypeStr();
     else if (var == "sourceProtocol")
-        strcpy_s(buf, _countof(buf), ChanInfo::getProtocolStr(info.srcProtocol));
+        buf = ChanInfo::getProtocolStr(info.srcProtocol);
     else if (var == "sourceURL")
-    {
-        if (sourceURL.isEmpty())
-        {
-            if (srcType == SRC_HTTPPUSH)
-                strcpy_s(buf, _countof(buf), sock->host.str().c_str());
-            else
-            {
-                std::string s;
-                s += sourceHost.str(true);
-                if (sourceHost.uphost.ip)
-                {
-                    s += " recv. from ";
-                    s += sourceHost.uphost.str();
-                }
-                strcpy_s(buf, _countof(buf), s.c_str());
-            }
-        }
-        else
-            strcpy_s(buf, _countof(buf), sourceURL.cstr());
-    }
+        buf = getSourceString();
     else if (var == "headPos")
-        strcpy_s(buf, _countof(buf), str::group_digits(std::to_string(headPack.pos), ",").c_str());
+        buf = str::group_digits(std::to_string(headPack.pos), ",");
     else if (var == "headLen")
-        strcpy_s(buf, _countof(buf), str::group_digits(std::to_string(headPack.len), ",").c_str());
+        buf = str::group_digits(std::to_string(headPack.len), ",");
     else if (var == "buffer")
-    {
-        std::string s;
-        String time;
-        auto lastWritten = (double) sys->getTime() - rawData.lastWriteTime;
-        if (lastWritten < 5)
-            time = "< 5 sec";
-        else
-            time.setFromStopwatch(static_cast<unsigned>(lastWritten));
-        auto stat = rawData.getStatistics();
-        auto& lens = stat.packetLengths;
-        double byterate = (sourceData) ? sourceData->getSourceRateAvg() : 0.0;
-        auto sum = std::accumulate(lens.begin(), lens.end(), 0);
-
-        s += str::format("Length: %s bytes (%.2f sec)\n", str::group_digits(std::to_string(sum)).c_str(), sum / byterate);
-        s += str::format("Packets: %lu (c %d / nc %d)\n", lens.size(), stat.continuations, stat.nonContinuations);
-        if (lens.size() > 0)
-        {
-            auto pmax = std::max_element(lens.begin(), lens.end());
-            auto pmin = std::min_element(lens.begin(), lens.end());
-            s += str::format("Packet length min/avg/max: %u/%lu/%u\n",
-                             *pmin, sum/lens.size(), *pmax);
-        }
-        s += str::format("Last written: %s", time.str().c_str());
-        // s += str::format("First/Safe/Last/Read/Write: %u/%u/%u/%u/%u",
-        //                  rawData.firstPos, rawData.safePos, rawData.lastPos, rawData.readPos, rawData.writePos);
-        strcpy_s(buf, _countof(buf), s.c_str());
-    }
+        buf = getBufferString();
     else if (var == "headDump")
     {
         out.writeString(renderHexDump(std::string(headPack.data, headPack.data + headPack.len)));
@@ -1543,11 +1548,11 @@ bool Channel::writeVariable(Stream &out, const String &var)
     }else if (var == "numHits")
     {
         ChanHitList *chl = chanMgr->findHitListByID(info.id);
-        snprintf(buf, _countof(buf), "%d", (chl) ? chl->numHits() : 0);
+        buf = to_string((chl) ? chl->numHits() : 0);
     }else if (var == "authToken")
-        snprintf(buf, _countof(buf), "%s", chanMgr->authToken(info.id).c_str());
+        buf = chanMgr->authToken(info.id).c_str();
     else if (var == "plsExt")
-        snprintf(buf, _countof(buf), "%s", info.getPlayListExt());
+        buf = info.getPlayListExt();
     else
         return false;
 
