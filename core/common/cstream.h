@@ -106,12 +106,6 @@ public:
         }
     }
 
-    void reset()
-    {
-        free();
-        init();
-    }
-
     void    init()
     {
         type     = ChanPacket::T_UNKNOWN;
