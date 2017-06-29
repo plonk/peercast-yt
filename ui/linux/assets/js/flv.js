@@ -1771,6 +1771,10 @@ var defaultConfig = exports.defaultConfig = {
     lazyLoadRecoverDuration: 30,
     deferLoadAfterSourceOpen: true,
 
+    // autoCleanupSourceBuffer: default as false, leave unspecified
+    autoCleanupMaxBackwardDuration: 3 * 60,
+    autoCleanupMinBackwardDuration: 2 * 60,
+
     statisticsInfoReportInterval: 600,
 
     accurateSeek: false,
@@ -2336,12 +2340,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 // Media Source Extensions controller
 var MSEController = function () {
-    function MSEController() {
+    function MSEController(config) {
         _classCallCheck(this, MSEController);
 
         this.TAG = 'MSEController';
 
+        this._config = config;
         this._emitter = new _events2.default();
+
+        if (this._config.isLive && this._config.autoCleanupSourceBuffer == undefined) {
+            // For live stream, do auto cleanup by default
+            this._config.autoCleanupSourceBuffer = true;
+        }
 
         this.e = {
             onSourceOpen: this._onSourceOpen.bind(this),
@@ -2537,6 +2547,10 @@ var MSEController = function () {
             var ms = mediaSegment;
             this._pendingSegments[ms.type].push(ms);
 
+            if (this._config.autoCleanupSourceBuffer && this._needCleanupSourceBuffer()) {
+                this._doCleanupSourceBuffer();
+            }
+
             var sb = this._sourceBuffers[ms.type];
             if (sb && !sb.updating && !this._hasPendingRemoveRanges()) {
                 this._doAppendSegments();
@@ -2630,6 +2644,63 @@ var MSEController = function () {
         key: 'getNearestKeyframe',
         value: function getNearestKeyframe(dts) {
             return this._idrList.getLastSyncPointBeforeDts(dts);
+        }
+    }, {
+        key: '_needCleanupSourceBuffer',
+        value: function _needCleanupSourceBuffer() {
+            if (!this._config.autoCleanupSourceBuffer) {
+                return false;
+            }
+
+            var currentTime = this._mediaElement.currentTime;
+
+            for (var type in this._sourceBuffers) {
+                var sb = this._sourceBuffers[type];
+                if (sb) {
+                    var buffered = sb.buffered;
+                    if (buffered.length >= 1) {
+                        if (currentTime - buffered.start(0) >= this._config.autoCleanupMaxBackwardDuration) {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+    }, {
+        key: '_doCleanupSourceBuffer',
+        value: function _doCleanupSourceBuffer() {
+            var currentTime = this._mediaElement.currentTime;
+
+            for (var type in this._sourceBuffers) {
+                var sb = this._sourceBuffers[type];
+                if (sb) {
+                    var buffered = sb.buffered;
+                    var doRemove = false;
+
+                    for (var i = 0; i < buffered.length; i++) {
+                        var start = buffered.start(i);
+                        var end = buffered.end(i);
+
+                        if (start <= currentTime && currentTime < end + 3) {
+                            // padding 3 seconds
+                            if (currentTime - start >= this._config.autoCleanupMaxBackwardDuration) {
+                                doRemove = true;
+                                var removeEnd = currentTime - this._config.autoCleanupMinBackwardDuration;
+                                this._pendingRemoveRanges[type].push({ start: start, end: removeEnd });
+                            }
+                        } else if (end < currentTime) {
+                            doRemove = true;
+                            this._pendingRemoveRanges[type].push({ start: start, end: end });
+                        }
+                    }
+
+                    if (doRemove && !sb.updating) {
+                        this._doRemoveRanges();
+                    }
+                }
+            }
         }
     }, {
         key: '_updateMediaSourceDuration',
@@ -5921,7 +5992,7 @@ Object.defineProperty(flvjs, 'version', {
     enumerable: true,
     get: function get() {
         // replaced by browserify-versionify transform
-        return '1.3.0';
+        return '1.3.1';
     }
 });
 
@@ -8739,7 +8810,7 @@ var FlvPlayer = function () {
             mediaElement.addEventListener('stalled', this.e.onvStalled);
             mediaElement.addEventListener('progress', this.e.onvProgress);
 
-            this._msectl = new _mseController2.default();
+            this._msectl = new _mseController2.default(this._config);
 
             this._msectl.on(_mseEvents2.default.UPDATE_END, this._onmseUpdateEnd.bind(this));
             this._msectl.on(_mseEvents2.default.BUFFER_FULL, this._onmseBufferFull.bind(this));
@@ -8876,7 +8947,7 @@ var FlvPlayer = function () {
     }, {
         key: 'play',
         value: function play() {
-            this._mediaElement.play();
+            return this._mediaElement.play();
         }
     }, {
         key: 'pause',
@@ -9408,7 +9479,7 @@ var NativePlayer = function () {
     }, {
         key: 'play',
         value: function play() {
-            this._mediaElement.play();
+            return this._mediaElement.play();
         }
     }, {
         key: 'pause',
