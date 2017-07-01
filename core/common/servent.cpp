@@ -570,8 +570,8 @@ void Servent::handshakeOut()
         {
             agent.set(arg);
 
-            if (strnicmp(arg, "PeerCast/", 9)==0)
-                versionValid = (stricmp(arg+9, MIN_CONNECTVER)>=0);
+            if (Sys::strnicmp(arg, "PeerCast/", 9)==0)
+                versionValid = (Sys::stricmp(arg+9, MIN_CONNECTVER)>=0);
         }else if (http.isHeader(PCX_HS_NETWORKID))
             clientID.fromStr(arg);
     }
@@ -615,10 +615,10 @@ void Servent::handshakeIn()
         {
             agent.set(arg);
 
-            if (strnicmp(arg, "PeerCast/", 9)==0)
+            if (Sys::strnicmp(arg, "PeerCast/", 9)==0)
             {
-                versionValid = (stricmp(arg+9, MIN_CONNECTVER)>=0);
-                diffRootVer = stricmp(arg+9, MIN_ROOTVER)<0;
+                versionValid = (Sys::stricmp(arg+9, MIN_CONNECTVER)>=0);
+                diffRootVer = Sys::stricmp(arg+9, MIN_ROOTVER)<0;
             }
         }else if (http.isHeader(PCX_HS_NETWORKID))
         {
@@ -634,13 +634,13 @@ void Servent::handshakeIn()
                 throw StreamException("Servent loopback");
         }else if (http.isHeader(PCX_HS_OS))
         {
-            if (stricmp(arg, PCX_OS_LINUX)==0)
+            if (Sys::stricmp(arg, PCX_OS_LINUX)==0)
                 osType = 1;
-            else if (stricmp(arg, PCX_OS_WIN32)==0)
+            else if (Sys::stricmp(arg, PCX_OS_WIN32)==0)
                 osType = 2;
-            else if (stricmp(arg, PCX_OS_MACOSX)==0)
+            else if (Sys::stricmp(arg, PCX_OS_MACOSX)==0)
                 osType = 3;
-            else if (stricmp(arg, PCX_OS_WINAMP2)==0)
+            else if (Sys::stricmp(arg, PCX_OS_WINAMP2)==0)
                 osType = 4;
         }
     }
@@ -2560,69 +2560,67 @@ int Servent::serverProc(ThreadInfo *thread)
 // -----------------------------------
 bool    Servent::writeVariable(Stream &s, const String &var)
 {
-    char buf[1024];
+    using namespace std;
+
+    std::string buf;
 
     if (var == "type")
-        strcpy(buf, getTypeStr());
+        buf = getTypeStr();
     else if (var == "status")
-        strcpy(buf, getStatusStr());
+        buf = getStatusStr();
     else if (var == "address")
-        getHost().toStr(buf);
+        buf = getHost().str();
     else if (var == "agent")
-        strcpy(buf, agent.cstr());
+        buf = agent.c_str();
     else if (var == "bitrate")
     {
+        unsigned int tot = 0;
         if (sock)
-        {
-            unsigned int tot = sock->bytesInPerSec() + sock->bytesOutPerSec();
-            sprintf(buf, "%.1f", BYTES_TO_KBPS(tot));
-        }else
-            strcpy(buf, "0.0");
+            tot = sock->bytesInPerSec() + sock->bytesOutPerSec();
+        buf = str::format("%.1f", BYTES_TO_KBPS(tot));
     }else if (var == "bitrateAvg")
     {
+        unsigned int tot = 0;
         if (sock)
-        {
-            unsigned int tot = sock->stat.bytesInPerSecAvg() + sock->stat.bytesOutPerSecAvg();
-            sprintf(buf, "%.1f", BYTES_TO_KBPS(tot));
-        }else
-            strcpy(buf, "0.0");
+            tot = sock->stat.bytesInPerSecAvg() + sock->stat.bytesOutPerSecAvg();
+        buf = str::format("%.1f", BYTES_TO_KBPS(tot));
     }else if (var == "uptime")
     {
         String uptime;
         if (lastConnect)
-            uptime.setFromStopwatch(sys->getTime()-lastConnect);
+            uptime.setFromStopwatch(sys->getTime() - lastConnect);
         else
             uptime.set("-");
-        strcpy(buf, uptime.cstr());
+        buf = uptime.c_str();
     }else if (var.startsWith("gnet."))
     {
-        float ctime = (float)(sys->getTime()-lastConnect);
+        float ctime = (float)(sys->getTime() - lastConnect);
         if (var == "gnet.packetsIn")
-            sprintf(buf, "%d", gnuStream.packetsIn);
+            buf = str::format("%d", gnuStream.packetsIn);
         else if (var == "gnet.packetsInPerSec")
-            sprintf(buf, "%.1f", ctime>0?((float)gnuStream.packetsIn)/ctime:0);
+            buf = str::format("%.1f", ctime>0 ? (float)gnuStream.packetsIn/ctime : 0);
         else if (var == "gnet.packetsOut")
-            sprintf(buf, "%d", gnuStream.packetsOut);
+            buf = str::format("%d", gnuStream.packetsOut);
         else if (var == "gnet.packetsOutPerSec")
-            sprintf(buf, "%.1f", ctime>0?((float)gnuStream.packetsOut)/ctime:0);
+            buf = str::format("%.1f", ctime>0 ? (float)gnuStream.packetsOut/ctime : 0);
         else if (var == "gnet.normQueue")
-            sprintf(buf, "%d", outPacketsNorm.numPending());
+            buf = str::format("%d", outPacketsNorm.numPending());
         else if (var == "gnet.priQueue")
-            sprintf(buf, "%d", outPacketsPri.numPending());
+            buf = str::format("%d", outPacketsPri.numPending());
         else if (var == "gnet.flowControl")
-            sprintf(buf, "%d", flowControl?1:0);
+            buf = str::format("%d", flowControl?1:0);
         else if (var == "gnet.routeTime")
         {
             int nr = seenIDs.numUsed();
-            unsigned int tim = sys->getTime()-seenIDs.getOldest();
+            unsigned int tim = sys->getTime() - seenIDs.getOldest();
 
             String tstr;
             tstr.setFromStopwatch(tim);
 
             if (nr)
-                strcpy(buf, tstr.cstr());
+                buf = tstr.c_str();
             else
-                strcpy(buf, "-");
+                buf = "-";
         }
         else
             return false;

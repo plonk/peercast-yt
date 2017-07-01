@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "servmgr.h"
+#include "sstream.h"
 
 class ServMgrFixture : public ::testing::Test {
 public:
@@ -107,4 +108,240 @@ TEST_F(ServMgrFixture, initialState)
     ASSERT_FALSE(m.publicDirectoryEnabled);
     // FW_STATE            firewalled;
     ASSERT_EQ(ServMgr::FW_UNKNOWN, m.firewalled);
+}
+
+TEST_F(ServMgrFixture, writeVariable)
+{
+    StringStream mem;
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "version"));
+    ASSERT_EQ(12, mem.str().size());
+    ASSERT_STREQ("v0.1218", mem.str().substr(0,7).c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "uptime"));
+    ASSERT_STREQ("-", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "numRelays"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "numDirect"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "totalConnected"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "numServHosts"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "numServents"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "serverName"));
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "serverPort"));
+    ASSERT_STREQ("7144", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "serverIP"));
+    ASSERT_STREQ("127.0.0.1", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "ypAddress"));
+    ASSERT_STREQ("bayonet.ddo.jp:7146", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "password"));
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "isFirewalled"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "rootMsg"));
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "isRoot"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "isPrivate"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "forceYP"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "refreshHTML"));
+    ASSERT_STREQ("5", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "maxRelays"));
+    ASSERT_STREQ("2", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "maxDirect"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "maxBitrateOut"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "maxControlsIn"));
+    ASSERT_STREQ("3", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "maxServIn"));
+    ASSERT_STREQ("50", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "numFilters"));
+    ASSERT_STREQ("2", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "maxPGNUIn"));
+    ASSERT_STREQ("20", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "minPGNUIn"));
+    ASSERT_STREQ("10", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "numActive1"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "numActive2"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "numPGNU"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "numCIN"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "numCOUT"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "numIncoming"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "numValidBCID"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "disabled"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "serverPort1"));
+    ASSERT_STREQ("7144", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "serverLocalIP"));
+    ASSERT_STRNE("", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "upgradeURL"));
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "serverPort2"));
+    ASSERT_STREQ("7145", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "allow.HTML1"));
+    ASSERT_STREQ("1", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "allow.broadcasting1"));
+    ASSERT_STREQ("1", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "allow.broadcasting2"));
+    ASSERT_STREQ("1", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "allow.network1"));
+    ASSERT_STREQ("1", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "allow.direct1"));
+    ASSERT_STREQ("1", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "auth.useCookies"));
+    ASSERT_STREQ("1", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "auth.useHTTP"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "auth.useSessionCookies"));
+    ASSERT_STREQ("1", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "log.debug"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "log.errors"));
+    ASSERT_STREQ("1", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "log.gnet"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "log.channel"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "lang.en"));
+    ASSERT_STREQ("1", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "numExternalChannels"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "numChannelFeedsPlusOne"));
+    ASSERT_STREQ("1", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "numChannelFeeds"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    // channelDirectory.*
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "publicDirectoryEnabled"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "genrePrefix"));
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "test"));
+    ASSERT_STREQ("かきくけこABCDabcd", mem.str().c_str());
 }

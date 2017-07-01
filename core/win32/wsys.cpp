@@ -73,7 +73,7 @@ void WSys::endThread(ThreadInfo *info)
 // ---------------------------------
 void WSys::waitThread(ThreadInfo *info, int timeout)
 {
-    switch(WaitForSingleObject((void *)info->handle, timeout))
+    switch(WaitForSingleObject((HANDLE)info->handle, timeout))
     {
       case WAIT_TIMEOUT:
           throw TimeoutException();
@@ -121,7 +121,7 @@ void WSys::callLocalURL(const char *str,int port)
 void WSys::getURL(const char *url)
 {
     if (mainWindow)
-        if (strnicmp(url,"http://",7) || strnicmp(url,"mailto:",7))
+        if (Sys::strnicmp(url,"http://",7) || Sys::strnicmp(url,"mailto:",7)) // XXX: ==0 が抜けてる？
             ShellExecute(mainWindow, NULL, url, NULL, NULL, SW_SHOWNORMAL);
 }
 

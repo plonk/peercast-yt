@@ -196,44 +196,46 @@ bool ChannelDirectory::update()
 // index番目のチャンネル詳細のフィールドを出力する。成功したら true を返す。
 bool ChannelDirectory::writeChannelVariable(Stream& out, const String& varName, int index)
 {
+    using namespace std;
+
     CriticalSection cs(m_lock);
 
     if (!(index >= 0 && (size_t)index < m_channels.size()))
         return false;
 
-    char buf[1024];
+    string buf;
     ChannelEntry& ch = m_channels[index];
 
     if (varName == "name") {
-        sprintf(buf, "%s", ch.name.c_str());
+        buf = ch.name;
     } else if (varName == "id") {
-        ch.id.toStr(buf);
+        buf = ch.id.str();
     } else if (varName == "bitrate") {
-        sprintf(buf, "%d", ch.bitrate);
+        buf = to_string(ch.bitrate);
     } else if (varName == "contentTypeStr") {
-        sprintf(buf, "%s", ch.contentTypeStr.c_str());
+        buf = ch.contentTypeStr;
     } else if (varName == "desc") {
-        sprintf(buf, "%s", ch.desc.c_str());
+        buf = ch.desc;
     } else if (varName == "genre") {
-        sprintf(buf, "%s", ch.genre.c_str());
+        buf = ch.genre;
     } else if (varName == "url") {
-        sprintf(buf, "%s", ch.url.c_str());
+        buf = ch.url;
     } else if (varName == "tip") {
-        sprintf(buf, "%s", ch.tip.c_str());
+        buf = ch.tip;
     } else if (varName == "encodedName") {
-        sprintf(buf, "%s", ch.encodedName.c_str());
+        buf = ch.encodedName;
     } else if (varName == "uptime") {
-        sprintf(buf, "%s", ch.uptime.c_str());
+        buf = ch.uptime;
     } else if (varName == "numDirects") {
-        sprintf(buf, "%d", ch.numDirects);
+        buf = to_string(ch.numDirects);
     } else if (varName == "numRelays") {
-        sprintf(buf, "%d", ch.numRelays);
+        buf = to_string(ch.numRelays);
     } else if (varName == "chatUrl") {
-        sprintf(buf, "%s", ch.chatUrl().c_str());
+        buf = ch.chatUrl();
     } else if (varName == "statsUrl") {
-        sprintf(buf, "%s", ch.statsUrl().c_str());
+        buf = ch.statsUrl();
     } else if (varName == "isPlayable") {
-        sprintf(buf, "%d", ch.id.isSet());
+        buf = to_string(ch.id.isSet());
     } else {
         return false;
     }
