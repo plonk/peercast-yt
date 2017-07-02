@@ -15,7 +15,8 @@ namespace str
     std::string group_digits(const std::string& in, const std::string& separator = ",");
     std::string hexdump(const std::string& in);
     std::string inspect(const std::string str);
-    bool        is_prefix_of(const std::string&, const std::string&);
+    bool        is_prefix_of(const std::string&, const std::string&); // deprecated
+    bool        has_prefix(const std::string& subject, const std::string& prefix);
     bool        has_suffix(const std::string& subject, const std::string& suffix);
     std::string join(const std::string& delimiter, const std::vector<std::string>& vec);
     std::string repeat(const std::string&, int n);
