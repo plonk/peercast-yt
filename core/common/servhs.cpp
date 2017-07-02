@@ -237,12 +237,10 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
         throw HTTPException(HTTP_SC_SERVERERROR, 500);
     }
 
-    std::string body;
-    try
-    {
-        while (true)
-            body += stream.readChar();
-    } catch (StreamException&) {}
+    HTTPResponse res(statusCode, headers);
+
+    res.stream = &stream;
+    http.send(res);
 
     int status;
     bool normal = script.wait(&status);
@@ -250,21 +248,9 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
     if (!normal)
     {
         LOG_ERROR("child process (PID %d) terminated abnormally", script.pid());
-        http.send(HTTPResponse::serverError(
-                      str::format("child process (PID %d) terminated abnormally", script.pid())));
     }else
     {
         LOG_DEBUG("child process (PID %d) exited normally (status %d)", script.pid(), status);
-        if (status != 0)
-        {
-            http.send(HTTPResponse::serverError(
-                          str::format("child process (PID %d) exited with status %d", script.pid(), status)));
-        }else
-        {
-            HTTPResponse res(statusCode, headers);
-            res.body = body;
-            http.send(res);
-        }
     }
 }
 
