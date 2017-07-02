@@ -207,7 +207,7 @@ TEST_F(HTTPFixture, send_stringBody)
     http.send(res);
     auto output = mem.str();
     ASSERT_TRUE(str::contains(output, "200 OK"));
-    ASSERT_TRUE(str::contains(output, "hoge"));
+    ASSERT_TRUE(str::has_suffix(output, "hoge"));
 }
 
 TEST_F(HTTPFixture, send_streamBody)
@@ -220,5 +220,5 @@ TEST_F(HTTPFixture, send_streamBody)
     http.send(res);
     auto output = mem.str();
     ASSERT_TRUE(str::contains(output, "200 OK"));
-    ASSERT_TRUE(str::contains(output, "fuga"));
+    ASSERT_TRUE(str::has_suffix(output, "fuga"));
 }
