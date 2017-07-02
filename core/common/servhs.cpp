@@ -189,6 +189,8 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
     env.set("REQUEST_URI", req.url);
     env.set("SERVER_PROTOCOL", "HTTP/1.0");
     env.set("SERVER_SOFTWARE", PCX_AGENT);
+    env.set("SERVER_NAME", servMgr->serverHost.str(false));
+    env.set("SERVER_PORT", std::to_string(servMgr->serverHost.port));
 
     env.set("PATH", getenv("PATH"));
     // Windows で Ruby が名前引きをするのに必要なので SYSTEMROOT を通す。
