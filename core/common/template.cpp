@@ -28,6 +28,7 @@
 #include "notif.h"
 #include "str.h"
 #include "jrpc.h"
+#include "regexp.h"
 
 using json = nlohmann::json;
 using namespace std;
@@ -455,8 +456,10 @@ vector<string> Template::tokenize(const string& input)
             string t;
             tie(t, s) = readStringLiteral(s);
             tokens.push_back(t);
-        }else if (str::is_prefix_of("==", s)
-                  || str::is_prefix_of("!=", s))
+        }else if (str::has_prefix(s, "==") ||
+                  str::has_prefix(s, "!=") ||
+                  str::has_prefix(s, "=~") ||
+                  str::has_prefix(s, "!~"))
         {
             tokens.push_back(s.substr(0,2));
             s.erase(0,2);
@@ -496,27 +499,46 @@ bool    Template::evalCondition(const string& cond, int loop)
     auto tokens = tokenize(cond);
     bool res = false;
 
-    if (tokens.size() == 3)
+    if (tokens.size() == 3) // 二項演算
     {
         auto op = tokens[1];
-        if (op != "==" && op != "!=")
+        if (op == "=~" || op == "!~")
+        {
+            bool pred = (op == "=~");
+
+            string lhs, rhs;
+
+            if (tokens[0][0] == '\"')
+                lhs = evalStringLiteral(tokens[0]);
+            else
+                lhs = getStringVariable(tokens[0].c_str(), loop);
+
+            if (tokens[2][0] == '\"')
+                rhs = evalStringLiteral(tokens[2]);
+            else
+                rhs = getStringVariable(tokens[2].c_str(), loop);
+
+            res = ((!Regexp(rhs).exec(lhs).empty()) == pred);
+        }else if (op == "==" || op == "!=")
+        {
+            bool pred = (op == "==");
+
+            string lhs, rhs;
+
+            if (tokens[0][0] == '\"')
+                lhs = evalStringLiteral(tokens[0]);
+            else
+                lhs = getStringVariable(tokens[0].c_str(), loop);
+
+            if (tokens[2][0] == '\"')
+                rhs = evalStringLiteral(tokens[2]);
+            else
+                rhs = getStringVariable(tokens[2].c_str(), loop);
+
+            res = ((lhs==rhs) == pred);
+        }
+        else
             throw StreamException(("Unrecognized condition operator " + op).c_str());
-
-        bool pred = (op == "==");
-
-        string lhs, rhs;
-
-        if (tokens[0][0] == '\"')
-            lhs = evalStringLiteral(tokens[0]);
-        else
-            lhs = getStringVariable(tokens[0].c_str(), loop);
-
-        if (tokens[2][0] == '\"')
-            rhs = evalStringLiteral(tokens[2]);
-        else
-            rhs = getStringVariable(tokens[2].c_str(), loop);
-
-        res = ((lhs==rhs) == pred);
     }else if (tokens.size() == 1)
     {
         string varName;
