@@ -899,6 +899,10 @@ bool HTTPRequestScope::writeVariable(Stream& s, const String& varName, int loop)
             s.writeString(m_request.headers.get("Host"));
         }
         return true;
+    }else if (varName == "request.path") // HTTPRequest に委譲すべきか
+    {
+        s.writeString(m_request.path);
+        return true;
     }
 
     return false;
