@@ -897,8 +897,8 @@ bool HTTPRequestScope::writeVariable(Stream& s, const String& varName, int loop)
         else
         {
             s.writeString(m_request.headers.get("Host"));
-            return true;
         }
+        return true;
     }
 
     return false;
