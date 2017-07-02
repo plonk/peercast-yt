@@ -198,3 +198,27 @@ TEST_F(HTTPFixture, initialState)
     ASSERT_EQ(NULL, http.arg);
     ASSERT_EQ(0, http.headers.size());
 }
+
+TEST_F(HTTPFixture, send_stringBody)
+{
+    HTTPResponse res(200, {});
+
+    res.body = "hoge";
+    http.send(res);
+    auto output = mem.str();
+    ASSERT_TRUE(str::contains(output, "200 OK"));
+    ASSERT_TRUE(str::contains(output, "hoge"));
+}
+
+TEST_F(HTTPFixture, send_streamBody)
+{
+    HTTPResponse res(200, {});
+    StringStream input;
+
+    input.str("fuga");
+    res.stream = &input;
+    http.send(res);
+    auto output = mem.str();
+    ASSERT_TRUE(str::contains(output, "200 OK"));
+    ASSERT_TRUE(str::contains(output, "fuga"));
+}
