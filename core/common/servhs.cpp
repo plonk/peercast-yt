@@ -243,6 +243,7 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
 
     res.stream = &stream;
     http.send(res);
+    stream.close();
 
     int status;
     bool normal = script.wait(&status);
