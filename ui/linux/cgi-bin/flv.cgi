@@ -13,6 +13,7 @@ def main
   id = cgi['id']
   server_name = ENV['SERVER_NAME']
   server_port = ENV['SERVER_PORT']
+  r = 500 # video bitrate in kbps
 
   print "Content-Type: video/x-flv\n\n"
   system("ffmpeg",
@@ -20,7 +21,8 @@ def main
          "-y",       # confirm overwriting
          "-i", "mmsh://#{server_name}:#{server_port}/stream/#{id}.wmv",
          "-acodec", "aac",
-         "-vcodec", "h264",
+         "-vcodec", "libx264",
+         "-x264-params", "bitrate=#{r}:vbv-maxrate=#{r}:vbv-bufsize=#{2*r}",
          "-preset", "ultrafast",
          "-f", "flv",
          "-")        # to stdout
