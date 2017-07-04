@@ -83,7 +83,7 @@ void Host::fromStrIP(const char *str, int p)
 }
 
 // -----------------------------------
-bool Host::isMemberOf(Host &h)
+bool Host::isMemberOf(const Host &h) const
 {
     if (h.ip==0)
         return false;
