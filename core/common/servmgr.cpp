@@ -2143,7 +2143,7 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     else if (var == "maxServIn")
         buf = to_string(maxServIn);
     else if (var == "numFilters")
-        buf = to_string(numFilters+1);
+        buf = to_string(numFilters+1); // 入力用の空欄を生成する為に+1する。
     else if (var == "maxPGNUIn")
         buf = to_string(maxGnuIncoming);
     else if (var == "minPGNUIn")
