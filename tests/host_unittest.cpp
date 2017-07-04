@@ -1,7 +1,16 @@
 #include <gtest/gtest.h>
 #include "common.h"
 
-TEST(HostTest, loopbackIP) {
+TEST(HostTest, initialState)
+{
+    Host h;
+
+    ASSERT_EQ(0, h.ip);
+    ASSERT_EQ(0, h.port);
+}
+
+TEST(HostTest, loopbackIP)
+{
     Host host;
 
     host.fromStrIP("127.0.0.1", 0);
@@ -13,7 +22,8 @@ TEST(HostTest, loopbackIP) {
     ASSERT_FALSE( host.loopbackIP() );
 }
 
-TEST(HostTest, isMemberOf) {
+TEST(HostTest, isMemberOf)
+{
     Host host, pattern;
 
     host.fromStrIP("192.168.0.1", -1);
@@ -56,4 +66,3 @@ TEST(HostTest, strUlimit)
     ASSERT_STREQ("255.255.255.255:65535", host.str(true).c_str());
     ASSERT_STREQ("255.255.255.255", host.str(false).c_str());
 }
-
