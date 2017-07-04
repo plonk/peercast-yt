@@ -46,14 +46,12 @@ public:
     {
         ip = i;
         port = p;
-        value = 0;
     }
 
     void    init()
     {
         ip = 0;
         port = 0;
-        value = 0;
     }
 
     bool    isMemberOf(Host &);
@@ -157,7 +155,6 @@ public:
     };
 
     unsigned short  port;
-    unsigned int    value;
 };
 
 #endif

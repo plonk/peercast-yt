@@ -254,7 +254,6 @@ void ServMgr::addHost(Host &h, ServHost::TYPE type, unsigned int time)
     else
         LOG_DEBUG("Old host: %s - %s", str, ServHost::getTypeStr(type));
 
-    h.value = 0;    // make sure dead count is zero
     if (!sh)
     {
         // find empty slot
