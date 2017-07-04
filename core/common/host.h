@@ -149,11 +149,7 @@ public:
 
     bool    isLocalhost();
 
-    union
-    {
-        unsigned int ip;
-    };
-
+    unsigned int    ip;
     unsigned short  port;
 };
 
