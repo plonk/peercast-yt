@@ -1,52 +1,38 @@
-#!/usr/bin/env ruby
-require 'json'
-require 'cgi'
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import cgi, json, sys
 
-require_relative 'common'
-require_relative 'bbs_reader'
+sys.path.append('cgi-bin')
 
-include Bbs
+import bbs_reader
 
-cgi = CGI.new
+form = cgi.FieldStorage()
 
-if cgi["category"].empty? || cgi["board_num"].empty? || cgi["id"].empty?
-  print_bad_request "bad parameter"
-  exit
-end
+if "category" not in form or "board_num" not in form or "id" not in form:
+  common.print_bad_request("bad parameter")
+  sys.exit()
 
-if cgi["first"] == ""
+if "first" not in form:
   first = 1
-else
-  first = cgi['first'].to_i
-end
+else:
+  first = int(form['first'].value)
 
-board = Board.new(cgi["category"], cgi["board_num"].to_i)
-thread = board.thread(cgi["id"].to_i)
+board = bbs_reader.Board(form["category"].value, form["board_num"].value)
+thread = board.thread(form["id"].value)
 
-if thread.nil?
-  puts "Content-Type: text/json; charset=UTF-8\n\n"
-  print({
-    "status" => "error",
-    "message" => "そんなスレッドないです。"
-  }.to_json)
-  exit
-end
+posts = [{
+  "no":    post.no,
+  "name":  post.name,
+  "mail":  post.mail,
+  "body":  post.body,
+  "date":  post.date
+} for post in thread.posts(range(first, 1000))]
 
-posts = thread.posts(first..Float::INFINITY).map do |post|
-  {
-    "no" => post.no,
-    "name" => post.name,
-    "mail" => post.mail,
-    "body" => post.body,
-    "date" => post.date_str
-  }
-end
-
-puts "Content-Type: text/json; charset=UTF-8\n\n"
-print({
-  "status" => "ok",
-  "id" => thread.id,
-  "title" => thread.title,
-  "last" => thread.last,
-  "posts" => posts
-}.to_json)
+print("Content-Type: text/json; charset=UTF-8\n")
+print(json.dumps({
+  "status": "ok",
+  "id":     thread.id,
+  "title":  thread.title,
+  "last":   thread.last,
+  "posts":  posts
+}))
