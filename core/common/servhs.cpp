@@ -453,8 +453,19 @@ void Servent::handshakeGET(HTTP &http)
         if (!isAllowed(ALLOW_HTML))
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-        if (handshakeAuth(http, fn, true))
+        if (str::has_prefix(fn, "/cgi-bin/flv.cgi"))
+        {
+            if (!isPrivate() || !isFiltered(ServFilter::F_DIRECT))
+                throw HTTPException(HTTP_SC_FORBIDDEN, 403);
+            else
+            {
+                http.readHeaders();
+                invokeCGIScript(http, fn);
+            }
+        }else if (handshakeAuth(http, fn, true))
+        {
             invokeCGIScript(http, fn);
+        }
     }else
     {
         // GET マッチなし
