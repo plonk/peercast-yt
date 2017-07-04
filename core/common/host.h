@@ -154,7 +154,6 @@ public:
     union
     {
         unsigned int ip;
-//      unsigned char ipByte[4];
     };
 
     unsigned short  port;

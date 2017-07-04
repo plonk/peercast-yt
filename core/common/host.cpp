@@ -97,12 +97,5 @@ bool Host::isMemberOf(Host &h)
     if ( h.ip3() != 255 && ip3() != h.ip3() )
         return false;
 
-/* removed for endieness compatibility
-    for (int i=0; i<4; i++)
-        if (h.ipByte[i] != 255)
-            if (ipByte[i] != h.ipByte[i])
-                return false;
-*/
     return true;
 }
-
