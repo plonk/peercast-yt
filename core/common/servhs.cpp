@@ -189,8 +189,17 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
     env.set("REQUEST_URI", req.url);
     env.set("SERVER_PROTOCOL", "HTTP/1.0");
     env.set("SERVER_SOFTWARE", PCX_AGENT);
-    env.set("SERVER_NAME", servMgr->serverHost.str(false));
-    env.set("SERVER_PORT", std::to_string(servMgr->serverHost.port));
+    if (!Regexp("[A-Za-z0-9\\-_.]+:\\d+").exec(req.headers.get("Host")).empty())
+    {
+        auto v = str::split(req.headers.get("Host"), ":");
+        env.set("SERVER_NAME", v[0]);
+        env.set("SERVER_PORT", v[1]);
+    }else
+    {
+        LOG_ERROR("Host header missing");
+        env.set("SERVER_NAME", servMgr->serverHost.str(false));
+        env.set("SERVER_PORT", std::to_string(servMgr->serverHost.port));
+    }
 
     char *env_val;
     size_t env_len;
