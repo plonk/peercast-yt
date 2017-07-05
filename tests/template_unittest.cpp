@@ -123,6 +123,24 @@ TEST_F(TemplateFixture, evalCondition3)
     ASSERT_TRUE(temp.evalCondition("TRUE!=FALSE", 0));
 }
 
+TEST_F(TemplateFixture, stringBinaryCondition)
+{
+    ASSERT_TRUE(temp.evalCondition("\"A\"==\"A\"", 0));
+    ASSERT_FALSE(temp.evalCondition("\"A\"==\"B\"", 0));
+}
+
+TEST_F(TemplateFixture, regexpBinaryCondition)
+{
+    ASSERT_TRUE(temp.evalCondition("\"A\"=~\"A\"", 0));
+    ASSERT_FALSE(temp.evalCondition("\"A\"=~\"B\"", 0));
+
+    ASSERT_FALSE(temp.evalCondition("\"A\"!~\"A\"", 0));
+    ASSERT_TRUE(temp.evalCondition("\"A\"!~\"B\"", 0));
+
+    ASSERT_TRUE(temp.evalCondition("\"ABC\"=~\"^A\"", 0));
+    ASSERT_TRUE(temp.evalCondition("\"ABC\"=~\"C$\"", 0));
+}
+
 TEST_F(TemplateFixture, readIfTrue)
 {
     StringStream in, out;
