@@ -1636,10 +1636,6 @@ process.off = noop;
 process.removeListener = noop;
 process.removeAllListeners = noop;
 process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-
-process.listeners = function (name) { return [] }
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
@@ -1780,7 +1776,6 @@ var defaultConfig = exports.defaultConfig = {
     rangeLoadZeroStart: false,
     customSeekHandler: undefined,
     reuseRedirectedURL: false
-    // referrerPolicy: leave as unspecified
 };
 
 function createDefaultConfig() {
@@ -3258,10 +3253,6 @@ var TransmuxingController = function () {
             // params needed by IOController
             segment.cors = mediaDataSource.cors;
             segment.withCredentials = mediaDataSource.withCredentials;
-            // referrer policy control, if exist
-            if (config.referrerPolicy) {
-                segment.referrerPolicy = config.referrerPolicy;
-            }
         });
 
         if (!isNaN(totalDuration) && this._mediaDataSource.duration !== totalDuration) {
@@ -3464,13 +3455,6 @@ var TransmuxingController = function () {
                 if (mds.duration != undefined && !isNaN(mds.duration)) {
                     this._demuxer.overridedDuration = mds.duration;
                 }
-                if (typeof mds.hasAudio === 'boolean') {
-                    this._demuxer.overridedHasAudio = mds.hasAudio;
-                }
-                if (typeof mds.hasVideo === 'boolean') {
-                    this._demuxer.overridedHasVideo = mds.hasVideo;
-                }
-
                 this._demuxer.timestampBase = mds.segments[this._currentSegmentIndex].timestampBase;
 
                 this._demuxer.onError = this._onDemuxException.bind(this);
@@ -4422,9 +4406,6 @@ var FLVDemuxer = function () {
         this._hasAudio = probeData.hasAudioTrack;
         this._hasVideo = probeData.hasVideoTrack;
 
-        this._hasAudioFlagOverrided = false;
-        this._hasVideoFlagOverrided = false;
-
         this._audioInitialMetadataDispatched = false;
         this._videoInitialMetadataDispatched = false;
 
@@ -4533,6 +4514,7 @@ var FLVDemuxer = function () {
                 if (chunk.byteLength > 13) {
                     var probeData = FLVDemuxer.probe(chunk);
                     offset = probeData.dataOffset;
+                    byteStart = probeData.dataOffset;
                 } else {
                     return 0;
                 }
@@ -4541,7 +4523,7 @@ var FLVDemuxer = function () {
             if (this._firstParse) {
                 // handle PreviousTagSize0 before Tag1
                 this._firstParse = false;
-                if (byteStart + offset !== this._dataOffset) {
+                if (byteStart !== this._dataOffset) {
                     _logger2.default.w(this.TAG, 'First time parsing but chunk byteStart invalid!');
                 }
 
@@ -4630,10 +4612,6 @@ var FLVDemuxer = function () {
             var scriptData = _amfParser2.default.parseScriptData(arrayBuffer, dataOffset, dataSize);
 
             if (scriptData.hasOwnProperty('onMetaData')) {
-                if (scriptData.onMetaData == null || _typeof(scriptData.onMetaData) !== 'object') {
-                    _logger2.default.w(this.TAG, 'Invalid onMetaData structure!');
-                    return;
-                }
                 if (this._metadata) {
                     _logger2.default.w(this.TAG, 'Found another onMetaData tag!');
                 }
@@ -4642,17 +4620,13 @@ var FLVDemuxer = function () {
 
                 if (typeof onMetaData.hasAudio === 'boolean') {
                     // hasAudio
-                    if (this._hasAudioFlagOverrided === false) {
-                        this._hasAudio = onMetaData.hasAudio;
-                        this._mediaInfo.hasAudio = this._hasAudio;
-                    }
+                    this._hasAudio = onMetaData.hasAudio;
+                    this._mediaInfo.hasAudio = this._hasAudio;
                 }
                 if (typeof onMetaData.hasVideo === 'boolean') {
                     // hasVideo
-                    if (this._hasVideoFlagOverrided === false) {
-                        this._hasVideo = onMetaData.hasVideo;
-                        this._mediaInfo.hasVideo = this._hasVideo;
-                    }
+                    this._hasVideo = onMetaData.hasVideo;
+                    this._mediaInfo.hasVideo = this._hasVideo;
                 }
                 if (typeof onMetaData.audiodatarate === 'number') {
                     // audiodatarate
@@ -4735,12 +4709,6 @@ var FLVDemuxer = function () {
                 return;
             }
 
-            if (this._hasAudioFlagOverrided === true && this._hasAudio === false) {
-                // If hasAudio: false indicated explicitly in MediaDataSource,
-                // Ignore all the audio packets
-                return;
-            }
-
             var le = this._littleEndian;
             var v = new DataView(arrayBuffer, dataOffset, dataSize);
 
@@ -4769,7 +4737,7 @@ var FLVDemuxer = function () {
             var track = this._audioTrack;
 
             if (!meta) {
-                if (this._hasAudio === false && this._hasAudioFlagOverrided === false) {
+                if (this._hasAudio === false) {
                     this._hasAudio = true;
                     this._mediaInfo.hasAudio = true;
                 }
@@ -4800,10 +4768,9 @@ var FLVDemuxer = function () {
                     meta.audioSampleRate = misc.samplingRate;
                     meta.channelCount = misc.channelCount;
                     meta.codec = misc.codec;
-                    meta.originalCodec = misc.originalCodec;
                     meta.config = misc.config;
                     // The decode result of an aac sample is 1024 PCM samples
-                    meta.refSampleDuration = 1024 / meta.audioSampleRate * meta.timescale;
+                    meta.refSampleDuration = Math.floor(1024 / meta.audioSampleRate * meta.timescale);
                     _logger2.default.v(this.TAG, 'Parsed AudioSpecificConfig');
 
                     if (this._isInitialMetadataDispatched()) {
@@ -4819,7 +4786,7 @@ var FLVDemuxer = function () {
                     this._onTrackMetadata('audio', meta);
 
                     var mi = this._mediaInfo;
-                    mi.audioCodec = meta.originalCodec;
+                    mi.audioCodec = 'mp4a.40.' + misc.originalAudioObjectType;
                     mi.audioSampleRate = meta.audioSampleRate;
                     mi.audioChannelCount = meta.channelCount;
                     if (mi.hasVideo) {
@@ -4850,11 +4817,10 @@ var FLVDemuxer = function () {
                         return;
                     }
                     meta.audioSampleRate = _misc.samplingRate;
-                    meta.channelCount = _misc.channelCount;
+                    meta.channelConfig = _misc.channelCount;
                     meta.codec = _misc.codec;
-                    meta.originalCodec = _misc.originalCodec;
                     // The decode result of an mp3 sample is 1152 PCM samples
-                    meta.refSampleDuration = 1152 / meta.audioSampleRate * meta.timescale;
+                    meta.refSampleDuration = Math.floor(1152 / meta.audioSampleRate * meta.timescale);
                     _logger2.default.v(this.TAG, 'Parsed MPEG Audio Frame Header');
 
                     this._audioInitialMetadataDispatched = true;
@@ -5011,7 +4977,7 @@ var FLVDemuxer = function () {
                 samplingRate: samplingFrequence,
                 channelCount: channelConfig,
                 codec: 'mp4a.40.' + audioObjectType,
-                originalCodec: 'mp4a.40.' + originalAudioObjectType
+                originalAudioObjectType: originalAudioObjectType
             };
         }
     }, {
@@ -5088,8 +5054,7 @@ var FLVDemuxer = function () {
                     bitRate: bit_rate,
                     samplingRate: sample_rate,
                     channelCount: channel_count,
-                    codec: codec,
-                    originalCodec: codec
+                    codec: codec
                 };
             } else {
                 result = array;
@@ -5102,12 +5067,6 @@ var FLVDemuxer = function () {
         value: function _parseVideoData(arrayBuffer, dataOffset, dataSize, tagTimestamp, tagPosition) {
             if (dataSize <= 1) {
                 _logger2.default.w(this.TAG, 'Flv: Invalid video packet, missing VideoData payload!');
-                return;
-            }
-
-            if (this._hasVideoFlagOverrided === true && this._hasVideo === false) {
-                // If hasVideo: false indicated explicitly in MediaDataSource,
-                // Ignore all the video packets
                 return;
             }
 
@@ -5164,7 +5123,7 @@ var FLVDemuxer = function () {
             var v = new DataView(arrayBuffer, dataOffset, dataSize);
 
             if (!meta) {
-                if (this._hasVideo === false && this._hasVideoFlagOverrided === false) {
+                if (this._hasVideo === false) {
                     this._hasVideo = true;
                     this._mediaInfo.hasVideo = true;
                 }
@@ -5243,7 +5202,7 @@ var FLVDemuxer = function () {
 
                 var fps_den = meta.frameRate.fps_den;
                 var fps_num = meta.frameRate.fps_num;
-                meta.refSampleDuration = meta.timescale * (fps_den / fps_num);
+                meta.refSampleDuration = Math.floor(meta.timescale * (fps_den / fps_num));
 
                 var codecArray = sps.subarray(1, 4);
                 var codecString = 'avc1.';
@@ -5442,26 +5401,6 @@ var FLVDemuxer = function () {
             this._durationOverrided = true;
             this._duration = duration;
             this._mediaInfo.duration = duration;
-        }
-
-        // Force-override audio track present flag, boolean
-
-    }, {
-        key: 'overridedHasAudio',
-        set: function set(hasAudio) {
-            this._hasAudioFlagOverrided = true;
-            this._hasAudio = hasAudio;
-            this._mediaInfo.hasAudio = hasAudio;
-        }
-
-        // Force-override video track present flag, boolean
-
-    }, {
-        key: 'overridedHasVideo',
-        set: function set(hasVideo) {
-            this._hasVideoFlagOverrided = true;
-            this._hasVideo = hasVideo;
-            this._mediaInfo.hasVideo = hasVideo;
         }
     }], [{
         key: 'probe',
@@ -5921,7 +5860,7 @@ Object.defineProperty(flvjs, 'version', {
     enumerable: true,
     get: function get() {
         // replaced by browserify-versionify transform
-        return '1.3.0';
+        return '1.2.0';
     }
 });
 
@@ -6064,10 +6003,7 @@ var FetchStreamLoader = function (_BaseLoader) {
                 method: 'GET',
                 headers: headers,
                 mode: 'cors',
-                cache: 'default',
-                // The default policy of Fetch API in the whatwg standard
-                // Safari incorrectly indicates 'no-referrer' as default policy, fuck it
-                referrerPolicy: 'no-referrer-when-downgrade'
+                cache: 'default'
             };
 
             // cors is enabled by default
@@ -6079,11 +6015,6 @@ var FetchStreamLoader = function (_BaseLoader) {
             // withCredentials is disabled by default
             if (dataSource.withCredentials) {
                 params.credentials = 'include';
-            }
-
-            // referrerPolicy from config
-            if (dataSource.referrerPolicy) {
-                params.referrerPolicy = dataSource.referrerPolicy;
             }
 
             this._status = _loader.LoaderStatus.kConnecting;
@@ -9620,7 +9551,7 @@ var PlayerEvents = {
 exports.default = PlayerEvents;
 
 },{}],36:[function(_dereq_,module,exports){
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -9655,35 +9586,20 @@ var AAC = function () {
     }
 
     _createClass(AAC, null, [{
-        key: 'getSilentFrame',
-        value: function getSilentFrame(codec, channelCount) {
-            if (codec === 'mp4a.40.2') {
-                // handle LC-AAC
-                if (channelCount === 1) {
-                    return new Uint8Array([0x00, 0xc8, 0x00, 0x80, 0x23, 0x80]);
-                } else if (channelCount === 2) {
-                    return new Uint8Array([0x21, 0x00, 0x49, 0x90, 0x02, 0x19, 0x00, 0x23, 0x80]);
-                } else if (channelCount === 3) {
-                    return new Uint8Array([0x00, 0xc8, 0x00, 0x80, 0x20, 0x84, 0x01, 0x26, 0x40, 0x08, 0x64, 0x00, 0x8e]);
-                } else if (channelCount === 4) {
-                    return new Uint8Array([0x00, 0xc8, 0x00, 0x80, 0x20, 0x84, 0x01, 0x26, 0x40, 0x08, 0x64, 0x00, 0x80, 0x2c, 0x80, 0x08, 0x02, 0x38]);
-                } else if (channelCount === 5) {
-                    return new Uint8Array([0x00, 0xc8, 0x00, 0x80, 0x20, 0x84, 0x01, 0x26, 0x40, 0x08, 0x64, 0x00, 0x82, 0x30, 0x04, 0x99, 0x00, 0x21, 0x90, 0x02, 0x38]);
-                } else if (channelCount === 6) {
-                    return new Uint8Array([0x00, 0xc8, 0x00, 0x80, 0x20, 0x84, 0x01, 0x26, 0x40, 0x08, 0x64, 0x00, 0x82, 0x30, 0x04, 0x99, 0x00, 0x21, 0x90, 0x02, 0x00, 0xb2, 0x00, 0x20, 0x08, 0xe0]);
-                }
-            } else {
-                // handle HE-AAC (mp4a.40.5 / mp4a.40.29)
-                if (channelCount === 1) {
-                    // ffmpeg -y -f lavfi -i "aevalsrc=0:d=0.05" -c:a libfdk_aac -profile:a aac_he -b:a 4k output.aac && hexdump -v -e '16/1 "0x%x," "\n"' -v output.aac
-                    return new Uint8Array([0x1, 0x40, 0x22, 0x80, 0xa3, 0x4e, 0xe6, 0x80, 0xba, 0x8, 0x0, 0x0, 0x0, 0x1c, 0x6, 0xf1, 0xc1, 0xa, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5e]);
-                } else if (channelCount === 2) {
-                    // ffmpeg -y -f lavfi -i "aevalsrc=0|0:d=0.05" -c:a libfdk_aac -profile:a aac_he_v2 -b:a 4k output.aac && hexdump -v -e '16/1 "0x%x," "\n"' -v output.aac
-                    return new Uint8Array([0x1, 0x40, 0x22, 0x80, 0xa3, 0x5e, 0xe6, 0x80, 0xba, 0x8, 0x0, 0x0, 0x0, 0x0, 0x95, 0x0, 0x6, 0xf1, 0xa1, 0xa, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5e]);
-                } else if (channelCount === 3) {
-                    // ffmpeg -y -f lavfi -i "aevalsrc=0|0|0:d=0.05" -c:a libfdk_aac -profile:a aac_he_v2 -b:a 4k output.aac && hexdump -v -e '16/1 "0x%x," "\n"' -v output.aac
-                    return new Uint8Array([0x1, 0x40, 0x22, 0x80, 0xa3, 0x5e, 0xe6, 0x80, 0xba, 0x8, 0x0, 0x0, 0x0, 0x0, 0x95, 0x0, 0x6, 0xf1, 0xa1, 0xa, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5e]);
-                }
+        key: "getSilentFrame",
+        value: function getSilentFrame(channelCount) {
+            if (channelCount === 1) {
+                return new Uint8Array([0x00, 0xc8, 0x00, 0x80, 0x23, 0x80]);
+            } else if (channelCount === 2) {
+                return new Uint8Array([0x21, 0x00, 0x49, 0x90, 0x02, 0x19, 0x00, 0x23, 0x80]);
+            } else if (channelCount === 3) {
+                return new Uint8Array([0x00, 0xc8, 0x00, 0x80, 0x20, 0x84, 0x01, 0x26, 0x40, 0x08, 0x64, 0x00, 0x8e]);
+            } else if (channelCount === 4) {
+                return new Uint8Array([0x00, 0xc8, 0x00, 0x80, 0x20, 0x84, 0x01, 0x26, 0x40, 0x08, 0x64, 0x00, 0x80, 0x2c, 0x80, 0x08, 0x02, 0x38]);
+            } else if (channelCount === 5) {
+                return new Uint8Array([0x00, 0xc8, 0x00, 0x80, 0x20, 0x84, 0x01, 0x26, 0x40, 0x08, 0x64, 0x00, 0x82, 0x30, 0x04, 0x99, 0x00, 0x21, 0x90, 0x02, 0x38]);
+            } else if (channelCount === 6) {
+                return new Uint8Array([0x00, 0xc8, 0x00, 0x80, 0x20, 0x84, 0x01, 0x26, 0x40, 0x08, 0x64, 0x00, 0x82, 0x30, 0x04, 0x99, 0x00, 0x21, 0x90, 0x02, 0x00, 0xb2, 0x00, 0x20, 0x08, 0xe0]);
             }
             return null;
         }
@@ -9990,8 +9906,8 @@ var MP4 = function () {
             MP4.box(MP4.types.stts, MP4.constants.STTS), // Time-To-Sample
             MP4.box(MP4.types.stsc, MP4.constants.STSC), // Sample-To-Chunk
             MP4.box(MP4.types.stsz, MP4.constants.STSZ), // Sample size
-            MP4.box(MP4.types.stco, MP4.constants.STCO // Chunk offset
-            ));
+            MP4.box(MP4.types.stco, MP4.constants.STCO) // Chunk offset
+            );
             return result;
         }
 
@@ -10416,185 +10332,144 @@ var MP4Remuxer = function () {
     }, {
         key: '_remuxAudio',
         value: function _remuxAudio(audioTrack) {
-            if (this._audioMeta == null) {
-                return;
-            }
-
             var track = audioTrack;
             var samples = track.samples;
             var dtsCorrection = undefined;
             var firstDts = -1,
                 lastDts = -1,
                 lastPts = -1;
-            var refSampleDuration = this._audioMeta.refSampleDuration;
 
             var mpegRawTrack = this._audioMeta.codec === 'mp3' && this._mp3UseMpegAudio;
             var firstSegmentAfterSeek = this._dtsBaseInited && this._audioNextDts === undefined;
 
-            var insertPrefixSilentFrame = false;
+            var remuxSilentFrame = false;
+            var silentFrameDuration = -1;
 
             if (!samples || samples.length === 0) {
                 return;
             }
 
+            var bytes = 0;
             var offset = 0;
             var mdatbox = null;
-            var mdatBytes = 0;
 
-            // calculate initial mdat size
             if (mpegRawTrack) {
-                // for raw mpeg buffer
+                // allocate for raw mpeg buffer
+                bytes = track.length;
                 offset = 0;
-                mdatBytes = track.length;
+                mdatbox = new Uint8Array(bytes);
             } else {
-                // for fmp4 mdat box
+                // allocate for fmp4 mdat box
+                bytes = 8 + track.length;
                 offset = 8; // size + type
-                mdatBytes = 8 + track.length;
-            }
-
-            var firstSampleOriginalDts = samples[0].dts - this._dtsBase;
-
-            // calculate dtsCorrection
-            if (this._audioNextDts) {
-                dtsCorrection = firstSampleOriginalDts - this._audioNextDts;
-            } else {
-                // this._audioNextDts == undefined
-                if (this._audioSegmentInfoList.isEmpty()) {
-                    dtsCorrection = 0;
-                    if (this._fillSilentAfterSeek && !this._videoSegmentInfoList.isEmpty()) {
-                        if (this._audioMeta.originalCodec !== 'mp3') {
-                            insertPrefixSilentFrame = true;
-                        }
-                    }
-                } else {
-                    var lastSample = this._audioSegmentInfoList.getLastSampleBefore(firstSampleOriginalDts);
-                    if (lastSample != null) {
-                        var distance = firstSampleOriginalDts - (lastSample.originalDts + lastSample.duration);
-                        if (distance <= 3) {
-                            distance = 0;
-                        }
-                        var expectedDts = lastSample.dts + lastSample.duration + distance;
-                        dtsCorrection = firstSampleOriginalDts - expectedDts;
-                    } else {
-                        // lastSample == null, cannot found
-                        dtsCorrection = 0;
-                    }
-                }
-            }
-
-            if (insertPrefixSilentFrame) {
-                // align audio segment beginDts to match with current video segment's beginDts
-                var firstSampleDts = firstSampleOriginalDts - dtsCorrection;
-                var videoSegment = this._videoSegmentInfoList.getLastSegmentBefore(firstSampleOriginalDts);
-                if (videoSegment != null && videoSegment.beginDts < firstSampleDts) {
-                    var silentUnit = _aacSilent2.default.getSilentFrame(this._audioMeta.originalCodec, this._audioMeta.channelCount);
-                    if (silentUnit) {
-                        var dts = videoSegment.beginDts;
-                        var silentFrameDuration = firstSampleDts - videoSegment.beginDts;
-                        _logger2.default.v(this.TAG, 'InsertPrefixSilentAudio: dts: ' + dts + ', duration: ' + silentFrameDuration);
-                        samples.unshift({ unit: silentUnit, dts: dts, pts: dts });
-                        mdatBytes += silentUnit.byteLength;
-                    } // silentUnit == null: Cannot generate, skip
-                } else {
-                    insertPrefixSilentFrame = false;
-                }
+                mdatbox = new Uint8Array(bytes);
+                // size field
+                mdatbox[0] = bytes >>> 24 & 0xFF;
+                mdatbox[1] = bytes >>> 16 & 0xFF;
+                mdatbox[2] = bytes >>> 8 & 0xFF;
+                mdatbox[3] = bytes & 0xFF;
+                // type field (fourCC)
+                mdatbox.set(_mp4Generator2.default.types.mdat, 4);
             }
 
             var mp4Samples = [];
 
-            // Correct dts for each sample, and calculate sample duration. Then output to mp4Samples
-            for (var i = 0; i < samples.length; i++) {
-                var sample = samples[i];
-                var unit = sample.unit;
-                var originalDts = sample.dts - this._dtsBase;
-                var _dts = originalDts - dtsCorrection;
+            while (samples.length) {
+                var aacSample = samples.shift();
+                var unit = aacSample.unit;
+                var originalDts = aacSample.dts - this._dtsBase;
 
+                if (dtsCorrection == undefined) {
+                    if (this._audioNextDts == undefined) {
+                        if (this._audioSegmentInfoList.isEmpty()) {
+                            dtsCorrection = 0;
+                            if (this._fillSilentAfterSeek && !this._videoSegmentInfoList.isEmpty()) {
+                                if (this._audioMeta.codec !== 'mp3') {
+                                    remuxSilentFrame = true;
+                                }
+                            }
+                        } else {
+                            var lastSample = this._audioSegmentInfoList.getLastSampleBefore(originalDts);
+                            if (lastSample != null) {
+                                var distance = originalDts - (lastSample.originalDts + lastSample.duration);
+                                if (distance <= 3) {
+                                    distance = 0;
+                                }
+                                var expectedDts = lastSample.dts + lastSample.duration + distance;
+                                dtsCorrection = originalDts - expectedDts;
+                            } else {
+                                // lastSample == null
+                                dtsCorrection = 0;
+                            }
+                        }
+                    } else {
+                        dtsCorrection = originalDts - this._audioNextDts;
+                    }
+                }
+
+                var dts = originalDts - dtsCorrection;
+                if (remuxSilentFrame) {
+                    // align audio segment beginDts to match with current video segment's beginDts
+                    var videoSegment = this._videoSegmentInfoList.getLastSegmentBefore(originalDts);
+                    if (videoSegment != null && videoSegment.beginDts < dts) {
+                        silentFrameDuration = dts - videoSegment.beginDts;
+                        dts = videoSegment.beginDts;
+                    } else {
+                        remuxSilentFrame = false;
+                    }
+                }
                 if (firstDts === -1) {
-                    firstDts = _dts;
+                    firstDts = dts;
+                }
+
+                if (remuxSilentFrame) {
+                    remuxSilentFrame = false;
+                    samples.unshift(aacSample);
+
+                    var frame = this._generateSilentAudio(dts, silentFrameDuration);
+                    if (frame == null) {
+                        continue;
+                    }
+                    var _mp4Sample = frame.mp4Sample;
+                    var _unit = frame.unit;
+
+                    mp4Samples.push(_mp4Sample);
+
+                    // re-allocate mdatbox buffer with new size, to fit with this silent frame
+                    bytes += _unit.byteLength;
+                    mdatbox = new Uint8Array(bytes);
+                    mdatbox[0] = bytes >>> 24 & 0xFF;
+                    mdatbox[1] = bytes >>> 16 & 0xFF;
+                    mdatbox[2] = bytes >>> 8 & 0xFF;
+                    mdatbox[3] = bytes & 0xFF;
+                    mdatbox.set(_mp4Generator2.default.types.mdat, 4);
+
+                    // fill data now
+                    mdatbox.set(_unit, offset);
+                    offset += _unit.byteLength;
+                    continue;
                 }
 
                 var sampleDuration = 0;
 
-                if (i !== samples.length - 1) {
-                    var nextDts = samples[i + 1].dts - this._dtsBase - dtsCorrection;
-                    sampleDuration = nextDts - _dts;
+                if (samples.length >= 1) {
+                    var nextDts = samples[0].dts - this._dtsBase - dtsCorrection;
+                    sampleDuration = nextDts - dts;
                 } else {
-                    // the last sample
                     if (mp4Samples.length >= 1) {
                         // use second last sample duration
                         sampleDuration = mp4Samples[mp4Samples.length - 1].duration;
                     } else {
                         // the only one sample, use reference sample duration
-                        sampleDuration = Math.floor(refSampleDuration);
+                        sampleDuration = this._audioMeta.refSampleDuration;
                     }
                 }
 
-                var needFillSilentFrames = false;
-                var silentFrames = null;
-
-                // Silent frame generation, if large timestamp gap detected
-                if (sampleDuration > refSampleDuration * 1.5 && this._audioMeta.codec !== 'mp3') {
-                    // We need to insert silent frames to fill timestamp gap
-                    needFillSilentFrames = true;
-                    var delta = Math.abs(sampleDuration - refSampleDuration);
-                    var frameCount = Math.ceil(delta / refSampleDuration);
-                    var currentDts = _dts + refSampleDuration; // Notice: in float
-
-                    _logger2.default.w(this.TAG, 'Large audio timestamp gap detected, may cause AV sync to drift. ' + 'Silent frames will be generated to avoid unsync.\n' + ('dts: ' + (_dts + sampleDuration) + ' ms, expected: ' + (_dts + Math.round(refSampleDuration)) + ' ms, ') + ('delta: ' + Math.round(delta) + ' ms, generate: ' + frameCount + ' frames'));
-
-                    var _silentUnit = _aacSilent2.default.getSilentFrame(this._audioMeta.originalCodec, this._audioMeta.channelCount);
-                    if (_silentUnit == null) {
-                        _logger2.default.w(this.TAG, 'Unable to generate silent frame for ' + (this._audioMeta.originalCodec + ' with ' + this._audioMeta.channelCount + ' channels, repeat last frame'));
-                        // Repeat last frame
-                        _silentUnit = unit;
-                    }
-                    silentFrames = [];
-
-                    for (var j = 0; j < frameCount; j++) {
-                        var intDts = Math.round(currentDts); // round to integer
-                        if (silentFrames.length > 0) {
-                            // Set previous frame sample duration
-                            var previousFrame = silentFrames[silentFrames.length - 1];
-                            previousFrame.duration = intDts - previousFrame.dts;
-                        }
-                        var frame = {
-                            dts: intDts,
-                            pts: intDts,
-                            cts: 0,
-                            unit: _silentUnit,
-                            size: _silentUnit.byteLength,
-                            duration: 0, // wait for next sample
-                            originalDts: originalDts,
-                            flags: {
-                                isLeading: 0,
-                                dependsOn: 1,
-                                isDependedOn: 0,
-                                hasRedundancy: 0
-                            }
-                        };
-                        silentFrames.push(frame);
-                        mdatBytes += unit.byteLength;
-                        currentDts += refSampleDuration;
-                    }
-
-                    // last frame: align end time to next frame dts
-                    var lastFrame = silentFrames[silentFrames.length - 1];
-                    lastFrame.duration = _dts + sampleDuration - lastFrame.dts;
-
-                    // silentFrames.forEach((frame) => {
-                    //     Log.w(this.TAG, `SilentAudio: dts: ${frame.dts}, duration: ${frame.duration}`);
-                    // });
-
-                    // Set correct sample duration for current frame
-                    sampleDuration = Math.round(refSampleDuration);
-                }
-
-                mp4Samples.push({
-                    dts: _dts,
-                    pts: _dts,
+                var mp4Sample = {
+                    dts: dts,
+                    pts: dts,
                     cts: 0,
-                    unit: sample.unit,
-                    size: sample.unit.byteLength,
+                    size: unit.byteLength,
                     duration: sampleDuration,
                     originalDts: originalDts,
                     flags: {
@@ -10603,37 +10478,11 @@ var MP4Remuxer = function () {
                         isDependedOn: 0,
                         hasRedundancy: 0
                     }
-                });
-
-                if (needFillSilentFrames) {
-                    // Silent frames should be inserted after wrong-duration frame
-                    mp4Samples.push.apply(mp4Samples, silentFrames);
-                }
+                };
+                mp4Samples.push(mp4Sample);
+                mdatbox.set(unit, offset);
+                offset += unit.byteLength;
             }
-
-            // allocate mdatbox
-            if (mpegRawTrack) {
-                // allocate for raw mpeg buffer
-                mdatbox = new Uint8Array(mdatBytes);
-            } else {
-                // allocate for fmp4 mdat box
-                mdatbox = new Uint8Array(mdatBytes);
-                // size field
-                mdatbox[0] = mdatBytes >>> 24 & 0xFF;
-                mdatbox[1] = mdatBytes >>> 16 & 0xFF;
-                mdatbox[2] = mdatBytes >>> 8 & 0xFF;
-                mdatbox[3] = mdatBytes & 0xFF;
-                // type field (fourCC)
-                mdatbox.set(_mp4Generator2.default.types.mdat, 4);
-            }
-
-            // Write samples into mdatbox
-            for (var _i = 0; _i < mp4Samples.length; _i++) {
-                var _unit = mp4Samples[_i].unit;
-                mdatbox.set(_unit, offset);
-                offset += _unit.byteLength;
-            }
-
             var latest = mp4Samples[mp4Samples.length - 1];
             lastDts = latest.dts + latest.duration;
             this._audioNextDts = lastDts;
@@ -10684,12 +10533,39 @@ var MP4Remuxer = function () {
             this._onMediaSegment('audio', segment);
         }
     }, {
-        key: '_remuxVideo',
-        value: function _remuxVideo(videoTrack) {
-            if (this._videoMeta == null) {
-                return;
+        key: '_generateSilentAudio',
+        value: function _generateSilentAudio(dts, frameDuration) {
+            _logger2.default.v(this.TAG, 'GenerateSilentAudio: dts = ' + dts + ', duration = ' + frameDuration);
+
+            var unit = _aacSilent2.default.getSilentFrame(this._audioMeta.channelCount);
+            if (unit == null) {
+                _logger2.default.w(this.TAG, 'Cannot generate silent aac frame for channelCount = ' + this._audioMeta.channelCount);
+                return null;
             }
 
+            var mp4Sample = {
+                dts: dts,
+                pts: dts,
+                cts: 0,
+                size: unit.byteLength,
+                duration: frameDuration,
+                originalDts: dts,
+                flags: {
+                    isLeading: 0,
+                    dependsOn: 1,
+                    isDependedOn: 0,
+                    hasRedundancy: 0
+                }
+            };
+
+            return {
+                unit: unit,
+                mp4Sample: mp4Sample
+            };
+        }
+    }, {
+        key: '_remuxVideo',
+        value: function _remuxVideo(videoTrack) {
             var track = videoTrack;
             var samples = track.samples;
             var dtsCorrection = undefined;
@@ -10702,50 +10578,48 @@ var MP4Remuxer = function () {
                 return;
             }
 
-            var offset = 8;
-            var mdatBytes = 8 + videoTrack.length;
-            var mdatbox = new Uint8Array(mdatBytes);
-            mdatbox[0] = mdatBytes >>> 24 & 0xFF;
-            mdatbox[1] = mdatBytes >>> 16 & 0xFF;
-            mdatbox[2] = mdatBytes >>> 8 & 0xFF;
-            mdatbox[3] = mdatBytes & 0xFF;
+            var bytes = 8 + videoTrack.length;
+            var mdatbox = new Uint8Array(bytes);
+            mdatbox[0] = bytes >>> 24 & 0xFF;
+            mdatbox[1] = bytes >>> 16 & 0xFF;
+            mdatbox[2] = bytes >>> 8 & 0xFF;
+            mdatbox[3] = bytes & 0xFF;
             mdatbox.set(_mp4Generator2.default.types.mdat, 4);
 
-            var firstSampleOriginalDts = samples[0].dts - this._dtsBase;
+            var offset = 8;
+            var mp4Samples = [];
+            var info = new _mediaSegmentInfo.MediaSegmentInfo();
 
-            // calculate dtsCorrection
-            if (this._videoNextDts) {
-                dtsCorrection = firstSampleOriginalDts - this._videoNextDts;
-            } else {
-                // this._videoNextDts == undefined
-                if (this._videoSegmentInfoList.isEmpty()) {
-                    dtsCorrection = 0;
-                } else {
-                    var lastSample = this._videoSegmentInfoList.getLastSampleBefore(firstSampleOriginalDts);
-                    if (lastSample != null) {
-                        var distance = firstSampleOriginalDts - (lastSample.originalDts + lastSample.duration);
-                        if (distance <= 3) {
-                            distance = 0;
+            while (samples.length) {
+                var avcSample = samples.shift();
+                var keyframe = avcSample.isKeyframe;
+                var originalDts = avcSample.dts - this._dtsBase;
+
+                if (dtsCorrection == undefined) {
+                    if (this._videoNextDts == undefined) {
+                        if (this._videoSegmentInfoList.isEmpty()) {
+                            dtsCorrection = 0;
+                        } else {
+                            var lastSample = this._videoSegmentInfoList.getLastSampleBefore(originalDts);
+                            if (lastSample != null) {
+                                var distance = originalDts - (lastSample.originalDts + lastSample.duration);
+                                if (distance <= 3) {
+                                    distance = 0;
+                                }
+                                var expectedDts = lastSample.dts + lastSample.duration + distance;
+                                dtsCorrection = originalDts - expectedDts;
+                            } else {
+                                // lastSample == null
+                                dtsCorrection = 0;
+                            }
                         }
-                        var expectedDts = lastSample.dts + lastSample.duration + distance;
-                        dtsCorrection = firstSampleOriginalDts - expectedDts;
                     } else {
-                        // lastSample == null, cannot found
-                        dtsCorrection = 0;
+                        dtsCorrection = originalDts - this._videoNextDts;
                     }
                 }
-            }
 
-            var info = new _mediaSegmentInfo.MediaSegmentInfo();
-            var mp4Samples = [];
-
-            // Correct dts for each sample, and calculate sample duration. Then output to mp4Samples
-            for (var i = 0; i < samples.length; i++) {
-                var sample = samples[i];
-                var originalDts = sample.dts - this._dtsBase;
-                var isKeyframe = sample.isKeyframe;
                 var dts = originalDts - dtsCorrection;
-                var cts = sample.cts;
+                var cts = avcSample.cts;
                 var pts = dts + cts;
 
                 if (firstDts === -1) {
@@ -10753,58 +10627,56 @@ var MP4Remuxer = function () {
                     firstPts = pts;
                 }
 
+                // fill mdat box
+                var sampleSize = 0;
+                while (avcSample.units.length) {
+                    var unit = avcSample.units.shift();
+                    var data = unit.data;
+                    mdatbox.set(data, offset);
+                    offset += data.byteLength;
+                    sampleSize += data.byteLength;
+                }
+
                 var sampleDuration = 0;
 
-                if (i !== samples.length - 1) {
-                    var nextDts = samples[i + 1].dts - this._dtsBase - dtsCorrection;
+                if (samples.length >= 1) {
+                    var nextDts = samples[0].dts - this._dtsBase - dtsCorrection;
                     sampleDuration = nextDts - dts;
                 } else {
-                    // the last sample
                     if (mp4Samples.length >= 1) {
-                        // use second last sample duration
+                        // lastest sample, use second last duration
                         sampleDuration = mp4Samples[mp4Samples.length - 1].duration;
                     } else {
-                        // the only one sample, use reference sample duration
-                        sampleDuration = Math.floor(this._videoMeta.refSampleDuration);
+                        // the only one sample, use reference duration
+                        sampleDuration = this._videoMeta.refSampleDuration;
                     }
                 }
 
-                if (isKeyframe) {
-                    var syncPoint = new _mediaSegmentInfo.SampleInfo(dts, pts, sampleDuration, sample.dts, true);
-                    syncPoint.fileposition = sample.fileposition;
+                if (keyframe) {
+                    var syncPoint = new _mediaSegmentInfo.SampleInfo(dts, pts, sampleDuration, avcSample.dts, true);
+                    syncPoint.fileposition = avcSample.fileposition;
                     info.appendSyncPoint(syncPoint);
                 }
 
-                mp4Samples.push({
+                var mp4Sample = {
                     dts: dts,
                     pts: pts,
                     cts: cts,
-                    units: sample.units,
-                    size: sample.length,
-                    isKeyframe: isKeyframe,
+                    size: sampleSize,
+                    isKeyframe: keyframe,
                     duration: sampleDuration,
                     originalDts: originalDts,
                     flags: {
                         isLeading: 0,
-                        dependsOn: isKeyframe ? 2 : 1,
-                        isDependedOn: isKeyframe ? 1 : 0,
+                        dependsOn: keyframe ? 2 : 1,
+                        isDependedOn: keyframe ? 1 : 0,
                         hasRedundancy: 0,
-                        isNonSync: isKeyframe ? 0 : 1
+                        isNonSync: keyframe ? 0 : 1
                     }
-                });
-            }
+                };
 
-            // Write samples into mdatbox
-            for (var _i2 = 0; _i2 < mp4Samples.length; _i2++) {
-                var units = mp4Samples[_i2].units;
-                while (units.length) {
-                    var unit = units.shift();
-                    var data = unit.data;
-                    mdatbox.set(data, offset);
-                    offset += data.byteLength;
-                }
+                mp4Samples.push(mp4Sample);
             }
-
             var latest = mp4Samples[mp4Samples.length - 1];
             lastDts = latest.dts + latest.duration;
             lastPts = latest.pts + latest.duration;
