@@ -189,6 +189,8 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
     env.set("REQUEST_URI", req.url);
     env.set("SERVER_PROTOCOL", "HTTP/1.0");
     env.set("SERVER_SOFTWARE", PCX_AGENT);
+    env.set("SERVER_NAME", servMgr->serverHost.str(false));
+    env.set("SERVER_PORT", std::to_string(servMgr->serverHost.port));
 
     env.set("PATH", getenv("PATH"));
     // Windows で Ruby が名前引きをするのに必要なので SYSTEMROOT を通す。
@@ -237,12 +239,11 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
         throw HTTPException(HTTP_SC_SERVERERROR, 500);
     }
 
-    std::string body;
-    try
-    {
-        while (true)
-            body += stream.readChar();
-    } catch (StreamException&) {}
+    HTTPResponse res(statusCode, headers);
+
+    res.stream = &stream;
+    http.send(res);
+    stream.close();
 
     int status;
     bool normal = script.wait(&status);
@@ -250,21 +251,9 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
     if (!normal)
     {
         LOG_ERROR("child process (PID %d) terminated abnormally", script.pid());
-        http.send(HTTPResponse::serverError(
-                      str::format("child process (PID %d) terminated abnormally", script.pid())));
     }else
     {
         LOG_DEBUG("child process (PID %d) exited normally (status %d)", script.pid(), status);
-        if (status != 0)
-        {
-            http.send(HTTPResponse::serverError(
-                          str::format("child process (PID %d) exited with status %d", script.pid(), status)));
-        }else
-        {
-            HTTPResponse res(statusCode, headers);
-            res.body = body;
-            http.send(res);
-        }
     }
 }
 
@@ -464,8 +453,19 @@ void Servent::handshakeGET(HTTP &http)
         if (!isAllowed(ALLOW_HTML))
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-        if (handshakeAuth(http, fn, true))
+        if (str::has_prefix(fn, "/cgi-bin/flv.cgi"))
+        {
+            if (!isPrivate() || !isFiltered(ServFilter::F_DIRECT))
+                throw HTTPException(HTTP_SC_FORBIDDEN, 403);
+            else
+            {
+                http.readHeaders();
+                invokeCGIScript(http, fn);
+            }
+        }else if (handshakeAuth(http, fn, true))
+        {
             invokeCGIScript(http, fn);
+        }
     }else
     {
         // GET マッチなし
