@@ -1,45 +1,41 @@
-#!/usr/bin/env ruby
-require 'json'
-require 'cgi'
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import cgi, json, sys
 
-require_relative 'common'
-require_relative 'bbs_reader'
+sys.path.append('cgi-bin')
 
-include Bbs
+import bbs_reader
 
-cgi = CGI.new
+form = cgi.FieldStorage()
 
-if cgi["category"].empty? || cgi["board_num"].empty?
-  print_bad_request "category and board_num required"
-  exit
-end
+if "category" not in form or "board_num" not in form:
+  common.print_bad_request("bad parameter")
+  sys.exit()
 
-board = Board.new(cgi["category"], cgi["board_num"].to_i)
+board = bbs_reader.Board(form["category"].value, form["board_num"].value)
+settings = board.settings()
 
-settings = board.settings
-if settings.has_key?("ERROR")
+if "error" in settings:
   data = {
-    "status" => "error",
-    "message"=> settings["ERROR"]
+    "status": "error",
+    "message": settings["error"]
   }
-else
-  title = board.settings["BBS_TITLE"]
-  threads = board.threads.map do |thread|
-    {
-      "id" => thread.id,
-      "title" => thread.title,
-      "last" => thread.last
-    }
-  end
+else:
+  title = settings["bbs_title"]
+
+  threads = [{
+    "id":    thread.id,
+    "title": thread.title,
+    "last":  thread.last
+  } for thread in board.threads()]
 
   data = {
-    "status" => "ok",
-    "title" => title,
-    "threads" => threads,
-    "category" => board.category,
-    "board_num" => board.board_num
+    "status":    "ok",
+    "title":     title,
+    "threads":   threads,
+    "category":  board.category,
+    "board_num": board.board_num
   }
-end
 
-puts "Content-Type: text/json; charset=UTF-8\n\n"
-print JSON.generate(data)
+print("Content-Type: text/json; charset=UTF-8\n")
+print(json.dumps(data))
