@@ -26,6 +26,9 @@
 #include "common.h"
 #include "str.h"
 
+#include "cgi.h"
+#include "version2.h" // PCX_AGENT
+
 //-----------------------------------------
 bool HTTP::checkResponse(int r)
 {
@@ -207,8 +210,6 @@ static const char* statusMessage(int statusCode)
 }
 
 // -----------------------------------
-#include "cgi.h"
-#include "version2.h" // PCX_AGENT
 void HTTP::send(const HTTPResponse& response)
 {
     bool crlf = writeCRLF;
@@ -232,8 +233,22 @@ void HTTP::send(const HTTPResponse& response)
 
     writeLine("");
 
-    if (response.body.size())
+    if (response.stream != nullptr)
+    {
+        try
+        {
+            while (true)
+            {
+                char buf[4096];
+                int r = response.stream->read(buf, 4096);
+                write(buf, r);
+            }
+        } catch (StreamException&) {}
+    }
+    else
+    {
         write(response.body.data(), static_cast<int>(response.body.size()));
+    }
 }
 
 // -----------------------------------

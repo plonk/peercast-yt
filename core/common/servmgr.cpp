@@ -254,7 +254,6 @@ void ServMgr::addHost(Host &h, ServHost::TYPE type, unsigned int time)
     else
         LOG_DEBUG("Old host: %s - %s", str, ServHost::getTypeStr(type));
 
-    h.value = 0;    // make sure dead count is zero
     if (!sh)
     {
         // find empty slot
@@ -833,9 +832,8 @@ void ServMgr::setFirewall(FW_STATE state)
 bool ServMgr::isFiltered(int fl, Host &h)
 {
     for (int i=0; i<numFilters; i++)
-        if (filters[i].flags & fl)
-            if (h.isMemberOf(filters[i].host))
-                return true;
+        if (filters[i].matches(fl, h))
+            return true;
 
     return false;
 }
@@ -2064,6 +2062,12 @@ bool    ServFilter::writeVariable(Stream &out, const String &var)
 }
 
 // --------------------------------------------------
+bool ServFilter::matches(int fl, const Host& h) const
+{
+    return (flags&fl) != 0 && h.isMemberOf(host);
+}
+
+// --------------------------------------------------
 bool    BCID::writeVariable(Stream &out, const String &var)
 {
     std::string buf;
@@ -2144,7 +2148,7 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     else if (var == "maxServIn")
         buf = to_string(maxServIn);
     else if (var == "numFilters")
-        buf = to_string(numFilters+1);
+        buf = to_string(numFilters+1); // 入力用の空欄を生成する為に+1する。
     else if (var == "maxPGNUIn")
         buf = to_string(maxGnuIncoming);
     else if (var == "minPGNUIn")

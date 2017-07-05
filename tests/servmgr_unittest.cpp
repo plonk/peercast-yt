@@ -345,3 +345,14 @@ TEST_F(ServMgrFixture, writeVariable)
     ASSERT_TRUE(m.writeVariable(mem, "test"));
     ASSERT_STREQ("かきくけこABCDabcd", mem.str().c_str());
 }
+
+TEST_F(ServMgrFixture, isFiltered)
+{
+    Host h;
+    h.fromStrIP("192.168.0.1", 0);
+
+    ASSERT_FALSE(m.isFiltered(ServFilter::F_PRIVATE, h));
+    ASSERT_FALSE(m.isFiltered(ServFilter::F_BAN, h));
+    ASSERT_TRUE(m.isFiltered(ServFilter::F_NETWORK, h));
+    ASSERT_TRUE(m.isFiltered(ServFilter::F_DIRECT, h));
+}
