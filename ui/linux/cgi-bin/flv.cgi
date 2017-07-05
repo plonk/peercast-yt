@@ -13,7 +13,11 @@ def main
   id = cgi['id']
   server_name = ENV['SERVER_NAME']
   server_port = ENV['SERVER_PORT']
-  r = 500 # video bitrate in kbps
+  r = cgi['bitrate'].to_i # チャンネルのビットレートを映像ビットレートとする。
+  if r == 0
+    # 正常なビットレートが渡されなかった場合は 500Kbps にする。
+    r = 500
+  end
 
   print "Content-Type: video/x-flv\n\n"
   system("ffmpeg",

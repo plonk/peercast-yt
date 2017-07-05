@@ -47,7 +47,7 @@
        var flvPlayer = flvjs.createPlayer({
          type: 'flv',
          isLive: true,
-         url: '/cgi-bin/flv.cgi?id={$page.channel.id}&type={$page.channel.type}'
+         url: '/cgi-bin/flv.cgi?id={$page.channel.id}&type={$page.channel.type}&bitrate={$page.channel.bitrate}'
        });
        flvPlayer.attachMediaElement(videoElement);
        flvPlayer.load();
