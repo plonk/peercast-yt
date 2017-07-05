@@ -499,7 +499,7 @@ bool    Template::evalCondition(const string& cond, int loop)
     auto tokens = tokenize(cond);
     bool res = false;
 
-    if (tokens.size() == 3) // äºŒé …æ¼”ç®—
+    if (tokens.size() == 3) // “ñ€‰‰Z
     {
         auto op = tokens[1];
         if (op == "=~" || op == "!~")

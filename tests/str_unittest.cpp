@@ -153,7 +153,7 @@ TEST_F(strFixture, has_suffix)
     ASSERT_FALSE(str::has_suffix("a", "b"));
     ASSERT_FALSE(str::has_suffix("abc", "b"));
     ASSERT_TRUE(str::has_suffix("abc", "abc"));
-    ASSERT_TRUE(str::has_suffix("„ÅÇ„ÅÑ„ÅÜ„Åà„Åä", "„Åä"));
+    ASSERT_TRUE(str::has_suffix("Ç†Ç¢Ç§Ç¶Ç®", "Ç®"));
 }
 
 TEST_F(strFixture, join)

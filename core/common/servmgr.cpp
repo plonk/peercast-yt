@@ -2148,7 +2148,7 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     else if (var == "maxServIn")
         buf = to_string(maxServIn);
     else if (var == "numFilters")
-        buf = to_string(numFilters+1); // å…¥åŠ›ç”¨ã®ç©ºæ¬„ã‚’ç”Ÿæˆã™ã‚‹ç‚ºã«+1ã™ã‚‹ã€‚
+        buf = to_string(numFilters+1); // “ü—Í—p‚Ì‹ó—“‚ğ¶¬‚·‚éˆ×‚É+1‚·‚éB
     else if (var == "maxPGNUIn")
         buf = to_string(maxGnuIncoming);
     else if (var == "minPGNUIn")
