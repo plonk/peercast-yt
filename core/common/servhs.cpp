@@ -28,13 +28,10 @@
 #include "version2.h"
 #include "jrpc.h"
 #include "playlist.h"
-#include "dechunker.h"
-#include "matroska.h"
 #include "str.h"
 #include "cgi.h"
 #include "template.h"
 #include "public.h"
-#include "md5.h"
 
 using namespace std;
 
@@ -2030,7 +2027,6 @@ ChanInfo Servent::createChannelInfo(GnuID broadcastID, const String& broadcastMs
 // HTTP Push •ú‘—
 void Servent::handshakeHTTPPush(const std::string& args)
 {
-    using namespace matroska;
     using namespace cgi;
 
     Query query(args);
