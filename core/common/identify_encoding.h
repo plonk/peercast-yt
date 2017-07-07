@@ -15,23 +15,23 @@
 #define IDENTIFY_MAX_LENGTH 256
 
 enum identify_encoding_order {
-	ieo_EUCJP = 0,
-	ieo_SJIS  = 1
+    ieo_EUCJP = 0,
+    ieo_SJIS = 1
 };
 
 typedef struct {
-	int flag;
-	int state;
-	int c_type;
+    int flag;
+    int state;
+    int c_type;
 } ie_state_t;
 
 typedef struct {
-	enum identify_encoding_order order;
-	ie_state_t  st_ascii;
-	ie_state_t  st_jis;
-	ie_state_t  st_sjis;
-	ie_state_t  st_eucjp;
-	ie_state_t  st_utf8;
+    enum identify_encoding_order order;
+    ie_state_t  st_ascii;
+    ie_state_t  st_jis;
+    ie_state_t  st_sjis;
+    ie_state_t  st_eucjp;
+    ie_state_t  st_utf8;
 } identify_encoding_t;
 
 identify_encoding_t* identify_encoding_open(enum identify_encoding_order order);

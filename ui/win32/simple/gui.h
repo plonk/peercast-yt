@@ -21,22 +21,22 @@
 
 #include "sys.h"
 
-extern LRESULT CALLBACK GUIProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-extern void ADDLOG(const char *str,int id,bool sel,void *data, LogBuffer::TYPE type);
+extern LRESULT CALLBACK GUIProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+extern void ADDLOG(const char *str, int id, bool sel, void *data, LogBuffer::TYPE type);
 
 extern String iniFileName;
 extern HWND guiWnd;
 extern int logID;
 
-enum 
+enum
 {
-	WM_INITSETTINGS = WM_USER,
-	WM_GETPORTNUMBER,
-	WM_PLAYCHANNEL,
-	WM_TRAYICON,
-	WM_SHOWGUI,
-	WM_SHOWMENU,
-	WM_PROCURL
+    WM_INITSETTINGS = WM_USER,
+    WM_GETPORTNUMBER,
+    WM_PLAYCHANNEL,
+    WM_TRAYICON,
+    WM_SHOWGUI,
+    WM_SHOWMENU,
+    WM_PROCURL
 
 };
 

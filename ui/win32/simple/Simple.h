@@ -30,31 +30,31 @@
 class MyPeercastInst : public PeercastInstance
 {
 public:
-	virtual Sys * APICALL createSys();
+    virtual Sys * APICALL createSys();
 };
 // ---------------------------------
 class MyPeercastApp : public PeercastApplication
 {
 public:
-	MyPeercastApp ()
-	{
-		//logFile.openWriteReplace("log.txt");
-	}
+    MyPeercastApp()
+    {
+        //logFile.openWriteReplace("log.txt");
+    }
 
-	virtual const char * APICALL getPath();
+    virtual const char * APICALL getPath();
 
-	virtual const char * APICALL getIniFilename();
-	virtual const char *APICALL getClientTypeOS();
-	virtual void APICALL printLog(LogBuffer::TYPE t, const char *str);
+    virtual const char * APICALL getIniFilename();
+    virtual const char *APICALL getClientTypeOS();
+    virtual void APICALL printLog(LogBuffer::TYPE t, const char *str);
 
-	virtual void	APICALL updateSettings();
-	virtual void	APICALL notifyMessage(ServMgr::NOTIFY_TYPE, const char *);
+    virtual void	APICALL updateSettings();
+    virtual void	APICALL notifyMessage(ServMgr::NOTIFY_TYPE, const char *);
 
-	virtual void	APICALL channelStart(ChanInfo *);
-	virtual void	APICALL channelStop(ChanInfo *);
-	virtual void	APICALL channelUpdate(ChanInfo *);
+    virtual void	APICALL channelStart(ChanInfo *);
+    virtual void	APICALL channelStop(ChanInfo *);
+    virtual void	APICALL channelUpdate(ChanInfo *);
 
-	FileStream	logFile;
+    FileStream	logFile;
 
 };
 

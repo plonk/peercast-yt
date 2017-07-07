@@ -43,23 +43,23 @@
 
 extern "C"
 {
-	void loadIcons(HINSTANCE hInstance, HWND hWnd);
+    void loadIcons(HINSTANCE hInstance, HWND hWnd);
 };
 
 
 // PeerCast globals
 
-static int currNotify=0;
+static int currNotify = 0;
 String iniFileName;
 HWND guiWnd;
 HWND mainWnd;
-static HMENU trayMenu,ltrayMenu;
-bool showGUI=true;
-bool allowMulti=false;
-bool killMe=false;
-bool allowTrayMenu=true;
-int		seenNewVersionTime=0;
-HICON icon1,icon2;
+static HMENU trayMenu, ltrayMenu;
+bool showGUI = true;
+bool allowMulti = false;
+bool killMe = false;
+bool allowTrayMenu = true;
+int		seenNewVersionTime = 0;
+HICON icon1, icon2;
 ChanInfo chanInfo;
 bool chanInfoIsRelayed;
 GnuID	lastPlayID;
@@ -68,24 +68,24 @@ String exePath;
 // ---------------------------------
 Sys * APICALL MyPeercastInst::createSys()
 {
-	return new WSys(mainWnd);
+    return new WSys(mainWnd);
 }
 // ---------------------------------
-const char * APICALL MyPeercastApp ::getIniFilename()
+const char * APICALL MyPeercastApp::getIniFilename()
 {
-	return iniFileName.cstr();
+    return iniFileName.cstr();
 }
 
 // ---------------------------------
-const char *APICALL MyPeercastApp ::getClientTypeOS() 
+const char *APICALL MyPeercastApp::getClientTypeOS()
 {
-	return PCX_OS_WIN32;
+    return PCX_OS_WIN32;
 }
 
 // ---------------------------------
 const char * APICALL MyPeercastApp::getPath()
 {
-	return exePath.cstr();
+    return exePath.cstr();
 }
 
 
@@ -93,20 +93,20 @@ const char * APICALL MyPeercastApp::getPath()
 class NOTIFYICONDATA2
 {
 public:
-        DWORD cbSize; // DWORD
-        HWND hWnd; // HWND
-        UINT uID; // UINT
-        UINT uFlags; // UINT
-        UINT uCallbackMessage; // UINT
-        HICON hIcon; // HICON
-        char szTip[128]; // char[128]
-        DWORD dwState; // DWORD
-        DWORD dwStateMask; // DWORD
-        char szInfo[256]; // char[256]
-        UINT uTimeoutOrVersion; // UINT
-        char szInfoTitle[64]; // char[64]
-        DWORD dwInfoFlags; // DWORD
-        //GUID guidItem; > IE 6
+    DWORD cbSize; // DWORD
+    HWND hWnd; // HWND
+    UINT uID; // UINT
+    UINT uFlags; // UINT
+    UINT uCallbackMessage; // UINT
+    HICON hIcon; // HICON
+    char szTip[128]; // char[128]
+    DWORD dwState; // DWORD
+    DWORD dwStateMask; // DWORD
+    char szInfo[256]; // char[256]
+    UINT uTimeoutOrVersion; // UINT
+    char szInfoTitle[64]; // char[64]
+    DWORD dwInfoFlags; // DWORD
+    //GUID guidItem; > IE 6
 };
 
 NOTIFYICONDATA2 trayIcon;
@@ -124,21 +124,21 @@ LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK	ChanInfoProc(HWND, UINT, WPARAM, LPARAM);
 
-void setTrayIcon(int type, const char *,const char *,bool);
+void setTrayIcon(int type, const char *, const char *, bool);
 void flipNotifyPopup(int id, ServMgr::NOTIFY_TYPE nt);
 
 
-HWND chWnd=NULL;
+HWND chWnd = NULL;
 
 // --------------------------------------------------
-void LOG2(const char *fmt,...)
+void LOG2(const char *fmt, ...)
 {
-	va_list ap;
-  	va_start(ap, fmt);
-	char str[4096];
-	vsnprintf(str,_countof(str),fmt,ap);
-	OutputDebugString(str);
-   	va_end(ap);	
+    va_list ap;
+    va_start(ap, fmt);
+    char str[4096];
+    vsnprintf(str, _countof(str), fmt, ap);
+    OutputDebugString(str);
+    va_end(ap);
 }
 
 
@@ -146,173 +146,174 @@ void LOG2(const char *fmt,...)
 // ---------------------------------------
 
 int APIENTRY WinMain(HINSTANCE hInstance,
-                     HINSTANCE hPrevInstance,
-                     LPSTR     lpCmdLine,
-                     int       nCmdShow)
+    HINSTANCE hPrevInstance,
+    LPSTR     lpCmdLine,
+    int       nCmdShow)
 {
-	char tmpURL[8192];
-	tmpURL[0]=0;
-	char *chanURL=NULL;
+    char tmpURL[8192];
+    tmpURL[0] = 0;
+    char *chanURL = NULL;
 
 
-	iniFileName.set(".\\peercast.ini");
+    iniFileName.set(".\\peercast.ini");
 
-	// off by default now
-	showGUI = false;
+    // off by default now
+    showGUI = false;
 
-	if (strlen(lpCmdLine) > 0)
-	{
-		char *p;
-		if ((p = strstr(lpCmdLine,"-inifile"))!=NULL) 
-			iniFileName.setFromString(p+8);
+    if (strlen(lpCmdLine) > 0)
+    {
+        char *p;
+        if ((p = strstr(lpCmdLine, "-inifile")) != NULL)
+            iniFileName.setFromString(p + 8);
 
-		if (strstr(lpCmdLine,"-zen")) 
-			showGUI = false;
+        if (strstr(lpCmdLine, "-zen"))
+            showGUI = false;
 
-		if (strstr(lpCmdLine,"-multi")) 
-			allowMulti = true;
+        if (strstr(lpCmdLine, "-multi"))
+            allowMulti = true;
 
-		if (strstr(lpCmdLine,"-kill")) 
-			killMe = true;
+        if (strstr(lpCmdLine, "-kill"))
+            killMe = true;
 
-		if ((p = strstr(lpCmdLine,"-url"))!=NULL)
-		{
-			p+=4;
-			while (*p)
-			{
-				if (*p=='"')
-				{
-					p++;
-					break;
-				}				
-				if (*p != ' ')
-					break;
-				p++;
-			}
-			if (*p)
-				strncpy_s(tmpURL,_countof(tmpURL),p,_TRUNCATE);
-		}
-	}
+        if ((p = strstr(lpCmdLine, "-url")) != NULL)
+        {
+            p += 4;
+            while (*p)
+            {
+                if (*p == '"')
+                {
+                    p++;
+                    break;
+                }
+                if (*p != ' ')
+                    break;
+                p++;
+            }
+            if (*p)
+                strncpy_s(tmpURL, _countof(tmpURL), p, _TRUNCATE);
+        }
+    }
 
-	// get current path
-	{
-		exePath = iniFileName;
-		char *s = exePath.cstr();
-		char *end = NULL;
-		while (*s)
-		{
-			if (*s++ == '\\')
-				end = s;
-		}
-		if (end)
-			*end = 0;
-	}
-
-	
-	if (Sys::strnicmp(tmpURL,"peercast://",11)==0)
-	{
-		if (Sys::strnicmp(tmpURL+11,"pls/",4)==0)
-			chanURL = tmpURL+11+4;
-		else
-			chanURL = tmpURL+11;
-		showGUI = false;
-	}
+    // get current path
+    {
+        exePath = iniFileName;
+        char *s = exePath.cstr();
+        char *end = NULL;
+        while (*s)
+        {
+            if (*s++ == '\\')
+                end = s;
+        }
+        if (end)
+            *end = 0;
+    }
 
 
-	MSG msg;
-	HACCEL hAccelTable;
-
-	// Initialize global strings
-	//LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-	//LoadString(hInstance, IDC_APP_TITLE, szWindowClass, MAX_LOADSTRING);
-
-	strcpy_s(szTitle,_countof(szTitle),"PeerCast");
-	strcpy_s(szWindowClass,_countof(szWindowClass),"PeerCast");
-
-	if (!allowMulti)
-	{
-		HANDLE mutex = CreateMutex(NULL,TRUE,szWindowClass);
-		
-		if (GetLastError() == ERROR_ALREADY_EXISTS)
-		{
-			HWND oldWin = FindWindow(szWindowClass,NULL);
-			if (oldWin)
-			{
-				if (killMe)
-				{
-					SendMessage(oldWin,WM_DESTROY,0,0);
-					return 0;
-				}
-
-				if (chanURL)
-				{
-					COPYDATASTRUCT copy;
-					copy.dwData = WM_PLAYCHANNEL;
-					copy.cbData = static_cast<DWORD>(strlen(chanURL))+1;			// plus null term
-					copy.lpData = chanURL;
-					SendMessage(oldWin,WM_COPYDATA,NULL,(LPARAM)&copy);
-				}else{
-					if (showGUI)
-						SendMessage(oldWin,WM_SHOWGUI,0,0);
-				}
-			}
-			return 0;
-		}
-	}
-
-	if (killMe)
-		return 0;
-	
-	MyRegisterClass(hInstance);
-
-	// Perform application initialization:
-	if (!InitInstance (hInstance, nCmdShow)) 
-		return FALSE;
-
-	peercastInst = new MyPeercastInst();
-	peercastApp = new MyPeercastApp();
-
-	peercastInst->init();
+    if (Sys::strnicmp(tmpURL, "peercast://", 11) == 0)
+    {
+        if (Sys::strnicmp(tmpURL + 11, "pls/", 4) == 0)
+            chanURL = tmpURL + 11 + 4;
+        else
+            chanURL = tmpURL + 11;
+        showGUI = false;
+    }
 
 
+    MSG msg;
+    HACCEL hAccelTable;
+
+    // Initialize global strings
+    //LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
+    //LoadString(hInstance, IDC_APP_TITLE, szWindowClass, MAX_LOADSTRING);
+
+    strcpy_s(szTitle, _countof(szTitle), "PeerCast");
+    strcpy_s(szWindowClass, _countof(szWindowClass), "PeerCast");
+
+    if (!allowMulti)
+    {
+        HANDLE mutex = CreateMutex(NULL, TRUE, szWindowClass);
+
+        if (GetLastError() == ERROR_ALREADY_EXISTS)
+        {
+            HWND oldWin = FindWindow(szWindowClass, NULL);
+            if (oldWin)
+            {
+                if (killMe)
+                {
+                    SendMessage(oldWin, WM_DESTROY, 0, 0);
+                    return 0;
+                }
+
+                if (chanURL)
+                {
+                    COPYDATASTRUCT copy;
+                    copy.dwData = WM_PLAYCHANNEL;
+                    copy.cbData = static_cast<DWORD>(strlen(chanURL)) + 1;			// plus null term
+                    copy.lpData = chanURL;
+                    SendMessage(oldWin, WM_COPYDATA, NULL, (LPARAM)&copy);
+                }
+                else {
+                    if (showGUI)
+                        SendMessage(oldWin, WM_SHOWGUI, 0, 0);
+                }
+            }
+            return 0;
+        }
+    }
+
+    if (killMe)
+        return 0;
+
+    MyRegisterClass(hInstance);
+
+    // Perform application initialization:
+    if (!InitInstance(hInstance, nCmdShow))
+        return FALSE;
+
+    peercastInst = new MyPeercastInst();
+    peercastApp = new MyPeercastApp();
+
+    peercastInst->init();
 
 
-	if (chanURL)
-	{
-		ChanInfo info;
-		servMgr->procConnectArgs(chanURL,info);
-		chanMgr->findAndPlayChannel(info,false);
-	}
 
 
-	hAccelTable = LoadAccelerators(hInstance, (LPCTSTR)IDC_SIMPLE);
+    if (chanURL)
+    {
+        ChanInfo info;
+        servMgr->procConnectArgs(chanURL, info);
+        chanMgr->findAndPlayChannel(info, false);
+    }
 
-	// setup menu notifes
-	int mask = peercastInst->getNotifyMask();
-	if (mask & ServMgr::NT_PEERCAST)
-		CheckMenuItem(trayMenu,ID_POPUP_SHOWMESSAGES_PEERCAST,MF_CHECKED|MF_BYCOMMAND);
-	if (mask & ServMgr::NT_BROADCASTERS)
-		CheckMenuItem(trayMenu,ID_POPUP_SHOWMESSAGES_BROADCASTERS,MF_CHECKED|MF_BYCOMMAND);
-	if (mask & ServMgr::NT_TRACKINFO)
-		CheckMenuItem(trayMenu,ID_POPUP_SHOWMESSAGES_TRACKINFO,MF_CHECKED|MF_BYCOMMAND);
 
-	// Main message loop:
-	while (GetMessage(&msg, NULL, 0, 0)) 
-	{
-		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg)) 
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-	}
+    hAccelTable = LoadAccelerators(hInstance, (LPCTSTR)IDC_SIMPLE);
+
+    // setup menu notifes
+    int mask = peercastInst->getNotifyMask();
+    if (mask & ServMgr::NT_PEERCAST)
+        CheckMenuItem(trayMenu, ID_POPUP_SHOWMESSAGES_PEERCAST, MF_CHECKED | MF_BYCOMMAND);
+    if (mask & ServMgr::NT_BROADCASTERS)
+        CheckMenuItem(trayMenu, ID_POPUP_SHOWMESSAGES_BROADCASTERS, MF_CHECKED | MF_BYCOMMAND);
+    if (mask & ServMgr::NT_TRACKINFO)
+        CheckMenuItem(trayMenu, ID_POPUP_SHOWMESSAGES_TRACKINFO, MF_CHECKED | MF_BYCOMMAND);
+
+    // Main message loop:
+    while (GetMessage(&msg, NULL, 0, 0))
+    {
+        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+        {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+    }
 
     Shell_NotifyIcon(NIM_DELETE, (NOTIFYICONDATA*)&trayIcon);
 
-	peercastInst->saveSettings();
-	peercastInst->quit();
+    peercastInst->saveSettings();
+    peercastInst->quit();
 
 
-	return static_cast<int>(msg.wParam);
+    return static_cast<int>(msg.wParam);
 }
 
 
@@ -332,31 +333,31 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 //
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
-	WNDCLASSEX wcex;
+    WNDCLASSEX wcex;
 
-	wcex.cbSize = sizeof(WNDCLASSEX); 
+    wcex.cbSize = sizeof(WNDCLASSEX);
 
-	wcex.style			= CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc	= (WNDPROC)WndProc;
-	wcex.cbClsExtra		= 0;
-	wcex.cbWndExtra		= 0;
-	wcex.hInstance		= hInstance;
-	wcex.hIcon			= LoadIcon(hInstance, (LPCTSTR)IDI_SIMPLE);
-	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
-	wcex.lpszMenuName	= (LPCSTR)IDC_SIMPLE;
-	wcex.lpszClassName	= szWindowClass;
-	wcex.hIconSm		= LoadIcon(wcex.hInstance, (LPCTSTR)IDI_SMALL);
+    wcex.style = CS_HREDRAW | CS_VREDRAW;
+    wcex.lpfnWndProc = (WNDPROC)WndProc;
+    wcex.cbClsExtra = 0;
+    wcex.cbWndExtra = 0;
+    wcex.hInstance = hInstance;
+    wcex.hIcon = LoadIcon(hInstance, (LPCTSTR)IDI_SIMPLE);
+    wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wcex.lpszMenuName = (LPCSTR)IDC_SIMPLE;
+    wcex.lpszClassName = szWindowClass;
+    wcex.hIconSm = LoadIcon(wcex.hInstance, (LPCTSTR)IDI_SMALL);
 
-	return RegisterClassEx(&wcex);
+    return RegisterClassEx(&wcex);
 
 }
 
 //-----------------------------
 void loadIcons(HINSTANCE hInstance, HWND hWnd)
 {
-	icon1 = LoadIcon(hInstance, (LPCTSTR)IDI_SMALL);
-	icon2 = LoadIcon(hInstance, (LPCTSTR)IDI_SMALL2);
+    icon1 = LoadIcon(hInstance, (LPCTSTR)IDI_SMALL);
+    icon2 = LoadIcon(hInstance, (LPCTSTR)IDI_SMALL2);
 
     trayIcon.cbSize = sizeof(trayIcon);
     trayIcon.hWnd = hWnd;
@@ -364,15 +365,15 @@ void loadIcons(HINSTANCE hInstance, HWND hWnd)
     trayIcon.uFlags = NIF_MESSAGE + NIF_ICON + NIF_TIP;
     trayIcon.uCallbackMessage = WM_TRAYICON;
     trayIcon.hIcon = icon1;
-    strcpy_s(trayIcon.szTip,_countof(trayIcon.szTip), "PeerCast");
+    strcpy_s(trayIcon.szTip, _countof(trayIcon.szTip), "PeerCast");
 
     Shell_NotifyIcon(NIM_ADD, (NOTIFYICONDATA*)&trayIcon);
 
     //ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
 
-	trayMenu = LoadMenu(hInstance,MAKEINTRESOURCE(IDR_TRAYMENU));
-	ltrayMenu = LoadMenu(hInstance,MAKEINTRESOURCE(IDR_LTRAYMENU));
+    trayMenu = LoadMenu(hInstance, MAKEINTRESOURCE(IDR_TRAYMENU));
+    ltrayMenu = LoadMenu(hInstance, MAKEINTRESOURCE(IDR_LTRAYMENU));
 
 
 }
@@ -390,23 +391,23 @@ void loadIcons(HINSTANCE hInstance, HWND hWnd)
 //
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-	HWND hWnd;
+    HWND hWnd;
 
-	hInst = hInstance; // Store instance handle in our global variable
+    hInst = hInstance; // Store instance handle in our global variable
 
-	hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-	  CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+    hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
 
-	if (!hWnd)
-	{
-	  return FALSE;
-	}
+    if (!hWnd)
+    {
+        return FALSE;
+    }
 
-	mainWnd = hWnd;
+    mainWnd = hWnd;
 
-	loadIcons(hInstance,hWnd);
+    loadIcons(hInstance, hWnd);
 
-	return TRUE;
+    return TRUE;
 }
 //-----------------------------
 static String trackTitle;
@@ -415,141 +416,144 @@ static String channelComment;
 //-----------------------------
 void channelPopup(const char *title, const char *msg)
 {
-	String both;
+    String both;
 
-	both.append(msg);
-	both.append(" (");
-	both.append(title);
-	both.append(")");
+    both.append(msg);
+    both.append(" (");
+    both.append(title);
+    both.append(")");
 
-	trayIcon.uFlags = NIF_ICON|NIF_TIP;
-	strncpy_s(trayIcon.szTip,_countof(trayIcon.szTip), both.cstr(),_TRUNCATE);
+    trayIcon.uFlags = NIF_ICON | NIF_TIP;
+    strncpy_s(trayIcon.szTip, _countof(trayIcon.szTip), both.cstr(), _TRUNCATE);
 
-	trayIcon.uFlags |= 16;
-	trayIcon.uTimeoutOrVersion = 10000;
-	strncpy_s(trayIcon.szInfo,_countof(trayIcon.szInfo),msg,_TRUNCATE);
-	strncpy_s(trayIcon.szInfoTitle,_countof(trayIcon.szInfoTitle),title,_TRUNCATE);
-		
-	Shell_NotifyIcon(NIM_MODIFY, (NOTIFYICONDATA*)&trayIcon);
+    trayIcon.uFlags |= 16;
+    trayIcon.uTimeoutOrVersion = 10000;
+    strncpy_s(trayIcon.szInfo, _countof(trayIcon.szInfo), msg, _TRUNCATE);
+    strncpy_s(trayIcon.szInfoTitle, _countof(trayIcon.szInfoTitle), title, _TRUNCATE);
+
+    Shell_NotifyIcon(NIM_MODIFY, (NOTIFYICONDATA*)&trayIcon);
 }
 //-----------------------------
 void clearChannelPopup()
 {
-	trayIcon.uFlags = NIF_ICON|16;
-	trayIcon.uTimeoutOrVersion = 10000;
-    strncpy_s(trayIcon.szInfo,_countof(trayIcon.szInfo),"",_TRUNCATE);
-	strncpy_s(trayIcon.szInfoTitle,_countof(trayIcon.szInfoTitle),"",_TRUNCATE);
-	Shell_NotifyIcon(NIM_MODIFY, (NOTIFYICONDATA*)&trayIcon);
+    trayIcon.uFlags = NIF_ICON | 16;
+    trayIcon.uTimeoutOrVersion = 10000;
+    strncpy_s(trayIcon.szInfo, _countof(trayIcon.szInfo), "", _TRUNCATE);
+    strncpy_s(trayIcon.szInfoTitle, _countof(trayIcon.szInfoTitle), "", _TRUNCATE);
+    Shell_NotifyIcon(NIM_MODIFY, (NOTIFYICONDATA*)&trayIcon);
 }
 
 //-----------------------------
 void	APICALL MyPeercastApp::channelStart(ChanInfo *info)
 {
-	lastPlayID = info->id;
-	clearChannelPopup();
+    lastPlayID = info->id;
+    clearChannelPopup();
 }
 //-----------------------------
 void	APICALL MyPeercastApp::channelStop(ChanInfo *info)
 {
-	if (info->id.isSame(lastPlayID))
-	{
-		lastPlayID.clear();
-		clearChannelPopup();
-	}
+    if (info->id.isSame(lastPlayID))
+    {
+        lastPlayID.clear();
+        clearChannelPopup();
+    }
 }
 //-----------------------------
 void	APICALL MyPeercastApp::channelUpdate(ChanInfo *info)
 {
-	if (lastPlayID.isSet() && info && info->id.isSame(lastPlayID))
-	{
+    if (lastPlayID.isSet() && info && info->id.isSame(lastPlayID))
+    {
 
-		String tmp;
-		tmp.append(info->track.artist);
-		tmp.append(" ");
-		tmp.append(info->track.title);
-
-
-		if (!tmp.isSame(trackTitle))
-		{
-			if (ServMgr::NT_TRACKINFO & peercastInst->getNotifyMask())
-			{
-				trackTitle=tmp;
-				String name,track;
-				name = info->name;
-				track = tmp;
-				name.convertTo(String::T_SJIS);
-				track.convertTo(String::T_SJIS);
-				clearChannelPopup();
-				channelPopup(name.cstr(),track.cstr());
-			}
-		} else if (!info->comment.isSame(channelComment))
-		{
-			if (ServMgr::NT_BROADCASTERS & peercastInst->getNotifyMask())
-			{
-				channelComment = info->comment;
-				String name,comment;
-				name = info->name;
-				comment = info->comment;
-				name.convertTo(String::T_SJIS);
-				comment.convertTo(String::T_SJIS);
-				clearChannelPopup();
-				channelPopup(name.cstr(),comment.cstr());
-			}
-		}
+        String tmp;
+        tmp.append(info->track.artist);
+        tmp.append(" ");
+        tmp.append(info->track.title);
 
 
+        if (!tmp.isSame(trackTitle))
+        {
+            if (ServMgr::NT_TRACKINFO & peercastInst->getNotifyMask())
+            {
+                trackTitle = tmp;
+                String name, track;
+                name = info->name;
+                track = tmp;
+                name.convertTo(String::T_SJIS);
+                track.convertTo(String::T_SJIS);
+                clearChannelPopup();
+                channelPopup(name.cstr(), track.cstr());
+            }
+        }
+        else if (!info->comment.isSame(channelComment))
+        {
+            if (ServMgr::NT_BROADCASTERS & peercastInst->getNotifyMask())
+            {
+                channelComment = info->comment;
+                String name, comment;
+                name = info->name;
+                comment = info->comment;
+                name.convertTo(String::T_SJIS);
+                comment.convertTo(String::T_SJIS);
+                clearChannelPopup();
+                channelPopup(name.cstr(), comment.cstr());
+            }
+        }
 
-	}
+
+
+    }
 }
 //-----------------------------
 void	APICALL MyPeercastApp::notifyMessage(ServMgr::NOTIFY_TYPE type, const char *msg)
 {
-	static bool shownUpgradeAlert=false;
+    static bool shownUpgradeAlert = false;
 
-	currNotify = type;
+    currNotify = type;
 
-	trayIcon.uFlags = 0;
+    trayIcon.uFlags = 0;
 
-	if (!shownUpgradeAlert)
-	{
-	    trayIcon.uFlags = NIF_ICON;
+    if (!shownUpgradeAlert)
+    {
+        trayIcon.uFlags = NIF_ICON;
 
-		if (type == ServMgr::NT_UPGRADE)
-		{
-			shownUpgradeAlert = true;
-		    trayIcon.hIcon = icon2;
-		}else
-		{
-			trayIcon.hIcon = icon1;	
-		}
-	}else
-	{
-		if (type == ServMgr::NT_UPGRADE)
-			return;
+        if (type == ServMgr::NT_UPGRADE)
+        {
+            shownUpgradeAlert = true;
+            trayIcon.hIcon = icon2;
+        }
+        else
+        {
+            trayIcon.hIcon = icon1;
+        }
+    }
+    else
+    {
+        if (type == ServMgr::NT_UPGRADE)
+            return;
 
-	}
+    }
 
-	const char *title="";
+    const char *title = "";
 
-	switch(type)
-	{
-		case ServMgr::NT_UPGRADE:
-			title = "Upgrade alert";
-			break;
-		case ServMgr::NT_PEERCAST:
-			title = "Message from PeerCast:";
-			break;
+    switch (type)
+    {
+    case ServMgr::NT_UPGRADE:
+        title = "Upgrade alert";
+        break;
+    case ServMgr::NT_PEERCAST:
+        title = "Message from PeerCast:";
+        break;
 
-	}
+    }
 
-	if (type & peercastInst->getNotifyMask())
-	{
-		trayIcon.uFlags |= 16;
-		trayIcon.uTimeoutOrVersion = 10000;
-		strncpy_s(trayIcon.szInfo,_countof(trayIcon.szInfo),msg,_TRUNCATE);
-		strncpy_s(trayIcon.szInfoTitle,_countof(trayIcon.szInfoTitle),title,_TRUNCATE);
-	    Shell_NotifyIcon(NIM_MODIFY, (NOTIFYICONDATA*)&trayIcon);
-	}
+    if (type & peercastInst->getNotifyMask())
+    {
+        trayIcon.uFlags |= 16;
+        trayIcon.uTimeoutOrVersion = 10000;
+        strncpy_s(trayIcon.szInfo, _countof(trayIcon.szInfo), msg, _TRUNCATE);
+        strncpy_s(trayIcon.szInfoTitle, _countof(trayIcon.szInfoTitle), title, _TRUNCATE);
+        Shell_NotifyIcon(NIM_MODIFY, (NOTIFYICONDATA*)&trayIcon);
+    }
 }
 //-----------------------------
 
@@ -557,9 +561,9 @@ void	APICALL MyPeercastApp::notifyMessage(ServMgr::NOTIFY_TYPE type, const char 
 //
 void createGUI(HWND hWnd)
 {
-	if (!guiWnd)
-		guiWnd = CreateDialog(hInst, (LPCTSTR)IDD_MAINWINDOW, hWnd, (DLGPROC)GUIProc);
-	ShowWindow(guiWnd,SW_SHOWNORMAL);
+    if (!guiWnd)
+        guiWnd = CreateDialog(hInst, (LPCTSTR)IDD_MAINWINDOW, hWnd, (DLGPROC)GUIProc);
+    ShowWindow(guiWnd, SW_SHOWNORMAL);
 }
 
 
@@ -569,38 +573,38 @@ void createGUI(HWND hWnd)
 //
 void addRelayedChannelsMenu(HMENU cm)
 {
-	int cnt = GetMenuItemCount(cm);
-	for(int i=0; i<cnt-3; i++)
-		DeleteMenu(cm,0,MF_BYPOSITION);
+    int cnt = GetMenuItemCount(cm);
+    for (int i = 0; i < cnt - 3; i++)
+        DeleteMenu(cm, 0, MF_BYPOSITION);
 
-	Channel *c = chanMgr->channel;
-	while(c)
-	{
-		if (c->isActive())
-		{
-			char str[128],name[64];
-			strncpy_s(name,_countof(name),c->info.name,32);
-			if (strlen(c->info.name) > 32)
-				strcat_s(name,_countof(name),"...");
+    Channel *c = chanMgr->channel;
+    while (c)
+    {
+        if (c->isActive())
+        {
+            char str[128], name[64];
+            strncpy_s(name, _countof(name), c->info.name, 32);
+            if (strlen(c->info.name) > 32)
+                strcat_s(name, _countof(name), "...");
 
 
-			sprintf_s(str,_countof(str),"%s  (%d kb/s %s)",name,c->info.bitrate,ChanInfo::getTypeStr(c->info.contentType));
-			//InsertMenu(cm,0,MF_BYPOSITION,RELAY_CMD+i,str);
-		}
-		c=c->next;
-	}
+            sprintf_s(str, _countof(str), "%s  (%d kb/s %s)", name, c->info.bitrate, ChanInfo::getTypeStr(c->info.contentType));
+            //InsertMenu(cm,0,MF_BYPOSITION,RELAY_CMD+i,str);
+        }
+        c = c->next;
+    }
 }
 
-typedef int (*COMPARE_FUNC)(const void *,const void *);
+typedef int(*COMPARE_FUNC)(const void *, const void *);
 
 static int compareHitLists(ChanHitList **c2, ChanHitList **c1)
 {
-	return Sys::stricmp(c1[0]->info.name.cstr(),c2[0]->info.name.cstr());
+    return Sys::stricmp(c1[0]->info.name.cstr(), c2[0]->info.name.cstr());
 }
 
 static int compareChannels(Channel **c2, Channel **c1)
 {
-	return Sys::stricmp(c1[0]->info.name.cstr(),c2[0]->info.name.cstr());
+    return Sys::stricmp(c1[0]->info.name.cstr(), c2[0]->info.name.cstr());
 }
 
 // 
@@ -609,48 +613,48 @@ static int compareChannels(Channel **c2, Channel **c1)
 //
 void addAllChannelsMenu(HMENU cm)
 {
-	int cnt = GetMenuItemCount(cm);
-	for(int i=0; i<cnt-2; i++)
-		DeleteMenu(cm,0,MF_BYPOSITION);
+    int cnt = GetMenuItemCount(cm);
+    for (int i = 0; i < cnt - 2; i++)
+        DeleteMenu(cm, 0, MF_BYPOSITION);
 
 
 
 
 
-	// add channels to menu
-	int numActive=0;
-	Channel *ch = chanMgr->channel;
-	while(ch)
-	{
-		char str[128],name[64];
-		String sjis = ch->info.name;
-		sjis.convertTo(String::T_SJIS);
-		strncpy_s(name,_countof(name),sjis.cstr(),32);
-		if (strlen(sjis.cstr()) > 32)
-			strcat_s(name,_countof(name),"...");
+    // add channels to menu
+    int numActive = 0;
+    Channel *ch = chanMgr->channel;
+    while (ch)
+    {
+        char str[128], name[64];
+        String sjis = ch->info.name;
+        sjis.convertTo(String::T_SJIS);
+        strncpy_s(name, _countof(name), sjis.cstr(), 32);
+        if (strlen(sjis.cstr()) > 32)
+            strcat_s(name, _countof(name), "...");
 
-		snprintf(str,_countof(str),"%s  (%d kb/s %s)",name,ch->info.bitrate,ChanInfo::getTypeStr(ch->info.contentType));
+        snprintf(str, _countof(str), "%s  (%d kb/s %s)", name, ch->info.bitrate, ChanInfo::getTypeStr(ch->info.contentType));
 
-		HMENU opMenu = CreatePopupMenu();
-		InsertMenu(opMenu,0,MF_BYPOSITION,INFO_CMD+numActive,"Info");
-		if (ch->info.url.isValidURL())
-			InsertMenu(opMenu,0,MF_BYPOSITION,URL_CMD+numActive,"URL");
-		InsertMenu(opMenu,0,MF_BYPOSITION,PLAY_CMD+numActive,"Play");
+        HMENU opMenu = CreatePopupMenu();
+        InsertMenu(opMenu, 0, MF_BYPOSITION, INFO_CMD + numActive, "Info");
+        if (ch->info.url.isValidURL())
+            InsertMenu(opMenu, 0, MF_BYPOSITION, URL_CMD + numActive, "URL");
+        InsertMenu(opMenu, 0, MF_BYPOSITION, PLAY_CMD + numActive, "Play");
 
-		UINT fl = MF_BYPOSITION|MF_POPUP;
-		if (ch)
-			fl |= (ch->isPlaying()?MF_CHECKED:0);
+        UINT fl = MF_BYPOSITION | MF_POPUP;
+        if (ch)
+            fl |= (ch->isPlaying() ? MF_CHECKED : 0);
 
-		InsertMenu(cm,0,fl,(UINT_PTR)opMenu,str);
-		
-		numActive++;
+        InsertMenu(cm, 0, fl, (UINT_PTR)opMenu, str);
 
-		ch=ch->next;
-	}
+        numActive++;
+
+        ch = ch->next;
+    }
 
 
-	//if (!numActive)
-	//		InsertMenu(cm,0,MF_BYPOSITION,0,"<No channels>");
+    //if (!numActive)
+    //		InsertMenu(cm,0,MF_BYPOSITION,0,"<No channels>");
 
 }
 
@@ -659,35 +663,35 @@ void addAllChannelsMenu(HMENU cm)
 // flipNotifyPopup(id, flag)
 void flipNotifyPopup(int id, ServMgr::NOTIFY_TYPE nt)
 {
-	int mask = peercastInst->getNotifyMask();
+    int mask = peercastInst->getNotifyMask();
 
-	mask ^= nt;
-	if (mask & nt)
-		CheckMenuItem(trayMenu,id,MF_CHECKED|MF_BYCOMMAND);
-	else
-		CheckMenuItem(trayMenu,id,MF_UNCHECKED|MF_BYCOMMAND);
+    mask ^= nt;
+    if (mask & nt)
+        CheckMenuItem(trayMenu, id, MF_CHECKED | MF_BYCOMMAND);
+    else
+        CheckMenuItem(trayMenu, id, MF_UNCHECKED | MF_BYCOMMAND);
 
-	peercastInst->setNotifyMask(mask);
-	peercastInst->saveSettings();
+    peercastInst->setNotifyMask(mask);
+    peercastInst->saveSettings();
 }
- 
+
 
 static void showHTML(const char *file)
 {
-	char url[256];
-	snprintf(url,_countof(url),"%s/%s",servMgr->htmlPath,file);					
+    char url[256];
+    snprintf(url, _countof(url), "%s/%s", servMgr->htmlPath, file);
 
-	sys->callLocalURL(url,servMgr->serverHost.port);
+    sys->callLocalURL(url, servMgr->serverHost.port);
 }
 
 static ChanInfo getChannelInfo(int index)
 {
-	Channel *c = chanMgr->findChannelByIndex(index);
-	if (c)
-		return c->info;
+    Channel *c = chanMgr->findChannelByIndex(index);
+    if (c)
+        return c->info;
 
-	ChanInfo info;
-	return info;
+    ChanInfo info;
+    return info;
 }
 
 //
@@ -702,379 +706,380 @@ static ChanInfo getChannelInfo(int index)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	int wmId, wmEvent;
-	POINT point;
+    int wmId, wmEvent;
+    POINT point;
 
 
-	switch (message) 
-	{
-		case WM_SHOWGUI:
-			createGUI(hWnd);
-			break;
+    switch (message)
+    {
+    case WM_SHOWGUI:
+        createGUI(hWnd);
+        break;
 
 
-		case WM_TRAYICON:
-			switch((UINT)lParam) 
-			{
-				case WM_LBUTTONDOWN:
-					if (allowTrayMenu)
-						SendMessage(hWnd,WM_SHOWMENU,2,0);
-					SetForegroundWindow(hWnd);    
-					break;
-				case WM_RBUTTONDOWN:
-					if (allowTrayMenu)
-						SendMessage(hWnd,WM_SHOWMENU,1,0);
-					SetForegroundWindow(hWnd);    
-					break;
-				case WM_LBUTTONDBLCLK:
-					createGUI(hWnd);
-					break;
-			}
-			break;
+    case WM_TRAYICON:
+        switch ((UINT)lParam)
+        {
+        case WM_LBUTTONDOWN:
+            if (allowTrayMenu)
+                SendMessage(hWnd, WM_SHOWMENU, 2, 0);
+            SetForegroundWindow(hWnd);
+            break;
+        case WM_RBUTTONDOWN:
+            if (allowTrayMenu)
+                SendMessage(hWnd, WM_SHOWMENU, 1, 0);
+            SetForegroundWindow(hWnd);
+            break;
+        case WM_LBUTTONDBLCLK:
+            createGUI(hWnd);
+            break;
+        }
+        break;
 
-		case WM_COPYDATA:
-			{
-				COPYDATASTRUCT *pc = (COPYDATASTRUCT *)lParam;
-				LOG_DEBUG("URL request: %s",pc->lpData);
-				if (pc->dwData == WM_PLAYCHANNEL)
-				{
-					ChanInfo info;
-					servMgr->procConnectArgs((char *)pc->lpData,info);
-					chanMgr->findAndPlayChannel(info,false);
-				}
-				//sys->callLocalURL((const char *)pc->lpData,servMgr->serverHost.port);
-			}
-			break;
-		case WM_GETPORTNUMBER:
-			{
-				int port;
-				port=servMgr->serverHost.port;
-				ReplyMessage(port);
-			}
-			break;
+    case WM_COPYDATA:
+    {
+        COPYDATASTRUCT *pc = (COPYDATASTRUCT *)lParam;
+        LOG_DEBUG("URL request: %s", pc->lpData);
+        if (pc->dwData == WM_PLAYCHANNEL)
+        {
+            ChanInfo info;
+            servMgr->procConnectArgs((char *)pc->lpData, info);
+            chanMgr->findAndPlayChannel(info, false);
+        }
+        //sys->callLocalURL((const char *)pc->lpData,servMgr->serverHost.port);
+    }
+    break;
+    case WM_GETPORTNUMBER:
+    {
+        int port;
+        port = servMgr->serverHost.port;
+        ReplyMessage(port);
+    }
+    break;
 
-		case WM_SHOWMENU:
-			{
-				SetForegroundWindow(hWnd);    
-				bool skipMenu=false;
+    case WM_SHOWMENU:
+    {
+        SetForegroundWindow(hWnd);
+        bool skipMenu = false;
 
-				allowTrayMenu = false;
+        allowTrayMenu = false;
 
-				// check for notifications
-				if (currNotify & ServMgr::NT_UPGRADE)
-				{
-					if (servMgr->downloadURL[0])
-					{
-						if ((sys->getTime()-seenNewVersionTime) > (60*60))	// notify every hour
-						{
-							if (MessageBox(hWnd,"A newer version of PeerCast is available, press OK to upgrade.","PeerCast",MB_OKCANCEL|MB_APPLMODAL|MB_ICONEXCLAMATION) == IDOK)
-								sys->getURL(servMgr->downloadURL);
+        // check for notifications
+        if (currNotify & ServMgr::NT_UPGRADE)
+        {
+            if (servMgr->downloadURL[0])
+            {
+                if ((sys->getTime() - seenNewVersionTime) > (60 * 60))	// notify every hour
+                {
+                    if (MessageBox(hWnd, "A newer version of PeerCast is available, press OK to upgrade.", "PeerCast", MB_OKCANCEL | MB_APPLMODAL | MB_ICONEXCLAMATION) == IDOK)
+                        sys->getURL(servMgr->downloadURL);
 
-							seenNewVersionTime=sys->getTime();
-							skipMenu=true;
-						}
-					}
-				}
+                    seenNewVersionTime = sys->getTime();
+                    skipMenu = true;
+                }
+            }
+        }
 
 
-				if (!skipMenu)
-				{
-					GetCursorPos(&point);
-					HMENU menu = NULL;
+        if (!skipMenu)
+        {
+            GetCursorPos(&point);
+            HMENU menu = NULL;
 
-					switch (wParam)
-					{
-						case 1:
-							menu = GetSubMenu(trayMenu,0);
-							addAllChannelsMenu(GetSubMenu(menu,0));
-							addRelayedChannelsMenu(GetSubMenu(menu,1));
-							break;
-						case 2:
-							menu = GetSubMenu(ltrayMenu,0);
-							addAllChannelsMenu(menu);
-							break;
-					}
-					if (!TrackPopupMenu(menu,TPM_RIGHTALIGN,point.x,point.y,0,hWnd,NULL))
-					{
-						LOG_ERROR("Can`t track popup menu: %d",GetLastError());
-					}
-					PostMessage(hWnd,WM_NULL,0,0); 
+            switch (wParam)
+            {
+            case 1:
+                menu = GetSubMenu(trayMenu, 0);
+                addAllChannelsMenu(GetSubMenu(menu, 0));
+                addRelayedChannelsMenu(GetSubMenu(menu, 1));
+                break;
+            case 2:
+                menu = GetSubMenu(ltrayMenu, 0);
+                addAllChannelsMenu(menu);
+                break;
+            }
+            if (!TrackPopupMenu(menu, TPM_RIGHTALIGN, point.x, point.y, 0, hWnd, NULL))
+            {
+                LOG_ERROR("Can`t track popup menu: %d", GetLastError());
+            }
+            PostMessage(hWnd, WM_NULL, 0, 0);
 
-				}
-				allowTrayMenu = true;
-			}
-			break;
+        }
+        allowTrayMenu = true;
+    }
+    break;
 
-		case WM_CREATE:
-			if (showGUI)
-				createGUI(hWnd);
-			break;
+    case WM_CREATE:
+        if (showGUI)
+            createGUI(hWnd);
+        break;
 
-		case WM_COMMAND:
-			wmId    = LOWORD(wParam); 
-			wmEvent = HIWORD(wParam); 
+    case WM_COMMAND:
+        wmId = LOWORD(wParam);
+        wmEvent = HIWORD(wParam);
 
-			if ((wmId >= INFO_CMD) && (wmId < INFO_CMD+MAX_CHANNELS))
-			{
-				int c = wmId - INFO_CMD;
-				chanInfo = getChannelInfo(c);
-				chanInfoIsRelayed = false;
-				DialogBox(hInst, (LPCTSTR)IDD_CHANINFO, hWnd, (DLGPROC)ChanInfoProc);
-				return 0;
-			}
-			if ((wmId >= URL_CMD) && (wmId < URL_CMD+MAX_CHANNELS))
-			{
-				int c = wmId - URL_CMD;
-				chanInfo = getChannelInfo(c);
-				if (chanInfo.url.isValidURL())
-					sys->getURL(chanInfo.url);
-				return 0;
-			}
-			if ((wmId >= PLAY_CMD) && (wmId < PLAY_CMD+MAX_CHANNELS))
-			{
-				int c = wmId - PLAY_CMD;
-				chanInfo = getChannelInfo(c);
-				chanMgr->findAndPlayChannel(chanInfo,false);
-				return 0;
-			}
-			if ((wmId >= RELAY_CMD) && (wmId < RELAY_CMD+MAX_CHANNELS))
-			{
-				int c = wmId - RELAY_CMD;
-				chanInfo = getChannelInfo(c);
-				chanMgr->findAndPlayChannel(chanInfo,true);
-				return 0;
-			}
+        if ((wmId >= INFO_CMD) && (wmId < INFO_CMD + MAX_CHANNELS))
+        {
+            int c = wmId - INFO_CMD;
+            chanInfo = getChannelInfo(c);
+            chanInfoIsRelayed = false;
+            DialogBox(hInst, (LPCTSTR)IDD_CHANINFO, hWnd, (DLGPROC)ChanInfoProc);
+            return 0;
+        }
+        if ((wmId >= URL_CMD) && (wmId < URL_CMD + MAX_CHANNELS))
+        {
+            int c = wmId - URL_CMD;
+            chanInfo = getChannelInfo(c);
+            if (chanInfo.url.isValidURL())
+                sys->getURL(chanInfo.url);
+            return 0;
+        }
+        if ((wmId >= PLAY_CMD) && (wmId < PLAY_CMD + MAX_CHANNELS))
+        {
+            int c = wmId - PLAY_CMD;
+            chanInfo = getChannelInfo(c);
+            chanMgr->findAndPlayChannel(chanInfo, false);
+            return 0;
+        }
+        if ((wmId >= RELAY_CMD) && (wmId < RELAY_CMD + MAX_CHANNELS))
+        {
+            int c = wmId - RELAY_CMD;
+            chanInfo = getChannelInfo(c);
+            chanMgr->findAndPlayChannel(chanInfo, true);
+            return 0;
+        }
 
-			// Parse the menu selections:
-			switch (wmId)
-			{
-				case ID_POPUP_SHOWMESSAGES_PEERCAST:
-					flipNotifyPopup(ID_POPUP_SHOWMESSAGES_PEERCAST,ServMgr::NT_PEERCAST);
-					break;
-				case ID_POPUP_SHOWMESSAGES_BROADCASTERS:
-					flipNotifyPopup(ID_POPUP_SHOWMESSAGES_BROADCASTERS,ServMgr::NT_BROADCASTERS);
-					break;
-				case ID_POPUP_SHOWMESSAGES_TRACKINFO:
-					flipNotifyPopup(ID_POPUP_SHOWMESSAGES_TRACKINFO,ServMgr::NT_TRACKINFO);
-					break;
+        // Parse the menu selections:
+        switch (wmId)
+        {
+        case ID_POPUP_SHOWMESSAGES_PEERCAST:
+            flipNotifyPopup(ID_POPUP_SHOWMESSAGES_PEERCAST, ServMgr::NT_PEERCAST);
+            break;
+        case ID_POPUP_SHOWMESSAGES_BROADCASTERS:
+            flipNotifyPopup(ID_POPUP_SHOWMESSAGES_BROADCASTERS, ServMgr::NT_BROADCASTERS);
+            break;
+        case ID_POPUP_SHOWMESSAGES_TRACKINFO:
+            flipNotifyPopup(ID_POPUP_SHOWMESSAGES_TRACKINFO, ServMgr::NT_TRACKINFO);
+            break;
 
-				case ID_POPUP_ABOUT:
-				case IDM_ABOUT:
-					DialogBox(hInst, (LPCTSTR)IDD_ABOUTBOX, hWnd, (DLGPROC)About);
-					break;
-				case ID_POPUP_SHOWGUI:
-				case IDM_SETTINGS_GUI:
-				case ID_POPUP_ADVANCED_SHOWGUI:
-				{
-					createGUI(hWnd);
-					break;
-				}
-				case ID_POPUP_YELLOWPAGES:
-					sys->getURL("http://bayonet.ddo.jp/sp/");
-					break;
+        case ID_POPUP_ABOUT:
+        case IDM_ABOUT:
+            DialogBox(hInst, (LPCTSTR)IDD_ABOUTBOX, hWnd, (DLGPROC)About);
+            break;
+        case ID_POPUP_SHOWGUI:
+        case IDM_SETTINGS_GUI:
+        case ID_POPUP_ADVANCED_SHOWGUI:
+        {
+            createGUI(hWnd);
+            break;
+        }
+        case ID_POPUP_YELLOWPAGES:
+            sys->getURL("http://bayonet.ddo.jp/sp/");
+            break;
 
-				case ID_POPUP_ADVANCED_VIEWLOG:
-					showHTML("viewlog.html");
-					break;
-				case ID_POPUP_ADVANCED_SAVESETTINGS:
-					servMgr->saveSettings(iniFileName.cstr());
-					break;
-				case ID_POPUP_ADVANCED_INFORMATION:
-					showHTML("index.html");
-					break;
-				case ID_FIND_CHANNELS:
-				case ID_POPUP_ADVANCED_ALLCHANNELS:
-				case ID_POPUP_UPGRADE:
-					sys->callLocalURL("admin?cmd=upgrade",servMgr->serverHost.port);
-					break;
-				case ID_POPUP_ADVANCED_RELAYEDCHANNELS:
-				case ID_POPUP_FAVORITES_EDIT:
-					showHTML("channels.html");
-					break;
-				case ID_POPUP_ADVANCED_BROADCAST:
-					showHTML("broadcast.html");
-					break;
-				case ID_POPUP_SETTINGS:
-					showHTML("settings.html");
-					break;
-				case ID_POPUP_CONNECTIONS:
-					showHTML("connections.html");
-					break;
-				case ID_POPUP_HELP:
-					sys->getURL("https://github.com/shinji3/peercast-yt");
-					break;
+        case ID_POPUP_ADVANCED_VIEWLOG:
+            showHTML("viewlog.html");
+            break;
+        case ID_POPUP_ADVANCED_SAVESETTINGS:
+            servMgr->saveSettings(iniFileName.cstr());
+            break;
+        case ID_POPUP_ADVANCED_INFORMATION:
+            showHTML("index.html");
+            break;
+        case ID_FIND_CHANNELS:
+        case ID_POPUP_ADVANCED_ALLCHANNELS:
+        case ID_POPUP_UPGRADE:
+            sys->callLocalURL("admin?cmd=upgrade", servMgr->serverHost.port);
+            break;
+        case ID_POPUP_ADVANCED_RELAYEDCHANNELS:
+        case ID_POPUP_FAVORITES_EDIT:
+            showHTML("channels.html");
+            break;
+        case ID_POPUP_ADVANCED_BROADCAST:
+            showHTML("broadcast.html");
+            break;
+        case ID_POPUP_SETTINGS:
+            showHTML("settings.html");
+            break;
+        case ID_POPUP_CONNECTIONS:
+            showHTML("connections.html");
+            break;
+        case ID_POPUP_HELP:
+            sys->getURL("https://github.com/shinji3/peercast-yt");
+            break;
 
-				case ID_POPUP_EXIT_CONFIRM:
-				case IDM_EXIT:
-				   DestroyWindow(hWnd);
-				   break;
-				default:
-				   return DefWindowProc(hWnd, message, wParam, lParam);
-			}
-			break;
-		case WM_DESTROY:
-			PostQuitMessage(0);
-			break;
-		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
-   }
-   return 0;
+        case ID_POPUP_EXIT_CONFIRM:
+        case IDM_EXIT:
+            DestroyWindow(hWnd);
+            break;
+        default:
+            return DefWindowProc(hWnd, message, wParam, lParam);
+        }
+        break;
+    case WM_DESTROY:
+        PostQuitMessage(0);
+        break;
+    default:
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+    return 0;
 }
 // Mesage handler for about box.
 LRESULT CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	switch (message)
-	{
-		case WM_INITDIALOG:
-			SendDlgItemMessage(hDlg,IDC_ABOUTVER,WM_SETTEXT,0,(LPARAM)PCX_AGENT);
-			return TRUE;
+    switch (message)
+    {
+    case WM_INITDIALOG:
+        SendDlgItemMessage(hDlg, IDC_ABOUTVER, WM_SETTEXT, 0, (LPARAM)PCX_AGENT);
+        return TRUE;
 
-		case WM_COMMAND:
-			switch (LOWORD(wParam))
-			{
-				case IDOK:
-				case IDCANCEL:
-					EndDialog(hDlg, LOWORD(wParam));
-					return TRUE;
-				case IDC_BUTTON1:
-					sys->getURL("https://github.com/shinji3/peercast-yt");
-					EndDialog(hDlg, LOWORD(wParam));
-					return TRUE;
+    case WM_COMMAND:
+        switch (LOWORD(wParam))
+        {
+        case IDOK:
+        case IDCANCEL:
+            EndDialog(hDlg, LOWORD(wParam));
+            return TRUE;
+        case IDC_BUTTON1:
+            sys->getURL("https://github.com/shinji3/peercast-yt");
+            EndDialog(hDlg, LOWORD(wParam));
+            return TRUE;
 
-			}
-			break;
-		case WM_DESTROY:
-			break;
-	}
+        }
+        break;
+    case WM_DESTROY:
+        break;
+    }
     return FALSE;
 }
 
 // Mesage handler for chaninfo box
 LRESULT CALLBACK ChanInfoProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	switch (message)
-	{
-		case WM_INITDIALOG:
-			{
-				char str[1024];
-				strcpy_s(str,_countof(str),chanInfo.track.artist);
-				strcat_s(str,_countof(str)," - ");
-				strcat_s(str,_countof(str),chanInfo.track.title);
+    switch (message)
+    {
+    case WM_INITDIALOG:
+    {
+        char str[1024];
+        strcpy_s(str, _countof(str), chanInfo.track.artist);
+        strcat_s(str, _countof(str), " - ");
+        strcat_s(str, _countof(str), chanInfo.track.title);
 
-				String name = chanInfo.name;
-				String track = str;
-				String comment = chanInfo.comment;
-				String desc = chanInfo.desc;
-				String genre = chanInfo.genre;
+        String name = chanInfo.name;
+        String track = str;
+        String comment = chanInfo.comment;
+        String desc = chanInfo.desc;
+        String genre = chanInfo.genre;
 
-				name.convertTo(String::T_SJIS);
-				track.convertTo(String::T_SJIS);
-				comment.convertTo(String::T_SJIS);
-				desc.convertTo(String::T_SJIS);
-				genre.convertTo(String::T_SJIS);
+        name.convertTo(String::T_SJIS);
+        track.convertTo(String::T_SJIS);
+        comment.convertTo(String::T_SJIS);
+        desc.convertTo(String::T_SJIS);
+        genre.convertTo(String::T_SJIS);
 
-				SendDlgItemMessage(hDlg,IDC_EDIT_NAME,WM_SETTEXT,0,(LPARAM)name.cstr());
-				SendDlgItemMessage(hDlg,IDC_EDIT_PLAYING,WM_SETTEXT,0,(LPARAM)track.cstr());
-				SendDlgItemMessage(hDlg,IDC_EDIT_MESSAGE,WM_SETTEXT,0,(LPARAM)comment.cstr());
-				SendDlgItemMessage(hDlg,IDC_EDIT_DESC,WM_SETTEXT,0,(LPARAM)desc.cstr());
-				SendDlgItemMessage(hDlg,IDC_EDIT_GENRE,WM_SETTEXT,0,(LPARAM)genre.cstr());
+        SendDlgItemMessage(hDlg, IDC_EDIT_NAME, WM_SETTEXT, 0, (LPARAM)name.cstr());
+        SendDlgItemMessage(hDlg, IDC_EDIT_PLAYING, WM_SETTEXT, 0, (LPARAM)track.cstr());
+        SendDlgItemMessage(hDlg, IDC_EDIT_MESSAGE, WM_SETTEXT, 0, (LPARAM)comment.cstr());
+        SendDlgItemMessage(hDlg, IDC_EDIT_DESC, WM_SETTEXT, 0, (LPARAM)desc.cstr());
+        SendDlgItemMessage(hDlg, IDC_EDIT_GENRE, WM_SETTEXT, 0, (LPARAM)genre.cstr());
 
-				snprintf(str,_countof(str),"%d kb/s %s",chanInfo.bitrate,ChanInfo::getTypeStr(chanInfo.contentType));
-				SendDlgItemMessage(hDlg,IDC_FORMAT,WM_SETTEXT,0,(LPARAM)str);
-
-
-				if (!chanInfo.url.isValidURL())
-					EnableWindow(GetDlgItem(hDlg,IDC_CONTACT),false);
-
-				Channel *ch = chanMgr->findChannelByID(chanInfo.id);
-				if (ch)
-				{
-					SendDlgItemMessage(hDlg,IDC_EDIT_STATUS,WM_SETTEXT,0,(LPARAM)ch->getStatusStr());
-					SendDlgItemMessage(hDlg, IDC_KEEP,BM_SETCHECK, ch->stayConnected, 0);
-				}else
-				{
-					SendDlgItemMessage(hDlg,IDC_EDIT_STATUS,WM_SETTEXT,0,(LPARAM)"OK");
-					EnableWindow(GetDlgItem(hDlg,IDC_KEEP),false);
-				}
+        snprintf(str, _countof(str), "%d kb/s %s", chanInfo.bitrate, ChanInfo::getTypeStr(chanInfo.contentType));
+        SendDlgItemMessage(hDlg, IDC_FORMAT, WM_SETTEXT, 0, (LPARAM)str);
 
 
+        if (!chanInfo.url.isValidURL())
+            EnableWindow(GetDlgItem(hDlg, IDC_CONTACT), false);
 
-				POINT point;
-				RECT rect,drect;
-				HWND hDsk = GetDesktopWindow();
-				GetWindowRect(hDsk,&drect);
-				GetWindowRect(hDlg,&rect);
-				GetCursorPos(&point);
-
-				POINT pos,size;
-				size.x = rect.right-rect.left;
-				size.y = rect.bottom-rect.top;
-
-				if (point.x-drect.left < size.x)
-					pos.x = point.x;
-				else
-					pos.x = point.x-size.x;
-
-				if (point.y-drect.top < size.y)
-					pos.y = point.y;
-				else
-					pos.y = point.y-size.y;
-
-				SetWindowPos(hDlg,HWND_TOPMOST,pos.x,pos.y,size.x,size.y,0);
-				chWnd = hDlg;
-			}
-			return TRUE;
-
-		case WM_COMMAND:
-			{
-				char str[1024],idstr[64];
-				chanInfo.id.toStr(idstr);
-
-				switch (LOWORD(wParam))
-				{
-					case IDC_CONTACT:
-					{
-						sys->getURL(chanInfo.url);
-						return TRUE;
-					}
-					case IDC_DETAILS:
-					{
-						snprintf(str,_countof(str),"admin?page=chaninfo&id=%s&relay=%d",idstr,chanInfoIsRelayed);
-						sys->callLocalURL(str,servMgr->serverHost.port);
-						return TRUE;
-					}
-					case IDC_KEEP:
-					{
-						Channel *ch = chanMgr->findChannelByID(chanInfo.id);
-						if (ch)
-							ch->stayConnected = SendDlgItemMessage(hDlg, IDC_KEEP,BM_GETCHECK, 0, 0) == BST_CHECKED;;
-						return TRUE;
-					}
+        Channel *ch = chanMgr->findChannelByID(chanInfo.id);
+        if (ch)
+        {
+            SendDlgItemMessage(hDlg, IDC_EDIT_STATUS, WM_SETTEXT, 0, (LPARAM)ch->getStatusStr());
+            SendDlgItemMessage(hDlg, IDC_KEEP, BM_SETCHECK, ch->stayConnected, 0);
+        }
+        else
+        {
+            SendDlgItemMessage(hDlg, IDC_EDIT_STATUS, WM_SETTEXT, 0, (LPARAM)"OK");
+            EnableWindow(GetDlgItem(hDlg, IDC_KEEP), false);
+        }
 
 
-					case IDC_PLAY:
-					{
-						chanMgr->findAndPlayChannel(chanInfo,false);
-						return TRUE;
-					}
 
-				}
-			}
-			break;
+        POINT point;
+        RECT rect, drect;
+        HWND hDsk = GetDesktopWindow();
+        GetWindowRect(hDsk, &drect);
+        GetWindowRect(hDlg, &rect);
+        GetCursorPos(&point);
 
-		case WM_CLOSE:
-			EndDialog(hDlg, 0);
-			break;
+        POINT pos, size;
+        size.x = rect.right - rect.left;
+        size.y = rect.bottom - rect.top;
 
-		case WM_ACTIVATE:
-			if (LOWORD(wParam) == WA_INACTIVE)
-				EndDialog(hDlg, 0);
-			break;
-		case WM_DESTROY:
-			chWnd = NULL;
-			break;
+        if (point.x - drect.left < size.x)
+            pos.x = point.x;
+        else
+            pos.x = point.x - size.x;
+
+        if (point.y - drect.top < size.y)
+            pos.y = point.y;
+        else
+            pos.y = point.y - size.y;
+
+        SetWindowPos(hDlg, HWND_TOPMOST, pos.x, pos.y, size.x, size.y, 0);
+        chWnd = hDlg;
+    }
+    return TRUE;
+
+    case WM_COMMAND:
+    {
+        char str[1024], idstr[64];
+        chanInfo.id.toStr(idstr);
+
+        switch (LOWORD(wParam))
+        {
+        case IDC_CONTACT:
+        {
+            sys->getURL(chanInfo.url);
+            return TRUE;
+        }
+        case IDC_DETAILS:
+        {
+            snprintf(str, _countof(str), "admin?page=chaninfo&id=%s&relay=%d", idstr, chanInfoIsRelayed);
+            sys->callLocalURL(str, servMgr->serverHost.port);
+            return TRUE;
+        }
+        case IDC_KEEP:
+        {
+            Channel *ch = chanMgr->findChannelByID(chanInfo.id);
+            if (ch)
+                ch->stayConnected = SendDlgItemMessage(hDlg, IDC_KEEP, BM_GETCHECK, 0, 0) == BST_CHECKED;;
+            return TRUE;
+        }
 
 
-	}
+        case IDC_PLAY:
+        {
+            chanMgr->findAndPlayChannel(chanInfo, false);
+            return TRUE;
+        }
+
+        }
+    }
+    break;
+
+    case WM_CLOSE:
+        EndDialog(hDlg, 0);
+        break;
+
+    case WM_ACTIVATE:
+        if (LOWORD(wParam) == WA_INACTIVE)
+            EndDialog(hDlg, 0);
+        break;
+    case WM_DESTROY:
+        chWnd = NULL;
+        break;
+
+
+    }
     return FALSE;
 }
