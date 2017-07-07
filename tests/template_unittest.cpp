@@ -53,12 +53,12 @@ TEST_F(TemplateFixture, getBoolVariable)
 TEST_F(TemplateFixture, readTemplate)
 {
     StringStream in, out;
-    bool res;
+    int res;
 
     in.writeString("hoge");
     in.rewind();
     res = temp.readTemplate(in, &out, 0);
-    ASSERT_FALSE(res);
+    ASSERT_EQ(Template::TMPL_END, res);
     ASSERT_STREQ("hoge", out.str().c_str());
 }
 
@@ -184,75 +184,105 @@ TEST_F(TemplateFixture, readIfFalseWithoutElse)
 TEST_F(TemplateFixture, fragment)
 {
     StringStream in, out;
-    bool res;
+    int res;
 
     in.writeString("hoge{@fragment a}fuga{@end}piyo");
     in.rewind();
     res = temp.readTemplate(in, &out, 0);
-    ASSERT_FALSE(res);
+    ASSERT_EQ(Template::TMPL_END, res);
     ASSERT_STREQ("hogefugapiyo", out.str().c_str());
 }
 
 TEST_F(TemplateFixture, fragment2)
 {
     StringStream in, out;
-    bool res;
+    int res;
 
     in.writeString("hoge{@fragment a}fuga{@end}piyo");
     in.rewind();
     temp.selectedFragment = "a";
     res = temp.readTemplate(in, &out, 0);
-    ASSERT_FALSE(res);
+    ASSERT_EQ(Template::TMPL_END, res);
     ASSERT_STREQ("fuga", out.str().c_str());
 }
 
 TEST_F(TemplateFixture, fragment3)
 {
     StringStream in, out;
-    bool res;
+    int res;
 
     in.writeString("hoge{@fragment a}fuga{@end}piyo");
     in.rewind();
     temp.selectedFragment = "b";
     res = temp.readTemplate(in, &out, 0);
-    ASSERT_FALSE(res);
+    ASSERT_EQ(Template::TMPL_END, res);
     ASSERT_STREQ("", out.str().c_str());
 }
 
 TEST_F(TemplateFixture, variableInFragment)
 {
     StringStream in, out;
-    bool res;
+    int res;
 
     in.writeString("{@fragment a}{$TRUE}{@end}{@fragment b}{$FALSE}{@end}");
     in.rewind();
     res = temp.readTemplate(in, &out, 0);
-    ASSERT_FALSE(res);
+    ASSERT_EQ(Template::TMPL_END, res);
     ASSERT_STREQ("10", out.str().c_str());
 }
 
 TEST_F(TemplateFixture, variableInFragment2)
 {
     StringStream in, out;
-    bool res;
+    int res;
 
     in.writeString("{@fragment a}{$TRUE}{@end}{@fragment b}{$FALSE}{@end}");
     in.rewind();
     temp.selectedFragment = "a";
     res = temp.readTemplate(in, &out, 0);
-    ASSERT_FALSE(res);
+    ASSERT_EQ(Template::TMPL_END, res);
     ASSERT_STREQ("1", out.str().c_str());
 }
 
 TEST_F(TemplateFixture, variableInFragment3)
 {
     StringStream in, out;
-    bool res;
+    int res;
 
     in.writeString("{@fragment a}{$TRUE}{@end}{$FALSE}");
     in.rewind();
     temp.selectedFragment = "a";
     res = temp.readTemplate(in, &out, 0);
-    ASSERT_FALSE(res);
+    ASSERT_EQ(Template::TMPL_END, res);
     ASSERT_STREQ("1", out.str().c_str());
+}
+
+TEST_F(TemplateFixture, elsif)
+{
+    StringStream in, out;
+    int res;
+
+    in.str("{@if TRUE}A{@elsif TRUE}B{@else}C{@end}");
+    out.str("");
+    res = temp.readTemplate(in, &out, 0);
+    ASSERT_EQ(Template::TMPL_END, res);
+    ASSERT_EQ("A", out.str());
+
+    in.str("{@if TRUE}A{@elsif FALSE}B{@else}C{@end}");
+    out.str("");
+    res = temp.readTemplate(in, &out, 0);
+    ASSERT_EQ(Template::TMPL_END, res);
+    ASSERT_EQ("A", out.str());
+
+    in.str("{@if FALSE}A{@elsif TRUE}B{@else}C{@end}");
+    out.str("");
+    res = temp.readTemplate(in, &out, 0);
+    ASSERT_EQ(Template::TMPL_END, res);
+    ASSERT_EQ("B", out.str());
+
+    in.str("{@if FALSE}A{@elsif FALSE}B{@else}C{@end}");
+    out.str("");
+    res = temp.readTemplate(in, &out, 0);
+    ASSERT_EQ(Template::TMPL_END, res);
+    ASSERT_EQ("C", out.str());
 }

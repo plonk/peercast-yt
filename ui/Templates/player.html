@@ -34,7 +34,7 @@
     </object>
     </div>
   {@end}
-{@else}{@if page.channel.type == "WMV"}
+{@elsif page.channel.type == "WMV"}
   {@if request.path !~ "^/public/"} <!-- HTML UI では request.* は定義されていないが、動く  -->
     <div class="message" style="text-align: center">
     <script src="/assets/js/flv.min.js"></script>
@@ -77,8 +77,7 @@
       </object>
     </div>
   {@end}
-{@else}
-{@if page.channel.type == "MP3"}
+{@elsif page.channel.type == "MP3"}
   <div class="message" style="text-align: center">
     <audio controls autoplay style="min-width: 640px">
       <source src="/stream/{$page.channel.id}.mp3?auth={$page.channel.authToken}" type="audio/mpeg">
@@ -86,7 +85,7 @@
       <!-- Your browser does not support the audio element. -->
     </audio>
   </div>
-{@else}{@if page.channel.type == "MKV"}
+{@elsif page.channel.type == "MKV"}
   <div class="message" style="text-align: center">
     <video controls autoplay>
       <source src="/stream/{$page.channel.id}.mkv?auth={$page.channel.authToken}" type="video/webm">
@@ -94,7 +93,7 @@
     </video>
     <div>{#Should the playback fail, try the playlist link below.}</div>
   </div>
-{@else}{@if page.channel.type == "WEBM"}
+{@elsif page.channel.type == "WEBM"}
   <div class="message" style="text-align: center">
     <video controls autoplay>
       <source src="/stream/{$page.channel.id}.webm?auth={$page.channel.authToken}" type="video/webm">
@@ -106,8 +105,4 @@
     {#Playback of this type of stream is not supported.} ({$page.channel.type})
     {#Try the playlist link below.}
   </div>
-{@end}
-{@end}
-{@end}
-{@end}
 {@end}
