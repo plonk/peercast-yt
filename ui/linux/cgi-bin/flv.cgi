@@ -24,7 +24,8 @@ def main
          "-v", "-8", # quiet
          "-y",       # confirm overwriting
          "-i", "mmsh://#{server_name}:#{server_port}/stream/#{id}.wmv",
-         "-acodec", "aac",
+         "-strict", "-2",
+	 "-acodec", "aac",
          "-vcodec", "libx264",
          "-x264-params", "bitrate=#{r}:vbv-maxrate=#{r}:vbv-bufsize=#{2*r}",
          "-preset", "ultrafast",
