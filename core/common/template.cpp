@@ -346,10 +346,7 @@ void    Template::readFragment(Stream &in, Stream *outp, int loop)
         {
             auto outerFragment = currentFragment;
             currentFragment = fragName;
-            bool elsefound = false;
-            elsefound = readTemplate(in, outp, loop);
-            if (elsefound)
-                LOG_ERROR("Stray else in fragment block");
+            readTemplate(in, outp, loop);
             currentFragment = outerFragment;
             return;
         }else
@@ -561,7 +558,7 @@ bool    Template::evalCondition(const string& cond, int loop)
 }
 
 // --------------------------------------
-void    Template::readIf(Stream &in, Stream *outp, int loop)
+static String readCondition(Stream &in)
 {
     String cond;
 
@@ -570,22 +567,38 @@ void    Template::readIf(Stream &in, Stream *outp, int loop)
         char c = in.readChar();
 
         if (c == '}')
+            break;
+        else
+            cond.append(c);
+    }
+    return cond;
+}
+
+// --------------------------------------
+void    Template::readIf(Stream &in, Stream *outp, int loop)
+{
+    bool hadActive = false;
+    int cmd = TMPL_IF;
+
+    while (cmd != TMPL_END)
+    {
+        if (cmd == TMPL_ELSE)
         {
-            if (evalCondition(cond, loop))
+            cmd = readTemplate(in, hadActive ? NULL : outp, loop);
+        }else if (cmd == TMPL_IF || cmd == TMPL_ELSIF)
+        {
+            String cond = readCondition(in);
+            if (!hadActive && evalCondition(cond, loop))
             {
-                if (readTemplate(in, outp, loop))
-                    readTemplate(in, NULL, loop);
+                hadActive = true;
+                cmd = readTemplate(in, outp, loop);
             }else
             {
-                if (readTemplate(in, NULL, loop))
-                    readTemplate(in, outp, loop);
+                cmd = readTemplate(in, NULL, loop);
             }
-            return;
-        }else
-        {
-            cond.append(c);
         }
     }
+    return;
 }
 
 // --------------------------------------
@@ -733,6 +746,9 @@ int Template::readCmd(Stream &in, Stream *outp, int loop)
             {
                 readIf(in, outp, loop);
                 tmpl = TMPL_IF;
+            }else if (cmd == "elsif")
+            {
+                tmpl = TMPL_ELSIF;
             }else if (cmd == "fragment")
             {
                 readFragment(in, outp, loop);
@@ -828,13 +844,12 @@ void    Template::readVariableRaw(Stream &in, Stream *outp, int loop)
 }
 
 // --------------------------------------
-
-// in の現在の位置から 1 ブロック分のテンプレートを処理し、outp が
-// NULL でなければ *outp に出力する。{@loop} 内を処理している場合は、0
-// から始まるループカウンターの値が loop に設定される。EOF あるいは
-// {@end} に当たった場合は false を返し、{@else} に当たった場合は true
-// を返す。
-bool Template::readTemplate(Stream &in, Stream *outp, int loop)
+// ストリーム in の現在の位置から 1 ブロック分のテンプレートを処理し、
+// outp がNULL でなければ *outp に出力する。EOF あるいは{@end} に当たっ
+// た場合は TMPL_END を返し、{@else} に当たった場合は TMPL_ELSE、
+// {@elsif ...} に当たった場合は TMPL_ELSIF を返す(条件式を読み込む前
+// に停止する)。
+int Template::readTemplate(Stream &in, Stream *outp, int loop)
 {
     Stream *p = inSelectedFragment() ? outp : NULL;
 
@@ -860,10 +875,8 @@ bool Template::readTemplate(Stream &in, Stream *outp, int loop)
             else if (c == '@')
             {
                 int t = readCmd(in, outp, loop);
-                if (t == TMPL_END)
-                    return false;
-                else if (t == TMPL_ELSE)
-                    return true;
+                if (t == TMPL_END || t == TMPL_ELSE || t == TMPL_ELSIF)
+                    return t;
             }
             else
             {
@@ -880,7 +893,7 @@ bool Template::readTemplate(Stream &in, Stream *outp, int loop)
                 p->writeChar(c);
         }
     }
-    return false;
+    return TMPL_END;
 }
 
 // --------------------------------------
@@ -899,7 +912,7 @@ bool HTTPRequestScope::writeVariable(Stream& s, const String& varName, int loop)
             s.writeString(m_request.headers.get("Host"));
         }
         return true;
-    }else if (varName == "request.path") // HTTPRequest 縺ｫ蟋碑ｭｲ縺吶∋縺阪°
+    }else if (varName == "request.path") // HTTPRequest に委譲すべきか
     {
         s.writeString(m_request.path);
         return true;
