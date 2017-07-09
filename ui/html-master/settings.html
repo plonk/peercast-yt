@@ -324,7 +324,50 @@
         {@end}
       </td>
 
-      <td></td>
+      <td valign="top">
+
+        <table class="table-panel" width="100%" align=center border=0>
+          <tr align=middle class="normal">
+            <td colspan=2><b>{#Transcoding}</b></td>
+          </tr>
+
+          <tr class="normal">
+            <td>
+              {#Enable}
+            </td>
+            <td>
+              <input type="checkbox" name="transcoding_enabled" value="1" {@if servMgr.transcodingEnabled}checked{@end}>
+            </td>
+          </tr>
+
+          <tr class="normal">
+            <td>
+              {#x264 Preset}
+            </td>
+            <td>
+              <select name="preset">
+                <option {@if servMgr.preset == "ultrafast"}selected{@end}>ultrafast</option>
+                <option {@if servMgr.preset == "superfast"}selected{@end}>superfast</option>
+                <option {@if servMgr.preset == "veryfast"}selected{@end}>veryfast</option>
+              </select>
+            </td>
+          </tr>
+
+          <tr class="normal">
+            <td>
+              {#Audio Codec}
+            </td>
+            <td>
+              <select name="audio_codec">
+                <option value="mp3" {@if servMgr.audioCodec == "mp3"}selected{@end}>MP3</option>
+                <option value="aac" {@if servMgr.audioCodec == "aac"}selected{@end}>{#AAC (Experimental)}</option>
+              </select>
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
     </tr>
   </table>
 </form>
