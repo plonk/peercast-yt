@@ -1,36 +1,34 @@
-#!/usr/bin/env ruby
-require 'cgi'
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import cgi, os, subprocess, sys
 
-def main
-  cgi = CGI.new
+if __name__ == "__main__":
+  form = cgi.FieldStorage()
 
-  unless cgi['id'] =~ /\A[a-fA-F0-9]{32}\z/
-    puts "Status: 400 Bad Request"
-    puts ""
-    exit
-  end
+  if "id" not in form:
+    print("Status: 400 Bad Request\n")
+    sys.exit()
 
-  id = cgi['id']
-  server_name = ENV['SERVER_NAME']
-  server_port = ENV['SERVER_PORT']
-  r = cgi['bitrate'].to_i # チャンネルのビットレートを映像ビットレートとする。
-  if r == 0
+  id = form["id"].value
+  server_name = os.getenv("SERVER_NAME")
+  server_port = os.getenv("SERVER_PORT")
+  r = int(form["bitrate"].value) # チャンネルのビットレートを映像ビットレートとする。
+  if r == 0:
     # 正常なビットレートが渡されなかった場合は 500Kbps にする。
     r = 500
-  end
 
-  print "Content-Type: video/x-flv\n\n"
-  system("ffmpeg",
+  print("Content-Type: video/x-flv\n", flush=True)
+  ffmpeg = subprocess.Popen(["ffmpeg",
          "-v", "-8", # quiet
          "-y",       # confirm overwriting
-         "-i", "mmsh://#{server_name}:#{server_port}/stream/#{id}.wmv",
+         "-i", "mmsh://{0}:{1}/stream/{2}.wmv".format(server_name, server_port, id),
          "-strict", "-2",
-	 "-acodec", "aac",
+         "-acodec", "aac",
          "-vcodec", "libx264",
-         "-x264-params", "bitrate=#{r}:vbv-maxrate=#{r}:vbv-bufsize=#{2*r}",
+         "-x264-params", "bitrate={0}:vbv-maxrate={0}:vbv-bufsize={1}".format(r, 2*r),
          "-preset", "ultrafast",
          "-f", "flv",
-         "-")        # to stdout
-end
+         "-"], stdout=subprocess.PIPE)        # to stdout
 
-main
+  for line in ffmpeg.stdout:
+    sys.stdout.buffer.write(line)
