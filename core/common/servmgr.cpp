@@ -113,6 +113,10 @@ ServMgr::ServMgr()
     chanLog="";
 
     serverName = "";
+
+    transcodingEnabled = false;
+    preset = "veryfast";
+    audioCodec = "mp3";
 }
 
 // -----------------------------------
@@ -946,6 +950,9 @@ void ServMgr::saveSettings(const char *fn)
         iniFile.writeIntValue("maxPushHops", chanMgr->maxPushHops);
         iniFile.writeIntValue("autoQuery", chanMgr->autoQuery);
         iniFile.writeIntValue("queryTTL", servMgr->queryTTL);
+        iniFile.writeBoolValue("transcodingEnabled", servMgr->transcodingEnabled);
+        iniFile.writeStrValue("preset", servMgr->preset.c_str());
+        iniFile.writeStrValue("audioCodec", servMgr->audioCodec.c_str());
 
         iniFile.writeSection("Privacy");
         iniFile.writeStrValue("password", servMgr->password);
@@ -1261,6 +1268,12 @@ void ServMgr::loadSettings(const char *fn)
             {
                 servMgr->queryTTL = iniFile.getIntValue();
             }
+            else if (iniFile.isName("transcodingEnabled"))
+                servMgr->transcodingEnabled = iniFile.getBoolValue();
+            else if (iniFile.isName("preset"))
+                servMgr->preset = iniFile.getStrValue();
+            else if (iniFile.isName("audioCodec"))
+                servMgr->audioCodec = iniFile.getStrValue();
 
             // debug
             else if (iniFile.isName("logDebug"))
@@ -2248,6 +2261,15 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var == "genrePrefix")
     {
         buf = genrePrefix;
+    }else if (var == "transcodingEnabled")
+    {
+        buf = to_string(servMgr->transcodingEnabled);
+    }else if (var == "preset")
+    {
+        buf = servMgr->preset;
+    }else if (var == "audioCodec")
+    {
+        buf = servMgr->audioCodec;
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);

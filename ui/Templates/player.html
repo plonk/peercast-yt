@@ -36,26 +36,50 @@
   {@end}
 {@elsif page.channel.type == "WMV"}
   {@if request.path !~ "^/public/"} <!-- HTML UI では request.* は定義されていないが、動く  -->
-    <div class="message" style="text-align: center">
-    <script src="/assets/js/flv.min.js"></script>
-    <video id="videoElement" controls autoplay>
-      {#Your browser doesn't seem to support playback of FLV videos.} {#Try the playlist link below.}
-    </video>
-    <script>
-     if (flvjs.isSupported()) {
-       var videoElement = document.getElementById('videoElement');
-       var flvPlayer = flvjs.createPlayer({
-         type: 'flv',
-         isLive: true,
-         url: '/cgi-bin/flv.cgi?id={$page.channel.id}&type={$page.channel.type}&bitrate={$page.channel.bitrate}'
-       });
-       flvPlayer.attachMediaElement(videoElement);
-       flvPlayer.load();
-       flvPlayer.play();
-     }
-    </script>
-    </div>
+    <!-- HTML UI ならば -->
+    {@if servMgr.transcodingEnabled}
+      <div class="message" style="text-align: center">
+      <script src="/assets/js/flv.min.js"></script>
+      <video id="videoElement" controls autoplay>
+        {#Your browser doesn't seem to support playback of FLV videos.} {#Try the playlist link below.}
+      </video>
+      <script>
+       if (flvjs.isSupported()) {
+         var videoElement = document.getElementById('videoElement');
+         var flvPlayer = flvjs.createPlayer({
+           type: 'flv',
+           isLive: true,
+           url: '/cgi-bin/flv.cgi?id={$page.channel.id}&type={$page.channel.type}&bitrate={$page.channel.bitrate}&preset={$servMgr.preset}&audio_codec={$servMgr.audioCodec}'
+         });
+         flvPlayer.attachMediaElement(videoElement);
+         flvPlayer.load();
+         flvPlayer.play();
+       }
+      </script>
+      </div>
+    {@else}
+      <div class="message" style="text-align: center">
+        <object
+          id="wmplayer"
+          width="640" height="480"
+          classid="CLSID:22D6F312-B0F6-11D0-94AB-0080C74C7E95"
+          codebase="http://activex.microsoft.com/activex/controls/mplayer/en/nsmp2inf.cab#Version=6,4,5,715"
+          standby="Loading MicrosoftR WindowsR Media Player components..."
+          type="application/x-oleobject">
+
+          <param name="FileName" value="/pls/{$page.channel.id}.asx?auth={$page.channel.authToken}" />
+          <!-- 自動再生の有無 -->
+          <param name="AutoStart" value="true" />
+          <!-- コントロール表示の有無 -->
+          <param name="ShowControls" value="true" />
+
+          {#Your browser doesn't seem to support playback of WMV videos.} {#Try the playlist link below.}
+        </object>
+      </div>
+      <!-- 下と同じ -->
+    {@end}
   {@else}
+    <!-- 公開ディレクトリではトランスコーディングはしない -->
     <div class="message" style="text-align: center">
       <object
         id="wmplayer"
@@ -72,8 +96,6 @@
         <param name="ShowControls" value="true" />
 
         {#Your browser doesn't seem to support playback of WMV videos.} {#Try the playlist link below.}
-        <!-- IE 以外用 -->
-        <!-- <embed name="wmplayer" width="640" height="480" pluginspage="http://www.microsoft.com/Windows/MediaPlayer/" type="application/x-mplayer2" src="mmsh://{$servMgr.serverIP}:{$servMgr.serverPort}/stream/{$page.channel.id}.wmv" autostart="1" showcontrols="1"> -->
       </object>
     </div>
   {@end}

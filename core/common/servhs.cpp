@@ -1074,6 +1074,7 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr)
     ServFilter *currFilter = servMgr->filters;
     servMgr->channelDirectory.clearFeeds();
     servMgr->publicDirectoryEnabled = false;
+    servMgr->transcodingEnabled = false;
 
     bool brRoot = false;
     bool getUpd = false;
@@ -1241,6 +1242,13 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr)
             allowServer2 |= atoi(arg) ? (ALLOW_HTML) : 0;
         else if (strcmp(curr, "allowBroadcast2") == 0)
             allowServer2 |= atoi(arg) ? (ALLOW_BROADCAST) : 0;
+
+        else if (strcmp(curr, "transcoding_enabled") == 0)
+            servMgr->transcodingEnabled = getCGIargBOOL(arg);
+        else if (strcmp(curr, "preset") == 0)
+            servMgr->preset = arg;
+        else if (strcmp(curr, "audio_codec") == 0)
+            servMgr->audioCodec = arg;
     }
 
     servMgr->showLog = showLog;
