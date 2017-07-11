@@ -1,7 +1,16 @@
+# Uncomment following line to enabled RTMP fetch support
+#WITH_RTMP = yes
+
 CPPFLAGS = -g -Wreturn-type -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT $(INCLUDES)
+ifeq ($(WITH_RTMP),yes)
+  CPPFLAGS += -DWITH_RTMP
+endif
+
 LDFLAGS = -pthread -static-libstdc++ -static-libgcc
 LIBS = -L../../Onigmo/.libs -Wl,-Bstatic -lonigmo -Wl,-Bdynamic
-#LIBS += -lrtmp
+ifeq ($(WITH_RTMP),yes)
+  LIBS += -lrtmp
+endif
 
 OS = $(shell uname -s | tr A-Z a-z)
 ARCH = $(shell uname -p | tr A-Z a-z)

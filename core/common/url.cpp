@@ -232,6 +232,7 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
             }
         }else if (ch->info.srcProtocol == ChanInfo::SP_RTMP)
         {
+#ifdef WITH_RTMP
             LOG_CHANNEL("Channel source is RTMP");
 
             RTMPClientStream *rs = new RTMPClientStream();
@@ -239,6 +240,11 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
             inputStream = rs;
 
             ch->info.setContentType(ChanInfo::T_FLV);
+#else
+            LOG_ERROR("Not compiled with RTMP support");
+
+            throw StreamException("Unsupported URL");
+#endif
         }else if (ch->info.srcProtocol == ChanInfo::SP_FILE)
         {
             LOG_CHANNEL("Channel source is FILE");

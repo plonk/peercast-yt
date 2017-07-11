@@ -1,3 +1,5 @@
+#ifdef WITH_RTMP
+
 #include <iterator>
 
 #include "librtmp/rtmp.h"
@@ -46,3 +48,5 @@ void RTMPClientStream::getNextPacket()
     std::copy(buffer, buffer + nsize, std::back_inserter(m_buffer));
     updateTotals(nsize, 0);
 }
+
+#endif

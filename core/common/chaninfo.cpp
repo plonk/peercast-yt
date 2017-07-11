@@ -141,7 +141,7 @@ ChanInfo::PROTOCOL ChanInfo::getProtocolFromStr(const char *str)
         return SP_PCP;
     else if (Sys::stricmp(str, "WMHTTP")==0)
         return SP_WMHTTP;
-    else if (stricmp(str, "RTMP")==0)
+    else if (Sys::stricmp(str, "RTMP")==0)
         return SP_RTMP;
     else
         return SP_UNKNOWN;
