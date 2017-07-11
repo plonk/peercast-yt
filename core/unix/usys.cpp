@@ -38,7 +38,7 @@ USys::USys()
 {
     stats.clear();
 
-    rndGen.setSeed(rnd()+getpid());
+    rndGen.setSeed(rnd() + getpid());
     signal(SIGPIPE, SIG_IGN);
     signal(SIGABRT, SIG_IGN);
 
@@ -48,10 +48,10 @@ USys::USys()
 // ---------------------------------
 double USys::getDTime()
 {
-  struct timeval tv;
+    struct timeval tv;
 
-  gettimeofday(&tv, 0);
-  return (double)tv.tv_sec + ((double)tv.tv_usec)/1000000;
+    gettimeofday(&tv, 0);
+    return (double)tv.tv_sec + ((double)tv.tv_usec)/1000000;
 }
 
 // ---------------------------------
