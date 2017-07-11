@@ -1927,7 +1927,6 @@ int ServMgr::idleProc(ThreadInfo *thread)
         sys->sleep(500);
     }
 
-    sys->endThread(thread);
     return 0;
 }
 
@@ -2003,7 +2002,6 @@ int ServMgr::serverProc(ThreadInfo *thread)
         sys->sleepIdle();
     }
 
-    sys->endThread(thread);
     return 0;
 }
 
