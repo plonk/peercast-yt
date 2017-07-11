@@ -1,5 +1,5 @@
 CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT $(INCLUDES)
-LDFLAGS = -pthread
+LDFLAGS = -pthread -static-libstdc++ -static-libgcc
 LIBS = -L../../Onigmo/.libs -Wl,-Bstatic -lonigmo -Wl,-Bdynamic
 
 OS = $(shell uname -s | tr A-Z a-z)
