@@ -384,6 +384,10 @@ public:
     String              serverName;
 
     std::string         genrePrefix;
+
+    bool                transcodingEnabled;
+    std::string         preset;
+    std::string         audioCodec;
 };
 
 // ----------------------------------

@@ -66,11 +66,6 @@ ClientSocket *WSys::createSocket()
 }
 
 // ---------------------------------
-void WSys::endThread(ThreadInfo *info)
-{
-}
-
-// ---------------------------------
 void WSys::waitThread(ThreadInfo *info, int timeout)
 {
     switch(WaitForSingleObject((HANDLE)info->handle, timeout))

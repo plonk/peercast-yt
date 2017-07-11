@@ -41,7 +41,6 @@ Sys::Sys()
 {
     idleSleepTime = 10;
     logBuf = new LogBuffer(1000, 100);
-    numThreads=0;
 }
 
 // ------------------------------------------

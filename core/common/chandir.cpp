@@ -154,10 +154,7 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
             return false;
         }
         return true;
-    } catch (EOFException& e) {
-        LOG_ERROR("%s", e.msg);
-        return false;
-    } catch (TimeoutException& e) {
+    } catch (StreamException& e) {
         LOG_ERROR("%s", e.msg);
         return false;
     }

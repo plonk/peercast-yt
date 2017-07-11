@@ -117,8 +117,6 @@ void Channel::endThread()
     reset();
 
     chanMgr->deleteChannel(this);
-
-    sys->endThread(&thread);
 }
 
 // -----------------------------------------------------------------------------
