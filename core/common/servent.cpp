@@ -1393,7 +1393,6 @@ int Servent::givProc(ThreadInfo *thread)
     }
 
     sv->kill();
-    sys->endThread(thread);
     return 0;
 }
 
@@ -1963,7 +1962,6 @@ int Servent::outgoingProc(ThreadInfo *thread)
     }
 
     sv->kill();
-    sys->endThread(thread);
     LOG_DEBUG("COUT ended");
     return 0;
 }
@@ -2002,7 +2000,6 @@ int Servent::incomingProc(ThreadInfo *thread)
     }
 
     sv->kill();
-    sys->endThread(thread);
     return 0;
 }
 
@@ -2553,7 +2550,6 @@ int Servent::serverProc(ThreadInfo *thread)
     LOG_DEBUG("Server stopped");
 
     sv->kill();
-    sys->endThread(thread);
     return 0;
 }
 
