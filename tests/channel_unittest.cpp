@@ -105,3 +105,145 @@ TEST_F(ChannelFixture, renderHexDump)
                  "41                                               A\n",
                  Channel::renderHexDump("AAAAAAAAAAAAAAAAA").c_str());
 }
+
+#include "sstream.h"
+
+TEST_F(ChannelFixture, writeVariable)
+{
+    Channel c;
+    StringStream mem;
+
+    c.info.name = "A&B";
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "name"));
+    ASSERT_STREQ("A&amp;B", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "srcrate"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "genre"));
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "desc"));
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "comment"));
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "uptime"));
+    ASSERT_STREQ("-", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "type"));
+    ASSERT_STREQ("UNKNOWN", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "typeLong"));
+    ASSERT_STREQ("UNKNOWN (application/octet-stream; ) [contentTypeStr empty] [no styp] [no sext]", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "ext"));
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "localRelays"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "localListeners"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "totalRelays"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "totalListeners"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "status"));
+    ASSERT_STREQ("NONE", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "keep"));
+    ASSERT_STREQ("No", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "id"));
+    ASSERT_STREQ("00000000000000000000000000000000", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "track.title"));
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "track.artist"));
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "track.album"));
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "track.genre"));
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "track.contactURL"));
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "contactURL"));
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "streamPos"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "sourceType"));
+    ASSERT_STREQ("NONE", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "sourceProtocol"));
+    ASSERT_STREQ("UNKNOWN", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "sourceURL"));
+    ASSERT_STREQ("0.0.0.0:0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "headPos"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "headLen"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "buffer"));
+    ASSERT_STRNE("", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "headDump"));
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "numHits"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "authToken"));
+    ASSERT_STREQ("e2ed47ef8004826db92f10a7e5a402e9", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(c.writeVariable(mem, "plsExt"));
+    ASSERT_STREQ(".m3u", mem.str().c_str());
+}

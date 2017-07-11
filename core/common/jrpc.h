@@ -605,8 +605,6 @@ public:
 
         chanMgr->lock.on();
 
-        int publicChannels = chanMgr->numHitLists();
-
         for (ChanHitList *hitList = chanMgr->hitlist;
              hitList;
              hitList = hitList->next)

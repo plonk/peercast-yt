@@ -78,7 +78,6 @@ public:
     virtual bool            hasGUI() = 0;
     virtual void            callLocalURL(const char *, int)=0;
     virtual void            executeFile(const char *) = 0;
-    virtual void            endThread(ThreadInfo *) {}
     virtual void            waitThread(ThreadInfo *, int timeout = 30000) {}
     virtual void            setThreadName(ThreadInfo *, const char* name) {}
 
@@ -94,9 +93,13 @@ public:
 
     bool writeVariable(Stream&, const String&) override;
 
+    static char* strdup(const char *s);
+    static int   stricmp(const char* s1, const char* s2);
+    static int   strnicmp(const char* s1, const char* s2, size_t n);
+    static char* strcpy_truncate(char* dest, size_t destsize, const char* src);
+
     unsigned int idleSleepTime;
     unsigned int rndSeed;
-    unsigned int numThreads;
 
     class LogBuffer *logBuf;
 };
@@ -150,9 +153,8 @@ public:
 
 // ------------------------------------
 typedef int (WINAPI *THREAD_FUNC)(ThreadInfo *);
-typedef unsigned int THREAD_HANDLE;
+typedef uintptr_t THREAD_HANDLE;
 #define THREAD_PROC int WINAPI
-#define vsnprintf _vsnprintf
 
 // ------------------------------------
 class WLock
@@ -192,10 +194,6 @@ typedef int (*THREAD_FUNC)(ThreadInfo *);
 typedef pthread_t THREAD_HANDLE;
 
 // ------------------------------------
-#define stricmp strcasecmp
-#define strnicmp strncasecmp
-
-// ------------------------------------
 class WEvent
 {
 public:
@@ -225,14 +223,15 @@ private:
 public:
     WLock()
     {
-        const pthread_mutexattr_t mattr =
-        {
+        pthread_mutexattr_t mattr;
+
+        pthread_mutexattr_init(&mattr);
+
 #ifdef __APPLE__
-            PTHREAD_MUTEX_RECURSIVE
+        pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
 #else
-            PTHREAD_MUTEX_RECURSIVE_NP
+        pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE_NP);
 #endif
-         };
 
         pthread_mutex_init( &mutex, &mattr );
     }

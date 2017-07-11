@@ -28,6 +28,7 @@
 #include "notif.h"
 #include "str.h"
 #include "jrpc.h"
+#include "regexp.h"
 
 using json = nlohmann::json;
 using namespace std;
@@ -49,7 +50,7 @@ void Template::initVariableWriters()
     m_variableWriters["servMgr"] = servMgr;
     m_variableWriters["chanMgr"] = chanMgr;
     m_variableWriters["stats"]   = &stats;
-    m_variableWriters["notificationBufer"] = &g_notificationBuffer;
+    m_variableWriters["notificationBuffer"] = &g_notificationBuffer;
     m_variableWriters["sys"]     = sys;
 }
 
@@ -58,7 +59,7 @@ Template::Template(const char* args)
     : currentElement(json::object({}))
 {
     if (args)
-        tmplArgs = strdup(args);
+        tmplArgs = Sys::strdup(args);
     else
         tmplArgs = NULL;
     initVariableWriters();
@@ -68,7 +69,7 @@ Template::Template(const char* args)
 Template::Template(const std::string& args)
     : currentElement(json::object({}))
 {
-    tmplArgs = strdup(args.c_str());
+    tmplArgs = Sys::strdup(args.c_str());
     initVariableWriters();
 }
 
@@ -345,10 +346,7 @@ void    Template::readFragment(Stream &in, Stream *outp, int loop)
         {
             auto outerFragment = currentFragment;
             currentFragment = fragName;
-            bool elsefound = false;
-            elsefound = readTemplate(in, outp, loop);
-            if (elsefound)
-                LOG_ERROR("Stray else in fragment block");
+            readTemplate(in, outp, loop);
             currentFragment = outerFragment;
             return;
         }else
@@ -455,8 +453,10 @@ vector<string> Template::tokenize(const string& input)
             string t;
             tie(t, s) = readStringLiteral(s);
             tokens.push_back(t);
-        }else if (str::is_prefix_of("==", s)
-                  || str::is_prefix_of("!=", s))
+        }else if (str::has_prefix(s, "==") ||
+                  str::has_prefix(s, "!=") ||
+                  str::has_prefix(s, "=~") ||
+                  str::has_prefix(s, "!~"))
         {
             tokens.push_back(s.substr(0,2));
             s.erase(0,2);
@@ -496,27 +496,46 @@ bool    Template::evalCondition(const string& cond, int loop)
     auto tokens = tokenize(cond);
     bool res = false;
 
-    if (tokens.size() == 3)
+    if (tokens.size() == 3) // 二項演算
     {
         auto op = tokens[1];
-        if (op != "==" && op != "!=")
+        if (op == "=~" || op == "!~")
+        {
+            bool pred = (op == "=~");
+
+            string lhs, rhs;
+
+            if (tokens[0][0] == '\"')
+                lhs = evalStringLiteral(tokens[0]);
+            else
+                lhs = getStringVariable(tokens[0].c_str(), loop);
+
+            if (tokens[2][0] == '\"')
+                rhs = evalStringLiteral(tokens[2]);
+            else
+                rhs = getStringVariable(tokens[2].c_str(), loop);
+
+            res = ((!Regexp(rhs).exec(lhs).empty()) == pred);
+        }else if (op == "==" || op == "!=")
+        {
+            bool pred = (op == "==");
+
+            string lhs, rhs;
+
+            if (tokens[0][0] == '\"')
+                lhs = evalStringLiteral(tokens[0]);
+            else
+                lhs = getStringVariable(tokens[0].c_str(), loop);
+
+            if (tokens[2][0] == '\"')
+                rhs = evalStringLiteral(tokens[2]);
+            else
+                rhs = getStringVariable(tokens[2].c_str(), loop);
+
+            res = ((lhs==rhs) == pred);
+        }
+        else
             throw StreamException(("Unrecognized condition operator " + op).c_str());
-
-        bool pred = (op == "==");
-
-        string lhs, rhs;
-
-        if (tokens[0][0] == '\"')
-            lhs = evalStringLiteral(tokens[0]);
-        else
-            lhs = getStringVariable(tokens[0].c_str(), loop);
-
-        if (tokens[2][0] == '\"')
-            rhs = evalStringLiteral(tokens[2]);
-        else
-            rhs = getStringVariable(tokens[2].c_str(), loop);
-
-        res = ((lhs==rhs) == pred);
     }else if (tokens.size() == 1)
     {
         string varName;
@@ -539,7 +558,7 @@ bool    Template::evalCondition(const string& cond, int loop)
 }
 
 // --------------------------------------
-void    Template::readIf(Stream &in, Stream *outp, int loop)
+static String readCondition(Stream &in)
 {
     String cond;
 
@@ -548,22 +567,38 @@ void    Template::readIf(Stream &in, Stream *outp, int loop)
         char c = in.readChar();
 
         if (c == '}')
+            break;
+        else
+            cond.append(c);
+    }
+    return cond;
+}
+
+// --------------------------------------
+void    Template::readIf(Stream &in, Stream *outp, int loop)
+{
+    bool hadActive = false;
+    int cmd = TMPL_IF;
+
+    while (cmd != TMPL_END)
+    {
+        if (cmd == TMPL_ELSE)
         {
-            if (evalCondition(cond, loop))
+            cmd = readTemplate(in, hadActive ? NULL : outp, loop);
+        }else if (cmd == TMPL_IF || cmd == TMPL_ELSIF)
+        {
+            String cond = readCondition(in);
+            if (!hadActive && evalCondition(cond, loop))
             {
-                if (readTemplate(in, outp, loop))
-                    readTemplate(in, NULL, loop);
+                hadActive = true;
+                cmd = readTemplate(in, outp, loop);
             }else
             {
-                if (readTemplate(in, NULL, loop))
-                    readTemplate(in, outp, loop);
+                cmd = readTemplate(in, NULL, loop);
             }
-            return;
-        }else
-        {
-            cond.append(c);
         }
     }
+    return;
 }
 
 // --------------------------------------
@@ -611,7 +646,12 @@ json::array_t Template::evaluateCollectionVariable(String& varName)
     {
         JrpcApi api;
         LOG_DEBUG("%s", api.getChannelsFound({}).dump().c_str());
-        return api.getChannelsFound({});
+        json::array_t cs = api.getChannelsFound({});
+        // ジャンル接頭辞で始まらないチャンネルは掲載しない。
+        cs.erase(std::remove_if(cs.begin(), cs.end(),
+                                [] (json c) { return !str::is_prefix_of(servMgr->genrePrefix, c["genre"]); }),
+                 cs.end());
+        return cs;
     }else if (varName == "broadcastingChannels")
     {
         // このサーバーから配信中のチャンネルをリスナー数降順でソート。
@@ -706,6 +746,9 @@ int Template::readCmd(Stream &in, Stream *outp, int loop)
             {
                 readIf(in, outp, loop);
                 tmpl = TMPL_IF;
+            }else if (cmd == "elsif")
+            {
+                tmpl = TMPL_ELSIF;
             }else if (cmd == "fragment")
             {
                 readFragment(in, outp, loop);
@@ -801,13 +844,12 @@ void    Template::readVariableRaw(Stream &in, Stream *outp, int loop)
 }
 
 // --------------------------------------
-
-// in の現在の位置から 1 ブロック分のテンプレートを処理し、outp が
-// NULL でなければ *outp に出力する。{@loop} 内を処理している場合は、0
-// から始まるループカウンターの値が loop に設定される。EOF あるいは
-// {@end} に当たった場合は false を返し、{@else} に当たった場合は true
-// を返す。
-bool Template::readTemplate(Stream &in, Stream *outp, int loop)
+// ストリーム in の現在の位置から 1 ブロック分のテンプレートを処理し、
+// outp がNULL でなければ *outp に出力する。EOF あるいは{@end} に当たっ
+// た場合は TMPL_END を返し、{@else} に当たった場合は TMPL_ELSE、
+// {@elsif ...} に当たった場合は TMPL_ELSIF を返す(条件式を読み込む前
+// に停止する)。
+int Template::readTemplate(Stream &in, Stream *outp, int loop)
 {
     Stream *p = inSelectedFragment() ? outp : NULL;
 
@@ -833,10 +875,8 @@ bool Template::readTemplate(Stream &in, Stream *outp, int loop)
             else if (c == '@')
             {
                 int t = readCmd(in, outp, loop);
-                if (t == TMPL_END)
-                    return false;
-                else if (t == TMPL_ELSE)
-                    return true;
+                if (t == TMPL_END || t == TMPL_ELSE || t == TMPL_ELSIF)
+                    return t;
             }
             else
             {
@@ -853,7 +893,7 @@ bool Template::readTemplate(Stream &in, Stream *outp, int loop)
                 p->writeChar(c);
         }
     }
-    return false;
+    return TMPL_END;
 }
 
 // --------------------------------------
@@ -870,8 +910,12 @@ bool HTTPRequestScope::writeVariable(Stream& s, const String& varName, int loop)
         else
         {
             s.writeString(m_request.headers.get("Host"));
-            return true;
         }
+        return true;
+    }else if (varName == "request.path") // HTTPRequest に委譲すべきか
+    {
+        s.writeString(m_request.path);
+        return true;
     }
 
     return false;

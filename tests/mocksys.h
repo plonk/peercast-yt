@@ -67,10 +67,6 @@ public:
     {
     }
 
-    void endThread(ThreadInfo*) override
-    {
-    }
-
     void waitThread(ThreadInfo*, int timeout = 30000) override
     {
     }

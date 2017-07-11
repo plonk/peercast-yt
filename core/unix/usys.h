@@ -43,7 +43,6 @@ public:
     bool            hasGUI() override { return false; }
     void            callLocalURL(const char *, int) override;
     void            executeFile(const char *) override;
-    void            endThread(ThreadInfo *) override;
     void            waitThread(ThreadInfo *, int timeout = 30000) override;
     void            setThreadName(ThreadInfo *, const char* name) override;
 

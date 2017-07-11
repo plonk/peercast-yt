@@ -157,6 +157,22 @@ public:
 class HTTPHeaders
 {
 public:
+    HTTPHeaders() {}
+
+    HTTPHeaders(const std::initializer_list<std::pair<std::string,std::string> >& aHeaders)
+    {
+        for (auto pair : aHeaders)
+            m_headers[pair.first] = pair.second;
+    }
+
+    HTTPHeaders(const std::map<std::string,std::string>& aHeaders)
+        : m_headers(aHeaders)
+    {
+    }
+
+    std::map<std::string,std::string>::const_iterator begin() const { return m_headers.cbegin(); }
+    std::map<std::string,std::string>::const_iterator end() const { return m_headers.cend(); }
+
     void set(const std::string& name, const std::string& value)
     {
         m_headers[str::upcase(name)] = value;
@@ -188,6 +204,14 @@ public:
 class HTTPRequest
 {
 public:
+    HTTPRequest()
+        : method("")
+        , url("")
+        , protocolVersion("")
+        , headers()
+    {
+    }
+
     HTTPRequest(const std::string& aMethod, const std::string& aUrl, const std::string& aProtocolVersion,
         HTTPHeaders& aHeaders)
         : method(aMethod)
@@ -217,14 +241,14 @@ class HTTPResponse
 {
 public:
 
-    HTTPResponse(int aStatusCode, const std::map<std::string,std::string>& aHeaders)
+    HTTPResponse(int aStatusCode, const HTTPHeaders& aHeaders)
         : statusCode(aStatusCode)
         , headers(aHeaders)
         , stream(NULL)
     {
     }
 
-    static HTTPResponse ok(const std::map<std::string,std::string>& aHeaders, const std::string& body)
+    static HTTPResponse ok(const HTTPHeaders& aHeaders, const std::string& body)
     {
         HTTPResponse res(200, aHeaders);
         res.body = body;
@@ -238,6 +262,16 @@ public:
         return res;
     }
 
+    static HTTPResponse serverError(const std::string& message = "")
+    {
+        HTTPResponse res(500, {{"Conetnt-Type", "text/html"}});
+        if (!message.empty())
+            res.body = message;
+        else
+            res.body = "Internal server error";
+        return res;
+    }
+
     static HTTPResponse redirectTo(const std::string& url)
     {
         HTTPResponse res(302, {{"Location",url}});
@@ -246,7 +280,7 @@ public:
 
     std::string body;
     int statusCode;
-    std::map<std::string,std::string> headers;
+    HTTPHeaders headers;
     Stream* stream;
 };
 

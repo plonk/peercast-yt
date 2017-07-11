@@ -28,13 +28,10 @@
 #include "version2.h"
 #include "jrpc.h"
 #include "playlist.h"
-#include "dechunker.h"
-#include "matroska.h"
 #include "str.h"
 #include "cgi.h"
 #include "template.h"
 #include "public.h"
-#include "md5.h"
 
 using namespace std;
 
@@ -122,7 +119,7 @@ void Servent::handshakeJRPC(HTTP &http)
     try {
         http.stream->read(body.get(), content_length);
         body.get()[content_length] = '\0';
-    }catch (SockException&)
+    }catch (EOFException&)
     {
         // body too short
         throw HTTPException(HTTP_SC_BADREQUEST, 400);
@@ -160,6 +157,110 @@ bool Servent::hasValidAuthToken(const std::string& requestFilename)
     }
 
     return false;
+}
+
+// -----------------------------------
+#include "subprog.h"
+#include "env.h"
+#include "regexp.h"
+
+void Servent::invokeCGIScript(HTTP &http, const char* fn)
+{
+    HTTPRequest req;
+    try {
+        req = http.getRequest();
+    } catch (GeneralException& e) // request not ready
+    {
+        throw HTTPException(HTTP_SC_BADREQUEST, 400);
+    }
+    FileSystemMapper fs("/cgi-bin", (std::string) peercastApp->getPath() + "cgi-bin");
+    std::string filePath = fs.toLocalFilePath(req.path);
+    Environment env;
+
+    env.set("SCRIPT_NAME", req.path);
+    env.set("SCRIPT_FILENAME", filePath);
+    env.set("GATEWAY_INTERFACE", "CGI/1.1");
+    env.set("DOCUMENT_ROOT", peercastApp->getPath());
+    env.set("QUERY_STRING", req.queryString);
+    env.set("REQUEST_METHOD", "GET");
+    env.set("REQUEST_URI", req.url);
+    env.set("SERVER_PROTOCOL", "HTTP/1.0");
+    env.set("SERVER_SOFTWARE", PCX_AGENT);
+    if (!Regexp("[A-Za-z0-9\\-_.]+:\\d+").exec(req.headers.get("Host")).empty())
+    {
+        auto v = str::split(req.headers.get("Host"), ":");
+        env.set("SERVER_NAME", v[0]);
+        env.set("SERVER_PORT", v[1]);
+    }else
+    {
+        LOG_ERROR("Host header missing");
+        env.set("SERVER_NAME", servMgr->serverHost.str(false));
+        env.set("SERVER_PORT", std::to_string(servMgr->serverHost.port));
+    }
+
+    env.set("PATH", getenv("PATH"));
+    // Windows で Ruby が名前引きをするのに必要なので SYSTEMROOT を通す。
+    if (getenv("SYSTEMROOT"))
+        env.set("SYSTEMROOT", getenv("SYSTEMROOT"));
+
+    if (filePath.empty())
+        throw HTTPException(HTTP_SC_NOTFOUND, 404);
+
+    Subprogram script(filePath, env);
+
+    bool success = script.start();
+    if (success)
+        LOG_DEBUG("script started (pid = %d)", script.pid());
+    else
+    {
+        LOG_ERROR("failed to start script `%s`", filePath.c_str());
+        throw HTTPException(HTTP_SC_SERVERERROR, 500);
+    }
+    Stream& stream = script.inputStream();
+
+    HTTPHeaders headers;
+    int statusCode = 200;
+    try {
+        Regexp headerPattern("\\A([A-Za-z\\-]+):\\s*(.*)\\z");
+        std::string line;
+        while ((line = stream.readLine()) != "")
+        {
+            LOG_DEBUG("Line: %s", line.c_str());
+            auto caps = headerPattern.exec(line);
+            if (caps.size() == 0)
+            {
+                LOG_ERROR("Invalid header: \"%s\"", line.c_str());
+                continue;
+            }
+            if (str::capitalize(caps[1]) == "Status")
+                statusCode = atoi(caps[2].c_str());
+            else
+                headers.set(caps[1], caps[2]);
+        }
+        if (headers.get("Location") != "")
+            statusCode = 302; // Found
+    } catch (StreamException&)
+    {
+        LOG_ERROR("CGI script did not finish the headers");
+        throw HTTPException(HTTP_SC_SERVERERROR, 500);
+    }
+
+    HTTPResponse res(statusCode, headers);
+
+    res.stream = &stream;
+    http.send(res);
+    stream.close();
+
+    int status;
+    bool normal = script.wait(&status);
+
+    if (!normal)
+    {
+        LOG_ERROR("child process (PID %d) terminated abnormally", script.pid());
+    }else
+    {
+        LOG_DEBUG("child process (PID %d) exited normally (status %d)", script.pid(), status);
+    }
 }
 
 // -----------------------------------
@@ -350,6 +451,26 @@ void Servent::handshakeGET(HTTP &http)
         {
             LOG_ERROR("Error: %s", e.msg);
             throw HTTPException(HTTP_SC_SERVERERROR, 500);
+        }
+    }else if (str::is_prefix_of("/cgi-bin/", fn))
+    {
+        // CGI スクリプトの実行
+
+        if (!isAllowed(ALLOW_HTML))
+            throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
+
+        if (str::has_prefix(fn, "/cgi-bin/flv.cgi"))
+        {
+            if (!isPrivate() || !isFiltered(ServFilter::F_DIRECT))
+                throw HTTPException(HTTP_SC_FORBIDDEN, 403);
+            else
+            {
+                http.readHeaders();
+                invokeCGIScript(http, fn);
+            }
+        }else if (handshakeAuth(http, fn, true))
+        {
+            invokeCGIScript(http, fn);
         }
     }else
     {
@@ -711,14 +832,22 @@ bool Servent::handshakeHTTPBasicAuth(HTTP &http)
     }
 
     if (sock->host.isLocalhost())
+    {
+        LOG_DEBUG("HTTP Basic Auth: host is localhost");
         return true;
+    }
 
     if (strlen(servMgr->password) != 0 && strcmp(pass, servMgr->password) == 0)
+    {
+        LOG_DEBUG("HTTP Basic Auth: password matches");
         return true;
+    }
 
     http.writeLine(HTTP_SC_UNAUTHORIZED);
     http.writeLine("WWW-Authenticate: Basic realm=\"PeerCast Admin\"");
     http.writeLine("");
+
+    LOG_DEBUG("HTTP Basic Auth: rejected");
     return false;
 }
 
@@ -945,6 +1074,7 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr)
     ServFilter *currFilter = servMgr->filters;
     servMgr->channelDirectory.clearFeeds();
     servMgr->publicDirectoryEnabled = false;
+    servMgr->transcodingEnabled = false;
 
     bool brRoot = false;
     bool getUpd = false;
@@ -973,7 +1103,7 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 
             chanMgr->icyMetaInterval = iv;
         }else if (strcmp(curr, "passnew") == 0)
-            strcpy(servMgr->password, arg);
+            Sys::strcpy_truncate(servMgr->password, sizeof(servMgr->password), arg);
         else if (strcmp(curr, "root") == 0)
             servMgr->isRoot = getCGIargBOOL(arg);
         else if (strcmp(curr, "brroot") == 0)
@@ -1074,6 +1204,8 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr)
             servMgr->refreshHTML = getCGIargINT(arg);
         else if (strcmp(curr, "public_directory") == 0)
             servMgr->publicDirectoryEnabled = true;
+        else if (strcmp(curr, "genreprefix") == 0)
+            servMgr->genrePrefix = arg;
         else if (strcmp(curr, "auth") == 0)
         {
             if (strcmp(arg, "cookie") == 0)
@@ -1110,6 +1242,13 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr)
             allowServer2 |= atoi(arg) ? (ALLOW_HTML) : 0;
         else if (strcmp(curr, "allowBroadcast2") == 0)
             allowServer2 |= atoi(arg) ? (ALLOW_BROADCAST) : 0;
+
+        else if (strcmp(curr, "transcoding_enabled") == 0)
+            servMgr->transcodingEnabled = getCGIargBOOL(arg);
+        else if (strcmp(curr, "preset") == 0)
+            servMgr->preset = arg;
+        else if (strcmp(curr, "audio_codec") == 0)
+            servMgr->audioCodec = arg;
     }
 
     servMgr->showLog = showLog;
@@ -1888,7 +2027,6 @@ ChanInfo Servent::createChannelInfo(GnuID broadcastID, const String& broadcastMs
 // HTTP Push 放送
 void Servent::handshakeHTTPPush(const std::string& args)
 {
-    using namespace matroska;
     using namespace cgi;
 
     Query query(args);

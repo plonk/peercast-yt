@@ -45,6 +45,7 @@ public:
         TMPL_LOOP,
         TMPL_IF,
         TMPL_ELSE,
+        TMPL_ELSIF,
         TMPL_END,
         TMPL_FRAGMENT,
         TMPL_FOREACH
@@ -88,7 +89,7 @@ public:
     void    readVariable(Stream &, Stream *, int);
     void    readVariableJavaScript(Stream &in, Stream *outp, int loop);
     void    readVariableRaw(Stream &in, Stream *outp, int loop);
-    bool    readTemplate(Stream &, Stream *, int);
+    int     readTemplate(Stream &, Stream *, int);
     bool    writeObjectProperty(Stream& s, const String& varName, json::object_t object);
     json::array_t evaluateCollectionVariable(String& varName);
 

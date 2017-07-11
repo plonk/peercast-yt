@@ -103,8 +103,8 @@ public:
         flags = 0;
         host.init();
     }
-
     bool    writeVariable(Stream &, const String &) override;
+    bool    matches(int fl, const Host& h) const;
 
     Host host;
     unsigned int flags;
@@ -382,6 +382,12 @@ public:
     FW_STATE            firewalled;
 
     String              serverName;
+
+    std::string         genrePrefix;
+
+    bool                transcodingEnabled;
+    std::string         preset;
+    std::string         audioCodec;
 };
 
 // ----------------------------------

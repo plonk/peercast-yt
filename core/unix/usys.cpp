@@ -69,16 +69,6 @@ ClientSocket *USys::createSocket()
 }
 
 // ---------------------------------
-void USys::endThread(ThreadInfo *info)
-{
-    numThreads--;
-
-    LOG_DEBUG("End thread: %d", numThreads);
-
-    //pthread_exit(NULL);
-}
-
-// ---------------------------------
 void USys::waitThread(ThreadInfo *info, int timeout)
 {
 #ifdef _GNU_SOURCE
@@ -95,8 +85,6 @@ bool    USys::startThread(ThreadInfo *info)
 {
     info->active = true;
 
-    LOG_DEBUG("New thread: %d", numThreads);
-
     pthread_attr_t attr;
 
     pthread_attr_init(&attr);
@@ -108,12 +96,11 @@ bool    USys::startThread(ThreadInfo *info)
 
     if (r)
     {
-        LOG_ERROR("Error creating thread %d: %d", numThreads, r);
+        LOG_ERROR("Error creating thread: %d", r);
         return false;
     }else
     {
-        setThreadName(info, String::format("thread %d", numThreads).cstr());
-        numThreads++;
+        setThreadName(info, "new thread");
         return true;
     }
 }
@@ -193,7 +180,7 @@ void USys::callLocalURL(const char *str, int port)
 // ---------------------------------
 void USys::getURL(const char *url)
 {
-    if (strnicmp(url, "http://", 7) || strnicmp(url, "mailto:", 7))
+    if (Sys::strnicmp(url, "http://", 7) || Sys::strnicmp(url, "mailto:", 7)) // XXX: ==0 が抜けてる？
     {
         openURL( url );
     }

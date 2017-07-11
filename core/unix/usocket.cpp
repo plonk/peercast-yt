@@ -244,7 +244,7 @@ int UClientSocket::read(void *p, int l)
             checkTimeout(true, false);
         }else if (r == 0)
         {
-            throw SockException("Closed on read");
+            throw EOFException("Closed on read");
         }else
         {
             stats.add(Stats::BYTESIN, r);

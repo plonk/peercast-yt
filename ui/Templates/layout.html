@@ -27,7 +27,7 @@
 
         function notifyMe() {
           if (!("Notification" in window)) {
-            alert("This browser does not support system notifications");
+            console.log("This browser does not support system notifications");
           }
           else if (Notification.permission === "granted") {
             for (var i = 0; i < notifications.length; i++) {

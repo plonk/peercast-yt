@@ -18,6 +18,11 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
+#ifdef WIN32
+#undef __STRICT_ANSI__
+#include <stdio.h>
+#endif
+
 #include "stream.h"
 #include "common.h"
 #include "sys.h"
@@ -45,6 +50,22 @@ void FileStream::openReadOnly(const char *fn)
     if (file)
         close();
     file = fopen(fn, "rb");
+
+    if (!file)
+        throw StreamException("Unable to open file");
+}
+
+// -------------------------------------
+void FileStream::openReadOnly(int fd)
+{
+    if (file)
+        close();
+
+#if WIN32
+    file = _fdopen(fd, "rb");
+#else
+    file = fdopen(fd, "rb");
+#endif
 
     if (!file)
         throw StreamException("Unable to open file");
@@ -287,6 +308,25 @@ int Stream::readLine(char *in, int max)
     }
     in[i] = 0;
     return i;
+}
+
+// -------------------------------------
+std::string Stream::readLine()
+{
+    std::string res;
+
+    while (true)
+    {
+        char c;
+        read(&c, 1);
+        if (c == '\n')
+            break;
+        if (c == '\r')
+            continue;
+        res.push_back(c);
+    }
+
+    return res;
 }
 
 // -------------------------------------

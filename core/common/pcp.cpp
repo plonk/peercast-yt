@@ -202,7 +202,7 @@ void PCPStream::readPushAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
         {
             Channel *ch = chanMgr->findChannelByID(chanID);
             if (ch)
-                if (ch->isBroadcasting() || !ch->isFull() && !servMgr->relaysFull() && ch->info.id.isSame(chanID))
+                if (ch->isBroadcasting() || (!ch->isFull() && !servMgr->relaysFull() && ch->info.id.isSame(chanID)))
                     s = servMgr->allocServent();
         }else{
             s = servMgr->allocServent();
@@ -243,7 +243,7 @@ void PCPStream::readRootAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
             unsigned int newVer = atom.readInt();
             if (newVer > PCP_CLIENT_VERSION)
             {
-                strcpy(servMgr->downloadURL, url.cstr());
+                Sys::strcpy_truncate(servMgr->downloadURL, sizeof(servMgr->downloadURL), url.cstr());
                 peercast::notifyMessage(ServMgr::NT_UPGRADE, "There is a new version of PeerCast available, please click here to upgrade your client.");
             }
             LOG_DEBUG("PCP got version check: %d / %d", newVer, PCP_CLIENT_VERSION);

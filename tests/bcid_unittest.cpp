@@ -37,8 +37,25 @@ TEST_F(BCIDFixture, initialState)
 
 TEST_F(BCIDFixture, writeVariable)
 {
+    mem.str("");
     bcid.writeVariable(mem, "id");
     ASSERT_STREQ("00000000000000000000000000000000", mem.str().c_str());
+
+    mem.str("");
+    bcid.writeVariable(mem, "name");
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
+    bcid.writeVariable(mem, "email");
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
+    bcid.writeVariable(mem, "url");
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
+    bcid.writeVariable(mem, "valid");
+    ASSERT_STREQ("Yes", mem.str().c_str());
 }
 
 TEST_F(BCIDFixture, writeVariable_name)

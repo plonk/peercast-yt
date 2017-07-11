@@ -130,7 +130,7 @@ std::vector<std::string> split(const std::string& in, const std::string& separat
 std::string codepoint_to_utf8(uint32_t codepoint)
 {
     std::string res;
-    if (codepoint >= 0 && codepoint <= 0x7f) {
+    if (/* codepoint >= 0 && */ codepoint <= 0x7f) {
         res += (char) codepoint;
     } else if (codepoint >= 0x80 && codepoint <= 0x7ff) {
         res += (char) (0xb0 | (codepoint >> 6));
@@ -262,6 +262,19 @@ bool is_prefix_of(const std::string& prefix, const std::string& string)
         return false;
 
     return string.substr(0, prefix.size()) == prefix;
+}
+
+bool has_prefix(const std::string& subject, const std::string& prefix)
+{
+    return is_prefix_of(prefix, subject);
+}
+
+bool has_suffix(const std::string& subject, const std::string& suffix)
+{
+    if (subject.size() < suffix.size())
+        return false;
+
+    return subject.substr(subject.size() - suffix.size(), suffix.size()) == suffix;
 }
 
 std::string join(const std::string& delimiter, const std::vector<std::string>& vec)

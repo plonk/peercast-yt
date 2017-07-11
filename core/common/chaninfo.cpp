@@ -46,6 +46,22 @@ const char *ChanInfo::getTypeStr()
 }
 
 // -----------------------------------
+std::string ChanInfo::getTypeStringLong()
+{
+    std::string buf = std::string(getTypeStr()) +
+        " (" + getMIMEType() + "; " + getTypeExt() + ")";
+
+    if (contentTypeStr == "")
+        buf += " [contentTypeStr empty]"; // これが起こるのは何かがおかしい
+    if (MIMEType == "")
+        buf += " [no styp]";
+    if (streamExt == "")
+        buf += " [no sext]";
+
+    return buf;
+}
+
+// -----------------------------------
 const char *ChanInfo::getTypeExt()
 {
     if (streamExt.isEmpty()) {
@@ -113,17 +129,17 @@ const char *ChanInfo::getProtocolStr(PROTOCOL t)
 // -----------------------------------
 ChanInfo::PROTOCOL ChanInfo::getProtocolFromStr(const char *str)
 {
-    if (stricmp(str, "PEERCAST")==0)
+    if (Sys::stricmp(str, "PEERCAST")==0)
         return SP_PEERCAST;
-    else if (stricmp(str, "HTTP")==0)
+    else if (Sys::stricmp(str, "HTTP")==0)
         return SP_HTTP;
-    else if (stricmp(str, "FILE")==0)
+    else if (Sys::stricmp(str, "FILE")==0)
         return SP_FILE;
-    else if (stricmp(str, "MMS")==0)
+    else if (Sys::stricmp(str, "MMS")==0)
         return SP_MMS;
-    else if (stricmp(str, "PCP")==0)
+    else if (Sys::stricmp(str, "PCP")==0)
         return SP_PCP;
-    else if (stricmp(str, "WMHTTP")==0)
+    else if (Sys::stricmp(str, "WMHTTP")==0)
         return SP_WMHTTP;
     else if (stricmp(str, "RTMP")==0)
         return SP_RTMP;
@@ -228,31 +244,31 @@ ChanInfo::TYPE ChanInfo::getTypeFromMIME(const std::string& mediaType)
 // -----------------------------------
 ChanInfo::TYPE ChanInfo::getTypeFromStr(const char *str)
 {
-    if (stricmp(str, "MP3")==0)
+    if (Sys::stricmp(str, "MP3")==0)
         return T_MP3;
-    else if (stricmp(str, "OGG")==0)
+    else if (Sys::stricmp(str, "OGG")==0)
         return T_OGG;
-    else if (stricmp(str, "OGM")==0)
+    else if (Sys::stricmp(str, "OGM")==0)
         return T_OGM;
-    else if (stricmp(str, "RAW")==0)
+    else if (Sys::stricmp(str, "RAW")==0)
         return T_RAW;
-    else if (stricmp(str, "NSV")==0)
+    else if (Sys::stricmp(str, "NSV")==0)
         return T_NSV;
-    else if (stricmp(str, "WMA")==0)
+    else if (Sys::stricmp(str, "WMA")==0)
         return T_WMA;
-    else if (stricmp(str, "WMV")==0)
+    else if (Sys::stricmp(str, "WMV")==0)
         return T_WMV;
-    else if (stricmp(str, "FLV")==0)
+    else if (Sys::stricmp(str, "FLV")==0)
         return T_FLV;
-    else if (stricmp(str, "MKV")==0)
+    else if (Sys::stricmp(str, "MKV")==0)
         return T_MKV;
-    else if (stricmp(str, "WEBM")==0)
+    else if (Sys::stricmp(str, "WEBM")==0)
         return T_WEBM;
-    else if (stricmp(str, "PLS")==0)
+    else if (Sys::stricmp(str, "PLS")==0)
         return T_PLS;
-    else if (stricmp(str, "M3U")==0)
+    else if (Sys::stricmp(str, "M3U")==0)
         return T_PLS;
-    else if (stricmp(str, "ASX")==0)
+    else if (Sys::stricmp(str, "ASX")==0)
         return T_ASX;
     else
         return T_UNKNOWN;

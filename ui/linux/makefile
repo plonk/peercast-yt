@@ -1,6 +1,7 @@
-CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT $(INCLUDES)
-LDFLAGS = -pthread
-LIBS = -lrtmp
+CPPFLAGS = -g -Wreturn-type -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT $(INCLUDES)
+LDFLAGS = -pthread -static-libstdc++ -static-libgcc
+LIBS = -L../../Onigmo/.libs -Wl,-Bstatic -lonigmo -Wl,-Bdynamic
+#LIBS += -lrtmp
 
 OS = $(shell uname -s | tr A-Z a-z)
 ARCH = $(shell uname -p | tr A-Z a-z)
@@ -8,7 +9,7 @@ ARCH = $(shell uname -p | tr A-Z a-z)
 DISTARCHIVE = peercast-yt-$(OS)-$(ARCH).tar.gz
 AR = ar
 
-INCLUDES = -I../../core -I../../core/common
+INCLUDES = -I../../core -I../../core/common -I../../Onigmo
 
 TARGET = peercast
 CORE = ../../core
@@ -16,8 +17,8 @@ SRCHTMLTAR = ../html.tar
 HTML = html
 SRCPUBLICTAR = ../public.tar
 PUBLIC = public
-SRCASSETSTAR = ../assets.tar
 ASSETS = assets
+CGIBIN = cgi-bin
 
 LIBOBJSTATIC = libpeercast.a
 
@@ -31,9 +32,11 @@ SYSOBJ = $(notdir $(SYSSOURCE:.cpp=.o))
 LINUXSOURCE = main.cpp
 LINUXOBJ = $(notdir $(LINUXSOURCE:.cpp=.o))
 
+LIBONIGMO = ../../Onigmo/.libs/libonigmo.a
+
 DEPENDFILE = .deps
 
-.PHONY: all clean build-html deps $(SRCHTMLTAR) $(SRCPUBLICTAR) $(SRCASSETSTAR)
+.PHONY: all clean build-html deps $(SRCHTMLTAR) $(SRCPUBLICTAR)
 
 # Here follow the generic build rules.
 all: $(TARGET) $(LIBOBJSTATIC) $(DISTARCHIVE)
@@ -56,25 +59,18 @@ $(PUBLIC): $(SRCPUBLICTAR)
 	tar xf $(SRCPUBLICTAR)
 	touch $(PUBLIC)
 
-$(SRCASSETSTAR):
-	$(MAKE) -C .. assets.tar
-
-$(ASSETS): $(SRCASSETSTAR)
-	rm -rf $(ASSETS)
-	tar xf $(SRCASSETSTAR)
-	touch $(ASSETS)
-
 $(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS)
 	rm -rf peercast-yt
 	mkdir peercast-yt
-	cp -R $(HTML) $(PUBLIC) $(TARGET) $(ASSETS) ../../licenses ../../core/LICENSE peercast-yt/
+	cp -R $(HTML) $(PUBLIC) $(TARGET) $(ASSETS) $(CGIBIN) ../../licenses ../../core/LICENSE peercast-yt/
 	strip peercast-yt/$(TARGET)
 	tar czf $(DISTARCHIVE) peercast-yt
 
 clean:
+	$(MAKE) -C ../../Onigmo clean
 	$(MAKE) -C .. clean
 	rm -f $(LINUXOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE)
-	rm -rf $(HTML) $(PUBLIC) $(ASSETS)
+	rm -rf $(HTML) $(PUBLIC)
 	rm -rf peercast-yt/
 	rm -f $(DISTARCHIVE)
 
@@ -90,7 +86,11 @@ $(DEPENDFILE): $(CORESOURCE) $(LINUXSOURCE)
 $(LIBOBJSTATIC): $(COREOBJ) $(SYSOBJ)
 	$(AR) rcs $(LIBOBJSTATIC) $(COREOBJ) $(SYSOBJ)
 
-$(TARGET): $(LINUXOBJ) $(LIBOBJSTATIC)
+$(TARGET): $(LINUXOBJ) $(LIBOBJSTATIC) $(LIBONIGMO)
 	$(CXX) $(LDFLAGS) -o $@ $(LINUXOBJ) $(LIBOBJSTATIC) $(LIBS)
+
+$(LIBONIGMO):
+	cd ../../Onigmo; ./configure
+	$(MAKE) -C ../../Onigmo clean all
 
 -include $(DEPENDFILE)

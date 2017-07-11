@@ -79,7 +79,7 @@ ServMgr::ServMgr()
     strcpy(connectHost, "connect1.peercast.org");
     strcpy(htmlPath, "html/en");
 
-    rootHost = "yp.peercast.org";
+    rootHost = "bayonet.ddo.jp:7146";
 
     serverHost.fromStrIP("127.0.0.1", DEFAULT_PORT);
 
@@ -97,7 +97,7 @@ ServMgr::ServMgr()
     totalStreams = 0;
     firewallTimeout = 30;
     pauseLog = false;
-    showLog = 0;
+    showLog = (1<<LogBuffer::T_ERROR);
 
     shutdownTimer = 0;
 
@@ -113,6 +113,10 @@ ServMgr::ServMgr()
     chanLog="";
 
     serverName = "";
+
+    transcodingEnabled = false;
+    preset = "veryfast";
+    audioCodec = "mp3";
 }
 
 // -----------------------------------
@@ -254,7 +258,6 @@ void ServMgr::addHost(Host &h, ServHost::TYPE type, unsigned int time)
     else
         LOG_DEBUG("Old host: %s - %s", str, ServHost::getTypeStr(type));
 
-    h.value = 0;    // make sure dead count is zero
     if (!sh)
     {
         // find empty slot
@@ -833,9 +836,8 @@ void ServMgr::setFirewall(FW_STATE state)
 bool ServMgr::isFiltered(int fl, Host &h)
 {
     for (int i=0; i<numFilters; i++)
-        if (filters[i].flags & fl)
-            if (h.isMemberOf(filters[i].host))
-                return true;
+        if (filters[i].matches(fl, h))
+            return true;
 
     return false;
 }
@@ -923,6 +925,7 @@ void ServMgr::saveSettings(const char *fn)
         iniFile.writeIntValue("maxServIn", servMgr->maxServIn);
         iniFile.writeStrValue("chanLog", servMgr->chanLog.cstr());
         iniFile.writeBoolValue("publicDirectory", servMgr->publicDirectoryEnabled);
+        iniFile.writeStrValue("genrePrefix", servMgr->genrePrefix.c_str());
 
         networkID.toStr(idStr);
         iniFile.writeStrValue("networkID", idStr);
@@ -947,6 +950,9 @@ void ServMgr::saveSettings(const char *fn)
         iniFile.writeIntValue("maxPushHops", chanMgr->maxPushHops);
         iniFile.writeIntValue("autoQuery", chanMgr->autoQuery);
         iniFile.writeIntValue("queryTTL", servMgr->queryTTL);
+        iniFile.writeBoolValue("transcodingEnabled", servMgr->transcodingEnabled);
+        iniFile.writeStrValue("preset", servMgr->preset.c_str());
+        iniFile.writeStrValue("audioCodec", servMgr->audioCodec.c_str());
 
         iniFile.writeSection("Privacy");
         iniFile.writeStrValue("password", servMgr->password);
@@ -1202,17 +1208,20 @@ void ServMgr::loadSettings(const char *fn)
             else if (iniFile.isName("authType"))
             {
                 const char *t = iniFile.getStrValue();
-                if (stricmp(t, "cookie")==0)
+                if (Sys::stricmp(t, "cookie")==0)
                     servMgr->authType = ServMgr::AUTH_COOKIE;
-                else if (stricmp(t, "http-basic")==0)
+                else if (Sys::stricmp(t, "http-basic")==0)
                     servMgr->authType = ServMgr::AUTH_HTTPBASIC;
             }else if (iniFile.isName("cookiesExpire"))
             {
                 const char *t = iniFile.getStrValue();
-                if (stricmp(t, "never")==0)
+                if (Sys::stricmp(t, "never")==0)
                     servMgr->cookieList.neverExpire = true;
-                else if (stricmp(t, "session")==0)
+                else if (Sys::stricmp(t, "session")==0)
                     servMgr->cookieList.neverExpire = false;
+            }else if (iniFile.isName("genrePrefix"))
+            {
+                servMgr->genrePrefix = iniFile.getStrValue();
             }
 
             // privacy settings
@@ -1259,6 +1268,12 @@ void ServMgr::loadSettings(const char *fn)
             {
                 servMgr->queryTTL = iniFile.getIntValue();
             }
+            else if (iniFile.isName("transcodingEnabled"))
+                servMgr->transcodingEnabled = iniFile.getBoolValue();
+            else if (iniFile.isName("preset"))
+                servMgr->preset = iniFile.getStrValue();
+            else if (iniFile.isName("audioCodec"))
+                servMgr->audioCodec = iniFile.getStrValue();
 
             // debug
             else if (iniFile.isName("logDebug"))
@@ -1835,14 +1850,8 @@ int ServMgr::idleProc(ThreadInfo *thread)
 {
     sys->setThreadName(thread, "IDLE");
 
-    //unsigned int lastPasvFind=0;
-    //unsigned int lastBroadcast=0;
-
     // nothing much to do for the first couple of seconds, so just hang around.
     sys->sleep(2000);
-
-    //unsigned int lastBWcheck=0;
-    //unsigned int bytesIn=0, bytesOut=0;
 
     unsigned int lastBroadcastConnect = 0;
     unsigned int lastRootBroadcast = 0;
@@ -1857,7 +1866,7 @@ int ServMgr::idleProc(ThreadInfo *thread)
 
         if (!servMgr->forceIP.isEmpty())
         {
-            if ((ctime-lastForceIPCheck) > 60)
+            if ((ctime - lastForceIPCheck) > 60)
             {
                 if (servMgr->checkForceIP())
                 {
@@ -1870,7 +1879,7 @@ int ServMgr::idleProc(ThreadInfo *thread)
 
         if (chanMgr->isBroadcasting())
         {
-            if ((ctime-lastBroadcastConnect) > 30)
+            if ((ctime - lastBroadcastConnect) > 30)
             {
                 servMgr->connectBroadcaster();
                 lastBroadcastConnect = ctime;
@@ -1880,13 +1889,13 @@ int ServMgr::idleProc(ThreadInfo *thread)
         if (servMgr->isRoot)
         {
             // 1時間着信がなかったら終了する。…なぜ？
-            if ((servMgr->lastIncoming) && ((ctime-servMgr->lastIncoming) > 60*60))
+            if ((servMgr->lastIncoming) && (((int64_t)ctime - servMgr->lastIncoming) > 60*60))
             {
                 peercastInst->saveSettings();
                 sys->exit();
             }
 
-            if ((ctime-lastRootBroadcast) > chanMgr->hostUpdateInterval)
+            if ((ctime - lastRootBroadcast) > chanMgr->hostUpdateInterval)
             {
                 servMgr->broadcastRootSettings(true);
                 lastRootBroadcast = ctime;
@@ -1918,7 +1927,6 @@ int ServMgr::idleProc(ThreadInfo *thread)
         sys->sleep(500);
     }
 
-    sys->endThread(thread);
     return 0;
 }
 
@@ -1994,7 +2002,6 @@ int ServMgr::serverProc(ThreadInfo *thread)
         sys->sleepIdle();
     }
 
-    sys->endThread(thread);
     return 0;
 }
 
@@ -2029,15 +2036,15 @@ const char *ServHost::getTypeStr(TYPE t)
 // --------------------------------------------------
 ServHost::TYPE ServHost::getTypeFromStr(const char *s)
 {
-    if (stricmp(s, "NONE")==0)
+    if (Sys::stricmp(s, "NONE")==0)
         return T_NONE;
-    else if (stricmp(s, "SERVENT")==0)
+    else if (Sys::stricmp(s, "SERVENT")==0)
         return T_SERVENT;
-    else if (stricmp(s, "STREAM")==0)
+    else if (Sys::stricmp(s, "STREAM")==0)
         return T_STREAM;
-    else if (stricmp(s, "CHANNEL")==0)
+    else if (Sys::stricmp(s, "CHANNEL")==0)
         return T_CHANNEL;
-    else if (stricmp(s, "TRACKER")==0)
+    else if (Sys::stricmp(s, "TRACKER")==0)
         return T_TRACKER;
 
     return T_NONE;
@@ -2046,18 +2053,18 @@ ServHost::TYPE ServHost::getTypeFromStr(const char *s)
 // --------------------------------------------------
 bool    ServFilter::writeVariable(Stream &out, const String &var)
 {
-    char buf[1024] = "";
+    std::string buf;
 
     if (var == "network")
-        strcpy(buf, (flags & F_NETWORK)?"1":"0");
+        buf = (flags & F_NETWORK) ? "1" : "0";
     else if (var == "private")
-        strcpy(buf, (flags & F_PRIVATE)?"1":"0");
+        buf = (flags & F_PRIVATE) ? "1" : "0";
     else if (var == "direct")
-        strcpy(buf, (flags & F_DIRECT)?"1":"0");
+        buf = (flags & F_DIRECT) ? "1" : "0";
     else if (var == "banned")
-        strcpy(buf, (flags & F_BAN)?"1":"0");
+        buf = (flags & F_BAN) ? "1" : "0";
     else if (var == "ip")
-        host.IPtoStr(buf);
+        buf = host.str(false); // without port
     else
         return false;
 
@@ -2066,20 +2073,26 @@ bool    ServFilter::writeVariable(Stream &out, const String &var)
 }
 
 // --------------------------------------------------
+bool ServFilter::matches(int fl, const Host& h) const
+{
+    return (flags&fl) != 0 && h.isMemberOf(host);
+}
+
+// --------------------------------------------------
 bool    BCID::writeVariable(Stream &out, const String &var)
 {
-    char buf[1024];
+    std::string buf;
 
     if (var == "id")
-        id.toStr(buf);
+        buf = id.str();
     else if (var == "name")
-        strcpy(buf, name.cstr());
+        buf = name.c_str();
     else if (var == "email")
-        strcpy(buf, email.cstr());
+        buf = email.c_str();
     else if (var == "url")
-        strcpy(buf, url.cstr());
+        buf = url.c_str();
     else if (var == "valid")
-        strcpy(buf, valid?"Yes":"No");
+        buf = valid ? "Yes" : "No";
     else
         return false;
 
@@ -2090,77 +2103,79 @@ bool    BCID::writeVariable(Stream &out, const String &var)
 // --------------------------------------------------
 bool ServMgr::writeVariable(Stream &out, const String &var)
 {
-    char buf[1024];
-    String str;
+    using namespace std;
+
+    string buf;
 
     if (var == "version")
-        strcpy(buf, PCX_VERSTRING);
+        buf = PCX_VERSTRING;
     else if (var == "uptime")
     {
+        String str;
         str.setFromStopwatch(getUptime());
-        strcpy(buf, str.cstr());
+        buf = str.c_str();
     }else if (var == "numRelays")
-        sprintf(buf, "%d", numStreams(Servent::T_RELAY, true));
+        buf = to_string(numStreams(Servent::T_RELAY, true));
     else if (var == "numDirect")
-        sprintf(buf, "%d", numStreams(Servent::T_DIRECT, true));
+        buf = to_string(numStreams(Servent::T_DIRECT, true));
     else if (var == "totalConnected")
-        sprintf(buf, "%d", totalConnected());
+        buf = to_string(totalConnected());
     else if (var == "numServHosts")
-        sprintf(buf, "%d", numHosts(ServHost::T_SERVENT));
+        buf = to_string(numHosts(ServHost::T_SERVENT));
     else if (var == "numServents")
-        sprintf(buf, "%d", numServents());
+        buf = to_string(numServents());
     else if (var == "serverName")
-        sprintf(buf, "%s", serverName.cstr());
+        buf = serverName.c_str();
     else if (var == "serverPort")
-        sprintf(buf, "%d", serverHost.port);
+        buf = to_string(serverHost.port);
     else if (var == "serverIP")
-        serverHost.IPtoStr(buf);
+        buf = serverHost.str(false);
     else if (var == "ypAddress")
-        strcpy(buf, rootHost.cstr());
+        buf = rootHost.c_str();
     else if (var == "password")
-        strcpy(buf, password);
+        buf = password;
     else if (var == "isFirewalled")
-        sprintf(buf, "%d", getFirewall()==FW_ON?1:0);
+        buf = getFirewall()==FW_ON ? "1" : "0";
     else if (var == "firewallKnown")
-        sprintf(buf, "%d", getFirewall()==FW_UNKNOWN?0:1);
+        buf = getFirewall()==FW_UNKNOWN ? "0" : "1";
     else if (var == "rootMsg")
-        strcpy(buf, rootMsg);
+        buf = rootMsg.c_str();
     else if (var == "isRoot")
-        sprintf(buf, "%d", isRoot?1:0);
+        buf = to_string(isRoot ? 1 : 0);
     else if (var == "isPrivate")
-        sprintf(buf, "%d", (PCP_BROADCAST_FLAGS&1)?1:0);
+        buf = (PCP_BROADCAST_FLAGS&1) ? "1" : "0";
     else if (var == "forceYP")
-        sprintf(buf, "%d", PCP_FORCE_YP?1:0);
+        buf = PCP_FORCE_YP ? "1" : "0";
     else if (var == "refreshHTML")
-        sprintf(buf, "%d", refreshHTML?refreshHTML:0x0fffffff);
+        buf = to_string(refreshHTML ? refreshHTML : 0x0fffffff);
     else if (var == "maxRelays")
-        sprintf(buf, "%d", maxRelays);
+        buf = to_string(maxRelays);
     else if (var == "maxDirect")
-        sprintf(buf, "%d", maxDirect);
+        buf = to_string(maxDirect);
     else if (var == "maxBitrateOut")
-        sprintf(buf, "%d", maxBitrateOut);
+        buf = to_string(maxBitrateOut);
     else if (var == "maxControlsIn")
-        sprintf(buf, "%d", maxControl);
+        buf = to_string(maxControl);
     else if (var == "maxServIn")
-        sprintf(buf, "%d", maxServIn);
+        buf = to_string(maxServIn);
     else if (var == "numFilters")
-        sprintf(buf, "%d", numFilters+1);
+        buf = to_string(numFilters+1); // 入力用の空欄を生成する為に+1する。
     else if (var == "maxPGNUIn")
-        sprintf(buf, "%d", maxGnuIncoming);
+        buf = to_string(maxGnuIncoming);
     else if (var == "minPGNUIn")
-        sprintf(buf, "%d", minGnuIncoming);
+        buf = to_string(minGnuIncoming);
     else if (var == "numActive1")
-        sprintf(buf, "%d", numActiveOnPort(serverHost.port));
+        buf = to_string(numActiveOnPort(serverHost.port));
     else if (var == "numActive2")
-        sprintf(buf, "%d", numActiveOnPort(serverHost.port+1));
+        buf = to_string(numActiveOnPort(serverHost.port+1));
     else if (var == "numPGNU")
-        sprintf(buf, "%d", numConnected(Servent::T_PGNU));
+        buf = to_string(numConnected(Servent::T_PGNU));
     else if (var == "numCIN")
-        sprintf(buf, "%d", numConnected(Servent::T_CIN));
+        buf = to_string(numConnected(Servent::T_CIN));
     else if (var == "numCOUT")
-        sprintf(buf, "%d", numConnected(Servent::T_COUT));
+        buf = to_string(numConnected(Servent::T_COUT));
     else if (var == "numIncoming")
-        sprintf(buf, "%d", numActive(Servent::T_INCOMING));
+        buf = to_string(numActive(Servent::T_INCOMING));
     else if (var == "numValidBCID")
     {
         int cnt = 0;
@@ -2168,58 +2183,53 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
         while (bcid)
         {
             cnt++;
-            bcid=bcid->next;
+            bcid = bcid->next;
         }
-        sprintf(buf, "%d", cnt);
-    }
-
-    else if (var == "disabled")
-        sprintf(buf, "%d", isDisabled);
-
+        buf = to_string(cnt);
+    }else if (var == "disabled")
+        buf = to_string(isDisabled);
     else if (var == "serverPort1")
-        sprintf(buf, "%d", serverHost.port);
+        buf = to_string(serverHost.port);
     else if (var == "serverLocalIP")
     {
         Host lh(ClientSocket::getIP(NULL), 0);
-        char ipStr[64];
-        lh.IPtoStr(ipStr);
-        strcpy(buf, ipStr);
+        buf = lh.str(false);
     }else if (var == "upgradeURL")
-        strcpy(buf, servMgr->downloadURL);
+        buf = servMgr->downloadURL;
     else if (var == "serverPort2")
-        sprintf(buf, "%d", serverHost.port+1);
+        buf = to_string(serverHost.port+1);
     else if (var.startsWith("allow."))
     {
         if (var == "allow.HTML1")
-            strcpy(buf, (allowServer1&Servent::ALLOW_HTML)?"1":"0");
+            buf = (allowServer1 & Servent::ALLOW_HTML) ? "1" : "0";
         else if (var == "allow.HTML2")
-            strcpy(buf, (allowServer2&Servent::ALLOW_HTML)?"1":"0");
+            buf = (allowServer2 & Servent::ALLOW_HTML) ? "1" : "0";
         else if (var == "allow.broadcasting1")
-            strcpy(buf, (allowServer1&Servent::ALLOW_BROADCAST)?"1":"0");
+            buf = (allowServer1 & Servent::ALLOW_BROADCAST) ? "1" : "0";
         else if (var == "allow.broadcasting2")
-            strcpy(buf, (allowServer2&Servent::ALLOW_BROADCAST)?"1":"0");
+            buf = (allowServer2 & Servent::ALLOW_BROADCAST) ? "1" : "0";
         else if (var == "allow.network1")
-            strcpy(buf, (allowServer1&Servent::ALLOW_NETWORK)?"1":"0");
+            buf = (allowServer1 & Servent::ALLOW_NETWORK) ? "1" : "0";
         else if (var == "allow.direct1")
-            strcpy(buf, (allowServer1&Servent::ALLOW_DIRECT)?"1":"0");
+            buf = (allowServer1 & Servent::ALLOW_DIRECT) ? "1" : "0";
     }else if (var.startsWith("auth."))
     {
         if (var == "auth.useCookies")
-            strcpy(buf, (authType==AUTH_COOKIE)?"1":"0");
+            buf = (authType==AUTH_COOKIE) ? "1" : "0";
         else if (var == "auth.useHTTP")
-            strcpy(buf, (authType==AUTH_HTTPBASIC)?"1":"0");
+            buf = (authType==AUTH_HTTPBASIC) ? "1" : "0";
         else if (var == "auth.useSessionCookies")
-            strcpy(buf, (cookieList.neverExpire==false)?"1":"0");
+            buf = (cookieList.neverExpire==false) ? "1" : "0";
     }else if (var.startsWith("log."))
     {
         if (var == "log.debug")
-            strcpy(buf, (showLog&(1<<LogBuffer::T_DEBUG))?"1":"0");
+            buf = (showLog & (1<<LogBuffer::T_DEBUG)) ? "1" : "0";
         else if (var == "log.errors")
-            strcpy(buf, (showLog&(1<<LogBuffer::T_ERROR))?"1":"0");
+            buf = (showLog & (1<<LogBuffer::T_ERROR)) ? "1" : "0";
         else if (var == "log.gnet")
-            strcpy(buf, (showLog&(1<<LogBuffer::T_NETWORK))?"1":"0");
+            buf = (showLog & (1<<LogBuffer::T_NETWORK)) ? "1" : "0";
         else if (var == "log.channel")
-            strcpy(buf, (showLog&(1<<LogBuffer::T_CHANNEL))?"1":"0");
+            buf = (showLog & (1<<LogBuffer::T_CHANNEL)) ? "1" : "0";
         else
             return false;
     }else if (var.startsWith("lang."))
@@ -2228,24 +2238,36 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
 
         if (strrchr(htmlPath, '/') &&
             strcmp(strrchr(htmlPath, '/') + 1, lang) == 0)
-            strcpy(buf, "1");
+            buf = "1";
         else
-            strcpy(buf, "0");
+            buf = "0";
     }else if (var == "numExternalChannels")
     {
-        sprintf(buf, "%d", channelDirectory.numChannels());
+        buf = to_string(channelDirectory.numChannels());
     }else if (var == "numChannelFeedsPlusOne")
     {
-        sprintf(buf, "%d", channelDirectory.numFeeds() + 1);
+        buf = to_string(channelDirectory.numFeeds() + 1);
     }else if (var == "numChannelFeeds")
     {
-        sprintf(buf, "%d", channelDirectory.numFeeds());
+        buf = to_string(channelDirectory.numFeeds());
     }else if (var.startsWith("channelDirectory."))
     {
         return channelDirectory.writeVariable(out, var + strlen("channelDirectory."));
     }else if (var == "publicDirectoryEnabled")
     {
-        sprintf(buf, "%d", publicDirectoryEnabled);
+        buf = to_string(publicDirectoryEnabled);
+    }else if (var == "genrePrefix")
+    {
+        buf = genrePrefix;
+    }else if (var == "transcodingEnabled")
+    {
+        buf = to_string(servMgr->transcodingEnabled);
+    }else if (var == "preset")
+    {
+        buf = servMgr->preset;
+    }else if (var == "audioCodec")
+    {
+        buf = servMgr->audioCodec;
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);

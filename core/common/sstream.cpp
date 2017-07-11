@@ -7,6 +7,12 @@ StringStream::StringStream()
 {
 }
 
+StringStream::StringStream(const std::string& content)
+    : StringStream()
+{
+    str(content);
+}
+
 void  StringStream::checkSize(size_t size)
 {
     if (size > m_buffer.size())

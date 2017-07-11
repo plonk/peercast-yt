@@ -11,21 +11,19 @@ VPS等の Linux で動かすのに向いている PeerCast です。
 * WME、Expression Encoder、KotoEncoder からプッシュ配信できます。
 * HTML UI をメッセージカタログ化。各国語版で機能に違いがないようにしました。
 * YPブラウザ内蔵。YP4G 形式の index.txt を取得してチャンネルリストを表示します。
+* ウェブブラウザでの動画再生と、したらば掲示板表示機能。
 * 公開ディレクトリ機能。チャンネルリストやストリームをWebに公開できます。
 * [継続パケット機能](docs/continuation-packets.md)。キーフレームからの再生ができます。
-
-# 使用ライブラリ
-
-* [JSON for Modern C++](https://github.com/nlohmann/json)
 
 # Linuxでのビルド
 
 ## 必要なもの
 
-GCC 4.9 以降あるいは Clang 3.4 以降などの C++11 に準拠したコンパイラを
-使ってください。
+コンパイラは、GCC 4.9 以降あるいは Clang 3.4 以降などの C++11 に準拠し
+たものを使ってください。
 
-また、HTML の生成に ruby を使っているので、ruby が必要です。
+また、ビルド時および実行時(CGIスクリプト)に Ruby を必要とします。(バー
+ジョン 2.0 以上)
 
 ## 手順
 

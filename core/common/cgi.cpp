@@ -34,9 +34,9 @@ std::string unescape(const std::string& in)
 
     while (i < in.size()) {
         if (in[i] == '%') {
-            char c;
-            sscanf(in.substr(i + 1, 2).c_str(), "%hhx", &c);
-            res += c;
+            int c;
+            sscanf(in.substr(i + 1, 2).c_str(), "%x", &c);
+            res += (char) c;
             i += 3;
         } else if (in[i] == '+') {
             res += ' ';
@@ -99,12 +99,21 @@ static const char* monthNames[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "J
 
 std::string rfc1123Time(time_t t)
 {
-    tm tm;
     char fmt[30], buf[30];
+#if !defined(WIN32) && (_POSIX_C_SOURCE >= 1 || _XOPEN_SOURCE || _BSD_SOURCE || _SVID_SOURCE || _POSIX_SOURCE)
+    tm tm;
 
     gmtime_r(&t, &tm);
     strftime(fmt, sizeof(fmt), "%%s, %d %%s %Y %H:%M:%S GMT", &tm);
     std::snprintf(buf, sizeof(buf), fmt, daysOfWeek[tm.tm_wday], monthNames[tm.tm_mon]);
+#else
+    // FIXME: The code that follows should have a race!
+    struct tm* ptm;
+
+    ptm = gmtime(&t);
+    strftime(fmt, sizeof(fmt), "%%s, %d %%s %Y %H:%M:%S GMT", ptm);
+    std::snprintf(buf, sizeof(buf), fmt, daysOfWeek[ptm->tm_wday], monthNames[ptm->tm_mon]);
+#endif
 
     return buf;
 }

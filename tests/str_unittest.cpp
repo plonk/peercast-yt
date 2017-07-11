@@ -143,6 +143,19 @@ TEST_F(strFixture, is_prefix_of)
     ASSERT_TRUE(str::is_prefix_of("あ", "あいうえお"));
 }
 
+TEST_F(strFixture, has_suffix)
+{
+    ASSERT_TRUE(str::has_suffix("", ""));
+    ASSERT_TRUE(str::has_suffix("a", ""));
+    ASSERT_TRUE(str::has_suffix("a", "a"));
+    ASSERT_TRUE(str::has_suffix("abc", "c"));
+    ASSERT_FALSE(str::has_suffix("", "b"));
+    ASSERT_FALSE(str::has_suffix("a", "b"));
+    ASSERT_FALSE(str::has_suffix("abc", "b"));
+    ASSERT_TRUE(str::has_suffix("abc", "abc"));
+    ASSERT_TRUE(str::has_suffix("あいうえお", "お"));
+}
+
 TEST_F(strFixture, join)
 {
     ASSERT_STREQ("", str::join("", {}).c_str());

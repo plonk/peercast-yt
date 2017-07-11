@@ -12,8 +12,8 @@ a {
 a:hover {
 	font-family: Verdana, Arial, Helvetica, sans-serif;
 	text-decoration: underline;
-
 }
+
 .normal {
 	font-family: Verdana, Arial, Helvetica, sans-serif;
 	font-size: 12px;
@@ -82,4 +82,20 @@ a.button {
 
 .text-muted {
 	color: #777;
+}
+
+table.table-panel {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+}
+
+table.table-panel tbody tr:nth-child(odd) {
+	background-color: #eee;
+}
+table.table-panel tbody tr:nth-child(even) {
+	background-color: #ddd;
+}
+
+table.table-panel tbody tr:nth-child(1) {
+	background-color: #ccc;
 }

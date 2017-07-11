@@ -177,6 +177,7 @@ public:
 
     void    handshakeRemoteFile(const char *);
     void    handshakeLocalFile(const char *);
+    void    invokeCGIScript(HTTP &http, const char* fn);
 
     static void handshakeOutgoingPCP(AtomStream &, Host &, GnuID &, String &, bool);
     static void handshakeIncomingPCP(AtomStream &, Host &, GnuID &, String &);
