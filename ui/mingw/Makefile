@@ -29,11 +29,9 @@ LIBOBJSTATIC = libpeercast.a
 
 SYSSOURCE = $(wildcard $(CORE)/win32/*.cpp)
 CORESOURCE = $(wildcard $(CORE)/common/*.cpp)
-MISSINGSOURCE = ../../missing/strdup.cpp
 
 COREOBJ = $(notdir $(CORESOURCE:.cpp=.o))
 SYSOBJ = $(notdir $(SYSSOURCE:.cpp=.o))
-MISSINGOBJ = $(notdir $(MISSINGSOURCE:.cpp=.o))
 
 LINUXSOURCE = main.cpp
 LINUXOBJ = $(notdir $(LINUXSOURCE:.cpp=.o))
@@ -86,14 +84,11 @@ $(COREOBJ): %.o : $(CORE)/common/%.cpp
 $(SYSOBJ): %.o : $(CORE)/win32/%.cpp
 	$(CXX) $(CPPFLAGS) -c $< -o $@
 
-$(MISSINGOBJ): %.o : ../../missing/%.cpp
-	$(CXX) $(CPPFLAGS) -c $< -o $@
-
 $(DEPENDFILE): $(CORESOURCE) $(LINUXSOURCE)
-	$(CXX) $(CPPFLAGS) -MM $(CORESOURCE) $(SYSSOURCE) $(LINUXSOURCE) $(MISSINGSOURCE)> $(DEPENDFILE)
+	$(CXX) $(CPPFLAGS) -MM $(CORESOURCE) $(SYSSOURCE) $(LINUXSOURCE) > $(DEPENDFILE)
 
-$(LIBOBJSTATIC): $(COREOBJ) $(SYSOBJ) $(MISSINGOBJ)
-	$(AR) rcs $(LIBOBJSTATIC) $(COREOBJ) $(SYSOBJ) $(MISSINGOBJ)
+$(LIBOBJSTATIC): $(COREOBJ) $(SYSOBJ)
+	$(AR) rcs $(LIBOBJSTATIC) $(COREOBJ) $(SYSOBJ)
 
 $(TARGET): $(LINUXOBJ) $(LIBOBJSTATIC)
 	$(CXX) $(LDFLAGS) -o $@ $(LINUXOBJ) $(LIBOBJSTATIC) $(LIBS)
