@@ -10,7 +10,6 @@ addons:
     - gcc-5
     - g++-5
     - libgtest-dev
-    - librtmp-dev
 script: export CC=gcc-5 CXX=g++-5; make -C ui/linux && make -C tests && cd tests &&
   ./test-all
 before_deploy:

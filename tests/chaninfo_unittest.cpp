@@ -152,8 +152,7 @@ TEST_F(ChanInfoFixture, static_getProtocolFromStr)
     ASSERT_EQ(ChanInfo::SP_WMHTTP, ChanInfo::getProtocolFromStr("WMHTTP"));
 
     ASSERT_EQ(ChanInfo::SP_PEERCAST, ChanInfo::getProtocolFromStr("Peercast")); // type str. is case-insesitive
-    ASSERT_EQ(ChanInfo::SP_RTMP, ChanInfo::getProtocolFromStr("RTMP"));
-    ASSERT_EQ(ChanInfo::SP_UNKNOWN, ChanInfo::getProtocolFromStr("Hoge2.0"));
+    ASSERT_EQ(ChanInfo::SP_UNKNOWN, ChanInfo::getProtocolFromStr("RTMP"));
 }
 
 TEST_F(ChanInfoFixture, setContentType)
