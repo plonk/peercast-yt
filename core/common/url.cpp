@@ -24,7 +24,9 @@
 #include "peercast.h"
 #include "version2.h"
 #include "playlist.h"
+#ifdef WITH_RTMP
 #include "rtmp.h"
+#endif
 
 // ------------------------------------------------
 void URLSource::stream(Channel *ch)
