@@ -209,6 +209,9 @@
     <ClInclude Include="..\..\common\subprog.h">
       <Filter>Core Includes</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\rtmp.h">
+      <Filter>Core Includes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\common\cgi.cpp">
@@ -362,6 +365,9 @@
       <Filter>Win32 Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\subprog.cpp">
+      <Filter>Core Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\rtmp.cpp">
       <Filter>Core Source</Filter>
     </ClCompile>
   </ItemGroup>

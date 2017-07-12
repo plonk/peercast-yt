@@ -75,6 +75,7 @@
     <ClCompile Include="sys_unittest.cpp" />
     <ClCompile Include="template_unittest.cpp" />
     <ClCompile Include="uri_unittest.cpp" />
+    <ClCompile Include="urlsource_unittest.cpp" />
     <ClCompile Include="vint_unittest.cpp" />
     <ClCompile Include="xml_unittest.cpp" />
   </ItemGroup>
