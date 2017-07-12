@@ -24,6 +24,9 @@
 #include "peercast.h"
 #include "version2.h"
 #include "playlist.h"
+#ifdef WITH_RTMP
+#include "rtmp.h"
+#endif
 
 // ------------------------------------------------
 void URLSource::stream(Channel *ch)
@@ -57,6 +60,40 @@ int URLSource::getSourceRateAvg()
 }
 
 // ------------------------------------------------
+ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
+{
+    if (Sys::strnicmp(fileName, "http://", 7)==0)
+    {
+        fileName += 7;
+        return ChanInfo::SP_HTTP;
+    }
+    else if (Sys::strnicmp(fileName, "mms://", 6)==0)
+    {
+        fileName += 6;
+        return ChanInfo::SP_MMS;
+    }
+    else if (Sys::strnicmp(fileName, "pcp://", 6)==0)
+    {
+        fileName += 6;
+        return ChanInfo::SP_PCP;
+    }
+    else if (Sys::strnicmp(fileName, "file://", 7)==0)
+    {
+        fileName += 7;
+        return ChanInfo::SP_FILE;
+    }
+    else if (Sys::strnicmp(fileName, "rtmp://", 7)==0)
+    {
+        fileName += 7;
+        return ChanInfo::SP_RTMP;
+    }
+    else
+    {
+        return ChanInfo::SP_FILE;
+    }
+}
+
+// ------------------------------------------------
 ::String URLSource::streamURL(Channel *ch, const char *url)
 {
     String nextURL;
@@ -77,34 +114,11 @@ int URLSource::getSourceRateAvg()
     try
     {
         // get the source protocol
-        if (Sys::strnicmp(fileName, "http://", 7)==0)
-        {
-            ch->info.srcProtocol = ChanInfo::SP_HTTP;
-            fileName += 7;
-        }
-        else if (Sys::strnicmp(fileName, "mms://", 6)==0)
-        {
-            ch->info.srcProtocol = ChanInfo::SP_MMS;
-            fileName += 6;
-        }
-        else if (Sys::strnicmp(fileName, "pcp://", 6)==0)
-        {
-            ch->info.srcProtocol = ChanInfo::SP_PCP;
-            fileName += 6;
-        }
-        else if (Sys::strnicmp(fileName, "file://", 7)==0)
-        {
-            ch->info.srcProtocol = ChanInfo::SP_FILE;
-            fileName += 7;
-        }
-        else
-        {
-            ch->info.srcProtocol = ChanInfo::SP_FILE;
-        }
+        ch->info.srcProtocol = getSourceProtocol(fileName);
 
         // default to mp3 for shoutcast servers
         if (ch->info.contentType == ChanInfo::T_PLS)
-            ch->info.contentType = ChanInfo::T_MP3;
+            ch->info.contentType = ChanInfo::T_MP3; // setContentType?
 
         ch->setStatus(Channel::S_CONNECTING);
 
@@ -217,6 +231,21 @@ int URLSource::getSourceRateAvg()
                 LOG_ERROR("HTTP response: %d", res);
                 throw StreamException("Bad HTTP connect");
             }
+        }else if (ch->info.srcProtocol == ChanInfo::SP_RTMP)
+        {
+#ifdef WITH_RTMP
+            LOG_CHANNEL("Channel source is RTMP");
+
+            RTMPClientStream *rs = new RTMPClientStream();
+            rs->open(url);
+            inputStream = rs;
+
+            ch->info.setContentType(ChanInfo::T_FLV);
+#else
+            LOG_ERROR("Not compiled with RTMP support");
+
+            throw StreamException("Unsupported URL");
+#endif
         }else if (ch->info.srcProtocol == ChanInfo::SP_FILE)
         {
             LOG_CHANNEL("Channel source is FILE");
@@ -288,7 +317,7 @@ int URLSource::getSourceRateAvg()
 
             ch->setStatus(Channel::S_BROADCASTING);
 
-            inputStream->setReadTimeout(60);    // use longer read timeout
+            inputStream->setReadTimeout(60);    // use longer read timeout // 60ミリ秒!?
 
             source = ch->createSource();
 

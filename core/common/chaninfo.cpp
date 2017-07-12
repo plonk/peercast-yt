@@ -122,6 +122,7 @@ const char *ChanInfo::getProtocolStr(PROTOCOL t)
         case SP_MMS: return "MMS";
         case SP_PCP: return "PCP";
         case SP_WMHTTP: return "WMHTTP";
+        case SP_RTMP: return "RTMP";
         default: return "UNKNOWN";
     }
 }
@@ -141,6 +142,8 @@ ChanInfo::PROTOCOL ChanInfo::getProtocolFromStr(const char *str)
         return SP_PCP;
     else if (Sys::stricmp(str, "WMHTTP")==0)
         return SP_WMHTTP;
+    else if (Sys::stricmp(str, "RTMP")==0)
+        return SP_RTMP;
     else
         return SP_UNKNOWN;
 }
