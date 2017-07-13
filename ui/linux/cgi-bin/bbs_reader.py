@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import configparser, re, urllib.request
+import configparser, re, urllib.request, html
 
 def print_bad_request(message):
   print("Status: 400 Bad Request")
@@ -38,7 +38,7 @@ class Board:
     p = re.compile("^(\d+)\.cgi,(.+?)\((\d+)\)$")
     for i, line in enumerate(lines):
       m = p.match(line)
-      lines[i] = Thread(self, m.group(1), m.group(2), m.group(3))
+      lines[i] = Thread(self, m.group(1), html.unescape(m.group(2)), m.group(3))
     return lines
 
   def download(self, url):
