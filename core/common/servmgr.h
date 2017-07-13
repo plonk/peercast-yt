@@ -388,6 +388,8 @@ public:
     bool                transcodingEnabled;
     std::string         preset;
     std::string         audioCodec;
+
+    std::string         wmvProtocol;
 };
 
 // ----------------------------------

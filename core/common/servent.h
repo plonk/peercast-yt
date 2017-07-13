@@ -144,8 +144,7 @@ public:
     bool    getLocalURL(char *);
 
     // various types of handshaking are needed
-    void    handshakePLS(ChanHitList **, int, bool);
-    void    handshakePLS(ChanInfo &, bool);
+    void    handshakePLS(ChanInfo &);
 
     void    handshakeHTML(char *);
     void    handshakeXML();

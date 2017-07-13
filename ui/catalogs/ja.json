@@ -189,6 +189,7 @@
     "x264 Preset"             : "x264プリセット",
     "Audio Codec"             : "オーディオ・コーデック",
     "AAC (Experimental)"      : "AAC (実験的)",
+    "WMV Protocol"            : "WMVプロトコル",
 
     // viewlog.html
     "Clear log"               : "ログをクリア",

@@ -117,6 +117,8 @@ ServMgr::ServMgr()
     transcodingEnabled = false;
     preset = "veryfast";
     audioCodec = "mp3";
+
+    wmvProtocol = "http";
 }
 
 // -----------------------------------
@@ -953,6 +955,7 @@ void ServMgr::saveSettings(const char *fn)
         iniFile.writeBoolValue("transcodingEnabled", servMgr->transcodingEnabled);
         iniFile.writeStrValue("preset", servMgr->preset.c_str());
         iniFile.writeStrValue("audioCodec", servMgr->audioCodec.c_str());
+        iniFile.writeStrValue("wmvProtocol", servMgr->wmvProtocol.c_str());
 
         iniFile.writeSection("Privacy");
         iniFile.writeStrValue("password", servMgr->password);
@@ -1274,6 +1277,8 @@ void ServMgr::loadSettings(const char *fn)
                 servMgr->preset = iniFile.getStrValue();
             else if (iniFile.isName("audioCodec"))
                 servMgr->audioCodec = iniFile.getStrValue();
+            else if (iniFile.isName("wmvProtocol"))
+                servMgr->wmvProtocol = iniFile.getStrValue();
 
             // debug
             else if (iniFile.isName("logDebug"))
@@ -2268,6 +2273,9 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var == "audioCodec")
     {
         buf = servMgr->audioCodec;
+    }else if (var == "wmvProtocol")
+    {
+        buf = servMgr->wmvProtocol;
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);
