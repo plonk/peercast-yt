@@ -115,8 +115,9 @@ void PlayList::writeASX(Stream &out)
     out.writeLine("<ASX Version=\"3.0\">");
     for (int i=0; i<numURLs; i++)
     {
+        auto url = str::replace_prefix(urls[i].cstr(), "http", wmvProtocol);
         out.writeLine("<ENTRY>");
-        out.writeLineF("<REF href=\"mmsh%s\" />", urls[i].cstr() + 4);
+        out.writeLineF("<REF href=\"%s\" />", url.c_str());
         out.writeLine("</ENTRY>");
     }
     out.writeLine("</ASX>");
