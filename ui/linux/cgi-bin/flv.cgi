@@ -21,21 +21,6 @@ if __name__ == "__main__":
     r = 500
 
   print("Content-Type: video/x-flv\n", flush=True)
-<<<<<<< HEAD
-  ffmpeg = subprocess.Popen(["ffmpeg",
-         "-v", "-8", # quiet
-         "-y",       # confirm overwriting
-         "-i", "mmsh://{0}:{1}/stream/{2}.wmv".format(server_name, server_port, id),
-         "-acodec", "aac",
-         "-vcodec", "libx264",
-         "-x264-params", "bitrate={0}:vbv-maxrate={0}:vbv-bufsize={1}".format(r, 2*r),
-         "-preset", "ultrafast",
-         "-f", "flv",
-         "-"], stdout=subprocess.PIPE)        # to stdout
-
-  for line in ffmpeg.stdout:
-    sys.stdout.buffer.write(line)
-=======
   subprocess.call(["ffmpeg",
     "-v", "-8", # quiet
     "-y",       # confirm overwriting
@@ -48,4 +33,3 @@ if __name__ == "__main__":
     "-preset", preset,
     "-f", "flv",
     "-"])        # to stdout
->>>>>>> plonk/master
