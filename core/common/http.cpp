@@ -28,6 +28,7 @@
 
 #include "cgi.h"
 #include "version2.h" // PCX_AGENT
+#include "defer.h"
 
 //-----------------------------------------
 bool HTTP::checkResponse(int r)
@@ -175,22 +176,6 @@ void HTTP::getAuthUserPass(char *user, char *pass, size_t ulen, size_t plen)
         }
     }
 }
-
-#include <functional>
-class Defer
-{
-public:
-    Defer(std::function<void()> aCallback)
-        : callback(aCallback)
-    {}
-
-    ~Defer()
-    {
-        callback();
-    }
-
-    std::function<void()> callback;
-};
 
 static const char* statusMessage(int statusCode)
 {
