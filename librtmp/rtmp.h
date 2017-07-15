@@ -25,9 +25,16 @@
  *  http://www.gnu.org/copyleft/lgpl.html
  */
 
+#define NO_CRYPTO 1
+
 #if !defined(NO_CRYPTO) && !defined(CRYPTO)
 #define CRYPTO
+#else
+#include <sys/types.h> //for off_t
 #endif
+
+#pragma warning(disable:4996) //depricated warnings
+#pragma warning(disable:4244) //64bit defensive mechanism, fixed the ones that mattered
 
 #include <errno.h>
 #include <stdint.h>

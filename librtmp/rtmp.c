@@ -417,7 +417,7 @@ SocksSetup(RTMP *r, AVal *sockshost)
       if (socksport)
 	hostname[socksport - sockshost->av_val] = '\0';
       r->Link.sockshost.av_val = hostname;
-      r->Link.sockshost.av_len = strlen(hostname);
+      r->Link.sockshost.av_len = (int)strlen(hostname);
 
       r->Link.socksport = socksport ? atoi(socksport + 1) : 1080;
       RTMP_Log(RTMP_LOGDEBUG, "Connecting via SOCKS proxy: %s:%d", r->Link.sockshost.av_val,
@@ -764,7 +764,7 @@ int RTMP_SetupURL(RTMP *r, char *url)
   if (ptr)
     *ptr = '\0';
 
-  len = strlen(url);
+  len = (int)strlen(url);
   ret = RTMP_ParseURL(url, &r->Link.protocol, &r->Link.hostname,
   	&port, &r->Link.playpath0, &r->Link.app);
   if (!ret)
@@ -790,7 +790,7 @@ int RTMP_SetupURL(RTMP *r, char *url)
       while(ptr[1] == ' ')
       	*ptr++ = '\0';
     } else {
-      arg.av_len = strlen(p2);
+      arg.av_len = (int)strlen(p2);
     }
 
     /* unescape */
@@ -842,7 +842,7 @@ int RTMP_SetupURL(RTMP *r, char *url)
         }
       else
         {
-	  r->Link.tcUrl.av_len = strlen(url);
+	  r->Link.tcUrl.av_len = (int)strlen(url);
 	}
     }
 
@@ -4960,7 +4960,7 @@ Read_1_Packet(RTMP *r, char *buf, unsigned int buflen)
 
   if (recopy)
     {
-      len = ret > buflen ? buflen : ret;
+      len = (unsigned int)(ret) > buflen ? buflen : ret;
       memcpy(buf, r->m_read.buf, len);
       r->m_read.bufpos = r->m_read.buf + len;
       r->m_read.buflen = ret - len;
