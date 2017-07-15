@@ -768,7 +768,6 @@ void writePLSHeader(Stream &s, PlayList::TYPE type)
 void Servent::handshakePLS(ChanInfo &info)
 {
     char url[256];
-    char in[128];
 
     if (getLocalURL(url))
     {
