@@ -27,6 +27,7 @@ if __name__ == "__main__":
     "-i", "mmsh://{0}:{1}/stream/{2}.wmv".format(server_name, server_port, id),
     "-strict", "-2",
     "-acodec", audio_codec,
+    "-async", "1",
     "-ar", "44100",
     "-vcodec", "libx264",
     "-x264-params", "bitrate={0}:vbv-maxrate={0}:vbv-bufsize={1}".format(r, 2*r),

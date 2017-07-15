@@ -286,42 +286,24 @@
       </td>
     </tr>
     <tr>
-      <td>
-        {@if servMgr.isRoot}
+      <td valign=top>
         <table class="table-panel" width="100%" align=center border=0>
           <tr align=middle class="normal">
-            <td colspan=2><b>{#Root Mode}</b></td>
+            <td colspan=2><b>{#Playlist}</b></td>
           </tr>
           <tr class="normal">
-            <td>{#Host Update (sec)}</td>
-            <td><input size=5 {@if chanMgr.hostUpdateInterval}value="{$chanMgr.hostUpdateInterval}"{@end} name=huint></td>
-          </tr>
-          <tr class="normal">
-            <td>{#Message}</td>
-            <td><input type=text {@if servMgr.rootMsg}value="{$servMgr.rootMsg}"{@end} name=pcmsg></td>
-          </tr>
-          <tr class="normal">
-            <td width="50%">{#Get Update}</td>
-            <td><input type=checkbox value=1 name=getupd></td>
-          </tr>
-          <tr class="normal">
-            <td width="50%">{#Send}</td>
-            <td><input type=checkbox value=1 name=brroot></td>
-          </tr>
-          <tr class="normal">
-            <td>{#Min. PGNU In}</td>
-            <td><input size=5 value="{$servMgr.minPGNUIn}" name=minpgnu></td>
-          </tr>
-          <tr class="normal">
-            <td>{#Max. PGNU In}</td>
-            <td><input size=5 value="{$servMgr.maxPGNUIn}" name=maxpgnu></td>
-          </tr>
-          <tr class="normal">
-            <td>{#Broadcast IDs}</td>
-            <td><a href="bcid.html">{#View}</a></td>
+            <td>
+              {#WMV Protocol}
+            </td>
+            <td>
+              <select name="wmvProtocol">
+                <option {@if servMgr.wmvProtocol == "http"}selected{@end}>http</option>
+                <option {@if servMgr.wmvProtocol == "mms"}selected{@end}>mms</option>
+                <option {@if servMgr.wmvProtocol == "mmsh"}selected{@end}>mmsh</option>
+              </select>
+            </td>
           </tr>
         </table>
-        {@end}
       </td>
 
       <td valign="top">
@@ -367,6 +349,47 @@
 
         </table>
 
+      </td>
+    </tr>
+    <tr>
+      <td>
+        {@if servMgr.isRoot}
+        <table class="table-panel" width="100%" align=center border=0>
+          <tr align=middle class="normal">
+            <td colspan=2><b>{#Root Mode}</b></td>
+          </tr>
+          <tr class="normal">
+            <td>{#Host Update (sec)}</td>
+            <td><input size=5 {@if chanMgr.hostUpdateInterval}value="{$chanMgr.hostUpdateInterval}"{@end} name=huint></td>
+          </tr>
+          <tr class="normal">
+            <td>{#Message}</td>
+            <td><input type=text {@if servMgr.rootMsg}value="{$servMgr.rootMsg}"{@end} name=pcmsg></td>
+          </tr>
+          <tr class="normal">
+            <td width="50%">{#Get Update}</td>
+            <td><input type=checkbox value=1 name=getupd></td>
+          </tr>
+          <tr class="normal">
+            <td width="50%">{#Send}</td>
+            <td><input type=checkbox value=1 name=brroot></td>
+          </tr>
+          <tr class="normal">
+            <td>{#Min. PGNU In}</td>
+            <td><input size=5 value="{$servMgr.minPGNUIn}" name=minpgnu></td>
+          </tr>
+          <tr class="normal">
+            <td>{#Max. PGNU In}</td>
+            <td><input size=5 value="{$servMgr.maxPGNUIn}" name=maxpgnu></td>
+          </tr>
+          <tr class="normal">
+            <td>{#Broadcast IDs}</td>
+            <td><a href="bcid.html">{#View}</a></td>
+          </tr>
+        </table>
+        {@end}
+      </td>
+      <td>
       </td>
     </tr>
   </table>

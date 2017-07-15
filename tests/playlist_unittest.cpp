@@ -96,6 +96,27 @@ TEST_F(PlayListFixture, write_asx)
                  mem.str().c_str());
 }
 
+TEST_F(PlayListFixture, write_asx_mmsh)
+{
+    StringStream mem;
+
+    asx.wmvProtocol = "mmsh";
+
+    ChanInfo info;
+    info.name = "1ch";
+    info.id.fromStr("01234567890123456789012345678901");
+    info.contentType = ChanInfo::T_WMV;
+    asx.addChannel("http://127.0.0.1:7144", info);
+
+    asx.write(mem);
+    ASSERT_STREQ("<ASX Version=\"3.0\">\r\n"
+                 "<ENTRY>\r\n"
+                 "<REF href=\"mmsh://127.0.0.1:7144/stream/01234567890123456789012345678901.wmv?auth=44d5299e57ad9274fee7960a9fa60bfd\" />\r\n"
+                 "</ENTRY>\r\n"
+                 "</ASX>\r\n",
+                 mem.str().c_str());
+}
+
 TEST_F(PlayListFixture, getPlayListType)
 {
     ASSERT_EQ(PlayList::T_ASX, PlayList::getPlayListType(ChanInfo::T_WMA));

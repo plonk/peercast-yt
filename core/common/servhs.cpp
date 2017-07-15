@@ -389,9 +389,15 @@ void Servent::handshakeGET(HTTP &http)
 
         ChanInfo info;
         if (servMgr->getChannel(fn+5, info, isPrivate() || hasValidAuthToken(fn+5)))
-            handshakePLS(info, false);
-        else
+        {
+            http.readHeaders(); // this smashes fn
+            LOG_DEBUG("User-Agent: %s", http.headers.get("User-Agent").c_str());
+            handshakePLS(info);
+        }else
+        {
+            http.readHeaders();
             throw HTTPException(HTTP_SC_NOTFOUND, 404);
+        }
     }else if (strncmp(fn, "/stream/", 8) == 0)
     {
         // ƒXƒgƒŠ[ƒ€
@@ -759,13 +765,10 @@ void writePLSHeader(Stream &s, PlayList::TYPE type)
 }
 
 // -----------------------------------
-void Servent::handshakePLS(ChanInfo &info, bool doneHandshake)
+void Servent::handshakePLS(ChanInfo &info)
 {
     char url[256];
     char in[128];
-
-    if (!doneHandshake)
-        while (sock->readLine(in, 128));
 
     if (getLocalURL(url))
     {
@@ -774,29 +777,8 @@ void Servent::handshakePLS(ChanInfo &info, bool doneHandshake)
         writePLSHeader(*sock, type);
 
         PlayList pls(type, 1);
+        pls.wmvProtocol = servMgr->wmvProtocol;
         pls.addChannel(url, info);
-        pls.write(*sock);
-    }
-}
-
-// -----------------------------------
-void Servent::handshakePLS(ChanHitList **cl, int num, bool doneHandshake)
-{
-    char url[256];
-    char in[128];
-
-    if (!doneHandshake)
-        while (sock->readLine(in, 128));
-
-    if (getLocalURL(url))
-    {
-        writePLSHeader(*sock, PlayList::T_SCPLS);
-
-        PlayList pls(PlayList::T_SCPLS, num);
-
-        for (int i=0; i<num; i++)
-            pls.addChannel(url, cl[i]->info);
-
         pls.write(*sock);
     }
 }
@@ -1257,6 +1239,8 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr)
             servMgr->preset = arg;
         else if (strcmp(curr, "audio_codec") == 0)
             servMgr->audioCodec = arg;
+        else if (strcmp(curr, "wmvProtocol") == 0)
+            servMgr->wmvProtocol = arg;
     }
 
     servMgr->showLog = showLog;

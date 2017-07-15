@@ -45,6 +45,7 @@ public:
         type = t;
         urls = new ::String[max];
         titles = new ::String[max];
+        wmvProtocol = "http";
     }
 
     ~PlayList()
@@ -103,6 +104,7 @@ public:
     TYPE        type;
     int         numURLs, maxURLs;
     ::String    *urls, *titles;
+    std::string wmvProtocol;
 };
 
 #endif
