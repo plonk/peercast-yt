@@ -6,7 +6,7 @@
 
 #include "rtmp.h"
 
-#define MAX_PACKET_SIZE (1024*1024)
+#define MAX_PACKET_SIZE (512*1024)
 
 void RTMPClientStream::open(const std::string& url)
 {
@@ -24,7 +24,7 @@ int  RTMPClientStream::read(void *buffer, int len)
     char *p = (char*)buffer;
     if (len <= static_cast<int>(m_buffer.size()))
     {
-        std::copy(m_buffer.begin(), m_buffer.begin() + len, p);
+        std::copy(m_buffer.begin(), m_buffer.begin() + len, stdext::checked_array_iterator<char *>(p, len));
         m_buffer.erase(m_buffer.begin(), m_buffer.begin() + len);
         return len;
     }else
