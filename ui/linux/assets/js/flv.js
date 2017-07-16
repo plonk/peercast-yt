@@ -1777,6 +1777,8 @@ var defaultConfig = exports.defaultConfig = {
 
     statisticsInfoReportInterval: 600,
 
+    fixAudioTimestampGap: true,
+
     accurateSeek: false,
     seekType: 'range', // [range, param, custom]
     seekParamStart: 'bstart',
@@ -3213,6 +3215,9 @@ var Transmuxer = function () {
                 case _transmuxingEvents2.default.RECOMMEND_SEEKPOINT:
                     this._emitter.emit(message.msg, data);
                     break;
+                case 'logcat_callback':
+                    _logger2.default.emitter.emit('log', data.type, data.logcat);
+                    break;
                 default:
                     break;
             }
@@ -3804,6 +3809,7 @@ var TransmuxingWorker = function TransmuxingWorker(self) {
 
     var TAG = 'TransmuxingWorker';
     var controller = null;
+    var logcatListener = onLogcatCallback.bind(this);
 
     _polyfill2.default.install();
 
@@ -3844,8 +3850,17 @@ var TransmuxingWorker = function TransmuxingWorker(self) {
                 controller.resume();
                 break;
             case 'logging_config':
-                _loggingControl2.default.applyConfig(e.data.param);
-                break;
+                {
+                    var config = e.data.param;
+                    _loggingControl2.default.applyConfig(config);
+
+                    if (config.enableCallback === true) {
+                        _loggingControl2.default.addLogListener(logcatListener);
+                    } else {
+                        _loggingControl2.default.removeLogListener(logcatListener);
+                    }
+                    break;
+                }
         }
     });
 
@@ -3925,6 +3940,16 @@ var TransmuxingWorker = function TransmuxingWorker(self) {
         self.postMessage({
             msg: _transmuxingEvents2.default.RECOMMEND_SEEKPOINT,
             data: milliseconds
+        });
+    }
+
+    function onLogcatCallback(type, str) {
+        self.postMessage({
+            msg: 'logcat_callback',
+            data: {
+                type: type,
+                logcat: str
+            }
         });
     }
 }; /*
@@ -5992,7 +6017,7 @@ Object.defineProperty(flvjs, 'version', {
     enumerable: true,
     get: function get() {
         // replaced by browserify-versionify transform
-        return '1.3.1';
+        return '1.3.2';
     }
 });
 
@@ -10373,6 +10398,8 @@ var MP4Remuxer = function () {
 
         // While only FireFox supports 'audio/mp4, codecs="mp3"', use 'audio/mpeg' for chrome, safari, ...
         this._mp3UseMpegAudio = !_browser2.default.firefox;
+
+        this._fillAudioTimestampGap = this._config.fixAudioTimestampGap;
     }
 
     _createClass(MP4Remuxer, [{
@@ -10603,8 +10630,8 @@ var MP4Remuxer = function () {
                 var needFillSilentFrames = false;
                 var silentFrames = null;
 
-                // Silent frame generation, if large timestamp gap detected
-                if (sampleDuration > refSampleDuration * 1.5 && this._audioMeta.codec !== 'mp3') {
+                // Silent frame generation, if large timestamp gap detected && config.fixAudioTimestampGap
+                if (sampleDuration > refSampleDuration * 1.5 && this._audioMeta.codec !== 'mp3' && this._fillAudioTimestampGap && !_browser2.default.safari) {
                     // We need to insert silent frames to fill timestamp gap
                     needFillSilentFrames = true;
                     var delta = Math.abs(sampleDuration - refSampleDuration);
@@ -11195,27 +11222,31 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /*
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright (C) 2016 Bilibili. All Rights Reserved.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * @author zheng qian <xqq@xqq.im>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
+var _events = _dereq_('events');
+
+var _events2 = _interopRequireDefault(_events);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/*
- * Copyright (C) 2016 Bilibili. All Rights Reserved.
- *
- * @author zheng qian <xqq@xqq.im>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 var Log = function () {
     function Log() {
@@ -11225,13 +11256,17 @@ var Log = function () {
     _createClass(Log, null, [{
         key: 'e',
         value: function e(tag, msg) {
-            if (!Log.ENABLE_ERROR) {
-                return;
-            }
-
             if (!tag || Log.FORCE_GLOBAL_TAG) tag = Log.GLOBAL_TAG;
 
             var str = '[' + tag + '] > ' + msg;
+
+            if (Log.ENABLE_CALLBACK) {
+                Log.emitter.emit('log', 'error', str);
+            }
+
+            if (!Log.ENABLE_ERROR) {
+                return;
+            }
 
             if (console.error) {
                 console.error(str);
@@ -11244,13 +11279,17 @@ var Log = function () {
     }, {
         key: 'i',
         value: function i(tag, msg) {
-            if (!Log.ENABLE_INFO) {
-                return;
-            }
-
             if (!tag || Log.FORCE_GLOBAL_TAG) tag = Log.GLOBAL_TAG;
 
             var str = '[' + tag + '] > ' + msg;
+
+            if (Log.ENABLE_CALLBACK) {
+                Log.emitter.emit('log', 'info', str);
+            }
+
+            if (!Log.ENABLE_INFO) {
+                return;
+            }
 
             if (console.info) {
                 console.info(str);
@@ -11261,13 +11300,17 @@ var Log = function () {
     }, {
         key: 'w',
         value: function w(tag, msg) {
-            if (!Log.ENABLE_WARN) {
-                return;
-            }
-
             if (!tag || Log.FORCE_GLOBAL_TAG) tag = Log.GLOBAL_TAG;
 
             var str = '[' + tag + '] > ' + msg;
+
+            if (Log.ENABLE_CALLBACK) {
+                Log.emitter.emit('log', 'warn', str);
+            }
+
+            if (!Log.ENABLE_WARN) {
+                return;
+            }
 
             if (console.warn) {
                 console.warn(str);
@@ -11278,13 +11321,17 @@ var Log = function () {
     }, {
         key: 'd',
         value: function d(tag, msg) {
-            if (!Log.ENABLE_DEBUG) {
-                return;
-            }
-
             if (!tag || Log.FORCE_GLOBAL_TAG) tag = Log.GLOBAL_TAG;
 
             var str = '[' + tag + '] > ' + msg;
+
+            if (Log.ENABLE_CALLBACK) {
+                Log.emitter.emit('log', 'debug', str);
+            }
+
+            if (!Log.ENABLE_DEBUG) {
+                return;
+            }
 
             if (console.debug) {
                 console.debug(str);
@@ -11295,13 +11342,19 @@ var Log = function () {
     }, {
         key: 'v',
         value: function v(tag, msg) {
+            if (!tag || Log.FORCE_GLOBAL_TAG) tag = Log.GLOBAL_TAG;
+
+            var str = '[' + tag + '] > ' + msg;
+
+            if (Log.ENABLE_CALLBACK) {
+                Log.emitter.emit('log', 'verbose', str);
+            }
+
             if (!Log.ENABLE_VERBOSE) {
                 return;
             }
 
-            if (!tag || Log.FORCE_GLOBAL_TAG) tag = Log.GLOBAL_TAG;
-
-            console.log('[' + tag + '] > ' + msg);
+            console.log(str);
         }
     }]);
 
@@ -11316,9 +11369,13 @@ Log.ENABLE_WARN = true;
 Log.ENABLE_DEBUG = true;
 Log.ENABLE_VERBOSE = true;
 
+Log.ENABLE_CALLBACK = false;
+
+Log.emitter = new _events2.default();
+
 exports.default = Log;
 
-},{}],42:[function(_dereq_,module,exports){
+},{"events":2}],42:[function(_dereq_,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -11370,7 +11427,8 @@ var LoggingControl = function () {
                 enableDebug: _logger2.default.ENABLE_DEBUG,
                 enableInfo: _logger2.default.ENABLE_INFO,
                 enableWarn: _logger2.default.ENABLE_WARN,
-                enableError: _logger2.default.ENABLE_ERROR
+                enableError: _logger2.default.ENABLE_ERROR,
+                enableCallback: _logger2.default.ENABLE_CALLBACK
             };
         }
     }, {
@@ -11383,6 +11441,7 @@ var LoggingControl = function () {
             _logger2.default.ENABLE_INFO = config.enableInfo;
             _logger2.default.ENABLE_WARN = config.enableWarn;
             _logger2.default.ENABLE_ERROR = config.enableError;
+            _logger2.default.ENABLE_CALLBACK = config.enableCallback;
         }
     }, {
         key: '_notifyChange',
@@ -11403,6 +11462,24 @@ var LoggingControl = function () {
         key: 'removeListener',
         value: function removeListener(listener) {
             LoggingControl.emitter.removeListener('change', listener);
+        }
+    }, {
+        key: 'addLogListener',
+        value: function addLogListener(listener) {
+            _logger2.default.emitter.addListener('log', listener);
+            if (_logger2.default.emitter.listenerCount('log') > 0) {
+                _logger2.default.ENABLE_CALLBACK = true;
+                LoggingControl._notifyChange();
+            }
+        }
+    }, {
+        key: 'removeLogListener',
+        value: function removeLogListener(listener) {
+            _logger2.default.emitter.removeListener('log', listener);
+            if (_logger2.default.emitter.listenerCount('log') === 0) {
+                _logger2.default.ENABLE_CALLBACK = false;
+                LoggingControl._notifyChange();
+            }
         }
     }, {
         key: 'forceGlobalTag',
