@@ -874,7 +874,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         }
         case ID_POPUP_YELLOWPAGES:
-            sys->getURL("http://bayonet.ddo.jp/sp/");
+            showHTML("channels.html");
             break;
 
         case ID_POPUP_ADVANCED_VIEWLOG:
