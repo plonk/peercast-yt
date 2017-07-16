@@ -1381,7 +1381,7 @@ RTMP_ClientPacket(RTMP *r, RTMPPacket *packet)
   return bHasMediaPacket;
 }
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && !defined(WIN32)
 extern FILE *netstackdump;
 extern FILE *netstackdump_read;
 #endif
@@ -1469,7 +1469,7 @@ ReadN(RTMP *r, char *buffer, int n)
 	        return FALSE;
 	}
       /*RTMP_Log(RTMP_LOGDEBUG, "%s: %d bytes\n", __FUNCTION__, nBytes); */
-#ifdef _DEBUG
+#if defined(_DEBUG) && !defined(WIN32)
       fwrite(ptr, 1, nBytes, netstackdump_read);
 #endif
 
@@ -4298,7 +4298,7 @@ RTMPSockBuf_Send(RTMPSockBuf *sb, const char *buf, int len)
 {
   int rc;
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && !defined(WIN32)
   fwrite(buf, 1, len, netstackdump);
 #endif
 
