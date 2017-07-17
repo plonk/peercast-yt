@@ -6,8 +6,6 @@
 
 #include "rtmp.h"
 
-#define MAX_PACKET_SIZE (1024*1024)
-
 void RTMPClientStream::open(const std::string& url)
 {
     if (RTMP_SetupURL(&m_rtmp, (char*)url.c_str()) == false)
@@ -21,10 +19,9 @@ int  RTMPClientStream::read(void *buffer, int len)
 {
     if (len == 0) return 0;
 
-    char *p = (char*)buffer;
     if (len <= m_buffer.size())
     {
-        std::copy(m_buffer.begin(), m_buffer.begin() + len, p);
+        std::copy(m_buffer.begin(), m_buffer.begin() + len, (char*)buffer);
         m_buffer.erase(m_buffer.begin(), m_buffer.begin() + len);
         return len;
     }else
@@ -36,8 +33,7 @@ int  RTMPClientStream::read(void *buffer, int len)
 
 void RTMPClientStream::getNextPacket()
 {
-    char buffer[MAX_PACKET_SIZE];
-    int nsize = RTMP_Read(&m_rtmp, buffer, MAX_PACKET_SIZE);
+    int nsize = RTMP_Read(&m_rtmp, m_packetData, kMaxPacketSize);
 
     if (nsize == 0)
     {
@@ -45,7 +41,7 @@ void RTMPClientStream::getNextPacket()
         throw StreamException("End of stream");
     }
 
-    std::copy(buffer, buffer + nsize, std::back_inserter(m_buffer));
+    std::copy(m_packetData, m_packetData + nsize, std::back_inserter(m_buffer));
     updateTotals(nsize, 0);
 }
 
