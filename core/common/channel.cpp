@@ -923,7 +923,7 @@ void Channel::broadcastTrackerUpdate(GnuID &svID, bool force)
     {
         ChanPacket pack;
 
-        MemoryStream mem(pack.data, sizeof(pack));
+        MemoryStream mem(pack.data, sizeof(pack.data));
 
         AtomStream atom(mem);
 
@@ -1009,7 +1009,7 @@ void Channel::updateInfo(const ChanInfo &newInfo)
             lastMetaUpdate = ctime;
 
             ChanPacket pack;
-            MemoryStream mem(pack.data, sizeof(pack));
+            MemoryStream mem(pack.data, sizeof(pack.data));
             AtomStream atom(mem);
 
             atom.writeParent(PCP_BCST, 10);
