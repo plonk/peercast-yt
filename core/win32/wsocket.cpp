@@ -79,16 +79,7 @@ unsigned int ClientSocket::getIP(const char *name)
             return 0;
     }
 
-    struct in_addr *inAddr = WSAClientSocket::resolveHost(name);
-
-    if (inAddr)
-    {
-        return inAddr->S_un.S_un_b.s_b1<<24 |
-               inAddr->S_un.S_un_b.s_b2<<16 |
-               inAddr->S_un.S_un_b.s_b3<<8 |
-               inAddr->S_un.S_un_b.s_b4;
-    }
-    return 0;
+    return WSAClientSocket::resolveHost(name);
 }
 
 // --------------------------------------------------
@@ -128,23 +119,23 @@ void WSAClientSocket::setReuse(bool yes)
 }
 
 // --------------------------------------------------
-struct in_addr *WSAClientSocket::resolveHost(const char *hostName)
+unsigned int WSAClientSocket::resolveHost(const char *hostName)
 {
-    struct in_addr *inAddr;
-    struct addrinfo hints, *result;
+    unsigned int ip = NULL;
+    struct addrinfo hints, *res;
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_family = AF_INET;
 
-    if (getaddrinfo(hostName, NULL, &hints, &result) == 0)
-        inAddr = &((struct sockaddr_in *)result->ai_addr)->sin_addr;
-    else
-        inAddr = NULL;
+    if (getaddrinfo(hostName, NULL, &hints, &res) == 0)
+    {
+        struct in_addr inAddr = ((struct sockaddr_in *)res->ai_addr)->sin_addr;
+        ip = ntohl(inAddr.s_addr);
+        freeaddrinfo(res);
+    }
 
-    freeaddrinfo(result);
-
-    return inAddr;
+    return ip;
 }
 
 // --------------------------------------------------
