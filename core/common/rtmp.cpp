@@ -19,7 +19,7 @@ int  RTMPClientStream::read(void *buffer, int len)
 {
     if (len == 0) return 0;
 
-    if (len <= m_buffer.size())
+    if (len <= static_cast<int>(m_buffer.size()))
     {
         std::copy(m_buffer.begin(), m_buffer.begin() + len, stdext::checked_array_iterator<char*>((char*)buffer, len));
         m_buffer.erase(m_buffer.begin(), m_buffer.begin() + len);
