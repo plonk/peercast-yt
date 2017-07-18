@@ -18,6 +18,7 @@
 #include "common.h"
 #include "host.h"
 #include "socket.h"
+#include "str.h"
 
 // ------------------------------------------
 bool Host::isLocalhost()
@@ -35,17 +36,13 @@ void Host::fromStrName(const char *str, int p)
         return;
     }
 
-    char name[128];
-    strncpy(name, str, sizeof(name)-1);
-    port = p;
-    char *pp = strstr(name, ":");
-    if (pp)
-    {
-        port = atoi(pp+1);
-        pp[0] = 0;
-    }
+    auto v = str::split(str, ":");
+    if (v.size() == 2)
+        port = atoi(v[1].c_str());
+    else
+        port = p;
 
-    ip = ClientSocket::getIP(name);
+    ip = ClientSocket::getIP(v[0].c_str());
 }
 
 // ------------------------------------------
