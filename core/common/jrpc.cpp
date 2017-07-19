@@ -43,12 +43,16 @@ json JrpcApi::call_internal(const string& input)
         id = j.at("id");
     } catch (std::range_error&) {
         return error_object(-32600, "Invalid Request");
+    } catch (std::out_of_range) {
+        return error_object(-32600, "Invalid Request");
     }
 
     try {
         method = j.at("method");
     } catch (std::range_error&) {
         return error_object(-32600, "Invalid Request", id);
+    } catch (std::out_of_range) {
+        return error_object(-32600, "Invalid Request");
     }
 
     if (j.find("params") == j.end())
