@@ -465,7 +465,8 @@ void Servent::handshakeGET(HTTP &http)
         if (!isAllowed(ALLOW_HTML))
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-        if (str::has_prefix(fn, "/cgi-bin/flv.cgi"))
+        if (str::has_prefix(fn, "/cgi-bin/flv.cgi") ||
+            str::has_prefix(fn, "/cgi-bin/wmv.cgi"))
         {
             if (!isPrivate() || !isFiltered(ServFilter::F_DIRECT))
                 throw HTTPException(HTTP_SC_FORBIDDEN, 403);
