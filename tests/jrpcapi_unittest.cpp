@@ -63,3 +63,45 @@ TEST_F(JrpcApiFixture, getChannelRelayTree)
 {
     ASSERT_THROW(api.getChannelRelayTree({"hoge"}), JrpcApi::application_error);
 }
+
+TEST_F(JrpcApiFixture, call_nonJson)
+{
+    auto res = api.call("hello world");
+    ASSERT_TRUE(str::contains(res, "-32700"));
+    ASSERT_TRUE(str::contains(res, "Parse error"));
+}
+
+TEST_F(JrpcApiFixture, call_nonObject)
+{
+    auto res = api.call("\"hoge\"");
+    ASSERT_TRUE(str::contains(res, "-32600"));
+    ASSERT_TRUE(str::contains(res, "Invalid Request"));
+}
+
+TEST_F(JrpcApiFixture, call_noMethodKey)
+{
+    auto res = api.call("{\"jsonrpc\": \"2.0\",\"id\": 1234}");
+    ASSERT_TRUE(str::contains(res, "-32600"));
+    ASSERT_TRUE(str::contains(res, "Invalid Request"));
+}
+
+TEST_F(JrpcApiFixture, call_noIdKey)
+{
+    auto res = api.call("{\"jsonrpc\": \"2.0\", \"method\": \"getVersionInfo\"}");
+    ASSERT_TRUE(str::contains(res, "-32600"));
+    ASSERT_TRUE(str::contains(res, "Invalid Request"));
+}
+
+TEST_F(JrpcApiFixture, call_methodNotAvailable)
+{
+    auto res = api.call("{\"jsonrpc\": \"2.0\", \"method\": \"nonexistentMethod\", \"id\": 1234}");
+    ASSERT_TRUE(str::contains(res, "-32601"));
+    ASSERT_TRUE(str::contains(res, "Method not found"));
+}
+
+TEST_F(JrpcApiFixture, call_ArgumentsNotSupplied)
+{
+    auto res = api.call("{\"jsonrpc\": \"2.0\", \"method\": \"stopChannel\", \"id\": 1234}");
+    ASSERT_TRUE(str::contains(res, "-32602"));
+    ASSERT_TRUE(str::contains(res, "Wrong number of arguments"));
+}
