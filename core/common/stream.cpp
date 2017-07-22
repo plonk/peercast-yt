@@ -22,6 +22,7 @@
 #undef __STRICT_ANSI__
 #include <stdio.h>
 #endif
+#include <algorithm>
 
 #include "stream.h"
 #include "common.h"
@@ -326,6 +327,23 @@ std::string Stream::readLine()
         res.push_back(c);
     }
 
+    return res;
+}
+
+// -------------------------------------
+std::string Stream::read(int remaining)
+{
+    std::string res;
+
+    uint8_t buffer[4096];
+
+    while (remaining > 0)
+    {
+        int readSize = std::min(remaining, 4096);
+        int r = read(buffer, readSize);
+        res += std::string(buffer, buffer + r);
+        remaining -= r;
+    }
     return res;
 }
 

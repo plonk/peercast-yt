@@ -22,7 +22,6 @@
 
 // -------------------------------------
 
-#include <algorithm>
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
@@ -143,21 +142,7 @@ public:
 
     std::string readLine();
 
-    std::string read(int remaining)
-    {
-        std::string res;
-
-        uint8_t buffer[4096];
-
-        while (remaining > 0)
-        {
-            int readSize = std::min(remaining, 4096);
-            int r = read(buffer, readSize);
-            res += std::string(buffer, buffer + r);
-            remaining -= r;
-        }
-        return res;
-    }
+    std::string read(int remaining);
 
     virtual bool    readReady(int timeoutMilliseconds = 0) { return true; }
     virtual int numPending() { return 0; }
