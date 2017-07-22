@@ -12,7 +12,7 @@ addons:
     - libgtest-dev
     - librtmp-dev
 script: export CC=gcc-5 CXX=g++-5; make -C ui/linux && make -C tests && cd tests &&
-  ./test-all
+  ./test-all && cd ../bvt && cp -R ../ui/linux/peercast-yt . && gem install typhoeus && ruby test-all.rb
 before_deploy:
 - cd $TRAVIS_BUILD_DIR
 deploy:
