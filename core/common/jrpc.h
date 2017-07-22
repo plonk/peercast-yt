@@ -306,7 +306,7 @@ public:
     {
         return {
             { "agentName", PCX_AGENT },
-            { "apiVesion", "1.0.0" },
+            { "apiVersion", "1.0.0" },
             { "jsonrpc", "2.0" }
         };
     }
