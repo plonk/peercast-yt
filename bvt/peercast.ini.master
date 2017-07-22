@@ -1,0 +1,88 @@
+
+[Server]
+serverName = 
+serverPort = 7144
+autoServe = Yes
+forceIP = 
+isRoot = No
+maxBitrateOut = 0
+maxRelays = 2
+maxDirect = 0
+maxRelaysPerChannel = 0
+firewallTimeout = 30
+forceNormal = No
+rootMsg = 
+authType = cookie
+cookiesExpire = session
+htmlPath = html/en
+minPGNUIncoming = 10
+maxPGNUIncoming = 20
+maxServIn = 50
+chanLog = 
+publicDirectory = No
+genrePrefix = 
+networkID = 00000000000000000000000000000000
+
+[Broadcast]
+broadcastMsgInterval = 10
+broadcastMsg = 
+icyMetaInterval = 8192
+broadcastID = 00D67218FD425A17786B476C25E22A34
+hostUpdateInterval = 120
+maxControlConnections = 3
+rootHost = bayonet.ddo.jp:7146
+
+[Client]
+refreshHTML = 5
+relayBroadcast = 30
+minBroadcastTTL = 1
+maxBroadcastTTL = 7
+pushTries = 5
+pushTimeout = 60
+maxPushHops = 8
+autoQuery = 0
+queryTTL = 7
+transcodingEnabled = No
+preset = veryfast
+audioCodec = mp3
+wmvProtocol = http
+
+[Privacy]
+password = 
+maxUptime = 0
+
+[Filter]
+ip = 255.255.255.255
+private = No
+ban = No
+network = Yes
+direct = Yes
+[End]
+
+[Notify]
+PeerCast = Yes
+Broadcasters = Yes
+TrackInfo = Yes
+[End]
+
+[Server1]
+allowHTML = Yes
+allowBroadcast = Yes
+allowNetwork = Yes
+allowDirect = Yes
+[End]
+
+[Server2]
+allowHTML = No
+allowBroadcast = Yes
+allowNetwork = No
+allowDirect = No
+[End]
+
+[Debug]
+logDebug = No
+logErrors = No
+logNetwork = No
+logChannel = No
+pauseLog = No
+idleSleepTime = 10
