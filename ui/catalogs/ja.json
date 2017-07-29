@@ -191,6 +191,9 @@
     "AAC (Experimental)"      : "AAC (実験的)",
     "WMV Protocol"            : "WMVプロトコル",
 
+    // rtmp.html
+    "Start"                   : "開始",
+
     // viewlog.html
     "Clear log"               : "ログをクリア",
     "View tail"               : "最下部を表示",
