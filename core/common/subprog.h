@@ -21,6 +21,8 @@ public:
     Stream& inputStream();
     Stream& outputStream();
     int     pid();
+    bool    isAlive();
+    void    terminate();
 
     bool m_receiveData;
     bool m_feedData;

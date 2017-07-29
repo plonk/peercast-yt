@@ -1,0 +1,119 @@
+#include <stdexcept>
+
+#include "subprog.h"
+
+// Windows headers
+#include <io.h>
+#include <fcntl.h>
+
+Subprogram::Subprogram(const std::string& name, bool receiveData, bool feedData)
+    : m_name(name)
+    , m_pid(-1)
+    , m_receiveData(receiveData)
+    , m_feedData(feedData)
+    , m_processHandle(INVALID_HANDLE_VALUE)
+{
+}
+
+Subprogram::~Subprogram()
+{
+    if (m_processHandle != INVALID_HANDLE_VALUE)
+    {
+        BOOL success;
+
+        success = CloseHandle(m_processHandle);
+        if (success)
+            LOG_DEBUG("Process handle closed.");
+        else
+            LOG_DEBUG("Failed to close process handle.");
+    }
+}
+
+// プログラムの実行を開始。
+extern "C" {
+    extern DWORD WINAPI GetProcessId(HANDLE Process);
+}
+bool Subprogram::start(std::initializer_list<std::string> arguments, Environment& env)
+{
+    SECURITY_ATTRIBUTES sa;
+
+    sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+    sa.bInheritHandle = TRUE;
+    sa.lpSecurityDescriptor = NULL;
+
+    HANDLE stdoutRead;
+    HANDLE stdoutWrite;
+
+    CreatePipe(&stdoutRead, &stdoutWrite, &sa, 0);
+    SetHandleInformation(stdoutRead, HANDLE_FLAG_INHERIT, 0);
+
+    PROCESS_INFORMATION procInfo;
+    STARTUPINFO startupInfo;
+    bool success;
+
+    ZeroMemory(&procInfo, sizeof(PROCESS_INFORMATION));
+    ZeroMemory(&startupInfo, sizeof(STARTUPINFO));
+    startupInfo.cb = sizeof(STARTUPINFO);
+    startupInfo.hStdError = stdoutWrite;
+    startupInfo.hStdOutput = stdoutWrite;
+    startupInfo.dwFlags |= STARTF_USESTDHANDLES;
+    // 標準入力のハンドル指定しなくていいのかな？
+
+    success = CreateProcess(NULL,
+                            (char*) ("python\\python \"" + m_name + "\"").c_str(),
+                            NULL,
+                            NULL,
+                            TRUE,
+                            0,
+                            (PVOID) m_env.windowsEnvironmentBlock().c_str(),
+                            NULL,
+                            &startupInfo,
+                            &procInfo);
+
+    if (!success)
+        return false;
+
+    m_processHandle = procInfo.hProcess;
+    m_pid = GetProcessId(procInfo.hProcess);
+
+    int fd = _open_osfhandle((intptr_t) stdoutRead, _O_RDONLY);
+    m_inputStream.openReadOnly(fd);
+
+    CloseHandle(stdoutWrite);
+    CloseHandle(procInfo.hThread);
+    return true;
+}
+
+// プログラムにより終了ステータスが返された場合は true を返し、ステー
+// タスが *status にセットされる。
+bool Subprogram::wait(int* status)
+{
+    DWORD res;
+    DWORD exitCode;
+
+    res = WaitForSingleObject(m_processHandle, 10 * 1000);
+    if (res == WAIT_TIMEOUT)
+        LOG_ERROR("Process wait timeout.");
+    else if (res == WAIT_FAILED)
+        LOG_ERROR("Process wait failed.");
+
+    if (!GetExitCodeProcess(m_processHandle, &exitCode))
+    {
+        LOG_ERROR("Failed to get exit code of child process.");
+        return false;
+    }else
+    {
+        *status = exitCode;
+        return true;
+    }
+}
+
+bool Subprogram::isAlive()
+{
+#error unimplemented
+}
+
+void Subprogram::terminate()
+{
+#error unimplemented
+}
