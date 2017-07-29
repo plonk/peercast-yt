@@ -87,6 +87,7 @@ a.button {
 table.table-panel {
     font-family: Verdana, Arial, Helvetica, sans-serif;
     font-size: 12px;
+    margin-bottom: 1em;
 }
 
 table.table-panel tbody tr:nth-child(odd) {
@@ -98,4 +99,9 @@ table.table-panel tbody tr:nth-child(even) {
 
 table.table-panel tbody tr:nth-child(1) {
 	background-color: #ccc;
+}
+
+table.table-panel th {
+	text-align: right;
+	font-weight: normal;
 }
