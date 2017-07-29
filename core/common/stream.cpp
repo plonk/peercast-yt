@@ -84,6 +84,18 @@ void FileStream::openWriteReplace(const char *fn)
 }
 
 // -------------------------------------
+void FileStream::openWriteReplace(int fd)
+{
+    if (file)
+        close();
+
+    file = fdopen(fd, "wb");
+
+    if (!file)
+        throw StreamException("Unable to open file");
+}
+
+// -------------------------------------
 void FileStream::openWriteAppend(const char *fn)
 {
     if (file)

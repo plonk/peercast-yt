@@ -12,10 +12,14 @@
 #include "subprog.h"
 #include "env.h"
 
-Subprogram::Subprogram(const std::string& name, Environment& env)
+#include <stdexcept>
+
+
+Subprogram::Subprogram(const std::string& name, bool receiveData, bool feedData)
     : m_name(name)
     , m_pid(-1)
-    , m_env(env)
+    , m_receiveData(receiveData)
+    , m_feedData(feedData)
 #ifdef WIN32
     , m_processHandle(INVALID_HANDLE_VALUE)
 #endif
@@ -48,7 +52,7 @@ Subprogram::~Subprogram()
 extern "C" {
     extern DWORD WINAPI GetProcessId(HANDLE Process);
 }
-bool Subprogram::start()
+bool Subprogram::start(std::initializer_list<std::string> arguments, Environment& env)
 {
     SECURITY_ATTRIBUTES sa;
 
@@ -100,14 +104,27 @@ bool Subprogram::start()
 }
 #endif
 #ifdef _UNIX
-bool Subprogram::start()
+bool Subprogram::start(std::initializer_list<std::string> arguments, Environment& env)
 {
-    int pipefd[2];
-    if (pipe(pipefd) == -1)
+    int stdoutPipe[2];
+    int stdinPipe[2];
+
+    if (pipe(stdoutPipe) == -1)
     {
         char buf[1024];
         strerror_r(errno, buf, sizeof(buf));
         LOG_ERROR("pipe: %s", buf);
+        return false;
+    }
+
+    if (pipe(stdinPipe) == -1)
+    {
+        char buf[1024];
+        strerror_r(errno, buf, sizeof(buf));
+        LOG_ERROR("pipe: %s", buf);
+
+        close(stdoutPipe[0]);
+        close(stdoutPipe[1]);
         return false;
     }
 
@@ -117,22 +134,37 @@ bool Subprogram::start()
         // 子プロセス。
 
         // パイプの読み出し側を閉じる。
-        close(pipefd[0]);
+        close(stdoutPipe[0]);
+        close(stdinPipe[1]);
 
         // 書き込み側を標準出力として複製する。
-        close(1);
-        dup(pipefd[1]);
+        if (m_receiveData)
+        {
+            close(1);
+            dup(stdoutPipe[1]);
+        }
+        if (m_feedData)
+        {
+            close(0);
+            dup(stdinPipe[0]);
+        }
 
-        close(pipefd[1]);
+        close(stdoutPipe[1]);
+        close(stdinPipe[0]);
 
-        int r = execle(m_name.c_str(),
-                       m_name.c_str(), NULL,
-                       m_env.env());
+        // exec するか exit するかなので解放しなくていいかも。
+        const char* *argv = new const char* [arguments.size() + 1];
+        argv[0] = m_name.c_str();
+        int i = 1;
+        for (auto it = arguments.begin(); it != arguments.end(); ++it)
+        {
+            argv[i++] = it->c_str();
+        }
+        argv[i] = nullptr;
+
+        int r = execvpe(m_name.c_str(), (char* const*) argv, (char* const*) env.env());
         if (r == -1)
         {
-            // char buf[1024];
-            // strerror_r(errno, buf, sizeof(buf));
-
             char *buf = strerror(errno);
             LOG_ERROR("execle: %s: %s", m_name.c_str(), buf);
             _exit(1);
@@ -145,9 +177,18 @@ bool Subprogram::start()
         m_pid = pid;
 
         // 書き込み側を閉じる。
-        close(pipefd[1]);
+        close(stdoutPipe[1]);
+        close(stdinPipe[0]);
 
-        m_inputStream.openReadOnly(pipefd[0]);
+        if (m_receiveData)
+            m_inputStream.openReadOnly(stdoutPipe[0]);
+        else
+            close(stdoutPipe[0]);
+
+        if (m_feedData)
+            m_outputStream.openWriteReplace(stdinPipe[1]);
+        else
+            close(stdinPipe[1]);
     }
     return true;
 }
@@ -199,7 +240,16 @@ bool Subprogram::wait(int* status)
 // プログラムの出力を読み出すストリーム。
 Stream& Subprogram::inputStream()
 {
+    if (!m_receiveData)
+        throw std::runtime_error("no input stream");
     return m_inputStream;
+}
+
+Stream& Subprogram::outputStream()
+{
+    if (!m_feedData)
+        throw std::runtime_error("no output stream");
+    return m_outputStream;
 }
 
 // プロセスID。

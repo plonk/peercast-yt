@@ -206,9 +206,9 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
     if (filePath.empty())
         throw HTTPException(HTTP_SC_NOTFOUND, 404);
 
-    Subprogram script(filePath, env);
+    Subprogram script(filePath);
 
-    bool success = script.start();
+    bool success = script.start({}, env);
     if (success)
         LOG_DEBUG("script started (pid = %d)", script.pid());
     else

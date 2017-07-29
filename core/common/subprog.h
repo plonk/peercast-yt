@@ -1,6 +1,7 @@
 #ifndef _SUBPROG_H
 #define _SUBPROG_H
 
+#include <initializer_list>
 #include <string>
 #include "stream.h"
 #include "env.h"
@@ -12,17 +13,21 @@
 class Subprogram
 {
 public:
-    Subprogram(const std::string& name, Environment& env);
+    Subprogram(const std::string& name, bool receiveData = true, bool feedData = true);
     ~Subprogram();
 
-    bool    start();
+    bool    start(std::initializer_list<std::string> arguments, Environment& env);
     bool    wait(int* status);
     Stream& inputStream();
+    Stream& outputStream();
     int     pid();
 
+    bool m_receiveData;
+    bool m_feedData;
+
     std::string  m_name;
-    Environment& m_env;
     FileStream   m_inputStream;
+    FileStream   m_outputStream;
     int          m_pid;
 
 #ifdef WIN32
