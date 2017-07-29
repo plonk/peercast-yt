@@ -302,6 +302,7 @@ public:
     void    openReadOnly(int fd);
     void    openWriteReplace(const char *);
     void    openWriteReplace(const std::string& fn) { openWriteReplace(fn.c_str()); }
+    void    openWriteReplace(int fd);
     void    openWriteAppend(const char *);
     void    openWriteAppend(const std::string& fn) { openWriteAppend(fn.c_str()); }
     bool    isOpen() { return file!=NULL; }
