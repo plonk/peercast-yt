@@ -18,6 +18,7 @@ public:
     bool hasKey(const std::string&) const;
     std::vector<std::string> keys() const;
     size_t size() const { return m_vars.size(); }
+    void copyFromCurrentProcess();
 
     std::vector<std::string> m_vars;
 

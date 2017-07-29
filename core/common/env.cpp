@@ -22,6 +22,15 @@ Environment::~Environment()
         free(m_env);
 }
 
+void Environment::copyFromCurrentProcess()
+{
+    extern char** environ;
+
+    m_vars.clear();
+    for (int i = 0; environ[i] != NULL; i++)
+        m_vars.push_back(environ[i]);
+}
+
 void Environment::set(const std::string& key, const std::string& value)
 {
     for (auto& entry : m_vars)
