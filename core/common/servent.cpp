@@ -184,8 +184,6 @@ void    Servent::kill()
         pushSock = NULL;
     }
 
-//  thread.unlock();
-
     if (type != T_SERVER)
     {
         reset();
