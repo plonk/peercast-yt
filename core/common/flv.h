@@ -268,7 +268,7 @@ public:
             in.read(data, len);
             return data;
         }
-    };
+    }
 
     double readDouble(Stream &in)
     {
@@ -279,7 +279,7 @@ public:
             *(data + i - 1) = c;
         }
         return number;
-    };
+    }
 
     void readObject(Stream &in)
     {
