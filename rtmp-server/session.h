@@ -50,7 +50,7 @@ namespace rtmpserver
             int  message_stream_id = to_integer_little_endian({ io->readChar(), io->readChar(), io->readChar(), io->readChar() });
             if (timestamp >= 0xffffff)
                 throw std::runtime_error("extended timestamp not implemented");
-            return { timestamp, message_length, message_type_id, message_stream_id };
+            return std::make_tuple(timestamp, message_length, message_type_id, message_stream_id);
         }
 
         std::tuple<int,int,int> read_type1_header(Stream* io)
@@ -58,7 +58,7 @@ namespace rtmpserver
             int tdelta = to_integer_big_endian({ io->readChar(), io->readChar(), io->readChar() });
             int length = to_integer_big_endian({ io->readChar(), io->readChar(), io->readChar() });
             int type = io->readChar();
-            return { tdelta, length, type };
+            return std::make_tuple(tdelta, length, type);
         }
 
         void run()
