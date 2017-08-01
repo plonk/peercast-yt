@@ -27,12 +27,14 @@
 #include "pcp.h"
 #include "atom.h"
 #include "version2.h"
+#include "rtmpmonit.h"
 
 ThreadInfo ServMgr::serverThread, ServMgr::idleThread;
 
 // -----------------------------------
 ServMgr::ServMgr()
     : publicDirectoryEnabled(false)
+    , rtmpServerMonitor(std::string(peercastApp->getPath()) + "rtmp-server")
 {
     validBCID = NULL;
 
@@ -119,6 +121,8 @@ ServMgr::ServMgr()
     audioCodec = "mp3";
 
     wmvProtocol = "http";
+
+    rtmpServerMonitor.enable();
 }
 
 // -----------------------------------
@@ -1928,6 +1932,8 @@ int ServMgr::idleProc(ThreadInfo *thread)
 
         // チャンネル一覧を取得する。
         servMgr->channelDirectory.update();
+
+        servMgr->rtmpServerMonitor.update();
 
         sys->sleep(500);
     }

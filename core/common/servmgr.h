@@ -23,6 +23,7 @@
 #include "servent.h"
 #include "chandir.h"
 #include "varwriter.h"
+#include "rtmpmonit.h"
 
 // ----------------------------------
 
@@ -390,6 +391,8 @@ public:
     std::string         audioCodec;
 
     std::string         wmvProtocol;
+
+    RTMPServerMonitor  rtmpServerMonitor;
 };
 
 // ----------------------------------
