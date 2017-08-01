@@ -47,6 +47,11 @@ public:
         ip = i;
         port = p;
     }
+    Host(const std::string& hostname, uint16_t port)
+    {
+        fromStrName(hostname.c_str(), port);
+    }
+
 
     void    init()
     {
