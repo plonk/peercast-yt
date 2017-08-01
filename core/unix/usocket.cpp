@@ -323,6 +323,9 @@ void UClientSocket::bind(Host &h)
     if ((sockNum = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
         throw SockException("Can`t open socket");
 
+    if (fcntl(sockNum, F_SETFD, FD_CLOEXEC) == -1)
+        throw SockException("Can`t set close-on-exec flag");
+
     setReuse(true);
     setBlocking(false);
 
