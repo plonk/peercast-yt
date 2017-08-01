@@ -1,6 +1,7 @@
 #include <stdexcept>
 
 #include "subprog.h"
+#include "str.h"
 
 // Windows headers
 #include <io.h>
@@ -29,6 +30,30 @@ Subprogram::~Subprogram()
     }
 }
 
+static
+std::string createCommandLine(std::string prog, std::vector<std::string> args)
+{
+    bool isCGI = str::has_suffix(str::upcase(prog), ".CGI");
+
+    std::vector<std::string> words;
+    if (isCGI)
+        words.push_back("python\\python");
+
+    words.push_back(prog);
+    for (auto s : args)
+        words.push_back(s);
+
+    for (int i = 0; i < words.size(); ++i)
+    {
+        auto s = words[i];
+        for (int j = 0; j < s.size(); j++)
+            if (s[j] == '%' || s[j] == '!' || s[j] == '\"')
+                s[j] = ' '; // replace unsafe characters with a space
+        words[i] = "\"" + s + "\"";
+    }
+    return str::join(" ", words);
+}
+
 // プログラムの実行を開始。
 extern "C" {
     extern DWORD WINAPI GetProcessId(HANDLE Process);
@@ -44,8 +69,11 @@ bool Subprogram::start(std::initializer_list<std::string> arguments, Environment
     HANDLE stdoutRead;
     HANDLE stdoutWrite;
 
-    CreatePipe(&stdoutRead, &stdoutWrite, &sa, 0);
-    SetHandleInformation(stdoutRead, HANDLE_FLAG_INHERIT, 0);
+    if (m_receiveData)
+    {
+        CreatePipe(&stdoutRead, &stdoutWrite, &sa, 0);
+        SetHandleInformation(stdoutRead, HANDLE_FLAG_INHERIT, 0);
+    }
 
     PROCESS_INFORMATION procInfo;
     STARTUPINFO startupInfo;
@@ -54,18 +82,23 @@ bool Subprogram::start(std::initializer_list<std::string> arguments, Environment
     ZeroMemory(&procInfo, sizeof(PROCESS_INFORMATION));
     ZeroMemory(&startupInfo, sizeof(STARTUPINFO));
     startupInfo.cb = sizeof(STARTUPINFO);
-    startupInfo.hStdError = stdoutWrite;
-    startupInfo.hStdOutput = stdoutWrite;
+    if (m_receiveData)
+    {
+        startupInfo.hStdError = stdoutWrite;
+        startupInfo.hStdOutput = stdoutWrite;
+    }
     startupInfo.dwFlags |= STARTF_USESTDHANDLES;
     // 標準入力のハンドル指定しなくていいのかな？
 
+    std::string cmdline = createCommandLine(m_name, arguments);
+    LOG_DEBUG("cmdline: %s", str::inspect(cmdline).c_str());
     success = CreateProcess(NULL,
-                            (char*) ("python\\python \"" + m_name + "\"").c_str(),
+                            const_cast<char*>( cmdline.c_str() ),
                             NULL,
                             NULL,
                             TRUE,
                             0,
-                            (PVOID) m_env.windowsEnvironmentBlock().c_str(),
+                            (PVOID) env.windowsEnvironmentBlock().c_str(),
                             NULL,
                             &startupInfo,
                             &procInfo);
@@ -76,10 +109,13 @@ bool Subprogram::start(std::initializer_list<std::string> arguments, Environment
     m_processHandle = procInfo.hProcess;
     m_pid = GetProcessId(procInfo.hProcess);
 
-    int fd = _open_osfhandle((intptr_t) stdoutRead, _O_RDONLY);
-    m_inputStream.openReadOnly(fd);
+    if (m_receiveData)
+    {
+        int fd = _open_osfhandle((intptr_t) stdoutRead, _O_RDONLY);
+        m_inputStream.openReadOnly(fd);
 
-    CloseHandle(stdoutWrite);
+        CloseHandle(stdoutWrite);
+    }
     CloseHandle(procInfo.hThread);
     return true;
 }
@@ -110,10 +146,26 @@ bool Subprogram::wait(int* status)
 
 bool Subprogram::isAlive()
 {
-#error unimplemented
+    if (m_processHandle == INVALID_HANDLE_VALUE)
+        return false;
+
+    DWORD exitCode;
+    if (GetExitCodeProcess(m_processHandle, &exitCode) == 0)
+    {
+        LOG_ERROR("GetExitCodeProcess: error code = %d\n", (int) GetLastError());
+        abort();
+    }
+    return exitCode == STILL_ACTIVE;
 }
 
 void Subprogram::terminate()
 {
-#error unimplemented
+    if (m_processHandle == INVALID_HANDLE_VALUE)
+        return;
+
+    if (TerminateProcess(m_processHandle, 1) == 0)
+    {
+        LOG_ERROR("TerminateProcess: error code = %d\n", (int) GetLastError());
+        abort();
+    }
 }
