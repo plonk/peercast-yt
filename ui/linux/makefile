@@ -21,7 +21,9 @@ AR = ar
 INCLUDES = -I../../core -I../../core/common -I../../Onigmo
 
 TARGET = peercast
+RTMPSERVER = rtmp-server
 CORE = ../../core
+RTMP = ../../rtmp-server
 SRCHTMLTAR = ../html.tar
 HTML = html
 SRCPUBLICTAR = ../public.tar
@@ -41,6 +43,9 @@ SYSOBJ = $(notdir $(SYSSOURCE:.cpp=.o))
 LINUXSOURCE = main.cpp
 LINUXOBJ = $(notdir $(LINUXSOURCE:.cpp=.o))
 
+RTMPSOURCE = $(wildcard $(RTMP)/*.cpp)
+RTMPOBJ = $(notdir $(RTMPSOURCE:.cpp=.o))
+
 LIBONIGMO = ../../Onigmo/.libs/libonigmo.a
 
 DEPENDFILE = .deps
@@ -48,7 +53,7 @@ DEPENDFILE = .deps
 .PHONY: all clean build-html deps $(SRCHTMLTAR) $(SRCPUBLICTAR)
 
 # Here follow the generic build rules.
-all: $(TARGET) $(LIBOBJSTATIC) $(DISTARCHIVE)
+all: $(TARGET) $(LIBOBJSTATIC) $(DISTARCHIVE) $(RTMPSERVER)
 
 deps: $(DEPENDFILE)
 
@@ -89,14 +94,20 @@ $(COREOBJ): %.o : $(CORE)/common/%.cpp
 $(SYSOBJ): %.o : $(CORE)/unix/%.cpp
 	$(CXX) $(CPPFLAGS) -c $< -o $@
 
-$(DEPENDFILE): $(CORESOURCE) $(LINUXSOURCE)
-	$(CXX) $(CPPFLAGS) -MM $(CORESOURCE) $(SYSSOURCE) $(LINUXSOURCE) > $(DEPENDFILE)
+$(RTMPOBJ): %.o : $(RTMP)/%.cpp
+	$(CXX) $(CPPFLAGS) -c $< -o $@
+
+$(DEPENDFILE): $(CORESOURCE) $(SYSSOURCE) $(LINUXSOURCE) $(RTMPSOURCE)
+	$(CXX) $(CPPFLAGS) -MM $(CORESOURCE) $(SYSSOURCE) $(LINUXSOURCE) $(RTMPSOURCE) > $(DEPENDFILE)
 
 $(LIBOBJSTATIC): $(COREOBJ) $(SYSOBJ)
 	$(AR) rcs $(LIBOBJSTATIC) $(COREOBJ) $(SYSOBJ)
 
 $(TARGET): $(LINUXOBJ) $(LIBOBJSTATIC) $(LIBONIGMO)
 	$(CXX) $(LDFLAGS) -o $@ $(LINUXOBJ) $(LIBOBJSTATIC) $(LIBS)
+
+$(RTMPSERVER): $(RTMPOBJ) $(LIBOBJSTATIC) $(LIBONIGMO)
+	$(CXX) $(LDFLAGS) -o $@ $(RTMPOBJ) $(LIBOBJSTATIC) $(LIBS)
 
 $(LIBONIGMO):
 	cd ../../Onigmo; ./configure
