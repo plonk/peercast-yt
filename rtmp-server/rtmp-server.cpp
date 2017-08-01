@@ -4,7 +4,13 @@
 #include <assert.h>
 
 #include "sys.h"
+
+#ifdef _UNIX
 #include "unix/usys.h"
+#else
+#include "win32/wsys.h"
+#endif
+
 #include "uri.h"
 #include "iohelpers.h"
 #include "session.h"
