@@ -49,7 +49,7 @@ public:
         close();
     }
 
-    void    open(Host &) override;
+    void    open(const Host &) override;
     int     read(void *, int) override;
     int     readUpto(void *, int) override;
     void    write(const void *, int) override;

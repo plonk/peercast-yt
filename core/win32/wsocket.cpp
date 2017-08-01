@@ -150,7 +150,7 @@ HOSTENT *WSAClientSocket::resolveHost(const char *hostName)
 }
 
 // --------------------------------------------------
-void WSAClientSocket::open(Host &rh)
+void WSAClientSocket::open(const Host &rh)
 {
     sockNum = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 

@@ -36,7 +36,7 @@ public:
     {
     }
 
-    virtual void    open(Host &);
+    virtual void    open(const Host &);
     virtual int     read(void *, int);
     virtual int     readUpto(void *, int);
     virtual void    write(const void *, int);

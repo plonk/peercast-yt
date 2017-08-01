@@ -155,7 +155,7 @@ hostent *UClientSocket::resolveHost(const char *hostName)
 }
 
 // --------------------------------------------------
-void UClientSocket::open(Host &rh)
+void UClientSocket::open(const Host &rh)
 {
     sockNum = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
