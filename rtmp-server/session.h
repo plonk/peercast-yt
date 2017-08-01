@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <map>
 #include <tuple>
-#include "uri.h"
 #include "message.h"
 #include "amf0.h"
 #include "sstream.h"
@@ -17,19 +16,17 @@ namespace rtmpserver
     public:
         ClientSocket* client;
         FLVWriter& flv_writer;
-        const URI& uri;
 
         int max_incoming_chunk_size;
         int max_outgoing_chunk_size;
 
         bool quitting;
 
-        Session(ClientSocket* aClient, const URI& aUri, FLVWriter& aFlvWriter)
+        Session(ClientSocket* aClient, FLVWriter& aFlvWriter)
             : client(aClient)
             , max_incoming_chunk_size(128)
             , max_outgoing_chunk_size(128)
             , flv_writer(aFlvWriter)
-            , uri(aUri)
             , quitting(false) {}
 
         // 毎回同じ乱数列を生成する。
