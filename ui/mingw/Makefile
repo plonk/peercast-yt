@@ -17,7 +17,9 @@ AR = ar
 INCLUDES = -I../../core -I../../core/common -I../../Onigmo
 
 TARGET = peercast.exe
+RTMPSERVER = rtmp-server
 CORE = ../../core
+RTMP = ../../rtmp-server
 SRCHTMLTAR = ../html.tar
 HTML = html
 SRCPUBLICTAR = ../public.tar
@@ -36,12 +38,15 @@ SYSOBJ = $(notdir $(SYSSOURCE:.cpp=.o))
 LINUXSOURCE = main.cpp
 LINUXOBJ = $(notdir $(LINUXSOURCE:.cpp=.o))
 
+RTMPSOURCE = $(wildcard $(RTMP)/*.cpp)
+RTMPOBJ = $(notdir $(RTMPSOURCE:.cpp=.o))
+
 DEPENDFILE = .deps
 
 .PHONY: all clean build-html deps $(SRCHTMLTAR) $(SRCPUBLICTAR) $(SRCASSETSTAR)
 
 # Here follow the generic build rules.
-all: $(TARGET) $(LIBOBJSTATIC) $(DISTARCHIVE)
+all: $(TARGET) $(LIBOBJSTATIC) $(DISTARCHIVE) $(RTMPSERVER)
 
 deps: $(DEPENDFILE)
 
@@ -84,13 +89,19 @@ $(COREOBJ): %.o : $(CORE)/common/%.cpp
 $(SYSOBJ): %.o : $(CORE)/win32/%.cpp
 	$(CXX) $(CPPFLAGS) -c $< -o $@
 
-$(DEPENDFILE): $(CORESOURCE) $(LINUXSOURCE)
-	$(CXX) $(CPPFLAGS) -MM $(CORESOURCE) $(SYSSOURCE) $(LINUXSOURCE) > $(DEPENDFILE)
+$(RTMPOBJ): %.o : $(RTMP)/%.cpp
+	$(CXX) $(CPPFLAGS) -c $< -o $@
+
+$(DEPENDFILE): $(CORESOURCE) $(LINUXSOURCE) $(RTMPSOURCE)
+	$(CXX) $(CPPFLAGS) -MM $(CORESOURCE) $(SYSSOURCE) $(LINUXSOURCE) $(RTMPSOURCE) > $(DEPENDFILE)
 
 $(LIBOBJSTATIC): $(COREOBJ) $(SYSOBJ)
 	$(AR) rcs $(LIBOBJSTATIC) $(COREOBJ) $(SYSOBJ)
 
 $(TARGET): $(LINUXOBJ) $(LIBOBJSTATIC)
 	$(CXX) $(LDFLAGS) -o $@ $(LINUXOBJ) $(LIBOBJSTATIC) $(LIBS)
+
+$(RTMPSERVER): $(RTMPOBJ) $(LIBOBJSTATIC) $(LIBONIGMO)
+	$(CXX) $(LDFLAGS) -o $@ $(RTMPOBJ) $(LIBOBJSTATIC) $(LIBS)
 
 -include $(DEPENDFILE)
