@@ -5,7 +5,7 @@
 class MockClientSocket : public ClientSocket
 {
 public:
-    void            open(Host &) override
+    void            open(const Host &) override
     {
     }
 
