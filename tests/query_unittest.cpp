@@ -45,3 +45,12 @@ TEST_F(QueryFixture, nonexistentKey)
     ASSERT_EQ(0, query.getAll("d").size());
     ASSERT_EQ(false, query.hasKey("d")); // still doesn't have the key
 }
+
+TEST_F(QueryFixture, add)
+{
+    Query query1;
+    ASSERT_EQ("", query1.str());
+    query1.add("a a", "1 1");
+    query1.add("b b", "2 2");
+    ASSERT_EQ("a+a=1+1&b+b=2+2", query1.str());
+}

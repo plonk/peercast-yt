@@ -97,6 +97,30 @@ std::vector<std::string> Query::getAll(const std::string& key)
     }
 }
 
+std::string Query::str()
+{
+    std::string res;
+    bool firstTime = true;
+    for (auto pair : m_dict)
+    {
+        for (auto value : pair.second)
+        {
+            if (firstTime)
+                firstTime = false;
+            else
+                res += "&";
+
+            res += escape(pair.first) + "=" + escape(value);
+        }
+    }
+    return res;
+}
+
+void Query::add(const std::string& key, const std::string& value)
+{
+    m_dict[key].push_back(value);
+}
+
 static const char* daysOfWeek[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
 static const char* monthNames[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Nov", "Oct", "Dec" };
 
