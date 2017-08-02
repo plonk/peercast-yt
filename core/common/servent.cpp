@@ -1970,10 +1970,9 @@ int Servent::incomingProc(ThreadInfo *thread)
 {
     Servent *sv = (Servent*)thread->data;
 
-    char ipStr[64];
-    sv->sock->host.toStr(ipStr);
+    std::string ipStr = sv->sock->host.str(true);
 
-    sys->setThreadName(thread, String::format("INCOMING %s", ipStr));
+    sys->setThreadName(thread, String::format("INCOMING %s", ipStr.c_str()));
 
     try
     {
@@ -1991,10 +1990,10 @@ int Servent::incomingProc(ThreadInfo *thread)
             sv->sock->writeString(e.msg);
         }catch (StreamException &) {}
 
-        LOG_ERROR("Incoming from %s: %s", ipStr, e.msg);
+        LOG_ERROR("Incoming from %s: %s", ipStr.c_str(), e.msg);
     }catch (StreamException &e)
     {
-        LOG_ERROR("Incoming from %s: %s", ipStr, e.msg);
+        LOG_ERROR("Incoming from %s: %s", ipStr.c_str(), e.msg);
     }
 
     sv->kill();
@@ -2499,13 +2498,10 @@ int Servent::serverProc(ThreadInfo *thread)
 
         sv->setStatus(S_LISTENING);
 
-        char servIP[64];
-        sv->sock->host.toStr(servIP);
-
         if (servMgr->isRoot)
-            LOG_DEBUG("Root Server started: %s", servIP);
+            LOG_DEBUG("Root Server started: %s", sv->sock->host.str().c_str());
         else
-            LOG_DEBUG("Server started: %s", servIP);
+            LOG_DEBUG("Server started: %s", sv->sock->host.str().c_str());
 
         while (thread->active && sv->sock->active())
         {
@@ -2545,7 +2541,7 @@ int Servent::serverProc(ThreadInfo *thread)
         LOG_ERROR("Server Error: %s:%d", e.msg, e.err);
     }
 
-    LOG_DEBUG("Server stopped");
+    LOG_DEBUG("Server stopped: %s", sv->sock->host.str().c_str());
 
     sv->kill();
     return 0;
