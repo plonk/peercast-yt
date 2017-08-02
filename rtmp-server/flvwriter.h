@@ -81,12 +81,11 @@ namespace rtmpserver
             writeTag(TT_AUDIO, timestamp1, timestamp_extended, data);
         }
 
-        // XXX: Unimplemented
         // conversion of a SI32 timestamp to UI24 + UI8.
         std::pair<int32_t,uint8_t>
         splitTimestamp(int32_t timestamp)
         {
-            return {timestamp, 0};
+            return { timestamp & 0xffffff, (timestamp >> 24) & 0xff };
         }
 
         void writeTag(int tag_type,
