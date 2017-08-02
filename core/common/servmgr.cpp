@@ -2277,6 +2277,12 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var == "wmvProtocol")
     {
         buf = servMgr->wmvProtocol;
+    }else if (var.startsWith("defaultChannelInfo."))
+    {
+        return servMgr->defaultChannelInfo.writeVariable(out, var + strlen("defaultChannelInfo."));
+    }else if (var.startsWith("rtmpServerMonitor."))
+    {
+        return servMgr->rtmpServerMonitor.writeVariable(out, var + strlen("rtmpServerMonitor."));
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);

@@ -5,28 +5,65 @@
 
 <div style="width: 500px">
   <form action=/admin method=get>
-    <input type=hidden value=add_bcid name=cmd>
+    <input type=hidden value="control_rtmp" name=cmd>
 
     <table class="table-panel" width="100%" border=0>
       <tr>
-        <td colspan="2"><div align="center"><b>{#RTMP Service}</b></div></td>
+        <td colspan="2"><div align="center"><b>{#RTMP Server}</b></div></td>
+      </tr>
+      <!-- <tr>
+      <th style="width: 5em">{#App}</th>
+      <td><input name=id value="live"></td>
       </tr>
       <tr>
-        <th style="width: 5em">{#App}</th>
-        <td><input name=id value="live"></td>
+      <th>{#Key}</th>
+      <td><input name=name value="livestream"></td>
+      </tr>
+      <tr>
+      <th>{#Port}</th>
+      <td><input type=text value="1935"></td>
+      </tr> -->
+      <tr>
+        <th style="width: 8em">{#Status}</th>
+        <td>{$servMgr.rtmpServerMonitor.status}</td>
+      </tr>
+      <tr>
+        <th>{#Process ID}</th>
+        <td>
+          {@if servMgr.rtmpServerMonitor.processID == "-1"}
+            n/a
+          {@else}
+            {$servMgr.rtmpServerMonitor.processID}
+          {@end}
+        </td>
+      </tr>
+      <tr>
+        <th>{#URL} 1</th>
+        <td>
+          <code>rtmp://localhost/live</code>
+        </td>
+      </tr>
+      <tr>
+        <th>{#URL} 2</th>
+        <td>
+          <code>rtmp://{$servMgr.serverIP}/live</code>
+        </td>
       </tr>
       <tr>
         <th>{#Key}</th>
-        <td><input name=name value="livestream"></td>
-      </tr>
-      <tr>
-        <th>{#Port}</th>
-        <td><input type=text value="1935"></td>
+        <td>
+          <code>livestream</code>
+        </td>
       </tr>
       <tr align="center">
         <td colspan=2 style="padding: 5px">
-          <input type=submit value="{#Start}" name=submit>
-          <input type=submit value="{#Stop}" name=submit disabled>
+          {@if servMgr.rtmpServerMonitor.status == "DOWN"}
+            <button type=submit value="start" name=action>{#Start}</button>
+            <button type=submit value="stop" name=action disabled>{#Stop}</button>
+          {@else}
+            <button type=submit value="start" name=action disabled>{#Start}</button>
+            <button type=submit value="stop" name=action>{#Stop}</button>
+          {@end}
         </td>
       </tr>
     </table>
@@ -36,33 +73,38 @@
         <td colspan="2"><div align="center"><b>{#Channel Information}</b></div></td>
       </tr>
       <tr>
-        <th style="width: 5em">{#Name}</th>
+        <th style="width: 8em">{#Name}</th>
         <td>
-          <input type="text" size="32">
+          <input type="text" name="name" value="{$servMgr.defaultChannelInfo.name}" style="width: 100%" required
+                 {@if servMgr.rtmpServerMonitor.status == "UP"}disabled{@end}>
         </td>
       </tr>
       <tr>
         <th>{#Genre}</th>
         <td>
-          <input type="text" size="32">
+          <input type="text" name="genre" value="{$servMgr.defaultChannelInfo.genre}" style="width: 100%"
+                 {@if servMgr.rtmpServerMonitor.status == "UP"}disabled{@end}>
         </td>
       </tr>
       <tr>
         <th>{#Desc.}</th>
         <td>
-          <input type="text" size="32">
+          <input type="text" name="desc" value="{$servMgr.defaultChannelInfo.desc}" style="width: 100%"
+                 {@if servMgr.rtmpServerMonitor.status == "UP"}disabled{@end}>
         </td>
       </tr>
       <tr>
         <th>{#URL}</th>
         <td>
-          <input type="url" size="32">
+          <input type="url" name="url" value="{$servMgr.defaultChannelInfo.url}" style="width: 100%"
+                 {@if servMgr.rtmpServerMonitor.status == "UP"}disabled{@end}>
         </td>
       </tr>
       <tr>
         <th>{#Comment}</th>
         <td>
-          <input type="text" size="32">
+          <input type="text" name="comment" value="{$servMgr.defaultChannelInfo.comment}" style="width: 100%"
+                 {@if servMgr.rtmpServerMonitor.status == "UP"}disabled{@end}>
         </td>
       </tr>
     </table>

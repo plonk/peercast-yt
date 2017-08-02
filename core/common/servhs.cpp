@@ -1608,6 +1608,40 @@ void Servent::CMD_login(char *cmd, HTTP& http, HTML& html, String& jumpStr)
     http.writeLine("");
 }
 
+void Servent::CMD_control_rtmp(char *cmd, HTTP& http, HTML& html, String& jumpStr)
+{
+    cgi::Query query(cmd);
+    auto action = query.get("action");
+
+    if (action == "start")
+    {
+        if (query.get("name") == "")
+            throw HTTPException(HTTP_SC_BADREQUEST, 400); // name required to start RTMP server
+
+        {
+            CriticalSection cs(servMgr->lock);
+            ChanInfo& info = servMgr->defaultChannelInfo;
+            info.name    = query.get("name").c_str();
+            info.genre   = query.get("genre").c_str();
+            info.desc    = query.get("desc").c_str();
+            info.url     = query.get("url").c_str();
+            info.comment = query.get("comment").c_str();
+        }
+
+        servMgr->rtmpServerMonitor.enable();
+        // Give serverProc the time to actually start the process.
+        sys->sleep(500);
+        jumpStr.sprintf("/%s/rtmp.html", servMgr->htmlPath);
+    }else if (action == "stop")
+    {
+        servMgr->rtmpServerMonitor.disable();
+        jumpStr.sprintf("/%s/rtmp.html", servMgr->htmlPath);
+    }else
+    {
+        throw HTTPException(HTTP_SC_BADREQUEST, 400);
+    }
+}
+
 void Servent::handshakeCMD(char *cmd)
 {
     String jumpStr;
@@ -1686,6 +1720,9 @@ void Servent::handshakeCMD(char *cmd)
         }else if (cmpCGIarg(cmd, "cmd=", "login"))
         {
             CMD_login(cmd, http, html, jumpStr);
+        }else if (cmpCGIarg(cmd, "cmd=", "control_rtmp"))
+        {
+            CMD_control_rtmp(cmd, http, html, jumpStr);
         }else{
             throw HTTPException(HTTP_SC_BADREQUEST, 400);
         }
