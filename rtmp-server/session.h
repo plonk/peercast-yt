@@ -58,6 +58,9 @@ namespace rtmpserver
             int tdelta = to_integer_big_endian({ io->readChar(), io->readChar(), io->readChar() });
             int length = to_integer_big_endian({ io->readChar(), io->readChar(), io->readChar() });
             int type = io->readChar();
+
+            if (tdelta >= 0xffffff)
+                throw std::runtime_error("extended timestamp not implemented");
             return std::make_tuple(tdelta, length, type);
         }
 
