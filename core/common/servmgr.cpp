@@ -121,8 +121,6 @@ ServMgr::ServMgr()
     audioCodec = "mp3";
 
     wmvProtocol = "http";
-
-    rtmpServerMonitor.enable();
 }
 
 // -----------------------------------
