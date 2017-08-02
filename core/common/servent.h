@@ -288,6 +288,7 @@ private:
     void CMD_clear(char *cmd, HTTP& http, HTML& html, String& jumpStr);
     void CMD_clearlog(char *cmd, HTTP& http, HTML& html, String& jumpStr);
     void CMD_connect(char *cmd, HTTP& http, HTML& html, String& jumpStr);
+    void CMD_control_rtmp(char *cmd, HTTP& http, HTML& html, String& jumpStr);
     void CMD_edit_bcid(char *cmd, HTTP& http, HTML& html, String& jumpStr);
     void CMD_fetch(char *cmd, HTTP& http, HTML& html, String& jumpStr);
     void CMD_hitlist(char *cmd, HTTP& http, HTML& html, String& jumpStr);
