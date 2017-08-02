@@ -122,6 +122,8 @@ public:
     void    readInfoAtoms(AtomStream &, int);
     void    readTrackAtoms(AtomStream &, int);
 
+    bool    writeVariable(Stream &out, const String &var);
+
     unsigned int        getUptime();
     unsigned int        getAge();
     bool                isActive() { return id.isSet(); }

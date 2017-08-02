@@ -1,5 +1,5 @@
 {
-    // peercast.dwt
+    // layout.html
     "PeerCast on" : "PeerCast -",
     "Please upgrade your client, click here to download the latest version." : "クライアントをアップグレードしてください。ここをクリックで最新バージョンをダウンロード。",
     "_Information_navbar" : "情報",
@@ -12,6 +12,7 @@
     "_View Log_navbar" : "ログ表示",
     "_Logout_navbar" : "ログアウト",
     "Message from the root server" : "ルートサーバーからのメッセージ",
+    "RTMP Server" : "RTMPサーバー",
 
     // bcid.html
     "New BCID"      : "新規BCID",
@@ -193,6 +194,7 @@
 
     // rtmp.html
     "Start"                   : "開始",
+    "Process ID"              : "プロセスID",
 
     // viewlog.html
     "Clear log"               : "ログをクリア",

@@ -6,66 +6,23 @@
 
 struct RTMPServerMonitor
 {
-    std::string status() // RUNNING etc.
-    {
-        CriticalSection cs(m_lock);
-        return "RUNNING";
-    }
+    RTMPServerMonitor(const std::string& aPath);
 
-    void update()
-    {
-        CriticalSection cs(m_lock);
+    std::string status();
+    bool isEnabled();
 
-        if (!m_enabled) return;
+    void update();
+    void enable();
+    void disable();
 
-        // RTMP server の死活を監視する。
-        if (!m_rtmpServer.isAlive())
-        {
-            LOG_ERROR("RTMP server is down! Restarting... ");
-            start();
-        }
-    }
+    bool writeVariable(Stream &out, const String &var);
 
-    bool isEnabled()
-    {
-        CriticalSection cs(m_lock);
-        return m_enabled;
-    }
-
-    void enable()
-    {
-        CriticalSection cs(m_lock);
-        m_enabled = true;
-    }
-
-    void disable()
-    {
-        CriticalSection cs(m_lock);
-        m_enabled = false;
-        if (m_rtmpServer.isAlive())
-            m_rtmpServer.terminate();
-    }
-
-    RTMPServerMonitor(const std::string& aPath)
-        : m_rtmpServer(aPath, false, false)
-        , m_enabled(false)
-    {
-    }
+    void start();
+    std::string makeEndpointURL();
 
     Subprogram m_rtmpServer;
     bool m_enabled;
     WLock m_lock;
-
-    std::string makeEndpointURL();
-
-    void start()
-    {
-        // Environment env を現在の環境から初期化する。
-        Environment env;
-        env.copyFromCurrentProcess();
-
-        m_rtmpServer.start({makeEndpointURL()}, env);
-    }
 };
 
 #endif

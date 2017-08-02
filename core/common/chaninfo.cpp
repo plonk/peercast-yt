@@ -830,3 +830,25 @@ const char* ChanInfo::getPlayListExt()
         return "";
     }
 }
+
+// -----------------------------------
+bool ChanInfo::writeVariable(Stream &out, const String &var)
+{
+    std::string buf;
+
+    if (var == "name")
+        buf = name.c_str();
+    else if (var == "desc")
+        buf = desc.c_str();
+    else if (var == "genre")
+        buf = genre.c_str();
+    else if (var == "url")
+        buf = url.c_str();
+    else if (var == "comment")
+        buf = comment.c_str();
+    else
+        return false;
+
+    out.writeString(buf);
+    return true;
+}
