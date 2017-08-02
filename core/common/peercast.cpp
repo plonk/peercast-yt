@@ -123,6 +123,8 @@ void    APICALL PeercastInstance::quit()
         chanMgr->quit();
     if (servMgr)
         servMgr->quit();
+    // Give threads time to run all the deconstructors.
+    sys->sleep(1000);
 }
 
 // --------------------------------------------------
