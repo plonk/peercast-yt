@@ -223,7 +223,7 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
     try {
         Regexp headerPattern("\\A([A-Za-z\\-]+):\\s*(.*)\\z");
         std::string line;
-        while ((line = stream.readLine()) != "")
+        while ((line = stream.readLine(8192)) != "")
         {
             LOG_DEBUG("Line: %s", line.c_str());
             auto caps = headerPattern.exec(line);
