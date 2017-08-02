@@ -140,7 +140,7 @@ public:
         return cnt;
     }
 
-    std::string readLine();
+    std::string readLine(size_t);
 
     std::string read(int remaining);
 
