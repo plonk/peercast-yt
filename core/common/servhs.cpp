@@ -1687,7 +1687,7 @@ void Servent::handshakeCMD(char *cmd)
         {
             CMD_login(cmd, http, html, jumpStr);
         }else{
-            jumpStr.sprintf("/%s/index.html", servMgr->htmlPath);
+            throw HTTPException(HTTP_SC_BADREQUEST, 400);
         }
     }catch (HTTPException &e)
     {
