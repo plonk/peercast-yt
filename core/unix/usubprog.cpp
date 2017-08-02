@@ -17,6 +17,8 @@ Subprogram::Subprogram(const std::string& name, bool receiveData, bool feedData)
 
 Subprogram::~Subprogram()
 {
+    if (m_pid != -1)
+        kill(m_pid, 9);
 }
 
 // プログラムの実行を開始。
@@ -129,6 +131,9 @@ bool Subprogram::wait(int* status)
 
 bool Subprogram::isAlive()
 {
+    if (m_pid == -1) // not started yet
+        return false;
+
     int r;
 
     r = waitpid(m_pid, NULL, WNOHANG);
@@ -138,14 +143,13 @@ bool Subprogram::isAlive()
     else if (r == -1)
     {
         LOG_ERROR("Failed in checking the status of %d: %s", (int) m_pid, strerror(errno));
-        return true;
+        return false;
     }
     else
     {
+        m_pid = -1;
         return false; // the child died
     }
-
-    // ここで waitpid したあと this->wait() すると深刻な問題がありそう。
 }
 
 void Subprogram::terminate()
@@ -158,4 +162,6 @@ void Subprogram::terminate()
         LOG_ERROR("Failed in killing %d.", (int) m_pid);
 
     waitpid(m_pid, NULL, 0);
+
+    m_pid = -1;
 }
