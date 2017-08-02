@@ -127,19 +127,26 @@ bool Subprogram::wait(int* status)
     DWORD res;
     DWORD exitCode;
 
-    res = WaitForSingleObject(m_processHandle, 10 * 1000);
-    if (res == WAIT_TIMEOUT)
-        LOG_ERROR("Process wait timeout.");
-    else if (res == WAIT_FAILED)
+    res = WaitForSingleObject(m_processHandle, INFINITE);
+    if (res != WAIT_OBJECT_0)
+    {
         LOG_ERROR("Process wait failed.");
+        abort();
+    }
 
-    if (!GetExitCodeProcess(m_processHandle, &exitCode))
+    if (GetExitCodeProcess(m_processHandle, &exitCode) == 0)
     {
         LOG_ERROR("Failed to get exit code of child process.");
-        return false;
+        abort();
     }else
     {
+        if (exitCode == STILL_ACTIVE)
+            abort(); // something is very wrong
+
         *status = exitCode;
+        CloseHandle(m_processHandle);
+        m_processHandle = INVALID_HANDLE_VALUE;
+        m_pid = -1;
         return true;
     }
 }
@@ -155,7 +162,14 @@ bool Subprogram::isAlive()
         LOG_ERROR("GetExitCodeProcess: error code = %d\n", (int) GetLastError());
         abort();
     }
-    return exitCode == STILL_ACTIVE;
+    if (exitCode != STILL_ACTIVE)
+    {
+        LOG_DEBUG("Child process exited with error code %d\n", (int) exitCode);
+        CloseHandle(m_processHandle);
+        m_processHandle = INVALID_HANDLE_VALUE;
+        return false;
+    }else
+        return true;
 }
 
 void Subprogram::terminate()
@@ -168,4 +182,7 @@ void Subprogram::terminate()
         LOG_ERROR("TerminateProcess: error code = %d\n", (int) GetLastError());
         abort();
     }
+    CloseHandle(m_processHandle);
+    m_processHandle = INVALID_HANDLE_VALUE;
+    m_pid = -1;
 }
