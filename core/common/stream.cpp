@@ -324,18 +324,21 @@ int Stream::readLine(char *in, int max)
 }
 
 // -------------------------------------
-std::string Stream::readLine()
+std::string Stream::readLine(size_t max)
 {
     std::string res;
 
     while (true)
     {
         char c;
+
         read(&c, 1);
         if (c == '\n')
             break;
         if (c == '\r')
             continue;
+        if (res.size() == max)
+            throw StreamException("Line too long");
         res.push_back(c);
     }
 
