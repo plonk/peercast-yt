@@ -54,6 +54,9 @@ Query::Query(const std::string& queryString)
     auto assignments = str::split(queryString, "&");
     for (auto& assignment : assignments)
     {
+        if (assignment.empty())
+            continue;
+
         auto sides = str::split(assignment, "=");
         if (sides.size() == 1)
             m_dict[sides[0]] = {};
