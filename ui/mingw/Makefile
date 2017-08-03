@@ -17,7 +17,7 @@ AR = ar
 INCLUDES = -I../../core -I../../core/common -I../../Onigmo
 
 TARGET = peercast.exe
-RTMPSERVER = rtmp-server
+RTMPSERVER = rtmp-server.exe
 CORE = ../../core
 RTMP = ../../rtmp-server
 SRCHTMLTAR = ../html.tar
