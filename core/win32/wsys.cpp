@@ -89,6 +89,10 @@ bool    WSys::startThread(ThreadInfo *info)
     if(info->handle == 0)
         return false;
 
+    // Make the thread detached.
+    CloseHandle((HANDLE) info->handle);
+    info->handle = (THREAD_HANDLE) INVALID_HANDLE_VALUE;
+
     return true;
 }
 
