@@ -22,6 +22,7 @@ if __name__ == "__main__":
 
   print("Content-Type: video/x-flv\n", flush=True)
   subprocess.call(["ffmpeg",
+    "-nostdin",
     "-v", "-8", # quiet
     "-y",       # confirm overwriting
     "-i", "mmsh://{0}:{1}/stream/{2}.wmv".format(server_name, server_port, id),
