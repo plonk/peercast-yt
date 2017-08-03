@@ -69,7 +69,7 @@ $(PUBLIC): $(SRCPUBLICTAR)
 $(SRCASSETSTAR):
 	$(MAKE) -C .. assets.tar
 
-$(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS)
+$(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS) $(RTMPSERVER)
 	rm -rf peercast-yt
 	mkdir peercast-yt
 	cp -R $(HTML) $(PUBLIC) $(TARGET) $(ASSETS) $(CGIBIN) $(RTMPSERVER) ../../licenses ../../core/LICENSE peercast-yt/
