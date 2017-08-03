@@ -78,7 +78,7 @@ namespace rtmpserver
                 int fmt = v[0];
                 int cs_id = v[1];
 
-                printf("fmt = %d, cs_id = %d\n", fmt, cs_id);
+                //printf("fmt = %d, cs_id = %d\n", fmt, cs_id);
 
                 if ( !(cs_id >= 2 && cs_id < 64) )
                     throw std::runtime_error("cs_id out of range");
@@ -138,7 +138,7 @@ namespace rtmpserver
 
                 if (message.remaining() == 0)
                 {
-                    puts("message complete");
+                    //puts("message complete");
                     on_message(message);
                 }
             } // while (true)
@@ -146,7 +146,7 @@ namespace rtmpserver
 
         void on_connect(Value& transaction_id, const std::vector<Value>& params)
         {
-            puts("sending ServBW");
+            //puts("sending ServBW");
             { // send ServerBW
                 Message message(0, 4, 0x05, 0); // timestamp, len, type, msg. stream id
                 message.add_data(to_bytes_big_endian(5000*1000, 4));
@@ -154,14 +154,14 @@ namespace rtmpserver
                 client->writeString(chunks);
             }
 
-            puts("sending ClientBW");
+            //puts("sending ClientBW");
             { // send ClientBW
                 Message message(0, 5, 0x06, 0);
                 message.add_data(to_bytes_big_endian(5000*1000, 4) + "\x01");  // 0: Hard, 1: Soft, 2: Dynamic
                 client->writeString(str::join("", message.to_chunks(max_outgoing_chunk_size, 2)));
             }
 
-            puts("sending SetPacketSize");
+            //puts("sending SetPacketSize");
             { // send SetPacketSize
                 Message message(0, 4, 0x01, 0);
                 message.add_data(to_bytes_big_endian(4096, 4));
@@ -169,7 +169,7 @@ namespace rtmpserver
                 max_outgoing_chunk_size = 4096;
             }
 
-            puts("sending _result");
+            //puts("sending _result");
             { // send command result
                 std::string data;
 
@@ -218,7 +218,7 @@ namespace rtmpserver
 
         void on_publish(Value& transaction_id, const std::vector<Value>& params)
         {
-            puts("Sending onStatus in response to publish command");
+            //puts("Sending onStatus in response to publish command");
             std::string data;
             data += Value("onStatus").serialize();
             data += Value(0).serialize();
@@ -312,22 +312,18 @@ namespace rtmpserver
             switch (message.type_id)
             {
             case 0x14: // Command
-                puts("command");
                 on_command(message);
                 break;
             case 0x12:
-                puts("metadata");
                 on_metadata(message);
                 break;
             case 0x01:
                 on_set_chunk_size(message);
                 break;
             case 0x08:
-                puts("audio");
                 on_audio_packet(message);
                 break;
             case 0x09:
-                puts("video");
                 on_video_packet(message);
                 break;
             default:
@@ -340,9 +336,12 @@ namespace rtmpserver
             // receive C0
             char c0 = client->readChar();
             if (c0 == 3)
-                puts("client requests version 3");
-            else if (c0 >= 32)
+            {
+                //puts("client requests version 3");
+            }else if (c0 >= 32)
+            {
                 throw std::runtime_error("invalid C0");
+            }
 
             // send S0 + S1
             client->writeChar(3);
