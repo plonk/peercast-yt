@@ -83,7 +83,7 @@ $(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS) $(RTMPSERVER)
 clean:
 	$(MAKE) -C ../../Onigmo clean
 	$(MAKE) -C .. clean
-	rm -f $(LINUXOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE)
+	rm -f $(LINUXOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE) $(RTMPSERVER)
 	rm -rf $(HTML) $(PUBLIC)
 	rm -rf peercast-yt/
 	rm -f $(DISTARCHIVE)
