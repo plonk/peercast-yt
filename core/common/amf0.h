@@ -285,11 +285,7 @@ namespace amf0
         std::string readString(Stream &in)
         {
             int len = (in.readChar() << 8) | (in.readChar());
-            char* data = new char[len];
-            in.read(data, len);
-            std::string r = std::string(data, data+len);
-            delete[] data;
-            return r;
+            return in.read(len);
         }
 
         double readDouble(Stream &in)

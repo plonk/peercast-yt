@@ -72,6 +72,16 @@ TEST_F(amf0Fixture, Deserializer_String)
     ASSERT_EQ("\"hoge\"", v.inspect());
 }
 
+TEST_F(amf0Fixture, Deserializer_String_empty)
+{
+    amf0::Deserializer d;
+    char data[3] = { 0x02, 0x00, 0x00 };
+    StringStream mem;
+    mem.str(std::string(data, data + sizeof(data)));
+    Value v = d.readValue(mem);
+    ASSERT_EQ("\"\"", v.inspect());
+}
+
 TEST_F(amf0Fixture, Deserializer_Object)
 {
     amf0::Deserializer d;
