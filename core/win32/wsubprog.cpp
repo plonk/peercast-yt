@@ -46,9 +46,11 @@ std::string createCommandLine(std::string prog, std::vector<std::string> args)
     for (int i = 0; i < words.size(); ++i)
     {
         auto s = words[i];
+        // Replace unsafe characters with a space.  The percent mark
+        // '%' is intentionally allowed.
         for (int j = 0; j < s.size(); j++)
-            if (s[j] == '%' || s[j] == '!' || s[j] == '\"')
-                s[j] = ' '; // replace unsafe characters with a space
+            if (s[j] == '!' || s[j] == '\"')
+                s[j] = ' ';
         words[i] = "\"" + s + "\"";
     }
     return str::join(" ", words);
