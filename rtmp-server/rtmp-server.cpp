@@ -25,39 +25,38 @@ namespace rtmpserver
         exit(1);
     }
 
+    Stream* openUri(const std::string& spec)
+    {
+        URI uri(spec);
+
+        if (uri.scheme() == "http")
+        {
+            ClientSocket* sock = sys->createSocket();
+            Host host;
+            host.fromStrName(uri.host().c_str(), uri.port());
+            sock->open(host);
+            sock->connect();
+            sock->writeLineF("POST %s?%s HTTP/1.0", uri.path().c_str(), uri.query().c_str());
+            sock->writeLine("");
+            return sock;
+        }else if (uri.scheme() == "file")
+        {
+            FileStream *file = new FileStream();
+            file->openWriteReplace(uri.path().c_str());
+            return file;
+        }else if (!uri.isValid())
+        {
+            FileStream *file = new FileStream();
+            file->openWriteReplace(spec.c_str());
+            return file;
+        }else
+        {
+            throw std::runtime_error("Unsupported protocol " + uri.scheme());
+        }
+    }
 }
 
 using namespace rtmpserver;
-
-Stream* openUri(const std::string& spec)
-{
-    URI uri(spec);
-
-    if (uri.scheme() == "http")
-    {
-        ClientSocket* sock = sys->createSocket();
-        Host host;
-        host.fromStrName(uri.host().c_str(), uri.port());
-        sock->open(host);
-        sock->connect();
-        sock->writeLineF("POST %s?%s HTTP/1.0", uri.path().c_str(), uri.query().c_str());
-        sock->writeLine("");
-        return sock;
-    }else if (uri.scheme() == "file")
-    {
-        FileStream *file = new FileStream();
-        file->openWriteReplace(uri.path().c_str());
-        return file;
-    }else if (!uri.isValid())
-    {
-        FileStream *file = new FileStream();
-        file->openWriteReplace(spec.c_str());
-        return file;
-    }else
-    {
-        throw std::runtime_error("Unsupported protocol " + uri.scheme());
-    }
-}
 
 int main(int argc, char* argv[])
 {
