@@ -54,6 +54,73 @@ namespace rtmpserver
             throw std::runtime_error("Unsupported protocol " + uri.scheme());
         }
     }
+
+    std::map<std::string,std::string>
+    optparse(int* pArgc, char* argv[])
+    {
+        assert(*pArgc > 0);
+
+        std::map<std::string,std::string> opts;
+
+        int ri = 1;
+        int wi = 1;
+        while (argv[ri] != nullptr)
+        {
+            if (argv[ri] == std::string("-p"))
+            {
+                if (argv[ri + 1] == nullptr)
+                    throw std::runtime_error("no value for option -p");
+                opts[argv[ri]] = argv[ri+1];
+                ri += 2;
+            }else
+            {
+                argv[wi++] = argv[ri++];
+            }
+        }
+        argv[wi] = argv[ri];
+
+        *pArgc = wi;
+        return opts;
+    }
+
+    void test()
+    {
+        {
+            const char *argv[] = { "cmd", NULL };
+            int argc = 1;
+            auto opts = optparse(&argc, (char**)argv);
+            assert(argc == 1);
+            assert(opts.size() == 0);
+            assert(argv[0] == std::string("cmd"));
+            assert(argv[1] == NULL);
+        }
+
+        {
+            const char *argv[] = { "cmd", "url1", "-p", "9999", "url2", NULL };
+            int argc = 5;
+            auto opts = optparse(&argc, (char**)argv);
+            assert(argc == 3);
+            assert(opts.size() == 1);
+            assert(opts["-p"] == std::string("9999"));
+            assert(argv[0] == std::string("cmd"));
+            assert(argv[1] == std::string("url1"));
+            assert(argv[2] == std::string("url2"));
+            assert(argv[3] == NULL);
+        }
+
+        {
+            const char *argv[] = { "cmd", "url1", "-p", NULL };
+            int argc = 3;
+            try
+            {
+                optparse(&argc, (char**)argv);
+                assert(false);
+            }catch (std::runtime_error& e)
+            {
+                assert(e.what() == std::string("no value for option -p"));
+            }
+        }
+    }
 }
 
 using namespace rtmpserver;
@@ -68,10 +135,11 @@ int main(int argc, char* argv[])
 
     iohelpers::test();
     Session::test();
+    rtmpserver::test();
 
-    uint16_t rtmp_port = 1935;
-
-    // TODO: コマンドラインから -p PORT を受け取る。
+    // コマンドラインから -p PORT を受け取る。
+    std::map<std::string,std::string> opts = optparse(&argc, argv);
+    unsigned int rtmp_port = opts.count("-p") ? std::stoi(opts["-p"]) : 1935;
 
     if (argc == 1)
         die("no URL supplied");
