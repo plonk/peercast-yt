@@ -25,16 +25,28 @@
           {@end}
         </td>
       </tr>
+      {@if servMgr.rtmpServerMonitor.status == "UP"}
       <tr>
         <th>{#URL} 1</th>
         <td>
-          <code>rtmp://localhost/</code>
+          <code>rtmp://localhost{@if servMgr.rtmpPort != "1935"}:{$servMgr.rtmpPort}{@end}/</code>
         </td>
       </tr>
       <tr>
         <th>{#URL} 2</th>
         <td>
-          <code>rtmp://{$servMgr.serverIP}/</code>
+          <code>rtmp://{$servMgr.serverIP}{@if servMgr.rtmpPort != "1935"}:{$servMgr.rtmpPort}{@end}/</code>
+        </td>
+      </tr>
+      {@end}
+      <tr>
+        <th>{#Port}</th>
+        <td>
+          {@if servMgr.rtmpServerMonitor.status == "DOWN"}
+            <input type="number" name="port" value="1935" min="1" max="65535" style="width: 100%">
+          {@else}
+            <input type="number" name="port" value="1935" min="1" max="65535" style="width: 100%" disabled>
+          {@end}
         </td>
       </tr>
       <tr align="center">

@@ -1618,9 +1618,13 @@ void Servent::CMD_control_rtmp(char *cmd, HTTP& http, HTML& html, String& jumpSt
         if (query.get("name") == "")
             throw HTTPException(HTTP_SC_BADREQUEST, 400); // name required to start RTMP server
 
+        uint16_t port = std::atoi(query.get("port").c_str());
         {
             CriticalSection cs(servMgr->lock);
             ChanInfo& info = servMgr->defaultChannelInfo;
+
+            servMgr->rtmpPort = port;
+
             info.name    = query.get("name").c_str();
             info.genre   = query.get("genre").c_str();
             info.desc    = query.get("desc").c_str();

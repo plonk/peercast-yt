@@ -393,6 +393,7 @@ public:
     std::string         wmvProtocol;
 
     RTMPServerMonitor   rtmpServerMonitor;
+    uint16_t            rtmpPort;
     ChanInfo            defaultChannelInfo;
 };
 

@@ -71,7 +71,13 @@ void RTMPServerMonitor::start()
     Environment env;
     env.copyFromCurrentProcess();
 
-    m_rtmpServer.start({makeEndpointURL()}, env);
+    uint16_t port;
+    {
+        CriticalSection cs(servMgr->lock);
+        port = servMgr->rtmpPort;
+    }
+
+    m_rtmpServer.start({"-p", std::to_string(port), makeEndpointURL()}, env);
 }
 
 std::string RTMPServerMonitor::makeEndpointURL()

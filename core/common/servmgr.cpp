@@ -121,6 +121,8 @@ ServMgr::ServMgr()
     audioCodec = "mp3";
 
     wmvProtocol = "http";
+
+    rtmpPort = 1935;
 }
 
 // -----------------------------------
@@ -2282,6 +2284,9 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var.startsWith("rtmpServerMonitor."))
     {
         return servMgr->rtmpServerMonitor.writeVariable(out, var + strlen("rtmpServerMonitor."));
+    }else if (var == "rtmpPort")
+    {
+        buf = std::to_string(servMgr->rtmpPort);
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);
