@@ -1,0 +1,95 @@
+{^define LAYOUT layout.html}
+{^define TITLE}
+{#Channel Information} [{#Edit}] - {#PeerCast on} {^SERVER_NAME}
+{^end}
+
+<style>
+  input { width: 100% }
+</style>
+
+<script>
+  $(function() { $("#track").hide(); $("#widget").text("▼"); });
+  function toggleTrack()
+  {
+    if ( $('#widget').text() == "▼" ) {
+      $('#track').show();
+      $('#widget').text("▲");
+    } else {
+      $('#track').hide();
+      $('#widget').text("▼");
+    }
+  }
+</script>
+
+{@if page.channel.exist}
+  <form action="/admin" method="GET">
+    <input type="hidden" name="cmd" value="update_channel_info">
+    <input type="hidden" name="id" value="{$page.channel.id}">
+
+    <table align=center border=0>
+      <tr align=middle bgcolor=#ccc class="normal">
+        <td colSpan=2><B>{#Channel Information}</B></td>
+      </tr>
+      <tr align=left bgcolor=#eee class="normal">
+        <td style="min-width: 90px">{#Name}</td>
+        <td style="min-width: 300px">
+          <input type="text" name="name" value="{$page.channel.name}">
+        </td>
+      </tr>
+      <tr align=left bgcolor=#ddd class="normal">
+        <td>{#Genre}</td>
+        <td><input type="text" name="genre" value="{$page.channel.genre}"></td>
+      </tr>
+      <tr align=left bgcolor=#eee class="normal">
+        <td>{#Desc.}</td>
+        <td><input type="text" name="desc" value="{$page.channel.desc}"></td>
+      </tr>
+      <tr align=left bgcolor=#ddd class="normal">
+        <td>{#URL}</td>
+        <td><input type="text" name="contactURL" value="{$page.channel.contactURL}"></td>
+      </tr>
+      <tr align=left bgcolor=#eee class="normal">
+        <td>{#Comment}</td>
+        <td><input type="text" name="comment" value="{$page.channel.comment}"></td>
+      </tr>
+      <tr align=left bgcolor=#ccc class="normal">
+        <td colSpan=2 align=middle>
+          <B>{#Current Track}</B>
+          <div id="widget" style="color: blue; cursor: pointer; float: right" onclick="toggleTrack()"></div>
+        </td>
+      </tr>
+    </table>
+    <table id="track">
+      <tr align=left bgcolor=#ddd class="normal">
+        <td style="min-width: 90px">{#Artist}</td>
+        <td style="min-width: 300px">
+          <input type="text" name="track.artist" value="{$page.channel.track.artist}">
+        </td>
+      </tr>
+      <tr align=left bgcolor=#eee class="normal">
+        <td>{#Title}</td>
+        <td><input type="text" name="track.title" value="{$page.channel.track.title}"></td>
+      </tr>
+      <tr align=left bgcolor=#ddd class="normal">
+        <td>{#Album}</td>
+        <td><input type="text" name="track.album" value="{$page.channel.track.album}"></td>
+      </tr>
+      <tr align=left bgcolor=#eee class="normal">
+        <td>{#Genre}</td>
+        <td><input type="text" name="track.genre" value="{$page.channel.track.genre}"></td>
+      </tr>
+      <tr align=left bgcolor=#ddd class="normal">
+        <td>{#Contact}</td>
+        <td><input type="text" name="track.contactURL" value="{$page.channel.track.contactURL}"></td>
+      </tr>
+    </table>
+    <div style="text-align: center; margin: 15px 0 15px 0">
+      <button type="submit">{#Apply}</button>
+    </div>
+  </form>
+{@else}
+  <p class="normal" style="text-align: center">
+    {#Channel not found.}
+  </p>
+{@end} <!-- if page.channel.exit -->
+</div>

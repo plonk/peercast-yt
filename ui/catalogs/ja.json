@@ -60,7 +60,7 @@
     "Incoming"                : "着信",
     "Port"                    : "ポート",
 
-    // relays.html
+    // channels.html
     "Channel"                 : "チャンネル",
     "Bitrate (kb/s)"          : "転送速度 (Kbps)",
     "Stream"                  : "タイプ",
@@ -72,6 +72,7 @@
     "WWW"                     : "WWW",
     "Bump"                    : "バンプ",
     "Stop"                    : "停止",
+    "Edit"                    : "編集",
 
     // relayinfo.html
     "Channel Information"     : "チャンネル情報",
@@ -99,6 +100,9 @@
     "_Firewalled_relayinfo"   : "FW有",
 
     "Channel not found."      : "チャンネルが見付かりません。",
+
+    // editinfo.html
+    "Apply"                   : "適用",
 
     // head.html
     "Head Packet"             : "ヘッドパケット",

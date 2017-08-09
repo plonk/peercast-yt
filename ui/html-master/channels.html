@@ -55,6 +55,11 @@
           <span class="normal">{$loop.channel.desc}</span><br>
           <span class="normal">
             <b><a href="relayinfo.html?id={$loop.channel.id}">{#Info}</a></b>
+            {@if loop.channel.status == "BROADCAST"}
+              - <b><a href="editinfo.html?id={$loop.channel.id}">{#Edit}</a></b>
+            {@else}
+              - <b class="text-muted">{#Edit}</b>
+            {@end}
             {@if loop.channel.contactURL}
               - <b><a href="{$loop.channel.contactURL}">{#WWW}</a></b>
             {@else}

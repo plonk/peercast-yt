@@ -303,6 +303,7 @@ private:
     void CMD_shutdown(char *cmd, HTTP& http, HTML& html, String& jumpStr);
     void CMD_stop(char *cmd, HTTP& http, HTML& html, String& jumpStr);
     void CMD_stopserv(char *cmd, HTTP& http, HTML& html, String& jumpStr);
+    void CMD_update_channel_info(char *cmd, HTTP& http, HTML& html, String& jumpStr);
     void CMD_upgrade(char *cmd, HTTP& http, HTML& html, String& jumpStr);
     void CMD_viewxml(char *cmd, HTTP& http, HTML& html, String& jumpStr);
 };

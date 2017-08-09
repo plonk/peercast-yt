@@ -1646,6 +1646,36 @@ void Servent::CMD_control_rtmp(char *cmd, HTTP& http, HTML& html, String& jumpSt
     }
 }
 
+void Servent::CMD_update_channel_info(char *cmd, HTTP& http, HTML& html, String& jumpStr)
+{
+    cgi::Query query(cmd);
+
+    GnuID id(query.get("id"));
+    auto ch = chanMgr->findChannelByID(id);
+    if (ch == NULL)
+        throw HTTPException(HTTP_SC_SERVERERROR, 500);
+
+    // I don't think this operation is safe
+
+    ChanInfo info = ch->info;
+
+    info.name    = query.get("name").c_str();
+    info.desc    = query.get("desc").c_str();
+    info.genre   = query.get("genre").c_str();
+    info.url     = query.get("contactURL").c_str();
+    info.comment = query.get("comment").c_str();
+
+    info.track.contact = query.get("track.contactURL").c_str();
+    info.track.title   = query.get("track.title").c_str();
+    info.track.artist  = query.get("track.artist").c_str();
+    info.track.album   = query.get("track.album").c_str();
+    info.track.genre   = query.get("track.genre").c_str();
+
+    ch->updateInfo(info);
+
+    jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
+}
+
 void Servent::handshakeCMD(char *cmd)
 {
     String jumpStr;
@@ -1727,6 +1757,9 @@ void Servent::handshakeCMD(char *cmd)
         }else if (cmpCGIarg(cmd, "cmd=", "control_rtmp"))
         {
             CMD_control_rtmp(cmd, http, html, jumpStr);
+        }else if (cmpCGIarg(cmd, "cmd=", "update_channel_info"))
+        {
+            CMD_update_channel_info(cmd, http, html, jumpStr);
         }else{
             throw HTTPException(HTTP_SC_BADREQUEST, 400);
         }
