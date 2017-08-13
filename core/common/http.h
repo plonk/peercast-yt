@@ -162,7 +162,7 @@ public:
     HTTPHeaders(const std::initializer_list<std::pair<std::string,std::string> >& aHeaders)
     {
         for (auto pair : aHeaders)
-            m_headers[pair.first] = pair.second;
+            m_headers[str::upcase(pair.first)] = pair.second;
     }
 
     HTTPHeaders(const std::map<std::string,std::string>& aHeaders)
