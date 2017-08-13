@@ -19,32 +19,32 @@
               <TD colSpan=2 class="normal"><B>{#Information}</B></TD>
             </TR>
             <TR align=left>
-              <TD>{#Server IP}</TD>
+              <th class="left-heading">{#Server IP}</th>
               <TD>{$servMgr.serverIP}</TD>
             </TR>
             <TR align=left>
-              <TD>{#Uptime}</TD>
+              <th class="left-heading">{#Uptime}</th>
               <TD>{$servMgr.uptime}</TD>
             </TR>
             <TR align=left>
-              <TD>{#Channel cache}</TD>
+              <th class="left-heading">{#Channel cache}</th>
               <TD>{$chanMgr.numHitLists} - <a href="/admin?cmd=clear&amp;hitlists=1">{#Clear}</a></TD>
             </TR>
             <TR align=left>
-              <TD>{#Firewalled}</TD>
+              <th class="left-heading">{#Firewalled}</th>
               <TD>{@if servMgr.firewallKnown} {@if servMgr.isFirewalled}
                 {#Yes} {@else} {#No} {@end} {@else} {#Unknown} {@end} </TD>
             </TR>
             <TR align=left>
-              <TD>{#XML stats}</TD>
+              <th class="left-heading">{#XML stats}</th>
               <TD><A href="/admin?cmd=viewxml">{#View}</A></TD>
             </TR>
             <tr align=left>
-              <td>{#YP Address}</td>
+              <th class="left-heading">{#YP Address}</th>
               <td>{$servMgr.ypAddress}</td>
             </tr>
             <TR align=left>
-              <TD>{#Host options}</TD>
+              <th class="left-heading">{#Host options}</th>
               <TD>{@if servMgr.isRoot}{#Root}{@end} {@if servMgr.isPrivate}{#Licensed}{@end} {@if servMgr.forceYP}{#ForceYP}{@end}</TD>
             </TR>
           </TABLE>
@@ -67,19 +67,19 @@
               <TD colSpan=4 class="normal"><B>{#Bandwidth}</B></TD>
             </TR>
             <TR align=left class="normal">
-              <TD></TD>
+              <th class="left-heading"></th>
               <TH>{#In}</TH>
               <TH>{#Out}</TH>
             </TR>
             <TR align=left class="normal">
-              <TD>{#Internet (Kbit/s)}</TD>
-              <TD>{$stats.wanInPerSec}</TD>
-              <TD>{$stats.wanOutPerSec}</TD>
+              <th class="left-heading">{#Internet (Kbit/s)}</th>
+              <TD class="bandwidth-cell">{$stats.wanInPerSec}</TD>
+              <TD class="bandwidth-cell">{$stats.wanOutPerSec}</TD>
             </TR>
             <TR align=left class="normal">
-              <TD>{#Total (Kbit/s)}</TD>
-              <TD>{$stats.totalInPerSec}</TD>
-              <TD>{$stats.totalOutPerSec}</TD>
+              <th class="left-heading">{#Total (Kbit/s)}</th>
+              <TD class="bandwidth-cell">{$stats.totalInPerSec}</TD>
+              <TD class="bandwidth-cell">{$stats.totalOutPerSec}</TD>
             </TR>
           </TABLE>
           <table class="table-panel" width="100%" border="0">
@@ -87,25 +87,24 @@
               <td colspan="2"><div align="center" class="normal"><strong>{#Connections}</strong></div></td>
             </tr>
             <tr>
-              <td width="66%">{#Direct}
-              </td>
+              <th class="left-heading" width="66%">{#Direct}</th>
               <td width="34%" class="normal">{$servMgr.numDirect}</td>
             </tr>
             <tr>
-              <td>{#Relay}</td>
+              <th class="left-heading">{#Relay}</th>
               <td class="normal">{$servMgr.numRelays}</td>
             </tr>
             <tr>
-              <td class="normal">{#CIN / COUT}</td>
+              <th class="left-heading">{#CIN / COUT}</th>
               <td>{$servMgr.numCIN} / {$servMgr.numCOUT}</td>
             </tr>
             <tr>
-              <td class="normal">{#Incoming}</td>
+              <th class="left-heading">{#Incoming}</th>
               <td>{$servMgr.numIncoming}</td>
             </tr>
             <tr>
-              <td class="normal">{#Port} {$servMgr.serverPort1} / {$servMgr.serverPort2}</td>
-              <td class="normal">{$servMgr.numActive1} / {$servMgr.numActive2}</td>
+              <th class="left-heading">{#Port} {$servMgr.serverPort1} / {$servMgr.serverPort2}</th>
+              <td>{$servMgr.numActive1} / {$servMgr.numActive2}</td>
             </tr>
           </table>
         </TD>

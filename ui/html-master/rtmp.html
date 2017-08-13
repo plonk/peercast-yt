@@ -12,11 +12,11 @@
         <td colspan="2"><div align="center"><b>{#RTMP Server}</b></div></td>
       </tr>
       <tr>
-        <th style="width: 8em">{#Status}</th>
+        <th class="left-heading" style="width: 8em">{#Status}</th>
         <td>{$servMgr.rtmpServerMonitor.status}</td>
       </tr>
       <tr>
-        <th>{#Process ID}</th>
+        <th class="left-heading">{#Process ID}</th>
         <td>
           {@if servMgr.rtmpServerMonitor.processID == "-1"}
             n/a
@@ -27,20 +27,20 @@
       </tr>
       {@if servMgr.rtmpServerMonitor.status == "UP"}
       <tr>
-        <th>{#URL} 1</th>
+        <th class="left-heading">{#URL} 1</th>
         <td>
           <code>rtmp://localhost{@if servMgr.rtmpPort != "1935"}:{$servMgr.rtmpPort}{@end}/</code>
         </td>
       </tr>
       <tr>
-        <th>{#URL} 2</th>
+        <th class="left-heading">{#URL} 2</th>
         <td>
           <code>rtmp://{$servMgr.serverIP}{@if servMgr.rtmpPort != "1935"}:{$servMgr.rtmpPort}{@end}/</code>
         </td>
       </tr>
       {@end}
       <tr>
-        <th>{#Port}</th>
+        <th class="left-heading">{#Port}</th>
         <td>
           {@if servMgr.rtmpServerMonitor.status == "DOWN"}
             <input type="number" name="port" value="{$servMgr.rtmpPort}" min="1" max="65535" style="width: 100%">
@@ -67,35 +67,35 @@
         <td colspan="2"><div align="center"><b>{#Channel Information}</b></div></td>
       </tr>
       <tr>
-        <th style="width: 8em">{#Name}</th>
+        <th class="left-heading" style="width: 8em">{#Name}</th>
         <td>
           <input type="text" name="name" value="{$servMgr.defaultChannelInfo.name}" style="width: 100%" required
                  {@if servMgr.rtmpServerMonitor.status == "UP"}disabled{@end}>
         </td>
       </tr>
       <tr>
-        <th>{#Genre}</th>
+        <th class="left-heading">{#Genre}</th>
         <td>
           <input type="text" name="genre" value="{$servMgr.defaultChannelInfo.genre}" style="width: 100%"
                  {@if servMgr.rtmpServerMonitor.status == "UP"}disabled{@end}>
         </td>
       </tr>
       <tr>
-        <th>{#Desc.}</th>
+        <th class="left-heading">{#Desc.}</th>
         <td>
           <input type="text" name="desc" value="{$servMgr.defaultChannelInfo.desc}" style="width: 100%"
                  {@if servMgr.rtmpServerMonitor.status == "UP"}disabled{@end}>
         </td>
       </tr>
       <tr>
-        <th>{#URL}</th>
+        <th class="left-heading">{#URL}</th>
         <td>
           <input type="url" name="url" value="{$servMgr.defaultChannelInfo.url}" style="width: 100%"
                  {@if servMgr.rtmpServerMonitor.status == "UP"}disabled{@end}>
         </td>
       </tr>
       <tr>
-        <th>{#Comment}</th>
+        <th class="left-heading">{#Comment}</th>
         <td>
           <input type="text" name="comment" value="{$servMgr.defaultChannelInfo.comment}" style="width: 100%"
                  {@if servMgr.rtmpServerMonitor.status == "UP"}disabled{@end}>
