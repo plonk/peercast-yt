@@ -33,7 +33,7 @@ class Template
 {
 public:
 
-    class Scope : VariableWriter
+    class Scope : public VariableWriter
     {
     public:
         virtual bool writeVariable(Stream &, const String &, int) = 0;
