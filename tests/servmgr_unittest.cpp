@@ -108,6 +108,33 @@ TEST_F(ServMgrFixture, initialState)
     ASSERT_FALSE(m.publicDirectoryEnabled);
     // FW_STATE            firewalled;
     ASSERT_EQ(ServMgr::FW_UNKNOWN, m.firewalled);
+
+    // String              serverName;
+    ASSERT_TRUE(m.serverName == "");
+
+    // std::string         genrePrefix;
+    ASSERT_EQ("", m.genrePrefix);
+
+    // bool                transcodingEnabled;
+    ASSERT_FALSE(m.transcodingEnabled);
+
+    // std::string         preset;
+    ASSERT_EQ("veryfast", m.preset);
+
+    // std::string         audioCodec;
+    ASSERT_EQ("mp3", m.audioCodec);
+
+    // std::string         wmvProtocol;
+    ASSERT_EQ("http", m.wmvProtocol);
+
+    // RTMPServerMonitor   rtmpServerMonitor;
+    ASSERT_FALSE(m.rtmpServerMonitor.isEnabled());
+
+    // uint16_t            rtmpPort;
+    ASSERT_EQ(1935, m.rtmpPort);
+
+    // ChanInfo            defaultChannelInfo;
+    ASSERT_FALSE(m.defaultChannelInfo.id.isSet());
 }
 
 TEST_F(ServMgrFixture, writeVariable)
