@@ -97,7 +97,13 @@ table.table-panel tbody tr:nth-child(even) {
 	background-color: #ddd;
 }
 
+/* パネルの上部のスパンする見出し行。他の行よりも背景が濃い。 */
 table.table-panel tbody tr:nth-child(1) {
+	background-color: #ccc;
+}
+
+/* 通常、上の指定で十分。 */
+table.table-panel tbody tr.heading-row {
 	background-color: #ccc;
 }
 

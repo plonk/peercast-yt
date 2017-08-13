@@ -6,102 +6,102 @@
 <div class="reloader" data-url="?id={$page.channel.id}&amp;fragment=content" data-interval="{$servMgr.refreshHTML}">
   {@fragment content}
   {@if page.channel.exist}
-  <TABLE align=center border=0>
+  <TABLE border=0 class="table-panel">
     <TBODY>
-      <TR align=middle bgColor=#ccc class="normal">
+      <TR align=middle class="normal">
         <TD colSpan=2><B>{#Channel Information}</B></TD>
       </TR>
-      <TR align=left bgColor=#eee class="normal">
-        <TD>{#Name}</TD>
+      <TR class="normal">
+        <th class="left-heading">{#Name}</th>
         <TD>{$page.channel.name}</TD>
       </TR>
-      <TR align=left bgColor=#ddd class="normal">
-        <TD>{#Genre}</TD>
+      <TR class="normal">
+        <th class="left-heading">{#Genre}</th>
         <TD>{$page.channel.genre}</TD>
       </TR>
-      <TR align=left bgColor=#eee class="normal">
-        <TD>{#Desc.}</TD>
+      <TR class="normal">
+        <th class="left-heading">{#Desc.}</th>
         <TD>{$page.channel.desc}</TD>
       </TR>
-      <TR align=left bgColor=#ddd class="normal">
-        <TD>{#URL}</TD>
+      <TR class="normal">
+        <th class="left-heading">{#URL}</th>
         <TD style="word-break: break-all">
           <A href="/admin?cmd=redirect&amp;url={$page.channel.contactURL}"
              target=_blank>{$page.channel.contactURL}</A>
         </TD>
       </TR>
-      <TR align=left bgColor=#eee class="normal">
-        <TD>{#Comment}</TD>
+      <TR class="normal">
+        <th class="left-heading">{#Comment}</th>
         <TD>{$page.channel.comment}</TD>
       </TR>
-      <TR align=left bgColor=#ddd class="normal">
-        <TD>{#ID}</TD>
+      <TR class="normal">
+        <th class="left-heading">{#ID}</th>
         <TD>{$page.channel.id}</TD>
       </TR>
-      <TR align=left bgColor=#eee class="normal">
-        <TD>{#Type}</TD>
+      <TR class="normal">
+        <th class="left-heading">{#Type}</th>
         <TD>{$page.channel.typeLong}</TD>
       </TR>
-      <TR align=left bgColor=#ddd class="normal">
-        <TD>{#Bitrate}</TD>
+      <TR class="normal">
+        <th class="left-heading">{#Bitrate}</th>
         <TD>{$page.channel.bitrate} kb/s
         </TD>
       </TR>
-      <TR align=left bgColor=#eee class="normal">
-        <TD>{#Source}</TD>
+      <TR class="normal">
+        <th class="left-heading">{#Source}</th>
         <TD>{$page.channel.sourceType} - {$page.channel.sourceProtocol} - {$page.channel.srcrate} kb/s<BR>
           {$page.channel.sourceURL}
         </TD>
       </TR>
-      <TR align=left bgColor=#ddd class="normal">
-        <TD>{#_Uptime_relayinfo}</TD>
+      <TR class="normal">
+        <th class="left-heading">{#_Uptime_relayinfo}</th>
         <TD>{$page.channel.uptime}</TD>
       </TR>
-      <TR align=left bgColor=#eee class="normal">
-        <TD>{#Status}</TD>
+      <TR class="normal">
+        <th class="left-heading">{#Status}</th>
         <TD>{$page.channel.status}</TD>
       </TR>
-      <TR align=left bgColor=#ddd class="normal">
-        <TD>{#Position}</TD>
+      <TR class="normal">
+        <th class="left-heading">{#Position}</th>
         <TD>{$page.channel.streamPos}</TD>
       </TR>
-      <TR align=left bgColor=#eee class="normal">
-        <TD>{#Head}</TD>
+      <TR class="normal">
+        <th class="left-heading">{#Head}</th>
         <TD>{$page.channel.headPos} ({$page.channel.headLen} {#bytes}) <a href="head.html?id={$page.channel.id}">{#View}</a></TD>
       </TR>
-      <TR align=left bgColor=#ddd class="normal">
-        <TD>{#Buffer}</TD>
+      <TR class="normal">
+        <th class="left-heading">{#Buffer}</th>
         <TD><pre style="margin-bottom: 0; min-width: 25em">{$page.channel.buffer}</pre></TD>
       </TR>
-      <TR align=left bgColor=#ccc class="normal">
+      <TR class="heading-row normal">
         <TD colSpan=2 align=middle><B>{#Current Track}</B></TD>
       </TR>
-      <TR align=left bgColor=#ddd class="normal">
-        <TD>{#Artist}</TD>
+      <TR class="normal">
+        <th class="left-heading">{#Artist}</th>
         <TD>{$page.channel.track.artist}</TD>
       </TR>
-      <TR align=left bgColor=#eee class="normal">
-        <TD>{#Title}</TD>
+      <TR class="normal">
+        <th class="left-heading">{#Title}</th>
         <TD>{$page.channel.track.title}</TD>
       </TR>
-      <TR align=left bgColor=#ddd class="normal">
-        <TD>{#Album}</TD>
+      <TR class="normal">
+        <th class="left-heading">{#Album}</th>
         <TD>{$page.channel.track.album}</TD>
       </TR>
-      <TR align=left bgColor=#eee class="normal">
-        <TD>{#Genre}</TD>
+      <TR class="normal">
+        <th class="left-heading">{#Genre}</th>
         <TD>{$page.channel.track.genre}</TD>
       </TR>
-      <TR align=left bgColor=#ddd class="normal">
-        <TD>{#Contact}</TD>
+      <TR class="normal">
+        <th class="left-heading">{#Contact}</th>
         <TD>{$page.channel.track.contactURL}</TD>
       </TR>
     </TBODY>
   </TABLE>
   <BR><BR>
-  <TABLE align=center border=0>
+  <TABLE class="table-panel" border=0>
     <TBODY>
-      <TR align=middle bgColor=#ccc class="normal">
+      <TR align=middle class="normal">
         <TD colspan="2"><B>{#IP:Port}</B></TD>
         <TD><B>{#Hops}</B></TD>
         <TD><B>{#Listeners}</B></TD>
