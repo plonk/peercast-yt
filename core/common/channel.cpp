@@ -915,7 +915,7 @@ void ChanMeta::addMem(void *p, int l)
 }
 
 // -----------------------------------
-void Channel::broadcastTrackerUpdate(GnuID &svID, bool force)
+void Channel::broadcastTrackerUpdate(GnuID &svID, bool force /* = false */)
 {
     unsigned int ctime = sys->getTime();
 
@@ -989,9 +989,11 @@ bool    Channel::sendPacketUp(ChanPacket &pack, GnuID &cid, GnuID &sid, GnuID &d
 void Channel::updateInfo(const ChanInfo &newInfo)
 {
     String oldComment = info.comment;
-    if (!info.update(newInfo))
-        return;
 
+    if (!info.update(newInfo))
+        return; // チャンネル情報は更新されなかった。
+
+    // コメント更新の通知。
     if (!oldComment.isSame(info.comment))
     {
         // Shift_JIS かも知れない文字列を UTF8 に変換したい。
