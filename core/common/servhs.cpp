@@ -968,21 +968,6 @@ void Servent::CMD_clearlog(char *cmd, HTTP& http, HTML& html, String& jumpStr)
     jumpStr.sprintf("/%s/viewlog.html", servMgr->htmlPath);
 }
 
-void Servent::CMD_save(char *cmd, HTTP& http, HTML& html, String& jumpStr)
-{
-    peercastInst->saveSettings();
-
-    jumpStr.sprintf(jumpStr, "/%s/settings.html", servMgr->htmlPath);
-}
-
-void Servent::CMD_reg(char *cmd, HTTP& http, HTML& html, String& jumpStr)
-{
-    char idstr[128];
-
-    chanMgr->broadcastID.toStr(idstr);
-    jumpStr.sprintf("http://www.peercast.org/register/?id=%s", idstr);
-}
-
 void Servent::CMD_edit_bcid(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     char arg[MAX_CGI_LEN];
@@ -1325,6 +1310,8 @@ void Servent::CMD_fetch(char *cmd, HTTP& http, HTML& html, String& jumpStr)
     jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
 }
 
+// サーバントを停止する機能を追加したい時に役に立つかも。
+#if 0
 void Servent::CMD_stopserv(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
     char arg[MAX_CGI_LEN];
@@ -1342,44 +1329,7 @@ void Servent::CMD_stopserv(char *cmd, HTTP& http, HTML& html, String& jumpStr)
     }
     jumpStr.sprintf("/%s/connections.html", servMgr->htmlPath);
 }
-
-void Servent::CMD_hitlist(char *cmd, HTTP& http, HTML& html, String& jumpStr)
-{
-    bool stayConnected=hasCGIarg(cmd, "relay");
-
-    int index = 0;
-    ChanHitList *chl = chanMgr->hitlist;
-    while (chl)
-    {
-        if (chl->isUsed())
-        {
-            char tmp[64];
-            sprintf(tmp, "c%d=", index);
-            if (cmpCGIarg(cmd, tmp, "1"))
-            {
-                Channel *c;
-                if (!(c=chanMgr->findChannelByID(chl->info.id)))
-                {
-                    c = chanMgr->createChannel(chl->info, NULL);
-                    if (!c)
-                        throw StreamException("out of channels");
-                    c->stayConnected = stayConnected;
-                    c->startGet();
-                }
-            }
-        }
-        chl = chl->next;
-        index++;
-    }
-
-    const char *findArg = getCGIarg(cmd, "keywords=");
-
-    if (hasCGIarg(cmd, "relay"))
-    {
-        sys->sleep(500);
-        jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
-    }
-}
+#endif
 
 void Servent::CMD_clear(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
@@ -1403,30 +1353,6 @@ void Servent::CMD_clear(char *cmd, HTTP& http, HTML& html, String& jumpStr)
         jumpStr.sprintf("%s", http.headers.get("Referer").c_str());
     else
         jumpStr.sprintf("/%s/index.html", servMgr->htmlPath);
-}
-
-void Servent::CMD_upgrade(char *cmd, HTTP& http, HTML& html, String& jumpStr)
-{
-    if (servMgr->downloadURL[0])
-    {
-        jumpStr.sprintf("/admin?cmd=redirect&url=%s", servMgr->downloadURL);
-    }
-}
-
-void Servent::CMD_connect(char *cmd, HTTP& http, HTML& html, String& jumpStr)
-{
-    Servent *s = servMgr->servents;
-    {
-        char tmp[64];
-        sprintf(tmp, "c%d=", s->serventIndex);
-        if (cmpCGIarg(cmd, tmp, "1"))
-        {
-            if (hasCGIarg(cmd, "stop"))
-                s->thread.active = false;
-        }
-        s=s->next;
-    }
-    jumpStr.sprintf("/%s/connections.html", servMgr->htmlPath);
 }
 
 void Servent::CMD_shutdown(char *cmd, HTTP& http, HTML& html, String& jumpStr)
@@ -1527,57 +1453,6 @@ void Servent::CMD_keep(char *cmd, HTTP& http, HTML& html, String& jumpStr)
         c->stayConnected = !c->stayConnected;
 
     jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
-}
-
-void Servent::CMD_relay(char *cmd, HTTP& http, HTML& html, String& jumpStr)
-{
-    char arg[MAX_CGI_LEN];
-    char curr[MAX_CGI_LEN];
-
-    ChanInfo info;
-    char *cp = cmd;
-    while (cp=nextCGIarg(cp, curr, arg))
-    {
-        if (strcmp(curr, "id") == 0)
-            info.id.fromStr(arg);
-    }
-
-    if (!chanMgr->findChannelByID(info.id))
-    {
-        ChanHitList *chl = chanMgr->findHitList(info);
-        if (!chl)
-            throw StreamException("channel not found");
-
-        Channel *c = chanMgr->createChannel(chl->info, NULL);
-        if (!c)
-            throw StreamException("out of channels");
-
-        c->stayConnected = true;
-        c->startGet();
-    }
-
-    jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
-}
-
-void Servent::CMD_net_add(char *cmd, HTTP& http, HTML& html, String& jumpStr)
-{
-    char arg[MAX_CGI_LEN];
-    char curr[MAX_CGI_LEN];
-
-    GnuID id;
-    while (cmd=nextCGIarg(cmd, curr, arg))
-    {
-        if (strcmp(curr, "ip") == 0)
-        {
-            Host h;
-            h.fromStrIP(arg, DEFAULT_PORT);
-            if (servMgr->addOutgoing(h, id, true))
-                LOG_NETWORK("Added connection: %s", arg);
-        }else if (strcmp(curr, "id") == 0)
-        {
-            id.fromStr(arg);
-        }
-    }
 }
 
 void Servent::CMD_logout(char *cmd, HTTP& http, HTML& html, String& jumpStr)
@@ -1688,78 +1563,54 @@ void Servent::handshakeCMD(char *cmd)
 
     try
     {
-        if (cmpCGIarg(cmd, "cmd=", "redirect"))
-        {
-            CMD_redirect(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "viewxml"))
-        {
-            CMD_viewxml(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "clearlog"))
-        {
-            CMD_clearlog(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "save"))
-        {
-            CMD_save(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "reg"))
-        {
-            CMD_reg(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "edit_bcid"))
-        {
-            CMD_edit_bcid(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "add_bcid"))
+        if (cmpCGIarg(cmd, "cmd=", "add_bcid"))
         {
             CMD_add_bcid(cmd, http, html, jumpStr);
         }else if (cmpCGIarg(cmd, "cmd=", "apply"))
         {
             CMD_apply(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "fetch"))
+        }else if (cmpCGIarg(cmd, "cmd=", "bump"))
         {
-            CMD_fetch(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "stopserv"))
-        {
-            CMD_stopserv(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "hitlist"))
-        {
-            CMD_hitlist(cmd, http, html, jumpStr);
+            CMD_bump(cmd, http, html, jumpStr);
         }else if (cmpCGIarg(cmd, "cmd=", "clear"))
         {
             CMD_clear(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "upgrade"))
+        }else if (cmpCGIarg(cmd, "cmd=", "clearlog"))
         {
-            CMD_upgrade(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "connect"))
+            CMD_clearlog(cmd, http, html, jumpStr);
+        }else if (cmpCGIarg(cmd, "cmd=", "control_rtmp"))
         {
-            CMD_connect(cmd, http, html, jumpStr);
+            CMD_control_rtmp(cmd, http, html, jumpStr);
+        }else if (cmpCGIarg(cmd, "cmd=", "edit_bcid"))
+        {
+            CMD_edit_bcid(cmd, http, html, jumpStr);
+        }else if (cmpCGIarg(cmd, "cmd=", "fetch"))
+        {
+            CMD_fetch(cmd, http, html, jumpStr);
+        }else if (cmpCGIarg(cmd, "cmd=", "keep"))
+        {
+            CMD_keep(cmd, http, html, jumpStr);
+        }else if (cmpCGIarg(cmd, "cmd=", "login"))
+        {
+            CMD_login(cmd, http, html, jumpStr);
+        }else if (cmpCGIarg(cmd, "cmd=", "logout"))
+        {
+            CMD_logout(cmd, http, html, jumpStr);
         }else if (cmpCGIarg(cmd, "cmd=", "shutdown"))
         {
             CMD_shutdown(cmd, http, html, jumpStr);
         }else if (cmpCGIarg(cmd, "cmd=", "stop"))
         {
             CMD_stop(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "bump"))
+        }else if (cmpCGIarg(cmd, "cmd=", "redirect"))
         {
-            CMD_bump(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "keep"))
-        {
-            CMD_keep(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "relay"))
-        {
-            CMD_relay(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "net=", "add"))
-        {
-            CMD_net_add(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "logout"))
-        {
-            CMD_logout(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "login"))
-        {
-            CMD_login(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "control_rtmp"))
-        {
-            CMD_control_rtmp(cmd, http, html, jumpStr);
+            CMD_redirect(cmd, http, html, jumpStr);
         }else if (cmpCGIarg(cmd, "cmd=", "update_channel_info"))
         {
             CMD_update_channel_info(cmd, http, html, jumpStr);
+        }else if (cmpCGIarg(cmd, "cmd=", "viewxml"))
+        {
+            CMD_viewxml(cmd, http, html, jumpStr);
         }else{
             throw HTTPException(HTTP_SC_BADREQUEST, 400);
         }
