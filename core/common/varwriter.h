@@ -1,6 +1,8 @@
 #ifndef _VARWRITER_H
 #define _VARWRITER_H
 
+#include <string>
+
 class String;
 class Stream;
 // ----------------------------------
@@ -17,6 +19,9 @@ public:
     {
         return false;
     }
+
+    std::string getVariable(const std::string& name);
+    std::string getVariable(const std::string& name, int loop);
 };
 
 #endif
