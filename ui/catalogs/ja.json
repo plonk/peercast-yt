@@ -148,7 +148,7 @@
     //"ICY MetaInterval"      : "ICY MetaInterval",
     "Mode"                    : "モード",
     "Normal"                  : "通常",
-    "Refresh HTML (sec)"      : "HTML再読み込み (秒)",
+    "Refresh HTML (sec)"      : "HTML更新 (秒)",
     "Network"                 : "ネットワーク",
     "YP Address"              : "YPアドレス",
     "Max. Output (Kbits/s)"   : "送信速度上限 (Kbps)",
