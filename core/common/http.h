@@ -212,8 +212,10 @@ public:
     {
     }
 
-    HTTPRequest(const std::string& aMethod, const std::string& aUrl, const std::string& aProtocolVersion,
-        HTTPHeaders& aHeaders)
+    HTTPRequest(const std::string& aMethod,
+                const std::string& aUrl,
+                const std::string& aProtocolVersion,
+                const HTTPHeaders& aHeaders)
         : method(aMethod)
         , url(aUrl)
         , protocolVersion(aProtocolVersion)
