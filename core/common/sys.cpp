@@ -339,15 +339,24 @@ bool    Sys::startThread(ThreadInfo *info)
     info->m_active.store(true);
 
     try {
-        info->handle = std::thread(info->func, info);
+        std::mutex blocker;
+
+        blocker.lock();
+        info->handle = std::thread([info, &blocker]()
+                                   {
+                                       blocker.lock(); // wait til info is setup
+                                       info->func(info);
+                                   });
+
         info->nativeHandle = info->handle.native_handle();
         info->handle.detach();
+        setThreadName(info, "new thread");
+
+        blocker.unlock();  // allow new thread to continue
+        return true;
     } catch (std::system_error& e)
     {
         LOG_ERROR("Error creating thread");
         return false;
     }
-
-    setThreadName(info, "new thread");
-    return true;
 }
