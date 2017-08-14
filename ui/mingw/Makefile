@@ -14,7 +14,7 @@ ARCH = $(shell uname -m | tr A-Z a-z)
 DISTARCHIVE = peercast-yt-$(OS)-$(ARCH).tar.gz
 AR = ar
 
-INCLUDES = -I../../core -I../../core/common -I../../Onigmo
+INCLUDES = -I../../core -I../../core/common -I../../core/win32 -I../../Onigmo
 
 TARGET = peercast.exe
 RTMPSERVER = rtmp-server.exe
