@@ -155,28 +155,6 @@ public:
 typedef int (WINAPI *THREAD_FUNC)(ThreadInfo *);
 typedef uintptr_t THREAD_HANDLE;
 #define THREAD_PROC int WINAPI
-
-// ------------------------------------
-class WLock
-{
-public:
-    WLock()
-    {
-        InitializeCriticalSection(&cs);
-    }
-
-    void    on()
-    {
-        EnterCriticalSection(&cs);
-    }
-
-    void    off()
-    {
-        LeaveCriticalSection(&cs);
-    }
-
-    CRITICAL_SECTION cs;
-};
 #endif
 
 #ifdef _UNIX
@@ -214,44 +192,25 @@ public:
     {
     }
 };
+#endif
 
 // ------------------------------------
 class WLock
 {
 private:
-    pthread_mutex_t mutex;
+    std::recursive_mutex m_mutex;
+
 public:
-    WLock()
-    {
-        pthread_mutexattr_t mattr;
-
-        pthread_mutexattr_init(&mattr);
-
-#ifdef __APPLE__
-        pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
-#else
-        pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE_NP);
-#endif
-
-        pthread_mutex_init( &mutex, &mattr );
-    }
-
-    ~WLock()
-    {
-        pthread_mutex_destroy( &mutex );
-    }
-
     void    on()
     {
-        pthread_mutex_lock(&mutex);
+        m_mutex.lock();
     }
 
     void    off()
     {
-        pthread_mutex_unlock(&mutex);
+        m_mutex.unlock();
     }
 };
-#endif
 
 // ------------------------------------
 class ThreadInfo
