@@ -5,7 +5,7 @@ import cgi, os, subprocess, sys
 if __name__ == "__main__":
   form = cgi.FieldStorage()
 
-  for param in ["id", "preset", "audio_codec"]:
+  for param in ["id", "preset", "audio_codec", "type"]:
     if param not in form:
       print("Status: 400 Bad Request\n")
       sys.exit()
@@ -20,12 +20,17 @@ if __name__ == "__main__":
     # 正常なビットレートが渡されなかった場合は 500Kbps にする。
     r = 500
 
+  if "type" == "WMV":
+    protocol = "mmsh"
+  else:
+    protocol = "http"
+
   print("Content-Type: video/x-flv\n", flush=True)
   subprocess.call(["ffmpeg",
     "-nostdin",
     "-v", "-8", # quiet
     "-y",       # confirm overwriting
-    "-i", "mmsh://{0}:{1}/stream/{2}.wmv".format(server_name, server_port, id),
+    "-i", "{0}://{1}:{2}/stream/{3}".format(protocol, server_name, server_port, id),
     "-strict", "-2",
     "-acodec", audio_codec,
     "-async", "1",

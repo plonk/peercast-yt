@@ -108,13 +108,45 @@
     </audio>
   </div>
 {@elsif page.channel.type == "MKV"}
-  <div class="message" style="text-align: center">
-    <video controls autoplay>
-      <source src="/stream/{$page.channel.id}.mkv?auth={$page.channel.authToken}" type="video/webm">
-      {#Your browser doesn't seem to support playback of MKV videos.} {#Try the playlist link below.}
-    </video>
-    <div>{#Should the playback fail, try the playlist link below.}</div>
-  </div>
+  {@if request.path !~ "^/public/"}
+    {@if servMgr.transcodingEnabled}
+      <div class="message" style="text-align: center">
+      <script src="/assets/js/flv.min.js"></script>
+      <video id="videoElement" controls autoplay>
+        {#Your browser doesn't seem to support playback of MKV videos.} {#Try the playlist link below.}
+      </video>
+      <script>
+       if (flvjs.isSupported()) {
+         var videoElement = document.getElementById('videoElement');
+         var flvPlayer = flvjs.createPlayer({
+           type: 'flv',
+           isLive: true,
+           url: '/cgi-bin/flv.cgi?id={$page.channel.id}&type={$page.channel.type}&bitrate={$page.channel.bitrate}&preset={$servMgr.preset}&audio_codec={$servMgr.audioCodec}'
+         });
+         flvPlayer.attachMediaElement(videoElement);
+         flvPlayer.load();
+         flvPlayer.play();
+       }
+      </script>
+      </div>
+    {@else}
+      <div class="message" style="text-align: center">
+        <video controls autoplay>
+          <source src="/stream/{$page.channel.id}.mkv?auth={$page.channel.authToken}" type="video/webm">
+          {#Your browser doesn't seem to support playback of MKV videos.} {#Try the playlist link below.}
+        </video>
+        <div>{#Should the playback fail, try the playlist link below.}</div>
+      </div>
+    {@end}
+  {@else}
+    <div class="message" style="text-align: center">
+      <video controls autoplay>
+        <source src="/stream/{$page.channel.id}.mkv?auth={$page.channel.authToken}" type="video/webm">
+        {#Your browser doesn't seem to support playback of MKV videos.} {#Try the playlist link below.}
+      </video>
+      <div>{#Should the playback fail, try the playlist link below.}</div>
+    </div>
+  {@end}
 {@elsif page.channel.type == "WEBM"}
   <div class="message" style="text-align: center">
     <video controls autoplay>
