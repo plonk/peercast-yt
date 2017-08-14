@@ -32,6 +32,7 @@
 #include "usys.h"
 #include "usocket.h"
 #include "stats.h"
+#include <thread>
 
 // ---------------------------------
 USys::USys()
@@ -69,49 +70,12 @@ ClientSocket *USys::createSocket()
 }
 
 // ---------------------------------
-void USys::waitThread(ThreadInfo *info, int timeout)
-{
-#ifdef _GNU_SOURCE
-    struct timespec abstime = { getTime() + timeout/1000, (timeout%1000)*1000*1000 };
-    pthread_timedjoin_np(info->handle, NULL, &abstime);
-#else
-    pthread_join(info->handle, NULL);
-#endif
-}
-
-// ---------------------------------
-typedef void *(*THREAD_PTR)(void *);
-bool    USys::startThread(ThreadInfo *info)
-{
-    info->active = true;
-
-    pthread_attr_t attr;
-
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-
-    int r = pthread_create(&info->handle, &attr, (THREAD_PTR)info->func, info);
-
-    pthread_attr_destroy(&attr);
-
-    if (r)
-    {
-        LOG_ERROR("Error creating thread: %d", r);
-        return false;
-    }else
-    {
-        setThreadName(info, "new thread");
-        return true;
-    }
-}
-
-// ---------------------------------
 void    USys::setThreadName(ThreadInfo *thread, const char* name)
 {
 #ifdef _GNU_SOURCE
     char buf[16];
     snprintf(buf, 16, "%s", name);
-    pthread_setname_np(thread->handle, buf);
+    pthread_setname_np(thread->nativeHandle, buf);
 #endif
 }
 

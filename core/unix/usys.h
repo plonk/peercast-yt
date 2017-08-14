@@ -32,7 +32,6 @@ public:
     USys();
 
     ClientSocket    *createSocket() override;
-    bool            startThread(ThreadInfo *) override;
     void            sleep(int ) override;
     void            appMsg(long, long) override;
     unsigned int    getTime() override;
@@ -43,7 +42,6 @@ public:
     bool            hasGUI() override { return false; }
     void            callLocalURL(const char *, int) override;
     void            executeFile(const char *) override;
-    void            waitThread(ThreadInfo *, int timeout = 30000) override;
     void            setThreadName(ThreadInfo *, const char* name) override;
 
     peercast::Random rndGen;

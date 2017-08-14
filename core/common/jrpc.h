@@ -795,7 +795,7 @@ public:
         Channel *channel = chanMgr->findChannelByID(id);
 
         if (channel)
-            channel->thread.active = false;
+            channel->thread.shutdown();
 
         return nullptr;
     }

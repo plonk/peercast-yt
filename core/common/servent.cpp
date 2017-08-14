@@ -158,7 +158,7 @@ Servent::~Servent()
 // -----------------------------------
 void    Servent::kill()
 {
-    thread.active = false;
+    thread.shutdown();
 
     setStatus(S_CLOSING);
 
@@ -194,7 +194,7 @@ void    Servent::kill()
 // -----------------------------------
 void    Servent::abort()
 {
-    thread.active = false;
+    thread.shutdown();
     if (sock)
     {
         sock->close();
@@ -351,7 +351,7 @@ void Servent::checkFree()
 {
     if (sock)
         throw StreamException("Socket already set");
-    if (thread.active)
+    if (thread.active())
         throw StreamException("Thread already active");
 }
 
@@ -1157,7 +1157,7 @@ void Servent::processGnutella()
 
     unsigned int lastTotalIn=0, lastTotalOut=0;
 
-    while (thread.active && sock->active())
+    while (thread.active() && sock->active())
     {
         if (sock->readReady())
         {
@@ -1297,7 +1297,7 @@ void Servent::processRoot()
 
         unsigned int lastConnect = sys->getTime();
 
-        while (thread.active && sock->active())
+        while (thread.active() && sock->active())
         {
             if (gnuStream.readPacket(pack))
             {
@@ -1774,7 +1774,7 @@ void Servent::processIncomingPCP(bool suggestOthers)
 
     int error = 0;
     BroadcastState bcs;
-    while (!error && thread.active && !sock->eof())
+    while (!error && thread.active() && !sock->eof())
     {
         error = pcpStream->readPacket(*sock, bcs);
         sys->sleepIdle();
@@ -1806,7 +1806,7 @@ int Servent::outgoingProc(ThreadInfo *thread)
     noID.clear();
     sv->pcpStream = new PCPStream(noID);
 
-    while (sv->thread.active)
+    while (sv->thread.active())
     {
         sv->setStatus(S_WAIT);
 
@@ -1866,7 +1866,7 @@ int Servent::outgoingProc(ThreadInfo *thread)
                     chanMgr->lastYPConnect = ctime;
                 }
                 sys->sleepIdle();
-            }while (!bestHit.host.ip && (sv->thread.active));
+            }while (!bestHit.host.ip && (sv->thread.active()));
 
             if (!bestHit.host.ip)       // give up
             {
@@ -1908,7 +1908,7 @@ int Servent::outgoingProc(ThreadInfo *thread)
 
                 BroadcastState bcs;
                 error = 0;
-                while (!error && sv->thread.active && !sv->sock->eof() && servMgr->autoServe)
+                while (!error && sv->thread.active() && !sv->sock->eof() && servMgr->autoServe)
                 {
                     error = sv->pcpStream->readPacket(*sv->sock, bcs);
 
@@ -2100,7 +2100,7 @@ bool Servent::waitForChannelHeader(ChanInfo &info)
         if (ch->isPlaying() && (ch->rawData.writePos>0))
             return true;
 
-        if (!thread.active || !sock->active())
+        if (!thread.active() || !sock->active())
             break;
         sys->sleep(100);
     }
@@ -2141,7 +2141,7 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
             unsigned int lastWriteTime = connectTime;
             bool         skipContinuation = true;
 
-            while ((thread.active) && sock->active())
+            while ((thread.active()) && sock->active())
             {
                 ch = chanMgr->findChannelByID(chanID);
 
@@ -2224,7 +2224,7 @@ void Servent::sendRawMetaChannel(int interval)
 
         streamPos = 0;      // raw meta channel has no header (its MP3)
 
-        while ((thread.active) && sock->active())
+        while ((thread.active()) && sock->active())
         {
             ch = chanMgr->findChannelByID(chanID);
 
@@ -2335,7 +2335,7 @@ void Servent::sendPeercastChannel()
 
         streamPos = 0;
         unsigned int syncPos=0;
-        while ((thread.active) && sock->active())
+        while ((thread.active()) && sock->active())
         {
             ch = chanMgr->findChannelByID(chanID);
             if (ch)
@@ -2400,7 +2400,7 @@ void Servent::sendPCPChannel()
 
         unsigned int streamIndex = ch->streamIndex;
 
-        while (thread.active)
+        while (thread.active())
         {
             Channel *ch = chanMgr->findChannelByID(chanID);
 
@@ -2503,7 +2503,7 @@ int Servent::serverProc(ThreadInfo *thread)
         else
             LOG_DEBUG("Server started: %s", sv->sock->host.str().c_str());
 
-        while (thread->active && sv->sock->active())
+        while (thread->active() && sv->sock->active())
         {
             if (!sv->sock->readReady(100))
                 continue;

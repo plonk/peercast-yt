@@ -333,7 +333,7 @@ THREAD_PROC Channel::stream(ThreadInfo *thread)
 
     sys->setThreadName(thread, "CHANNEL");
 
-    while (thread->active && !peercastInst->isQuitting)
+    while (thread->active() && !peercastInst->isQuitting)
     {
         LOG_CHANNEL("Channel started");
 
@@ -358,7 +358,7 @@ THREAD_PROC Channel::stream(ThreadInfo *thread)
             LOG_DEBUG("Channel sleeping for %d seconds", diff);
             for (unsigned int i=0; i<diff; i++)
             {
-                if (!thread->active || peercastInst->isQuitting)
+                if (!thread->active() || peercastInst->isQuitting)
                     break;
                 sys->sleep(1000);
             }
@@ -545,7 +545,7 @@ void PeercastSource::stream(Channel *ch)
     m_channel = ch;
 
     int numYPTries=0;
-    while (ch->thread.active)
+    while (ch->thread.active())
     {
         ch->sourceHost.init();
 
@@ -608,7 +608,7 @@ void PeercastSource::stream(Channel *ch)
             }
 
             sys->sleepIdle();
-        }while ((ch->sourceHost.host.ip==0) && (ch->thread.active));
+        }while ((ch->sourceHost.host.ip==0) && (ch->thread.active()));
 
         if (!ch->sourceHost.host.ip)
         {
@@ -723,7 +723,7 @@ void PeercastSource::stream(Channel *ch)
 
         ch->lastIdleTime = sys->getTime();
         ch->setStatus(Channel::S_IDLE);
-        while ((ch->checkIdle()) && (ch->thread.active))
+        while ((ch->checkIdle()) && (ch->thread.active()))
         {
             sys->sleep(200);
         }
@@ -1159,7 +1159,7 @@ int Channel::readStream(Stream &in, ChannelStream *source)
 
     try
     {
-        while (thread.active && !peercastInst->isQuitting)
+        while (thread.active() && !peercastInst->isQuitting)
         {
             if (checkIdle())
             {

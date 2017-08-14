@@ -21,6 +21,9 @@
 #define _SYS_H
 
 #include <string>
+#include <atomic>
+#include <mutex>
+#include <thread>
 
 #include <string.h>
 #include <stdarg.h>
@@ -67,7 +70,7 @@ public:
     virtual ~Sys();
 
     virtual class ClientSocket  *createSocket() = 0;
-    virtual bool            startThread(class ThreadInfo *) = 0;
+    virtual bool            startThread(class ThreadInfo *);
     virtual void            sleep(int) = 0;
     virtual void            appMsg(long, long = 0) = 0;
     virtual unsigned int    getTime() = 0;
@@ -150,26 +153,16 @@ public:
 
     HANDLE event;
 };
-
-// ------------------------------------
-typedef int (WINAPI *THREAD_FUNC)(ThreadInfo *);
-typedef uintptr_t THREAD_HANDLE;
-#define THREAD_PROC int WINAPI
 #endif
 
 #ifdef _UNIX
 // ------------------------------------
-#include <pthread.h>
 #include <errno.h>
 
 #ifdef __APPLE__
 #include <sched.h>
 #define _BIG_ENDIAN 1
 #endif
-
-typedef int (*THREAD_FUNC)(ThreadInfo *);
-#define THREAD_PROC int
-typedef pthread_t THREAD_HANDLE;
 
 // ------------------------------------
 class WEvent
@@ -213,27 +206,31 @@ public:
 };
 
 // ------------------------------------
+typedef int (*THREAD_FUNC)(ThreadInfo *);
+#define THREAD_PROC int
+typedef std::thread THREAD_HANDLE;
+
 class ThreadInfo
 {
 public:
-    //typedef int  (__stdcall *THREAD_FUNC)(ThreadInfo *);
-
     ThreadInfo()
+        : m_active(false)
     {
-        active = false;
-        id = 0;
-        func = NULL;
-        data = NULL;
+        func         = NULL;
+        data         = NULL;
+        nativeHandle = std::thread::native_handle_type();
     }
 
     void    shutdown();
 
-    volatile bool   active;
-    int             id;
-    THREAD_FUNC     func;
-    THREAD_HANDLE   handle;
+    bool active() { return m_active.load(); }
 
+    std::atomic<bool>   m_active;
+    THREAD_FUNC     func;
     void            *data;
+
+    THREAD_HANDLE   handle;
+    std::thread::native_handle_type nativeHandle;
 };
 
 // ------------------------------------
