@@ -30,7 +30,7 @@ int ChanMgr::numIdleChannels()
     while (ch)
     {
         if (ch->isActive())
-            if (ch->thread.active)
+            if (ch->thread.active())
                 if (ch->status == Channel::S_IDLE)
                     cnt++;
         ch = ch->next;
@@ -56,7 +56,7 @@ void ChanMgr::closeOldestIdle()
     while (ch)
     {
         if (ch->isActive())
-            if (ch->thread.active)
+            if (ch->thread.active())
                 if (ch->status == Channel::S_IDLE)
                     if (ch->lastIdleTime < idleTime)
                     {
@@ -67,7 +67,7 @@ void ChanMgr::closeOldestIdle()
     }
 
     if (oldest)
-        oldest->thread.active = false;
+        oldest->thread.shutdown();
 }
 
 // -----------------------------------
@@ -76,7 +76,7 @@ void ChanMgr::closeAll()
     Channel *ch = channel;
     while (ch)
     {
-        if (ch->thread.active)
+        if (ch->thread.active())
             ch->thread.shutdown();
         ch = ch->next;
     }

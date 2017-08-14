@@ -278,7 +278,7 @@ void LogBuffer::dumpHTML(Stream &out)
 // ---------------------------
 void    ThreadInfo::shutdown()
 {
-    active = false;
+    m_active.store(false);
     //sys->waitThread(this);
 }
 
@@ -331,4 +331,23 @@ char* Sys::strcpy_truncate(char* dest, size_t destsize, const char* src)
     dest[destsize - 1] = '\0';
 
     return dest;
+}
+
+// ---------------------------------
+bool    Sys::startThread(ThreadInfo *info)
+{
+    info->m_active.store(true);
+
+    try {
+        info->handle = std::thread(info->func, info);
+        info->nativeHandle = info->handle.native_handle();
+        info->handle.detach();
+    } catch (std::system_error& e)
+    {
+        LOG_ERROR("Error creating thread");
+        return false;
+    }
+
+    setThreadName(info, "new thread");
+    return true;
 }

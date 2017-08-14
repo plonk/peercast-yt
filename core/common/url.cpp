@@ -32,7 +32,7 @@
 void URLSource::stream(Channel *ch)
 {
     String url;
-    while (ch->thread.active && !peercastInst->isQuitting)
+    while (ch->thread.active() && !peercastInst->isQuitting)
     {
         if (url.isEmpty())
             url = baseurl;
@@ -98,7 +98,7 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
 {
     String nextURL;
 
-    if (peercastInst->isQuitting || !ch->thread.active)
+    if (peercastInst->isQuitting || !ch->thread.active())
         return nextURL;
 
     String urlTmp;
@@ -289,7 +289,7 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
             String url;
 
             LOG_CHANNEL("Playlist: %d URLs", pls->numURLs);
-            while ((ch->thread.active) && (pls->numURLs) && (!peercastInst->isQuitting))
+            while ((ch->thread.active()) && (pls->numURLs) && (!peercastInst->isQuitting))
             {
                 if (url.isEmpty())
                 {

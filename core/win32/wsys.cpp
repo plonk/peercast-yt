@@ -66,37 +66,6 @@ ClientSocket *WSys::createSocket()
 }
 
 // ---------------------------------
-void WSys::waitThread(ThreadInfo *info, int timeout)
-{
-    switch(WaitForSingleObject((HANDLE)info->handle, timeout))
-    {
-      case WAIT_TIMEOUT:
-          throw TimeoutException();
-          break;
-    }
-}
-
-// ---------------------------------
-bool    WSys::startThread(ThreadInfo *info)
-{
-    info->active = true;
-
-    typedef unsigned ( __stdcall *start_address )( void * );
-
-    unsigned int threadID;
-    info->handle = (unsigned int)_beginthreadex( NULL, 0, (start_address)info->func, info, 0, &threadID );
-
-    if(info->handle == 0)
-        return false;
-
-    // Make the thread detached.
-    CloseHandle((HANDLE) info->handle);
-    info->handle = (THREAD_HANDLE) INVALID_HANDLE_VALUE;
-
-    return true;
-}
-
-// ---------------------------------
 void    WSys::sleep(int ms)
 {
     Sleep(ms);
