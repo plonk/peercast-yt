@@ -22,7 +22,15 @@
 
 #include <string>
 #include <atomic>
+
 #include <mutex>
+#if defined(__MINGW32__) || defined(__MINGW64__)
+#include "mingw.mutex.h"
+#endif
+
+#if defined(__MINGW32__) || defined(__MINGW64__)
+#include "mingw.thread.h"
+#endif
 #include <thread>
 
 #include <string.h>
