@@ -226,7 +226,6 @@ public:
     {
         func         = NULL;
         data         = NULL;
-        nativeHandle = std::thread::native_handle_type();
     }
 
     void    shutdown();
@@ -238,7 +237,6 @@ public:
     void            *data;
 
     THREAD_HANDLE   handle;
-    std::thread::native_handle_type nativeHandle;
 };
 
 // ------------------------------------
