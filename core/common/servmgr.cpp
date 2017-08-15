@@ -18,7 +18,6 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-#include <stdlib.h>
 #include "servent.h"
 #include "servmgr.h"
 #include "inifile.h"

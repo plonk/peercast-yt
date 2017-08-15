@@ -24,8 +24,6 @@
 #include "sys.h"
 #include "gnutella.h"
 #include "logbuf.h"
-#include <stdlib.h>
-#include <time.h>
 #include <chrono>
 
 // ------------------------------------------

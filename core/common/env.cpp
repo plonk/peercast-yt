@@ -1,8 +1,7 @@
 #include "env.h"
 #include "str.h"
 
-#include <stdlib.h>
-#include <assert.h>
+#include <cassert>
 
 Environment::Environment()
     : m_env(NULL)

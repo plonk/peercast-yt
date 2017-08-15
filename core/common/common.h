@@ -19,9 +19,7 @@
 #ifndef _COMMON_H
 #define _COMMON_H
 
-#include <stdio.h>
-#include <string.h>
-
+#include <cstring>
 #include <string>
 
 #include "gnuid.h"
@@ -37,7 +35,7 @@ class GeneralException : public std::exception
 public:
     GeneralException(const char *m, int e = 0)
     {
-        snprintf(msg, sizeof(msg), "%s", m);
+        std::snprintf(msg, sizeof(msg), "%s", m);
         err = e;
     }
 

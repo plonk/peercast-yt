@@ -27,7 +27,6 @@
 #include "servent.h"
 #include "servmgr.h"
 #include "stats.h"
-#include <stdlib.h>
 
 // ---------------------------
 const char *GNU_FUNC_STR(int func)

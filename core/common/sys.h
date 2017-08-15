@@ -22,8 +22,6 @@
 
 #include <string>
 
-#include <string.h>
-#include <stdarg.h>
 #include "common.h"
 
 #define RAND(a, b) (((a = 36969 * (a & 65535) + (a >> 16)) << 16) + \
@@ -111,12 +109,12 @@ extern Sys *sys;
 
 // ------------------------------------
 #ifdef _UNIX
-#include <errno.h>
 
 #ifdef __APPLE__
 #include <sched.h>
 #define _BIG_ENDIAN 1
 #endif
+
 #endif
 
 #ifdef WIN32
