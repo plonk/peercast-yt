@@ -1863,7 +1863,7 @@ int ServMgr::broadcastPacket(ChanPacket &pack, GnuID &chanID, GnuID &srcID, GnuI
 // --------------------------------------------------
 int ServMgr::idleProc(ThreadInfo *thread)
 {
-    sys->setThreadName(thread, "IDLE");
+    sys->setThreadName("IDLE");
 
     unsigned int lastBroadcastConnect = 0;
     unsigned int lastRootBroadcast = 0;
@@ -1947,7 +1947,7 @@ int ServMgr::idleProc(ThreadInfo *thread)
 // --------------------------------------------------
 int ServMgr::serverProc(ThreadInfo *thread)
 {
-    sys->setThreadName(thread, "SERVER");
+    sys->setThreadName("SERVER");
 
     Servent *serv = servMgr->allocServent();
     Servent *serv2 = servMgr->allocServent();

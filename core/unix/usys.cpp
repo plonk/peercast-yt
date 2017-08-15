@@ -70,12 +70,12 @@ ClientSocket *USys::createSocket()
 }
 
 // ---------------------------------
-void    USys::setThreadName(ThreadInfo *thread, const char* name)
+void    USys::setThreadName(const char* name)
 {
 #ifdef _GNU_SOURCE
     char buf[16];
     snprintf(buf, 16, "%s", name);
-    pthread_setname_np(thread->nativeHandle, buf);
+    pthread_setname_np(pthread_self(), buf);
 #endif
 }
 

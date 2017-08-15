@@ -1378,7 +1378,7 @@ void Servent::processRoot()
 // る。
 int Servent::givProc(ThreadInfo *thread)
 {
-    sys->setThreadName(thread, "Servent GIV");
+    sys->setThreadName("Servent GIV");
 
     Servent *sv = (Servent*)thread->data;
     try
@@ -1796,7 +1796,7 @@ void Servent::processIncomingPCP(bool suggestOthers)
 // -----------------------------------
 int Servent::outgoingProc(ThreadInfo *thread)
 {
-    sys->setThreadName(thread, "COUT");
+    sys->setThreadName("COUT");
 
     LOG_DEBUG("COUT started");
 
@@ -1972,7 +1972,7 @@ int Servent::incomingProc(ThreadInfo *thread)
 
     std::string ipStr = sv->sock->host.str(true);
 
-    sys->setThreadName(thread, String::format("INCOMING %s", ipStr.c_str()));
+    sys->setThreadName(String::format("INCOMING %s", ipStr.c_str()));
 
     try
     {
@@ -2494,7 +2494,7 @@ int Servent::serverProc(ThreadInfo *thread)
         if (!sv->sock)
             throw StreamException("Server has no socket");
 
-        sys->setThreadName(thread, String::format("LISTEN %hu", sv->sock->host.port));
+        sys->setThreadName(String::format("LISTEN %hu", sv->sock->host.port));
 
         sv->setStatus(S_LISTENING);
 

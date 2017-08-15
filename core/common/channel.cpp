@@ -331,7 +331,7 @@ THREAD_PROC Channel::stream(ThreadInfo *thread)
 {
     Channel *ch = (Channel *)thread->data;
 
-    sys->setThreadName(thread, "CHANNEL");
+    sys->setThreadName("CHANNEL");
 
     while (thread->active() && !peercastInst->isQuitting)
     {

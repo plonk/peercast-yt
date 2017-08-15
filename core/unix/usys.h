@@ -42,7 +42,7 @@ public:
     bool            hasGUI() override { return false; }
     void            callLocalURL(const char *, int) override;
     void            executeFile(const char *) override;
-    void            setThreadName(ThreadInfo *, const char* name) override;
+    void            setThreadName(const char* name) override;
 
     peercast::Random rndGen;
 private:

@@ -90,7 +90,7 @@ public:
     virtual void            callLocalURL(const char *, int)=0;
     virtual void            executeFile(const char *) = 0;
     virtual void            waitThread(ThreadInfo *, int timeout = 30000) {}
-    virtual void            setThreadName(ThreadInfo *, const char* name) {}
+    virtual void            setThreadName(const char* name) {}
 
 #ifdef __BIG_ENDIAN__
     unsigned short  convertEndian(unsigned short v) { return SWAP2(v); }
