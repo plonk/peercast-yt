@@ -6,7 +6,8 @@
 #include <stdexcept> // runtime_error
 
 #include "cgi.h"
-#include "sys.h" // WLock
+#include "threading.h" // WLock
+#include "gnuid.h"
 
 #include "varwriter.h"
 
