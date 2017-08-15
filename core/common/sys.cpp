@@ -25,6 +25,7 @@
 #include "gnutella.h"
 #include <stdlib.h>
 #include <time.h>
+#include <chrono>
 
 // -----------------------------------
 const char *LogBuffer::logTypes[]=
@@ -47,6 +48,12 @@ Sys::Sys()
 Sys::~Sys()
 {
     delete logBuf;
+}
+
+// ------------------------------------------
+void Sys::sleep(int ms)
+{
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 
 // ------------------------------------------

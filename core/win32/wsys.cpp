@@ -66,12 +66,6 @@ ClientSocket *WSys::createSocket()
 }
 
 // ---------------------------------
-void    WSys::sleep(int ms)
-{
-    Sleep(ms);
-}
-
-// ---------------------------------
 void WSys::appMsg(long msg, long arg)
 {
     //SendMessage(mainWindow,WM_USER,(WPARAM)msg,(LPARAM)arg);

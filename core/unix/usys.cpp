@@ -80,12 +80,6 @@ void    USys::setThreadName(const char* name)
 }
 
 // ---------------------------------
-void    USys::sleep(int ms)
-{
-    ::usleep(ms*1000);
-}
-
-// ---------------------------------
 void USys::appMsg(long msg, long arg)
 {
     //SendMessage(mainWindow, WM_USER, (WPARAM)msg, (LPARAM)arg);

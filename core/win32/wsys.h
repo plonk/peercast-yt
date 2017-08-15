@@ -32,17 +32,16 @@ class WSys : public Sys
 public:
     WSys(HWND);
 
-    virtual ClientSocket    *createSocket();
-    virtual void            sleep(int );
-    virtual void            appMsg(long,long);
-    virtual unsigned int    getTime();
-    virtual double          getDTime();
-    virtual unsigned int    rnd() { return rndGen.next(); }
-    virtual void            getURL(const char *);
-    virtual void            exit();
-    virtual bool            hasGUI() { return mainWindow!=NULL; }
-    virtual void            callLocalURL(const char *str,int port);
-    virtual void            executeFile(const char *);
+    ClientSocket    *createSocket() override;
+    void            appMsg(long, long) overide;
+    unsigned int    getTime() override;
+    double          getDTime() override;
+    unsigned int    rnd() override { return rndGen.next(); }
+    void            getURL(const char *) override;
+    void            exit() override;
+    bool            hasGUI() override { return mainWindow!=NULL; }
+    void            callLocalURL(const char *str, int port) override;
+    void            executeFile(const char *) override;
 
     HWND    mainWindow;
     peercast::Random rndGen;

@@ -79,7 +79,7 @@ public:
 
     virtual class ClientSocket  *createSocket() = 0;
     virtual bool            startThread(class ThreadInfo *);
-    virtual void            sleep(int) = 0;
+    virtual void            sleep(int);
     virtual void            appMsg(long, long = 0) = 0;
     virtual unsigned int    getTime() = 0;
     virtual double          getDTime() = 0;
