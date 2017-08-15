@@ -363,7 +363,5 @@ bool    Sys::startThread(ThreadInfo *info)
 // ---------------------------------
 unsigned int Sys::getTime()
 {
-    time_t ltime;
-    time(&ltime);
-    return ltime;
+    return time(NULL);
 }
