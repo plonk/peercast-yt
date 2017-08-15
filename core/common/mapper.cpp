@@ -1,5 +1,4 @@
 #include <limits.h>
-#include <stdlib.h>
 
 #include "common.h"
 #include "mapper.h"

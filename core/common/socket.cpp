@@ -18,7 +18,3 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-#include <stdio.h>
-#include <string.h>
-#include "socket.h"
-#include "sys.h"

@@ -20,7 +20,6 @@
 
 #include "xml.h"
 #include "stream.h"
-#include <stdlib.h>
 #include <stdarg.h>
 
 // ----------------------------------

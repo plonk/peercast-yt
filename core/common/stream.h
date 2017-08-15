@@ -22,9 +22,7 @@
 
 // -------------------------------------
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
+#include <cstdarg>
 #include "common.h"
 #include "sys.h"
 #include "id.h"

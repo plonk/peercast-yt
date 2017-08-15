@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <time.h>
+#include <ctime>
 
 namespace cgi {
 

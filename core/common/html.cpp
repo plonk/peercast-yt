@@ -19,7 +19,6 @@
 // ------------------------------------------------
 
 #include <stdarg.h>
-#include <stdlib.h>
 #include "cgi.h"
 #include "channel.h"
 #include "gnutella.h"
