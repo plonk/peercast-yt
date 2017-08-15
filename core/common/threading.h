@@ -36,6 +36,7 @@
 
 #ifdef WIN32
 #include <windows.h>
+#include "common.h" // TimeoutException
 
 class WEvent
 {
