@@ -1,11 +1,21 @@
 #include <gtest/gtest.h>
 
 #include "sys.h"
+#ifdef _UNIX
+#include "usys.h"
+#else
+#include "wsys.h"
+#endif
 
 class SysFixture : public ::testing::Test {
 public:
     SysFixture()
     {
+#ifdef _UNIX
+        m_sys = new USys();
+#else
+        m_sys = new WSys();
+#endif
     }
 
     void SetUp()
@@ -18,7 +28,10 @@ public:
 
     ~SysFixture()
     {
+        delete m_sys;
     }
+
+    Sys* m_sys;
 };
 
 TEST_F(SysFixture, strdup)
@@ -85,4 +98,18 @@ TEST_F(SysFixture, strcpy_truncate)
     ASSERT_STREQ("hoge", Sys::strcpy_truncate(dest, 10, "hoge"));
     ASSERT_STREQ("f", Sys::strcpy_truncate(dest, 2, "fuga"));
     ASSERT_STREQ("", Sys::strcpy_truncate(dest, 1, "piyo"));
+}
+
+TEST_F(SysFixture, sleep)
+{
+    auto t0 = m_sys->getDTime();
+    m_sys->sleep(1);
+    auto t1 = m_sys->getDTime();
+    //ASSERT_TRUE(t1 - t0 < 1.000);
+    ASSERT_TRUE(t1 - t0 >= 0.001);
+}
+
+TEST_F(SysFixture, getTime)
+{
+    ASSERT_LT(0, m_sys->getTime());
 }
