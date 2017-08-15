@@ -71,6 +71,7 @@ public:
 }
 
 // ------------------------------------
+class ThreadInfo;
 class Sys : public VariableWriter
 {
 public:
@@ -79,6 +80,8 @@ public:
 
     virtual class ClientSocket  *createSocket() = 0;
     virtual bool            startThread(class ThreadInfo *);
+    virtual bool            startWaitableThread(class ThreadInfo *);
+    virtual void            waitThread(ThreadInfo *);
     virtual void            sleep(int);
     virtual void            appMsg(long, long = 0) = 0;
     virtual unsigned int    getTime();
@@ -89,7 +92,6 @@ public:
     virtual bool            hasGUI() = 0;
     virtual void            callLocalURL(const char *, int)=0;
     virtual void            executeFile(const char *) = 0;
-    virtual void            waitThread(ThreadInfo *, int timeout = 30000) {}
     virtual void            setThreadName(const char* name) {}
 
 #ifdef __BIG_ENDIAN__

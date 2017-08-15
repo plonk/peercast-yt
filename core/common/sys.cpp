@@ -361,7 +361,38 @@ bool    Sys::startThread(ThreadInfo *info)
 }
 
 // ---------------------------------
+bool    Sys::startWaitableThread(ThreadInfo *info)
+{
+    info->m_active.store(true);
+
+    try {
+        info->handle = std::thread([info]()
+                                   {
+                                       sys->setThreadName("new thread");
+                                       info->func(info);
+                                   });
+        return true;
+    } catch (std::system_error& e)
+    {
+        LOG_ERROR("Error creating thread");
+        return false;
+    }
+}
+
+// ---------------------------------
 unsigned int Sys::getTime()
 {
     return time(NULL);
+}
+
+// ---------------------------------
+void Sys::waitThread(ThreadInfo* info)
+{
+    if (info->handle.joinable())
+    {
+        info->handle.join();
+    }else
+    {
+        LOG_ERROR("waitThread called on non-joinable thread");
+    }
 }

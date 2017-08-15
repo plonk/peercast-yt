@@ -20,6 +20,11 @@ public:
         return false;
     }
 
+    bool startWaitableThread(class ThreadInfo*) override
+    {
+        return false;
+    }
+
     void sleep(int) override
     {
     }
@@ -67,7 +72,7 @@ public:
     {
     }
 
-    void waitThread(ThreadInfo*, int timeout = 30000) override
+    void waitThread(ThreadInfo*) override
     {
     }
 };
