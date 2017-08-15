@@ -28,6 +28,7 @@
 #include "common.h"
 #include "sys.h"
 #include "id.h"
+#include "threading.h"
 
 // -------------------------------------
 class Stream

@@ -2,6 +2,7 @@
 #define _CRITSEC_H
 
 #include "sys.h"
+#include "threading.h"
 
 // クリティカルセクションをマークする。コンストラクターでロックを取得
 // し、デストラクタで開放する。
