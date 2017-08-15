@@ -33,7 +33,7 @@ public:
     WSys(HWND);
 
     ClientSocket    *createSocket() override;
-    void            appMsg(long, long) overide;
+    void            appMsg(long, long) override;
     unsigned int    getTime() override;
     double          getDTime() override;
     unsigned int    rnd() override { return rndGen.next(); }
