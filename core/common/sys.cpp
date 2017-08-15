@@ -359,3 +359,11 @@ bool    Sys::startThread(ThreadInfo *info)
         return false;
     }
 }
+
+// ---------------------------------
+unsigned int Sys::getTime()
+{
+    time_t ltime;
+    time(&ltime);
+    return ltime;
+}

@@ -81,7 +81,7 @@ public:
     virtual bool            startThread(class ThreadInfo *);
     virtual void            sleep(int);
     virtual void            appMsg(long, long = 0) = 0;
-    virtual unsigned int    getTime() = 0;
+    virtual unsigned int    getTime();
     virtual double          getDTime() = 0;
     virtual unsigned int    rnd() = 0;
     virtual void            getURL(const char *) = 0;

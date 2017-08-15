@@ -56,14 +56,6 @@ double USys::getDTime()
 }
 
 // ---------------------------------
-unsigned int USys::getTime()
-{
-    time_t ltime;
-    time( &ltime );
-    return ltime;
-}
-
-// ---------------------------------
 ClientSocket *USys::createSocket()
 {
     return new UClientSocket();
