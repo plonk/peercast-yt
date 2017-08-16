@@ -16,7 +16,7 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-#include <time.h> // for ctime
+#include <ctime> // for ctime
 
 #include "_string.h"
 #include "jis.h"
@@ -54,7 +54,7 @@ static int base64chartoval(char input)
 void String::setFromTime(unsigned int t)
 {
     time_t t2 = t;
-    char *p = ctime(&t2);
+    char *p = std::ctime(&t2);
     if (p)
         strcpy(data, p);
     else

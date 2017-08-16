@@ -1,8 +1,6 @@
 #ifndef _ID_H
 #define _ID_H
 
-#include <string.h>
-
 // ---------------------------------------------------
 class IDString
 {

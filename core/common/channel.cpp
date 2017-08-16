@@ -20,8 +20,6 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-#include <string.h>
-#include <stdlib.h>
 #include <algorithm>
 #include <numeric> // accumulate
 

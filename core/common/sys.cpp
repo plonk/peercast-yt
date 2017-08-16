@@ -23,19 +23,8 @@
 #include "common.h"
 #include "sys.h"
 #include "gnutella.h"
-#include <stdlib.h>
-#include <time.h>
+#include "logbuf.h"
 #include <chrono>
-
-// -----------------------------------
-const char *LogBuffer::logTypes[]=
-{
-    "",
-    "DBUG",
-    "EROR",
-    "GNET",
-    "CHAN",
-};
 
 // ------------------------------------------
 Sys::Sys()
@@ -129,42 +118,6 @@ char *stristr(const char *s1, const char *s2)
 }
 
 // -----------------------------------
-void LogBuffer::write(const char *str, TYPE t)
-{
-    lock.on();
-
-    unsigned int len = strlen(str);
-    int cnt=0;
-    while (len)
-    {
-        unsigned int rlen = len;
-        if (rlen > (lineLen-1))
-            rlen = lineLen-1;
-
-        int i = currLine % maxLines;
-        int bp = i*lineLen;
-        strncpy(&buf[bp], str, rlen);
-        buf[bp+rlen] = 0;
-        if (cnt==0)
-        {
-            times[i] = sys->getTime();
-            types[i] = t;
-        }else
-        {
-            times[i] = 0;
-            types[i] = T_NONE;
-        }
-        currLine++;
-
-        str += rlen;
-        len -= rlen;
-        cnt++;
-    }
-
-    lock.off();
-}
-
-// -----------------------------------
 const char *getCGIarg(const char *str, const char *arg)
 {
     if (!str)
@@ -207,79 +160,6 @@ bool hasCGIarg(const char *str, const char *arg)
         return false;
 
     return true;
-}
-
-// ---------------------------
-void LogBuffer::escapeHTML(char* dest, char* src)
-{
-    while (*src)
-    {
-        switch (*src)
-        {
-        case '&':
-            strcpy(dest, "&amp;");
-            dest += 5;
-            break;
-        case '<':
-            strcpy(dest, "&lt;");
-            dest += 4;
-            break;
-        case '>':
-            strcpy(dest, "&gt;");
-            dest += 4;
-            break;
-        default:
-            *dest = *src;
-            dest++;
-        }
-        src++;
-    }
-    *dest = '\0';
-}
-
-// ---------------------------
-void LogBuffer::dumpHTML(Stream &out)
-{
-    lock.on();
-
-    unsigned int nl = currLine;
-    unsigned int sp = 0;
-    if (nl > maxLines)
-    {
-        nl = maxLines-1;
-        sp = (currLine+1)%maxLines;
-    }
-
-    String tim;
-    const size_t BUFSIZE = (lineLen - 1) * 5 + 1;
-    char* escaped = new char [BUFSIZE];
-    if (nl)
-    {
-        for (unsigned int i=0; i<nl; i++)
-        {
-            unsigned int bp = sp*lineLen;
-
-            if (types[sp])
-            {
-                tim.setFromTime(times[sp]);
-
-                out.writeString(tim.cstr());
-                out.writeString(" <b>[");
-                out.writeString(getTypeStr(types[sp]));
-                out.writeString("]</b> ");
-            }
-
-            escapeHTML(escaped, &buf[bp]);
-            out.writeString(escaped);
-            out.writeString("<br>");
-
-            sp++;
-            sp %= maxLines;
-        }
-    }
-    delete[] escaped;
-
-    lock.off();
 }
 
 // ---------------------------
@@ -361,7 +241,38 @@ bool    Sys::startThread(ThreadInfo *info)
 }
 
 // ---------------------------------
+bool    Sys::startWaitableThread(ThreadInfo *info)
+{
+    info->m_active.store(true);
+
+    try {
+        info->handle = std::thread([info]()
+                                   {
+                                       sys->setThreadName("new thread");
+                                       info->func(info);
+                                   });
+        return true;
+    } catch (std::system_error& e)
+    {
+        LOG_ERROR("Error creating thread");
+        return false;
+    }
+}
+
+// ---------------------------------
 unsigned int Sys::getTime()
 {
     return time(NULL);
+}
+
+// ---------------------------------
+void Sys::waitThread(ThreadInfo* info)
+{
+    if (info->handle.joinable())
+    {
+        info->handle.join();
+    }else
+    {
+        LOG_ERROR("waitThread called on non-joinable thread");
+    }
 }

@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 #include "cgi.h"
 #include "str.h"
 

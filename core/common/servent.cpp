@@ -21,7 +21,6 @@
 // ------------------------------------------------
 // todo: make lan->yp not check firewall
 
-#include <stdlib.h>
 #include "servent.h"
 #include "sys.h"
 #include "gnutella.h"

@@ -20,6 +20,7 @@ public:
 
     void SetUp()
     {
+        m_done = false;
     }
 
     void TearDown()
@@ -31,8 +32,17 @@ public:
         delete m_sys;
     }
 
+    static THREAD_PROC proc(ThreadInfo* p)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        m_done = true;
+    }
+
+    static bool m_done;
     Sys* m_sys;
 };
+
+bool SysFixture::m_done;
 
 TEST_F(SysFixture, strdup)
 {
@@ -112,4 +122,13 @@ TEST_F(SysFixture, sleep)
 TEST_F(SysFixture, getTime)
 {
     ASSERT_LT(0, m_sys->getTime());
+}
+
+TEST_F(SysFixture, waitThread)
+{
+    ThreadInfo info;
+    info.func = proc;
+    m_sys->startWaitableThread(&info);
+    m_sys->waitThread(&info);
+    ASSERT_TRUE(m_done);
 }
