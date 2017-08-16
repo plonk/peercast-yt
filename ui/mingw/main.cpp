@@ -32,7 +32,6 @@
 #include <sys/time.h>
 #include <libgen.h> // dirname
 #include <windows.h> // GetModuleFileName
-#include <locale.h>
 
 // ----------------------------------
 static std::string utf8ToAnsi(const char *utf8);
