@@ -22,7 +22,7 @@
 
 // -------------------------------------
 
-#include <cstdarg>
+#include <stdarg.h>
 #include "common.h"
 #include "sys.h"
 #include "id.h"

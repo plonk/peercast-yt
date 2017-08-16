@@ -19,7 +19,7 @@
 #ifndef _COMMON_H
 #define _COMMON_H
 
-#include <cstring>
+#include <stdio.h> // snprintf
 #include <string>
 
 #include "gnuid.h"
