@@ -19,6 +19,7 @@
 #define _GNUID_H
 
 #include "common.h"
+#include <string.h>
 
 // --------------------------------
 class GnuID

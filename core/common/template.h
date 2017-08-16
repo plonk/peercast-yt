@@ -21,7 +21,6 @@
 #define _TEMPLATE_H
 
 #include <list>
-#include "sys.h"
 #include "stream.h"
 #include "json.hpp"
 #include "varwriter.h"
