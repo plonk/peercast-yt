@@ -71,7 +71,7 @@ bool Subprogram::start(std::initializer_list<std::string> arguments, Environment
         close(stdinPipe[0]);
 
         // exec するか exit するかなので解放しなくていいかも。
-        const char* *argv = new const char* [arguments.size() + 1];
+        const char* *argv = new const char* [arguments.size() + 2];
         argv[0] = m_name.c_str();
         int i = 1;
         for (auto it = arguments.begin(); it != arguments.end(); ++it)
