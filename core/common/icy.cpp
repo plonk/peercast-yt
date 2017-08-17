@@ -2,7 +2,7 @@
 #include "socket.h"
 
 // ------------------------------------------------
-void ICYSource::stream(Channel *ch)
+void ICYSource::stream(std::shared_ptr<Channel> ch)
 {
     ChannelStream *source=NULL;
     try

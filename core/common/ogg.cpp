@@ -22,18 +22,18 @@
 static int test=0;
 
 // ------------------------------------------
-void OGGStream::readHeader(Stream &, Channel *)
+void OGGStream::readHeader(Stream &, std::shared_ptr<Channel>)
 {
     test = 0;
 }
 
 // ------------------------------------------
-void OGGStream::readEnd(Stream &, Channel *)
+void OGGStream::readEnd(Stream &, std::shared_ptr<Channel>)
 {
 }
 
 // ------------------------------------------
-int OGGStream::readPacket(Stream &in, Channel *ch)
+int OGGStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
 {
     OggPage ogg;
     ChanPacket pack;
@@ -124,7 +124,7 @@ int OGGStream::readPacket(Stream &in, Channel *ch)
 }
 
 // -----------------------------------
-void OggSubStream::readHeader(Channel *ch, OggPage &ogg)
+void OggSubStream::readHeader(std::shared_ptr<Channel> ch, OggPage &ogg)
 {
     if ((pack.bodyLen + ogg.bodyLen) >= OggPacket::MAX_BODYLEN)
         throw StreamException("OGG packet too big");
@@ -147,7 +147,7 @@ void OggSubStream::readHeader(Channel *ch, OggPage &ogg)
 }
 
 // -----------------------------------
-void OggVorbisSubStream::procHeaders(Channel *ch)
+void OggVorbisSubStream::procHeaders(std::shared_ptr<Channel> ch)
 {
     unsigned int packPtr=0;
 
@@ -225,7 +225,7 @@ void OggTheoraSubStream::readInfo(Stream &in, ChanInfo &info)
 }
 
 // -----------------------------------
-void OggTheoraSubStream::procHeaders(Channel *ch)
+void OggTheoraSubStream::procHeaders(std::shared_ptr<Channel> ch)
 {
     unsigned int packPtr=0;
 

@@ -75,9 +75,9 @@ public:
 
     bool    isActive() { return serialNo!=0; }
 
-    void    readHeader(Channel *, OggPage &);
+    void    readHeader(std::shared_ptr<Channel>, OggPage &);
 
-    virtual void procHeaders(Channel *) = 0;
+    virtual void procHeaders(std::shared_ptr<Channel>) = 0;
 
     int             bitrate;
 
@@ -94,7 +94,7 @@ public:
     :samplerate(0)
     {}
 
-    void    procHeaders(Channel *) override;
+    void    procHeaders(std::shared_ptr<Channel>) override;
 
     void    readIdent(Stream &, ChanInfo &);
     void    readSetup(Stream &);
@@ -111,7 +111,7 @@ class OggTheoraSubStream : public OggSubStream
 public:
     OggTheoraSubStream() : granposShift(0), frameTime(0) {}
 
-    void    procHeaders(Channel *) override;
+    void    procHeaders(std::shared_ptr<Channel>) override;
 
     void    readInfo(Stream &, ChanInfo &);
 
@@ -128,11 +128,11 @@ public:
     OGGStream()
     {}
 
-    void    readHeader(Stream &, Channel *) override;
-    int     readPacket(Stream &, Channel *) override;
-    void    readEnd(Stream &, Channel *) override;
+    void    readHeader(Stream &, std::shared_ptr<Channel>) override;
+    int     readPacket(Stream &, std::shared_ptr<Channel>) override;
+    void    readEnd(Stream &, std::shared_ptr<Channel>) override;
 
-    void    readHeaders(Stream &, Channel *, OggPage &);
+    void    readHeaders(Stream &, std::shared_ptr<Channel>, OggPage &);
 
     OggVorbisSubStream  vorbis;
     OggTheoraSubStream  theora;

@@ -114,7 +114,7 @@ void Channel::endThread()
 
     reset();
 
-    chanMgr->deleteChannel(this);
+    chanMgr->deleteChannel(shared_from_this());
 }
 
 // -----------------------------------------------------------------------------
@@ -292,7 +292,7 @@ void    Channel::startURL(const char *u)
 // -----------------------------------
 void Channel::startStream()
 {
-    thread.data = this;
+    thread.channel = shared_from_this();
     thread.func = stream;
     if (!sys->startThread(&thread))
         reset();
@@ -327,7 +327,9 @@ void Channel::checkReadDelay(unsigned int len)
 // -----------------------------------
 THREAD_PROC Channel::stream(ThreadInfo *thread)
 {
-    Channel *ch = (Channel *)thread->data;
+    auto ch = thread->channel;
+
+    assert(thread->channel != nullptr);
 
     sys->setThreadName("CHANNEL");
 
@@ -474,7 +476,7 @@ int PeercastSource::getSourceRateAvg()
 }
 
 // -----------------------------------
-ChanHit PeercastSource::pickFromHitList(Channel *ch, ChanHit &oldHit)
+ChanHit PeercastSource::pickFromHitList(std::shared_ptr<Channel> ch, ChanHit &oldHit)
 {
     ChanHit res = oldHit;
     ChanHitList *chl = NULL;
@@ -538,7 +540,7 @@ static std::string chName(ChanInfo& info)
 }
 
 // -----------------------------------
-void PeercastSource::stream(Channel *ch)
+void PeercastSource::stream(std::shared_ptr<Channel> ch)
 {
     m_channel = ch;
 
@@ -1147,7 +1149,7 @@ int Channel::readStream(Stream &in, ChannelStream *source)
 
     info.numSkips = 0;
 
-    source->readHeader(in, this);
+    source->readHeader(in, shared_from_this());
 
     peercastApp->channelStart(&info);
 
@@ -1182,7 +1184,7 @@ int Channel::readStream(Stream &in, ChannelStream *source)
 
             if (in.readReady(sys->idleSleepTime))
             {
-                error = source->readPacket(in, this);
+                error = source->readPacket(in, shared_from_this());
 
                 if (error)
                     break;
@@ -1203,7 +1205,7 @@ int Channel::readStream(Stream &in, ChannelStream *source)
                             peercast::notifyMessage(ServMgr::NT_PEERCAST, info.name.str() + "を受信中です。");
                         setStatus(Channel::S_RECEIVING);
                     }
-                    source->updateStatus(this);
+                    source->updateStatus(shared_from_this());
                 }
             }
         }
@@ -1223,25 +1225,25 @@ int Channel::readStream(Stream &in, ChannelStream *source)
 
     peercastApp->channelStop(&info);
 
-    source->readEnd(in, this);
+    source->readEnd(in, shared_from_this());
 
     return error;
 }
 
 // -----------------------------------
-void PeercastStream::readHeader(Stream &in, Channel *ch)
+void PeercastStream::readHeader(Stream &in, std::shared_ptr<Channel> ch)
 {
     if (in.readTag() != 'PCST')
         throw StreamException("Not PeerCast stream");
 }
 
 // -----------------------------------
-void PeercastStream::readEnd(Stream &, Channel *)
+void PeercastStream::readEnd(Stream &, std::shared_ptr<Channel>)
 {
 }
 
 // -----------------------------------
-int PeercastStream::readPacket(Stream &in, Channel *ch)
+int PeercastStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
 {
     ChanPacket pack;
 
@@ -1306,19 +1308,19 @@ int PeercastStream::readPacket(Stream &in, Channel *ch)
 }
 
 // ------------------------------------------
-void RawStream::readHeader(Stream &, Channel *)
+void RawStream::readHeader(Stream &, std::shared_ptr<Channel>)
 {
 }
 
 // ------------------------------------------
-int RawStream::readPacket(Stream &in, Channel *ch)
+int RawStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
 {
     readRaw(in, ch);
     return 0;
 }
 
 // ------------------------------------------
-void RawStream::readEnd(Stream &, Channel *)
+void RawStream::readEnd(Stream &, std::shared_ptr<Channel>)
 {
 }
 

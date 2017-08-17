@@ -19,17 +19,17 @@
 #include "nsv.h"
 
 // ------------------------------------------
-void NSVStream::readEnd(Stream &, Channel *)
+void NSVStream::readEnd(Stream &, std::shared_ptr<Channel>)
 {
 }
 
 // ------------------------------------------
-void NSVStream::readHeader(Stream &, Channel *)
+void NSVStream::readHeader(Stream &, std::shared_ptr<Channel>)
 {
 }
 
 // ------------------------------------------
-int NSVStream::readPacket(Stream &in, Channel *ch)
+int NSVStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
 {
     ChanPacket pack;
 

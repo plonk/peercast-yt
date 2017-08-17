@@ -93,7 +93,7 @@ bool    Servent::isFiltered(int f)
 }
 
 // -----------------------------------
-bool Servent::canStream(Channel *ch)
+bool Servent::canStream(std::shared_ptr<Channel> ch)
 {
     if (ch==NULL)
         return false;
@@ -820,7 +820,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
     bool chanFound=false;
     bool chanReady=false;
 
-    Channel *ch = chanMgr->findChannelByID(chanInfo.id);
+    auto ch = chanMgr->findChannelByID(chanInfo.id);
     if (ch)
     {
         sendHeader = true;
@@ -2034,7 +2034,7 @@ void Servent::processStream(bool doneHandshake, ChanInfo &chanInfo)
 
         servMgr->totalStreams++;
 
-        Channel *ch = chanMgr->findChannelByID(chanID);
+        auto ch = chanMgr->findChannelByID(chanID);
         if (!ch)
             throw StreamException("Channel not found");
 
@@ -2092,7 +2092,7 @@ bool Servent::waitForChannelHeader(ChanInfo &info)
 {
     for (int i=0; i<30*10; i++)
     {
-        Channel *ch = chanMgr->findChannelByID(info.id);
+        auto ch = chanMgr->findChannelByID(info.id);
         if (!ch)
             return false;
 
@@ -2115,7 +2115,7 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
     {
         sock->setWriteTimeout(DIRECT_WRITE_TIMEOUT*1000);
 
-        Channel *ch = chanMgr->findChannelByID(chanID);
+        auto ch = chanMgr->findChannelByID(chanID);
         if (!ch)
             throw StreamException("Channel not found");
 
@@ -2197,7 +2197,7 @@ void Servent::sendRawMetaChannel(int interval)
 {
     try
     {
-        Channel *ch = chanMgr->findChannelByID(chanID);
+        auto ch = chanMgr->findChannelByID(chanID);
         if (!ch)
             throw StreamException("Channel not found");
 
@@ -2317,7 +2317,7 @@ void Servent::sendPeercastChannel()
     {
         setStatus(S_CONNECTED);
 
-        Channel *ch = chanMgr->findChannelByID(chanID);
+        auto ch = chanMgr->findChannelByID(chanID);
         if (!ch)
             throw StreamException("Channel not found");
 
@@ -2366,7 +2366,7 @@ void Servent::sendPeercastChannel()
 // -----------------------------------
 void Servent::sendPCPChannel()
 {
-    Channel *ch = chanMgr->findChannelByID(chanID);
+    auto ch = chanMgr->findChannelByID(chanID);
     if (!ch)
         throw StreamException("Channel not found");
 
@@ -2401,7 +2401,7 @@ void Servent::sendPCPChannel()
 
         while (thread.active())
         {
-            Channel *ch = chanMgr->findChannelByID(chanID);
+            auto ch = chanMgr->findChannelByID(chanID);
 
             if (!ch)
             {

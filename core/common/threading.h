@@ -132,6 +132,7 @@ class ThreadInfo
 public:
     ThreadInfo()
         : m_active(false)
+        , channel(NULL)
     {
         func         = NULL;
         data         = NULL;
@@ -144,6 +145,7 @@ public:
     std::atomic<bool>   m_active;
     THREAD_FUNC     func;
     void            *data;
+    std::shared_ptr<class Channel> channel;
 
     THREAD_HANDLE   handle;
 };

@@ -13,7 +13,7 @@ public:
     {
     }
 
-    void stream(Channel *) override;
+    void stream(std::shared_ptr<Channel>) override;
     int getSourceRate() override;
     int getSourceRateAvg() override;
 

@@ -15,9 +15,9 @@ TEST_F(HostGraphFixture, constructorNullChannel)
 
 TEST_F(HostGraphFixture, simplestCase)
 {
-    auto ch = new Channel();
+    auto ch = std::make_shared<Channel>();
     auto hitList = new ChanHitList();
-    Defer reclaim([=]() { delete ch; delete hitList; });
+    Defer reclaim([=]() { delete hitList; });
 
     JrpcApi::HostGraph graph(ch, hitList);
 
@@ -26,9 +26,9 @@ TEST_F(HostGraphFixture, simplestCase)
 
 TEST_F(HostGraphFixture, withHitList)
 {
-    auto ch = new Channel();
+    auto ch = std::make_shared<Channel>();
     auto hitList = new ChanHitList();
-    Defer reclaim([=]() { delete ch; delete hitList; });
+    Defer reclaim([=]() { delete hitList; });
     ChanHit hit;
 
     hit.init();

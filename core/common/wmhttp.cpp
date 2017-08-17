@@ -2,17 +2,17 @@
 
 extern ASFInfo parseASFHeader(Stream &in); // from mms.cpp
 
-void WMHTTPStream::readEnd(Stream &, Channel *)
+void WMHTTPStream::readEnd(Stream &, std::shared_ptr<Channel>)
 {
 }
 
 // ------------------------------------------
-void WMHTTPStream::readHeader(Stream &, Channel *)
+void WMHTTPStream::readHeader(Stream &, std::shared_ptr<Channel>)
 {
 }
 
 // ------------------------------------------
-int WMHTTPStream::readPacket(Stream &in, Channel *ch)
+int WMHTTPStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
 {
     WMHTTPChunk c;
 

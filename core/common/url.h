@@ -31,8 +31,8 @@ public:
         baseurl.set(url);
     }
 
-    ::String        streamURL(Channel *, const char *);
-    void            stream(Channel *) override;
+    ::String        streamURL(std::shared_ptr<Channel>, const char *);
+    void            stream(std::shared_ptr<Channel>) override;
     int             getSourceRate() override;
     int             getSourceRateAvg() override;
 

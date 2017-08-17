@@ -125,7 +125,7 @@ public:
     void    initPing(int);
     void    initPong(Host &, bool, GnuPacket &);
     void    initFind(const char *, class XML *, int);
-    bool    initHit(Host &, Channel *, GnuPacket *, bool, bool, bool, bool, int);
+    bool    initHit(Host &, std::shared_ptr<Channel>, GnuPacket *, bool, bool, bool, bool, int);
     void    initPush(ChanHit &, Host &);
 
     void    makeChecksumID();

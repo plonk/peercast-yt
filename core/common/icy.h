@@ -25,7 +25,7 @@
 class ICYSource : public ChannelSource
 {
 public:
-    void stream(Channel *) override;
+    void stream(std::shared_ptr<Channel>) override;
 };
 
 #endif

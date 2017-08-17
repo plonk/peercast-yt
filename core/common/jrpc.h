@@ -39,7 +39,7 @@ public:
     class HostGraph
     {
     public:
-        HostGraph(Channel *ch, ChanHitList *hitList)
+        HostGraph(std::shared_ptr<Channel> ch, ChanHitList *hitList)
         {
             if (ch == nullptr)
                 throw std::invalid_argument("ch");
@@ -288,7 +288,7 @@ public:
             info.id = chanMgr->broadcastID;
             info.id.encode(NULL, info.name, info.genre, info.bitrate);
 
-            Channel *c = chanMgr->createChannel(info, NULL); // info, mount
+            auto c = chanMgr->createChannel(info, NULL); // info, mount
             if (!c)
             {
                 throw application_error(0, "failed to create channel");
@@ -370,7 +370,7 @@ public:
         }
     }
 
-    json channelStatus(Channel *c)
+    json channelStatus(std::shared_ptr<Channel> c)
     {
         return {
             {"status", to_json(c->status)},
@@ -387,7 +387,7 @@ public:
         };
     }
 
-    json to_json(Channel *c)
+    json to_json(std::shared_ptr<Channel> c)
     {
         return {
             {"channelId", to_json(c->info.id)},
@@ -428,7 +428,7 @@ public:
 
         GnuID id = params[0].get<std::string>();
 
-        Channel *c = chanMgr->findChannelByID(id);
+        auto c = chanMgr->findChannelByID(id);
         if (!c)
             throw application_error(-1, "Channel not found");
 
@@ -497,7 +497,7 @@ public:
     {
         GnuID id(params[0].get<std::string>());
 
-        Channel *c = chanMgr->findChannelByID(id);
+        auto c = chanMgr->findChannelByID(id);
         if (!c)
             throw application_error(-1, "Channel not found");
 
@@ -514,7 +514,7 @@ public:
     {
         GnuID id(params[0].get<std::string>());
 
-        Channel *c = chanMgr->findChannelByID(id);
+        auto c = chanMgr->findChannelByID(id);
 
         if (!c)
             throw application_error(-1, "Channel not found");
@@ -527,7 +527,7 @@ public:
         json result = json::array();
 
         CriticalSection cs(chanMgr->lock);
-        for (Channel *c = chanMgr->channel; c != NULL; c = c->next)
+        for (auto c = chanMgr->channel; c != NULL; c = c->next)
         {
             result.push_back(to_json(c));
         }
@@ -620,7 +620,7 @@ public:
 
     // 配信中のチャンネルとルートサーバーとの接続状態。
     // 返り値: "Idle" | "Connecting" | "Connected" | "Error"
-    json::string_t announcingChannelStatus(Channel* c)
+    json::string_t announcingChannelStatus(std::shared_ptr<Channel> c)
     {
         return "Connected";
     }
@@ -630,7 +630,7 @@ public:
         json::array_t result;
 
         CriticalSection cs(chanMgr->lock);
-        for (Channel *c = chanMgr->channel; c != NULL; c = c->next)
+        for (auto c = chanMgr->channel; c != NULL; c = c->next)
         {
             if (!c->isBroadcasting())
                 continue;
@@ -777,7 +777,7 @@ public:
         json info             = args[1];
         json track            = args[2];
 
-        Channel *channel = chanMgr->findChannelByID(channelId);
+        auto channel = chanMgr->findChannelByID(channelId);
         if (!channel)
             throw application_error(0, "Channel not found");
 
@@ -792,7 +792,7 @@ public:
 
         GnuID id(channelId);
 
-        Channel *channel = chanMgr->findChannelByID(id);
+        auto channel = chanMgr->findChannelByID(id);
 
         if (channel)
             channel->thread.shutdown();
@@ -804,7 +804,7 @@ public:
     {
         GnuID id = args[0].get<std::string>();
 
-        Channel *channel = chanMgr->findChannelByID(id);
+        auto channel = chanMgr->findChannelByID(id);
         if (!channel)
             throw application_error(0, "Channel not found");
 
@@ -821,7 +821,7 @@ public:
     {
         GnuID id = args[0].get<std::string>();
 
-        Channel *channel = chanMgr->findChannelByID(id);
+        auto channel = chanMgr->findChannelByID(id);
         if (!channel)
             throw application_error(0, "Channel not found");
 

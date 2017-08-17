@@ -21,6 +21,7 @@
 
 #include <stdio.h> // snprintf
 #include <string>
+#include <assert.h>
 
 #include "gnuid.h"
 #include "host.h"

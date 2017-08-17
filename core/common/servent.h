@@ -205,10 +205,9 @@ public:
     void    sendRawChannel(bool, bool);
     void    sendRawMetaChannel(int);
     void    sendPCPChannel();
-    void    checkPCPComms(Channel *, AtomStream &);
 
     static void readICYHeader(HTTP &, ChanInfo &, char *, size_t);
-    bool    canStream(Channel *);
+    bool    canStream(std::shared_ptr<Channel>);
 
     bool    isConnected() { return status == S_CONNECTED; }
     bool    isListening() { return status == S_LISTENING; }
