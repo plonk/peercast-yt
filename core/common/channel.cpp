@@ -330,6 +330,7 @@ THREAD_PROC Channel::stream(ThreadInfo *thread)
     auto ch = thread->channel;
 
     assert(thread->channel != nullptr);
+    thread->channel = nullptr; // make sure to not leave the reference behind
 
     sys->setThreadName("CHANNEL");
 
