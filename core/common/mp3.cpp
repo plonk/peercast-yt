@@ -20,17 +20,17 @@
 #include "mp3.h"
 
 // ------------------------------------------
-void MP3Stream::readEnd(Stream &, Channel *)
+void MP3Stream::readEnd(Stream &, std::shared_ptr<Channel>)
 {
 }
 
 // ------------------------------------------
-void MP3Stream::readHeader(Stream &, Channel *)
+void MP3Stream::readHeader(Stream &, std::shared_ptr<Channel>)
 {
 }
 
 // ------------------------------------------
-int MP3Stream::readPacket(Stream &in, Channel *ch)
+int MP3Stream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
 {
     ChanPacket pack;
 

@@ -51,7 +51,7 @@ void PCPStream::readVersion(Stream &in)
 }
 
 // ------------------------------------------
-void PCPStream::readHeader(Stream &in, Channel *)
+void PCPStream::readHeader(Stream &in, std::shared_ptr<Channel>)
 {
 //  AtomStream atom(in);
 
@@ -85,7 +85,7 @@ void PCPStream::flush(Stream &in)
 }
 
 // ------------------------------------------
-int PCPStream::readPacket(Stream &in, Channel *)
+int PCPStream::readPacket(Stream &in, std::shared_ptr<Channel>)
 {
     BroadcastState bcs;
     return readPacket(in, bcs);
@@ -161,7 +161,7 @@ int PCPStream::readPacket(Stream &in, BroadcastState &bcs)
 }
 
 // ------------------------------------------
-void PCPStream::readEnd(Stream &, Channel *)
+void PCPStream::readEnd(Stream &, std::shared_ptr<Channel>)
 {
 }
 
@@ -200,7 +200,7 @@ void PCPStream::readPushAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 
         if (chanID.isSet())
         {
-            Channel *ch = chanMgr->findChannelByID(chanID);
+            auto ch = chanMgr->findChannelByID(chanID);
             if (ch)
                 if (ch->isBroadcasting() || (!ch->isFull() && !servMgr->relaysFull() && ch->info.id.isSame(chanID)))
                     s = servMgr->allocServent();
@@ -287,7 +287,7 @@ void PCPStream::readRootAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 }
 
 // ------------------------------------------
-void PCPStream::readPktAtoms(Channel *ch, AtomStream &atom, int numc, BroadcastState &bcs)
+void PCPStream::readPktAtoms(std::shared_ptr<Channel> ch, AtomStream &atom, int numc, BroadcastState &bcs)
 {
     ChanPacket pack;
     ID4 type;
@@ -446,8 +446,8 @@ void PCPStream::readHostAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 // ------------------------------------------
 void PCPStream::readChanAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 {
-    Channel *ch=NULL;
-    ChanHitList *chl=NULL;
+    std::shared_ptr<Channel> ch = NULL;
+    ChanHitList *chl = NULL;
     ChanInfo newInfo;
 
     ch = chanMgr->findChannelByID(bcs.chanID);

@@ -143,7 +143,7 @@ bool Template::writeLoopVariable(Stream &s, const String &varName, int loop)
 {
     if (varName.startsWith("loop.channel."))
     {
-        Channel *ch = chanMgr->findChannelByIndex(loop);
+        auto ch = chanMgr->findChannelByIndex(loop);
         if (ch)
             return ch->writeVariable(s, varName+13);
     }else if (varName.startsWith("loop.servent."))
@@ -223,7 +223,7 @@ bool Template::writePageVariable(Stream &s, const String &varName, int loop)
         {
             GnuID id;
             id.fromStr(idstr);
-            Channel *ch = chanMgr->findChannelByID(id);
+            auto ch = chanMgr->findChannelByID(id);
             if (varName == "page.channel.exist")
             {
                 if (ch)

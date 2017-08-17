@@ -1020,7 +1020,7 @@ void ServMgr::saveSettings(const char *fn)
             }
         }
 
-        Channel *c = chanMgr->channel;
+        std::shared_ptr<Channel> c = chanMgr->channel;
         while (c)
         {
             char idstr[64];
@@ -1396,7 +1396,7 @@ void ServMgr::loadSettings(const char *fn)
                 }else
                 {
                     info.bcID = chanMgr->broadcastID;
-                    Channel *c = chanMgr->createChannel(info, NULL);
+                    auto c = chanMgr->createChannel(info, NULL);
                     if (c)
                         c->startURL(sourceURL.cstr());
                 }
@@ -1483,9 +1483,7 @@ bool ServMgr::getChannel(char *str, ChanInfo &info, bool relay)
 {
     procConnectArgs(str, info);
 
-    Channel *ch;
-
-    ch = chanMgr->findChannelByNameID(info);
+    auto ch = chanMgr->findChannelByNameID(info);
     if (ch)
     {
         if (!ch->isPlaying())

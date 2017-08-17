@@ -29,7 +29,7 @@
 #endif
 
 // ------------------------------------------------
-void URLSource::stream(Channel *ch)
+void URLSource::stream(std::shared_ptr<Channel> ch)
 {
     String url;
     while (ch->thread.active() && !peercastInst->isQuitting)
@@ -94,7 +94,7 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
 }
 
 // ------------------------------------------------
-::String URLSource::streamURL(Channel *ch, const char *url)
+::String URLSource::streamURL(std::shared_ptr<Channel> ch, const char *url)
 {
     String nextURL;
 

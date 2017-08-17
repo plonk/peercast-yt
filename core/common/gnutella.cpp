@@ -125,7 +125,7 @@ void GnuPacket::initPush(ChanHit &ch, Host &sh)
 }
 
 // ---------------------------
-bool GnuPacket::initHit(Host &h, Channel *ch, GnuPacket *query, bool push, bool busy, bool stable, bool tracker, int maxttl)
+bool GnuPacket::initHit(Host &h, std::shared_ptr<Channel> ch, GnuPacket *query, bool push, bool busy, bool stable, bool tracker, int maxttl)
 {
     if (!ch)
         return false;
@@ -428,7 +428,7 @@ GnuStream::R_TYPE GnuStream::processPacket(GnuPacket &in, Servent *serv, GnuID &
                 MemoryStream xm(&data.buf[data.pos], data.len-data.pos);
                 xm.buf[xm.len] = 0;
 
-                Channel *hits[16];
+                std::shared_ptr<Channel> hits[16];
                 int numHits=0;
 
                 if (strncmp(xm.buf, "<?xml", 5)==0)

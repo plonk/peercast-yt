@@ -341,7 +341,7 @@ void Servent::handshakeGET(HTTP &http)
             for (int i=0; i<slen; i++)
                 if (fn[i]=='&') fn[i] = 0;
 
-            Channel *c=chanMgr->channel;
+            auto c = chanMgr->channel;
             while (c)
             {
                 if ((c->status == Channel::S_BROADCASTING) &&
@@ -367,7 +367,7 @@ void Servent::handshakeGET(HTTP &http)
                         c->updateInfo(newInfo);
                     }
                 }
-                c=c->next;
+                c = c->next;
             }
         }
     }else if (strncmp(fn, "/pls/", 5) == 0)
@@ -569,7 +569,7 @@ void Servent::handshakeGIV(const char *requestLine)
     if (id.isSet())
     {
         // at the moment we don`t really care where the GIV came from, so just give to chan. no. if its waiting.
-        Channel *ch = chanMgr->findChannelByID(id);
+        auto ch = chanMgr->findChannelByID(id);
 
         if (!ch)
             throw HTTPException(HTTP_SC_NOTFOUND, 404);
@@ -1302,7 +1302,7 @@ void Servent::CMD_fetch(char *cmd, HTTP& http, HTML& html, String& jumpStr)
     info.id = chanMgr->broadcastID;
     info.id.encode(NULL, info.name, info.genre, info.bitrate);
 
-    Channel *c = chanMgr->createChannel(info, NULL);
+    auto c = chanMgr->createChannel(info, NULL);
     if (c)
         c->startURL(curl.cstr());
 
@@ -1373,7 +1373,7 @@ void Servent::CMD_stop(char *cmd, HTTP& http, HTML& html, String& jumpStr)
             id.fromStr(arg);
     }
 
-    Channel *c = chanMgr->findChannelByID(id);
+    auto c = chanMgr->findChannelByID(id);
     if (c)
         c->thread.shutdown();
 
@@ -1394,7 +1394,7 @@ void Servent::CMD_bump(char *cmd, HTTP& http, HTML& html, String& jumpStr)
     Host designation;
     designation.fromStrIP(ip.c_str(), 7144);
 
-    Channel *c = chanMgr->findChannelByID(id);
+    auto c = chanMgr->findChannelByID(id);
     if (c)
     {
         if (!ip.empty())
@@ -1447,7 +1447,7 @@ void Servent::CMD_keep(char *cmd, HTTP& http, HTML& html, String& jumpStr)
             id.fromStr(arg);
     }
 
-    Channel *c = chanMgr->findChannelByID(id);
+    auto c = chanMgr->findChannelByID(id);
     if (c)
         c->stayConnected = !c->stayConnected;
 
@@ -1634,7 +1634,7 @@ void Servent::handshakeCMD(char *cmd)
 }
 
 // -----------------------------------
-static XML::Node *createChannelXML(Channel *c)
+static XML::Node *createChannelXML(std::shared_ptr<Channel> c)
 {
     XML::Node *n = c->info.createChannelXML();
     n->add(c->createRelayXML(true));
@@ -1673,12 +1673,12 @@ void Servent::handshakeXML()
     XML::Node *an = new XML::Node("channels_relayed total=\"%d\"", chanMgr->numChannels());
     rn->add(an);
 
-    Channel *c = chanMgr->channel;
+    auto c = chanMgr->channel;
     while (c)
     {
         if (c->isActive())
             an->add(createChannelXML(c));
-        c=c->next;
+        c = c->next;
     }
 
     // add public channels
@@ -1887,7 +1887,7 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
     info.id = chanMgr->broadcastID;
     info.id.encode(NULL, info.name.cstr(), info.genre.cstr(), info.bitrate);
 
-    Channel *c = chanMgr->findChannelByID(info.id);
+    auto c = chanMgr->findChannelByID(info.id);
     if (c)
     {
         LOG_CHANNEL("WMHTTP Push channel already active, closing old one");
@@ -1950,7 +1950,7 @@ void Servent::handshakeHTTPPush(const std::string& args)
 
     ChanInfo info = createChannelInfo(chanMgr->broadcastID, chanMgr->broadcastMsg, query, http.headers.get("Content-Type"));
 
-    Channel *c = chanMgr->findChannelByID(info.id);
+    auto c = chanMgr->findChannelByID(info.id);
     if (c)
     {
         LOG_CHANNEL("HTTP Push channel already active, closing old one");
@@ -2006,7 +2006,7 @@ void Servent::handshakeICY(Channel::SRC_TYPE type, bool isHTTP)
     else
         sock->writeLine("OK");
 
-    Channel *c = chanMgr->findChannelByID(info.id);
+    auto c = chanMgr->findChannelByID(info.id);
     if (c)
     {
         LOG_CHANNEL("ICY channel already active, closing old one");

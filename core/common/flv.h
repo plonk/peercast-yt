@@ -196,8 +196,8 @@ public:
     {
     }
 
-    bool put(FLVTag& tag, Channel* ch);
-    void flush(Channel* ch);
+    bool put(FLVTag& tag, std::shared_ptr<Channel> ch);
+    void flush(std::shared_ptr<Channel> ch);
     void rateLimit(uint32_t timestamp);
 
     MemoryStream m_mem;
@@ -205,7 +205,7 @@ public:
     unsigned int startTime;
 
 private:
-    void sendImmediately(FLVTag& tag, Channel* ch);
+    void sendImmediately(FLVTag& tag, std::shared_ptr<Channel> ch);
 };
 
 // ----------------------------------------------
@@ -220,9 +220,9 @@ public:
     FLVStream() : metaBitrate(0)
     {
     }
-    void readHeader(Stream &, Channel *) override;
-    int  readPacket(Stream &, Channel *) override;
-    void readEnd(Stream &, Channel *) override;
+    void readHeader(Stream &, std::shared_ptr<Channel>) override;
+    int  readPacket(Stream &, std::shared_ptr<Channel>) override;
+    void readEnd(Stream &, std::shared_ptr<Channel>) override;
 
     FLVTagBuffer m_buffer;
 };

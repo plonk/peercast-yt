@@ -35,15 +35,15 @@ public:
     ChanMgr();
     ~ChanMgr();
 
-    Channel *deleteChannel(Channel *);
+    void deleteChannel(std::shared_ptr<Channel>);
 
-    Channel *createChannel(ChanInfo &, const char *);
-    Channel *findChannelByName(const char *);
-    Channel *findChannelByIndex(int);
-    Channel *findChannelByMount(const char *);
-    Channel *findChannelByID(const GnuID &);
-    Channel *findChannelByNameID(ChanInfo &);
-    Channel *findPushChannel(int);
+    std::shared_ptr<Channel> createChannel(ChanInfo &, const char *);
+    std::shared_ptr<Channel> findChannelByName(const char *);
+    std::shared_ptr<Channel> findChannelByIndex(int);
+    std::shared_ptr<Channel> findChannelByMount(const char *);
+    std::shared_ptr<Channel> findChannelByID(const GnuID &);
+    std::shared_ptr<Channel> findChannelByNameID(ChanInfo &);
+    std::shared_ptr<Channel> findPushChannel(int);
 
     void    broadcastTrackerSettings();
     void    setUpdateInterval(unsigned int v);
@@ -54,8 +54,8 @@ public:
 
     bool    writeVariable(Stream &, const String &) override;
 
-    int     findChannels(ChanInfo &, Channel **, int);
-    int     findChannelsByStatus(Channel **, int, Channel::STATUS);
+    int     findChannels(ChanInfo &, std::shared_ptr<Channel> *, int);
+    int     findChannelsByStatus(std::shared_ptr<Channel> *, int, Channel::STATUS);
 
     int     numIdleChannels();
     int     numChannels();
@@ -81,8 +81,8 @@ public:
 
     void        setBroadcastMsg(::String &);
 
-    Channel     *createRelay(ChanInfo &, bool);
-    Channel     *findAndRelay(ChanInfo &);
+    std::shared_ptr<Channel> createRelay(ChanInfo &, bool);
+    std::shared_ptr<Channel> findAndRelay(ChanInfo &);
     void        startSearch(ChanInfo &);
 
     void        playChannel(ChanInfo &);
@@ -96,7 +96,7 @@ public:
     std::string authSecret(const GnuID& id);
     std::string authToken(const GnuID& id);
 
-    Channel         *channel;
+    std::shared_ptr<Channel> channel;
     ChanHitList     *hitlist;
 
     GnuID           broadcastID;

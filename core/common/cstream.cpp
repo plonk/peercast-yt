@@ -313,7 +313,7 @@ bool    ChanPacketBuffer::willSkip()
 }
 
 // ------------------------------------------
-bool ChannelStream::getStatus(Channel *ch, ChanPacket &pack)
+bool ChannelStream::getStatus(std::shared_ptr<Channel> ch, ChanPacket &pack)
 {
     unsigned int ctime = sys->getTime();
 
@@ -375,7 +375,7 @@ bool ChannelStream::getStatus(Channel *ch, ChanPacket &pack)
 }
 
 // ------------------------------------------
-void ChannelStream::updateStatus(Channel *ch)
+void ChannelStream::updateStatus(std::shared_ptr<Channel> ch)
 {
     ChanPacket pack;
     if (getStatus(ch, pack))
@@ -390,7 +390,7 @@ void ChannelStream::updateStatus(Channel *ch)
 }
 
 // -----------------------------------
-void ChannelStream::readRaw(Stream &in, Channel *ch)
+void ChannelStream::readRaw(Stream &in, std::shared_ptr<Channel> ch)
 {
     ChanPacket pack;
     const int readLen = 8192;

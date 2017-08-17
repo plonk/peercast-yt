@@ -26,11 +26,11 @@ class MMSStream : public ChannelStream
 {
 public:
 
-    void    readHeader(Stream &, Channel *) override;
-    int     readPacket(Stream &, Channel *) override;
-    void    readEnd(Stream &, Channel *) override;
+    void    readHeader(Stream &, std::shared_ptr<Channel>) override;
+    int     readPacket(Stream &, std::shared_ptr<Channel>) override;
+    void    readEnd(Stream &, std::shared_ptr<Channel>) override;
 
-    static void processChunk(Stream &in, Channel *ch, ASFChunk& chunk);
+    static void processChunk(Stream &in, std::shared_ptr<Channel> ch, ASFChunk& chunk);
 };
 
 #endif

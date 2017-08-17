@@ -77,18 +77,18 @@ public:
 class RawStream : public ChannelStream
 {
 public:
-    void readHeader(Stream &, Channel *) override;
-    int  readPacket(Stream &, Channel *) override;
-    void readEnd(Stream &, Channel *) override;
+    void readHeader(Stream &, std::shared_ptr<Channel>) override;
+    int  readPacket(Stream &, std::shared_ptr<Channel>) override;
+    void readEnd(Stream &, std::shared_ptr<Channel>) override;
 };
 
 // ------------------------------------------
 class PeercastStream : public ChannelStream
 {
 public:
-    void readHeader(Stream &, Channel *) override;
-    int  readPacket(Stream &, Channel *) override;
-    void readEnd(Stream &, Channel *) override;
+    void readHeader(Stream &, std::shared_ptr<Channel>) override;
+    int  readPacket(Stream &, std::shared_ptr<Channel>) override;
+    void readEnd(Stream &, std::shared_ptr<Channel>) override;
 };
 
 // ------------------------------------------
@@ -97,7 +97,7 @@ class ChannelSource
 public:
     virtual ~ChannelSource() {}
 
-    virtual void stream(Channel *) = 0;
+    virtual void stream(std::shared_ptr<Channel>) = 0;
     virtual int getSourceRate() { return 0; }
     virtual int getSourceRateAvg() { return this->getSourceRate(); }
 };
@@ -108,16 +108,17 @@ class PeercastSource : public ChannelSource
 public:
 
     PeercastSource() : m_channel(NULL) {}
-    void    stream(Channel *) override;
+    void    stream(std::shared_ptr<Channel>) override;
     int     getSourceRate() override;
     int     getSourceRateAvg() override;
-    ChanHit pickFromHitList(Channel *ch, ChanHit &oldHit);
+    ChanHit pickFromHitList(std::shared_ptr<Channel> ch, ChanHit &oldHit);
 
-    Channel*        m_channel;
+    std::shared_ptr<Channel> m_channel;
 };
 
 // ----------------------------------
-class Channel : public VariableWriter
+class Channel : public VariableWriter,
+                public std::enable_shared_from_this<Channel>
 {
 public:
 
@@ -290,7 +291,7 @@ public:
 
     WEvent              syncEvent;
 
-    Channel             *next;
+    std::shared_ptr<Channel> next;
 };
 
 #include "chanmgr.h"

@@ -51,9 +51,9 @@ public:
         : m_seqno(0)
     {}
 
-    void    readHeader(Stream &, Channel *) override;
-    int     readPacket(Stream &, Channel *) override;
-    void    readEnd(Stream &, Channel *) override;
+    void    readHeader(Stream &, std::shared_ptr<Channel>) override;
+    int     readPacket(Stream &, std::shared_ptr<Channel>) override;
+    void    readEnd(Stream &, std::shared_ptr<Channel>) override;
 
     uint32_t m_seqno;
 };

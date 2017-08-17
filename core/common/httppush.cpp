@@ -5,7 +5,7 @@
 #include "dechunker.h"
 
 // ------------------------------------------------
-void HTTPPushSource::stream(Channel *ch)
+void HTTPPushSource::stream(std::shared_ptr<Channel> ch)
 {
     try
     {

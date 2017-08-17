@@ -26,7 +26,7 @@ void ChanMgr::quit()
 int ChanMgr::numIdleChannels()
 {
     int cnt = 0;
-    Channel *ch = channel;
+    auto ch = channel;
     while (ch)
     {
         if (ch->isActive())
@@ -41,7 +41,7 @@ int ChanMgr::numIdleChannels()
 // -----------------------------------
 void ChanMgr::closeIdles()
 {
-    for (Channel *ch = channel; ch; ch = ch->next)
+    for (auto ch = channel; ch; ch = ch->next)
     {
         if (ch->isIdle())
             ch->thread.shutdown();
@@ -52,7 +52,8 @@ void ChanMgr::closeIdles()
 void ChanMgr::closeOldestIdle()
 {
     unsigned int idleTime = (unsigned int)-1;
-    Channel *ch = channel, *oldest = NULL;
+    std::shared_ptr<Channel> ch = channel, oldest = NULL;
+
     while (ch)
     {
         if (ch->isActive())
@@ -73,7 +74,7 @@ void ChanMgr::closeOldestIdle()
 // -----------------------------------
 void ChanMgr::closeAll()
 {
-    Channel *ch = channel;
+    auto ch = channel;
     while (ch)
     {
         if (ch->thread.active())
@@ -83,9 +84,9 @@ void ChanMgr::closeAll()
 }
 
 // -----------------------------------
-Channel *ChanMgr::findChannelByNameID(ChanInfo &info)
+std::shared_ptr<Channel>ChanMgr::findChannelByNameID(ChanInfo &info)
 {
-    Channel *ch = channel;
+    auto ch = channel;
     while (ch)
     {
         if (ch->isActive())
@@ -97,9 +98,9 @@ Channel *ChanMgr::findChannelByNameID(ChanInfo &info)
 }
 
 // -----------------------------------
-Channel *ChanMgr::findChannelByName(const char *n)
+std::shared_ptr<Channel>ChanMgr::findChannelByName(const char *n)
 {
-    Channel *ch = channel;
+    auto ch = channel;
     while (ch)
     {
         if (ch->isActive())
@@ -112,10 +113,10 @@ Channel *ChanMgr::findChannelByName(const char *n)
 }
 
 // -----------------------------------
-Channel *ChanMgr::findChannelByIndex(int index)
+std::shared_ptr<Channel> ChanMgr::findChannelByIndex(int index)
 {
     int cnt = 0;
-    Channel *ch = channel;
+    auto ch = channel;
     while (ch)
     {
         if (ch->isActive())
@@ -130,9 +131,9 @@ Channel *ChanMgr::findChannelByIndex(int index)
 }
 
 // -----------------------------------
-Channel *ChanMgr::findChannelByMount(const char *str)
+std::shared_ptr<Channel> ChanMgr::findChannelByMount(const char *str)
 {
-    Channel *ch = channel;
+    auto ch = channel;
     while (ch)
     {
         if (ch->isActive())
@@ -145,9 +146,9 @@ Channel *ChanMgr::findChannelByMount(const char *str)
 }
 
 // -----------------------------------
-Channel *ChanMgr::findChannelByID(const GnuID &id)
+std::shared_ptr<Channel> ChanMgr::findChannelByID(const GnuID &id)
 {
-    Channel *ch = channel;
+    auto ch = channel;
     while (ch)
     {
         if (ch->isActive())
@@ -159,10 +160,10 @@ Channel *ChanMgr::findChannelByID(const GnuID &id)
 }
 
 // -----------------------------------
-int ChanMgr::findChannels(ChanInfo &info, Channel **chlist, int max)
+int ChanMgr::findChannels(ChanInfo &info, std::shared_ptr<Channel> *chlist, int max)
 {
     int cnt = 0;
-    Channel *ch = channel;
+    auto ch = channel;
     while (ch)
     {
         if (ch->isActive())
@@ -178,10 +179,10 @@ int ChanMgr::findChannels(ChanInfo &info, Channel **chlist, int max)
 }
 
 // -----------------------------------
-int ChanMgr::findChannelsByStatus(Channel **chlist, int max, Channel::STATUS status)
+int ChanMgr::findChannelsByStatus(std::shared_ptr<Channel> *chlist, int max, Channel::STATUS status)
 {
     int cnt = 0;
-    Channel *ch = channel;
+    auto ch = channel;
     while (ch)
     {
         if (ch->isActive())
@@ -197,9 +198,9 @@ int ChanMgr::findChannelsByStatus(Channel **chlist, int max, Channel::STATUS sta
 }
 
 // -----------------------------------
-Channel *ChanMgr::createRelay(ChanInfo &info, bool stayConnected)
+std::shared_ptr<Channel> ChanMgr::createRelay(ChanInfo &info, bool stayConnected)
 {
-    Channel *c = chanMgr->createChannel(info, NULL);
+    auto c = chanMgr->createChannel(info, NULL);
     if (c)
     {
         c->stayConnected = stayConnected;
@@ -219,16 +220,14 @@ static std::string chName(ChanInfo& info)
 }
 
 // -----------------------------------
-Channel *ChanMgr::findAndRelay(ChanInfo &info)
+std::shared_ptr<Channel> ChanMgr::findAndRelay(ChanInfo &info)
 {
     char idStr[64];
     info.id.toStr(idStr);
     LOG_CHANNEL("Searching for: %s (%s)", idStr, info.name.cstr());
     //peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルを検索中...");
 
-    Channel *c = NULL;
-
-    c = findChannelByNameID(info);
+    auto c = findChannelByNameID(info);
 
     if (!c)
     {
@@ -338,7 +337,7 @@ bool ChanMgr::writeVariable(Stream &out, const String &var)
 // -----------------------------------
 void ChanMgr::broadcastTrackerUpdate(GnuID &svID, bool force)
 {
-    Channel *c = channel;
+    auto c = channel;
     while (c)
     {
         if ( c->isActive() && c->isBroadcasting() )
@@ -352,7 +351,7 @@ int ChanMgr::broadcastPacketUp(ChanPacket &pack, GnuID &chanID, GnuID &srcID, Gn
 {
     int cnt = 0;
 
-    Channel *c = channel;
+    auto c = channel;
     while (c)
     {
         if (c->sendPacketUp(pack, chanID, srcID, destID))
@@ -377,7 +376,7 @@ void ChanMgr::broadcastRelays(Servent *serv, int minTTL, int maxTTL)
 
         int numChans = 0;
 
-        Channel *c = channel;
+        auto c = channel;
         while (c)
         {
             if (c->isPlaying())
@@ -425,7 +424,7 @@ void ChanMgr::setBroadcastMsg(String &msg)
     {
         broadcastMsg = msg;
 
-        Channel *c = channel;
+        auto c = channel;
         while (c)
         {
             if (c->isActive() && c->isBroadcasting())
@@ -455,42 +454,34 @@ void ChanMgr::clearHitLists()
 }
 
 // -----------------------------------
-Channel *ChanMgr::deleteChannel(Channel *delchan)
+void ChanMgr::deleteChannel(std::shared_ptr<Channel> delchan)
 {
-    lock.on();
+    CriticalSection cs(lock);
 
-    Channel *ch = channel, *prev = NULL, *next = NULL;
+    std::shared_ptr<Channel> ch = channel, prev = NULL;
 
     while (ch)
     {
         if (ch == delchan)
         {
-            Channel *next = ch->next;
+            std::shared_ptr<Channel> next = ch->next;
             if (prev)
                 prev->next = next;
             else
                 channel = next;
-
-            delete delchan;
-
             break;
         }
         prev = ch;
         ch = ch->next;
     }
-
-    lock.off();
-    return next;
 }
 
 // -----------------------------------
-Channel *ChanMgr::createChannel(ChanInfo &info, const char *mount)
+std::shared_ptr<Channel> ChanMgr::createChannel(ChanInfo &info, const char *mount)
 {
     lock.on();
 
-    Channel *nc = NULL;
-
-    nc = new Channel();
+    auto nc = std::make_shared<Channel>();
 
     nc->next = channel;
     channel = nc;
@@ -630,7 +621,7 @@ void ChanMgr::clearDeadHits(bool clearTrackers)
 // -----------------------------------
 bool    ChanMgr::isBroadcasting(GnuID &id)
 {
-    Channel *ch = findChannelByID(id);
+    auto ch = findChannelByID(id);
     if (ch)
         return ch->isBroadcasting();
 
@@ -640,7 +631,7 @@ bool    ChanMgr::isBroadcasting(GnuID &id)
 // -----------------------------------
 bool    ChanMgr::isBroadcasting()
 {
-    Channel *ch = channel;
+    auto ch = channel;
     while (ch)
     {
         if (ch->isActive())
@@ -656,7 +647,7 @@ bool    ChanMgr::isBroadcasting()
 int ChanMgr::numChannels()
 {
     int tot = 0;
-    Channel *ch = channel;
+    auto ch = channel;
     while (ch)
     {
         if (ch->isActive())
@@ -738,7 +729,7 @@ THREAD_PROC findAndPlayChannelProc(ThreadInfo *th)
     ChanInfo info;
     info = cfi->info;
 
-    Channel *ch = chanMgr->findChannelByNameID(info);
+    auto ch = chanMgr->findChannelByNameID(info);
 
     chanMgr->currFindAndPlayChannel = info.id;
 

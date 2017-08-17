@@ -24,17 +24,17 @@
 ASFInfo parseASFHeader(Stream &in);
 
 // ------------------------------------------
-void MMSStream::readEnd(Stream &, Channel *)
+void MMSStream::readEnd(Stream &, std::shared_ptr<Channel>)
 {
 }
 
 // ------------------------------------------
-void MMSStream::readHeader(Stream &, Channel *)
+void MMSStream::readHeader(Stream &, std::shared_ptr<Channel>)
 {
 }
 
 // ------------------------------------------
-void MMSStream::processChunk(Stream &in, Channel *ch, ASFChunk& chunk)
+void MMSStream::processChunk(Stream &in, std::shared_ptr<Channel> ch, ASFChunk& chunk)
 {
     switch (chunk.type)
     {
@@ -91,7 +91,7 @@ void MMSStream::processChunk(Stream &in, Channel *ch, ASFChunk& chunk)
 }
 
 // ------------------------------------------
-int MMSStream::readPacket(Stream &in, Channel *ch)
+int MMSStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
 {
     ASFChunk chunk;
 
