@@ -2520,7 +2520,7 @@ int Servent::serverProc(ThreadInfo *thread)
                 continue;
             }
 
-            LOG_DEBUG("accepted incoming");
+            LOG_TRACE("accepted incoming");
             Servent *ns = servMgr->allocServent();
             if (!ns)
             {

@@ -512,9 +512,9 @@ Servent *ServMgr::allocServent()
         s->next = servents;
         servents = s;
 
-        LOG_DEBUG("allocated servent %d", serventNum);
+        LOG_TRACE("allocated servent %d", serventNum);
     }else
-        LOG_DEBUG("reused servent %d", s->serventIndex);
+        LOG_TRACE("reused servent %d", s->serventIndex);
 
     s->reset();
 
