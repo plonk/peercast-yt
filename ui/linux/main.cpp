@@ -121,11 +121,13 @@ void sigProc(int sig)
         if (!quit)
             LOG_DEBUG("Received INT signal");
         quit = true;
+        signal(SIGINT, SIG_DFL);
         break;
     case SIGTERM:
         if (!quit)
             LOG_DEBUG("Received TERM signal");
         quit = true;
+        signal(SIGTERM, SIG_DFL);
         break;
     case SIGHUP:
         LOG_DEBUG("Received HUP signal, reloading a new logfile");
@@ -142,13 +144,10 @@ void sigProc(int sig)
             unlink(logFileName);
             logfile = fopen(logFileName, "a");
         }
+        /* This may be nescessary for some systems... */
+        signal(SIGHUP, sigProc);
         break;
     }
-
-    /* This may be nescessary for some systems... */
-    signal(SIGINT, sigProc);
-    signal(SIGTERM, sigProc);
-    signal(SIGHUP, sigProc);
 }
 
 // ----------------------------------
