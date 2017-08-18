@@ -33,6 +33,8 @@ public:
         T_ERROR,
         T_NETWORK,
         T_CHANNEL,
+        T_WARNING,
+        T_INFO,
     };
 
     LogBuffer(int i, int l)

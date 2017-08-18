@@ -232,6 +232,16 @@
             <td><input type=checkbox {@if servMgr.log.channel}checked{@end} value=1 name=logChannel>
             </td>
           </tr>
+          <tr class="normal">
+            <th class="left-heading">{#Warnings}</th>
+            <td><input type=checkbox {@if servMgr.log.warnings}checked{@end} value=1 name=logWarnings>
+            </td>
+          </tr>
+          <tr class="normal">
+            <th class="left-heading">{#Informational}</th>
+            <td><input type=checkbox {@if servMgr.log.informational}checked{@end} value=1 name=logInformational>
+            </td>
+          </tr>
         </table>
       </td>
     </tr>
