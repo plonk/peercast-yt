@@ -356,11 +356,13 @@ THREAD_PROC Channel::stream(ThreadInfo *thread)
 
             unsigned int diff = (sys->getTime() - ch->info.lastPlayEnd) + 5;
 
-            LOG_DEBUG("Channel sleeping for %d seconds", diff);
             for (unsigned int i=0; i<diff; i++)
             {
                 if (!thread->active() || peercastInst->isQuitting)
                     break;
+
+                if (i == 0)
+                    LOG_DEBUG("Channel sleeping for %d seconds", diff);
                 sys->sleep(1000);
             }
         }
