@@ -1550,66 +1550,68 @@ void Servent::CMD_update_channel_info(char *cmd, HTTP& http, HTML& html, String&
     jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
 }
 
-void Servent::handshakeCMD(char *cmd)
+void Servent::handshakeCMD(char *query)
 {
     String jumpStr;
 
     HTTP http(*sock);
     HTML html("", *sock);
 
-    if (!handshakeAuth(http, cmd, true))
+    if (!handshakeAuth(http, query, true))
         return;
+
+    std::string cmd = cgi::Query(query).get("cmd");
 
     try
     {
-        if (cmpCGIarg(cmd, "cmd=", "add_bcid"))
+        if (cmd == "add_bcid")
         {
-            CMD_add_bcid(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "apply"))
+            CMD_add_bcid(query, http, html, jumpStr);
+        }else if (cmd == "apply")
         {
-            CMD_apply(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "bump"))
+            CMD_apply(query, http, html, jumpStr);
+        }else if (cmd == "bump")
         {
-            CMD_bump(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "clear"))
+            CMD_bump(query, http, html, jumpStr);
+        }else if (cmd == "clear")
         {
-            CMD_clear(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "clearlog"))
+            CMD_clear(query, http, html, jumpStr);
+        }else if (cmd == "clearlog")
         {
-            CMD_clearlog(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "control_rtmp"))
+            CMD_clearlog(query, http, html, jumpStr);
+        }else if (cmd == "control_rtmp")
         {
-            CMD_control_rtmp(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "edit_bcid"))
+            CMD_control_rtmp(query, http, html, jumpStr);
+        }else if (cmd == "edit_bcid")
         {
-            CMD_edit_bcid(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "fetch"))
+            CMD_edit_bcid(query, http, html, jumpStr);
+        }else if (cmd == "fetch")
         {
-            CMD_fetch(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "keep"))
+            CMD_fetch(query, http, html, jumpStr);
+        }else if (cmd == "keep")
         {
-            CMD_keep(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "login"))
+            CMD_keep(query, http, html, jumpStr);
+        }else if (cmd == "login")
         {
-            CMD_login(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "logout"))
+            CMD_login(query, http, html, jumpStr);
+        }else if (cmd == "logout")
         {
-            CMD_logout(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "shutdown"))
+            CMD_logout(query, http, html, jumpStr);
+        }else if (cmd == "shutdown")
         {
-            CMD_shutdown(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "stop"))
+            CMD_shutdown(query, http, html, jumpStr);
+        }else if (cmd == "stop")
         {
-            CMD_stop(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "redirect"))
+            CMD_stop(query, http, html, jumpStr);
+        }else if (cmd == "redirect")
         {
-            CMD_redirect(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "update_channel_info"))
+            CMD_redirect(query, http, html, jumpStr);
+        }else if (cmd == "update_channel_info")
         {
-            CMD_update_channel_info(cmd, http, html, jumpStr);
-        }else if (cmpCGIarg(cmd, "cmd=", "viewxml"))
+            CMD_update_channel_info(query, http, html, jumpStr);
+        }else if (cmd == "viewxml")
         {
-            CMD_viewxml(cmd, http, html, jumpStr);
+            CMD_viewxml(query, http, html, jumpStr);
         }else{
             throw HTTPException(HTTP_SC_BADREQUEST, 400);
         }
