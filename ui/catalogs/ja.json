@@ -195,6 +195,8 @@
     "Audio Codec"             : "オーディオ・コーデック",
     "AAC (Experimental)"      : "AAC (実験的)",
     "WMV Protocol"            : "WMVプロトコル",
+    "Informational"           : "情報",
+    "Warnings"                : "警告",
 
     // rtmp.html
     "Start"                   : "開始",

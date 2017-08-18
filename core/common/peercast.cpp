@@ -254,6 +254,36 @@ void LOG_CHANNEL(const char *fmt, ...)
 }
 
 // --------------------------------------------------
+void LOG_WARNING(const char *fmt, ...)
+{
+    if (servMgr)
+    {
+        if ((servMgr->showLog & (1<<LogBuffer::T_WARNING)) && (!servMgr->pauseLog))
+        {
+            va_list ap;
+            va_start(ap, fmt);
+            ADDLOG(fmt, ap, LogBuffer::T_WARNING);
+            va_end(ap);
+        }
+    }
+}
+
+// --------------------------------------------------
+void LOG_INFO(const char *fmt, ...)
+{
+    if (servMgr)
+    {
+        if ((servMgr->showLog & (1<<LogBuffer::T_INFO)) && (!servMgr->pauseLog))
+        {
+            va_list ap;
+            va_start(ap, fmt);
+            ADDLOG(fmt, ap, LogBuffer::T_INFO);
+            va_end(ap);
+        }
+    }
+}
+
+// --------------------------------------------------
 #include "notif.h"
 
 namespace peercast {

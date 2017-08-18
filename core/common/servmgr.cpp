@@ -998,6 +998,8 @@ void ServMgr::saveSettings(const char *fn)
         iniFile.writeBoolValue("logErrors", (showLog&(1<<LogBuffer::T_ERROR))!=0);
         iniFile.writeBoolValue("logNetwork", (showLog&(1<<LogBuffer::T_NETWORK))!=0);
         iniFile.writeBoolValue("logChannel", (showLog&(1<<LogBuffer::T_CHANNEL))!=0);
+        iniFile.writeBoolValue("logWarnings", (showLog&(1<<LogBuffer::T_WARNING))!=0);
+        iniFile.writeBoolValue("logInformational", (showLog&(1<<LogBuffer::T_INFO))!=0);
         iniFile.writeBoolValue("pauseLog", pauseLog);
         iniFile.writeIntValue("idleSleepTime", sys->idleSleepTime);
 
@@ -1294,6 +1296,10 @@ void ServMgr::loadSettings(const char *fn)
                 showLog |= iniFile.getBoolValue() ? 1<<LogBuffer::T_NETWORK:0;
             else if (iniFile.isName("logChannel"))
                 showLog |= iniFile.getBoolValue() ? 1<<LogBuffer::T_CHANNEL:0;
+            else if (iniFile.isName("logWarnings"))
+                showLog |= iniFile.getBoolValue() ? 1<<LogBuffer::T_WARNING:0;
+            else if (iniFile.isName("logInformational"))
+                showLog |= iniFile.getBoolValue() ? 1<<LogBuffer::T_INFO:0;
             else if (iniFile.isName("pauseLog"))
                 pauseLog = iniFile.getBoolValue();
             else if (iniFile.isName("idleSleepTime"))
@@ -1665,13 +1671,13 @@ bool ServMgr::start()
 #else
     priv = "";
 #endif
-    LOG_DEBUG("Peercast %s, %s %s", PCX_VERSTRING, peercastApp->getClientTypeOS(), priv);
+    LOG_INFO("Peercast %s, %s %s", PCX_VERSTRING, peercastApp->getClientTypeOS(), priv);
 
     sessionID.toStr(idStr);
-    LOG_DEBUG("SessionID: %s", idStr);
+    LOG_INFO("SessionID: %s", idStr);
 
     chanMgr->broadcastID.toStr(idStr);
-    LOG_DEBUG("BroadcastID: %s", idStr);
+    LOG_INFO("BroadcastID: %s", idStr);
 
     checkForceIP();
 
@@ -2240,6 +2246,10 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
             buf = (showLog & (1<<LogBuffer::T_NETWORK)) ? "1" : "0";
         else if (var == "log.channel")
             buf = (showLog & (1<<LogBuffer::T_CHANNEL)) ? "1" : "0";
+        else if (var == "log.warnings")
+            buf = (showLog & (1<<LogBuffer::T_WARNING)) ? "1" : "0";
+        else if (var == "log.informational")
+            buf = (showLog & (1<<LogBuffer::T_INFO)) ? "1" : "0";
         else
             return false;
     }else if (var.startsWith("lang."))

@@ -1193,6 +1193,10 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr)
             showLog |= atoi(arg) ? (1<<LogBuffer::T_NETWORK) : 0;
         else if (strcmp(curr, "logChannel") == 0)
             showLog |= atoi(arg) ? (1<<LogBuffer::T_CHANNEL) : 0;
+        else if (strcmp(curr, "logWarnings") == 0)
+            showLog |= atoi(arg) ? (1<<LogBuffer::T_WARNING) : 0;
+        else if (strcmp(curr, "logInformational") == 0)
+            showLog |= atoi(arg) ? (1<<LogBuffer::T_INFO) : 0;
 
         else if (strcmp(curr, "allowHTML1") == 0)
             allowServer1 |= atoi(arg) ? (ALLOW_HTML) : 0;

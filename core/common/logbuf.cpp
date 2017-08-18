@@ -29,6 +29,8 @@ const char *LogBuffer::logTypes[]=
     "EROR",
     "GNET",
     "CHAN",
+    "WARN",
+    "INFO",
 };
 
 // -----------------------------------
