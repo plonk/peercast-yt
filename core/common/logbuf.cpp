@@ -19,6 +19,7 @@
 
 #include "logbuf.h"
 #include "stream.h"
+#include "critsec.h"
 
 // -----------------------------------
 const char *LogBuffer::logTypes[]=
