@@ -20,6 +20,7 @@
 #include "logbuf.h"
 #include "stream.h"
 #include "critsec.h"
+#include "cgi.h"
 
 // -----------------------------------
 const char *LogBuffer::logTypes[]=
@@ -69,34 +70,6 @@ void LogBuffer::write(const char *str, TYPE t)
 }
 
 // ---------------------------
-void LogBuffer::escapeHTML(char* dest, char* src)
-{
-    while (*src)
-    {
-        switch (*src)
-        {
-        case '&':
-            strcpy(dest, "&amp;");
-            dest += 5;
-            break;
-        case '<':
-            strcpy(dest, "&lt;");
-            dest += 4;
-            break;
-        case '>':
-            strcpy(dest, "&gt;");
-            dest += 4;
-            break;
-        default:
-            *dest = *src;
-            dest++;
-        }
-        src++;
-    }
-    *dest = '\0';
-}
-
-// ---------------------------
 void LogBuffer::dumpHTML(Stream &out)
 {
     CriticalSection cs(lock);
@@ -110,8 +83,6 @@ void LogBuffer::dumpHTML(Stream &out)
     }
 
     String tim;
-    const size_t BUFSIZE = (lineLen - 1) * 5 + 1;
-    char* escaped = new char [BUFSIZE];
     if (nl)
     {
         for (unsigned int i=0; i<nl; i++)
@@ -128,15 +99,13 @@ void LogBuffer::dumpHTML(Stream &out)
                 out.writeString("]</b> ");
             }
 
-            escapeHTML(escaped, &buf[bp]);
-            out.writeString(escaped);
+            out.writeString(cgi::escape_html(&buf[bp]).c_str());
             out.writeString("<br>");
 
             sp++;
             sp %= maxLines;
         }
     }
-    delete[] escaped;
 }
 
 // ---------------------------
