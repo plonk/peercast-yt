@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "logbuf.h"
 #include "servmgr.h"
 #include "sstream.h"
 
@@ -50,8 +51,8 @@ TEST_F(ServMgrFixture, initialState)
     ASSERT_STREQ("00000000000000000000000000000000", m.networkID.str().c_str());
     // unsigned int        firewallTimeout;
     ASSERT_EQ(30, m.firewallTimeout);
-    // int                 showLog;
-    ASSERT_EQ(4, m.showLog); // ERROR
+    // int                 logLevel;
+    ASSERT_EQ(LogBuffer::T_INFO, m.logLevel);
     // int                 shutdownTimer;
     ASSERT_EQ(0, m.shutdownTimer);
     // bool                pauseLog;
@@ -327,20 +328,8 @@ TEST_F(ServMgrFixture, writeVariable)
     ASSERT_STREQ("1", mem.str().c_str());
 
     mem.str("");
-    ASSERT_TRUE(m.writeVariable(mem, "log.debug"));
-    ASSERT_STREQ("0", mem.str().c_str());
-
-    mem.str("");
-    ASSERT_TRUE(m.writeVariable(mem, "log.errors"));
-    ASSERT_STREQ("1", mem.str().c_str());
-
-    mem.str("");
-    ASSERT_TRUE(m.writeVariable(mem, "log.gnet"));
-    ASSERT_STREQ("0", mem.str().c_str());
-
-    mem.str("");
-    ASSERT_TRUE(m.writeVariable(mem, "log.channel"));
-    ASSERT_STREQ("0", mem.str().c_str());
+    ASSERT_TRUE(m.writeVariable(mem, "log.level"));
+    ASSERT_STREQ("3", mem.str().c_str());
 
     mem.str("");
     ASSERT_TRUE(m.writeVariable(mem, "lang.en"));
