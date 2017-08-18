@@ -38,10 +38,10 @@ public:
         T_OFF   = 7,
     };
 
-    LogBuffer(int i, int l)
+    LogBuffer(int aMaxLines, int aLineLen)
+        : lineLen(aLineLen)
+        , maxLines(aMaxLines)
     {
-        lineLen = l;
-        maxLines = i;
         currLine = 0;
         buf = new char[lineLen*maxLines];
         times = new unsigned int [maxLines];
@@ -63,12 +63,14 @@ public:
 
     static void         escapeHTML(char* dest, char* src);
 
-    char            *buf;
-    unsigned int    *times;
-    unsigned int    currLine, maxLines, lineLen;
-    TYPE            *types;
-    WLock           lock;
-    static          const char *logTypes[];
+    char                *buf;
+    unsigned int        *times;
+    unsigned int        currLine;
+    const unsigned int  maxLines;
+    const unsigned int  lineLen;
+    TYPE                *types;
+    WLock               lock;
+    static const char   *logTypes[];
 };
 
 #endif
