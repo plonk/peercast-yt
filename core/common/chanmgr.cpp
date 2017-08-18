@@ -224,7 +224,7 @@ std::shared_ptr<Channel> ChanMgr::findAndRelay(ChanInfo &info)
 {
     char idStr[64];
     info.id.toStr(idStr);
-    LOG_CHANNEL("Searching for: %s (%s)", idStr, info.name.cstr());
+    LOG_INFO("Searching for: %s (%s)", idStr, info.name.cstr());
     //peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルを検索中...");
 
     auto c = findChannelByNameID(info);
@@ -401,13 +401,13 @@ void ChanMgr::broadcastRelays(Servent *serv, int minTTL, int maxTTL)
                         numOut++;
                     }
 
-                    LOG_NETWORK("Sent channel to %d servents, TTL %d", numOut, ttl);
+                    LOG_INFO("Sent channel to %d servents, TTL %d", numOut, ttl);
                 }
             }
             c = c->next;
         }
         //if (numChans)
-        //  LOG_NETWORK("Sent %d channels to %d servents", numChans, numOut);
+        //  LOG_INFO("Sent %d channels to %d servents", numChans, numOut);
     }
 }
 
@@ -496,7 +496,7 @@ std::shared_ptr<Channel> ChanMgr::createChannel(ChanInfo &info, const char *moun
     nc->type = Channel::T_ALLOCATED;
     nc->info.createdTime = sys->getTime();
 
-    LOG_CHANNEL("New channel created");
+    LOG_INFO("New channel created");
 
     lock.off();
     return nc;

@@ -169,19 +169,21 @@ void    APICALL PeercastInstance::callLocalURL(const char *url)
 // --------------------------------------------------
 void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)
 {
-    if (sys)
-    {
-        const int MAX_LINELEN = 1024;
+    if (!servMgr) return;
+    if (servMgr->logLevel > type) return;
+    if (servMgr->pauseLog) return;
+    if (!sys) return;
 
-        char str[MAX_LINELEN+1];
-        vsnprintf(str, MAX_LINELEN-1, fmt, ap);
-        str[MAX_LINELEN-1]=0;
+    const int MAX_LINELEN = 1024;
 
-        if (type != LogBuffer::T_NONE)
-            sys->logBuf->write(str, type);
+    char str[MAX_LINELEN+1];
+    vsnprintf(str, MAX_LINELEN-1, fmt, ap);
+    str[MAX_LINELEN-1]=0;
 
-        peercastApp->printLog(type, str);
-    }
+    if (type != LogBuffer::T_NONE)
+        sys->logBuf->write(str, type);
+
+    peercastApp->printLog(type, str);
 }
 
 // --------------------------------------------------
@@ -194,93 +196,57 @@ void LOG(const char *fmt, ...)
 }
 
 // --------------------------------------------------
-void LOG_ERROR(const char *fmt, ...)
+void LOG_TRACE(const char *fmt, ...)
 {
-    if (servMgr)
-    {
-        if ((servMgr->showLog & (1<<LogBuffer::T_ERROR)) && (!servMgr->pauseLog))
-        {
-            va_list ap;
-            va_start(ap, fmt);
-            ADDLOG(fmt, ap, LogBuffer::T_ERROR);
-            va_end(ap);
-        }
-    }
+    va_list ap;
+    va_start(ap, fmt);
+    ADDLOG(fmt, ap, LogBuffer::T_TRACE);
+    va_end(ap);
 }
 
 // --------------------------------------------------
 void LOG_DEBUG(const char *fmt, ...)
 {
-    if (servMgr)
-    {
-        if ((servMgr->showLog & (1<<LogBuffer::T_DEBUG)) && (!servMgr->pauseLog))
-        {
-            va_list ap;
-            va_start(ap, fmt);
-            ADDLOG(fmt, ap, LogBuffer::T_DEBUG);
-            va_end(ap);
-        }
-    }
-}
-
-// --------------------------------------------------
-void LOG_NETWORK(const char *fmt, ...)
-{
-    if (servMgr)
-    {
-        if ((servMgr->showLog & (1<<LogBuffer::T_NETWORK)) && (!servMgr->pauseLog))
-        {
-            va_list ap;
-            va_start(ap, fmt);
-            ADDLOG(fmt, ap, LogBuffer::T_NETWORK);
-            va_end(ap);
-        }
-    }
-}
-
-// --------------------------------------------------
-void LOG_CHANNEL(const char *fmt, ...)
-{
-    if (servMgr)
-    {
-        if ((servMgr->showLog & (1<<LogBuffer::T_CHANNEL)) && (!servMgr->pauseLog))
-        {
-            va_list ap;
-            va_start(ap, fmt);
-            ADDLOG(fmt, ap, LogBuffer::T_CHANNEL);
-            va_end(ap);
-        }
-    }
-}
-
-// --------------------------------------------------
-void LOG_WARNING(const char *fmt, ...)
-{
-    if (servMgr)
-    {
-        if ((servMgr->showLog & (1<<LogBuffer::T_WARNING)) && (!servMgr->pauseLog))
-        {
-            va_list ap;
-            va_start(ap, fmt);
-            ADDLOG(fmt, ap, LogBuffer::T_WARNING);
-            va_end(ap);
-        }
-    }
+    va_list ap;
+    va_start(ap, fmt);
+    ADDLOG(fmt, ap, LogBuffer::T_DEBUG);
+    va_end(ap);
 }
 
 // --------------------------------------------------
 void LOG_INFO(const char *fmt, ...)
 {
-    if (servMgr)
-    {
-        if ((servMgr->showLog & (1<<LogBuffer::T_INFO)) && (!servMgr->pauseLog))
-        {
-            va_list ap;
-            va_start(ap, fmt);
-            ADDLOG(fmt, ap, LogBuffer::T_INFO);
-            va_end(ap);
-        }
-    }
+    va_list ap;
+    va_start(ap, fmt);
+    ADDLOG(fmt, ap, LogBuffer::T_INFO);
+    va_end(ap);
+}
+
+// --------------------------------------------------
+void LOG_WARN(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    ADDLOG(fmt, ap, LogBuffer::T_WARN);
+    va_end(ap);
+}
+
+// --------------------------------------------------
+void LOG_ERROR(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    ADDLOG(fmt, ap, LogBuffer::T_ERROR);
+    va_end(ap);
+}
+
+// --------------------------------------------------
+void LOG_FATAL(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    ADDLOG(fmt, ap, LogBuffer::T_FATAL);
+    va_end(ap);
 }
 
 // --------------------------------------------------

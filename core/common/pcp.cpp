@@ -338,7 +338,7 @@ void PCPStream::readPktAtoms(std::shared_ptr<Channel> ch, AtomStream &atom, int 
             // check for stream restart
             if (pack.pos == 0)
             {
-                LOG_CHANNEL("PCP resetting stream");
+                LOG_INFO("PCP resetting stream");
                 ch->streamIndex++;
                 ch->rawData.init();
             }
@@ -712,7 +712,7 @@ int PCPStream::procAtom(AtomStream &atom, ID4 id, int numc, int dlen, BroadcastS
     {
         LOG_ERROR("PCP unknown or misplaced atom: %s", id.getString().str());
         throw StreamException("Protocol error");
-        //LOG_CHANNEL("PCP skip: %s", id.getString().str());
+        //LOG_INFO("PCP skip: %s", id.getString().str());
         //atom.skip(numc, dlen);
     }
 

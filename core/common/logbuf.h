@@ -28,13 +28,14 @@ class LogBuffer
 public:
     enum TYPE
     {
-        T_NONE,
-        T_DEBUG,
-        T_ERROR,
-        T_NETWORK,
-        T_CHANNEL,
-        T_WARNING,
-        T_INFO,
+        T_NONE  = 0,
+        T_TRACE = 1,
+        T_DEBUG = 2,
+        T_INFO  = 3,
+        T_WARN  = 4,
+        T_ERROR = 5,
+        T_FATAL = 6,
+        T_OFF   = 7,
     };
 
     LogBuffer(int i, int l)

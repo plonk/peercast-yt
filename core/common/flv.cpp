@@ -76,7 +76,7 @@ int FLVStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
             avcHeader = flvTag;
             if (avcHeader.getTimestamp() != 0)
             {
-                LOG_CHANNEL("AVC header has non-zero timestamp. Cleared to zero.");
+                LOG_INFO("AVC header has non-zero timestamp. Cleared to zero.");
                 avcHeader.setTimestamp(0);
             }
             headerUpdate = true;
@@ -88,7 +88,7 @@ int FLVStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
             aacHeader = flvTag;
             if (aacHeader.getTimestamp() != 0)
             {
-                LOG_CHANNEL("AAC header has non-zero timestamp. Cleared to zero.");
+                LOG_INFO("AAC header has non-zero timestamp. Cleared to zero.");
                 aacHeader.setTimestamp(0);
             }
             headerUpdate = true;
