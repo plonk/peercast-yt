@@ -80,9 +80,6 @@ allowDirect = No
 [End]
 
 [Debug]
-logDebug = No
-logErrors = No
-logNetwork = No
-logChannel = No
+logLevel = 7
 pauseLog = No
 idleSleepTime = 10
