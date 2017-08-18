@@ -33,6 +33,7 @@
 #include <sys/time.h>
 #include <limits.h> // PATH_MAX
 #include <libgen.h> // dirname
+#include "critsec.h"
 
 // ----------------------------------
 String iniFileName;
@@ -76,7 +77,7 @@ public:
 
     virtual void APICALL printLog(LogBuffer::TYPE t, const char *str)
     {
-        loglock.on();
+        CriticalSection cs(loglock);
 
         char buf[20];
         struct timeval tv;
@@ -99,7 +100,6 @@ public:
         if (logfile != NULL) {
             fprintf(logfile, "%s\n", str);
         }
-        loglock.off();
     }
 };
 
@@ -134,13 +134,13 @@ void sigProc(int sig)
         // to remove the logfile after it has been copied.
         // some data can still be lost, but this way it is reduced to minimun at lost costs..
         if (logToFile) {
-            loglock.on();
+            CriticalSection cs(loglock);
+
             if (logfile != NULL) {
                 fclose(logfile);
             }
             unlink(logFileName);
             logfile = fopen(logFileName, "a");
-            loglock.off();
         }
         break;
     }
@@ -248,9 +248,8 @@ int main(int argc, char* argv[])
         sys->sleep(1000);
         if (logfile != NULL)
         {
-            loglock.on();
+            CriticalSection cs(loglock);
             fflush(logfile);
-            loglock.off();
         }
     }
 
@@ -259,11 +258,11 @@ int main(int argc, char* argv[])
     peercastInst->quit();
 
     if (logfile != NULL) {
-        loglock.on();
+        CriticalSection cs(loglock);
+
         fflush(logfile);
         fclose(logfile);
         // Log might continue but will only be written to stdout.
-        loglock.off();
     }
     if (setPidFile) unlink(pidFileName);
 
