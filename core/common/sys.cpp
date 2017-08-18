@@ -163,7 +163,7 @@ bool hasCGIarg(const char *str, const char *arg)
 }
 
 // ---------------------------
-void    ThreadInfo::shutdown()
+void    ThreadInfo::shutdown() noexcept
 {
     m_active.store(false);
     //sys->waitThread(this);

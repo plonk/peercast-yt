@@ -138,9 +138,9 @@ public:
         data         = NULL;
     }
 
-    void    shutdown();
+    void    shutdown() noexcept;
 
-    bool active() { return m_active.load(); }
+    bool active() noexcept { return m_active.load(); }
 
     std::atomic<bool>   m_active;
     THREAD_FUNC     func;

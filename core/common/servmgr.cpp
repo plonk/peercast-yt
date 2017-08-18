@@ -692,14 +692,10 @@ void ServMgr::quit()
     Servent *s = servents;
     while (s)
     {
-        try
-        {
-            if (s->thread.active())
-                s->thread.shutdown();
-        }catch (StreamException &)
-        {
-        }
-        s=s->next;
+        if (s->thread.active())
+            s->thread.shutdown();
+
+        s = s->next;
     }
 }
 
