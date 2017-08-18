@@ -135,3 +135,9 @@ void LogBuffer::dumpHTML(Stream &out)
     delete[] escaped;
 }
 
+// ---------------------------
+void    LogBuffer::clear()
+{
+    CriticalSection cs(lock);
+    currLine = 0;
+}

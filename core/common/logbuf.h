@@ -52,10 +52,7 @@ public:
         delete[] types;
     }
 
-    void    clear()
-    {
-        currLine = 0;
-    }
+    void    clear();
 
     void                write(const char *, TYPE);
     static const char   *getTypeStr(TYPE t) { return logTypes[t]; }
