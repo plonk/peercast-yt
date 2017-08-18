@@ -57,12 +57,12 @@ int OGGStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
     {
         if (ogg.getSerialNo() == vorbis.serialNo)
         {
-            LOG_CHANNEL("Vorbis stream: EOS");
+            LOG_INFO("Vorbis stream: EOS");
             vorbis.eos();
         }
         if (ogg.getSerialNo() == theora.serialNo)
         {
-            LOG_CHANNEL("Theora stream: EOS");
+            LOG_INFO("Theora stream: EOS");
             theora.eos();
         }
     }
@@ -97,7 +97,7 @@ int OGGStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
             ch->streamPos += ch->headPack.len;
 
             ch->newPacket(ch->headPack);
-            LOG_CHANNEL("Got %d bytes of headers", ch->headPack.len);
+            LOG_INFO("Got %d bytes of headers", ch->headPack.len);
         }
     }else
     {
@@ -165,19 +165,19 @@ void OggVorbisSubStream::procHeaders(std::shared_ptr<Channel> ch)
         switch (id[0])
         {
             case 1: // ident
-                LOG_CHANNEL("OGG Vorbis Header: Ident (%d bytes)", vin.len);
+                LOG_INFO("OGG Vorbis Header: Ident (%d bytes)", vin.len);
                 readIdent(vin, ch->info);
                 break;
             case 3: // comment
                 {
-                    LOG_CHANNEL("OGG Vorbis Header: Comment (%d bytes)", vin.len);
+                    LOG_INFO("OGG Vorbis Header: Comment (%d bytes)", vin.len);
                     ChanInfo newInfo = ch->info;
                     readComment(vin, newInfo);
                     ch->updateInfo(newInfo);
                 }
                 break;
             case 5: // setup
-                LOG_CHANNEL("OGG Vorbis Header: Setup (%d bytes)", vin.len);
+                LOG_INFO("OGG Vorbis Header: Setup (%d bytes)", vin.len);
                 //readSetup(vin);
                 break;
             default:
@@ -221,7 +221,7 @@ void OggTheoraSubStream::readInfo(Stream &in, ChanInfo &info)
 
     granposShift = in.readBits(5);
 
-    LOG_CHANNEL("OGG Theora Info: %dx%dx%.1ffps %dkbps %dQ %dG", encWidth, encHeight, fps, bitrate, quality, granposShift);
+    LOG_INFO("OGG Theora Info: %dx%dx%.1ffps %dkbps %dQ %dG", encWidth, encHeight, fps, bitrate, quality, granposShift);
 }
 
 // -----------------------------------
@@ -243,11 +243,11 @@ void OggTheoraSubStream::procHeaders(std::shared_ptr<Channel> ch)
         switch (id[0] & 0xff)
         {
             case 128:   // info
-                LOG_CHANNEL("OGG Theora Header: Info (%d bytes)", vin.len);
+                LOG_INFO("OGG Theora Header: Info (%d bytes)", vin.len);
                 readInfo(vin, ch->info);
                 break;
             default:
-                LOG_CHANNEL("OGG Theora Header: Unknown %d (%d bytes)", id[0] & 0xff, vin.len);
+                LOG_INFO("OGG Theora Header: Unknown %d (%d bytes)", id[0] & 0xff, vin.len);
                 break;
         }
     }
@@ -271,7 +271,7 @@ void OggVorbisSubStream::readIdent(Stream &in, ChanInfo &info)
 
     in.readChar();  // skip blocksize 0+1
 
-    LOG_CHANNEL("OGG Vorbis Ident: ver=%d, chans=%d, rate=%d, brMax=%d, brNom=%d, brLow=%d",
+    LOG_INFO("OGG Vorbis Ident: ver=%d, chans=%d, rate=%d, brMax=%d, brNom=%d, brLow=%d",
         ver, chans, samplerate, brMax, brNom, brLow);
 
     bitrate = brNom/1000;
@@ -292,7 +292,7 @@ void OggVorbisSubStream::readSetup(Stream &in)
         in.readChar();
     }
 
-    LOG_CHANNEL("Read %d bytes of Vorbis Setup", cnt);
+    LOG_INFO("Read %d bytes of Vorbis Setup", cnt);
 }
 
 // -----------------------------------
@@ -314,7 +314,7 @@ void OggVorbisSubStream::readComment(Stream &in, ChanInfo &info)
             throw StreamException("Comment string too long");
         in.read(argBuf, l);
         argBuf[l] = 0;
-        LOG_CHANNEL("OGG Comment: %s", argBuf);
+        LOG_INFO("OGG Comment: %s", argBuf);
 
         char *arg;
         if ((arg=stristr(argBuf, "ARTIST=")))
@@ -390,7 +390,7 @@ void OggPage::read(Stream &in)
                     if (in.readChar() == 'S')
                         gotOgg = true;
         if (!gotOgg)
-            LOG_CHANNEL("Skipping OGG packet");
+            LOG_INFO("Skipping OGG packet");
     }
 
     memcpy(&data[0], "OggS", 4);

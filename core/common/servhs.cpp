@@ -363,7 +363,7 @@ void Servent::handshakeGET(HTTP &http)
                         if (urlArg)
                             if (urlArg[0])
                                 newInfo.track.contact.set(urlArg, String::T_ESC);
-                        LOG_CHANNEL("Channel Shoutcast update: %s", songArg);
+                        LOG_INFO("Channel Shoutcast update: %s", songArg);
                         c->updateInfo(newInfo);
                     }
                 }
@@ -1185,18 +1185,8 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr)
                 servMgr->cookieList.neverExpire = true;
         }
 
-        else if (strcmp(curr, "logDebug") == 0)
-            showLog |= atoi(arg) ? (1<<LogBuffer::T_DEBUG) : 0;
-        else if (strcmp(curr, "logErrors") == 0)
-            showLog |= atoi(arg) ? (1<<LogBuffer::T_ERROR) : 0;
-        else if (strcmp(curr, "logNetwork") == 0)
-            showLog |= atoi(arg) ? (1<<LogBuffer::T_NETWORK) : 0;
-        else if (strcmp(curr, "logChannel") == 0)
-            showLog |= atoi(arg) ? (1<<LogBuffer::T_CHANNEL) : 0;
-        else if (strcmp(curr, "logWarnings") == 0)
-            showLog |= atoi(arg) ? (1<<LogBuffer::T_WARNING) : 0;
-        else if (strcmp(curr, "logInformational") == 0)
-            showLog |= atoi(arg) ? (1<<LogBuffer::T_INFO) : 0;
+        else if (strcmp(curr, "logLevel") == 0)
+            servMgr->logLevel = atoi(arg); // これバリデートしたほうが良くない？
 
         else if (strcmp(curr, "allowHTML1") == 0)
             allowServer1 |= atoi(arg) ? (ALLOW_HTML) : 0;
@@ -1222,7 +1212,6 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr)
             servMgr->wmvProtocol = arg;
     }
 
-    servMgr->showLog = showLog;
     servMgr->allowServer1 = allowServer1;
     servMgr->allowServer2 = allowServer2;
 
@@ -1896,7 +1885,7 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
     auto c = chanMgr->findChannelByID(info.id);
     if (c)
     {
-        LOG_CHANNEL("WMHTTP Push channel already active, closing old one");
+        LOG_INFO("WMHTTP Push channel already active, closing old one");
         c->thread.shutdown();
     }
 
@@ -1959,7 +1948,7 @@ void Servent::handshakeHTTPPush(const std::string& args)
     auto c = chanMgr->findChannelByID(info.id);
     if (c)
     {
-        LOG_CHANNEL("HTTP Push channel already active, closing old one");
+        LOG_INFO("HTTP Push channel already active, closing old one");
         c->thread.shutdown();
     }
     // ここでシャットダウン待たなくていいの？
@@ -2015,7 +2004,7 @@ void Servent::handshakeICY(Channel::SRC_TYPE type, bool isHTTP)
     auto c = chanMgr->findChannelByID(info.id);
     if (c)
     {
-        LOG_CHANNEL("ICY channel already active, closing old one");
+        LOG_INFO("ICY channel already active, closing old one");
         c->thread.shutdown();
     }
 

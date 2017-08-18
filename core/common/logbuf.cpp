@@ -25,12 +25,13 @@
 const char *LogBuffer::logTypes[]=
 {
     "",
+    "TRAC",
     "DBUG",
-    "EROR",
-    "GNET",
-    "CHAN",
-    "WARN",
     "INFO",
+    "WARN",
+    "EROR",
+    "FATL",
+    " OFF",
 };
 
 // -----------------------------------

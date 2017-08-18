@@ -384,7 +384,7 @@ void ChannelStream::updateStatus(std::shared_ptr<Channel> ch)
         {
             GnuID noID;
             int cnt = chanMgr->broadcastPacketUp(pack, ch->info.id, servMgr->sessionID, noID);
-            LOG_CHANNEL("Sent channel status update to %d clients", cnt);
+            LOG_INFO("Sent channel status update to %d clients", cnt);
         }
     }
 }

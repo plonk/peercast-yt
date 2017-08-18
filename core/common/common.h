@@ -102,12 +102,12 @@ bool        hasCGIarg(const char *str, const char *arg);
 
 // ----------------------------------
 extern void LOG(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
-extern void LOG_ERROR(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
+extern void LOG_TRACE(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
 extern void LOG_DEBUG(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
-extern void LOG_NETWORK(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
-extern void LOG_CHANNEL(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
-extern void LOG_WARN(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
 extern void LOG_INFO(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
+extern void LOG_WARN(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
+extern void LOG_ERROR(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
+extern void LOG_FATAL(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
 
 #endif
 

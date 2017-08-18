@@ -213,33 +213,17 @@
             <td colspan=2><b>{#Log}</b></td>
           </tr>
           <tr class="normal">
-            <th class="left-heading" width="30%">{#Debug}</th>
-            <td><input type=checkbox {@if servMgr.log.debug}checked{@end} value=1 name=logDebug>
-            </td>
-          </tr>
-          <tr class="normal">
-            <th class="left-heading">{#Errors}</th>
-            <td><input type=checkbox {@if servMgr.log.errors}checked{@end} value=1 name=logErrors>
-            </td>
-          </tr>
-          <tr class="normal">
-            <th class="left-heading">{#Network}</th>
-            <td><input type=checkbox {@if servMgr.log.gnet}checked{@end} value=1 name=logNetwork>
-            </td>
-          </tr>
-          <tr class="normal">
-            <th class="left-heading">{#Channels}</th>
-            <td><input type=checkbox {@if servMgr.log.channel}checked{@end} value=1 name=logChannel>
-            </td>
-          </tr>
-          <tr class="normal">
-            <th class="left-heading">{#Warnings}</th>
-            <td><input type=checkbox {@if servMgr.log.warnings}checked{@end} value=1 name=logWarnings>
-            </td>
-          </tr>
-          <tr class="normal">
-            <th class="left-heading">{#Informational}</th>
-            <td><input type=checkbox {@if servMgr.log.informational}checked{@end} value=1 name=logInformational>
+            <th class="left-heading" width="30%">{#Level}</th>
+            <td>
+              <select name="logLevel">
+                <option {@if servMgr.log.level == "1"}selected{@end} value="1">1. {#TRACE} ({#Everything})</option>
+                <option {@if servMgr.log.level == "2"}selected{@end} value="2">2. {#DEBUG}</option>
+                <option {@if servMgr.log.level == "3"}selected{@end} value="3">3. {#INFO} ({#Default})</option>
+                <option {@if servMgr.log.level == "4"}selected{@end} value="4">4. {#WARN}</option>
+                <option {@if servMgr.log.level == "5"}selected{@end} value="5">5. {#ERROR}</option>
+                <option {@if servMgr.log.level == "6"}selected{@end} value="6">6. {#FATAL}</option>
+                <option {@if servMgr.log.level == "7"}selected{@end} value="7">7. {#OFF} ({#No logging})</option>
+              </select>
             </td>
           </tr>
         </table>

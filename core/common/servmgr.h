@@ -343,7 +343,7 @@ public:
     char                connectHost[128];
     GnuID               networkID;
     unsigned int        firewallTimeout;
-    int                 showLog;
+    int                 logLevel;
     int                 shutdownTimer;
     bool                pauseLog;
     bool                forceNormal;

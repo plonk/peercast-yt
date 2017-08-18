@@ -195,8 +195,18 @@
     "Audio Codec"             : "オーディオ・コーデック",
     "AAC (Experimental)"      : "AAC (実験的)",
     "WMV Protocol"            : "WMVプロトコル",
-    "Informational"           : "情報",
-    "Warnings"                : "警告",
+
+    "Level"                   : "レベル",
+    "TRACE"                   : "トレース",
+    "DEBUG"                   : "デバッグ",
+    "INFO"                    : "情報",
+    "WARN"                    : "警告",
+    "ERROR"                   : "エラー",
+    "FATAL"                   : "致命的なエラー",
+    "OFF"                     : "オフ",
+    "Default"                 : "デフォルト",
+    "Everything"              : "全て",
+    "No logging"              : "ログ無効",
 
     // rtmp.html
     "Start"                   : "開始",

@@ -1219,7 +1219,7 @@ void Servent::processGnutella()
                         break;
                 }
 
-                LOG_NETWORK("packet in: %s-%s, %d bytes, %d hops, %d ttl, from %s", GNU_FUNC_STR(pack.func), GnuStream::getRouteStr(ret), pack.len, pack.hops, pack.ttl, ipstr);
+                LOG_INFO("packet in: %s-%s, %d bytes, %d hops, %d ttl, from %s", GNU_FUNC_STR(pack.func), GnuStream::getRouteStr(ret), pack.len, pack.hops, pack.ttl, ipstr);
             }else{
                 LOG_ERROR("Bad packet");
             }
@@ -1303,7 +1303,7 @@ void Servent::processRoot()
                 char ipstr[64];
                 sock->host.toStr(ipstr);
 
-                LOG_NETWORK("packet in: %d from %s", pack.func, ipstr);
+                LOG_INFO("packet in: %d from %s", pack.func, ipstr);
 
                 if (pack.func == GNU_FUNC_PING)     // if ping then pong back some hosts and close
                 {
@@ -1324,15 +1324,15 @@ void Servent::processRoot()
                             char ipstr[64];
                             hl[start].toStr(ipstr);
 
-                            //LOG_NETWORK("Pong %d: %s", start+1, ipstr);
+                            //LOG_INFO("Pong %d: %s", start+1, ipstr);
                             start = (start+1) % cnt;
                         }
                         char str[64];
                         sock->host.toStr(str);
-                        LOG_NETWORK("Sent %d pong(s) to %s", max, str);
+                        LOG_INFO("Sent %d pong(s) to %s", max, str);
                     }else
                     {
-                        LOG_NETWORK("No Pongs to send");
+                        LOG_INFO("No Pongs to send");
                         //return;
                     }
                 }else if (pack.func == GNU_FUNC_PONG)       // pong?
@@ -1347,7 +1347,7 @@ void Servent::processRoot()
                     Host h(ip, port);
                     if ((ip) && (port) && (h.globalIP()))
                     {
-                        LOG_NETWORK("added pong: %d.%d.%d.%d:%d", ip>>24&0xff, ip>>16&0xff, ip>>8&0xff, ip&0xff, port);
+                        LOG_INFO("added pong: %d.%d.%d.%d:%d", ip>>24&0xff, ip>>16&0xff, ip>>8&0xff, ip&0xff, port);
                         servMgr->addHost(h, ServHost::T_SERVENT, sys->getTime());
                     }
                     //return;
@@ -2027,7 +2027,7 @@ void Servent::processStream(bool doneHandshake, ChanInfo &chanInfo)
     {
         chanID = chanInfo.id;
 
-        LOG_CHANNEL("Sending channel: %s ", ChanInfo::getProtocolStr(outputProtocol));
+        LOG_INFO("Sending channel: %s ", ChanInfo::getProtocolStr(outputProtocol));
 
         if (!waitForChannelHeader(chanInfo))
             throw StreamException("Channel not ready");

@@ -98,7 +98,7 @@ ServMgr::ServMgr()
     totalStreams = 0;
     firewallTimeout = 30;
     pauseLog = false;
-    showLog = (1<<LogBuffer::T_ERROR);
+    logLevel = LogBuffer::T_INFO;
 
     shutdownTimer = 0;
 
@@ -728,7 +728,7 @@ int ServMgr::broadcast(GnuPacket &pack, Servent *src)
         }
     }
 
-    LOG_NETWORK("broadcast: %s (%d) to %d servents", GNU_FUNC_STR(pack.func), pack.ttl, cnt);
+    LOG_INFO("broadcast: %s (%d) to %d servents", GNU_FUNC_STR(pack.func), pack.ttl, cnt);
 
     return cnt;
 }
@@ -759,7 +759,7 @@ int ServMgr::route(GnuPacket &pack, GnuID &routeID, Servent *src)
         }
     }
 
-    LOG_NETWORK("route: %s (%d) to %d servents", GNU_FUNC_STR(pack.func), pack.ttl, cnt);
+    LOG_INFO("route: %s (%d) to %d servents", GNU_FUNC_STR(pack.func), pack.ttl, cnt);
     return cnt;
 }
 
@@ -994,12 +994,7 @@ void ServMgr::saveSettings(const char *fn)
         iniFile.writeLine("[End]");
 
         iniFile.writeSection("Debug");
-        iniFile.writeBoolValue("logDebug", (showLog&(1<<LogBuffer::T_DEBUG))!=0);
-        iniFile.writeBoolValue("logErrors", (showLog&(1<<LogBuffer::T_ERROR))!=0);
-        iniFile.writeBoolValue("logNetwork", (showLog&(1<<LogBuffer::T_NETWORK))!=0);
-        iniFile.writeBoolValue("logChannel", (showLog&(1<<LogBuffer::T_CHANNEL))!=0);
-        iniFile.writeBoolValue("logWarnings", (showLog&(1<<LogBuffer::T_WARNING))!=0);
-        iniFile.writeBoolValue("logInformational", (showLog&(1<<LogBuffer::T_INFO))!=0);
+        iniFile.writeIntValue("logLevel", logLevel);
         iniFile.writeBoolValue("pauseLog", pauseLog);
         iniFile.writeIntValue("idleSleepTime", sys->idleSleepTime);
 
@@ -1141,7 +1136,6 @@ void ServMgr::loadSettings(const char *fn)
         saveSettings(fn);
 
     servMgr->numFilters = 0;
-    showLog = 0;
 
     if (iniFile.openReadOnly(fn))
     {
@@ -1288,18 +1282,8 @@ void ServMgr::loadSettings(const char *fn)
                 servMgr->wmvProtocol = iniFile.getStrValue();
 
             // debug
-            else if (iniFile.isName("logDebug"))
-                showLog |= iniFile.getBoolValue() ? 1<<LogBuffer::T_DEBUG:0;
-            else if (iniFile.isName("logErrors"))
-                showLog |= iniFile.getBoolValue() ? 1<<LogBuffer::T_ERROR:0;
-            else if (iniFile.isName("logNetwork"))
-                showLog |= iniFile.getBoolValue() ? 1<<LogBuffer::T_NETWORK:0;
-            else if (iniFile.isName("logChannel"))
-                showLog |= iniFile.getBoolValue() ? 1<<LogBuffer::T_CHANNEL:0;
-            else if (iniFile.isName("logWarnings"))
-                showLog |= iniFile.getBoolValue() ? 1<<LogBuffer::T_WARNING:0;
-            else if (iniFile.isName("logInformational"))
-                showLog |= iniFile.getBoolValue() ? 1<<LogBuffer::T_INFO:0;
+            else if (iniFile.isName("logLevel"))
+                logLevel = iniFile.getIntValue();
             else if (iniFile.isName("pauseLog"))
                 pauseLog = iniFile.getBoolValue();
             else if (iniFile.isName("idleSleepTime"))
@@ -1557,7 +1541,7 @@ int ServMgr::findChannel(ChanInfo &info)
     addReplyID(pack.id);
     int cnt = broadcast(pack, NULL);
 
-    LOG_NETWORK("Querying network: %s %s - %d servents", info.name.cstr(), idStr, cnt);
+    LOG_INFO("Querying network: %s %s - %d servents", info.name.cstr(), idStr, cnt);
 
     return cnt;
 #endif
@@ -1627,14 +1611,14 @@ void ServMgr::procConnectArgs(char *str, ChanInfo &info)
                 Host h;
                 h.fromStrName(arg, DEFAULT_PORT);
                 if (addOutgoing(h, servMgr->networkID, true))
-                    LOG_NETWORK("Added connection: %s", arg);
+                    LOG_INFO("Added connection: %s", arg);
             }else if (strcmp(curr, "pip")==0)
             // pip - add private network connection to client with channel
             {
                 Host h;
                 h.fromStrName(arg, DEFAULT_PORT);
                 if (addOutgoing(h, info.id, true))
-                    LOG_NETWORK("Added private connection: %s", arg);
+                    LOG_INFO("Added private connection: %s", arg);
             }else if (strcmp(curr, "ip")==0)
             // ip - add hit
             {
@@ -2238,18 +2222,8 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
             buf = (cookieList.neverExpire==false) ? "1" : "0";
     }else if (var.startsWith("log."))
     {
-        if (var == "log.debug")
-            buf = (showLog & (1<<LogBuffer::T_DEBUG)) ? "1" : "0";
-        else if (var == "log.errors")
-            buf = (showLog & (1<<LogBuffer::T_ERROR)) ? "1" : "0";
-        else if (var == "log.gnet")
-            buf = (showLog & (1<<LogBuffer::T_NETWORK)) ? "1" : "0";
-        else if (var == "log.channel")
-            buf = (showLog & (1<<LogBuffer::T_CHANNEL)) ? "1" : "0";
-        else if (var == "log.warnings")
-            buf = (showLog & (1<<LogBuffer::T_WARNING)) ? "1" : "0";
-        else if (var == "log.informational")
-            buf = (showLog & (1<<LogBuffer::T_INFO)) ? "1" : "0";
+        if (var == "log.level")
+            buf = std::to_string(logLevel);
         else
             return false;
     }else if (var.startsWith("lang."))
