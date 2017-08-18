@@ -130,7 +130,7 @@ void sigProc(int sig)
     case SIGHUP:
         LOG_DEBUG("Received HUP signal, reloading a new logfile");
         // The aim of this call is to completly reload a new log file.
-        // It can be used in conjonction with logrotate,
+        // It can be used in conjunction with logrotate,
         // to remove the logfile after it has been copied.
         // some data can still be lost, but this way it is reduced to minimun at lost costs..
         if (logToFile) {
