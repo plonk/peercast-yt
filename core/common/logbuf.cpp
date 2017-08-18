@@ -33,7 +33,7 @@ const char *LogBuffer::logTypes[]=
 // -----------------------------------
 void LogBuffer::write(const char *str, TYPE t)
 {
-    lock.on();
+    CriticalSection cs(lock);
 
     unsigned int len = strlen(str);
     int cnt=0;
@@ -62,8 +62,6 @@ void LogBuffer::write(const char *str, TYPE t)
         len -= rlen;
         cnt++;
     }
-
-    lock.off();
 }
 
 // ---------------------------
@@ -97,7 +95,7 @@ void LogBuffer::escapeHTML(char* dest, char* src)
 // ---------------------------
 void LogBuffer::dumpHTML(Stream &out)
 {
-    lock.on();
+    CriticalSection cs(lock);
 
     unsigned int nl = currLine;
     unsigned int sp = 0;
@@ -135,7 +133,5 @@ void LogBuffer::dumpHTML(Stream &out)
         }
     }
     delete[] escaped;
-
-    lock.off();
 }
 
