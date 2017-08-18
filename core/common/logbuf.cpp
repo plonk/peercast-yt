@@ -83,28 +83,24 @@ void LogBuffer::dumpHTML(Stream &out)
     }
 
     String tim;
-    if (nl)
+    for (unsigned int i=0; i<nl; i++)
     {
-        for (unsigned int i=0; i<nl; i++)
+        unsigned int bp = sp*lineLen;
+
+        if (types[sp] != LogBuffer::T_NONE)
         {
-            unsigned int bp = sp*lineLen;
+            tim.setFromTime(times[sp]);
 
-            if (types[sp])
-            {
-                tim.setFromTime(times[sp]);
-
-                out.writeString(tim.cstr());
-                out.writeString(" <b>[");
-                out.writeString(getTypeStr(types[sp]));
-                out.writeString("]</b> ");
-            }
-
-            out.writeString(cgi::escape_html(&buf[bp]).c_str());
-            out.writeString("<br>");
-
-            sp++;
-            sp %= maxLines;
+            out.writeString(tim.cstr());
+            out.writeString(" <b>[");
+            out.writeString(getTypeStr(types[sp]));
+            out.writeString("]</b> ");
         }
+
+        out.writeString(cgi::escape_html(&buf[bp]).c_str());
+        out.writeString("<br>");
+
+        sp = (sp+1) % maxLines;
     }
 }
 
