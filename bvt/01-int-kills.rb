@@ -11,9 +11,17 @@ sleep 0.1
 # プロセスを終了する。
 Process.kill(:INT, pid)
 
-# プロセスは死んだか。
-if Process.wait(-1, Process::WNOHANG) != nil
-  fail
+t0 = Time.now
+loop do
+  # 10 秒超待ってもプロセスが死ななかったら失敗。
+  if Time.now - t0 > 10
+    fail
+  end
+  pid, status = Process.wait2(-1, Process::WNOHANG)
+  if pid && status.exited?
+    break
+  end
+  sleep 0.1
 end
 
 puts 'ok'
