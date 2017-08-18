@@ -12,7 +12,7 @@ def spawn_peercast
     Process.kill(9, pid)
   }
 
-  fail "peercast dead immediately after spawn" if Process.wait(-1, Process::WNOHANG) != nil
+  fail "peercast died immediately after spawn" if Process.wait(-1, Process::WNOHANG) != nil
 end
 
 def assert_eq(expectation, actual, opts = {})
