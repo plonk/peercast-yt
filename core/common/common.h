@@ -98,7 +98,6 @@ public:
 
 // -----------------------------------
 const char  *getCGIarg(const char *str, const char *arg);
-bool        cmpCGIarg(const char *str, const char *arg, const char *value);
 bool        hasCGIarg(const char *str, const char *arg);
 
 // ----------------------------------

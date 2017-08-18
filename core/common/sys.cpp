@@ -134,21 +134,6 @@ const char *getCGIarg(const char *str, const char *arg)
 }
 
 // -----------------------------------
-bool cmpCGIarg(const char *str, const char *arg, const char *value)
-{
-    if ((!str) || (!strlen(value)))
-        return false;
-
-    if (Sys::strnicmp(str, arg, strlen(arg)) == 0)
-    {
-        str += strlen(arg);
-
-        return strncmp(str, value, strlen(value))==0;
-    }else
-        return false;
-}
-
-// -----------------------------------
 bool hasCGIarg(const char *str, const char *arg)
 {
     if (!str)
