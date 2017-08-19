@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "logbuf.h"
 #include "sstream.h"
+#include "str.h"
 
 class LogBufferFixture : public ::testing::Test {
 public:
@@ -49,7 +50,8 @@ TEST_F(LogBufferFixture, dumpHTML_simple)
     lb.write("<>&ほげ", LogBuffer::T_ERROR);
     lb.dumpHTML(mem);
 
-    ASSERT_EQ("Thu Jan  1 09:00:00 1970\n <b>[EROR]</b> &lt;&gt;&amp;ほげ<br>", mem.str());
+    ASSERT_TRUE(str::has_suffix(mem.str(), " <b>[EROR]</b> &lt;&gt;&amp;ほげ<br>"));
+    ASSERT_NE(" <b>[EROR]</b> &lt;&gt;&amp;ほげ<br>", mem.str());
 }
 
 TEST_F(LogBufferFixture, write)
