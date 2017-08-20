@@ -315,7 +315,8 @@ public:
 
     unsigned int    totalOutput(bool);
 
-    static ThreadInfo   serverThread, idleThread;
+    ThreadInfo          serverThread;
+    ThreadInfo          idleThread;
 
     Servent             *servents;
     WLock               lock;

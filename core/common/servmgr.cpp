@@ -28,8 +28,6 @@
 #include "version2.h"
 #include "rtmpmonit.h"
 
-ThreadInfo ServMgr::serverThread, ServMgr::idleThread;
-
 // -----------------------------------
 ServMgr::ServMgr()
     : publicDirectoryEnabled(false)
