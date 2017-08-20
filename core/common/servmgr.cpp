@@ -1887,6 +1887,7 @@ int ServMgr::idleProc(ThreadInfo *thread)
             if ((servMgr->lastIncoming) && (((int64_t)ctime - servMgr->lastIncoming) > 60*60))
             {
                 peercastInst->saveSettings();
+                peercastInst->quit();
                 sys->exit();
             }
 
@@ -1908,6 +1909,7 @@ int ServMgr::idleProc(ThreadInfo *thread)
             if (--servMgr->shutdownTimer <= 0)
             {
                 peercastInst->saveSettings();
+                peercastInst->quit();
                 sys->exit();
             }
         }
@@ -1967,6 +1969,7 @@ int ServMgr::serverProc(ThreadInfo *thread)
                     if (!serv->initServer(h))
                     {
                         LOG_ERROR("Failed to start server on port %d. Exitting...", h.port);
+                        peercastInst->quit();
                         sys->exit();
                     }
 
@@ -1975,6 +1978,7 @@ int ServMgr::serverProc(ThreadInfo *thread)
                     if (!serv2->initServer(h))
                     {
                         LOG_ERROR("Failed to start server on port %d. Exitting...", h.port);
+                        peercastInst->quit();
                         sys->exit();
                     }
             }
