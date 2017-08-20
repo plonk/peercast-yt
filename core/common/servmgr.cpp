@@ -686,12 +686,7 @@ void ServMgr::quit()
     LOG_DEBUG("ServMgr is quitting..");
 
     serverThread.shutdown();
-    LOG_DEBUG("waiting for server thread..");
-    sys->waitThread(&serverThread);
-
     idleThread.shutdown();
-    LOG_DEBUG("waiting for idle thread..");
-    sys->waitThread(&idleThread);
 
     Servent *s = servents;
     while (s)
@@ -1666,11 +1661,11 @@ bool ServMgr::start()
     checkForceIP();
 
     serverThread.func = ServMgr::serverProc;
-    if (!sys->startWaitableThread(&serverThread))
+    if (!sys->startThread(&serverThread))
         return false;
 
     idleThread.func = ServMgr::idleProc;
-    if (!sys->startWaitableThread(&idleThread))
+    if (!sys->startThread(&idleThread))
         return false;
 
     return true;
