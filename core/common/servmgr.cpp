@@ -686,6 +686,9 @@ void ServMgr::quit()
     serverThread.shutdown();
     idleThread.shutdown();
 
+    LOG_DEBUG("Disabling RMTP server..");
+    rtmpServerMonitor.disable();
+
     Servent *s = servents;
     while (s)
     {
