@@ -791,7 +791,7 @@ public:
 
         auto channel = chanMgr->findChannelByID(channelId);
         if (!channel)
-            throw application_error(0, "Channel not found");
+            throw application_error(kChannelNotFound, "Channel not found");
 
         channel->updateInfo(mergeChanInfo(channel->info, info, track));
 
@@ -818,7 +818,7 @@ public:
 
         auto channel = chanMgr->findChannelByID(id);
         if (!channel)
-            throw application_error(0, "Channel not found");
+            throw application_error(kChannelNotFound, "Channel not found");
 
         ChanHitList *hitList = chanMgr->findHitListByID(id);
         if (!hitList)
