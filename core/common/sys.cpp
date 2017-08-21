@@ -213,8 +213,15 @@ bool    Sys::startThread(ThreadInfo *info)
     try {
         info->handle = std::thread([info]()
                                    {
-                                       sys->setThreadName("new thread");
-                                       info->func(info);
+                                       try
+                                       {
+                                           sys->setThreadName("new thread");
+                                           info->func(info);
+                                       }catch (std::exception &e)
+                                       {
+                                           // just log it and continue..
+                                           LOG_ERROR("Unexpected exception: %s", e.what());
+                                       }
                                    });
         info->handle.detach();
         return true;
@@ -233,8 +240,15 @@ bool    Sys::startWaitableThread(ThreadInfo *info)
     try {
         info->handle = std::thread([info]()
                                    {
-                                       sys->setThreadName("new thread");
-                                       info->func(info);
+                                       try
+                                       {
+                                           sys->setThreadName("new thread");
+                                           info->func(info);
+                                       }catch (std::exception &e)
+                                       {
+                                           // just log it and continue..
+                                           LOG_ERROR("Unexpected exception: %s", e.what());
+                                       }
                                    });
         return true;
     } catch (std::system_error& e)
