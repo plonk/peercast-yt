@@ -17,6 +17,17 @@ class JrpcApi
 public:
     using json = nlohmann::json;
 
+    enum ErrorCode
+    {
+        kParseError = -32700,
+        kInvalidRequest = -32600,
+        kMethodNotFound = -32601,
+        kInvalidParams = -32602,
+        kInternalError = -32603,
+
+        kChannelNotFound = -1,
+    };
+
     class method_not_found : public std::runtime_error
     {
     public:
