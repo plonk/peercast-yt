@@ -33,6 +33,7 @@
 #include "atom.h"
 #include "pcp.h"
 #include "version2.h"
+#include "defer.h"
 
 const int DIRECT_WRITE_TIMEOUT = 60;
 
@@ -1380,6 +1381,8 @@ int Servent::givProc(ThreadInfo *thread)
     sys->setThreadName("Servent GIV");
 
     Servent *sv = (Servent*)thread->data;
+    Defer cb([sv]() { sv->kill(); });
+
     try
     {
         sv->handshakeGiv(sv->givID);
@@ -1389,7 +1392,6 @@ int Servent::givProc(ThreadInfo *thread)
         LOG_ERROR("GIV: %s", e.msg);
     }
 
-    sv->kill();
     return 0;
 }
 
@@ -1800,6 +1802,7 @@ int Servent::outgoingProc(ThreadInfo *thread)
     LOG_DEBUG("COUT started");
 
     Servent *sv = (Servent*)thread->data;
+    Defer cb([sv]() { sv->kill(); });
 
     GnuID noID;
     noID.clear();
@@ -1958,8 +1961,8 @@ int Servent::outgoingProc(ThreadInfo *thread)
         sys->sleepIdle();
     }
 
-    sv->kill();
     LOG_DEBUG("COUT ended");
+
     return 0;
 }
 
@@ -1968,9 +1971,9 @@ int Servent::outgoingProc(ThreadInfo *thread)
 int Servent::incomingProc(ThreadInfo *thread)
 {
     Servent *sv = (Servent*)thread->data;
+    Defer cb([sv]() { sv->kill(); });
 
     std::string ipStr = sv->sock->host.str(true);
-
     sys->setThreadName(String::format("INCOMING %s", ipStr.c_str()));
 
     try
@@ -1995,7 +1998,6 @@ int Servent::incomingProc(ThreadInfo *thread)
         LOG_ERROR("Incoming from %s: %s", ipStr.c_str(), e.msg);
     }
 
-    sv->kill();
     return 0;
 }
 
@@ -2487,6 +2489,7 @@ void Servent::sendPCPChannel()
 int Servent::serverProc(ThreadInfo *thread)
 {
     Servent *sv = (Servent*)thread->data;
+    Defer cb([sv]() { sv->kill(); });
 
     try
     {
@@ -2542,7 +2545,6 @@ int Servent::serverProc(ThreadInfo *thread)
 
     LOG_DEBUG("Server stopped: %s", sv->sock->host.str().c_str());
 
-    sv->kill();
     return 0;
 }
 
