@@ -33,7 +33,7 @@ json JrpcApi::call_internal(const string& input)
     }
 
     if (!j.is_object() ||
-        j.find("jsonrpc") == j.end() ||
+        j.count("jsonrpc") == 0 ||
         j.at("jsonrpc") != "2.0")
     {
         return error_object(kInvalidRequest, "Invalid Request");
@@ -51,7 +51,7 @@ json JrpcApi::call_internal(const string& input)
         return error_object(kInvalidRequest, "Invalid Request", id);
     }
 
-    if (j.find("params") == j.end())
+    if (j.count("params") == 0)
     {
         params = json::array();
     } else if (!j.at("params").is_object() &&
