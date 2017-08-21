@@ -28,7 +28,8 @@ class LogBuffer
 public:
     enum TYPE
     {
-        T_NONE  = 0,
+        T_NONE  = 0, // Denotes that the line is a continuation of the
+                     // previous one.
         T_TRACE = 1,
         T_DEBUG = 2,
         T_INFO  = 3,
