@@ -833,6 +833,9 @@ public:
     {
         GnuID id = args[0].get<std::string>();
 
+        if (!id.isSet())
+            throw invalid_params("id");
+
         auto channel = chanMgr->findChannelByID(id);
         if (!channel)
             throw application_error(kChannelNotFound, "Channel not found");
