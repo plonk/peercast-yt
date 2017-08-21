@@ -29,26 +29,26 @@ json JrpcApi::call_internal(const string& input)
     try {
         j = json::parse(input);
     } catch (std::invalid_argument&) {
-        return error_object(-32700, "Parse error");
+        return error_object(kParseError, "Parse error");
     }
 
     if (!j.is_object() ||
         j.find("jsonrpc") == j.end() ||
         j.at("jsonrpc") != "2.0")
     {
-        return error_object(-32600, "Invalid Request");
+        return error_object(kInvalidRequest, "Invalid Request");
     }
 
     try {
         id = j.at("id");
     } catch (std::out_of_range) {
-        return error_object(-32600, "Invalid Request");
+        return error_object(kInvalidRequest, "Invalid Request");
     }
 
     try {
         method = j.at("method");
     } catch (std::out_of_range) {
-        return error_object(-32600, "Invalid Request", id);
+        return error_object(kInvalidRequest, "Invalid Request", id);
     }
 
     if (j.find("params") == j.end())
@@ -57,7 +57,7 @@ json JrpcApi::call_internal(const string& input)
     } else if (!j.at("params").is_object() &&
                !j.at("params").is_array())
     {
-        return error_object(-32602, "Invalid params", id, "params must be either object or array");
+        return error_object(kInvalidParams, "Invalid params", id, "params must be either object or array");
     } else {
         params = j.at("params");
     }
@@ -66,13 +66,13 @@ json JrpcApi::call_internal(const string& input)
         result = dispatch(method, params);
     } catch (method_not_found& e) {
         LOG_DEBUG("Method not found: %s", e.what());
-        return error_object(-32601, "Method not found", id, e.what());
+        return error_object(kMethodNotFound, "Method not found", id, e.what());
     } catch (invalid_params& e) {
-        return error_object(-32602, "Invalid params", id, e.what());
+        return error_object(kInvalidParams, "Invalid params", id, e.what());
     } catch (application_error& e) {
         return error_object(e.m_errno, e.what(), id);
     } catch (std::exception& e) {
-        return error_object(-32603, e.what(), id);
+        return error_object(kInternalError, e.what(), id);
     }
 
     return {

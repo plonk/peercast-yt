@@ -26,6 +26,7 @@ public:
         kInternalError = -32603,
 
         kChannelNotFound = -1,
+        kUnknownError = 0,
     };
 
     class method_not_found : public std::runtime_error
@@ -302,7 +303,7 @@ public:
             auto c = chanMgr->createChannel(info, NULL); // info, mount
             if (!c)
             {
-                throw application_error(0, "failed to create channel");
+                throw application_error(kUnknownError, "failed to create channel");
             }
             c->startURL(url.c_str());
 
@@ -441,7 +442,7 @@ public:
 
         auto c = chanMgr->findChannelByID(id);
         if (!c)
-            throw application_error(-1, "Channel not found");
+            throw application_error(kChannelNotFound, "Channel not found");
 
         json remoteEndPoint;
         if (c->sock)
@@ -510,7 +511,7 @@ public:
 
         auto c = chanMgr->findChannelByID(id);
         if (!c)
-            throw application_error(-1, "Channel not found");
+            throw application_error(kChannelNotFound, "Channel not found");
 
         json j = {
             { "info", to_json(c->info) },
@@ -528,7 +529,7 @@ public:
         auto c = chanMgr->findChannelByID(id);
 
         if (!c)
-            throw application_error(-1, "Channel not found");
+            throw application_error(kChannelNotFound, "Channel not found");
 
         return channelStatus(c);
     }
@@ -821,7 +822,7 @@ public:
 
         ChanHitList *hitList = chanMgr->findHitListByID(id);
         if (!hitList)
-            throw application_error(0, "Hit list not found");
+            throw application_error(kUnknownError, "Hit list not found");
 
         HostGraph graph(channel, hitList);
 
@@ -834,7 +835,7 @@ public:
 
         auto channel = chanMgr->findChannelByID(id);
         if (!channel)
-            throw application_error(0, "Channel not found");
+            throw application_error(kChannelNotFound, "Channel not found");
 
         channel->bump = true;
 
@@ -843,7 +844,7 @@ public:
 
     json removeYellowPage(json::array_t args)
     {
-        throw application_error(0, "Method unavailable");
+        throw application_error(kUnknownError, "Method unavailable");
     }
 
     static std::string tolower(std::string str)
