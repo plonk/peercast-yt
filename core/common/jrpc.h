@@ -190,6 +190,7 @@ public:
         m_methods
         ({
             { "bumpChannel",             &JrpcApi::bumpChannel,             { "channelId" } },
+            { "clearLog",                &JrpcApi::clearLog,                {} },
             { "fetch",                   &JrpcApi::fetch,                   { "url", "name", "desc", "genre", "contact", "bitrate", "type" } },
             { "getChannelConnections",   &JrpcApi::getChannelConnections,   { "channelId" } },
             { "getChannelInfo",          &JrpcApi::getChannelInfo,          { "channelId" } },
@@ -931,6 +932,7 @@ public:
     }
 
     json getLog(json::array_t args);
+    json clearLog(json::array_t args);
 };
 
 #endif

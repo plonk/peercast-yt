@@ -127,3 +127,9 @@ json JrpcApi::getLog(json::array_t args)
 
     return { { "from", from.get<int>() }, { "lines", lines.size() }, { "log", log} };
 }
+
+json JrpcApi::clearLog(json::array_t args)
+{
+    sys->logBuf->clear();
+    return nullptr;
+}
