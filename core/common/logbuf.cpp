@@ -74,16 +74,20 @@ void LogBuffer::dumpHTML(Stream &out)
 {
     CriticalSection cs(lock);
 
-    unsigned int nl = currLine;
-    unsigned int sp = 0;
-    if (nl > maxLines)
+    unsigned int nlines;
+    unsigned int sp;
+    if (currLine < maxLines)
     {
-        nl = maxLines-1;
-        sp = (currLine+1)%maxLines;
+        nlines = currLine;
+        sp = 0;
+    }else
+    {
+        nlines = maxLines;
+        sp = currLine % maxLines;
     }
 
     String tim;
-    for (unsigned int i=0; i<nl; i++)
+    for (unsigned int i = 0; i < nlines; i++)
     {
         unsigned int bp = sp*lineLen;
 
