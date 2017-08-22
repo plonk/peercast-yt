@@ -75,3 +75,30 @@ TEST_F(LogBufferFixture, getTypeStr)
     ASSERT_STREQ("FATL", LogBuffer::getTypeStr(LogBuffer::T_FATAL));
     ASSERT_STREQ(" OFF", LogBuffer::getTypeStr(LogBuffer::T_OFF));
 }
+
+TEST_F(LogBufferFixture, dumpHTML_999)
+{
+    StringStream mem;
+    for (int i = 0; i < 999; i++)
+        lb.write(std::to_string(i).c_str(), LogBuffer::T_ERROR);
+
+    ASSERT_EQ(999, str::count((lb.dumpHTML(mem),mem.str()), "<br>"));
+}
+
+TEST_F(LogBufferFixture, dumpHTML_1000)
+{
+    StringStream mem;
+    for (int i = 0; i < 1000; i++)
+        lb.write(std::to_string(i).c_str(), LogBuffer::T_ERROR);
+
+    ASSERT_EQ(1000, str::count((lb.dumpHTML(mem),mem.str()), "<br>"));
+}
+
+TEST_F(LogBufferFixture, dumpHTML_1001)
+{
+    StringStream mem;
+    for (int i = 0; i < 1001; i++)
+        lb.write(std::to_string(i).c_str(), LogBuffer::T_ERROR);
+
+    ASSERT_EQ(1000, str::count((lb.dumpHTML(mem),mem.str()), "<br>"));
+}
