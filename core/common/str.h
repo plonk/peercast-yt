@@ -25,6 +25,10 @@ namespace str
     std::vector<std::string> split(const std::string& in, const std::string& separator);
     std::string upcase(const std::string& input);
     std::string extension_without_dot(const std::string& filename);
+
+    // Count how many occurrences of the substring `needle` are in `haystack`.
+    // Throws std::domain_error if `needle` is an empty string.
+    int         count(const std::string& haystack, const std::string& needle);
 }
 
 #endif

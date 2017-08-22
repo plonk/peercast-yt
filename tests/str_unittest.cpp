@@ -173,3 +173,18 @@ TEST_F(strFixture, extension_without_dot)
     ASSERT_STREQ("",    str::extension_without_dot("test.").c_str());
     ASSERT_STREQ("gz",  str::extension_without_dot("hoge.tar.gz").c_str());
 }
+
+TEST_F(strFixture, count)
+{
+    ASSERT_THROW(str::count("", ""), std::domain_error);
+    ASSERT_THROW(str::count("abc", ""), std::domain_error);
+
+    ASSERT_EQ(0, str::count("", "a"));
+    ASSERT_EQ(1, str::count("abc", "a"));
+    ASSERT_EQ(2, str::count("aba", "a"));
+
+    ASSERT_EQ(1, str::count("aba", "ab"));
+    ASSERT_EQ(2, str::count("abab", "ab"));
+    ASSERT_EQ(3, str::count("  ab   ab   ab  ", "ab"));
+}
+

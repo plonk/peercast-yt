@@ -4,6 +4,7 @@
 #include <cstring>
 #include <vector>
 #include <cctype>
+#include <stdexcept>
 
 namespace str
 {
@@ -312,6 +313,22 @@ std::string extension_without_dot(const std::string& filename)
         return "";
     else
         return filename.substr(i + 1);
+}
+
+int count(const std::string& haystack, const std::string& needle)
+{
+    if (needle.empty())
+        throw std::domain_error("cannot count empty strings");
+
+    size_t start = 0;
+    int n = 0;
+
+    while ((start = haystack.find(needle, start)) != std::string::npos)
+    {
+        n++;
+        start++;
+    }
+    return n;
 }
 
 } // namespace str
