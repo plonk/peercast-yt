@@ -21,6 +21,9 @@
 #define _LOGBUF_H
 
 #include "threading.h"
+#include <vector>
+
+class Stream;
 
 // ------------------------------------
 class LogBuffer
@@ -60,8 +63,11 @@ public:
 
     void                write(const char *, TYPE);
     static const char   *getTypeStr(TYPE t) { return logTypes[t]; }
-    void                dumpHTML(class Stream &);
+    void                eachLine(std::function<void(unsigned int, TYPE, const char*)> block);
+    std::vector<std::string> toLines(std::function<std::string(unsigned int, TYPE, const char*)> renderer);
+    void                dumpHTML(Stream &);
 
+    static std::string  lineRendererHTML(unsigned int time, TYPE type, const char* line);
     static void         escapeHTML(char* dest, char* src);
 
     char                *buf;

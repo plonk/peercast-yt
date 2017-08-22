@@ -70,7 +70,29 @@ void LogBuffer::write(const char *str, TYPE t)
 }
 
 // ---------------------------
-void LogBuffer::dumpHTML(Stream &out)
+std::string LogBuffer::lineRendererHTML(unsigned int time, TYPE type, const char* line)
+{
+    std::string buf;
+
+    if (type != LogBuffer::T_NONE)
+    {
+        String tim;
+        tim.setFromTime(time);
+
+        buf += tim.cstr();
+        buf += " <b>[";
+        buf += getTypeStr(type);
+        buf += "]</b> ";
+    }
+
+    buf += cgi::escape_html(line).c_str();
+    buf += "<br>";
+
+    return buf;
+}
+
+// ---------------------------
+void LogBuffer::eachLine(std::function<void(unsigned int, TYPE, const char*)> block)
 {
     CriticalSection cs(lock);
 
@@ -86,26 +108,34 @@ void LogBuffer::dumpHTML(Stream &out)
         sp = currLine % maxLines;
     }
 
-    String tim;
     for (unsigned int i = 0; i < nlines; i++)
     {
-        unsigned int bp = sp*lineLen;
-
-        if (types[sp] != LogBuffer::T_NONE)
-        {
-            tim.setFromTime(times[sp]);
-
-            out.writeString(tim.cstr());
-            out.writeString(" <b>[");
-            out.writeString(getTypeStr(types[sp]));
-            out.writeString("]</b> ");
-        }
-
-        out.writeString(cgi::escape_html(&buf[bp]).c_str());
-        out.writeString("<br>");
+        block(times[sp], types[sp], &buf[sp*lineLen]);
 
         sp = (sp+1) % maxLines;
     }
+}
+
+// ---------------------------
+void LogBuffer::dumpHTML(Stream &out)
+{
+    eachLine([&out](unsigned int time, TYPE type, const char* line)
+             {
+                 out.writeString(lineRendererHTML(time, type, line));
+             });
+}
+
+// ---------------------------
+std::vector<std::string> LogBuffer::toLines(std::function<std::string(unsigned int, TYPE, const char*)> renderer)
+{
+    std::vector<std::string> res;
+
+    eachLine([&res, renderer](unsigned int time, TYPE type, const char* line)
+             {
+                 res.push_back(renderer(time, type, line));
+             });
+
+    return res;
 }
 
 // ---------------------------
