@@ -86,3 +86,44 @@ json JrpcApi::call_internal(const string& input)
         { "id", id }
     };
 }
+
+json JrpcApi::getLog(json::array_t args)
+{
+    json from = args[0];
+    json maxLines = args[1];
+
+    if (!from.is_null() && from.get<int>() < 0)     throw invalid_params("from must be non negative");
+    if (!from.is_null() && maxLines.get<int>() < 0) throw invalid_params("maxLines must be non negative");
+
+    std::vector<string> lines =
+        sys->logBuf->toLines([](unsigned int time, LogBuffer::TYPE type, const char* line)
+                             {
+                                 std::string buf;
+
+                                 if (type != LogBuffer::T_NONE)
+                                 {
+                                     buf += str::rstrip(String().setFromTime(time));
+                                     buf += " [";
+                                     buf += LogBuffer::getTypeStr(type);
+                                     buf += "] ";
+                                 }
+
+                                 buf += line;
+
+                                 return buf;
+                             });
+    lines.push_back("");
+
+    if (from == nullptr)
+        from = 0;
+    lines.erase(lines.begin(), lines.begin() + (std::min)(from.get<size_t>(), lines.size()));
+
+    if (maxLines == nullptr)
+        maxLines = lines.size();
+    while (lines.size() > maxLines)
+        lines.pop_back();
+
+    auto log = str::join("\n", lines);
+
+    return { { "from", from.get<int>() }, { "lines", lines.size() }, { "log", log} };
+}

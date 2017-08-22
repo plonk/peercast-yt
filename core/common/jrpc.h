@@ -196,6 +196,7 @@ public:
             { "getChannelRelayTree",     &JrpcApi::getChannelRelayTree,     { "channelId" } },
             { "getChannelStatus",        &JrpcApi::getChannelStatus,        { "channelId" } },
             { "getChannels",             &JrpcApi::getChannels,             {} },
+            { "getLog",                  &JrpcApi::getLog,                  { "from", "maxLines" } },
             { "getNewVersions",          &JrpcApi::getNewVersions,          {} },
             { "getNotificationMessages", &JrpcApi::getNotificationMessages, {} },
             { "getPlugins",              &JrpcApi::getPlugins,              {} },
@@ -928,6 +929,8 @@ public:
         }
         return res;
     }
+
+    json getLog(json::array_t args);
 };
 
 #endif
