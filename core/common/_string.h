@@ -55,19 +55,19 @@ public:
     }
 
     // set from straight null terminated string
-    void set(const char *p, TYPE t=T_ASCII);
+    String& set(const char *p, TYPE t=T_ASCII);
 
     // set from quoted or unquoted null terminated string
-    void setFromString(const char *str, TYPE t=T_ASCII);
+    String& setFromString(const char *str, TYPE t=T_ASCII);
 
     // set from stopwatch
-    void setFromStopwatch(unsigned int t);
+    String& setFromStopwatch(unsigned int t);
 
     // set from time
-    void setFromTime(unsigned int t);
+    String& setFromTime(unsigned int t);
 
     // set from null terminated string, remove first/last chars
-    void setUnquote(const char *p, TYPE t=T_ASCII);
+    String& setUnquote(const char *p, TYPE t=T_ASCII);
 
     void clear();
 
