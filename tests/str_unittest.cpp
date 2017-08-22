@@ -188,3 +188,14 @@ TEST_F(strFixture, count)
     ASSERT_EQ(3, str::count("  ab   ab   ab  ", "ab"));
 }
 
+TEST_F(strFixture, rstrip)
+{
+    ASSERT_EQ("", str::rstrip(""));
+    ASSERT_EQ("", str::rstrip(" "));
+    ASSERT_EQ("", str::rstrip("\t\r\n"));
+    ASSERT_EQ("a", str::rstrip("a"));
+    ASSERT_EQ("a", str::rstrip("a "));
+    ASSERT_EQ("a", str::rstrip("a\t\r\n"));
+    ASSERT_EQ(" a", str::rstrip(" a "));
+    ASSERT_EQ("a", str::rstrip({ 'a', '\0', '\n' }));
+}

@@ -29,6 +29,8 @@ namespace str
     // Count how many occurrences of the substring `needle` are in `haystack`.
     // Throws std::domain_error if `needle` is an empty string.
     int         count(const std::string& haystack, const std::string& needle);
+
+    std::string rstrip(const std::string& str);
 }
 
 #endif

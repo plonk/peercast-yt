@@ -331,4 +331,20 @@ int count(const std::string& haystack, const std::string& needle)
     return n;
 }
 
+std::string rstrip(const std::string& str)
+{
+    std::string res = str;
+
+    while (!res.empty())
+    {
+        auto c = res.back();
+        if (c == ' ' || (c >= 0x09 && c <= 0x0d) || c == '\0')
+            res.pop_back();
+        else
+            break;
+    }
+
+    return res;
+}
+
 } // namespace str
