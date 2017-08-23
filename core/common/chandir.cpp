@@ -111,14 +111,14 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
     WriteBufferedStream brsock(&*rsock);
 
     try {
-        LOG_DEBUG("Connecting to %s ...", feed.host().c_str());
+        LOG_TRACE("Connecting to %s ...", feed.host().c_str());
         rsock->open(host);
         rsock->connect();
 
         HTTP rhttp(brsock);
 
         auto request_line = "GET " + feed.path() + "?host=" + cgi::escape(servMgr->serverHost) + " HTTP/1.0";
-        LOG_DEBUG("Request line: %s", request_line.c_str());
+        LOG_TRACE("Request line to %s: %s", feed.host().c_str(), request_line.c_str());
 
         rhttp.writeLineF("%s", request_line.c_str());
         rhttp.writeLineF("%s %s", HTTP_HS_HOST, feed.host().c_str());
@@ -128,7 +128,7 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
 
         auto code = rhttp.readResponse();
         if (code != 200) {
-            LOG_DEBUG("%s: status code %d", feed.host().c_str(), code);
+            LOG_ERROR("%s: status code %d", feed.host().c_str(), code);
             return false;
         }
 
