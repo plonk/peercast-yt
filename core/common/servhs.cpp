@@ -1304,7 +1304,7 @@ void Servent::CMD_fetch(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 
 void Servent::CMD_fetch_feeds(char *cmd, HTTP& http, HTML& html, String& jumpStr)
 {
-    servMgr->channelDirectory.update(ChannelDirectory::kUpdateQuick);
+    servMgr->channelDirectory.update(ChannelDirectory::kUpdateManual);
 
     if (!http.headers.get("Referer").empty())
         jumpStr.sprintf("%s", http.headers.get("Referer").c_str());

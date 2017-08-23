@@ -105,8 +105,8 @@ class ChannelDirectory : public VariableWriter
 {
 public:
     enum UpdateMode {
-        kUpdateSlow,
-        kUpdateQuick,
+        kUpdateAuto,
+        kUpdateManual,
     };
 
     ChannelDirectory();
@@ -121,7 +121,7 @@ public:
     int totalListeners();
     int totalRelays();
 
-    bool update(UpdateMode mode = kUpdateSlow);
+    bool update(UpdateMode mode = kUpdateAuto);
 
     bool writeChannelVariable(Stream& out, const String& varName, int index);
     bool writeFeedVariable(Stream& out, const String& varName, int index);
