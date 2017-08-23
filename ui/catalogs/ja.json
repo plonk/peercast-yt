@@ -75,6 +75,7 @@
     "Bump"                    : "バンプ",
     "Stop"                    : "停止",
     "Edit"                    : "編集",
+    "Auto-updates every 5 minutes. Manual updates have a cooldown of 30 seconds." : "5分間隔で自動更新。手動更新は30秒のクールダウンが必要です。",
 
     // relayinfo.html
     "Channel Information"     : "チャンネル情報",

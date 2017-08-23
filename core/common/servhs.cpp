@@ -1302,6 +1302,16 @@ void Servent::CMD_fetch(char *cmd, HTTP& http, HTML& html, String& jumpStr)
     jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
 }
 
+void Servent::CMD_fetch_feeds(char *cmd, HTTP& http, HTML& html, String& jumpStr)
+{
+    servMgr->channelDirectory.update(ChannelDirectory::kUpdateQuick);
+
+    if (!http.headers.get("Referer").empty())
+        jumpStr.sprintf("%s", http.headers.get("Referer").c_str());
+    else
+        jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
+}
+
 // サーバントを停止する機能を追加したい時に役に立つかも。
 #if 0
 void Servent::CMD_stopserv(char *cmd, HTTP& http, HTML& html, String& jumpStr)
@@ -1581,6 +1591,9 @@ void Servent::handshakeCMD(char *query)
         }else if (cmd == "fetch")
         {
             CMD_fetch(query, http, html, jumpStr);
+        }else if (cmd == "fetch_feeds")
+        {
+            CMD_fetch_feeds(query, http, html, jumpStr);
         }else if (cmd == "keep")
         {
             CMD_keep(query, http, html, jumpStr);
