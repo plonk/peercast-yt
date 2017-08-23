@@ -171,7 +171,7 @@ bool ChannelDirectory::update(UpdateMode mode)
 
     double t0 = sys->getDTime();
     std::vector<std::thread> workers;
-    std::mutex mutex;;
+    std::mutex mutex; // m_channels を保護するミューテックス。
     m_channels.clear();
     for (auto& feed : m_feeds)
     {
