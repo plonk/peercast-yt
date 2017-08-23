@@ -170,7 +170,7 @@ void    APICALL PeercastInstance::callLocalURL(const char *url)
 void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)
 {
     if (!servMgr) return;
-    if (servMgr->logLevel > type) return;
+    if (servMgr->logLevel() > type) return;
     if (servMgr->pauseLog) return;
     if (!sys) return;
 

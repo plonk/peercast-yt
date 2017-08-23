@@ -1186,7 +1186,7 @@ void Servent::CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr)
         }
 
         else if (strcmp(curr, "logLevel") == 0)
-            servMgr->logLevel = atoi(arg); // これバリデートしたほうが良くない？
+            servMgr->logLevel(atoi(arg));
 
         else if (strcmp(curr, "allowHTML1") == 0)
             allowServer1 |= atoi(arg) ? (ALLOW_HTML) : 0;

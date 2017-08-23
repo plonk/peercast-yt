@@ -96,7 +96,7 @@ ServMgr::ServMgr()
     totalStreams = 0;
     firewallTimeout = 30;
     pauseLog = false;
-    logLevel = LogBuffer::T_INFO;
+    m_logLevel = LogBuffer::T_INFO;
 
     shutdownTimer = 0;
 
@@ -990,7 +990,7 @@ void ServMgr::saveSettings(const char *fn)
         iniFile.writeLine("[End]");
 
         iniFile.writeSection("Debug");
-        iniFile.writeIntValue("logLevel", logLevel);
+        iniFile.writeIntValue("logLevel", logLevel());
         iniFile.writeBoolValue("pauseLog", pauseLog);
         iniFile.writeIntValue("idleSleepTime", sys->idleSleepTime);
 
@@ -1279,7 +1279,7 @@ void ServMgr::loadSettings(const char *fn)
 
             // debug
             else if (iniFile.isName("logLevel"))
-                logLevel = iniFile.getIntValue();
+                logLevel(iniFile.getIntValue());
             else if (iniFile.isName("pauseLog"))
                 pauseLog = iniFile.getBoolValue();
             else if (iniFile.isName("idleSleepTime"))
@@ -2223,7 +2223,7 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var.startsWith("log."))
     {
         if (var == "log.level")
-            buf = std::to_string(logLevel);
+            buf = std::to_string(logLevel());
         else
             return false;
     }else if (var.startsWith("lang."))
@@ -2297,4 +2297,14 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
 
     out.writeString(buf);
     return true;
+}
+
+// --------------------------------------------------
+void ServMgr::logLevel(int newLevel)
+{
+    if (1 <= newLevel && newLevel <= 7) // (T_TRACE, T_OFF)
+    {
+        m_logLevel = newLevel;
+    }else
+        LOG_ERROR("Trying to set log level outside valid range. Ignored");
 }

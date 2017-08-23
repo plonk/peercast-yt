@@ -51,8 +51,8 @@ TEST_F(ServMgrFixture, initialState)
     ASSERT_STREQ("00000000000000000000000000000000", m.networkID.str().c_str());
     // unsigned int        firewallTimeout;
     ASSERT_EQ(30, m.firewallTimeout);
-    // int                 logLevel;
-    ASSERT_EQ(LogBuffer::T_INFO, m.logLevel);
+    // atomic<int>         m_logLevel;
+    ASSERT_EQ(LogBuffer::T_INFO, m.m_logLevel);
     // int                 shutdownTimer;
     ASSERT_EQ(0, m.shutdownTimer);
     // bool                pauseLog;

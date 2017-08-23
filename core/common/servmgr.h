@@ -313,6 +313,12 @@ public:
         return maxBitrateOut ? (BYTES_TO_KBPS(totalOutput(false))+br) > maxBitrateOut  : false;
     }
 
+    void logLevel(int newLevel);
+    int logLevel()
+    {
+        return m_logLevel;
+    }
+
     unsigned int    totalOutput(bool);
 
     ThreadInfo          serverThread;
@@ -344,7 +350,7 @@ public:
     char                connectHost[128];
     GnuID               networkID;
     unsigned int        firewallTimeout;
-    int                 logLevel;
+    std::atomic<int>    m_logLevel;
     int                 shutdownTimer;
     bool                pauseLog;
     bool                forceNormal;
