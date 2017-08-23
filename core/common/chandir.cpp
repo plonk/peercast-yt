@@ -2,7 +2,6 @@
 #include <sstream>
 #include <memory> // unique_ptr
 #include <stdexcept> // runtime_error
-#include <future>
 
 #include "http.h"
 #include "version2.h"
@@ -166,17 +165,18 @@ bool ChannelDirectory::update(UpdateMode mode)
     typedef std::vector<ChannelEntry> ChannelList;
     CriticalSection cs(m_lock);
 
-    const int coolDownTime = (mode==kUpdateQuick) ? 30 : 5 * 60;
+    const int coolDownTime = (mode==kUpdateManual) ? 30 : 5 * 60;
     if (sys->getTime() - m_lastUpdate < coolDownTime)
         return false;
 
     double t0 = sys->getDTime();
+    std::vector<std::thread> workers;
+    std::mutex mutex;;
     m_channels.clear();
-    std::vector<std::future<ChannelList>> futures;
     for (auto& feed : m_feeds)
     {
-        std::function<ChannelList(void)> getChannels =
-            [&feed] // このループ変数のキャプチャ安全なのだろうか？
+        std::function<void(void)> getChannels =
+            [&feed, &mutex, this]
             {
                 ChannelList channels;
                 bool success;
@@ -187,32 +187,30 @@ bool ChannelDirectory::update(UpdateMode mode)
                 if (success) {
                     feed.status = ChannelFeed::Status::kOk;
                     LOG_TRACE("Got %zu channels from %s", channels.size(), feed.url.c_str());
+                    {
+                        std::lock_guard<std::mutex> lock(mutex);
+                        for (auto& c : channels) m_channels.push_back(c);
+                    }
                 } else {
                     feed.status = ChannelFeed::Status::kError;
                     LOG_ERROR("Failed to get channels from %s", feed.url.c_str());
                 }
-                return channels;
             };
-        const auto launchMode = (mode==kUpdateQuick) ? std::launch::async : std::launch::deferred;
-        futures.push_back(std::async(launchMode, getChannels));
+        workers.push_back(std::thread(getChannels));
     }
 
-    for (auto& future : futures)
-    {
-        auto channels = future.get();
-        for (auto ch : channels)
-            m_channels.push_back(ch);
-    }
+    for (auto& t : workers)
+        t.join();
+
     sort(m_channels.begin(), m_channels.end(),
          [](ChannelEntry& a, ChannelEntry& b)
          {
              return a.numDirects > b.numDirects;
          });
     m_lastUpdate = sys->getTime();
-    LOG_INFO("Channel feed update total: %zu channels in %f sec (in %s mode)",
+    LOG_INFO("Channel feed update total: %zu channels in %f sec",
              m_channels.size(),
-             sys->getDTime() - t0,
-             (mode==kUpdateQuick) ? "quick" : "slow");
+             sys->getDTime() - t0);
     return true;
 }
 
