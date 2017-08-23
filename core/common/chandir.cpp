@@ -2,6 +2,7 @@
 #include <sstream>
 #include <memory> // unique_ptr
 #include <stdexcept> // runtime_error
+#include <future>
 
 #include "http.h"
 #include "version2.h"
@@ -160,33 +161,58 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
     }
 }
 
-bool ChannelDirectory::update()
+bool ChannelDirectory::update(UpdateMode mode)
 {
+    typedef std::vector<ChannelEntry> ChannelList;
     CriticalSection cs(m_lock);
 
-    if (sys->getTime() - m_lastUpdate < 5 * 60)
+    const int coolDownTime = (mode==kUpdateQuick) ? 30 : 5 * 60;
+    if (sys->getTime() - m_lastUpdate < coolDownTime)
         return false;
 
+    double t0 = sys->getDTime();
     m_channels.clear();
-    for (auto& feed : m_feeds) {
-        std::vector<ChannelEntry> channels;
-        bool success;
+    std::vector<std::future<ChannelList>> futures;
+    for (auto& feed : m_feeds)
+    {
+        std::function<ChannelList(void)> getChannels =
+            [&feed] // このループ変数のキャプチャ安全なのだろうか？
+            {
+                ChannelList channels;
+                bool success;
+                double t1 = sys->getDTime();
+                success = getFeed(feed.url, channels);
+                LOG_TRACE("Channel feed: %f sec %s", sys->getDTime() - t1, feed.url.c_str());
 
-        success = getFeed(feed.url, channels);
-
-        if (success) {
-            feed.status = ChannelFeed::Status::kOk;
-            LOG_DEBUG("Got %zu channels from %s", channels.size(), feed.url.c_str());
-            for (auto ch : channels) {
-                m_channels.push_back(ch);
-            }
-        } else {
-            feed.status = ChannelFeed::Status::kError;
-            LOG_ERROR("Failed to get channels from %s", feed.url.c_str());
-        }
+                if (success) {
+                    feed.status = ChannelFeed::Status::kOk;
+                    LOG_TRACE("Got %zu channels from %s", channels.size(), feed.url.c_str());
+                } else {
+                    feed.status = ChannelFeed::Status::kError;
+                    LOG_ERROR("Failed to get channels from %s", feed.url.c_str());
+                }
+                return channels;
+            };
+        const auto launchMode = (mode==kUpdateQuick) ? std::launch::async : std::launch::deferred;
+        futures.push_back(std::async(launchMode, getChannels));
     }
-    sort(m_channels.begin(), m_channels.end(), [](ChannelEntry&a, ChannelEntry&b) { return a.numDirects > b.numDirects; });
+
+    for (auto& future : futures)
+    {
+        auto channels = future.get();
+        for (auto ch : channels)
+            m_channels.push_back(ch);
+    }
+    sort(m_channels.begin(), m_channels.end(),
+         [](ChannelEntry& a, ChannelEntry& b)
+         {
+             return a.numDirects > b.numDirects;
+         });
     m_lastUpdate = sys->getTime();
+    LOG_INFO("Channel feed update total: %zu channels in %f sec (in %s mode)",
+             m_channels.size(),
+             sys->getDTime() - t0,
+             (mode==kUpdateQuick) ? "quick" : "slow");
     return true;
 }
 
