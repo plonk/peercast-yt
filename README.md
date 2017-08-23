@@ -2,18 +2,44 @@
 
 [![Build Status](https://travis-ci.org/plonk/peercast-yt.svg?branch=master)](https://travis-ci.org/plonk/peercast-yt)
 
-VPS等の Linux で動かすのに向いている PeerCast です。
+VPS 等の Linux で動かすのに向いている PeerCast です。Web 技術による UI
+に注力しており、プラットフォームネイティブの GUI はありませんが、YPブ
+ラウザ、動画プレーヤー、したらば掲示板ビューワを内蔵しており、ユーザー
+はウェブブラウザさえあれば PeerCast が視聴できます。
 
-* Ajax による画面更新。
-* PeerCastStation 互換の JSON RPC インターフェイス。(epcyp、ginger などで使えます)
-* FLV、MKV、WebMフォーマットの配信に対応。
-* HTTP Push での配信に対応。ffmpeg と直接接続できます。
-* WME、Expression Encoder、KotoEncoder からプッシュ配信できます。
-* HTML UI をメッセージカタログ化。各国語版で機能に違いがないようにしました。
-* YPブラウザ内蔵。YP4G 形式の index.txt を取得してチャンネルリストを表示します。
-* ウェブブラウザでの動画再生と、したらば掲示板表示機能。
+Mono で動かす
+[PeerCastStation](https://github.com/kumaryu/peercaststation/) よりも
+I/O に伴う CPU 負荷が少なくなっており、より多くのリレーに耐えられるは
+ずです。
+
+## 多種のエンコーダーに対応
+
+* RTMP に対応しており、OBS などで配信できます。
+  →[RTMPプロトコル対応エンコーダーでの配信のやり方](https://github.com/plonk/peercast-yt/wiki/RTMP%E3%83%97%E3%83%AD%E3%83%88%E3%82%B3%E3%83%AB%E5%AF%BE%E5%BF%9C%E3%82%A8%E3%83%B3%E3%82%B3%E3%83%BC%E3%83%80%E3%83%BC%E3%81%A7%E3%81%AE%E9%85%8D%E4%BF%A1%E3%81%AE%E3%82%84%E3%82%8A%E6%96%B9)
+* HTTP Push に対応しており、ffmpeg で直接配信できます。FlazrDumper な
+  どのサーバーを間にはさむ必要がありません。
+  →[HTTP Push 配信のやり方](https://github.com/plonk/peercast-yt/wiki/HTTP-Push-%E9%85%8D%E4%BF%A1%E3%81%AE%E3%82%84%E3%82%8A%E6%96%B9)
+  
+* Windows Media HTTP Push 配信プロトコルに対応しており、WME、
+  Expression Encoder、KotoEncoder からプッシュ配信できます。(エンコー
+  ダーを動かす PC はポートが開いている必要がありません。)
+  →[Windows Media HTTP Push 配信のやり方](https://github.com/plonk/peercast-yt/wiki/Windows-Media-HTTP-Push-%E9%85%8D%E4%BF%A1%E3%81%AE%E3%82%84%E3%82%8A%E6%96%B9)
+
+## 多種の動画フォーマットに対応
+
+* 伝統的なフォーマットに加え、FLV、MKV、WebM の配信に対応しています。
+
+## その他
+
+* [継続パケット機能](docs/continuation-packets.md)により、キーフレーム
+  からの再生ができます。
+* PeerCastStation 互換の JSON RPC インターフェイス。
+  →[JSON RPC API](https://github.com/plonk/peercast-yt/wiki/JSON-RPC-API)
+  ([epcyp](https://github.com/mrhorin/epcyp)、
+  [ginger](https://github.com/plonk/ginger/) などで使えます)
 * 公開ディレクトリ機能。チャンネルリストやストリームをWebに公開できます。
-* [継続パケット機能](docs/continuation-packets.md)。キーフレームからの再生ができます。
+* HTML UI をメッセージカタログ化。各国語版で機能に違いがないようにしました。
+* Ajax による画面更新。
 
 # Linuxでのビルド
 
@@ -22,8 +48,8 @@ VPS等の Linux で動かすのに向いている PeerCast です。
 コンパイラは、GCC 4.9 以降あるいは Clang 3.4 以降などの C++11 に準拠し
 たものを使ってください。
 
-また、ビルド時および実行時(CGIスクリプト)に Ruby を必要とします。(バー
-ジョン 2.0 以上)
+また、ビルド時に HTML ファイルの生成のために Ruby を必要とします。また、
+実行時(CGIスクリプト)に Python3 が必要です。
 
 ## 手順
 
