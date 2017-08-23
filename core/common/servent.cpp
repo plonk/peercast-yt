@@ -2145,39 +2145,40 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
             while ((thread.active()) && sock->active())
             {
                 ch = chanMgr->findChannelByID(chanID);
-
-                if (ch)
+                if (!ch)
                 {
-                    if (streamIndex != ch->streamIndex)
-                    {
-                        streamIndex = ch->streamIndex;
-                        streamPos = ch->headPack.pos;
-                        LOG_DEBUG("sendRaw got new stream index");
-                    }
+                    throw StreamException("Channel not found");
+                }
 
-                    ChanPacket rawPack;
-                    while (ch->rawData.findPacket(streamPos, rawPack))
-                    {
-                        if (syncPos != rawPack.sync)
-                            LOG_ERROR("Send skip: %d", rawPack.sync-syncPos);
-                        syncPos = rawPack.sync + 1;
+                if (streamIndex != ch->streamIndex)
+                {
+                    streamIndex = ch->streamIndex;
+                    streamPos = ch->headPack.pos;
+                    LOG_DEBUG("sendRaw got new stream index");
+                }
 
-                        if ((rawPack.type == ChanPacket::T_DATA) || (rawPack.type == ChanPacket::T_HEAD))
+                ChanPacket rawPack;
+                while (ch->rawData.findPacket(streamPos, rawPack))
+                {
+                    if (syncPos != rawPack.sync)
+                        LOG_ERROR("Send skip: %d", rawPack.sync-syncPos);
+                    syncPos = rawPack.sync + 1;
+
+                    if ((rawPack.type == ChanPacket::T_DATA) || (rawPack.type == ChanPacket::T_HEAD))
+                    {
+                        if (!skipContinuation || !rawPack.cont)
                         {
-                            if (!skipContinuation || !rawPack.cont)
-                            {
-                                skipContinuation = false;
-                                rawPack.writeRaw(bsock);
-                                lastWriteTime = sys->getTime();
-                            }else{
-                                LOG_DEBUG("raw: skip continuation %s packet pos=%d", rawPack.type==ChanPacket::T_DATA?"DATA":"HEAD", rawPack.pos);
-                            }
+                            skipContinuation = false;
+                            rawPack.writeRaw(bsock);
+                            lastWriteTime = sys->getTime();
+                        }else{
+                            LOG_DEBUG("raw: skip continuation %s packet pos=%d", rawPack.type==ChanPacket::T_DATA?"DATA":"HEAD", rawPack.pos);
                         }
-
-                        if (rawPack.pos < streamPos)
-                            LOG_DEBUG("raw: skip back %d", rawPack.pos - streamPos);
-                        streamPos = rawPack.pos + rawPack.len;
                     }
+
+                    if (rawPack.pos < streamPos)
+                        LOG_DEBUG("raw: skip back %d", rawPack.pos - streamPos);
+                    streamPos = rawPack.pos + rawPack.len;
                 }
 
                 if ((sys->getTime() - lastWriteTime) > DIRECT_WRITE_TIMEOUT)
@@ -2228,79 +2229,81 @@ void Servent::sendRawMetaChannel(int interval)
         while ((thread.active()) && sock->active())
         {
             ch = chanMgr->findChannelByID(chanID);
-
-            if (ch)
+            if (!ch)
             {
-                ChanPacket rawPack;
-                if (ch->rawData.findPacket(streamPos, rawPack))
+                throw StreamException("Channel not found");
+            }
+
+            ChanPacket rawPack;
+            if (ch->rawData.findPacket(streamPos, rawPack))
+            {
+                if (syncPos != rawPack.sync)
+                    LOG_ERROR("Send skip: %d", rawPack.sync-syncPos);
+                syncPos = rawPack.sync+1;
+
+                MemoryStream mem(rawPack.data, rawPack.len);
+
+                if (rawPack.type == ChanPacket::T_DATA)
                 {
-                    if (syncPos != rawPack.sync)
-                        LOG_ERROR("Send skip: %d", rawPack.sync-syncPos);
-                    syncPos = rawPack.sync+1;
-
-                    MemoryStream mem(rawPack.data, rawPack.len);
-
-                    if (rawPack.type == ChanPacket::T_DATA)
+                    int len = rawPack.len;
+                    char *p = rawPack.data;
+                    while (len)
                     {
-                        int len = rawPack.len;
-                        char *p = rawPack.data;
-                        while (len)
+                        int rl = len;
+                        if ((bufPos+rl) > interval)
+                            rl = interval-bufPos;
+                        memcpy(&buf[bufPos], p, rl);
+                        bufPos+=rl;
+                        p+=rl;
+                        len-=rl;
+
+                        if (bufPos >= interval)
                         {
-                            int rl = len;
-                            if ((bufPos+rl) > interval)
-                                rl = interval-bufPos;
-                            memcpy(&buf[bufPos], p, rl);
-                            bufPos+=rl;
-                            p+=rl;
-                            len-=rl;
+                            bufPos = 0;
+                            sock->write(buf, interval);
+                            lastWriteTime = sys->getTime();
 
-                            if (bufPos >= interval)
-                            {
-                                bufPos = 0;
-                                sock->write(buf, interval);
-                                lastWriteTime = sys->getTime();
-
-                                if (chanMgr->broadcastMsgInterval)
-                                    if ((sys->getTime()-lastMsgTime) >= chanMgr->broadcastMsgInterval)
-                                    {
-                                        showMsg ^= true;
-                                        lastMsgTime = sys->getTime();
-                                    }
-
-                                String *metaTitle = &ch->info.track.title;
-                                if (!ch->info.comment.isEmpty() && (showMsg))
-                                    metaTitle = &ch->info.comment;
-
-                                if (!metaTitle->isSame(lastTitle) || !ch->info.url.isSame(lastURL))
+                            if (chanMgr->broadcastMsgInterval)
+                                if ((sys->getTime()-lastMsgTime) >= chanMgr->broadcastMsgInterval)
                                 {
-                                    char tmp[1024];
-                                    String title, url;
-
-                                    title = *metaTitle;
-                                    url = ch->info.url;
-
-                                    title.convertTo(String::T_META);
-                                    url.convertTo(String::T_META);
-
-                                    sprintf(tmp, "StreamTitle='%s';StreamUrl='%s';", title.cstr(), url.cstr());
-                                    int len = ((strlen(tmp) + 15+1) / 16);
-                                    sock->writeChar(len);
-                                    sock->write(tmp, len*16);
-
-                                    lastTitle = *metaTitle;
-                                    lastURL = ch->info.url;
-
-                                    LOG_DEBUG("StreamTitle: %s, StreamURL: %s", lastTitle.cstr(), lastURL.cstr());
-                                }else
-                                {
-                                    sock->writeChar(0);
+                                    showMsg ^= true;
+                                    lastMsgTime = sys->getTime();
                                 }
+
+                            String *metaTitle = &ch->info.track.title;
+                            if (!ch->info.comment.isEmpty() && (showMsg))
+                                metaTitle = &ch->info.comment;
+
+                            if (!metaTitle->isSame(lastTitle) || !ch->info.url.isSame(lastURL))
+                            {
+                                char tmp[1024];
+                                String title, url;
+
+                                title = *metaTitle;
+                                url = ch->info.url;
+
+                                title.convertTo(String::T_META);
+                                url.convertTo(String::T_META);
+
+                                sprintf(tmp, "StreamTitle='%s';StreamUrl='%s';", title.cstr(), url.cstr());
+                                int len = ((strlen(tmp) + 15+1) / 16);
+                                sock->writeChar(len);
+                                sock->write(tmp, len*16);
+
+                                lastTitle = *metaTitle;
+                                lastURL = ch->info.url;
+
+                                LOG_DEBUG("StreamTitle: %s, StreamURL: %s", lastTitle.cstr(), lastURL.cstr());
+                            }else
+                            {
+                                sock->writeChar(0);
                             }
                         }
                     }
-                    streamPos = rawPack.pos + rawPack.len;
                 }
+                streamPos = rawPack.pos + rawPack.len;
             }
+
             if ((sys->getTime()-lastWriteTime) > DIRECT_WRITE_TIMEOUT)
                 throw TimeoutException();
 
@@ -2339,23 +2342,25 @@ void Servent::sendPeercastChannel()
         while ((thread.active()) && sock->active())
         {
             ch = chanMgr->findChannelByID(chanID);
-            if (ch)
+            if (!ch)
             {
-                ChanPacket rawPack;
-                if (ch->rawData.findPacket(streamPos, rawPack))
-                {
-                    if ((rawPack.type == ChanPacket::T_DATA) || (rawPack.type == ChanPacket::T_HEAD))
-                    {
-                        sock->writeTag("SYNC");
-                        sock->writeShort(4);
-                        sock->writeShort(0);
-                        sock->write(&syncPos, 4);
-                        syncPos++;
+                throw StreamException("Channel not found");
+            }
 
-                        rawPack.writePeercast(*sock);
-                    }
-                    streamPos = rawPack.pos + rawPack.len;
+            ChanPacket rawPack;
+            if (ch->rawData.findPacket(streamPos, rawPack))
+            {
+                if ((rawPack.type == ChanPacket::T_DATA) || (rawPack.type == ChanPacket::T_HEAD))
+                {
+                    sock->writeTag("SYNC");
+                    sock->writeShort(4);
+                    sock->writeShort(0);
+                    sock->write(&syncPos, 4);
+                    syncPos++;
+
+                    rawPack.writePeercast(*sock);
                 }
+                streamPos = rawPack.pos + rawPack.len;
             }
             sys->sleepIdle();
         }
