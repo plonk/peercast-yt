@@ -289,6 +289,7 @@ private:
     void CMD_control_rtmp(char *cmd, HTTP& http, HTML& html, String& jumpStr);
     void CMD_edit_bcid(char *cmd, HTTP& http, HTML& html, String& jumpStr);
     void CMD_fetch(char *cmd, HTTP& http, HTML& html, String& jumpStr);
+    void CMD_fetch_feeds(char *cmd, HTTP& http, HTML& html, String& jumpStr);
     void CMD_keep(char *cmd, HTTP& http, HTML& html, String& jumpStr);
     void CMD_login(char *cmd, HTTP& http, HTML& html, String& jumpStr);
     void CMD_logout(char *cmd, HTTP& http, HTML& html, String& jumpStr);
