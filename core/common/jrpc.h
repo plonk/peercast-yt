@@ -198,6 +198,7 @@ public:
             { "getChannelStatus",        &JrpcApi::getChannelStatus,        { "channelId" } },
             { "getChannels",             &JrpcApi::getChannels,             {} },
             { "getLog",                  &JrpcApi::getLog,                  { "from", "maxLines" } },
+            { "getLogSettings",          &JrpcApi::getLogSettings,          {} },
             { "getNewVersions",          &JrpcApi::getNewVersions,          {} },
             { "getNotificationMessages", &JrpcApi::getNotificationMessages, {} },
             { "getPlugins",              &JrpcApi::getPlugins,              {} },
@@ -209,6 +210,7 @@ public:
             { "getYPChannels",           &JrpcApi::getYPChannels,           {} },
             { "removeYellowPage",        &JrpcApi::removeYellowPage,        { "yellowPageId" } },
             { "setChannelInfo",          &JrpcApi::setChannelInfo,          { "channelId", "info", "track" } },
+            { "setLogSettings",          &JrpcApi::setLogSettings,          { "settings" } },
             { "setSettings",             &JrpcApi::setSettings,             { "settings" } },
             { "stopChannel",             &JrpcApi::stopChannel,             { "channelId" } },
             { "stopChannelConnection",   &JrpcApi::stopChannelConnection,   { "channelId", "connectionId" } },
@@ -933,6 +935,8 @@ public:
 
     json getLog(json::array_t args);
     json clearLog(json::array_t args);
+    json getLogSettings(json::array_t args);
+    json setLogSettings(json::array_t args);
 };
 
 #endif

@@ -133,3 +133,27 @@ json JrpcApi::clearLog(json::array_t args)
     sys->logBuf->clear();
     return nullptr;
 }
+
+json JrpcApi::getLogSettings(json::array_t args)
+{
+    // YT -> PeerCastStation
+    // 7 OFF   -> 0 OFF
+    // 6 FATAL -> 1 FATAL
+    // 5 ERROR -> 2 ERROR
+    // 4 WARN  -> 3 WARN
+    // 3 INFO  -> 4 INFO
+    // 2 DEBUG -> 5 DEBUG
+    // 1 TRACE -> 5 DEBUG
+
+    return { { "level", std::min(5, 7 - servMgr->logLevel()) } };
+}
+
+json JrpcApi::setLogSettings(json::array_t args)
+{
+    int level = args[0]["level"];
+
+    if (0 <= level && level <= 5)
+        servMgr->logLevel(7 - level);
+
+    return nullptr;
+}
