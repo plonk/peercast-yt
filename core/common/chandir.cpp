@@ -208,7 +208,7 @@ bool ChannelDirectory::update(UpdateMode mode)
              return a.numDirects > b.numDirects;
          });
     m_lastUpdate = sys->getTime();
-    LOG_INFO("Channel feed update total: %zu channels in %f sec",
+    LOG_INFO("Channel feed update: total of %zu channels in %f sec",
              m_channels.size(),
              sys->getDTime() - t0);
     return true;
