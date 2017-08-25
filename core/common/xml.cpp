@@ -355,7 +355,7 @@ void XML::write(Stream &out)
     if (!root)
         throw StreamException("No XML root");
 
-    out.writeLine("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
+    out.writeString("<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n");
     root->write(out, 1);
 }
 
@@ -365,7 +365,7 @@ void XML::writeCompact(Stream &out)
     if (!root)
         throw StreamException("No XML root");
 
-    out.writeLine("<?xml ?>");
+    out.writeString("<?xml ?>\n");
     root->write(out, 1);
 }
 
