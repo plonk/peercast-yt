@@ -458,3 +458,19 @@ TEST_F(ServentFixture, writeVariable)
     ASSERT_TRUE(s.writeVariable(mem, "gnet.routeTime"));
     ASSERT_STREQ("-", mem.str().c_str());
 }
+
+TEST_F(ServentFixture, handshakeIncoming_viewxml)
+{
+    MockClientSocket* mock;
+
+    s.sock = mock = new MockClientSocket();
+    s.sock->host = Host("127.0.0.1", 12345);
+    mock->incoming.str("GET /admin?cmd=viewxml HTTP/1.0\r\n"
+                       "\r\n");
+
+    ASSERT_NO_THROW(s.handshakeIncoming());
+
+    ASSERT_TRUE(str::has_prefix(mock->outgoing.str(), "HTTP/1.0 200 OK\r\n"));
+
+    delete mock;
+}
