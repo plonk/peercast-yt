@@ -33,7 +33,6 @@
 HTML::HTML(const char *t, Stream &o)
 {
     out = &o;
-    out->writeCRLF = false;
 
     title.set(t);
     tagLevel = 0;
