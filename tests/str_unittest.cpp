@@ -199,3 +199,10 @@ TEST_F(strFixture, rstrip)
     ASSERT_EQ(" a", str::rstrip(" a "));
     ASSERT_EQ("a", str::rstrip({ 'a', '\0', '\n' }));
 }
+
+TEST_F(strFixture, escapeshellarg_unix)
+{
+    ASSERT_EQ("\'\'", str::escapeshellarg_unix(""));
+    ASSERT_EQ("\'abc\'\"\'\"\'def\'", str::escapeshellarg_unix("abc\'def"));
+    ASSERT_EQ("\'ａｂｃ\'\"\'\"\'ｄｅｆ\'", str::escapeshellarg_unix("ａｂｃ\'ｄｅｆ"));
+}

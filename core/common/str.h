@@ -31,6 +31,7 @@ namespace str
     int         count(const std::string& haystack, const std::string& needle);
 
     std::string rstrip(const std::string& str);
+    std::string escapeshellarg_unix(const std::string& str);
 }
 
 #endif

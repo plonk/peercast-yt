@@ -347,4 +347,19 @@ std::string rstrip(const std::string& str)
     return res;
 }
 
+std::string escapeshellarg_unix(const std::string& str)
+{
+    std::string buf = "\'";
+
+    for (char c : str)
+    {
+        if (c == '\'')
+            buf += "\'\"\'\"\'";
+        else
+            buf += c;
+    }
+    buf += "\'";
+    return buf;
+}
+
 } // namespace str
