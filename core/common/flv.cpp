@@ -38,7 +38,7 @@ void FLVStream::readHeader(Stream &in, std::shared_ptr<Channel> ch)
 {
     metaBitrate = 0;
     fileHeader.read(in);
-    m_buffer.startTime = sys->getTime();
+    m_buffer.startTime = sys->getDTime();
 }
 
 // ------------------------------------------
@@ -187,20 +187,20 @@ bool FLVTagBuffer::put(FLVTag& tag, std::shared_ptr<Channel> ch)
 
 void FLVTagBuffer::rateLimit(uint32_t timestamp)
 {
-    int64_t diff = ((int64_t)startTime + timestamp/1000) - sys->getTime();
+    double diff = (startTime + timestamp/1000.0) - sys->getDTime();
     if (diff > 10)
     {
         // 10秒は長すぎるので、タイムスタンプがジャンプしてるっぽい。
         // 基準時刻をリセット。
         LOG_DEBUG("Timestamp way into the future. Resetting referece point.");
-        startTime = sys->getTime();
+        startTime = sys->getDTime();
     }else if (diff < -10)
     {
         LOG_DEBUG("Timestamp way back in the past. Resetting referece point.");
-        startTime = sys->getTime();
+        startTime = sys->getDTime();
     }else if (diff > 0)
     {
-        //LOG_DEBUG("Sleeping %d s", (int)diff);
+        LOG_TRACE("Sleeping %.2f s", diff);
         sys->sleep(diff * 1000);
     }
 }

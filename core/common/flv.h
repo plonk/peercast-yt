@@ -202,7 +202,7 @@ public:
 
     MemoryStream m_mem;
     bool m_streamHasKeyFrames;
-    unsigned int startTime;
+    double startTime;
 
 private:
     void sendImmediately(FLVTag& tag, std::shared_ptr<Channel> ch);
