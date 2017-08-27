@@ -25,14 +25,17 @@
 #include <ApplicationServices/ApplicationServices.h>
 #endif
 
-#include <sys/time.h>
 #include <pthread.h>
 #include <signal.h>
 #include <stdlib.h>
-#include "usys.h"
-#include "usocket.h"
-#include "stats.h"
+#include <sys/time.h>
+#include <sys/wait.h> // WIFEXITED, WEXITSTATUS
 #include <thread>
+
+#include "stats.h"
+#include "str.h"
+#include "usocket.h"
+#include "usys.h"
 
 // ---------------------------------
 USys::USys()
@@ -87,6 +90,20 @@ void USys::getURL(const char *url)
 // ---------------------------------
 void USys::callLocalURL(const char *str, int port)
 {
+    int retval;
+    std::string cmdLine = str::format("xdg-open http://localhost:%d/%s", port, str);
+    retval = system(cmdLine.c_str()); // XXX: should shell-escape cmdLine
+    if (retval == -1)
+    {
+        LOG_ERROR("USys::callLocalURL: system(%s) returned -1", cmdLine.c_str());
+    }else if (WIFEXITED(retval))
+    {
+        LOG_ERROR("Usys::callLocalURL: Shell terminated abnormally");
+    }else if (WEXITSTATUS(retval) != 0)
+    {
+        LOG_ERROR("Usys::callLocalURL: Shell exited with error status (%d)", WEXITSTATUS(retval));
+    }else
+        ; // Shell exited normally.
 }
 
 // ---------------------------------

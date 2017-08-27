@@ -1981,6 +1981,10 @@ int ServMgr::serverProc(ThreadInfo *thread)
                         peercastInst->quit();
                         sys->exit();
                     }
+
+                std::string ui = servMgr->htmlPath; // "html/ja" etc.
+                ui += "/index.html";
+                peercastInst->callLocalURL(ui.c_str());
             }
         }else{
             // stop server
