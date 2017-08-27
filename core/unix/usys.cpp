@@ -91,8 +91,8 @@ void USys::getURL(const char *url)
 void USys::callLocalURL(const char *str, int port)
 {
     int retval;
-    std::string cmdLine = str::format("xdg-open http://localhost:%d/%s", port, str);
-    retval = system(cmdLine.c_str()); // XXX: should shell-escape cmdLine
+    std::string cmdLine = str::format("xdg-open http://localhost:%d/%s", port, str);  // XXX: should shell-escape str
+    retval = system(cmdLine.c_str());
     if (retval == -1)
     {
         LOG_ERROR("USys::callLocalURL: system(%s) returned -1", cmdLine.c_str());
