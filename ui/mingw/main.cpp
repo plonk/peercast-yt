@@ -32,6 +32,7 @@
 #include <sys/time.h>
 #include <libgen.h> // dirname
 #include <windows.h> // GetModuleFileName
+#include "threading.h"
 
 // ----------------------------------
 static std::string utf8ToAnsi(const char *utf8);
@@ -53,7 +54,7 @@ String pidFileName;
 String logFileName;
 bool setPidFile = false;
 bool logToFile = false;
-WLock loglock;
+std::recursive_mutex loglock;
 
 // ---------------------------------
 class MyPeercastInst : public PeercastInstance
@@ -87,7 +88,7 @@ public:
 
     virtual void APICALL printLog(LogBuffer::TYPE t, const char *str)
     {
-        loglock.on();
+        loglock.lock();
 
         if (t != LogBuffer::T_NONE) {
             printf("[%s] ", LogBuffer::getTypeStr(t));
@@ -99,7 +100,7 @@ public:
         if (logfile != NULL) {
             fprintf(logfile, "%s\n", str);
         }
-        loglock.off();
+        loglock.unlock();
     }
 };
 
@@ -212,9 +213,9 @@ int main(int argc, char* argv[])
         sys->sleep(1000);
         if (logfile != NULL)
         {
-            loglock.on();
+            loglock.lock();
             fflush(logfile);
-            loglock.off();
+            loglock.unlock();
         }
     }
 
@@ -223,11 +224,11 @@ int main(int argc, char* argv[])
     peercastInst->quit();
 
     if (logfile != NULL) {
-        loglock.on();
+        loglock.lock();
         fflush(logfile);
         fclose(logfile);
         // Log might continue but will only be written to stdout.
-        loglock.off();
+        loglock.unlock();
     }
     if (setPidFile) unlink(pidFileName);
 
