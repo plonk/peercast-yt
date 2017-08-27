@@ -71,7 +71,7 @@ public:
     bool writeVariable(Stream& out, const String& varName, int loopCount) override;
 
     std::deque<Entry> notifications;
-    WLock lock;
+    std::recursive_mutex lock;
 };
 
 #endif

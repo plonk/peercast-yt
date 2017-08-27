@@ -272,7 +272,7 @@ public:
     void    ping(int);
 
     int     packetsIn, packetsOut;
-    WLock   lock;
+    std::recursive_mutex lock;
 };
 
 #endif

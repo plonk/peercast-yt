@@ -422,7 +422,7 @@ Servent *ServMgr::findOldestServent(Servent::TYPE type, bool priv)
 // -----------------------------------
 Servent *ServMgr::findServent(Servent::TYPE type, Host &host, GnuID &netid)
 {
-    lock.on();
+    lock.lock();
     Servent *s = servents;
     while (s)
     {
@@ -431,20 +431,20 @@ Servent *ServMgr::findServent(Servent::TYPE type, Host &host, GnuID &netid)
             Host h = s->getHost();
             if (h.isSame(host) && s->networkID.isSame(netid))
             {
-                lock.off();
+                lock.unlock();
                 return s;
             }
         }
         s=s->next;
     }
-    lock.off();
+    lock.unlock();
     return NULL;
 }
 
 // -----------------------------------
 Servent *ServMgr::findServent(unsigned int ip, unsigned short port, GnuID &netid)
 {
-    lock.on();
+    lock.lock();
     Servent *s = servents;
     while (s)
     {
@@ -453,13 +453,13 @@ Servent *ServMgr::findServent(unsigned int ip, unsigned short port, GnuID &netid
             Host h = s->getHost();
             if ((h.ip == ip) && (h.port == port) && (s->networkID.isSame(netid)))
             {
-                lock.off();
+                lock.unlock();
                 return s;
             }
         }
         s=s->next;
     }
-    lock.off();
+    lock.unlock();
     return NULL;
 }
 
@@ -494,7 +494,7 @@ Servent *ServMgr::findServentByIndex(int id)
 // -----------------------------------
 Servent *ServMgr::allocServent()
 {
-    lock.on();
+    lock.lock();
 
     Servent *s = servents;
     while (s)
@@ -516,7 +516,7 @@ Servent *ServMgr::allocServent()
 
     s->reset();
 
-    lock.off();
+    lock.unlock();
 
     return s;
 }

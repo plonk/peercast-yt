@@ -253,7 +253,7 @@ void GnuStream::sendPacket(GnuPacket &p)
 {
     try
     {
-        lock.on();
+        lock.lock();
         packetsOut++;
         stats.add(Stats::NUMPACKETSOUT);
 
@@ -278,10 +278,10 @@ void GnuStream::sendPacket(GnuPacket &p)
 
         stats.add(Stats::PACKETDATAOUT, 23+p.len);
 
-        lock.off();
+        lock.unlock();
     }catch (StreamException &e)
     {
-        lock.off();
+        lock.unlock();
         throw e;
     }
 }
@@ -291,7 +291,7 @@ bool GnuStream::readPacket(GnuPacket &p)
 {
     try
     {
-        lock.on();
+        lock.lock();
         packetsIn++;
         stats.add(Stats::NUMPACKETSIN);
 
@@ -322,17 +322,17 @@ bool GnuStream::readPacket(GnuPacket &p)
             {
                 while (p.len--)
                     readChar();
-                lock.off();
+                lock.unlock();
                 return false;
             }
             read(p.data, p.len);
         }
 
-        lock.off();
+        lock.unlock();
         return true;
     }catch (StreamException &e)
     {
-        lock.off();
+        lock.unlock();
         throw e;
     }
 }

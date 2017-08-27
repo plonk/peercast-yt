@@ -282,7 +282,7 @@ Host Servent::getHost()
 // -----------------------------------
 bool Servent::outputPacket(GnuPacket &p, bool pri)
 {
-    lock.on();
+    lock.lock();
 
     bool r=false;
     if (pri)
@@ -310,7 +310,7 @@ bool Servent::outputPacket(GnuPacket &p, bool pri)
             r = outPacketsNorm.write(p);
     }
 
-    lock.off();
+    lock.unlock();
     return r;
 }
 

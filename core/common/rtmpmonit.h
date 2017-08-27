@@ -1,7 +1,6 @@
 #ifndef _RTMPMONIT_H
 #define _RTMPMONIT_H
 
-#include "critsec.h"
 #include "subprog.h"
 
 struct RTMPServerMonitor
@@ -22,7 +21,7 @@ struct RTMPServerMonitor
 
     Subprogram m_rtmpServer;
     bool m_enabled;
-    WLock m_lock;
+    std::recursive_mutex m_lock;
 };
 
 #endif

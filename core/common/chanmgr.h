@@ -112,7 +112,7 @@ public:
     unsigned int    deadHitAge;
     int             icyMetaInterval;
     int             maxRelaysPerChannel;
-    WLock           lock;
+    std::recursive_mutex lock;
     int             minBroadcastTTL, maxBroadcastTTL;
     int             pushTimeout, pushTries, maxPushHops;
     unsigned int    autoQuery;

@@ -1,5 +1,4 @@
 #include "notif.h"
-#include "critsec.h"
 
 // global
 NotificationBuffer g_notificationBuffer;
@@ -27,7 +26,7 @@ NotificationBuffer::NotificationBuffer()
 
 int NotificationBuffer::numUnread()
 {
-    CriticalSection cs(lock);
+    std::lock_guard<std::recursive_mutex> cs(lock);
 
     int count = 0;
     for (auto& e : notifications)
@@ -39,7 +38,7 @@ int NotificationBuffer::numUnread()
 
 void NotificationBuffer::markAsRead(unsigned int ctime)
 {
-    CriticalSection cs(lock);
+    std::lock_guard<std::recursive_mutex> cs(lock);
 
     for (auto& e : notifications)
     {
@@ -50,14 +49,14 @@ void NotificationBuffer::markAsRead(unsigned int ctime)
 
 int NotificationBuffer::numNotifications()
 {
-    CriticalSection cs(lock);
+    std::lock_guard<std::recursive_mutex> cs(lock);
 
     return notifications.size();
 }
 
 NotificationBuffer::Entry NotificationBuffer::getNotification(int index)
 {
-    CriticalSection cs(lock);
+    std::lock_guard<std::recursive_mutex> cs(lock);
 
     try
     {
@@ -70,7 +69,7 @@ NotificationBuffer::Entry NotificationBuffer::getNotification(int index)
 
 void NotificationBuffer::addNotification(const Notification& notif)
 {
-    CriticalSection cs(lock);
+    std::lock_guard<std::recursive_mutex> cs(lock);
 
     while (notifications.size() >= MAX_NOTIFS)
         notifications.pop_back();

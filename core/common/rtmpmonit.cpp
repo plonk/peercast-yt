@@ -9,7 +9,7 @@ RTMPServerMonitor::RTMPServerMonitor(const std::string& aPath)
 
 std::string RTMPServerMonitor::status()
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
     if (m_enabled)
         return "UP";
     else
@@ -18,13 +18,13 @@ std::string RTMPServerMonitor::status()
 
 bool RTMPServerMonitor::isEnabled()
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
     return m_enabled;
 }
 
 void RTMPServerMonitor::update()
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
 
     if (!m_enabled) return;
 
@@ -38,13 +38,13 @@ void RTMPServerMonitor::update()
 
 void RTMPServerMonitor::enable()
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
     m_enabled = true;
 }
 
 void RTMPServerMonitor::disable()
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
     m_enabled = false;
     if (m_rtmpServer.isAlive())
         m_rtmpServer.terminate();
@@ -73,7 +73,7 @@ void RTMPServerMonitor::start()
 
     uint16_t port;
     {
-        CriticalSection cs(servMgr->lock);
+        std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
         port = servMgr->rtmpPort;
     }
 
@@ -82,7 +82,7 @@ void RTMPServerMonitor::start()
 
 std::string RTMPServerMonitor::makeEndpointURL()
 {
-    CriticalSection cs(servMgr->lock);
+    std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
 
     ChanInfo info = servMgr->defaultChannelInfo;
     cgi::Query query;

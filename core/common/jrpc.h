@@ -4,7 +4,6 @@
 #include "peercast.h"
 #include "channel.h"
 #include "version2.h"
-#include "critsec.h"
 
 #include <stdarg.h>
 #include <string>
@@ -422,7 +421,7 @@ public:
         int connectionId = params[1].get<int>();
         bool success = false;
 
-        CriticalSection cs(servMgr->lock);
+        std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
         for (Servent* s = servMgr->servents; s != NULL; s = s->next)
         {
              if (s->serventIndex == connectionId &&
@@ -472,7 +471,7 @@ public:
         };
         result.push_back(sourceConnection);
 
-        CriticalSection cs(servMgr->lock);
+        std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
         for (Servent* s = servMgr->servents; s != NULL; s = s->next)
         {
             if (!s->chanID.isSame(id))
@@ -542,7 +541,7 @@ public:
     {
         json result = json::array();
 
-        CriticalSection cs(chanMgr->lock);
+        std::lock_guard<std::recursive_mutex> cs(chanMgr->lock);
         for (auto c = chanMgr->channel; c != NULL; c = c->next)
         {
             result.push_back(to_json(c));
@@ -619,7 +618,7 @@ public:
     {
         json result = json::array();
 
-        chanMgr->lock.on();
+        chanMgr->lock.lock();
 
         for (ChanHitList *hitList = chanMgr->hitlist;
              hitList;
@@ -629,7 +628,7 @@ public:
                 result.push_back(to_json(hitList));
         }
 
-        chanMgr->lock.off();
+        chanMgr->lock.unlock();
 
         return result;
     }
@@ -645,7 +644,7 @@ public:
     {
         json::array_t result;
 
-        CriticalSection cs(chanMgr->lock);
+        std::lock_guard<std::recursive_mutex> cs(chanMgr->lock);
         for (auto c = chanMgr->channel; c != NULL; c = c->next)
         {
             if (!c->isBroadcasting())

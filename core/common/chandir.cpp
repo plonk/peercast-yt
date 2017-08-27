@@ -7,7 +7,6 @@
 #include "version2.h"
 #include "socket.h"
 #include "chandir.h"
-#include "critsec.h"
 #include "uri.h"
 #include "servmgr.h"
 
@@ -75,13 +74,13 @@ ChannelDirectory::ChannelDirectory()
 
 int ChannelDirectory::numChannels()
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
     return m_channels.size();
 }
 
 int ChannelDirectory::numFeeds()
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
     return m_feeds.size();
 }
 
@@ -163,7 +162,7 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
 bool ChannelDirectory::update(UpdateMode mode)
 {
     typedef std::vector<ChannelEntry> ChannelList;
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
 
     const int coolDownTime = (mode==kUpdateManual) ? 30 : 5 * 60;
     if (sys->getTime() - m_lastUpdate < coolDownTime)
@@ -219,7 +218,7 @@ bool ChannelDirectory::writeChannelVariable(Stream& out, const String& varName, 
 {
     using namespace std;
 
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
 
     if (!(index >= 0 && (size_t)index < m_channels.size()))
         return false;
@@ -267,7 +266,7 @@ bool ChannelDirectory::writeChannelVariable(Stream& out, const String& varName, 
 
 bool ChannelDirectory::writeFeedVariable(Stream& out, const String& varName, int index)
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
 
     if (!(index >= 0 && (size_t)index < m_feeds.size())) {
         // empty string
@@ -326,7 +325,7 @@ bool ChannelDirectory::writeVariable(Stream& out, const String& varName)
 
 int ChannelDirectory::totalListeners()
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
     int res = 0;
 
     for (ChannelEntry& e : m_channels) {
@@ -337,7 +336,7 @@ int ChannelDirectory::totalListeners()
 
 int ChannelDirectory::totalRelays()
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
     int res = 0;
 
     for (ChannelEntry& e : m_channels) {
@@ -348,13 +347,13 @@ int ChannelDirectory::totalRelays()
 
 std::vector<ChannelFeed> ChannelDirectory::feeds()
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
     return m_feeds;
 }
 
 bool ChannelDirectory::addFeed(std::string url)
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
 
     auto iter = find_if(m_feeds.begin(), m_feeds.end(), [&](ChannelFeed& f) { return f.url == url;});
 
@@ -375,7 +374,7 @@ bool ChannelDirectory::addFeed(std::string url)
 
 void ChannelDirectory::clearFeeds()
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
 
     m_feeds.clear();
     m_channels.clear();
@@ -384,7 +383,7 @@ void ChannelDirectory::clearFeeds()
 
 void ChannelDirectory::setFeedPublic(int index, bool isPublic)
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
     if (index >= 0 && (size_t)index < m_feeds.size())
         m_feeds[index].isPublic = isPublic;
     else

@@ -456,7 +456,7 @@ void ChanMgr::clearHitLists()
 // -----------------------------------
 void ChanMgr::deleteChannel(std::shared_ptr<Channel> delchan)
 {
-    CriticalSection cs(lock);
+    std::lock_guard<std::recursive_mutex> cs(lock);
 
     std::shared_ptr<Channel> ch = channel, prev = NULL;
 
@@ -479,7 +479,7 @@ void ChanMgr::deleteChannel(std::shared_ptr<Channel> delchan)
 // -----------------------------------
 std::shared_ptr<Channel> ChanMgr::createChannel(ChanInfo &info, const char *mount)
 {
-    lock.on();
+    lock.lock();
 
     auto nc = std::make_shared<Channel>();
 
@@ -498,7 +498,7 @@ std::shared_ptr<Channel> ChanMgr::createChannel(ChanInfo &info, const char *moun
 
     LOG_INFO("New channel created");
 
-    lock.off();
+    lock.unlock();
     return nc;
 }
 

@@ -1498,7 +1498,7 @@ void Servent::CMD_control_rtmp(char *cmd, HTTP& http, String& jumpStr)
 
         uint16_t port = std::atoi(query.get("port").c_str());
         {
-            CriticalSection cs(servMgr->lock);
+            std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
             ChanInfo& info = servMgr->defaultChannelInfo;
 
             servMgr->rtmpPort = port;

@@ -263,7 +263,7 @@ public:
 
     ClientSocket        *sock, *pushSock;
 
-    WLock               lock;
+    std::recursive_mutex lock;
 
     bool                sendHeader;
     unsigned int        syncPos, streamPos;

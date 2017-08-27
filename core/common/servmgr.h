@@ -325,7 +325,7 @@ public:
     ThreadInfo          idleThread;
 
     Servent             *servents;
-    WLock               lock;
+    std::recursive_mutex lock;
 
     ServHost            hostCache[MAX_HOSTCACHE];
 

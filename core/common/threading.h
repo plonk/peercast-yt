@@ -104,24 +104,6 @@ public:
 #endif
 
 // ------------------------------------
-class WLock
-{
-private:
-    std::recursive_mutex m_mutex;
-
-public:
-    void    on()
-    {
-        m_mutex.lock();
-    }
-
-    void    off()
-    {
-        m_mutex.unlock();
-    }
-};
-
-// ------------------------------------
 class ThreadInfo;
 typedef int (*THREAD_FUNC)(ThreadInfo *);
 #define THREAD_PROC int

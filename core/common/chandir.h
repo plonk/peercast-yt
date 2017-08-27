@@ -6,10 +6,10 @@
 #include <stdexcept> // runtime_error
 
 #include "cgi.h"
-#include "threading.h" // WLock
 #include "gnuid.h"
 
 #include "varwriter.h"
+#include "threading.h"
 
 class ChannelEntry
 {
@@ -136,7 +136,7 @@ public:
     std::vector<ChannelFeed> m_feeds;
 
     unsigned int m_lastUpdate;
-    WLock m_lock;
+    std::recursive_mutex m_lock;
 };
 
 #endif

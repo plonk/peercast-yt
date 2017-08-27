@@ -33,7 +33,6 @@
 #include <sys/time.h>
 #include <limits.h> // PATH_MAX
 #include <libgen.h> // dirname
-#include "critsec.h"
 
 // ----------------------------------
 String iniFileName;
@@ -45,7 +44,7 @@ String logFileName;
 bool forkDaemon = false;
 bool setPidFile = false;
 bool logToFile = false;
-WLock loglock;
+std::recursive_mutex loglock;
 
 // ---------------------------------
 class MyPeercastInst : public PeercastInstance
@@ -77,7 +76,7 @@ public:
 
     virtual void APICALL printLog(LogBuffer::TYPE t, const char *str)
     {
-        CriticalSection cs(loglock);
+	std::lock_guard<std::recursive_mutex> cs(loglock);
 
         char buf[20];
         struct timeval tv;
@@ -136,7 +135,7 @@ void sigProc(int sig)
         // to remove the logfile after it has been copied.
         // some data can still be lost, but this way it is reduced to minimun at lost costs..
         if (logToFile) {
-            CriticalSection cs(loglock);
+	    std::lock_guard<std::recursive_mutex> cs(loglock);
 
             if (logfile != NULL) {
                 fclose(logfile);
@@ -247,7 +246,7 @@ int main(int argc, char* argv[])
         sys->sleep(1000);
         if (logfile != NULL)
         {
-            CriticalSection cs(loglock);
+            std::lock_guard<std::recursive_mutex> cs(loglock);
             fflush(logfile);
         }
     }
@@ -257,7 +256,7 @@ int main(int argc, char* argv[])
     peercastInst->quit();
 
     if (logfile != NULL) {
-        CriticalSection cs(loglock);
+        std::lock_guard<std::recursive_mutex> cs(loglock);
 
         fflush(logfile);
         fclose(logfile);

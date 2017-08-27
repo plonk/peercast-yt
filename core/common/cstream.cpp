@@ -25,7 +25,6 @@
 #include "pcp.h"
 #include "servmgr.h"
 #include "version2.h"
-#include "critsec.h"
 
 // -----------------------------------
 void ChanPacket::init(TYPE t, const void *p, unsigned int l, unsigned int _pos)
@@ -100,8 +99,8 @@ void ChanPacket::readPeercast(Stream &in)
 // (使われていないようだ。)
 int ChanPacketBuffer::copyFrom(ChanPacketBuffer &buf, unsigned int reqPos)
 {
-    lock.on();
-    buf.lock.on();
+    lock.lock();
+    buf.lock.lock();
 
     firstPos = 0;
     lastPos = 0;
@@ -121,8 +120,8 @@ int ChanPacketBuffer::copyFrom(ChanPacketBuffer &buf, unsigned int reqPos)
         }
     }
 
-    buf.lock.off();
-    lock.off();
+    buf.lock.unlock();
+    lock.unlock();
     return lastPos - firstPos;
 }
 
@@ -135,7 +134,7 @@ bool ChanPacketBuffer::findPacket(unsigned int spos, ChanPacket &pack)
     if (writePos == 0)
         return false;
 
-    lock.on();
+    lock.lock();
 
     unsigned int fpos = getStreamPos(firstPos);
     if (spos < fpos)
@@ -149,12 +148,12 @@ bool ChanPacketBuffer::findPacket(unsigned int spos, ChanPacket &pack)
         if (p.pos >= spos)
         {
             pack = p;
-            lock.off();
+            lock.unlock();
             return true;
         }
     }
 
-    lock.off();
+    lock.unlock();
     return false;
 }
 
@@ -175,7 +174,7 @@ unsigned int    ChanPacketBuffer::getLatestNonContinuationPos()
     if (writePos == 0)
         return 0;
 
-    CriticalSection cs(lock);
+    std::lock_guard<std::recursive_mutex> cs(lock);
 
     for (int64_t i = lastPos; i >= firstPos; i--)
     {
@@ -193,7 +192,7 @@ unsigned int    ChanPacketBuffer::getOldestNonContinuationPos()
     if (writePos == 0)
         return 0;
 
-    CriticalSection cs(lock);
+    std::lock_guard<std::recursive_mutex> cs(lock);
 
     for (int64_t i = firstPos; i <= lastPos; i++)
     {
@@ -254,7 +253,7 @@ bool ChanPacketBuffer::writePacket(ChanPacket &pack, bool updateReadPos)
         if (willSkip()) // too far behind
             return false;
 
-        lock.on();
+        lock.lock();
 
         pack.sync = writePos;
         packets[writePos%MAX_PACKETS] = pack;
@@ -276,7 +275,7 @@ bool ChanPacketBuffer::writePacket(ChanPacket &pack, bool updateReadPos)
 
         lastWriteTime = sys->getTime();
 
-        lock.off();
+        lock.unlock();
         return true;
     }
 
@@ -297,10 +296,10 @@ void    ChanPacketBuffer::readPacket(ChanPacket &pack)
         if ((sys->getTime() - tim) > 30)
             throw TimeoutException();
     }
-    lock.on();
+    lock.lock();
     pack = packets[readPos%MAX_PACKETS];
     readPos++;
-    lock.off();
+    lock.unlock();
 
     sys->sleepIdle();
 }

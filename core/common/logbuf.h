@@ -76,7 +76,7 @@ public:
     const unsigned int  maxLines;
     const unsigned int  lineLen;
     TYPE                *types;
-    WLock               lock;
+    std::recursive_mutex lock;
     static const char   *logTypes[];
 };
 

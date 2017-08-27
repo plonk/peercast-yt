@@ -95,12 +95,12 @@ public:
 
     void    init()
     {
-        lock.on();
+        lock.lock();
         lastPos = firstPos = safePos = 0;
         readPos = writePos = 0;
         accept = 0;
         lastWriteTime = 0;
-        lock.off();
+        lock.unlock();
     }
 
     int     copyFrom(ChanPacketBuffer &, unsigned in);
@@ -152,7 +152,7 @@ public:
     volatile unsigned int   readPos, writePos;
     unsigned int            accept;
     unsigned int            lastWriteTime;
-    WLock                   lock;
+    std::recursive_mutex    lock;
 };
 
 // ----------------------------------
