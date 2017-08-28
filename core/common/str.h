@@ -11,7 +11,7 @@ namespace str
     std::string codepoint_to_utf8(uint32_t);
     bool        contains(const std::string& haystack, const std::string& needle);
     std::string downcase(const std::string& input);
-    std::string format(const char* fmt, ...);
+    std::string format(const char* fmt, ...) __attribute__ ((format (printf, 1, 2)));
     std::string group_digits(const std::string& in, const std::string& separator = ",");
     std::string hexdump(const std::string& in);
     std::string inspect(const std::string str);
