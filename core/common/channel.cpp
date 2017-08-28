@@ -1330,11 +1330,7 @@ void RawStream::readEnd(Stream &, std::shared_ptr<Channel>)
 // -----------------------------------
 void Channel::getStreamPath(char *str)
 {
-    char idStr[64];
-
-    getIDStr(idStr);
-
-    sprintf(str, "/stream/%s%s", idStr, info.getTypeExt());
+    sprintf(str, "/stream/%s%s", info.id.str().c_str(), info.getTypeExt());
 }
 
 // -----------------------------------

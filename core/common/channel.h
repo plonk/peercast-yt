@@ -217,7 +217,6 @@ public:
     const char   *getName() { return info.name.cstr(); }
     GnuID        getID() { return info.id; }
     int          getBitrate() { return info.bitrate; }
-    void         getIDStr(char *s) { info.id.toStr(s); }
     void         getStreamPath(char *);
     std::string  getSourceString();
     std::string  getBufferString();

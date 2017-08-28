@@ -896,9 +896,6 @@ static void  writeServHost(IniFile &iniFile, ServHost &sh)
 // --------------------------------------------------
 static void  writeRelayChannel(IniFile &iniFile, std::shared_ptr<Channel> c)
 {
-    char idstr[64];
-    c->getIDStr(idstr);
-
     iniFile.writeSection("RelayChannel");
     iniFile.writeStrValue("name", c->getName());
     iniFile.writeStrValue("desc", c->info.desc.c_str());
@@ -912,7 +909,7 @@ static void  writeRelayChannel(IniFile &iniFile, std::shared_ptr<Channel> c)
     iniFile.writeStrValue("MIMEType", c->info.MIMEType);
     iniFile.writeStrValue("streamExt", c->info.streamExt);
     iniFile.writeIntValue("bitrate", c->info.bitrate);
-    iniFile.writeStrValue("id", idstr);
+    iniFile.writeStrValue("id", c->info.id.str().c_str());
     iniFile.writeBoolValue("stayConnected", c->stayConnected);
 
     ChanHitList *chl = chanMgr->findHitListByID(c->info.id);
