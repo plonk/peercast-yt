@@ -897,13 +897,14 @@ static void  writeServHost(IniFile &iniFile, ServHost &sh)
 static void  writeRelayChannel(IniFile &iniFile, std::shared_ptr<Channel> c)
 {
     iniFile.writeSection("RelayChannel");
+
     iniFile.writeStrValue("name", c->getName());
-    iniFile.writeStrValue("desc", c->info.desc.c_str());
-    iniFile.writeStrValue("genre", c->info.genre.c_str());
-    iniFile.writeStrValue("contactURL", c->info.url.c_str());
-    iniFile.writeStrValue("comment", c->info.comment.c_str());
+    iniFile.writeStrValue("desc", c->info.desc);
+    iniFile.writeStrValue("genre", c->info.genre);
+    iniFile.writeStrValue("contactURL", c->info.url);
+    iniFile.writeStrValue("comment", c->info.comment);
     if (!c->sourceURL.isEmpty())
-        iniFile.writeStrValue("sourceURL", c->sourceURL.cstr());
+        iniFile.writeStrValue("sourceURL", c->sourceURL);
     iniFile.writeStrValue("sourceProtocol", ChanInfo::getProtocolStr(c->info.srcProtocol));
     iniFile.writeStrValue("contentType", c->info.getTypeStr());
     iniFile.writeStrValue("MIMEType", c->info.MIMEType);
@@ -912,6 +913,7 @@ static void  writeRelayChannel(IniFile &iniFile, std::shared_ptr<Channel> c)
     iniFile.writeStrValue("id", c->info.id.str().c_str());
     iniFile.writeBoolValue("stayConnected", c->stayConnected);
 
+    // トラッカーIPの書き出し。
     ChanHitList *chl = chanMgr->findHitListByID(c->info.id);
     if (chl)
     {
@@ -924,6 +926,14 @@ static void  writeRelayChannel(IniFile &iniFile, std::shared_ptr<Channel> c)
             iniFile.writeStrValue("tracker", ipStr);
         }
     }
+
+    // トラック情報の書き出し。
+    iniFile.writeStrValue("trackContact", c->info.track.contact);
+    iniFile.writeStrValue("trackTitle", c->info.track.title);
+    iniFile.writeStrValue("trackArtist", c->info.track.artist);
+    iniFile.writeStrValue("trackAlbum", c->info.track.album);
+    iniFile.writeStrValue("trackGenre", c->info.track.genre);
+
     iniFile.writeLine("[End]");
 }
 
@@ -1377,6 +1387,16 @@ void ServMgr::loadSettings(const char *fn)
                         hit.recv = true;
                         chanMgr->addHit(hit);
                     }
+                    else if (iniFile.isName("trackContact"))
+                        info.track.contact = iniFile.getStrValue();
+                    else if (iniFile.isName("trackTitle"))
+                        info.track.title = iniFile.getStrValue();
+                    else if (iniFile.isName("trackArtist"))
+                        info.track.artist = iniFile.getStrValue();
+                    else if (iniFile.isName("trackAlbum"))
+                        info.track.album = iniFile.getStrValue();
+                    else if (iniFile.isName("trackGenre"))
+                        info.track.genre = iniFile.getStrValue();
                 }
                 if (sourceURL.isEmpty())
                 {
