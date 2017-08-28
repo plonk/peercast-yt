@@ -48,7 +48,7 @@ void Environment::unset(const std::string& key)
 {
     for (auto it = m_vars.begin(); it != m_vars.end(); it++)
     {
-        if (str::is_prefix_of(key+"=", *it))
+        if (str::is_prefix_of(key + "=", *it))
         {
             m_vars.erase(it);
             return;
