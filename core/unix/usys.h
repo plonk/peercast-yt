@@ -36,7 +36,7 @@ public:
     unsigned int    rnd() override { return rndGen.next(); }
     void            getURL(const char *) override;
     void            exit() override;
-    bool            hasGUI() override { return false; }
+    bool            hasGUI() override;
     void            callLocalURL(const char *, int) override;
     void            executeFile(const char *) override;
     void            setThreadName(const char* name) override;

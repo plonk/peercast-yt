@@ -74,6 +74,12 @@ void    USys::setThreadName(const char* name)
 #endif
 }
 
+// ---------------------------------
+bool USys::hasGUI()
+{
+    return false;
+}
+
 #ifndef __APPLE__
 
 // ---------------------------------
