@@ -45,6 +45,8 @@ public:
     void        writeSection(const char *);
     void        writeIntValue(const char *, int);
     void        writeStrValue(const char *, const char *);
+    void        writeStrValue(const char *key, const String& value) { writeStrValue(key, value.c_str()); }
+    void        writeStrValue(const char *key, const std::string& value) { writeStrValue(key, value.c_str()); }
     void        writeBoolValue(const char *, int);
     void        writeLine(const char *);
 
