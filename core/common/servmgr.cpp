@@ -894,6 +894,43 @@ static void  writeServHost(IniFile &iniFile, ServHost &sh)
 }
 
 // --------------------------------------------------
+static void  writeRelayChannel(IniFile &iniFile, std::shared_ptr<Channel> c)
+{
+    char idstr[64];
+    c->getIDStr(idstr);
+
+    iniFile.writeSection("RelayChannel");
+    iniFile.writeStrValue("name", c->getName());
+    iniFile.writeStrValue("desc", c->info.desc.c_str());
+    iniFile.writeStrValue("genre", c->info.genre.c_str());
+    iniFile.writeStrValue("contactURL", c->info.url.c_str());
+    iniFile.writeStrValue("comment", c->info.comment.c_str());
+    if (!c->sourceURL.isEmpty())
+        iniFile.writeStrValue("sourceURL", c->sourceURL.cstr());
+    iniFile.writeStrValue("sourceProtocol", ChanInfo::getProtocolStr(c->info.srcProtocol));
+    iniFile.writeStrValue("contentType", c->info.getTypeStr());
+    iniFile.writeStrValue("MIMEType", c->info.MIMEType);
+    iniFile.writeStrValue("streamExt", c->info.streamExt);
+    iniFile.writeIntValue("bitrate", c->info.bitrate);
+    iniFile.writeStrValue("id", idstr);
+    iniFile.writeBoolValue("stayConnected", c->stayConnected);
+
+    ChanHitList *chl = chanMgr->findHitListByID(c->info.id);
+    if (chl)
+    {
+        ChanHitSearch chs;
+        chs.trackersOnly = true;
+        if (chl->pickHits(chs))
+        {
+            char ipStr[64];
+            chs.best[0].host.toStr(ipStr);
+            iniFile.writeStrValue("tracker", ipStr);
+        }
+    }
+    iniFile.writeLine("[End]");
+}
+
+// --------------------------------------------------
 void ServMgr::saveSettings(const char *fn)
 {
     IniFile iniFile;
@@ -1016,41 +1053,9 @@ void ServMgr::saveSettings(const char *fn)
         std::shared_ptr<Channel> c = chanMgr->channel;
         while (c)
         {
-            char idstr[64];
             if (c->isActive() && c->stayConnected)
-            {
-                c->getIDStr(idstr);
+                writeRelayChannel(iniFile, c);
 
-                iniFile.writeSection("RelayChannel");
-                iniFile.writeStrValue("name", c->getName());
-                iniFile.writeStrValue("desc", c->info.desc.c_str());
-                iniFile.writeStrValue("genre", c->info.genre.c_str());
-                iniFile.writeStrValue("contactURL", c->info.url.c_str());
-                iniFile.writeStrValue("comment", c->info.comment.c_str());
-                if (!c->sourceURL.isEmpty())
-                    iniFile.writeStrValue("sourceURL", c->sourceURL.cstr());
-                iniFile.writeStrValue("sourceProtocol", ChanInfo::getProtocolStr(c->info.srcProtocol));
-                iniFile.writeStrValue("contentType", c->info.getTypeStr());
-                iniFile.writeStrValue("MIMEType", c->info.MIMEType);
-                iniFile.writeStrValue("streamExt", c->info.streamExt);
-                iniFile.writeIntValue("bitrate", c->info.bitrate);
-                iniFile.writeStrValue("id", idstr);
-                iniFile.writeBoolValue("stayConnected", c->stayConnected);
-
-                ChanHitList *chl = chanMgr->findHitListByID(c->info.id);
-                if (chl)
-                {
-                    ChanHitSearch chs;
-                    chs.trackersOnly = true;
-                    if (chl->pickHits(chs))
-                    {
-                        char ipStr[64];
-                        chs.best[0].host.toStr(ipStr);
-                        iniFile.writeStrValue("tracker", ipStr);
-                    }
-                }
-                iniFile.writeLine("[End]");
-            }
             c=c->next;
         }
 
