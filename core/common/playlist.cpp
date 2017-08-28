@@ -128,13 +128,10 @@ void PlayList::addChannel(const char *path, ChanInfo &info)
 {
     String url;
 
-    char idStr[64];
-
-    info.id.toStr(idStr);
-    char *nid = info.id.isSet()?idStr:info.name.cstr();
+    std::string nid = info.id.isSet() ? info.id.str() : info.name;
 
     sprintf(url.cstr(), "%s/stream/%s%s?auth=%s",
-            path, nid, info.getTypeExt(), chanMgr->authToken(info.id).c_str());
+            path, nid.c_str(), info.getTypeExt(), chanMgr->authToken(info.id).c_str());
     addURL(url.cstr(), info.name);
 }
 

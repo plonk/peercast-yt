@@ -611,16 +611,7 @@ int PCPStream::readBroadcastAtoms(AtomStream &atom, int numc, BroadcastState &bc
         }
     }
 
-    char fromStr[64];
-    fromStr[0] = 0;
-    if (fromID.isSet())
-        fromID.toStr(fromStr);
-    char destStr[64];
-    destStr[0] = 0;
-    if (destID.isSet())
-        destID.toStr(destStr);
-
-    LOG_DEBUG("PCP bcst: group=%d, hops=%d, ver=%d, from=%s, dest=%s", bcs.group, bcs.numHops, ver, fromStr, destStr);
+    LOG_DEBUG("PCP bcst: group=%d, hops=%d, ver=%d, from=%s, dest=%s", bcs.group, bcs.numHops, ver, fromID.str().c_str(), destID.str().c_str());
     if (fromID.isSet())
         if (fromID.isSame(servMgr->sessionID))
         {

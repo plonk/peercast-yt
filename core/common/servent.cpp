@@ -370,9 +370,7 @@ void Servent::initIncoming(ClientSocket *s, unsigned int a)
 
         setStatus(S_PROTOCOL);
 
-        char ipStr[64];
-        sock->host.toStr(ipStr);
-        LOG_DEBUG("Incoming from %s", ipStr);
+        LOG_DEBUG("Incoming from %s", sock->host.str().c_str());
 
         if (!sys->startThread(&thread))
             throw StreamException("Can`t start thread");
@@ -408,10 +406,8 @@ void Servent::initOutgoing(TYPE ty)
 }
 
 // -----------------------------------
-void Servent::initPCP(Host &rh)
+void Servent::initPCP(const Host &rh)
 {
-    char ipStr[64];
-    rh.toStr(ipStr);
     try
     {
         checkFree();
@@ -428,44 +424,20 @@ void Servent::initPCP(Host &rh)
         thread.data = this;
         thread.func = outgoingProc;
 
-        LOG_DEBUG("Outgoing to %s", ipStr);
+        LOG_DEBUG("Outgoing to %s", rh.str().c_str());
 
         if (!sys->startThread(&thread))
             throw StreamException("Can`t start thread");
     }catch (StreamException &e)
     {
-        LOG_ERROR("Unable to open connection to %s - %s", ipStr, e.msg);
+        LOG_ERROR("Unable to open connection to %s - %s", rh.str().c_str(), e.msg);
         kill();
     }
 }
 
-#if 0
 // -----------------------------------
-void    Servent::initChannelFetch(Host &host)
+void Servent::initGIV(const Host &h, const GnuID &id)
 {
-    type = T_STREAM;
-
-    char ipStr[64];
-    host.toStr(ipStr);
-
-    checkFree();
-
-    createSocket();
-
-    sock->open(host);
-
-    if (!isAllowed(ALLOW_DATA))
-        throw StreamException("Servent not allowed");
-
-    sock->connect();
-}
-#endif
-
-// -----------------------------------
-void Servent::initGIV(Host &h, GnuID &id)
-{
-    char ipStr[64];
-    h.toStr(ipStr);
     try
     {
         checkFree();
@@ -490,7 +462,7 @@ void Servent::initGIV(Host &h, GnuID &id)
             throw StreamException("Can`t start thread");
     }catch (StreamException &e)
     {
-        LOG_ERROR("GIV error to %s: %s", ipStr, e.msg);
+        LOG_ERROR("GIV error to %s: %s", h.str().c_str(), e.msg);
         kill();
     }
 }
@@ -664,9 +636,7 @@ void Servent::handshakeIn()
 
     if (networkID.isSet())
     {
-        char idStr[64];
-        networkID.toStr(idStr);
-        sock->writeLineF("%s %s", PCX_HS_NETWORKID, idStr);
+        sock->writeLineF("%s %s", PCX_HS_NETWORKID, networkID.str().c_str());
     }
 
     if (servMgr->isRoot)
@@ -843,15 +813,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
     }
 
     bool result = false;
-
-    char idStr[64];
-    chanInfo.id.toStr(idStr);
-
-    char sidStr[64];
-    servMgr->sessionID.toStr(sidStr);
-
     Host rhost = sock->host;
-
     AtomStream atom(*sock);
 
     if (!chanFound)
@@ -871,9 +833,6 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
             sock->writeLine("");
 
             handshakeIncomingPCP(atom, rhost, remoteID, agent);
-
-            char ripStr[64];
-            rhost.toStr(ripStr);
 
             LOG_DEBUG("Sending channel unavailable");
 
@@ -932,7 +891,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 
                 if (cnt)
                 {
-                    LOG_DEBUG("Sent %d channel hit(s) to %s", cnt, ripStr);
+                    LOG_DEBUG("Sent %d channel hit(s) to %s", cnt, rhost.str().c_str());
                 }
                 else if (rhost.port)
                 {
@@ -945,7 +904,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                     {
                         best = chs.best[0];
                         int cnt = servMgr->broadcastPushRequest(best, rhost, chl->info.id, Servent::T_RELAY);
-                        LOG_DEBUG("Broadcasted channel push request to %d clients for %s", cnt, ripStr);
+                        LOG_DEBUG("Broadcasted channel push request to %d clients for %s", cnt, rhost.str().c_str());
                     }
                 }
 
@@ -987,7 +946,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                     if (best.host.ip)
                     {
                         best.writeAtoms(atom, chanInfo.id);
-                        LOG_DEBUG("Sent 1 tracker hit to %s", ripStr);
+                        LOG_DEBUG("Sent 1 tracker hit to %s", rhost.str().c_str());
                     }else if (rhost.port)
                     {
                         // find firewalled tracker
@@ -1000,7 +959,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                         {
                             best = chs.best[0];
                             int cnt = servMgr->broadcastPushRequest(best, rhost, chl->info.id, Servent::T_CIN);
-                            LOG_DEBUG("Broadcasted tracker push request to %d clients for %s", cnt, ripStr);
+                            LOG_DEBUG("Broadcasted tracker push request to %d clients for %s", cnt, rhost.str().c_str());
                         }
                     }
                 }
@@ -1029,7 +988,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
             sock->writeLineF("icy-genre:%s", chanInfo.genre.cstr());
             sock->writeLineF("icy-url:%s", chanInfo.url.cstr());
             sock->writeLineF("icy-metaint:%d", chanMgr->icyMetaInterval);
-            sock->writeLineF("%s %s", PCX_HS_CHANNELID, idStr);
+            sock->writeLineF("%s %s", PCX_HS_CHANNELID, chanInfo.id.str().c_str());
 
             sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_MP3);
         }else
@@ -1047,7 +1006,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                 sock->writeLineF("x-audiocast-genre: %s", chanInfo.genre.cstr());
                 sock->writeLineF("x-audiocast-description: %s", chanInfo.desc.cstr());
                 sock->writeLineF("x-audiocast-url: %s", chanInfo.url.cstr());
-                sock->writeLineF("%s %s", PCX_HS_CHANNELID, idStr);
+                sock->writeLineF("%s %s", PCX_HS_CHANNELID, chanInfo.id.str().c_str());
             }
 
             if (outputProtocol == ChanInfo::SP_HTTP)
@@ -1584,9 +1543,7 @@ void Servent::handshakeIncomingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
 
     if (pingPort)
     {
-        char ripStr[64];
-        rhost.toStr(ripStr);
-        LOG_DEBUG("Incoming firewalled test request: %s ", ripStr);
+        LOG_DEBUG("Incoming firewalled test request: %s ", rhost.str().c_str());
         rhost.port = pingPort;
         if (!rhost.globalIP() || !pingHost(rhost, rid))
             rhost.port = 0;
@@ -1816,7 +1773,6 @@ int Servent::outgoingProc(ThreadInfo *thread)
         {
             ChanHit bestHit;
             ChanHitSearch chs;
-            char ipStr[64];
 
             do
             {
@@ -1876,12 +1832,12 @@ int Servent::outgoingProc(ThreadInfo *thread)
                 break;
             }
 
-            bestHit.host.toStr(ipStr);
+            const std::string ipStr = bestHit.host.str();
 
             int error=0;
             try
             {
-                LOG_DEBUG("COUT to %s: Connecting..", ipStr);
+                LOG_DEBUG("COUT to %s: Connecting..", ipStr.c_str());
 
                 if (!sv->sock)
                 {
@@ -1904,7 +1860,7 @@ int Servent::outgoingProc(ThreadInfo *thread)
 
                 sv->setStatus(S_CONNECTED);
 
-                LOG_DEBUG("COUT to %s: OK", ipStr);
+                LOG_DEBUG("COUT to %s: OK", ipStr.c_str());
 
                 sv->pcpStream->init(sv->remoteID);
 
@@ -1932,14 +1888,14 @@ int Servent::outgoingProc(ThreadInfo *thread)
                 error += PCP_ERROR_QUIT;
                 atom.writeInt(PCP_QUIT, error);
 
-                LOG_ERROR("COUT to %s closed: %d", ipStr, error);
+                LOG_ERROR("COUT to %s closed: %d", ipStr.c_str(), error);
             }catch (TimeoutException &e)
             {
-                LOG_ERROR("COUT to %s: timeout (%s)", ipStr, e.msg);
+                LOG_ERROR("COUT to %s: timeout (%s)", ipStr.c_str(), e.msg);
                 sv->setStatus(S_TIMEOUT);
             }catch (StreamException &e)
             {
-                LOG_ERROR("COUT to %s: %s", ipStr, e.msg);
+                LOG_ERROR("COUT to %s: %s", ipStr.c_str(), e.msg);
                 sv->setStatus(S_ERROR);
             }
 

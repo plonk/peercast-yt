@@ -222,9 +222,7 @@ static std::string chName(ChanInfo& info)
 // -----------------------------------
 std::shared_ptr<Channel> ChanMgr::findAndRelay(ChanInfo &info)
 {
-    char idStr[64];
-    info.id.toStr(idStr);
-    LOG_INFO("Searching for: %s (%s)", idStr, info.name.cstr());
+    LOG_INFO("Searching for: %s (%s)", info.id.str().c_str(), info.name.cstr());
     //peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルを検索中...");
 
     auto c = findChannelByNameID(info);
@@ -764,10 +762,9 @@ void ChanMgr::findAndPlayChannel(ChanInfo &info, bool keep)
 // -----------------------------------
 void ChanMgr::playChannel(ChanInfo &info)
 {
-    char str[128], fname[256], idStr[128];
+    char str[128], fname[256];
 
     sprintf(str, "http://localhost:%d", servMgr->serverHost.port);
-    info.id.toStr(idStr);
 
     PlayList::TYPE type;
 
@@ -776,7 +773,7 @@ void ChanMgr::playChannel(ChanInfo &info)
         type = PlayList::T_ASX;
         // WMP seems to have a bug where it doesn`t re-read asx files if they have the same name
         // so we prepend the channel id to make it unique - NOTE: should be deleted afterwards.
-        sprintf(fname, "%s/%s.asx", peercastApp->getPath(), idStr);
+        sprintf(fname, "%s/%s.asx", peercastApp->getPath(), info.id.str().c_str());
     }else if (info.contentType == ChanInfo::T_OGM)
     {
         type = PlayList::T_RAM;

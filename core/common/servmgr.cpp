@@ -884,10 +884,8 @@ static void  writeServHost(IniFile &iniFile, ServHost &sh)
 {
     iniFile.writeSection("Host");
 
-    char ipStr[64];
-    sh.host.toStr(ipStr);
     iniFile.writeStrValue("type", ServHost::getTypeStr(sh.type));
-    iniFile.writeStrValue("address", ipStr);
+    iniFile.writeStrValue("address", sh.host.str().c_str());
     iniFile.writeIntValue("time", sh.time);
 
     iniFile.writeLine("[End]");
@@ -921,9 +919,7 @@ static void  writeRelayChannel(IniFile &iniFile, std::shared_ptr<Channel> c)
         chs.trackersOnly = true;
         if (chl->pickHits(chs))
         {
-            char ipStr[64];
-            chs.best[0].host.toStr(ipStr);
-            iniFile.writeStrValue("tracker", ipStr);
+            iniFile.writeStrValue("tracker", chs.best[0].host.str().c_str());
         }
     }
 
@@ -946,8 +942,6 @@ void ServMgr::saveSettings(const char *fn)
         LOG_ERROR("Unable to open ini file");
     }else{
         LOG_DEBUG("Saving settings to: %s", fn);
-
-        char idStr[64];
 
         iniFile.writeSection("Server");
         iniFile.writeStrValue("serverName", servMgr->serverName);
@@ -972,15 +966,13 @@ void ServMgr::saveSettings(const char *fn)
         iniFile.writeBoolValue("publicDirectory", servMgr->publicDirectoryEnabled);
         iniFile.writeStrValue("genrePrefix", servMgr->genrePrefix);
 
-        networkID.toStr(idStr);
-        iniFile.writeStrValue("networkID", idStr);
+        iniFile.writeStrValue("networkID", networkID.str().c_str());
 
         iniFile.writeSection("Broadcast");
         iniFile.writeIntValue("broadcastMsgInterval", chanMgr->broadcastMsgInterval);
         iniFile.writeStrValue("broadcastMsg", chanMgr->broadcastMsg);
         iniFile.writeIntValue("icyMetaInterval", chanMgr->icyMetaInterval);
-        chanMgr->broadcastID.toStr(idStr);
-        iniFile.writeStrValue("broadcastID", idStr);
+        iniFile.writeStrValue("broadcastID", chanMgr->broadcastID.str().c_str());
         iniFile.writeIntValue("hostUpdateInterval", chanMgr->hostUpdateInterval);
         iniFile.writeIntValue("maxControlConnections", servMgr->maxControl);
         iniFile.writeStrValue("rootHost", servMgr->rootHost);
@@ -1044,9 +1036,7 @@ void ServMgr::saveSettings(const char *fn)
             while (bcid)
             {
                 iniFile.writeSection("ValidBCID");
-                char idstr[128];
-                bcid->id.toStr(idstr);
-                iniFile.writeStrValue("id", idstr);
+                iniFile.writeStrValue("id",  bcid->id.str());
                 iniFile.writeStrValue("name", bcid->name);
                 iniFile.writeStrValue("email", bcid->email);
                 iniFile.writeStrValue("url", bcid->url);
@@ -1065,22 +1055,6 @@ void ServMgr::saveSettings(const char *fn)
 
             c=c->next;
         }
-
-#if 0
-        Servent *s = servents;
-        while (s)
-        {
-            if (s->type == Servent::T_OUTGOING)
-                if (s->isConnected())
-                {
-                    ServHost sh;
-                    Host h = s->getHost();
-                    sh.init(h, ServHost::T_SERVENT, 0, s->networkID);
-                    writeServHost(iniFile, sh);
-                }
-            s=s->next;
-        }
-#endif
 
         for (int i=0; i<ServMgr::MAX_HOSTCACHE; i++)
         {
@@ -1665,8 +1639,6 @@ void ServMgr::procConnectArgs(char *str, ChanInfo &info)
 // --------------------------------------------------
 bool ServMgr::start()
 {
-    char idStr[64];
-
     const char *priv;
 #if PRIVATE_BROADCASTER
     priv = "(private)";
@@ -1675,11 +1647,10 @@ bool ServMgr::start()
 #endif
     LOG_INFO("Peercast %s, %s %s", PCX_VERSTRING, peercastApp->getClientTypeOS(), priv);
 
-    sessionID.toStr(idStr);
-    LOG_INFO("SessionID: %s", idStr);
+    LOG_INFO("SessionID: %s", sessionID.str().c_str());
 
-    chanMgr->broadcastID.toStr(idStr);
-    LOG_INFO("BroadcastID: %s", idStr);
+
+    LOG_INFO("BroadcastID: %s", chanMgr->broadcastID.str().c_str());
 
     checkForceIP();
 

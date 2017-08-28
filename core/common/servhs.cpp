@@ -779,8 +779,6 @@ bool Servent::getLocalURL(char *str)
     if (!sock)
         throw StreamException("Not connected");
 
-    char ipStr[64];
-
     Host h;
 
     if (sock->host.localIP())
@@ -790,9 +788,7 @@ bool Servent::getLocalURL(char *str)
 
     h.port = servMgr->serverHost.port;
 
-    h.toStr(ipStr);
-
-    sprintf(str, "http://%s", ipStr);
+    sprintf(str, "http://%s", h.str().c_str());
     return true;
 }
 

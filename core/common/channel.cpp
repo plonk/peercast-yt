@@ -407,13 +407,7 @@ void Channel::connectFetch()
 // -----------------------------------
 int Channel::handshakeFetch()
 {
-    char idStr[64];
-    info.id.toStr(idStr);
-
-    char sidStr[64];
-    servMgr->sessionID.toStr(sidStr);
-
-    sock->writeLineF("GET /channel/%s HTTP/1.0", idStr);
+    sock->writeLineF("GET /channel/%s HTTP/1.0", info.id.str().c_str());
     sock->writeLineF("%s %d", PCX_HS_POS, streamPos);
     sock->writeLineF("%s %d", PCX_HS_PCP, 1);
 
@@ -824,12 +818,8 @@ void Channel::processMp3Metadata(char *str)
 // -----------------------------------
 XML::Node *ChanHit::createXML()
 {
-    // IP
-    char ipStr[64];
-    host.toStr(ipStr);
-
     return new XML::Node("host ip=\"%s\" hops=\"%d\" listeners=\"%d\" relays=\"%d\" uptime=\"%d\" push=\"%d\" relay=\"%d\" direct=\"%d\" cin=\"%d\" stable=\"%d\" version=\"%d\" update=\"%d\" tracker=\"%d\"",
-        ipStr,
+        host.str().c_str(),
         numHops,
         numListeners,
         numRelays,

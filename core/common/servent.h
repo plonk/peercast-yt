@@ -109,8 +109,8 @@ public:
     bool    initServer(Host &);
     void    initIncoming(ClientSocket *, unsigned int);
     void    initOutgoing(TYPE);
-    void    initGIV(Host &, GnuID &);
-    void    initPCP(Host &);
+    void    initGIV(const Host &, const GnuID &);
+    void    initPCP(const Host &);
 
     void    checkFree();
 
