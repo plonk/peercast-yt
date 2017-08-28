@@ -1328,12 +1328,6 @@ void RawStream::readEnd(Stream &, std::shared_ptr<Channel>)
 }
 
 // -----------------------------------
-void Channel::getStreamPath(char *str)
-{
-    sprintf(str, "/stream/%s%s", info.id.str().c_str(), info.getTypeExt());
-}
-
-// -----------------------------------
 std::string Channel::renderHexDump(const std::string& in)
 {
     std::string res;
