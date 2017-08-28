@@ -910,7 +910,7 @@ static void  writeRelayChannel(IniFile &iniFile, std::shared_ptr<Channel> c)
     iniFile.writeStrValue("MIMEType", c->info.MIMEType);
     iniFile.writeStrValue("streamExt", c->info.streamExt);
     iniFile.writeIntValue("bitrate", c->info.bitrate);
-    iniFile.writeStrValue("id", c->info.id.str().c_str());
+    iniFile.writeStrValue("id", c->info.id.str());
     iniFile.writeBoolValue("stayConnected", c->stayConnected);
 
     // トラッカーIPの書き出し。
@@ -961,29 +961,29 @@ void ServMgr::saveSettings(const char *fn)
         iniFile.writeIntValue("maxRelaysPerChannel", chanMgr->maxRelaysPerChannel);
         iniFile.writeIntValue("firewallTimeout", firewallTimeout);
         iniFile.writeBoolValue("forceNormal", forceNormal);
-        iniFile.writeStrValue("rootMsg", rootMsg.cstr());
+        iniFile.writeStrValue("rootMsg", rootMsg);
         iniFile.writeStrValue("authType", servMgr->authType==ServMgr::AUTH_COOKIE?"cookie":"http-basic");
         iniFile.writeStrValue("cookiesExpire", servMgr->cookieList.neverExpire==true?"never":"session");
         iniFile.writeStrValue("htmlPath", servMgr->htmlPath);
         iniFile.writeIntValue("minPGNUIncoming", servMgr->minGnuIncoming);
         iniFile.writeIntValue("maxPGNUIncoming", servMgr->maxGnuIncoming);
         iniFile.writeIntValue("maxServIn", servMgr->maxServIn);
-        iniFile.writeStrValue("chanLog", servMgr->chanLog.cstr());
+        iniFile.writeStrValue("chanLog", servMgr->chanLog);
         iniFile.writeBoolValue("publicDirectory", servMgr->publicDirectoryEnabled);
-        iniFile.writeStrValue("genrePrefix", servMgr->genrePrefix.c_str());
+        iniFile.writeStrValue("genrePrefix", servMgr->genrePrefix);
 
         networkID.toStr(idStr);
         iniFile.writeStrValue("networkID", idStr);
 
         iniFile.writeSection("Broadcast");
         iniFile.writeIntValue("broadcastMsgInterval", chanMgr->broadcastMsgInterval);
-        iniFile.writeStrValue("broadcastMsg", chanMgr->broadcastMsg.cstr());
+        iniFile.writeStrValue("broadcastMsg", chanMgr->broadcastMsg);
         iniFile.writeIntValue("icyMetaInterval", chanMgr->icyMetaInterval);
         chanMgr->broadcastID.toStr(idStr);
         iniFile.writeStrValue("broadcastID", idStr);
         iniFile.writeIntValue("hostUpdateInterval", chanMgr->hostUpdateInterval);
         iniFile.writeIntValue("maxControlConnections", servMgr->maxControl);
-        iniFile.writeStrValue("rootHost", servMgr->rootHost.cstr());
+        iniFile.writeStrValue("rootHost", servMgr->rootHost);
 
         iniFile.writeSection("Client");
         iniFile.writeIntValue("refreshHTML", refreshHTML);
@@ -996,9 +996,9 @@ void ServMgr::saveSettings(const char *fn)
         iniFile.writeIntValue("autoQuery", chanMgr->autoQuery);
         iniFile.writeIntValue("queryTTL", servMgr->queryTTL);
         iniFile.writeBoolValue("transcodingEnabled", servMgr->transcodingEnabled);
-        iniFile.writeStrValue("preset", servMgr->preset.c_str());
-        iniFile.writeStrValue("audioCodec", servMgr->audioCodec.c_str());
-        iniFile.writeStrValue("wmvProtocol", servMgr->wmvProtocol.c_str());
+        iniFile.writeStrValue("preset", servMgr->preset);
+        iniFile.writeStrValue("audioCodec", servMgr->audioCodec);
+        iniFile.writeStrValue("wmvProtocol", servMgr->wmvProtocol);
 
         iniFile.writeSection("Privacy");
         iniFile.writeStrValue("password", servMgr->password);
@@ -1014,7 +1014,7 @@ void ServMgr::saveSettings(const char *fn)
         for (auto feed : servMgr->channelDirectory.feeds())
         {
             iniFile.writeSection("Feed");
-            iniFile.writeStrValue("url", feed.url.c_str());
+            iniFile.writeStrValue("url", feed.url);
             iniFile.writeBoolValue("isPublic", feed.isPublic);
             iniFile.writeLine("[End]");
         }
@@ -1047,9 +1047,9 @@ void ServMgr::saveSettings(const char *fn)
                 char idstr[128];
                 bcid->id.toStr(idstr);
                 iniFile.writeStrValue("id", idstr);
-                iniFile.writeStrValue("name", bcid->name.cstr());
-                iniFile.writeStrValue("email", bcid->email.cstr());
-                iniFile.writeStrValue("url", bcid->url.cstr());
+                iniFile.writeStrValue("name", bcid->name);
+                iniFile.writeStrValue("email", bcid->email);
+                iniFile.writeStrValue("url", bcid->url);
                 iniFile.writeBoolValue("valid", bcid->valid);
                 iniFile.writeLine("[End]");
 
