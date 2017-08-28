@@ -29,10 +29,6 @@ public:
     {
     }
 
-    void appMsg(long, long = 0) override
-    {
-    }
-
     unsigned int getTime() override
     {
         return 0;

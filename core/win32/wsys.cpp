@@ -57,12 +57,6 @@ ClientSocket *WSys::createSocket()
     return new WSAClientSocket();
 }
 
-// ---------------------------------
-void WSys::appMsg(long msg, long arg)
-{
-    //SendMessage(mainWindow,WM_USER,(WPARAM)msg,(LPARAM)arg);
-}
-
 // --------------------------------------------------
 void WSys::callLocalURL(const char *str,int port)
 {

@@ -74,12 +74,6 @@ void    USys::setThreadName(const char* name)
 #endif
 }
 
-// ---------------------------------
-void USys::appMsg(long msg, long arg)
-{
-    //SendMessage(mainWindow, WM_USER, (WPARAM)msg, (LPARAM)arg);
-}
-
 #ifndef __APPLE__
 
 // ---------------------------------

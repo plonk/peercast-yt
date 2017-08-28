@@ -70,7 +70,6 @@ public:
     virtual bool            startWaitableThread(class ThreadInfo *);
     virtual void            waitThread(ThreadInfo *);
     virtual void            sleep(int);
-    virtual void            appMsg(long, long = 0) = 0;
     virtual unsigned int    getTime();
     virtual double          getDTime() = 0;
     virtual unsigned int    rnd() = 0;
