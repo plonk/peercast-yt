@@ -39,6 +39,28 @@ TEST_F(amf0Fixture, Number)
     ASSERT_EQ(1.5, v.number());
 }
 
+TEST_F(amf0Fixture, Bool_true)
+{
+    auto v = Value::boolean(true);
+    ASSERT_FALSE(v.isString());
+    ASSERT_FALSE(v.isObject());
+    ASSERT_FALSE(v.isNumber());
+    ASSERT_TRUE(v.isBool());
+    ASSERT_EQ("true", v.inspect());
+    ASSERT_EQ(true, v.boolean());
+}
+
+TEST_F(amf0Fixture, Bool_false)
+{
+    auto v = Value::boolean(false);
+    ASSERT_FALSE(v.isString());
+    ASSERT_FALSE(v.isObject());
+    ASSERT_FALSE(v.isNumber());
+    ASSERT_TRUE(v.isBool());
+    ASSERT_EQ("false", v.inspect());
+    ASSERT_EQ(false, v.boolean());
+}
+
 TEST_F(amf0Fixture, String)
 {
     Value s = "hoge";
@@ -58,6 +80,20 @@ TEST_F(amf0Fixture, Object)
         });
     ASSERT_FALSE(o.isString());
     ASSERT_TRUE(o.isObject());
+
+    ASSERT_EQ("{\"age\":\"30\",\"alias\":\"Mike\",\"name\":\"Mike\"}", o.inspect());
+}
+
+TEST_F(amf0Fixture, Array)
+{
+    auto o = Value::array({
+            { "name",  "Mike" },
+            { "age",   "30" },
+            { "alias", "Mike" }
+        });
+    ASSERT_FALSE(o.isString());
+    ASSERT_FALSE(o.isObject());
+    ASSERT_TRUE(o.isArray());
 
     ASSERT_EQ("{\"age\":\"30\",\"alias\":\"Mike\",\"name\":\"Mike\"}", o.inspect());
 }
