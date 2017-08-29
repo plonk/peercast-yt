@@ -225,37 +225,37 @@ namespace amf0
             case kBool:
                 return (m_bool) ? "true" : "false";
             default:
-                throw std::runtime_error("inspect: unknown type");
+                throw std::runtime_error(str::format("inspect: unknown type %d", m_type));
             }
         }
 
         double number()
         {
-            if (!isNumber()) throw std::runtime_error("type");
+            if (!isNumber()) throw std::runtime_error("not a number");
             return m_number;
         }
 
         std::string string()
         {
-            if (!isString()) throw std::runtime_error("type");
+            if (!isString()) throw std::runtime_error("not a string");
             return m_string;
         }
 
         bool boolean()
         {
-            if (!isBool()) throw std::runtime_error("type");
+            if (!isBool()) throw std::runtime_error("not a boolean");
             return m_bool;
         }
 
         std::map<std::string,Value>& object()
         {
-            if (!isObject() || !isArray()) throw std::runtime_error("type");
+            if (!isObject() && !isArray()) throw std::runtime_error("not an object or an array (%d)");
             return m_object;
         }
 
         std::vector<Value>& strictArray()
         {
-            if (!isStrictArray()) throw std::runtime_error("type");
+            if (!isStrictArray()) throw std::runtime_error("not a strict array");
             return m_strict_array;
         }
 
