@@ -204,6 +204,7 @@ namespace amf0
             case kNumber:
                 return std::to_string(m_number);
             case kObject:
+            case kArray:
             {
                 std::string buf = "{";
                 bool first = true;
@@ -221,6 +222,8 @@ namespace amf0
                 return str::inspect(m_string);
             case kNull:
                 return "null";
+            case kBool:
+                return (m_bool) ? "true" : "false";
             default:
                 throw std::runtime_error("inspect: unknown type");
             }
