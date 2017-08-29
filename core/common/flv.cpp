@@ -18,6 +18,8 @@
 
 #include "channel.h"
 #include "flv.h"
+#include "amf0.h"
+#include <math.h> // ceil
 
 static String timestampToString(uint32_t timestamp)
 {
@@ -49,16 +51,23 @@ std::pair<bool,int> FLVStream::readMetaData(void* data, int size)
     // 算して (true, bitrate) を返す。onMetaData でなかった場合や、ど
     // ちらのプロパティも存在しなかった場合は、(false, _) を返す。
 
-    AMFObject amf;
     MemoryStream flvmem(data, size);
-    if (amf.readMetaData(flvmem))
+    amf0::Deserializer deserializer;
+    double bitrate = 0;
+    auto cmd = deserializer.readValue(flvmem);
+    if (cmd.string() == "onMetaData")
     {
-        flvmem.close();
-        return std::make_pair(true, amf.bitrate);
-    }else
-    {
-        return std::make_pair(false, 0);
+        auto object = deserializer.readValue(flvmem).object();
+
+        if (object.count("videodatarate"))
+            bitrate += object["videodatarate"].number();
+        if (object.count("audiodatarate"))
+            bitrate += object["audiodatarate"].number();
+
+        if (bitrate > 0)
+            return std::make_pair(true, ceil(bitrate));
     }
+    return std::make_pair(false, 0);
 }
 
 // ------------------------------------------
