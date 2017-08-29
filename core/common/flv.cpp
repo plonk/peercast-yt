@@ -41,6 +41,26 @@ void FLVStream::readHeader(Stream &in, std::shared_ptr<Channel> ch)
     m_buffer.startTime = sys->getDTime();
 }
 
+// ----------------------------------------------------------
+std::pair<bool,int> FLVStream::readMetaData(void* data, int size)
+{
+    // スクリプトタグのペイロード data が onMetaData ならば、
+    // videodatarate / audiodatarate プロパティから総ビットレートを計
+    // 算して (true, bitrate) を返す。onMetaData でなかった場合や、ど
+    // ちらのプロパティも存在しなかった場合は、(false, _) を返す。
+
+    AMFObject amf;
+    MemoryStream flvmem(data, size);
+    if (amf.readMetaData(flvmem))
+    {
+        flvmem.close();
+        return std::make_pair(true, amf.bitrate);
+    }else
+    {
+        return std::make_pair(false, 0);
+    }
+}
+
 // ------------------------------------------
 int FLVStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
 {
@@ -59,11 +79,13 @@ int FLVStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
     {
     case FLVTag::T_SCRIPT:
         {
-            AMFObject amf;
-            MemoryStream flvmem(flvTag.data, flvTag.size);
-            if (amf.readMetaData(flvmem)) {
-                flvmem.close();
-                metaBitrate = amf.bitrate;
+            bool success;
+            int bitrate;
+
+            std::tie(success, bitrate) = readMetaData(flvTag.data, flvTag.size);
+            if (success)
+            {
+                metaBitrate = bitrate;
                 metaData = flvTag;
                 headerUpdate = true;
             }

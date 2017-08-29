@@ -224,6 +224,8 @@ public:
     int  readPacket(Stream &, std::shared_ptr<Channel>) override;
     void readEnd(Stream &, std::shared_ptr<Channel>) override;
 
+    static std::pair<bool,int> readMetaData(void* data, int size);
+
     FLVTagBuffer m_buffer;
 };
 
