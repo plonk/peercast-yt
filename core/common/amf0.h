@@ -261,6 +261,7 @@ namespace amf0
 
         std::nullptr_t null()
         {
+            if (!isNull()) throw std::runtime_error("not null");
             return nullptr;
         }
 
