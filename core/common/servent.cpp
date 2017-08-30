@@ -769,6 +769,26 @@ void Servent::handshakeStream_readHeaders(HTTP& http, bool& gotPCP, unsigned int
     }
 }
 
+
+// -----------------------------------
+void Servent::handshakeStream_changeOutputProtocol(bool gotPCP, const ChanInfo& chanInfo)
+{
+    // 旧プロトコルへの切り替え？
+    if ((!gotPCP) && (outputProtocol == ChanInfo::SP_PCP))
+        outputProtocol = ChanInfo::SP_PEERCAST;
+
+    // WMV ならば MMS(MMSH)
+    if (outputProtocol == ChanInfo::SP_HTTP)
+    {
+        if  ( (chanInfo.srcProtocol == ChanInfo::SP_MMS)
+              || (chanInfo.contentType == ChanInfo::T_WMA)
+              || (chanInfo.contentType == ChanInfo::T_WMV)
+              || (chanInfo.contentType == ChanInfo::T_ASX)
+            )
+        outputProtocol = ChanInfo::SP_MMS;
+    }
+}
+
 // -----------------------------------
 bool Servent::handshakeStream(ChanInfo &chanInfo)
 {
@@ -779,18 +799,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
     nsSwitchNum = 0;
 
     handshakeStream_readHeaders(http, gotPCP, reqPos, nsSwitchNum);
-    if ((!gotPCP) && (outputProtocol == ChanInfo::SP_PCP))
-        outputProtocol = ChanInfo::SP_PEERCAST;
-
-    if (outputProtocol == ChanInfo::SP_HTTP)
-    {
-        if  ( (chanInfo.srcProtocol == ChanInfo::SP_MMS)
-              || (chanInfo.contentType == ChanInfo::T_WMA)
-              || (chanInfo.contentType == ChanInfo::T_WMV)
-              || (chanInfo.contentType == ChanInfo::T_ASX)
-            )
-        outputProtocol = ChanInfo::SP_MMS;
-    }
+    handshakeStream_changeOutputProtocol(gotPCP, chanInfo);
 
     bool chanFound = false;
     bool chanReady = false;
