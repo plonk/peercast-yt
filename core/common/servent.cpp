@@ -878,6 +878,141 @@ void Servent::handshakeStream_returnStreamHeaders(AtomStream& atom, bool gotPCP,
 }
 
 // -----------------------------------
+void Servent::handshakeStream_returnHits(AtomStream& atom, const GnuID& channelID, ChanHitList* chl, Host& rhost)
+{
+    ChanHitSearch chs;
+
+    int error = PCP_ERROR_QUIT+PCP_ERROR_UNAVAILABLE;
+
+    if (chl)
+    {
+        ChanHit best;
+
+        // search for up to 8 other hits
+        int cnt = 0;
+        for (int i = 0; i < 8; i++)
+        {
+            best.init();
+
+            // find best hit this network if local IP
+            if (!rhost.globalIP())
+            {
+                chs.init();
+                chs.matchHost = servMgr->serverHost;
+                chs.waitDelay = 2;
+                chs.excludeID = remoteID;
+                if (chl->pickHits(chs))
+                    best = chs.best[0];
+            }
+
+            // find best hit on same network
+            if (!best.host.ip)
+            {
+                chs.init();
+                chs.matchHost = rhost;
+                chs.waitDelay = 2;
+                chs.excludeID = remoteID;
+                if (chl->pickHits(chs))
+                    best = chs.best[0];
+            }
+
+            // find best hit on other networks
+            if (!best.host.ip)
+            {
+                chs.init();
+                chs.waitDelay = 2;
+                chs.excludeID = remoteID;
+                if (chl->pickHits(chs))
+                    best = chs.best[0];
+            }
+
+            if (!best.host.ip)
+                break;
+
+            best.writeAtoms(atom, channelID);
+            cnt++;
+        }
+
+        if (cnt)
+        {
+            LOG_DEBUG("Sent %d channel hit(s) to %s", cnt, rhost.str().c_str());
+        }
+        else if (rhost.port)
+        {
+            // find firewalled host
+            chs.init();
+            chs.waitDelay = 30;
+            chs.useFirewalled = true;
+            chs.excludeID = remoteID;
+            if (chl->pickHits(chs))
+            {
+                best = chs.best[0];
+                int cnt = servMgr->broadcastPushRequest(best, rhost, chl->info.id, Servent::T_RELAY);
+                LOG_DEBUG("Broadcasted channel push request to %d clients for %s", cnt, rhost.str().c_str());
+            }
+        }
+
+        // if all else fails, use tracker
+        if (!best.host.ip)
+        {
+            // find best tracker on this network if local IP
+            if (!rhost.globalIP())
+            {
+                chs.init();
+                chs.matchHost = servMgr->serverHost;
+                chs.trackersOnly = true;
+                chs.excludeID = remoteID;
+                if (chl->pickHits(chs))
+                    best = chs.best[0];
+            }
+
+            // find local tracker
+            if (!best.host.ip)
+            {
+                chs.init();
+                chs.matchHost = rhost;
+                chs.trackersOnly = true;
+                chs.excludeID = remoteID;
+                if (chl->pickHits(chs))
+                    best = chs.best[0];
+            }
+
+            // find global tracker
+            if (!best.host.ip)
+            {
+                chs.init();
+                chs.trackersOnly = true;
+                chs.excludeID = remoteID;
+                if (chl->pickHits(chs))
+                    best = chs.best[0];
+            }
+
+            if (best.host.ip)
+            {
+                best.writeAtoms(atom, channelID);
+                LOG_DEBUG("Sent 1 tracker hit to %s", rhost.str().c_str());
+            }else if (rhost.port)
+            {
+                // find firewalled tracker
+                chs.init();
+                chs.useFirewalled = true;
+                chs.trackersOnly = true;
+                chs.excludeID = remoteID;
+                chs.waitDelay = 30;
+                if (chl->pickHits(chs))
+                {
+                    best = chs.best[0];
+                    int cnt = servMgr->broadcastPushRequest(best, rhost, chl->info.id, Servent::T_CIN);
+                    LOG_DEBUG("Broadcasted tracker push request to %d clients for %s", cnt, rhost.str().c_str());
+                }
+            }
+        }
+    }
+    // return not available yet code
+    atom.writeInt(PCP_QUIT, error);
+}
+
+// -----------------------------------
 bool Servent::handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool chanReady,
                                              std::shared_ptr<Channel> ch, ChanHitList* chl,
                                              const ChanInfo& chanInfo)
@@ -896,7 +1031,7 @@ bool Servent::handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool c
 
     if (!chanReady)       // cannot stream
     {
-        if (outputProtocol == ChanInfo::SP_PCP)
+        if (outputProtocol == ChanInfo::SP_PCP)    // relay stream
         {
             sock->writeLine(HTTP_SC_UNAVAILABLE);
             sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XPCP);
@@ -906,138 +1041,9 @@ bool Servent::handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool c
 
             LOG_DEBUG("Sending channel unavailable");
 
-            ChanHitSearch chs;
-
-            int error = PCP_ERROR_QUIT+PCP_ERROR_UNAVAILABLE;
-
-            if (chl)
-            {
-                ChanHit best;
-
-                // search for up to 8 other hits
-                int cnt = 0;
-                for (int i = 0; i < 8; i++)
-                {
-                    best.init();
-
-                    // find best hit this network if local IP
-                    if (!rhost.globalIP())
-                    {
-                        chs.init();
-                        chs.matchHost = servMgr->serverHost;
-                        chs.waitDelay = 2;
-                        chs.excludeID = remoteID;
-                        if (chl->pickHits(chs))
-                            best = chs.best[0];
-                    }
-
-                    // find best hit on same network
-                    if (!best.host.ip)
-                    {
-                        chs.init();
-                        chs.matchHost = rhost;
-                        chs.waitDelay = 2;
-                        chs.excludeID = remoteID;
-                        if (chl->pickHits(chs))
-                            best = chs.best[0];
-                    }
-
-                    // find best hit on other networks
-                    if (!best.host.ip)
-                    {
-                        chs.init();
-                        chs.waitDelay = 2;
-                        chs.excludeID = remoteID;
-                        if (chl->pickHits(chs))
-                            best = chs.best[0];
-                    }
-
-                    if (!best.host.ip)
-                        break;
-
-                    best.writeAtoms(atom, chanInfo.id);
-                    cnt++;
-                }
-
-                if (cnt)
-                {
-                    LOG_DEBUG("Sent %d channel hit(s) to %s", cnt, rhost.str().c_str());
-                }
-                else if (rhost.port)
-                {
-                    // find firewalled host
-                    chs.init();
-                    chs.waitDelay = 30;
-                    chs.useFirewalled = true;
-                    chs.excludeID = remoteID;
-                    if (chl->pickHits(chs))
-                    {
-                        best = chs.best[0];
-                        int cnt = servMgr->broadcastPushRequest(best, rhost, chl->info.id, Servent::T_RELAY);
-                        LOG_DEBUG("Broadcasted channel push request to %d clients for %s", cnt, rhost.str().c_str());
-                    }
-                }
-
-                // if all else fails, use tracker
-                if (!best.host.ip)
-                {
-                    // find best tracker on this network if local IP
-                    if (!rhost.globalIP())
-                    {
-                        chs.init();
-                        chs.matchHost = servMgr->serverHost;
-                        chs.trackersOnly = true;
-                        chs.excludeID = remoteID;
-                        if (chl->pickHits(chs))
-                            best = chs.best[0];
-                    }
-
-                    // find local tracker
-                    if (!best.host.ip)
-                    {
-                        chs.init();
-                        chs.matchHost = rhost;
-                        chs.trackersOnly = true;
-                        chs.excludeID = remoteID;
-                        if (chl->pickHits(chs))
-                            best = chs.best[0];
-                    }
-
-                    // find global tracker
-                    if (!best.host.ip)
-                    {
-                        chs.init();
-                        chs.trackersOnly = true;
-                        chs.excludeID = remoteID;
-                        if (chl->pickHits(chs))
-                            best = chs.best[0];
-                    }
-
-                    if (best.host.ip)
-                    {
-                        best.writeAtoms(atom, chanInfo.id);
-                        LOG_DEBUG("Sent 1 tracker hit to %s", rhost.str().c_str());
-                    }else if (rhost.port)
-                    {
-                        // find firewalled tracker
-                        chs.init();
-                        chs.useFirewalled = true;
-                        chs.trackersOnly = true;
-                        chs.excludeID = remoteID;
-                        chs.waitDelay = 30;
-                        if (chl->pickHits(chs))
-                        {
-                            best = chs.best[0];
-                            int cnt = servMgr->broadcastPushRequest(best, rhost, chl->info.id, Servent::T_CIN);
-                            LOG_DEBUG("Broadcasted tracker push request to %d clients for %s", cnt, rhost.str().c_str());
-                        }
-                    }
-                }
-            }
-            // return not available yet code
-            atom.writeInt(PCP_QUIT, error);
+            handshakeStream_returnHits(atom, chanInfo.id, chl, rhost);
             result = false;
-        }else
+        }else                                      // direct stream
         {
             LOG_DEBUG("Sending channel unavailable");
             sock->writeLine(HTTP_SC_UNAVAILABLE);
