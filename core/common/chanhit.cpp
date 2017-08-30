@@ -140,7 +140,7 @@ static int flags1(ChanHit* hit)
 }
 
 // -----------------------------------
-void ChanHit::writeAtoms(AtomStream &atom, GnuID &chanID)
+void ChanHit::writeAtoms(AtomStream &atom, const GnuID &chanID)
 {
     bool addChan = chanID.isSet();
 
