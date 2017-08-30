@@ -794,7 +794,7 @@ void Servent::handshakeStream_changeOutputProtocol(bool gotPCP, const ChanInfo& 
 // -----------------------------------
 bool Servent::handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool chanReady,
                                             std::shared_ptr<Channel> ch, ChanHitList* chl,
-                                            ChanInfo& chanInfo)
+                                            const ChanInfo& chanInfo)
 {
     bool result = false;
     Host rhost = sock->host;
@@ -967,10 +967,10 @@ bool Servent::handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool c
             sock->writeLine(ICY_OK);
 
             sock->writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
-            sock->writeLineF("icy-name:%s", chanInfo.name.cstr());
+            sock->writeLineF("icy-name:%s", chanInfo.name.c_str());
             sock->writeLineF("icy-br:%d", chanInfo.bitrate);
-            sock->writeLineF("icy-genre:%s", chanInfo.genre.cstr());
-            sock->writeLineF("icy-url:%s", chanInfo.url.cstr());
+            sock->writeLineF("icy-genre:%s", chanInfo.genre.c_str());
+            sock->writeLineF("icy-url:%s", chanInfo.url.c_str());
             sock->writeLineF("icy-metaint:%d", chanMgr->icyMetaInterval);
             sock->writeLineF("%s %s", PCX_HS_CHANNELID, chanInfo.id.str().c_str());
 
@@ -985,11 +985,11 @@ bool Servent::handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool c
 
                 sock->writeLine("Accept-Ranges: none");
 
-                sock->writeLineF("x-audiocast-name: %s", chanInfo.name.cstr());
+                sock->writeLineF("x-audiocast-name: %s", chanInfo.name.c_str());
                 sock->writeLineF("x-audiocast-bitrate: %d", chanInfo.bitrate);
-                sock->writeLineF("x-audiocast-genre: %s", chanInfo.genre.cstr());
-                sock->writeLineF("x-audiocast-description: %s", chanInfo.desc.cstr());
-                sock->writeLineF("x-audiocast-url: %s", chanInfo.url.cstr());
+                sock->writeLineF("x-audiocast-genre: %s", chanInfo.genre.c_str());
+                sock->writeLineF("x-audiocast-description: %s", chanInfo.desc.c_str());
+                sock->writeLineF("x-audiocast-url: %s", chanInfo.url.c_str());
                 sock->writeLineF("%s %s", PCX_HS_CHANNELID, chanInfo.id.str().c_str());
             }
 
