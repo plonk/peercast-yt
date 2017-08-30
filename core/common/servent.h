@@ -161,6 +161,9 @@ public:
     bool    handshakeStream(ChanInfo &);
     void    handshakeStream_readHeaders(bool& gotPCP, unsigned int& reqPos, int& nsSwitchNum);
     void    handshakeStream_changeOutputProtocol(bool gotPCP, const ChanInfo& chanInfo);
+    bool    handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool chanReady,
+                                           std::shared_ptr<Channel> ch, ChanHitList* chl,
+                                           ChanInfo& chanInfo);
     void    handshakeGiv(GnuID &);
 
     void    handshakeICY(Channel::SRC_TYPE, bool);

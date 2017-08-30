@@ -792,39 +792,10 @@ void Servent::handshakeStream_changeOutputProtocol(bool gotPCP, const ChanInfo& 
 }
 
 // -----------------------------------
-bool Servent::handshakeStream(ChanInfo &chanInfo)
+bool Servent::handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool chanReady,
+                                            std::shared_ptr<Channel> ch, ChanHitList* chl,
+                                            ChanInfo& chanInfo)
 {
-    bool gotPCP = false;
-    unsigned int reqPos = 0;
-    nsSwitchNum = 0;
-
-    handshakeStream_readHeaders(gotPCP, reqPos, nsSwitchNum);
-    handshakeStream_changeOutputProtocol(gotPCP, chanInfo);
-
-    bool chanFound = false;
-    bool chanReady = false;
-
-    auto ch = chanMgr->findChannelByID(chanInfo.id);
-    if (ch)
-    {
-        sendHeader = true;
-        if (reqPos)
-        {
-            streamPos = ch->rawData.findOldestPos(reqPos);
-        }else
-        {
-            streamPos = ch->rawData.getLatestPos();
-        }
-
-        chanReady = canStream(ch);
-    }
-
-    ChanHitList *chl = chanMgr->findHitList(chanInfo);
-    if (chl)
-    {
-        chanFound = true;
-    }
-
     bool result = false;
     Host rhost = sock->host;
     AtomStream atom(*sock);
@@ -1071,6 +1042,45 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
     }
 
     return result;
+}
+
+// -----------------------------------
+bool Servent::handshakeStream(ChanInfo &chanInfo)
+{
+    bool gotPCP = false;
+    unsigned int reqPos = 0;
+    nsSwitchNum = 0;
+
+    handshakeStream_readHeaders(gotPCP, reqPos, nsSwitchNum);
+    handshakeStream_changeOutputProtocol(gotPCP, chanInfo);
+
+    // -----------------------------------------
+    bool chanFound = false;
+    bool chanReady = false;
+
+    auto ch = chanMgr->findChannelByID(chanInfo.id);
+    if (ch)
+    {
+        sendHeader = true;
+        if (reqPos)
+        {
+            streamPos = ch->rawData.findOldestPos(reqPos);
+        }else
+        {
+            streamPos = ch->rawData.getLatestPos();
+        }
+
+        chanReady = canStream(ch);
+    }
+
+    ChanHitList *chl = chanMgr->findHitList(chanInfo);
+    if (chl)
+    {
+        chanFound = true;
+    }
+
+    // -----------------------------------------
+    return handshakeStream_returnResponse(gotPCP, chanFound, chanReady, ch, chl, chanInfo);
 }
 
 // -----------------------------------
