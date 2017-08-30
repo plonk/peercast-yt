@@ -735,15 +735,10 @@ bool    Servent::pingHost(Host &rhost, GnuID &rsid)
 }
 
 // -----------------------------------
-bool Servent::handshakeStream(ChanInfo &chanInfo)
+// HTTP ヘッダーを読み込み、gotPCP, reqPos, nsSwitchNum, this->addMetaData,
+// this->agent を設定する。
+void Servent::handshakeStream_readHeaders(HTTP& http, bool& gotPCP, unsigned int& reqPos, int& nsSwitchNum)
 {
-    HTTP http(*sock);
-
-    bool gotPCP = false;
-    unsigned int reqPos = 0;
-
-    nsSwitchNum = 0;
-
     while (http.nextHeader())
     {
         char *arg = http.getArgStr();
@@ -772,7 +767,18 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 
         LOG_DEBUG("Stream: %s", http.cmdLine);
     }
+}
 
+// -----------------------------------
+bool Servent::handshakeStream(ChanInfo &chanInfo)
+{
+    HTTP http(*sock);
+
+    bool gotPCP = false;
+    unsigned int reqPos = 0;
+    nsSwitchNum = 0;
+
+    handshakeStream_readHeaders(http, gotPCP, reqPos, nsSwitchNum);
     if ((!gotPCP) && (outputProtocol == ChanInfo::SP_PCP))
         outputProtocol = ChanInfo::SP_PEERCAST;
 

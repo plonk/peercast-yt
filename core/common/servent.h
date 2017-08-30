@@ -159,6 +159,7 @@ public:
     void    processOutChannel();
 
     bool    handshakeStream(ChanInfo &);
+    void    handshakeStream_readHeaders(HTTP& http, bool& gotPCP, unsigned int& reqPos, int& nsSwitchNum);
     void    handshakeGiv(GnuID &);
 
     void    handshakeICY(Channel::SRC_TYPE, bool);
