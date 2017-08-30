@@ -739,10 +739,10 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 {
     HTTP http(*sock);
 
-    bool gotPCP=false;
-    unsigned int reqPos=0;
+    bool gotPCP = false;
+    unsigned int reqPos = 0;
 
-    nsSwitchNum=0;
+    nsSwitchNum = 0;
 
     while (http.nextHeader())
     {
@@ -765,7 +765,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 
             if (ssc || so)
             {
-                nsSwitchNum=1;
+                nsSwitchNum = 1;
                 //nsSwitchNum = atoi(ssc+20);
             }
         }
@@ -786,8 +786,8 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
         outputProtocol = ChanInfo::SP_MMS;
     }
 
-    bool chanFound=false;
-    bool chanReady=false;
+    bool chanFound = false;
+    bool chanReady = false;
 
     auto ch = chanMgr->findChannelByID(chanInfo.id);
     if (ch)
@@ -843,8 +843,8 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                 ChanHit best;
 
                 // search for up to 8 other hits
-                int cnt=0;
-                for (int i=0; i<8; i++)
+                int cnt = 0;
+                for (int i = 0; i < 8; i++)
                 {
                     best.init();
 
@@ -974,7 +974,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
         }
     } else {
         if (chanInfo.contentType != ChanInfo::T_MP3)
-            addMetadata=false;
+            addMetadata = false;
 
         if (addMetadata && (outputProtocol == ChanInfo::SP_HTTP))       // winamp mp3 metadata check
         {
