@@ -159,7 +159,7 @@ public:
     void    processOutChannel();
 
     bool    handshakeStream(ChanInfo &);
-    void    handshakeStream_readHeaders(HTTP& http, bool& gotPCP, unsigned int& reqPos, int& nsSwitchNum);
+    void    handshakeStream_readHeaders(bool& gotPCP, unsigned int& reqPos, int& nsSwitchNum);
     void    handshakeStream_changeOutputProtocol(bool gotPCP, const ChanInfo& chanInfo);
     void    handshakeGiv(GnuID &);
 
