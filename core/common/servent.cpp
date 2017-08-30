@@ -1054,7 +1054,6 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
     handshakeStream_readHeaders(gotPCP, reqPos, nsSwitchNum);
     handshakeStream_changeOutputProtocol(gotPCP, chanInfo);
 
-    // -----------------------------------------
     bool chanFound = false;
     bool chanReady = false;
 
@@ -1079,7 +1078,6 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
         chanFound = true;
     }
 
-    // -----------------------------------------
     return handshakeStream_returnResponse(gotPCP, chanFound, chanReady, ch, chl, chanInfo);
 }
 
