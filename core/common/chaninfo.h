@@ -131,7 +131,7 @@ public:
     const char          *getTypeStr();
     std::string         getTypeStringLong();
     const char          *getTypeExt();
-    const char          *getMIMEType();
+    const char          *getMIMEType() const;
     static const char   *getTypeStr(TYPE);
     static const char   *getProtocolStr(PROTOCOL);
     static const char   *getTypeExt(TYPE);

@@ -73,13 +73,13 @@ const char *ChanInfo::getTypeExt()
 }
 
 // -----------------------------------
-const char *ChanInfo::getMIMEType()
+const char *ChanInfo::getMIMEType() const
 {
     if (MIMEType.isEmpty()) {
         return getMIMEType(contentType);
     }
     else {
-        return MIMEType.cstr();
+        return MIMEType.c_str();
     }
 }
 
