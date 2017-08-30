@@ -792,9 +792,95 @@ void Servent::handshakeStream_changeOutputProtocol(bool gotPCP, const ChanInfo& 
 }
 
 // -----------------------------------
+void Servent::handshakeStream_returnStreamHeaders(AtomStream& atom, bool gotPCP,
+                                                  std::shared_ptr<Channel> ch, const ChanInfo& chanInfo,
+                                                  Host& rhost)
+{
+    if (chanInfo.contentType != ChanInfo::T_MP3)
+        addMetadata = false;
+
+    if (addMetadata && (outputProtocol == ChanInfo::SP_HTTP))       // winamp mp3 metadata check
+    {
+        sock->writeLine(ICY_OK);
+
+        sock->writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
+        sock->writeLineF("icy-name:%s", chanInfo.name.c_str());
+        sock->writeLineF("icy-br:%d", chanInfo.bitrate);
+        sock->writeLineF("icy-genre:%s", chanInfo.genre.c_str());
+        sock->writeLineF("icy-url:%s", chanInfo.url.c_str());
+        sock->writeLineF("icy-metaint:%d", chanMgr->icyMetaInterval);
+        sock->writeLineF("%s %s", PCX_HS_CHANNELID, chanInfo.id.str().c_str());
+
+        sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_MP3);
+    }else
+    {
+        sock->writeLine(HTTP_SC_OK);
+
+        if ((chanInfo.contentType != ChanInfo::T_ASX) && (chanInfo.contentType != ChanInfo::T_WMV) && (chanInfo.contentType != ChanInfo::T_WMA))
+        {
+            sock->writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
+
+            sock->writeLine("Accept-Ranges: none");
+
+            sock->writeLineF("x-audiocast-name: %s", chanInfo.name.c_str());
+            sock->writeLineF("x-audiocast-bitrate: %d", chanInfo.bitrate);
+            sock->writeLineF("x-audiocast-genre: %s", chanInfo.genre.c_str());
+            sock->writeLineF("x-audiocast-description: %s", chanInfo.desc.c_str());
+            sock->writeLineF("x-audiocast-url: %s", chanInfo.url.c_str());
+            sock->writeLineF("%s %s", PCX_HS_CHANNELID, chanInfo.id.str().c_str());
+        }
+
+        if (outputProtocol == ChanInfo::SP_HTTP)
+        {
+            switch (chanInfo.contentType)
+            {
+            case ChanInfo::T_MOV:
+                sock->writeLine("Connection: close");
+                sock->writeLine("Content-Length: 10000000");
+                sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_MOV);
+                break;
+            }
+            sock->writeLineF("%s %s", HTTP_HS_CONTENT, chanInfo.getMIMEType());
+        } else if (outputProtocol == ChanInfo::SP_MMS)
+        {
+            sock->writeLine("Server: Rex/9.0.0.2980");
+            sock->writeLine("Cache-Control: no-cache");
+            sock->writeLine("Pragma: no-cache");
+            sock->writeLine("Pragma: client-id=3587303426");
+            sock->writeLine("Pragma: features=\"broadcast, playlist\"");
+
+            if (nsSwitchNum)
+            {
+                sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_MMS);
+            }else
+            {
+                sock->writeLine("Content-Type: application/vnd.ms.wms-hdr.asfv1");
+                if (ch)
+                    sock->writeLineF("Content-Length: %d", ch->headPack.len);
+                sock->writeLine("Connection: Keep-Alive");
+            }
+        } else if (outputProtocol == ChanInfo::SP_PCP)
+        {
+            sock->writeLineF("%s %d", PCX_HS_POS, streamPos);
+            sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XPCP);
+        }else if (outputProtocol == ChanInfo::SP_PEERCAST)
+        {
+            sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XPEERCAST);
+        }
+    }
+    sock->writeLine("");
+
+    if (gotPCP)
+    {
+        handshakeIncomingPCP(atom, rhost, remoteID, agent);
+        atom.writeInt(PCP_OK, 0);
+    }
+}
+
+// -----------------------------------
 bool Servent::handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool chanReady,
-                                            std::shared_ptr<Channel> ch, ChanHitList* chl,
-                                            const ChanInfo& chanInfo)
+                                             std::shared_ptr<Channel> ch, ChanHitList* chl,
+                                             const ChanInfo& chanInfo)
 {
     bool result = false;
     Host rhost = sock->host;
@@ -808,7 +894,7 @@ bool Servent::handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool c
         return false;
     }
 
-    if (!chanReady)
+    if (!chanReady)       // cannot stream
     {
         if (outputProtocol == ChanInfo::SP_PCP)
         {
@@ -958,87 +1044,9 @@ bool Servent::handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool c
             sock->writeLine("");
             result = false;
         }
-    } else {
-        if (chanInfo.contentType != ChanInfo::T_MP3)
-            addMetadata = false;
-
-        if (addMetadata && (outputProtocol == ChanInfo::SP_HTTP))       // winamp mp3 metadata check
-        {
-            sock->writeLine(ICY_OK);
-
-            sock->writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
-            sock->writeLineF("icy-name:%s", chanInfo.name.c_str());
-            sock->writeLineF("icy-br:%d", chanInfo.bitrate);
-            sock->writeLineF("icy-genre:%s", chanInfo.genre.c_str());
-            sock->writeLineF("icy-url:%s", chanInfo.url.c_str());
-            sock->writeLineF("icy-metaint:%d", chanMgr->icyMetaInterval);
-            sock->writeLineF("%s %s", PCX_HS_CHANNELID, chanInfo.id.str().c_str());
-
-            sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_MP3);
-        }else
-        {
-            sock->writeLine(HTTP_SC_OK);
-
-            if ((chanInfo.contentType != ChanInfo::T_ASX) && (chanInfo.contentType != ChanInfo::T_WMV) && (chanInfo.contentType != ChanInfo::T_WMA))
-            {
-                sock->writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
-
-                sock->writeLine("Accept-Ranges: none");
-
-                sock->writeLineF("x-audiocast-name: %s", chanInfo.name.c_str());
-                sock->writeLineF("x-audiocast-bitrate: %d", chanInfo.bitrate);
-                sock->writeLineF("x-audiocast-genre: %s", chanInfo.genre.c_str());
-                sock->writeLineF("x-audiocast-description: %s", chanInfo.desc.c_str());
-                sock->writeLineF("x-audiocast-url: %s", chanInfo.url.c_str());
-                sock->writeLineF("%s %s", PCX_HS_CHANNELID, chanInfo.id.str().c_str());
-            }
-
-            if (outputProtocol == ChanInfo::SP_HTTP)
-            {
-                switch (chanInfo.contentType)
-                {
-                    case ChanInfo::T_MOV:
-                        sock->writeLine("Connection: close");
-                        sock->writeLine("Content-Length: 10000000");
-                        sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_MOV);
-                        break;
-                }
-                sock->writeLineF("%s %s", HTTP_HS_CONTENT, chanInfo.getMIMEType());
-            } else if (outputProtocol == ChanInfo::SP_MMS)
-            {
-                sock->writeLine("Server: Rex/9.0.0.2980");
-                sock->writeLine("Cache-Control: no-cache");
-                sock->writeLine("Pragma: no-cache");
-                sock->writeLine("Pragma: client-id=3587303426");
-                sock->writeLine("Pragma: features=\"broadcast, playlist\"");
-
-                if (nsSwitchNum)
-                {
-                    sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_MMS);
-                }else
-                {
-                    sock->writeLine("Content-Type: application/vnd.ms.wms-hdr.asfv1");
-                    if (ch)
-                        sock->writeLineF("Content-Length: %d", ch->headPack.len);
-                    sock->writeLine("Connection: Keep-Alive");
-                }
-            } else if (outputProtocol == ChanInfo::SP_PCP)
-            {
-                sock->writeLineF("%s %d", PCX_HS_POS, streamPos);
-                sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XPCP);
-            }else if (outputProtocol == ChanInfo::SP_PEERCAST)
-            {
-                sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XPEERCAST);
-            }
-        }
-        sock->writeLine("");
+    } else {              // we CAN stream
+        handshakeStream_returnStreamHeaders(atom, gotPCP, ch, chanInfo, rhost);
         result = true;
-
-        if (gotPCP)
-        {
-            handshakeIncomingPCP(atom, rhost, remoteID, agent);
-            atom.writeInt(PCP_OK, 0);
-        }
     }
 
     return result;

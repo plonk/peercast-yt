@@ -163,7 +163,10 @@ public:
     void    handshakeStream_changeOutputProtocol(bool gotPCP, const ChanInfo& chanInfo);
     bool    handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool chanReady,
                                            std::shared_ptr<Channel> ch, ChanHitList* chl,
-                                           ChanInfo& chanInfo);
+                                           const ChanInfo& chanInfo);
+    void    handshakeStream_returnStreamHeaders(AtomStream& atom, bool gotPCP,
+                                                std::shared_ptr<Channel> ch, const ChanInfo& chanInfo,
+                                                Host& rhost);
     void    handshakeGiv(GnuID &);
 
     void    handshakeICY(Channel::SRC_TYPE, bool);
