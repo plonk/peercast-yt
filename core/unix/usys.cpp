@@ -107,7 +107,7 @@ void USys::callLocalURL(const char *str, int port)
     if (retval == -1)
     {
         LOG_ERROR("USys::callLocalURL: system(3) returned -1");;
-    }else if (WIFEXITED(retval))
+    }else if (!WIFEXITED(retval))
     {
         LOG_ERROR("Usys::callLocalURL: Shell terminated abnormally");
     }else if (WEXITSTATUS(retval) != 0)
