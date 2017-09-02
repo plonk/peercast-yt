@@ -6017,7 +6017,7 @@ Object.defineProperty(flvjs, 'version', {
     enumerable: true,
     get: function get() {
         // replaced by browserify-versionify transform
-        return '1.3.2';
+        return '1.3.3';
     }
 });
 
@@ -6259,7 +6259,7 @@ var FetchStreamLoader = function (_BaseLoader) {
                         _this3._onDataArrival(chunk, byteStart, _this3._receivedLength);
                     }
 
-                    return _this3._pump(reader);
+                    _this3._pump(reader);
                 }
             }).catch(function (e) {
                 if (e.code === 11 && _browser2.default.msedge) {
@@ -7853,6 +7853,11 @@ var MozChunkedLoader = function (_BaseLoader) {
     }, {
         key: '_onProgress',
         value: function _onProgress(e) {
+            if (this._status === _loader.LoaderStatus.kError) {
+                // Ignore error response
+                return;
+            }
+
             if (this._contentLength === null) {
                 if (e.total !== null && e.total !== 0) {
                     this._contentLength = e.total;
@@ -8384,7 +8389,13 @@ var RangeLoader = function (_BaseLoader) {
             this._range = range;
             this._status = _loader.LoaderStatus.kConnecting;
 
-            if (!this._totalLengthReceived) {
+            var useRefTotalLength = false;
+            if (this._dataSource.filesize != undefined && this._dataSource.filesize !== 0) {
+                useRefTotalLength = true;
+                this._totalLength = this._dataSource.filesize;
+            }
+
+            if (!this._totalLengthReceived && !useRefTotalLength) {
                 // We need total filesize
                 this._waitForTotalLength = true;
                 this._internalOpen(this._dataSource, { from: 0, to: -1 });
@@ -8506,6 +8517,11 @@ var RangeLoader = function (_BaseLoader) {
     }, {
         key: '_onProgress',
         value: function _onProgress(e) {
+            if (this._status === _loader.LoaderStatus.kError) {
+                // Ignore error response
+                return;
+            }
+
             if (this._contentLength === null) {
                 var openNextRange = false;
 
@@ -8569,6 +8585,11 @@ var RangeLoader = function (_BaseLoader) {
     }, {
         key: '_onLoad',
         value: function _onLoad(e) {
+            if (this._status === _loader.LoaderStatus.kError) {
+                // Ignore error response
+                return;
+            }
+
             if (this._waitForTotalLength) {
                 this._waitForTotalLength = false;
                 return;
