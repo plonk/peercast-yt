@@ -362,4 +362,48 @@ std::string escapeshellarg_unix(const std::string& str)
     return buf;
 }
 
+std::string STR()
+{
+    return "";
+}
+
+std::vector<std::string> to_lines(const std::string& text)
+{
+    std::vector<std::string> res;
+    std::string line;
+
+    for (auto it = text.begin(); it != text.end(); ++it)
+    {
+        if (*it == '\n')
+        {
+            line += *it;
+            res.push_back(line);
+            line.clear();
+        }else
+        {
+            line.push_back(*it);
+        }
+    }
+    res.push_back(line);
+
+    if (res.back() == "")
+        res.pop_back();
+
+    return res;
+}
+
+std::string indent_tab(const std::string& text, int n)
+{
+    if (n < 0)
+        throw std::domain_error("domain error");
+
+    auto lines = to_lines(text);
+    auto space = repeat("\t", n);
+
+    for (int i = 0; i < lines.size(); ++i)
+        lines[i] = space + lines[i];
+
+    return join("", lines);
+}
+
 } // namespace str
