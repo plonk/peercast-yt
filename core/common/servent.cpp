@@ -376,8 +376,6 @@ void Servent::initIncoming(ClientSocket *s, unsigned int a)
             throw StreamException("Can`t start thread");
     }catch (StreamException &e)
     {
-        //LOG_ERROR("!!FATAL!! Incoming error: %s", e.msg);
-        //servMgr->shutdownTimer = 1;
         kill();
 
         LOG_ERROR("INCOMING FAILED: %s", e.msg);
@@ -2022,28 +2020,6 @@ void Servent::processStream(bool doneHandshake, ChanInfo &chanInfo)
 
     setStatus(S_CLOSING);
 }
-
-// -----------------------------------------
-#if 0
-// debug
-        FileStream file;
-        file.openReadOnly("c://test.mp3");
-
-        LOG_DEBUG("raw file read");
-        char buf[4000];
-        int cnt=0;
-        while (!file.eof())
-        {
-            LOG_DEBUG("send %d", cnt++);
-            file.read(buf, sizeof(buf));
-            sock->write(buf, sizeof(buf));
-        }
-        file.close();
-        LOG_DEBUG("raw file sent");
-
-    return;
-// debug
-#endif
 
 // -----------------------------------
 bool Servent::waitForChannelHeader(ChanInfo &info)
