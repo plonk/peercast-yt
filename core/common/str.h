@@ -52,6 +52,8 @@ namespace str
     {
         return STR(value) + STR(rest...);
     }
+
+    bool validate_utf8(const std::string& str);
 }
 
 #endif
