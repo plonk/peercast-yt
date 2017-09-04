@@ -246,3 +246,13 @@ TEST_F(strFixture, indent_tab)
     ASSERT_EQ("\tfoo\n\tbar", indent_tab("foo\nbar"));
     ASSERT_EQ("\tfoo\n\tbar\n", indent_tab("foo\nbar\n"));
 }
+
+TEST_F(strFixture, inspect)
+{
+    ASSERT_EQ("\"\"", inspect(""));
+    ASSERT_EQ("\"a\"", inspect("a"));
+    ASSERT_EQ("\"\\n\"", inspect("\n"));
+    ASSERT_EQ("\"\\x00\"", inspect(std::string({'\0'})));
+    ASSERT_EQ("\"表\"", inspect("表")); // 表
+    ASSERT_EQ("\"漢\"", inspect("漢")); // 漢
+}
