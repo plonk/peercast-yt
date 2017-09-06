@@ -306,7 +306,7 @@ namespace amf0
 
         Date date()
         {
-            if (!isDate()) throw std::runtime_error("not date");
+            if (!isDate()) throw std::runtime_error("not a date");
             return m_date;
         }
 
