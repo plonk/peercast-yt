@@ -98,6 +98,18 @@ TEST_F(amf0Fixture, Array)
     ASSERT_EQ("{\"age\":\"30\",\"alias\":\"Mike\",\"name\":\"Mike\"}", o.inspect());
 }
 
+TEST_F(amf0Fixture, Date)
+{
+    auto d = Value::date(0, 0);
+    ASSERT_FALSE(d.isString());
+    ASSERT_FALSE(d.isObject());
+    ASSERT_FALSE(d.isArray());
+    ASSERT_TRUE(d.isDate());
+
+    ASSERT_EQ("(0.000000, 0)",
+              d.inspect());
+}
+
 TEST_F(amf0Fixture, Deserializer_String)
 {
     amf0::Deserializer d;
@@ -162,4 +174,18 @@ TEST_F(amf0Fixture, serialize_Object)
     Value o = {{"hoge", 123}};
     StringStream mem(o.serialize());
     ASSERT_EQ(Value::object({{"hoge", Value::number(123)}}), Deserializer().readValue(mem));
+}
+
+TEST_F(amf0Fixture, compare_Date)
+{
+    ASSERT_EQ(Value::date(0, 0), Value::date(0, 0));
+    ASSERT_NE(Value::date(0, 1), Value::date(0, 0)); // timezone difference
+    ASSERT_NE(Value::date(0, 0), Value::date(0.001, 0)); // one millisecond after the epoch
+}
+
+TEST_F(amf0Fixture, serialize_Date)
+{
+    Value d = amf0::Date(12, 34);
+    StringStream mem(d.serialize());
+    ASSERT_EQ(Value::date(12, 34), Deserializer().readValue(mem));
 }
