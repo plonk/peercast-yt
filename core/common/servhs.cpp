@@ -1550,6 +1550,112 @@ void Servent::CMD_update_channel_info(char *cmd, HTTP& http, String& jumpStr)
     jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
 }
 
+static std::string dumpHit(ChanHit* hit)
+{
+    using namespace str;
+
+    std::string buf;
+    buf += STR("ChanHit\n");
+    buf += STR("\thost = ", hit->host.str(), "\n");
+    buf += STR("\trhost[0] = ", hit->rhost[0].str(), "\n");
+    buf += STR("\trhost[1] = ", hit->rhost[1].str(), "\n");
+    buf += STR("\tversionString() = ", hit->versionString(), "\n");
+    buf += STR("\ttime = ", hit->time, "\n");
+    buf += STR("\tupTime = ", hit->upTime, "\n");
+    buf += STR("\tlastContact = ", hit->lastContact, "\n");
+    return buf;
+}
+
+static std::string dumpChanInfo(const ChanInfo& info)
+{
+    using namespace str;
+
+    std::string buf;
+
+    buf += STR("ChanInfo\n");
+    buf += STR("\tname = ", inspect(info.name), "\n");
+    buf += STR("\tid = ", info.id.str(), "\n");
+    buf += STR("\tbcID = ", info.bcID.str(), "\n");
+    buf += STR("\tbitrate = ", info.bitrate, "\n");
+    buf += STR("\tcontentType = ", info.contentType, "\n");
+    buf += STR("\tcontentTypeStr = ", info.contentTypeStr, "\n");
+    buf += STR("\tMIMEType = ", info.MIMEType, "\n");
+    buf += STR("\tstreamExt = ", info.streamExt, "\n");
+    buf += STR("\tsrcProtocol = ", info.srcProtocol, "\n");
+    buf += STR("\tlastPlayStart = ", info.lastPlayStart, "\n");
+    buf += STR("\tlastPlayEnd = ", info.lastPlayEnd, "\n");
+    buf += STR("\tnumSkips = ", info.numSkips, "\n");
+    buf += STR("\tcreatedTime = ", info.createdTime, "\n");
+    buf += STR("\tstatus = ", info.status, "\n");
+
+    buf += STR("\ttrack: [...]\n");
+
+    buf += STR("\tdesc = ", inspect(info.desc), "\n");
+    buf += STR("\tgenre = ", inspect(info.genre), "\n");
+    buf += STR("\turl = ", info.url, "\n");
+    buf += STR("\tcomment = ", inspect(info.comment), "\n");
+
+    return buf;
+}
+
+static std::string dumpHitList(ChanHitList* hitlist)
+{
+    using namespace str;
+
+    std::string buf;
+    buf += STR("ChanHitList\n");
+
+    buf += STR("\tused = ", hitlist->isUsed(), "\n");
+    buf += STR("\tlastHitTime = ", hitlist->lastHitTime, "\n");
+    buf += STR("\tinfo:\n");
+    buf += indent_tab(dumpChanInfo(hitlist->info));
+
+    buf += "\tHits:\n";
+    for (auto hit = hitlist->hit;
+              hit != nullptr;
+              hit = hit->next)
+        buf += indent_tab(dumpHit(hit), 2);
+
+    return buf;
+}
+
+void Servent::CMD_dump_hitlists(char *cmd, HTTP& http, String& jumpStr)
+{
+    using namespace str;
+
+    std::string buf;
+
+    {
+        std::lock_guard<std::recursive_mutex> cs(chanMgr->lock);
+
+        int nlists = 0;
+        for (auto hitlist = chanMgr->hitlist;
+                  hitlist != nullptr;
+                  hitlist = hitlist->next)
+            nlists++;
+
+        buf += STR(nlists, " hit list", nlists!=1 ? "s" : "", " found.\n\n");
+
+        for (auto hitlist = chanMgr->hitlist;
+                  hitlist != nullptr;
+                  hitlist = hitlist->next)
+        {
+            buf += dumpHitList(hitlist);
+
+            if (hitlist->next)
+                buf += '\n';
+        }
+    }
+
+    http.writeLine(HTTP_SC_OK);
+    http.writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
+    http.writeLineF("%s %zu", HTTP_HS_LENGTH, buf.size());
+    http.writeLineF("%s %s", HTTP_HS_CONTENT, "text/plain;charset=utf-8");
+    http.writeLine("");
+
+    http.writeString(buf);
+}
+
 void Servent::handshakeCMD(char *query)
 {
     String jumpStr;
@@ -1581,6 +1687,9 @@ void Servent::handshakeCMD(char *query)
         }else if (cmd == "control_rtmp")
         {
             CMD_control_rtmp(query, http, jumpStr);
+        }else if (cmd == "dump_hitlists")
+        {
+            CMD_dump_hitlists(query, http, jumpStr);
         }else if (cmd == "edit_bcid")
         {
             CMD_edit_bcid(query, http, jumpStr);
