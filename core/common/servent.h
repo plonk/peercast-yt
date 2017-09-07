@@ -234,6 +234,8 @@ public:
     static bool hasValidAuthToken(const std::string& requestFilename);
     static PlayList::TYPE playListType(ChanInfo &info);
 
+    static std::string formatTimeDifference(unsigned int t, unsigned int currentTime);
+
     TYPE                type;
     STATUS              status;
 

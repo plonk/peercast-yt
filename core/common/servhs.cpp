@@ -1555,68 +1555,135 @@ static std::string dumpHit(ChanHit* hit)
     using namespace str;
 
     std::string buf;
-    buf += STR("ChanHit\n");
-    buf += STR("\thost = ", hit->host.str(), "\n");
-    buf += STR("\trhost[0] = ", hit->rhost[0].str(), "\n");
-    buf += STR("\trhost[1] = ", hit->rhost[1].str(), "\n");
-    buf += STR("\tversionString() = ", hit->versionString(), "\n");
-    buf += STR("\ttime = ", hit->time, "\n");
-    buf += STR("\tupTime = ", hit->upTime, "\n");
-    buf += STR("\tlastContact = ", hit->lastContact, "\n");
-    return buf;
+    buf += STR("host = ", hit->host.str(), "\n");
+    buf += STR("rhost[0] = ", hit->rhost[0].str(), "\n");
+    buf += STR("rhost[1] = ", hit->rhost[1].str(), "\n");
+    buf += STR("numlisteners = ", hit->numListeners, "\n");
+    buf += STR("numRelays = ", hit->numRelays, "\n");
+    buf += STR("numHops = ", hit->numHops, "\n");
+
+    buf += STR("sessionID = ", hit->sessionID.str(), "\n");
+    buf += STR("chanID = ", hit->chanID.str(), "\n");
+
+    //buf += STR("versionString = ", hit->versionString(), "\n");
+
+    buf += STR("version = ", hit->version, "\n");
+    buf += STR("versionVP = ", hit->versionVP, "\n");
+    buf += STR("versionExPrefix = ", inspect(std::string(hit->versionExPrefix, hit->versionExPrefix + 2)), "\n");
+    buf += STR("versionExNumber = ", hit->versionExNumber, "\n");
+
+    buf += STR("oldestPos = ", hit->oldestPos, "\n");
+    buf += STR("newestPos = ", hit->newestPos, "\n");
+
+    buf += STR("firewalled = ", hit->firewalled, "\n");
+    buf += STR("stable = ", hit->stable, "\n");
+    buf += STR("tracker = ", hit->tracker, "\n");
+    buf += STR("recv = ", hit->recv, "\n");
+    buf += STR("yp = ", hit->yp, "\n");
+    buf += STR("dead = ", hit->dead, "\n");
+    buf += STR("direct = ", hit->direct, "\n");
+    buf += STR("relay = ", hit->relay, "\n");
+    buf += STR("cin = ", hit->cin, "\n");
+
+    buf += STR("uphost = ", hit->uphost.str(), "\n");
+    buf += STR("uphostHops = ", hit->uphostHops, "\n");
+
+    buf += STR("time = ", hit->time,
+               " ", Servent::formatTimeDifference(hit->time, sys->getTime()), "\n");
+    buf += STR("upTime = ", hit->upTime, "\n");
+    buf += STR("lastContact = ", hit->lastContact,
+               (hit->lastContact) ? " "+Servent::formatTimeDifference(hit->lastContact,sys->getTime()) : "",
+               "\n");
+
+    return "ChanHit\n" + indent_tab(buf);
+}
+
+std::string Servent::formatTimeDifference(unsigned int t, unsigned int currentTime)
+{
+    using namespace str;
+
+    int d = (uint64_t) currentTime - t;
+
+    if (d < 0)
+        return STR("(", d, "s into the future)");
+    else if (d > 0)
+        return STR("(", d, "s ago)");
+    else
+        return "just now";
+}
+
+static std::string dumpTrack(const TrackInfo& track)
+{
+    using namespace str;
+
+    std::string b;
+
+    b += STR("contact = ", inspect(track.contact), "\n");
+    b += STR("title = ", inspect(track.title), "\n");
+    b += STR("artist = ", inspect(track.artist), "\n");
+    b += STR("album = ", inspect(track.album), "\n");
+    b += STR("genre = ", inspect(track.genre), "\n");
+
+    return "TrackInfo\n" + indent_tab(b);
 }
 
 static std::string dumpChanInfo(const ChanInfo& info)
 {
     using namespace str;
 
-    std::string buf;
+    std::string b;
 
-    buf += STR("ChanInfo\n");
-    buf += STR("\tname = ", inspect(info.name), "\n");
-    buf += STR("\tid = ", info.id.str(), "\n");
-    buf += STR("\tbcID = ", info.bcID.str(), "\n");
-    buf += STR("\tbitrate = ", info.bitrate, "\n");
-    buf += STR("\tcontentType = ", info.contentType, "\n");
-    buf += STR("\tcontentTypeStr = ", info.contentTypeStr, "\n");
-    buf += STR("\tMIMEType = ", info.MIMEType, "\n");
-    buf += STR("\tstreamExt = ", info.streamExt, "\n");
-    buf += STR("\tsrcProtocol = ", info.srcProtocol, "\n");
-    buf += STR("\tlastPlayStart = ", info.lastPlayStart, "\n");
-    buf += STR("\tlastPlayEnd = ", info.lastPlayEnd, "\n");
-    buf += STR("\tnumSkips = ", info.numSkips, "\n");
-    buf += STR("\tcreatedTime = ", info.createdTime, "\n");
-    buf += STR("\tstatus = ", info.status, "\n");
+    b += STR("name = ", inspect(info.name), "\n");
+    b += STR("id = ", info.id.str(), "\n");
+    b += STR("bcID = ", info.bcID.str(), "\n");
+    b += STR("bitrate = ", info.bitrate, "\n");
+    b += STR("contentType = ", info.contentType, "\n");
+    b += STR("contentTypeStr = ", inspect(info.contentTypeStr), "\n");
+    b += STR("MIMEType = ", inspect(info.MIMEType), "\n");
+    b += STR("streamExt = ", inspect(info.streamExt), "\n");
+    b += STR("srcProtocol = ", info.srcProtocol, "\n");
+    b += STR("lastPlayStart = ", info.lastPlayStart, "\n");
+    b += STR("lastPlayEnd = ", info.lastPlayEnd, "\n");
+    b += STR("numSkips = ", info.numSkips, "\n");
+    b += STR("createdTime = ", info.createdTime,
+             " ", Servent::formatTimeDifference(info.createdTime, sys->getTime()), "\n");
+    b += STR("status = ", info.status, "\n");
 
-    buf += STR("\ttrack: [...]\n");
+    b += dumpTrack(info.track);
 
-    buf += STR("\tdesc = ", inspect(info.desc), "\n");
-    buf += STR("\tgenre = ", inspect(info.genre), "\n");
-    buf += STR("\turl = ", info.url, "\n");
-    buf += STR("\tcomment = ", inspect(info.comment), "\n");
+    b += STR("desc = ", inspect(info.desc), "\n");
+    b += STR("genre = ", inspect(info.genre), "\n");
+    b += STR("url = ", inspect(info.url), "\n");
+    b += STR("comment = ", inspect(info.comment), "\n");
 
-    return buf;
+    return "ChanInfo\n" + indent_tab(b);
 }
 
 static std::string dumpHitList(ChanHitList* hitlist)
 {
     using namespace str;
 
-    std::string buf;
-    buf += STR("ChanHitList\n");
+    std::string b;
+    b += STR("ChanHitList\n");
 
-    buf += STR("\tused = ", hitlist->isUsed(), "\n");
-    buf += STR("\tlastHitTime = ", hitlist->lastHitTime, "\n");
-    buf += STR("\tinfo:\n");
-    buf += indent_tab(dumpChanInfo(hitlist->info));
+    b += STR("\tused = ", hitlist->isUsed(), "\n");
+    b += STR("\tlastHitTime = ", hitlist->lastHitTime, "\n");
+    b += STR("\tinfo:\n");
+    b += indent_tab(dumpChanInfo(hitlist->info));
 
-    buf += "\tHits:\n";
+    int count = 0;
     for (auto hit = hitlist->hit;
               hit != nullptr;
               hit = hit->next)
-        buf += indent_tab(dumpHit(hit), 2);
+        count++;
 
-    return buf;
+    b += STR("\thit (", count, " entries):\n");
+    for (auto hit = hitlist->hit;
+              hit != nullptr;
+              hit = hit->next)
+        b += indent_tab(dumpHit(hit), 2);
+
+    return b;
 }
 
 void Servent::CMD_dump_hitlists(char *cmd, HTTP& http, String& jumpStr)
