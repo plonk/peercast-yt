@@ -206,3 +206,74 @@ TEST_F(strFixture, escapeshellarg_unix)
     ASSERT_EQ("\'abc\'\"\'\"\'def\'", str::escapeshellarg_unix("abc\'def"));
     ASSERT_EQ("\'ａｂｃ\'\"\'\"\'ｄｅｆ\'", str::escapeshellarg_unix("ａｂｃ\'ｄｅｆ"));
 }
+
+TEST_F(strFixture, STR)
+{
+    // no args
+    ASSERT_EQ("", STR());
+
+    // one arg
+    ASSERT_EQ("", STR(""));
+    ASSERT_EQ("", STR(std::string()));
+    ASSERT_EQ("0", STR(0));
+
+    // two args
+    ASSERT_EQ("x = 1", STR("x = ", 1));
+    ASSERT_EQ("x = 1", STR("x = ", (double) 1));
+    ASSERT_EQ("x = 1.234", STR("x = ", 1.2340));
+    ASSERT_EQ("x = A", STR("x = ", 'A'));
+    ASSERT_EQ("x = 65", STR("x = ", 65));
+    ASSERT_EQ("x = A", STR("x = ", (char) 65));
+
+    // many args
+    ASSERT_EQ("A1B2C3\n", STR("A", 1, "B", 2, "C", 3, '\n'));
+}
+
+TEST_F(strFixture, to_lines)
+{
+    ASSERT_EQ(std::vector<std::string>({}), str::to_lines(""));
+    ASSERT_EQ(std::vector<std::string>({"\n"}), str::to_lines("\n"));
+    ASSERT_EQ(std::vector<std::string>({"a\n", "b\n"}), str::to_lines("a\nb\n"));
+    ASSERT_EQ(std::vector<std::string>({"a\n", "b"}), str::to_lines("a\nb"));
+}
+
+TEST_F(strFixture, indent_tab)
+{
+    ASSERT_EQ("", indent_tab(""));
+    ASSERT_EQ("\t\n", indent_tab("\n"));
+    ASSERT_EQ("\tfoo", indent_tab("foo"));
+    ASSERT_EQ("\tfoo\n", indent_tab("foo\n"));
+    ASSERT_EQ("\tfoo\n\tbar", indent_tab("foo\nbar"));
+    ASSERT_EQ("\tfoo\n\tbar\n", indent_tab("foo\nbar\n"));
+}
+
+TEST_F(strFixture, inspect)
+{
+    ASSERT_EQ("\"\"", inspect(""));
+    ASSERT_EQ("\"a\"", inspect("a"));
+    ASSERT_EQ("\"\\n\"", inspect("\n"));
+    ASSERT_EQ("\"\\x00\"", inspect(std::string({'\0'})));
+    ASSERT_EQ("\"表\"", inspect("表")); // 表
+    ASSERT_EQ("\"漢\"", inspect("漢")); // 漢
+    ASSERT_EQ("\"\\x95\\\\\"", inspect("\x95\\")); // 表 in Shift_JIS
+    ASSERT_EQ("\"\\x8a\\xbf\"", inspect("\x8A\xBF")); // 漢 in Shift_JIS
+}
+
+TEST_F(strFixture, validate_utf8)
+{
+    ASSERT_TRUE(validate_utf8(""));
+    ASSERT_TRUE(validate_utf8(std::string({'\0'}))); // "\0"
+    ASSERT_TRUE(validate_utf8(std::string({(char)0xef, (char)0xbb, (char)0xbf}))); // BOM
+    ASSERT_TRUE(validate_utf8("a"));
+    ASSERT_TRUE(validate_utf8("あ"));
+    ASSERT_TRUE(validate_utf8("💩")); // PILE OF POO
+    ASSERT_TRUE(validate_utf8("aあ💩"));
+
+    ASSERT_FALSE(validate_utf8("\xff"));
+
+    // Shift_JIS
+    ASSERT_FALSE(validate_utf8("\x95\\"));   // 表
+    ASSERT_FALSE(validate_utf8("\x8A\xBF")); // 漢
+    ASSERT_FALSE(validate_utf8("\x83" "A")); // ア; KATAKANA LETTER A
+    ASSERT_FALSE(validate_utf8("\xB1"));     // ｱ; HALFWIDTH KATAKANA LETTER A
+}

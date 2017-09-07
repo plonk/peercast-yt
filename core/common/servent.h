@@ -234,6 +234,8 @@ public:
     static bool hasValidAuthToken(const std::string& requestFilename);
     static PlayList::TYPE playListType(ChanInfo &info);
 
+    static std::string formatTimeDifference(unsigned int t, unsigned int currentTime);
+
     TYPE                type;
     STATUS              status;
 
@@ -287,6 +289,7 @@ private:
     void CMD_clear(char *cmd, HTTP& http, String& jumpStr);
     void CMD_clearlog(char *cmd, HTTP& http, String& jumpStr);
     void CMD_control_rtmp(char *cmd, HTTP& http, String& jumpStr);
+    void CMD_dump_hitlists(char *cmd, HTTP& http, String& jumpStr);
     void CMD_edit_bcid(char *cmd, HTTP& http, String& jumpStr);
     void CMD_fetch(char *cmd, HTTP& http, String& jumpStr);
     void CMD_fetch_feeds(char *cmd, HTTP& http, String& jumpStr);
