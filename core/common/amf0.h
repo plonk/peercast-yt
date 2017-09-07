@@ -43,6 +43,22 @@ namespace amf0
     class Value;
     typedef std::pair<std::string,Value> KeyValuePair;
 
+    struct Date
+    {
+        Date()
+            : unixTime(0), timezone(0) {}
+        Date(double aUnixTime, uint16_t aTimezone)
+            : unixTime(aUnixTime), timezone(aTimezone) {}
+
+        bool operator == (const Date& rhs) const
+        {
+            return unixTime == rhs.unixTime && timezone == rhs.timezone;
+        }
+
+        double unixTime;
+        uint16_t timezone;
+    };
+
     class Value
     {
     public:
@@ -54,6 +70,7 @@ namespace amf0
             kArray,
             kStrictArray,
             kNull,
+            kDate,
         };
 
         Value() : m_type(kNull), m_number(0.0), m_bool(false) {}
@@ -67,6 +84,7 @@ namespace amf0
             for (auto pair: l)
                 m_object[pair.first] = pair.second;
         }
+        Value(const Date& d) : m_type(kDate), m_number(0.0), m_bool(false), m_date(d) {}
 
         static Value number(double d)
         { Value v; v.m_type = kNumber; v.m_number = d; return v; }
@@ -119,6 +137,11 @@ namespace amf0
         static Value strictArray(const std::vector<Value>& l)
         { Value v; v.m_type = kStrictArray; v.m_strict_array = l; return v; }
 
+        static Value date(const Date& d)
+        { return Value(d); }
+        static Value date(double unixTime, uint16_t timezone = 0)
+        { Value v; v.m_type = kDate; v.m_date = Date(unixTime, timezone); return v; }
+
         bool isNumber() { return m_type == kNumber; }
         bool isObject() { return m_type == kObject; }
         bool isString() { return m_type == kString; }
@@ -126,6 +149,7 @@ namespace amf0
         bool isArray() { return m_type == kArray; }
         bool isStrictArray() { return m_type == kStrictArray; }
         bool isNull() { return m_type == kNull; }
+        bool isDate() { return m_type == kDate; }
 
         bool operator == (const Value& rhs) const
         {
@@ -143,6 +167,8 @@ namespace amf0
                 return this->m_string == rhs.m_string;
             case kStrictArray:
                 return this->m_strict_array == rhs.m_strict_array;
+            case kDate:
+                return this->m_date == rhs.m_date;
             default:
                 throw std::runtime_error("unknown AMF value type " + std::to_string(m_type));
             }
@@ -192,6 +218,17 @@ namespace amf0
                 b += AMF_NULL;
                 return b;
             }
+            case kDate:
+            {
+                b += AMF_DATE;
+                auto p = reinterpret_cast<const char*>(&m_date.unixTime);
+                for (int i = 7; i >= 0; i--)
+                    b += p[i];
+                p = reinterpret_cast<const char*>(&m_date.timezone);
+                for (int i = 1; i >= 0; i--)
+                    b += p[i];
+                return b;
+            }
             default:
                 throw std::runtime_error("serialize: unknown type");
             }
@@ -224,6 +261,8 @@ namespace amf0
                 return "null";
             case kBool:
                 return (m_bool) ? "true" : "false";
+            case kDate:
+                return "(" + std::to_string(m_date.unixTime) + ", " + std::to_string(m_date.timezone) + ")";
             default:
                 throw std::runtime_error(str::format("inspect: unknown type %d", m_type));
             }
@@ -265,12 +304,19 @@ namespace amf0
             return nullptr;
         }
 
+        Date date()
+        {
+            if (!isDate()) throw std::runtime_error("not a date");
+            return m_date;
+        }
+
         int                         m_type;
         double                      m_number;
         bool                        m_bool;
         std::string                 m_string;
         std::map<std::string,Value> m_object;
         std::vector<Value>          m_strict_array;
+        Date                        m_date;
     };
 
     class Deserializer
@@ -281,9 +327,14 @@ namespace amf0
             return in.readChar() != 0;
         }
 
-        int readInt(Stream &in)
+        int32_t readInt32(Stream &in)
         {
             return (in.readChar() << 24) | (in.readChar() << 16) | (in.readChar() << 8) | (in.readChar());
+        }
+
+        int16_t readInt16(Stream& in)
+        {
+            return (in.readChar() << 8) | (in.readChar());
         }
 
         std::string readString(Stream &in)
@@ -342,12 +393,12 @@ namespace amf0
             }
             case AMF_ARRAY:
             {
-                int len = readInt(in); // length
+                int len = readInt32(in); // length
                 return Value::array(readObject(in));
             }
             case AMF_STRICTARRAY:
             {
-                int len = readInt(in);
+                int len = readInt32(in);
                 std::vector<Value> list;
                 for (int i = 0; i < len; i++) {
                     list.push_back(readValue(in));
@@ -359,7 +410,11 @@ namespace amf0
                 return Value(nullptr);
             }
             case AMF_DATE:
-                throw std::runtime_error("Date type is unimplemented");
+            {
+                double unixTime = readDouble(in);
+                uint16_t timeZone = readInt16(in);
+                return Value::date(unixTime, timeZone);
+            }
             default:
                 throw std::runtime_error("unknown AMF value type " + std::to_string(type));
             }
