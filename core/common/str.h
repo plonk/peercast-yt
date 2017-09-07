@@ -2,6 +2,7 @@
 #define _STR_H
 
 #include <string>
+#include <sstream> // to implement str
 #include <vector>
 
 namespace str
@@ -32,6 +33,27 @@ namespace str
 
     std::string rstrip(const std::string& str);
     std::string escapeshellarg_unix(const std::string& str);
+
+    std::vector<std::string> to_lines(const std::string& text);
+    std::string indent_tab(const std::string& text, int n = 1);
+
+    // str::STR(...)
+    // Convert the arguments to strings (as the << operator does) and concatenate them.
+    std::string STR();
+    template<typename T>
+    std::string STR(T value)
+    {
+        std::stringstream os;
+        os << value;
+        return os.str();
+    }
+    template<typename T, typename... Ts>
+    std::string STR(T value, Ts... rest)
+    {
+        return STR(value) + STR(rest...);
+    }
+
+    bool validate_utf8(const std::string& str);
 }
 
 #endif

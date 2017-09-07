@@ -25,12 +25,11 @@ std::string hexdump(const std::string& in)
     return res;
 }
 
-static std::string inspect(char c)
+static std::string inspect(char c, bool utf8)
 {
     int d = static_cast<unsigned char>(c);
 
-    // FIXME: UTF8 を通す為にしている。
-    if (d >= 0x80)
+    if (utf8 && d >= 0x80)
         return string() + (char) d;
 
     if (isprint(d)) {
@@ -60,10 +59,11 @@ static std::string inspect(char c)
 
 std::string inspect(const std::string str)
 {
+    bool utf8 = validate_utf8(str);
     std::string res = "\"";
 
     for (auto c : str) {
-        res += inspect(c);
+        res += inspect(c, utf8);
     }
     res += "\"";
     return res;
@@ -360,6 +360,98 @@ std::string escapeshellarg_unix(const std::string& str)
     }
     buf += "\'";
     return buf;
+}
+
+std::string STR()
+{
+    return "";
+}
+
+std::vector<std::string> to_lines(const std::string& text)
+{
+    std::vector<std::string> res;
+    std::string line;
+
+    for (auto it = text.begin(); it != text.end(); ++it)
+    {
+        if (*it == '\n')
+        {
+            line += *it;
+            res.push_back(line);
+            line.clear();
+        }else
+        {
+            line.push_back(*it);
+        }
+    }
+    res.push_back(line);
+
+    if (res.back() == "")
+        res.pop_back();
+
+    return res;
+}
+
+std::string indent_tab(const std::string& text, int n)
+{
+    if (n < 0)
+        throw std::domain_error("domain error");
+
+    auto lines = to_lines(text);
+    auto space = repeat("\t", n);
+
+    for (int i = 0; i < lines.size(); ++i)
+        lines[i] = space + lines[i];
+
+    return join("", lines);
+}
+
+bool validate_utf8(const std::string& str)
+{
+    auto it = str.begin();
+    while (it != str.end())
+    {
+        if ((*it & 0x80) == 0) // 0xxx xxxx
+        {
+            it++;
+            continue;
+        }else if ((*it & 0xE0) == 0xC0) // 110x xxxx
+        {
+            it++;
+            if (it == str.end())
+                return false;
+            if ((*it & 0xC0) == 0x80)
+                it++;
+            else
+                return false;
+        }else if ((*it & 0xF0) == 0xE0) // 1110 xxxx
+        {
+            it++;
+            for (int i = 0; i < 2; ++i)
+            {
+                if (it == str.end())
+                    return false;
+                if ((*it & 0xC0) == 0x80)
+                    it++;
+                else
+                    return false;
+            }
+        }else if ((*it & 0xF8) == 0xF0) // 1111 0xxx
+        {
+            it++;
+            for (int i = 0; i < 3; ++i)
+            {
+                if (it == str.end())
+                    return false;
+                if ((*it & 0xC0) == 0x80)
+                    it++;
+                else
+                    return false;
+            }
+        }else
+            return false;
+    }
+    return true;
 }
 
 } // namespace str
