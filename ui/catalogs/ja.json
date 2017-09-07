@@ -62,6 +62,7 @@
     //"PGNU"                  : "",
     "Incoming"                : "着信",
     "Port"                    : "ポート",
+    "Dump"                    : "ダンプ",
 
     // channels.html
     "Channel"                 : "チャンネル",
