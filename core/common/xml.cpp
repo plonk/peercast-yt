@@ -154,7 +154,7 @@ void XML::Node::setAttributes(const char *n)
     i=0;
 
     // skip until whitespace
-    while (c=attrData[i++])
+    while ((c = attrData[i++]) != '\0')
         if (isWhiteSpace(c))
             break;
 

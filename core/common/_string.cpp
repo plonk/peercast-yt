@@ -181,7 +181,7 @@ void String::UNKNOWN2UNICODE(const char *in, bool safe)
     unsigned char c;
     unsigned char d;
 
-    while (c = *in++)
+    while ((c = *in++) != '\0')
     {
         d = *in;
 
@@ -216,7 +216,7 @@ void String::UNKNOWN2UNICODE(const char *in, bool safe)
             in++;
             char code[16];
             char *cp = code;
-            while (c = *in++)
+            while ((c = *in++) != '\0')
             {
                 if (c != ';')
                     *cp++ = c;
@@ -262,7 +262,7 @@ void String::ASCII2HTML(const char *in)
     char *oe = data+MAX_LEN - 10;
     unsigned char c;
     const char *p = in;
-    while (c = *p++)
+    while ((c = *p++) != '\0')
     {
         if (((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z')))
         {
@@ -285,7 +285,7 @@ void String::ASCII2ESC(const char *in, bool safe)
     char *oe = data+MAX_LEN-10;
     const char *p = in;
     unsigned char c;
-    while (c = *p++)
+    while ((c = *p++) != '\0')
     {
         if (((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z')))
             *op++ = c;
@@ -311,7 +311,7 @@ void String::HTML2ASCII(const char *in)
     char *o = data;
     char *oe = data+MAX_LEN-10;
     const char *p = in;
-    while (c = *p++)
+    while ((c = *p++) != '\0')
     {
         if ((c == '&') && (p[0] == '#'))
         {
@@ -319,7 +319,7 @@ void String::HTML2ASCII(const char *in)
             char code[8];
             char *cp = code;
             char ec = *p++;     // hex/dec
-            while (c = *p++)
+            while ((c = *p++) != '\0')
             {
                 if (c != ';')
                     *cp++ = c;
@@ -343,7 +343,7 @@ void String::HTML2UNICODE(const char *in)
     MemoryStream utf8(data, MAX_LEN-1);
 
     unsigned char c;
-    while (c = *in++)
+    while ((c = *in++) != '\0')
     {
         if ((c == '&') && (*in == '#'))
         {
@@ -351,7 +351,7 @@ void String::HTML2UNICODE(const char *in)
             char code[16];
             char *cp = code;
             char ec = *in++;        // hex/dec
-            while (c = *in++)
+            while ((c = *in++) != '\0')
             {
                 if (c != ';')
                     *cp++ = c;
@@ -377,7 +377,7 @@ void String::ESC2ASCII(const char *in)
     char *o = data;
     char *oe = data+MAX_LEN-10;
     const char *p = in;
-    while (c = *p++)
+    while ((c = *p++) != '\0')
     {
         if (c == '+')
             c = ' ';
@@ -406,7 +406,7 @@ void String::ASCII2META(const char *in, bool safe)
     char *oe = data+MAX_LEN-10;
     const char *p = in;
     unsigned char c;
-    while (c = *p++)
+    while ((c = *p++) != '\0')
     {
         switch (c)
         {

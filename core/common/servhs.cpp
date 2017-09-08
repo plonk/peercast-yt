@@ -598,7 +598,7 @@ void Servent::handshakeSOURCE(char * in, bool isHTTP)
     char *mount = NULL;
 
     char *ps;
-    if (ps=strstr(in, "ICE/1.0"))
+    if ((ps = strstr(in, "ICE/1.0")) != nullptr)
     {
         mount = in+7;
         *ps = 0;
@@ -973,7 +973,7 @@ void Servent::CMD_edit_bcid(char *cmd, HTTP& http, String& jumpStr)
     GnuID id;
     BCID *bcid;
 
-    while (cp=nextCGIarg(cp, curr, arg))
+    while ((cp = nextCGIarg(cp, curr, arg)) != nullptr)
     {
         if (strcmp(curr, "id") == 0)
             id.fromStr(arg);
@@ -1000,7 +1000,7 @@ void Servent::CMD_add_bcid(char *cmd, HTTP& http, String& jumpStr)
 
     char *cp = cmd;
     bool result=false;
-    while (cp=nextCGIarg(cp, curr, arg))
+    while ((cp = nextCGIarg(cp, curr, arg)) != nullptr)
     {
         if (strcmp(curr, "id") == 0)
             bcid->id.fromStr(arg);
@@ -1048,7 +1048,7 @@ void Servent::CMD_apply(char *cmd, HTTP& http, String& jumpStr)
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
     char *cp = cmd;
-    while (cp=nextCGIarg(cp, curr, arg))
+    while ((cp = nextCGIarg(cp, curr, arg)) != nullptr)
     {
         // server
         if (strcmp(curr, "servername") == 0)
@@ -1251,7 +1251,7 @@ void Servent::CMD_fetch(char *cmd, HTTP& http, String& jumpStr)
     String curl;
 
     char *cp = cmd;
-    while (cp=nextCGIarg(cp, curr, arg))
+    while ((cp = nextCGIarg(cp, curr, arg)) != nullptr)
     {
         if (strcmp(curr, "url") == 0)
         {
@@ -1317,7 +1317,7 @@ void Servent::CMD_stopserv(char *cmd, HTTP& http, String& jumpStr)
     char curr[MAX_CGI_LEN];
 
     char *cp = cmd;
-    while (cp=nextCGIarg(cp, curr, arg))
+    while ((cp = nextCGIarg(cp, curr, arg)) != nullptr)
     {
         if (strcmp(curr, "index") == 0)
         {
@@ -1336,7 +1336,7 @@ void Servent::CMD_clear(char *cmd, HTTP& http, String& jumpStr)
     char curr[MAX_CGI_LEN];
 
     char *cp = cmd;
-    while (cp=nextCGIarg(cp, curr, arg))
+    while ((cp = nextCGIarg(cp, curr, arg)) != nullptr)
     {
         if (strcmp(curr, "hostcache") == 0)
             servMgr->clearHostCache(ServHost::T_SERVENT);
@@ -1367,7 +1367,7 @@ void Servent::CMD_stop(char *cmd, HTTP& http, String& jumpStr)
 
     GnuID id;
     char *cp = cmd;
-    while (cp=nextCGIarg(cp, curr, arg))
+    while ((cp = nextCGIarg(cp, curr, arg)) != nullptr)
     {
         if (strcmp(curr, "id") == 0)
             id.fromStr(arg);
@@ -1441,7 +1441,7 @@ void Servent::CMD_keep(char *cmd, HTTP& http, String& jumpStr)
 
     GnuID id;
     char *cp = cmd;
-    while (cp=nextCGIarg(cp, curr, arg))
+    while ((cp = nextCGIarg(cp, curr, arg)) != nullptr)
     {
         if (strcmp(curr, "id") == 0)
             id.fromStr(arg);
