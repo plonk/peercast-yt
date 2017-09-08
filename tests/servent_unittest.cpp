@@ -474,3 +474,28 @@ TEST_F(ServentFixture, handshakeIncoming_viewxml)
 
     delete mock;
 }
+
+TEST_F(ServentFixture, handshakeStream_emptyInput)
+{
+    auto mock = new MockClientSocket();
+    ChanInfo info;
+
+    s.sock = mock;
+    ASSERT_THROW(s.handshakeStream(info), StreamException);
+
+    delete mock;
+}
+
+TEST_F(ServentFixture, handshakeStream_noHeaders)
+{
+    auto mock = new MockClientSocket();
+    ChanInfo info;
+
+    s.sock = mock;
+    mock->incoming.str("\r\n");
+    ASSERT_NO_THROW(s.handshakeStream(info));
+
+    ASSERT_EQ("HTTP/1.0 404 Not Found\r\n\r\n", mock->outgoing.str());
+
+    delete mock;
+}
