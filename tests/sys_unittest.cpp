@@ -36,6 +36,7 @@ public:
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
         m_done = true;
+        return 0;
     }
 
     static bool m_done;
