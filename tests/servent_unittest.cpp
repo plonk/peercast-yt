@@ -6,13 +6,28 @@
 
 #include "defer.h"
 
+#include "mockclientsocket.h"
+
 using namespace cgi;
 
 class ServentFixture : public ::testing::Test {
 public:
     ServentFixture()
         : s(0) {}
+
+    void SetUp()
+    {
+        mock = new MockClientSocket();
+        s.sock = mock;
+    }
+
+    void TearDown()
+    {
+        delete mock;
+    }
+
     Servent s;
+    MockClientSocket* mock;
 };
 
 TEST_F(ServentFixture, initialState)
@@ -50,7 +65,7 @@ TEST_F(ServentFixture, initialState)
 
     ASSERT_EQ(Servent::ALLOW_ALL, s.allow);
 
-    ASSERT_EQ(nullptr, s.sock);
+    ASSERT_EQ(mock, s.sock);
     ASSERT_EQ(nullptr, s.pushSock);
 
     // WLock               lock;
@@ -76,15 +91,8 @@ TEST_F(ServentFixture, initialState)
 
 }
 
-#include "mockclientsocket.h"
-
 TEST_F(ServentFixture, handshakeHTTP)
 {
-    MockClientSocket* mock;
-    Defer reclaim([&]() { delete mock; });
-
-    s.sock = mock = new MockClientSocket();
-
     HTTP http(*mock);
     http.initRequest("GET / HTTP/1.0");
     mock->incoming.str("\r\n");
@@ -97,10 +105,6 @@ TEST_F(ServentFixture, handshakeHTTP)
 
 TEST_F(ServentFixture, handshakeIncomingGetRoot)
 {
-    MockClientSocket* mock;
-    Defer reclaim([&]() { delete mock; });
-
-    s.sock = mock = new MockClientSocket();
     mock->incoming.str("GET / HTTP/1.0\r\n\r\n");
 
     s.handshakeIncoming();
@@ -113,21 +117,13 @@ TEST_F(ServentFixture, handshakeIncomingGetRoot)
 // の放送要求だとして通してしまうが、良いのか？
 TEST_F(ServentFixture, handshakeIncomingBadRequest)
 {
-    MockClientSocket* mock;
-
-    s.sock = mock = new MockClientSocket();
     mock->incoming.str("\r\n");
 
     ASSERT_THROW(s.handshakeIncoming(), StreamException);
-
-    delete mock;
 }
 
 TEST_F(ServentFixture, handshakeIncomingHTMLRoot)
 {
-    MockClientSocket* mock;
-
-    s.sock = mock = new MockClientSocket();
     mock->incoming.str("GET /html/en/index.html HTTP/1.0\r\n\r\n");
 
     s.handshakeIncoming();
@@ -139,15 +135,10 @@ TEST_F(ServentFixture, handshakeIncomingHTMLRoot)
     ASSERT_TRUE(str::contains(output, "Server: "));
     ASSERT_TRUE(str::contains(output, "Date: "));
     ASSERT_TRUE(str::contains(output, "Unable to open file"));
-
-    delete mock;
 }
 
 TEST_F(ServentFixture, handshakeIncomingJRPCGetUnauthorized)
 {
-    MockClientSocket* mock;
-
-    s.sock = mock = new MockClientSocket();
     mock->incoming.str("GET /api/1 HTTP/1.0\r\n\r\n");
 
     ASSERT_NO_THROW(s.handshakeIncoming());
@@ -155,32 +146,26 @@ TEST_F(ServentFixture, handshakeIncomingJRPCGetUnauthorized)
     std::string output = mock->outgoing.str();
 
     ASSERT_STREQ("HTTP/1.0 401 Unauthorized\r\nWWW-Authenticate: Basic realm=\"PeerCast Admin\"\r\n\r\n", output.c_str());
-
-    delete mock;
 }
 
 #include "servmgr.h"
 
-TEST_F(ServentFixture, handshakeIncomingJRPCGetAuthorized)
+TEST_F(ServentFixture, handshakeIncomingJRPCGetAuthorized_noAuthInfoSupplied)
 {
-    MockClientSocket* mock;
-
     strcpy(servMgr->password, "Passw0rd");
 
-    // --------------------------------------------
-    s.sock = mock = new MockClientSocket();
     mock->incoming.str("GET /api/1 HTTP/1.0\r\n"
                        "\r\n");
 
     s.handshakeIncoming();
 
     ASSERT_TRUE(str::contains(mock->outgoing.str(), "401 Unauthorized"));
+}
 
-    delete mock;
+TEST_F(ServentFixture, handshakeIncomingJRPCGetAuthorized_authInfoSupplied)
+{
+    strcpy(servMgr->password, "Passw0rd");
 
-    // --------------------------------------------
-
-    s.sock = mock = new MockClientSocket();
     mock->incoming.str("GET /api/1 HTTP/1.0\r\n"
                        "Authorization: BASIC OlBhc3N3MHJk\r\n" // ruby -rbase64 -e 'p Base64.strict_encode64 ":Passw0rd"'
                        "\r\n");
@@ -189,8 +174,6 @@ TEST_F(ServentFixture, handshakeIncomingJRPCGetAuthorized)
 
     ASSERT_TRUE(str::contains(mock->outgoing.str(), "200 OK"));
     ASSERT_TRUE(str::contains(mock->outgoing.str(), "jsonrpc"));
-
-    delete mock;
 }
 
 //                  |<---------------------- 77 characters long  -------------------------------->|
@@ -223,15 +206,10 @@ TEST_F(ServentFixture, handshakeIncomingLongURI)
 {
     ASSERT_EQ(8470, strlen(LONG_LONG_STRING));
 
-    MockClientSocket* mock;
-
-    s.sock = mock = new MockClientSocket();
     mock->incoming.str("GET /" LONG_LONG_STRING " HTTP/1.0\r\n"
                        "\r\n");
 
     ASSERT_THROW(s.handshakeIncoming(), HTTPException);
-
-    delete mock;
 }
 
 TEST_F(ServentFixture, createChannelInfoNullCase)
@@ -301,11 +279,6 @@ TEST_F(ServentFixture, hasValidAuthToken)
 
 TEST_F(ServentFixture, handshakeHTTPBasicAuth_nonlocal_correctpass)
 {
-    MockClientSocket* mock;
-    Defer reclaim([&]() { delete mock; });
-
-    s.sock = mock = new MockClientSocket();
-
     ASSERT_EQ(0, s.sock->host.ip);
     ASSERT_FALSE(s.sock->host.isLocalhost());
 
@@ -320,11 +293,6 @@ TEST_F(ServentFixture, handshakeHTTPBasicAuth_nonlocal_correctpass)
 
 TEST_F(ServentFixture, handshakeHTTPBasicAuth_nonlocal_wrongpass)
 {
-    MockClientSocket* mock;
-    Defer reclaim([&]() { delete mock; });
-
-    s.sock = mock = new MockClientSocket();
-
     ASSERT_EQ(0, s.sock->host.ip);
     ASSERT_FALSE(s.sock->host.isLocalhost());
 
@@ -339,12 +307,7 @@ TEST_F(ServentFixture, handshakeHTTPBasicAuth_nonlocal_wrongpass)
 
 TEST_F(ServentFixture, handshakeHTTPBasicAuth_local_correctpass)
 {
-    MockClientSocket* mock;
-    Defer reclaim([&]() { delete mock; });
-
-    s.sock = mock = new MockClientSocket();
-
-   s.sock->host.ip = 127 << 24 | 1;
+    s.sock->host.ip = 127 << 24 | 1;
     ASSERT_TRUE(s.sock->host.isLocalhost());
 
     strcpy(servMgr->password, "Passw0rd");
@@ -358,12 +321,7 @@ TEST_F(ServentFixture, handshakeHTTPBasicAuth_local_correctpass)
 
 TEST_F(ServentFixture, handshakeHTTPBasicAuth_local_wrongpass)
 {
-    MockClientSocket* mock;
-    Defer reclaim([&]() { delete mock; });
-
-    s.sock = mock = new MockClientSocket();
-
-   s.sock->host.ip = 127 << 24 | 1;
+    s.sock->host.ip = 127 << 24 | 1;
     ASSERT_TRUE(s.sock->host.isLocalhost());
 
     strcpy(servMgr->password, "hoge");
@@ -377,11 +335,6 @@ TEST_F(ServentFixture, handshakeHTTPBasicAuth_local_wrongpass)
 
 TEST_F(ServentFixture, handshakeHTTPBasicAuth_noauthorizationheader)
 {
-    MockClientSocket* mock;
-    Defer reclaim([&]() { delete mock; });
-
-    s.sock = mock = new MockClientSocket();
-
     ASSERT_FALSE(s.sock->host.isLocalhost());
 
     strcpy(servMgr->password, "Passw0rd");
@@ -461,9 +414,6 @@ TEST_F(ServentFixture, writeVariable)
 
 TEST_F(ServentFixture, handshakeIncoming_viewxml)
 {
-    MockClientSocket* mock;
-
-    s.sock = mock = new MockClientSocket();
     s.sock->host = Host("127.0.0.1", 12345);
     mock->incoming.str("GET /admin?cmd=viewxml HTTP/1.0\r\n"
                        "\r\n");
@@ -471,31 +421,21 @@ TEST_F(ServentFixture, handshakeIncoming_viewxml)
     ASSERT_NO_THROW(s.handshakeIncoming());
 
     ASSERT_TRUE(str::has_prefix(mock->outgoing.str(), "HTTP/1.0 200 OK\r\n"));
-
-    delete mock;
 }
 
 TEST_F(ServentFixture, handshakeStream_emptyInput)
 {
-    auto mock = new MockClientSocket();
     ChanInfo info;
 
-    s.sock = mock;
     ASSERT_THROW(s.handshakeStream(info), StreamException);
-
-    delete mock;
 }
 
 TEST_F(ServentFixture, handshakeStream_noHeaders)
 {
-    auto mock = new MockClientSocket();
     ChanInfo info;
 
-    s.sock = mock;
     mock->incoming.str("\r\n");
     ASSERT_NO_THROW(s.handshakeStream(info));
 
     ASSERT_EQ("HTTP/1.0 404 Not Found\r\n\r\n", mock->outgoing.str());
-
-    delete mock;
 }
