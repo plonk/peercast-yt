@@ -120,7 +120,7 @@ json JrpcApi::getLog(json::array_t args)
 
     if (maxLines == nullptr)
         maxLines = lines.size();
-    while (lines.size() > maxLines)
+    while (lines.size() > (size_t)maxLines)
         lines.pop_back();
 
     auto log = str::join("\n", lines);
