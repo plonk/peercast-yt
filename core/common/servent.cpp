@@ -889,8 +889,6 @@ void Servent::handshakeStream_returnHits(AtomStream& atom,
 {
     ChanHitSearch chs;
 
-    int error = PCP_ERROR_QUIT+PCP_ERROR_UNAVAILABLE;
-
     if (chl)
     {
         ChanHit best;
@@ -1016,6 +1014,7 @@ void Servent::handshakeStream_returnHits(AtomStream& atom,
         }
     }
     // return not available yet code
+    const int error = PCP_ERROR_QUIT + PCP_ERROR_UNAVAILABLE;
     atom.writeInt(PCP_QUIT, error);
 }
 
