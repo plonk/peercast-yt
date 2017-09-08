@@ -882,7 +882,10 @@ void Servent::handshakeStream_returnStreamHeaders(AtomStream& atom, bool gotPCP,
 
 // -----------------------------------
 // リレー要求に対してストリームできない時、ノード情報を送信する。
-void Servent::handshakeStream_returnHits(AtomStream& atom, const GnuID& channelID, ChanHitList* chl, Host& rhost)
+void Servent::handshakeStream_returnHits(AtomStream& atom,
+                                         const GnuID& channelID,
+                                         ChanHitList* chl,
+                                         Host& rhost)
 {
     ChanHitSearch chs;
 
