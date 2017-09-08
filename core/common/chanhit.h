@@ -37,7 +37,7 @@ public:
     void    initLocal(int numl, int numr, int nums, int uptm, bool, unsigned int, unsigned int, const Host& = Host());
     XML::Node *createXML();
 
-    void    writeAtoms(AtomStream &, GnuID &);
+    void    writeAtoms(AtomStream &, const GnuID &);
     bool    writeVariable(Stream &, const String &);
 
     void    pickNearestIP(Host &);

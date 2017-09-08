@@ -735,14 +735,11 @@ bool    Servent::pingHost(Host &rhost, GnuID &rsid)
 }
 
 // -----------------------------------
-bool Servent::handshakeStream(ChanInfo &chanInfo)
+// HTTP ヘッダーを読み込み、gotPCP, reqPos, nsSwitchNum, this->addMetaData,
+// this->agent を設定する。
+void Servent::handshakeStream_readHeaders(bool& gotPCP, unsigned int& reqPos, int& nsSwitchNum)
 {
     HTTP http(*sock);
-
-    bool gotPCP=false;
-    unsigned int reqPos=0;
-
-    nsSwitchNum=0;
 
     while (http.nextHeader())
     {
@@ -765,17 +762,25 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 
             if (ssc || so)
             {
-                nsSwitchNum=1;
+                nsSwitchNum = 1;
                 //nsSwitchNum = atoi(ssc+20);
             }
         }
 
         LOG_DEBUG("Stream: %s", http.cmdLine);
     }
+}
 
+
+// -----------------------------------
+// 状況に応じて this->outputProtocol を設定する。
+void Servent::handshakeStream_changeOutputProtocol(bool gotPCP, const ChanInfo& chanInfo)
+{
+    // 旧プロトコルへの切り替え？
     if ((!gotPCP) && (outputProtocol == ChanInfo::SP_PCP))
         outputProtocol = ChanInfo::SP_PEERCAST;
 
+    // WMV ならば MMS(MMSH)
     if (outputProtocol == ChanInfo::SP_HTTP)
     {
         if  ( (chanInfo.srcProtocol == ChanInfo::SP_MMS)
@@ -785,9 +790,292 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
             )
         outputProtocol = ChanInfo::SP_MMS;
     }
+}
 
-    bool chanFound=false;
-    bool chanReady=false;
+// -----------------------------------
+// ストリームできる時の応答のヘッダー部分を送信する。
+void Servent::handshakeStream_returnStreamHeaders(AtomStream& atom, bool gotPCP,
+                                                  std::shared_ptr<Channel> ch,
+                                                  const ChanInfo& chanInfo,
+                                                  Host& rhost)
+{
+    if (chanInfo.contentType != ChanInfo::T_MP3)
+        addMetadata = false;
+
+    if (addMetadata && (outputProtocol == ChanInfo::SP_HTTP))       // winamp mp3 metadata check
+    {
+        sock->writeLine(ICY_OK);
+
+        sock->writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
+        sock->writeLineF("icy-name:%s", chanInfo.name.c_str());
+        sock->writeLineF("icy-br:%d", chanInfo.bitrate);
+        sock->writeLineF("icy-genre:%s", chanInfo.genre.c_str());
+        sock->writeLineF("icy-url:%s", chanInfo.url.c_str());
+        sock->writeLineF("icy-metaint:%d", chanMgr->icyMetaInterval);
+        sock->writeLineF("%s %s", PCX_HS_CHANNELID, chanInfo.id.str().c_str());
+
+        sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_MP3);
+    }else
+    {
+        sock->writeLine(HTTP_SC_OK);
+
+        if ((chanInfo.contentType != ChanInfo::T_ASX) && (chanInfo.contentType != ChanInfo::T_WMV) && (chanInfo.contentType != ChanInfo::T_WMA))
+        {
+            sock->writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
+
+            sock->writeLine("Accept-Ranges: none");
+
+            sock->writeLineF("x-audiocast-name: %s", chanInfo.name.c_str());
+            sock->writeLineF("x-audiocast-bitrate: %d", chanInfo.bitrate);
+            sock->writeLineF("x-audiocast-genre: %s", chanInfo.genre.c_str());
+            sock->writeLineF("x-audiocast-description: %s", chanInfo.desc.c_str());
+            sock->writeLineF("x-audiocast-url: %s", chanInfo.url.c_str());
+            sock->writeLineF("%s %s", PCX_HS_CHANNELID, chanInfo.id.str().c_str());
+        }
+
+        if (outputProtocol == ChanInfo::SP_HTTP)
+        {
+            switch (chanInfo.contentType)
+            {
+            case ChanInfo::T_MOV:
+                sock->writeLine("Connection: close");
+                sock->writeLine("Content-Length: 10000000");
+                sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_MOV);
+                break;
+            }
+            sock->writeLineF("%s %s", HTTP_HS_CONTENT, chanInfo.getMIMEType());
+        } else if (outputProtocol == ChanInfo::SP_MMS)
+        {
+            sock->writeLine("Server: Rex/9.0.0.2980");
+            sock->writeLine("Cache-Control: no-cache");
+            sock->writeLine("Pragma: no-cache");
+            sock->writeLine("Pragma: client-id=3587303426");
+            sock->writeLine("Pragma: features=\"broadcast, playlist\"");
+
+            if (nsSwitchNum)
+            {
+                sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_MMS);
+            }else
+            {
+                sock->writeLine("Content-Type: application/vnd.ms.wms-hdr.asfv1");
+                if (ch)
+                    sock->writeLineF("Content-Length: %d", ch->headPack.len);
+                sock->writeLine("Connection: Keep-Alive");
+            }
+        } else if (outputProtocol == ChanInfo::SP_PCP)
+        {
+            sock->writeLineF("%s %d", PCX_HS_POS, streamPos);
+            sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XPCP);
+        }else if (outputProtocol == ChanInfo::SP_PEERCAST)
+        {
+            sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XPEERCAST);
+        }
+    }
+    sock->writeLine("");
+
+    if (gotPCP)
+    {
+        handshakeIncomingPCP(atom, rhost, remoteID, agent);
+        atom.writeInt(PCP_OK, 0);
+    }
+}
+
+// -----------------------------------
+// リレー要求に対してストリームできない時、ノード情報を送信する。
+void Servent::handshakeStream_returnHits(AtomStream& atom, const GnuID& channelID, ChanHitList* chl, Host& rhost)
+{
+    ChanHitSearch chs;
+
+    int error = PCP_ERROR_QUIT+PCP_ERROR_UNAVAILABLE;
+
+    if (chl)
+    {
+        ChanHit best;
+
+        // search for up to 8 other hits
+        int cnt = 0;
+        for (int i = 0; i < 8; i++)
+        {
+            best.init();
+
+            // find best hit this network if local IP
+            if (!rhost.globalIP())
+            {
+                chs.init();
+                chs.matchHost = servMgr->serverHost;
+                chs.waitDelay = 2;
+                chs.excludeID = remoteID;
+                if (chl->pickHits(chs))
+                    best = chs.best[0];
+            }
+
+            // find best hit on same network
+            if (!best.host.ip)
+            {
+                chs.init();
+                chs.matchHost = rhost;
+                chs.waitDelay = 2;
+                chs.excludeID = remoteID;
+                if (chl->pickHits(chs))
+                    best = chs.best[0];
+            }
+
+            // find best hit on other networks
+            if (!best.host.ip)
+            {
+                chs.init();
+                chs.waitDelay = 2;
+                chs.excludeID = remoteID;
+                if (chl->pickHits(chs))
+                    best = chs.best[0];
+            }
+
+            if (!best.host.ip)
+                break;
+
+            best.writeAtoms(atom, channelID);
+            cnt++;
+        }
+
+        if (cnt)
+        {
+            LOG_DEBUG("Sent %d channel hit(s) to %s", cnt, rhost.str().c_str());
+        }
+        else if (rhost.port)
+        {
+            // find firewalled host
+            chs.init();
+            chs.waitDelay = 30;
+            chs.useFirewalled = true;
+            chs.excludeID = remoteID;
+            if (chl->pickHits(chs))
+            {
+                best = chs.best[0];
+                int cnt = servMgr->broadcastPushRequest(best, rhost, chl->info.id, Servent::T_RELAY);
+                LOG_DEBUG("Broadcasted channel push request to %d clients for %s", cnt, rhost.str().c_str());
+            }
+        }
+
+        // if all else fails, use tracker
+        if (!best.host.ip)
+        {
+            // find best tracker on this network if local IP
+            if (!rhost.globalIP())
+            {
+                chs.init();
+                chs.matchHost = servMgr->serverHost;
+                chs.trackersOnly = true;
+                chs.excludeID = remoteID;
+                if (chl->pickHits(chs))
+                    best = chs.best[0];
+            }
+
+            // find local tracker
+            if (!best.host.ip)
+            {
+                chs.init();
+                chs.matchHost = rhost;
+                chs.trackersOnly = true;
+                chs.excludeID = remoteID;
+                if (chl->pickHits(chs))
+                    best = chs.best[0];
+            }
+
+            // find global tracker
+            if (!best.host.ip)
+            {
+                chs.init();
+                chs.trackersOnly = true;
+                chs.excludeID = remoteID;
+                if (chl->pickHits(chs))
+                    best = chs.best[0];
+            }
+
+            if (best.host.ip)
+            {
+                best.writeAtoms(atom, channelID);
+                LOG_DEBUG("Sent 1 tracker hit to %s", rhost.str().c_str());
+            }else if (rhost.port)
+            {
+                // find firewalled tracker
+                chs.init();
+                chs.useFirewalled = true;
+                chs.trackersOnly = true;
+                chs.excludeID = remoteID;
+                chs.waitDelay = 30;
+                if (chl->pickHits(chs))
+                {
+                    best = chs.best[0];
+                    int cnt = servMgr->broadcastPushRequest(best, rhost, chl->info.id, Servent::T_CIN);
+                    LOG_DEBUG("Broadcasted tracker push request to %d clients for %s", cnt, rhost.str().c_str());
+                }
+            }
+        }
+    }
+    // return not available yet code
+    atom.writeInt(PCP_QUIT, error);
+}
+
+// -----------------------------------
+bool Servent::handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool chanReady,
+                                             std::shared_ptr<Channel> ch, ChanHitList* chl,
+                                             const ChanInfo& chanInfo)
+{
+    bool result = false;
+    Host rhost = sock->host;
+    AtomStream atom(*sock);
+
+    if (!chanFound)
+    {
+        sock->writeLine(HTTP_SC_NOTFOUND);
+        sock->writeLine("");
+        LOG_DEBUG("Sending channel not found");
+        return false;
+    }
+
+    if (!chanReady)       // cannot stream
+    {
+        if (outputProtocol == ChanInfo::SP_PCP)    // relay stream
+        {
+            sock->writeLine(HTTP_SC_UNAVAILABLE);
+            sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XPCP);
+            sock->writeLine("");
+
+            handshakeIncomingPCP(atom, rhost, remoteID, agent);
+
+            LOG_DEBUG("Sending channel unavailable");
+
+            handshakeStream_returnHits(atom, chanInfo.id, chl, rhost);
+            result = false;
+        }else                                      // direct stream
+        {
+            LOG_DEBUG("Sending channel unavailable");
+            sock->writeLine(HTTP_SC_UNAVAILABLE);
+            sock->writeLine("");
+            result = false;
+        }
+    }else
+    {
+        handshakeStream_returnStreamHeaders(atom, gotPCP, ch, chanInfo, rhost);
+        result = true;
+    }
+
+    return result;
+}
+
+// -----------------------------------
+// "/stream/<channel ID>" エンドポイントへの要求に対する反応。
+bool Servent::handshakeStream(ChanInfo &chanInfo)
+{
+    bool gotPCP = false;
+    unsigned int reqPos = 0;
+    nsSwitchNum = 0;
+
+    handshakeStream_readHeaders(gotPCP, reqPos, nsSwitchNum);
+    handshakeStream_changeOutputProtocol(gotPCP, chanInfo);
+
+    bool chanFound = false;
+    bool chanReady = false;
 
     auto ch = chanMgr->findChannelByID(chanInfo.id);
     if (ch)
@@ -810,252 +1098,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
         chanFound = true;
     }
 
-    bool result = false;
-    Host rhost = sock->host;
-    AtomStream atom(*sock);
-
-    if (!chanFound)
-    {
-        sock->writeLine(HTTP_SC_NOTFOUND);
-        sock->writeLine("");
-        LOG_DEBUG("Sending channel not found");
-        return false;
-    }
-
-    if (!chanReady)
-    {
-        if (outputProtocol == ChanInfo::SP_PCP)
-        {
-            sock->writeLine(HTTP_SC_UNAVAILABLE);
-            sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XPCP);
-            sock->writeLine("");
-
-            handshakeIncomingPCP(atom, rhost, remoteID, agent);
-
-            LOG_DEBUG("Sending channel unavailable");
-
-            ChanHitSearch chs;
-
-            int error = PCP_ERROR_QUIT+PCP_ERROR_UNAVAILABLE;
-
-            if (chl)
-            {
-                ChanHit best;
-
-                // search for up to 8 other hits
-                int cnt=0;
-                for (int i=0; i<8; i++)
-                {
-                    best.init();
-
-                    // find best hit this network if local IP
-                    if (!rhost.globalIP())
-                    {
-                        chs.init();
-                        chs.matchHost = servMgr->serverHost;
-                        chs.waitDelay = 2;
-                        chs.excludeID = remoteID;
-                        if (chl->pickHits(chs))
-                            best = chs.best[0];
-                    }
-
-                    // find best hit on same network
-                    if (!best.host.ip)
-                    {
-                        chs.init();
-                        chs.matchHost = rhost;
-                        chs.waitDelay = 2;
-                        chs.excludeID = remoteID;
-                        if (chl->pickHits(chs))
-                            best = chs.best[0];
-                    }
-
-                    // find best hit on other networks
-                    if (!best.host.ip)
-                    {
-                        chs.init();
-                        chs.waitDelay = 2;
-                        chs.excludeID = remoteID;
-                        if (chl->pickHits(chs))
-                            best = chs.best[0];
-                    }
-
-                    if (!best.host.ip)
-                        break;
-
-                    best.writeAtoms(atom, chanInfo.id);
-                    cnt++;
-                }
-
-                if (cnt)
-                {
-                    LOG_DEBUG("Sent %d channel hit(s) to %s", cnt, rhost.str().c_str());
-                }
-                else if (rhost.port)
-                {
-                    // find firewalled host
-                    chs.init();
-                    chs.waitDelay = 30;
-                    chs.useFirewalled = true;
-                    chs.excludeID = remoteID;
-                    if (chl->pickHits(chs))
-                    {
-                        best = chs.best[0];
-                        int cnt = servMgr->broadcastPushRequest(best, rhost, chl->info.id, Servent::T_RELAY);
-                        LOG_DEBUG("Broadcasted channel push request to %d clients for %s", cnt, rhost.str().c_str());
-                    }
-                }
-
-                // if all else fails, use tracker
-                if (!best.host.ip)
-                {
-                    // find best tracker on this network if local IP
-                    if (!rhost.globalIP())
-                    {
-                        chs.init();
-                        chs.matchHost = servMgr->serverHost;
-                        chs.trackersOnly = true;
-                        chs.excludeID = remoteID;
-                        if (chl->pickHits(chs))
-                            best = chs.best[0];
-                    }
-
-                    // find local tracker
-                    if (!best.host.ip)
-                    {
-                        chs.init();
-                        chs.matchHost = rhost;
-                        chs.trackersOnly = true;
-                        chs.excludeID = remoteID;
-                        if (chl->pickHits(chs))
-                            best = chs.best[0];
-                    }
-
-                    // find global tracker
-                    if (!best.host.ip)
-                    {
-                        chs.init();
-                        chs.trackersOnly = true;
-                        chs.excludeID = remoteID;
-                        if (chl->pickHits(chs))
-                            best = chs.best[0];
-                    }
-
-                    if (best.host.ip)
-                    {
-                        best.writeAtoms(atom, chanInfo.id);
-                        LOG_DEBUG("Sent 1 tracker hit to %s", rhost.str().c_str());
-                    }else if (rhost.port)
-                    {
-                        // find firewalled tracker
-                        chs.init();
-                        chs.useFirewalled = true;
-                        chs.trackersOnly = true;
-                        chs.excludeID = remoteID;
-                        chs.waitDelay = 30;
-                        if (chl->pickHits(chs))
-                        {
-                            best = chs.best[0];
-                            int cnt = servMgr->broadcastPushRequest(best, rhost, chl->info.id, Servent::T_CIN);
-                            LOG_DEBUG("Broadcasted tracker push request to %d clients for %s", cnt, rhost.str().c_str());
-                        }
-                    }
-                }
-            }
-            // return not available yet code
-            atom.writeInt(PCP_QUIT, error);
-            result = false;
-        }else
-        {
-            LOG_DEBUG("Sending channel unavailable");
-            sock->writeLine(HTTP_SC_UNAVAILABLE);
-            sock->writeLine("");
-            result = false;
-        }
-    } else {
-        if (chanInfo.contentType != ChanInfo::T_MP3)
-            addMetadata=false;
-
-        if (addMetadata && (outputProtocol == ChanInfo::SP_HTTP))       // winamp mp3 metadata check
-        {
-            sock->writeLine(ICY_OK);
-
-            sock->writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
-            sock->writeLineF("icy-name:%s", chanInfo.name.cstr());
-            sock->writeLineF("icy-br:%d", chanInfo.bitrate);
-            sock->writeLineF("icy-genre:%s", chanInfo.genre.cstr());
-            sock->writeLineF("icy-url:%s", chanInfo.url.cstr());
-            sock->writeLineF("icy-metaint:%d", chanMgr->icyMetaInterval);
-            sock->writeLineF("%s %s", PCX_HS_CHANNELID, chanInfo.id.str().c_str());
-
-            sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_MP3);
-        }else
-        {
-            sock->writeLine(HTTP_SC_OK);
-
-            if ((chanInfo.contentType != ChanInfo::T_ASX) && (chanInfo.contentType != ChanInfo::T_WMV) && (chanInfo.contentType != ChanInfo::T_WMA))
-            {
-                sock->writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
-
-                sock->writeLine("Accept-Ranges: none");
-
-                sock->writeLineF("x-audiocast-name: %s", chanInfo.name.cstr());
-                sock->writeLineF("x-audiocast-bitrate: %d", chanInfo.bitrate);
-                sock->writeLineF("x-audiocast-genre: %s", chanInfo.genre.cstr());
-                sock->writeLineF("x-audiocast-description: %s", chanInfo.desc.cstr());
-                sock->writeLineF("x-audiocast-url: %s", chanInfo.url.cstr());
-                sock->writeLineF("%s %s", PCX_HS_CHANNELID, chanInfo.id.str().c_str());
-            }
-
-            if (outputProtocol == ChanInfo::SP_HTTP)
-            {
-                switch (chanInfo.contentType)
-                {
-                    case ChanInfo::T_MOV:
-                        sock->writeLine("Connection: close");
-                        sock->writeLine("Content-Length: 10000000");
-                        sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_MOV);
-                        break;
-                }
-                sock->writeLineF("%s %s", HTTP_HS_CONTENT, chanInfo.getMIMEType());
-            } else if (outputProtocol == ChanInfo::SP_MMS)
-            {
-                sock->writeLine("Server: Rex/9.0.0.2980");
-                sock->writeLine("Cache-Control: no-cache");
-                sock->writeLine("Pragma: no-cache");
-                sock->writeLine("Pragma: client-id=3587303426");
-                sock->writeLine("Pragma: features=\"broadcast, playlist\"");
-
-                if (nsSwitchNum)
-                {
-                    sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_MMS);
-                }else
-                {
-                    sock->writeLine("Content-Type: application/vnd.ms.wms-hdr.asfv1");
-                    if (ch)
-                        sock->writeLineF("Content-Length: %d", ch->headPack.len);
-                    sock->writeLine("Connection: Keep-Alive");
-                }
-            } else if (outputProtocol == ChanInfo::SP_PCP)
-            {
-                sock->writeLineF("%s %d", PCX_HS_POS, streamPos);
-                sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XPCP);
-            }else if (outputProtocol == ChanInfo::SP_PEERCAST)
-            {
-                sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XPEERCAST);
-            }
-        }
-        sock->writeLine("");
-        result = true;
-
-        if (gotPCP)
-        {
-            handshakeIncomingPCP(atom, rhost, remoteID, agent);
-            atom.writeInt(PCP_OK, 0);
-        }
-    }
-
-    return result;
+    return handshakeStream_returnResponse(gotPCP, chanFound, chanReady, ch, chl, chanInfo);
 }
 
 // -----------------------------------
