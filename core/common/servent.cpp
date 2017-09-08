@@ -844,7 +844,7 @@ void Servent::handshakeStream_returnStreamHeaders(AtomStream& atom, bool gotPCP,
                 break;
             }
             sock->writeLineF("%s %s", HTTP_HS_CONTENT, chanInfo.getMIMEType());
-        } else if (outputProtocol == ChanInfo::SP_MMS)
+        }else if (outputProtocol == ChanInfo::SP_MMS)
         {
             sock->writeLine("Server: Rex/9.0.0.2980");
             sock->writeLine("Cache-Control: no-cache");
@@ -862,7 +862,7 @@ void Servent::handshakeStream_returnStreamHeaders(AtomStream& atom, bool gotPCP,
                     sock->writeLineF("Content-Length: %d", ch->headPack.len);
                 sock->writeLine("Connection: Keep-Alive");
             }
-        } else if (outputProtocol == ChanInfo::SP_PCP)
+        }else if (outputProtocol == ChanInfo::SP_PCP)
         {
             sock->writeLineF("%s %d", PCX_HS_POS, streamPos);
             sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XPCP);
@@ -941,8 +941,7 @@ void Servent::handshakeStream_returnHits(AtomStream& atom,
         if (cnt)
         {
             LOG_DEBUG("Sent %d channel hit(s) to %s", cnt, rhost.str().c_str());
-        }
-        else if (rhost.port)
+        }else if (rhost.port)
         {
             // find firewalled host
             chs.init();
@@ -1220,7 +1219,8 @@ void Servent::processGnutella()
                 }
 
                 LOG_INFO("packet in: %s-%s, %d bytes, %d hops, %d ttl, from %s", GNU_FUNC_STR(pack.func), GnuStream::getRouteStr(ret), pack.len, pack.hops, pack.ttl, ipstr);
-            }else{
+            }else
+            {
                 LOG_ERROR("Bad packet");
             }
         }
@@ -1232,7 +1232,7 @@ void Servent::processGnutella()
             gnuStream.sendPacket(*p);
             seenIDs.add(p->id);
             outPacketsPri.next();
-        } else if ((p=outPacketsNorm.curr()))       // or.. normal packet
+        }else if ((p=outPacketsNorm.curr()))       // or.. normal packet
         {
             gnuStream.sendPacket(*p);
             seenIDs.add(p->id);
@@ -1249,7 +1249,8 @@ void Servent::processGnutella()
                 lastPing = sys->getTime();
                 doneBigPing = true;
             }
-        }else{
+        }else
+        {
             if (lpt > packetTimeoutSecs)
             {
                 if ((sys->getTime()-lastPing) > packetTimeoutSecs)
@@ -1351,7 +1352,7 @@ void Servent::processRoot()
                         servMgr->addHost(h, ServHost::T_SERVENT, sys->getTime());
                     }
                     //return;
-                } else if (pack.func == GNU_FUNC_HIT)
+                }else if (pack.func == GNU_FUNC_HIT)
                 {
                     MemoryStream data(pack.data, pack.len);
                     ChanHit hit;
@@ -2054,7 +2055,7 @@ void Servent::processStream(bool doneHandshake, ChanInfo &chanInfo)
         }else if (outputProtocol  == ChanInfo::SP_PCP)
         {
             sendPCPChannel();
-        } else if (outputProtocol  == ChanInfo::SP_PEERCAST)
+        }else if (outputProtocol  == ChanInfo::SP_PEERCAST)
         {
             sendPeercastChannel();
         }
@@ -2145,7 +2146,8 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
                             skipContinuation = false;
                             rawPack.writeRaw(bsock);
                             lastWriteTime = sys->getTime();
-                        }else{
+                        }else
+                        {
                             LOG_DEBUG("raw: skip continuation %s packet pos=%d", rawPack.type==ChanPacket::T_DATA?"DATA":"HEAD", rawPack.pos);
                         }
                     }
