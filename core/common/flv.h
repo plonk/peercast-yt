@@ -159,8 +159,9 @@ public:
             return "Video";
         case T_AUDIO:
             return "Audio";
+        default:
+            return "Unknown";
         }
-        return "Unknown";
     }
 
     bool isKeyFrame()

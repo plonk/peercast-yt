@@ -52,6 +52,7 @@ void ChanPacket::writePeercast(Stream &out)
         case T_HEAD: tp = 'HEAD'; break;
         case T_META: tp = 'META'; break;
         case T_DATA: tp = 'DATA'; break;
+        default: throw StreamException("unsupported packet type for writing");
     }
 
     if (type != T_UNKNOWN)
