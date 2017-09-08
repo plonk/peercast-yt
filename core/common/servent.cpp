@@ -773,6 +773,7 @@ void Servent::handshakeStream_readHeaders(bool& gotPCP, unsigned int& reqPos, in
 
 
 // -----------------------------------
+// 状況に応じて this->outputProtocol を設定する。
 void Servent::handshakeStream_changeOutputProtocol(bool gotPCP, const ChanInfo& chanInfo)
 {
     // 旧プロトコルへの切り替え？
@@ -792,8 +793,10 @@ void Servent::handshakeStream_changeOutputProtocol(bool gotPCP, const ChanInfo& 
 }
 
 // -----------------------------------
+// ストリームできる時の応答のヘッダー部分を送信する。
 void Servent::handshakeStream_returnStreamHeaders(AtomStream& atom, bool gotPCP,
-                                                  std::shared_ptr<Channel> ch, const ChanInfo& chanInfo,
+                                                  std::shared_ptr<Channel> ch,
+                                                  const ChanInfo& chanInfo,
                                                   Host& rhost)
 {
     if (chanInfo.contentType != ChanInfo::T_MP3)
@@ -878,6 +881,7 @@ void Servent::handshakeStream_returnStreamHeaders(AtomStream& atom, bool gotPCP,
 }
 
 // -----------------------------------
+// リレー要求に対してストリームできない時、ノード情報を送信する。
 void Servent::handshakeStream_returnHits(AtomStream& atom, const GnuID& channelID, ChanHitList* chl, Host& rhost)
 {
     ChanHitSearch chs;
@@ -1050,7 +1054,8 @@ bool Servent::handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool c
             sock->writeLine("");
             result = false;
         }
-    } else {              // we CAN stream
+    }else
+    {
         handshakeStream_returnStreamHeaders(atom, gotPCP, ch, chanInfo, rhost);
         result = true;
     }
@@ -1059,6 +1064,7 @@ bool Servent::handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool c
 }
 
 // -----------------------------------
+// "/stream/<channel ID>" エンドポイントへの要求に対する反応。
 bool Servent::handshakeStream(ChanInfo &chanInfo)
 {
     bool gotPCP = false;
