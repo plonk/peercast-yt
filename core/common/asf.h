@@ -198,14 +198,15 @@ public:
 
     const char *getTypeName()
     {
-        switch(type)
+        switch (type)
         {
             case T_VIDEO:
                 return "Video";
             case T_AUDIO:
                 return "Audio";
+            default:
+                return "Unknown";
         }
-        return "Unknown";
     }
 
     void reset()
