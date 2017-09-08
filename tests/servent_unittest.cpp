@@ -527,3 +527,15 @@ TEST_F(ServentFixture, handshakeStream_returnResponse_channelReady_direct)
                   "\\z");
     ASSERT_EQ(1, regexp.exec(mock->outgoing.str()).size());
 }
+
+TEST_F(ServentFixture, handshakeStream_returnHits)
+{
+    AtomStream atom(*mock);
+    GnuID channelID;
+    ChanHitList* chl = nullptr;
+    Host rhost;
+
+    s.handshakeStream_returnHits(atom, channelID, chl, rhost);
+    // quit int 1003
+    ASSERT_EQ(std::string({'q','u','i','t', 4,0,0,0, (char)0xeb,0x03,0,0 }), mock->outgoing.str());
+}
