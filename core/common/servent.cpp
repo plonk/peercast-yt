@@ -1021,7 +1021,6 @@ bool Servent::handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool c
                                              std::shared_ptr<Channel> ch, ChanHitList* chl,
                                              const ChanInfo& chanInfo)
 {
-    bool result = false;
     Host rhost = sock->host;
     AtomStream atom(*sock);
 
@@ -1046,21 +1045,19 @@ bool Servent::handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool c
             LOG_DEBUG("Sending channel unavailable");
 
             handshakeStream_returnHits(atom, chanInfo.id, chl, rhost);
-            result = false;
+            return false;
         }else                                      // direct stream
         {
             LOG_DEBUG("Sending channel unavailable");
             sock->writeLine(HTTP_SC_UNAVAILABLE);
             sock->writeLine("");
-            result = false;
+            return false;
         }
     }else
     {
         handshakeStream_returnStreamHeaders(atom, gotPCP, ch, chanInfo, rhost);
-        result = true;
+        return true;
     }
-
-    return result;
 }
 
 // -----------------------------------
