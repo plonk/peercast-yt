@@ -4,7 +4,7 @@
 #include "servent.h"
 #include "sstream.h"
 
-#include "defer.h"
+#include "regexp.h"
 
 #include "mockclientsocket.h"
 
@@ -438,4 +438,92 @@ TEST_F(ServentFixture, handshakeStream_noHeaders)
     ASSERT_NO_THROW(s.handshakeStream(info));
 
     ASSERT_EQ("HTTP/1.0 404 Not Found\r\n\r\n", mock->outgoing.str());
+}
+
+TEST_F(ServentFixture, handshakeStream_returnResponse_channelNotFound)
+{
+    bool gotPCP = false;
+    bool chanFound = false;
+    bool chanReady = false;
+    std::shared_ptr<Channel> ch = nullptr;
+    ChanHitList* chl = nullptr;
+    const ChanInfo chanInfo;
+
+    ASSERT_FALSE(
+        s.handshakeStream_returnResponse(gotPCP, chanFound, chanReady, ch, chl, chanInfo));
+    ASSERT_EQ("HTTP/1.0 404 Not Found\r\n\r\n", mock->outgoing.str());
+}
+
+TEST_F(ServentFixture, handshakeStream_returnResponse_channelNotReady_relay)
+{
+    bool gotPCP = true;
+    bool chanFound = true;
+    bool chanReady = false;
+    std::shared_ptr<Channel> ch = nullptr;
+    ChanHitList* chl = nullptr;
+    const ChanInfo chanInfo;
+
+    s.outputProtocol = ChanInfo::SP_PCP;
+    // PCPハンドシェイクができない。
+    ASSERT_THROW(
+        s.handshakeStream_returnResponse(gotPCP, chanFound, chanReady, ch, chl, chanInfo),
+        StreamException);
+}
+
+TEST_F(ServentFixture, handshakeStream_returnResponse_channelNotReady_direct)
+{
+    bool gotPCP = false;
+    bool chanFound = true;
+    bool chanReady = false;
+    std::shared_ptr<Channel> ch = nullptr;
+    ChanHitList* chl = nullptr;
+    const ChanInfo chanInfo;
+
+    s.outputProtocol = ChanInfo::SP_HTTP;
+    ASSERT_FALSE(
+        s.handshakeStream_returnResponse(gotPCP, chanFound, chanReady, ch, chl, chanInfo));
+    ASSERT_EQ("HTTP/1.0 503 Service Unavailable\r\n\r\n", mock->outgoing.str());
+}
+
+TEST_F(ServentFixture, handshakeStream_returnResponse_channelReady_relay)
+{
+    bool gotPCP = true;
+    bool chanFound = true;
+    bool chanReady = true;
+    std::shared_ptr<Channel> ch = nullptr;
+    ChanHitList* chl = nullptr;
+    const ChanInfo chanInfo;
+
+    s.outputProtocol = ChanInfo::SP_PCP;
+    // PCPハンドシェイクができない。
+    ASSERT_THROW(
+        s.handshakeStream_returnResponse(gotPCP, chanFound, chanReady, ch, chl, chanInfo),
+        StreamException);
+}
+
+TEST_F(ServentFixture, handshakeStream_returnResponse_channelReady_direct)
+{
+    bool gotPCP = false;
+    bool chanFound = true;
+    bool chanReady = true;
+    std::shared_ptr<Channel> ch = nullptr;
+    ChanHitList* chl = nullptr;
+    const ChanInfo chanInfo;
+
+    s.outputProtocol = ChanInfo::SP_HTTP;
+    ASSERT_TRUE(
+        s.handshakeStream_returnResponse(gotPCP, chanFound, chanReady, ch, chl, chanInfo));
+    Regexp regexp("\\A"
+                  "HTTP/1\\.0 200 OK\\r\\n"
+                  "Server: PeerCast/0\\.1218 \\(YT\\d\\d\\)\\r\\n"
+                  "Accept-Ranges: none\\r\\n"
+                  "x-audiocast-name: \\r\\n"
+                  "x-audiocast-bitrate: 0\\r\\n"
+                  "x-audiocast-genre: \\r\\n"
+                  "x-audiocast-description: \\r\\n"
+                  "x-audiocast-url: \\r\\n"
+                  "x-peercast-channelid: 00000000000000000000000000000000\\r\\n"
+                  "Content-Type: application/octet-stream\\r\\n\\r\\n"
+                  "\\z");
+    ASSERT_EQ(1, regexp.exec(mock->outgoing.str()).size());
 }
