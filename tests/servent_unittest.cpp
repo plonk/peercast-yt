@@ -7,6 +7,7 @@
 #include "regexp.h"
 
 #include "mockclientsocket.h"
+#include "version2.h"
 
 using namespace cgi;
 
@@ -538,4 +539,61 @@ TEST_F(ServentFixture, handshakeStream_returnHits)
     s.handshakeStream_returnHits(atom, channelID, chl, rhost);
     // quit int 1003
     ASSERT_EQ(std::string({'q','u','i','t', 4,0,0,0, (char)0xeb,0x03,0,0 }), mock->outgoing.str());
+}
+
+TEST_F(ServentFixture, handshakeStream_returnStreamHeaders)
+{
+    AtomStream atom(*mock);
+    bool gotPCP = false;
+    std::shared_ptr<Channel> ch = nullptr;
+    ChanInfo chanInfo;
+    Host rhost;
+
+    s.outputProtocol = ChanInfo::SP_HTTP;
+    s.handshakeStream_returnStreamHeaders(atom, gotPCP, ch, chanInfo, rhost);
+
+    ASSERT_EQ("HTTP/1.0 200 OK\r\n"
+              "Server: " PCX_AGENT "\r\n"
+              "Accept-Ranges: none\r\n"
+              "x-audiocast-name: \r\n"
+              "x-audiocast-bitrate: 0\r\n"
+              "x-audiocast-genre: \r\n"
+              "x-audiocast-description: \r\n"
+              "x-audiocast-url: \r\n"
+              "x-peercast-channelid: 00000000000000000000000000000000\r\n"
+              "Content-Type: application/octet-stream\r\n"
+              "\r\n",
+              mock->outgoing.str());
+}
+
+TEST_F(ServentFixture, handshakeStream_returnStreamHeaders_mov)
+{
+    // ストリームタイプが MOV の時は、以下の2つのヘッダーが追加される。
+    // Connection: close
+    // Content-Length: 10000000
+
+    AtomStream atom(*mock);
+    bool gotPCP = false;
+    std::shared_ptr<Channel> ch = nullptr;
+    ChanInfo chanInfo;
+    Host rhost;
+
+    s.outputProtocol = ChanInfo::SP_HTTP;
+    chanInfo.contentType = ChanInfo::T_MOV;
+    s.handshakeStream_returnStreamHeaders(atom, gotPCP, ch, chanInfo, rhost);
+
+    ASSERT_EQ("HTTP/1.0 200 OK\r\n"
+              "Server: " PCX_AGENT "\r\n"
+              "Accept-Ranges: none\r\n"
+              "x-audiocast-name: \r\n"
+              "x-audiocast-bitrate: 0\r\n"
+              "x-audiocast-genre: \r\n"
+              "x-audiocast-description: \r\n"
+              "x-audiocast-url: \r\n"
+              "x-peercast-channelid: 00000000000000000000000000000000\r\n"
+              "Connection: close\r\n"
+              "Content-Length: 10000000\r\n"
+              "Content-Type: video/quicktime\r\n"
+              "\r\n",
+              mock->outgoing.str());
 }
