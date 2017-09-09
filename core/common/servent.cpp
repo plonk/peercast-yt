@@ -841,7 +841,6 @@ void Servent::handshakeStream_returnStreamHeaders(AtomStream& atom, bool gotPCP,
             {
                 sock->writeLine("Connection: close");
                 sock->writeLine("Content-Length: 10000000");
-                sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_MOV);
             }
             sock->writeLineF("%s %s", HTTP_HS_CONTENT, chanInfo.getMIMEType());
         }else if (outputProtocol == ChanInfo::SP_MMS)
