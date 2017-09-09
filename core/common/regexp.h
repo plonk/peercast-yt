@@ -15,7 +15,7 @@ public:
     Regexp(const std::string& exp);
     ~Regexp();
 
-    std::vector<std::string> exec(const std::string str);
+    std::vector<std::string> exec(const std::string& str);
 
     onig::regex_t *m_reg;
 };
