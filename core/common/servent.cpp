@@ -819,7 +819,9 @@ void Servent::handshakeStream_returnStreamHeaders(AtomStream& atom, bool gotPCP,
     {
         sock->writeLine(HTTP_SC_OK);
 
-        if ((chanInfo.contentType != ChanInfo::T_ASX) && (chanInfo.contentType != ChanInfo::T_WMV) && (chanInfo.contentType != ChanInfo::T_WMA))
+        if ((chanInfo.contentType != ChanInfo::T_ASX) &&
+            (chanInfo.contentType != ChanInfo::T_WMV) &&
+            (chanInfo.contentType != ChanInfo::T_WMA))
         {
             sock->writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
 
