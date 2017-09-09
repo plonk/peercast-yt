@@ -59,3 +59,11 @@ TEST_F(RegexpFixture, backslashCapitalADoesntMatchLineBeginning)
     auto captures = pat.exec("b\na");
     ASSERT_EQ(0, captures.size());
 }
+
+TEST_F(RegexpFixture, matches)
+{
+    ASSERT_TRUE(Regexp("").matches("abc"));
+    ASSERT_TRUE(Regexp("abc").matches("abc"));
+    ASSERT_FALSE(Regexp("def").matches("abc"));
+    ASSERT_FALSE(Regexp("def").matches(""));
+}

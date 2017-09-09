@@ -68,3 +68,8 @@ std::vector<std::string> Regexp::exec(const std::string& str)
         throw std::runtime_error(message);
     }
 }
+
+bool Regexp::matches(const std::string& str)
+{
+    return exec(str).size() > 0;
+}
