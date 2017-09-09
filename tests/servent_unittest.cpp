@@ -525,7 +525,7 @@ TEST_F(ServentFixture, handshakeStream_returnResponse_channelReady_direct)
                   "x-peercast-channelid: 00000000000000000000000000000000\\r\\n"
                   "Content-Type: application/octet-stream\\r\\n\\r\\n"
                   "\\z");
-    ASSERT_EQ(1, regexp.exec(mock->outgoing.str()).size());
+    ASSERT_TRUE(regexp.matches(mock->outgoing.str()));
 }
 
 TEST_F(ServentFixture, handshakeStream_returnHits)
