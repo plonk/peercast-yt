@@ -164,9 +164,8 @@ public:
     bool    handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool chanReady,
                                            std::shared_ptr<Channel> ch, ChanHitList* chl,
                                            const ChanInfo& chanInfo);
-    void    handshakeStream_returnStreamHeaders(AtomStream& atom, bool gotPCP,
-                                                std::shared_ptr<Channel> ch, const ChanInfo& chanInfo,
-                                                Host& rhost);
+    void    handshakeStream_returnStreamHeaders(AtomStream& atom,
+                                                std::shared_ptr<Channel> ch, const ChanInfo& chanInfo);
     void    handshakeStream_returnHits(AtomStream& atom, const GnuID& channelID, ChanHitList* chl, Host& rhost);
     void    handshakeGiv(GnuID &);
 

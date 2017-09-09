@@ -544,13 +544,11 @@ TEST_F(ServentFixture, handshakeStream_returnHits)
 TEST_F(ServentFixture, handshakeStream_returnStreamHeaders)
 {
     AtomStream atom(*mock);
-    bool gotPCP = false;
     std::shared_ptr<Channel> ch = nullptr;
     ChanInfo chanInfo;
-    Host rhost;
 
     s.outputProtocol = ChanInfo::SP_HTTP;
-    s.handshakeStream_returnStreamHeaders(atom, gotPCP, ch, chanInfo, rhost);
+    s.handshakeStream_returnStreamHeaders(atom, ch, chanInfo);
 
     ASSERT_EQ("HTTP/1.0 200 OK\r\n"
               "Server: " PCX_AGENT "\r\n"
@@ -573,14 +571,12 @@ TEST_F(ServentFixture, handshakeStream_returnStreamHeaders_mov)
     // Content-Length: 10000000
 
     AtomStream atom(*mock);
-    bool gotPCP = false;
     std::shared_ptr<Channel> ch = nullptr;
     ChanInfo chanInfo;
-    Host rhost;
 
     s.outputProtocol = ChanInfo::SP_HTTP;
     chanInfo.contentType = ChanInfo::T_MOV;
-    s.handshakeStream_returnStreamHeaders(atom, gotPCP, ch, chanInfo, rhost);
+    s.handshakeStream_returnStreamHeaders(atom, ch, chanInfo);
 
     ASSERT_EQ("HTTP/1.0 200 OK\r\n"
               "Server: " PCX_AGENT "\r\n"

@@ -794,10 +794,9 @@ void Servent::handshakeStream_changeOutputProtocol(bool gotPCP, const ChanInfo& 
 
 // -----------------------------------
 // ストリームできる時の応答のヘッダー部分を送信する。
-void Servent::handshakeStream_returnStreamHeaders(AtomStream& atom, bool gotPCP,
+void Servent::handshakeStream_returnStreamHeaders(AtomStream& atom,
                                                   std::shared_ptr<Channel> ch,
-                                                  const ChanInfo& chanInfo,
-                                                  Host& rhost)
+                                                  const ChanInfo& chanInfo)
 {
     if (chanInfo.contentType != ChanInfo::T_MP3)
         addMetadata = false;
@@ -871,12 +870,6 @@ void Servent::handshakeStream_returnStreamHeaders(AtomStream& atom, bool gotPCP,
         }
     }
     sock->writeLine("");
-
-    if (gotPCP)
-    {
-        handshakeIncomingPCP(atom, rhost, remoteID, agent);
-        atom.writeInt(PCP_OK, 0);
-    }
 }
 
 // -----------------------------------
@@ -1055,7 +1048,13 @@ bool Servent::handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool c
         }
     }else
     {
-        handshakeStream_returnStreamHeaders(atom, gotPCP, ch, chanInfo, rhost);
+        handshakeStream_returnStreamHeaders(atom, ch, chanInfo);
+
+        if (gotPCP)
+        {
+            handshakeIncomingPCP(atom, rhost, remoteID, agent);
+            atom.writeInt(PCP_OK, 0);
+        }
         return true;
     }
 }
