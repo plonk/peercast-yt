@@ -240,6 +240,8 @@ void Servent::reset()
 
     status = S_NONE;
     type = T_NONE;
+
+    streamPos = 0;
 }
 
 // -----------------------------------

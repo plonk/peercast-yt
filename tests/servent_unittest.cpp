@@ -73,7 +73,7 @@ TEST_F(ServentFixture, initialState)
 
     ASSERT_EQ(true, s.sendHeader);
     // ASSERT_EQ(0, s.syncPos); // 不定
-    // ASSERT_EQ(0, s.streamPos);  // 不定
+    ASSERT_EQ(0, s.streamPos);
     ASSERT_EQ(0, s.servPort);
 
     ASSERT_EQ(ChanInfo::SP_UNKNOWN, s.outputProtocol);
