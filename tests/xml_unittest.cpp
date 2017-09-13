@@ -95,3 +95,16 @@ TEST_F(XMLFixture, attribute_singleQuotes)
     XML xml;
     ASSERT_THROW(xml.read(mem), StreamException);
 }
+
+TEST_F(XMLFixture, node)
+{
+    XML::Node node("hoge");
+
+    ASSERT_EQ(nullptr, node.contData);
+    //ASSERT_EQ(nullptr, node.attrData);
+    //ASSERT_EQ(nullptr, node.attr);
+    ASSERT_EQ(1, node.numAttr);
+    ASSERT_EQ(nullptr, node.child);
+    ASSERT_EQ(nullptr, node.parent);
+    ASSERT_EQ(nullptr, node.sibling);
+}
