@@ -120,6 +120,8 @@ void XML::Node::setBinaryContent(void *ptr, int size)
 // ----------------------------------
 void XML::Node::setContent(const char *n)
 {
+    if (contData != nullptr)
+        free(contData);
     contData = Sys::strdup(n);
 }
 
