@@ -327,7 +327,7 @@ XML::Node::~Node()
 //  LOG("delete %s", getName());
 
     if (contData)
-        delete [] contData;
+        free(contData);
     if (attrData)
         free(attrData); // strdupped
     if (attr)
