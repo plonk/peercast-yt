@@ -169,7 +169,10 @@ void XML::Node::setAttributes(const char *n)
         if (!isWhiteSpace(c))
         {
             if (numAttr>=maxAttr)
+            {
+                free(attrData); delete[] attr; // clean up
                 throw StreamException("Too many attributes");
+            }
 
             // get start of tag name
             attr[numAttr].namePos = i;
@@ -199,7 +202,10 @@ void XML::Node::setAttributes(const char *n)
 
             // check for valid start of attribute value - '"'
             if (attrData[i++] != '\"')
+            {
+                free(attrData); delete[] attr; // clean up
                 throw StreamException("Bad tag value");
+            }
 
             attr[numAttr++].valuePos = i;
 
