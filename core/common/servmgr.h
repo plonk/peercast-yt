@@ -23,6 +23,7 @@
 #include "servent.h"
 #include "varwriter.h"
 #include "rtmpmonit.h"
+#include "inifile.h"
 
 // ----------------------------------
 
@@ -219,6 +220,7 @@ public:
     bool            checkForceIP();
     FW_STATE        getFirewall() { return firewalled; }
     void            saveSettings(const char *);
+    void            doSaveSettings(IniFileBase& iniFile);
     void            loadSettings(const char *);
     void            setPassiveSearch(unsigned int);
     int             findChannel(ChanInfo &);

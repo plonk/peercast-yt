@@ -863,7 +863,7 @@ bool ServMgr::canServeHost(Host &h)
 #endif
 
 // --------------------------------------------------
-void writeServerSettings(IniFile &iniFile, unsigned int a)
+void writeServerSettings(IniFileBase &iniFile, unsigned int a)
 {
     iniFile.writeBoolValue("allowHTML", a & Servent::ALLOW_HTML);
     iniFile.writeBoolValue("allowBroadcast", a & Servent::ALLOW_BROADCAST);
@@ -872,7 +872,7 @@ void writeServerSettings(IniFile &iniFile, unsigned int a)
 }
 
 // --------------------------------------------------
-void writeFilterSettings(IniFile &iniFile, ServFilter &f)
+void writeFilterSettings(IniFileBase &iniFile, ServFilter &f)
 {
     char ipstr[64];
     f.host.IPtoStr(ipstr);
@@ -884,7 +884,7 @@ void writeFilterSettings(IniFile &iniFile, ServFilter &f)
 }
 
 // --------------------------------------------------
-static void  writeServHost(IniFile &iniFile, ServHost &sh)
+static void  writeServHost(IniFileBase &iniFile, ServHost &sh)
 {
     iniFile.writeSection("Host");
 
@@ -896,7 +896,7 @@ static void  writeServHost(IniFile &iniFile, ServHost &sh)
 }
 
 // --------------------------------------------------
-static void  writeRelayChannel(IniFile &iniFile, std::shared_ptr<Channel> c)
+static void  writeRelayChannel(IniFileBase &iniFile, std::shared_ptr<Channel> c)
 {
     iniFile.writeSection("RelayChannel");
 
@@ -947,132 +947,137 @@ void ServMgr::saveSettings(const char *fn)
     }else{
         LOG_DEBUG("Saving settings to: %s", fn);
 
-        iniFile.writeSection("Server");
-        iniFile.writeStrValue("serverName", servMgr->serverName);
-        iniFile.writeIntValue("serverPort", servMgr->serverHost.port);
-        iniFile.writeBoolValue("autoServe", servMgr->autoServe);
-        iniFile.writeStrValue("forceIP", servMgr->forceIP);
-        iniFile.writeBoolValue("isRoot", servMgr->isRoot);
-        iniFile.writeIntValue("maxBitrateOut", servMgr->maxBitrateOut);
-        iniFile.writeIntValue("maxRelays", servMgr->maxRelays);
-        iniFile.writeIntValue("maxDirect", servMgr->maxDirect);
-        iniFile.writeIntValue("maxRelaysPerChannel", chanMgr->maxRelaysPerChannel);
-        iniFile.writeIntValue("firewallTimeout", firewallTimeout);
-        iniFile.writeBoolValue("forceNormal", forceNormal);
-        iniFile.writeStrValue("rootMsg", rootMsg);
-        iniFile.writeStrValue("authType", servMgr->authType==ServMgr::AUTH_COOKIE?"cookie":"http-basic");
-        iniFile.writeStrValue("cookiesExpire", servMgr->cookieList.neverExpire==true?"never":"session");
-        iniFile.writeStrValue("htmlPath", servMgr->htmlPath);
-        iniFile.writeIntValue("minPGNUIncoming", servMgr->minGnuIncoming);
-        iniFile.writeIntValue("maxPGNUIncoming", servMgr->maxGnuIncoming);
-        iniFile.writeIntValue("maxServIn", servMgr->maxServIn);
-        iniFile.writeStrValue("chanLog", servMgr->chanLog);
-        iniFile.writeBoolValue("publicDirectory", servMgr->publicDirectoryEnabled);
-        iniFile.writeStrValue("genrePrefix", servMgr->genrePrefix);
-
-        iniFile.writeStrValue("networkID", networkID.str().c_str());
-
-        iniFile.writeSection("Broadcast");
-        iniFile.writeIntValue("broadcastMsgInterval", chanMgr->broadcastMsgInterval);
-        iniFile.writeStrValue("broadcastMsg", chanMgr->broadcastMsg);
-        iniFile.writeIntValue("icyMetaInterval", chanMgr->icyMetaInterval);
-        iniFile.writeStrValue("broadcastID", chanMgr->broadcastID.str().c_str());
-        iniFile.writeIntValue("hostUpdateInterval", chanMgr->hostUpdateInterval);
-        iniFile.writeIntValue("maxControlConnections", servMgr->maxControl);
-        iniFile.writeStrValue("rootHost", servMgr->rootHost);
-
-        iniFile.writeSection("Client");
-        iniFile.writeIntValue("refreshHTML", refreshHTML);
-        iniFile.writeIntValue("relayBroadcast", servMgr->relayBroadcast);
-        iniFile.writeIntValue("minBroadcastTTL", chanMgr->minBroadcastTTL);
-        iniFile.writeIntValue("maxBroadcastTTL", chanMgr->maxBroadcastTTL);
-        iniFile.writeIntValue("pushTries", chanMgr->pushTries);
-        iniFile.writeIntValue("pushTimeout", chanMgr->pushTimeout);
-        iniFile.writeIntValue("maxPushHops", chanMgr->maxPushHops);
-        iniFile.writeIntValue("autoQuery", chanMgr->autoQuery);
-        iniFile.writeIntValue("queryTTL", servMgr->queryTTL);
-        iniFile.writeBoolValue("transcodingEnabled", servMgr->transcodingEnabled);
-        iniFile.writeStrValue("preset", servMgr->preset);
-        iniFile.writeStrValue("audioCodec", servMgr->audioCodec);
-        iniFile.writeStrValue("wmvProtocol", servMgr->wmvProtocol);
-
-        iniFile.writeSection("Privacy");
-        iniFile.writeStrValue("password", servMgr->password);
-        iniFile.writeIntValue("maxUptime", chanMgr->maxUptime);
-
-        for (int i=0; i<servMgr->numFilters; i++)
-        {
-            iniFile.writeSection("Filter");
-                writeFilterSettings(iniFile, servMgr->filters[i]);
-            iniFile.writeLine("[End]");
-        }
-
-        for (auto feed : servMgr->channelDirectory->feeds())
-        {
-            iniFile.writeSection("Feed");
-            iniFile.writeStrValue("url", feed.url);
-            iniFile.writeBoolValue("isPublic", feed.isPublic);
-            iniFile.writeLine("[End]");
-        }
-
-        iniFile.writeSection("Notify");
-            iniFile.writeBoolValue("PeerCast", notifyMask&NT_PEERCAST);
-            iniFile.writeBoolValue("Broadcasters", notifyMask&NT_BROADCASTERS);
-            iniFile.writeBoolValue("TrackInfo", notifyMask&NT_TRACKINFO);
-        iniFile.writeLine("[End]");
-
-        iniFile.writeSection("Server1");
-            writeServerSettings(iniFile, allowServer1);
-        iniFile.writeLine("[End]");
-
-        iniFile.writeSection("Server2");
-            writeServerSettings(iniFile, allowServer2);
-        iniFile.writeLine("[End]");
-
-        iniFile.writeSection("Debug");
-        iniFile.writeIntValue("logLevel", logLevel());
-        iniFile.writeBoolValue("pauseLog", pauseLog);
-        iniFile.writeIntValue("idleSleepTime", sys->idleSleepTime);
-
-        if (servMgr->validBCID)
-        {
-            BCID *bcid = servMgr->validBCID;
-            while (bcid)
-            {
-                iniFile.writeSection("ValidBCID");
-                iniFile.writeStrValue("id",  bcid->id.str());
-                iniFile.writeStrValue("name", bcid->name);
-                iniFile.writeStrValue("email", bcid->email);
-                iniFile.writeStrValue("url", bcid->url);
-                iniFile.writeBoolValue("valid", bcid->valid);
-                iniFile.writeLine("[End]");
-
-                bcid=bcid->next;
-            }
-        }
-
-        std::shared_ptr<Channel> c = chanMgr->channel;
-        while (c)
-        {
-            if (c->isActive() && c->stayConnected)
-                writeRelayChannel(iniFile, c);
-
-            c=c->next;
-        }
-
-        for (int i=0; i<ServMgr::MAX_HOSTCACHE; i++)
-        {
-            ServHost *sh = &servMgr->hostCache[i];
-            if (sh->type != ServHost::T_NONE)
-                writeServHost(iniFile, *sh);
-        }
-
+        doSaveSettings(iniFile);
         iniFile.close();
     }
 }
 
 // --------------------------------------------------
-unsigned int readServerSettings(IniFile &iniFile, unsigned int a)
+void ServMgr::doSaveSettings(IniFileBase& iniFile)
+{
+    iniFile.writeSection("Server");
+    iniFile.writeStrValue("serverName", servMgr->serverName);
+    iniFile.writeIntValue("serverPort", servMgr->serverHost.port);
+    iniFile.writeBoolValue("autoServe", servMgr->autoServe);
+    iniFile.writeStrValue("forceIP", servMgr->forceIP);
+    iniFile.writeBoolValue("isRoot", servMgr->isRoot);
+    iniFile.writeIntValue("maxBitrateOut", servMgr->maxBitrateOut);
+    iniFile.writeIntValue("maxRelays", servMgr->maxRelays);
+    iniFile.writeIntValue("maxDirect", servMgr->maxDirect);
+    iniFile.writeIntValue("maxRelaysPerChannel", chanMgr->maxRelaysPerChannel);
+    iniFile.writeIntValue("firewallTimeout", firewallTimeout);
+    iniFile.writeBoolValue("forceNormal", forceNormal);
+    iniFile.writeStrValue("rootMsg", rootMsg);
+    iniFile.writeStrValue("authType", servMgr->authType==ServMgr::AUTH_COOKIE?"cookie":"http-basic");
+    iniFile.writeStrValue("cookiesExpire", servMgr->cookieList.neverExpire==true?"never":"session");
+    iniFile.writeStrValue("htmlPath", servMgr->htmlPath);
+    iniFile.writeIntValue("minPGNUIncoming", servMgr->minGnuIncoming);
+    iniFile.writeIntValue("maxPGNUIncoming", servMgr->maxGnuIncoming);
+    iniFile.writeIntValue("maxServIn", servMgr->maxServIn);
+    iniFile.writeStrValue("chanLog", servMgr->chanLog);
+    iniFile.writeBoolValue("publicDirectory", servMgr->publicDirectoryEnabled);
+    iniFile.writeStrValue("genrePrefix", servMgr->genrePrefix);
+
+    iniFile.writeStrValue("networkID", networkID.str().c_str());
+
+    iniFile.writeSection("Broadcast");
+    iniFile.writeIntValue("broadcastMsgInterval", chanMgr->broadcastMsgInterval);
+    iniFile.writeStrValue("broadcastMsg", chanMgr->broadcastMsg);
+    iniFile.writeIntValue("icyMetaInterval", chanMgr->icyMetaInterval);
+    iniFile.writeStrValue("broadcastID", chanMgr->broadcastID.str().c_str());
+    iniFile.writeIntValue("hostUpdateInterval", chanMgr->hostUpdateInterval);
+    iniFile.writeIntValue("maxControlConnections", servMgr->maxControl);
+    iniFile.writeStrValue("rootHost", servMgr->rootHost);
+
+    iniFile.writeSection("Client");
+    iniFile.writeIntValue("refreshHTML", refreshHTML);
+    iniFile.writeIntValue("relayBroadcast", servMgr->relayBroadcast);
+    iniFile.writeIntValue("minBroadcastTTL", chanMgr->minBroadcastTTL);
+    iniFile.writeIntValue("maxBroadcastTTL", chanMgr->maxBroadcastTTL);
+    iniFile.writeIntValue("pushTries", chanMgr->pushTries);
+    iniFile.writeIntValue("pushTimeout", chanMgr->pushTimeout);
+    iniFile.writeIntValue("maxPushHops", chanMgr->maxPushHops);
+    iniFile.writeIntValue("autoQuery", chanMgr->autoQuery);
+    iniFile.writeIntValue("queryTTL", servMgr->queryTTL);
+    iniFile.writeBoolValue("transcodingEnabled", servMgr->transcodingEnabled);
+    iniFile.writeStrValue("preset", servMgr->preset);
+    iniFile.writeStrValue("audioCodec", servMgr->audioCodec);
+    iniFile.writeStrValue("wmvProtocol", servMgr->wmvProtocol);
+
+    iniFile.writeSection("Privacy");
+    iniFile.writeStrValue("password", servMgr->password);
+    iniFile.writeIntValue("maxUptime", chanMgr->maxUptime);
+
+    for (int i=0; i<servMgr->numFilters; i++)
+    {
+        iniFile.writeSection("Filter");
+            writeFilterSettings(iniFile, servMgr->filters[i]);
+        iniFile.writeLine("[End]");
+    }
+
+    for (auto feed : servMgr->channelDirectory->feeds())
+    {
+        iniFile.writeSection("Feed");
+        iniFile.writeStrValue("url", feed.url);
+        iniFile.writeBoolValue("isPublic", feed.isPublic);
+        iniFile.writeLine("[End]");
+    }
+
+    iniFile.writeSection("Notify");
+        iniFile.writeBoolValue("PeerCast", notifyMask&NT_PEERCAST);
+        iniFile.writeBoolValue("Broadcasters", notifyMask&NT_BROADCASTERS);
+        iniFile.writeBoolValue("TrackInfo", notifyMask&NT_TRACKINFO);
+    iniFile.writeLine("[End]");
+
+    iniFile.writeSection("Server1");
+        writeServerSettings(iniFile, allowServer1);
+    iniFile.writeLine("[End]");
+
+    iniFile.writeSection("Server2");
+        writeServerSettings(iniFile, allowServer2);
+    iniFile.writeLine("[End]");
+
+    iniFile.writeSection("Debug");
+    iniFile.writeIntValue("logLevel", logLevel());
+    iniFile.writeBoolValue("pauseLog", pauseLog);
+    iniFile.writeIntValue("idleSleepTime", sys->idleSleepTime);
+
+    if (servMgr->validBCID)
+    {
+        BCID *bcid = servMgr->validBCID;
+        while (bcid)
+        {
+            iniFile.writeSection("ValidBCID");
+            iniFile.writeStrValue("id",  bcid->id.str());
+            iniFile.writeStrValue("name", bcid->name);
+            iniFile.writeStrValue("email", bcid->email);
+            iniFile.writeStrValue("url", bcid->url);
+            iniFile.writeBoolValue("valid", bcid->valid);
+            iniFile.writeLine("[End]");
+
+            bcid=bcid->next;
+        }
+    }
+
+    std::shared_ptr<Channel> c = chanMgr->channel;
+    while (c)
+    {
+        if (c->isActive() && c->stayConnected)
+            writeRelayChannel(iniFile, c);
+
+        c=c->next;
+    }
+
+    for (int i=0; i<ServMgr::MAX_HOSTCACHE; i++)
+    {
+        ServHost *sh = &servMgr->hostCache[i];
+        if (sh->type != ServHost::T_NONE)
+            writeServHost(iniFile, *sh);
+    }
+}
+
+// --------------------------------------------------
+unsigned int readServerSettings(IniFileBase &iniFile, unsigned int a)
 {
     while (iniFile.readNext())
     {
@@ -1091,7 +1096,7 @@ unsigned int readServerSettings(IniFile &iniFile, unsigned int a)
 }
 
 // --------------------------------------------------
-void readFilterSettings(IniFile &iniFile, ServFilter &sv)
+void readFilterSettings(IniFileBase &iniFile, ServFilter &sv)
 {
     sv.host.init();
 
