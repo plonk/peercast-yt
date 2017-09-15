@@ -235,6 +235,7 @@ public:
     std::string path;
     std::string queryString;
     std::string protocolVersion;
+    std::string body;
     HTTPHeaders headers;
 };
 
@@ -342,6 +343,7 @@ public:
     }
 
     void send(const HTTPResponse& response);
+    HTTPResponse send(const HTTPRequest& request);
 
     char    cmdLine[8192], *arg;
 
