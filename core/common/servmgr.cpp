@@ -978,13 +978,13 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
     iniFile.writeBoolValue("publicDirectory", servMgr->publicDirectoryEnabled);
     iniFile.writeStrValue("genrePrefix", servMgr->genrePrefix);
 
-    iniFile.writeStrValue("networkID", networkID.str().c_str());
+    iniFile.writeStrValue("networkID", networkID.str());
 
     iniFile.writeSection("Broadcast");
     iniFile.writeIntValue("broadcastMsgInterval", chanMgr->broadcastMsgInterval);
     iniFile.writeStrValue("broadcastMsg", chanMgr->broadcastMsg);
     iniFile.writeIntValue("icyMetaInterval", chanMgr->icyMetaInterval);
-    iniFile.writeStrValue("broadcastID", chanMgr->broadcastID.str().c_str());
+    iniFile.writeStrValue("broadcastID", chanMgr->broadcastID.str());
     iniFile.writeIntValue("hostUpdateInterval", chanMgr->hostUpdateInterval);
     iniFile.writeIntValue("maxControlConnections", servMgr->maxControl);
     iniFile.writeStrValue("rootHost", servMgr->rootHost);
