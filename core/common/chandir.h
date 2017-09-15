@@ -128,7 +128,7 @@ public:
     bool writeVariable(Stream& out, const String& varName) override;
     bool writeVariable(Stream &, const String &, int) override;
 
-    std::vector<ChannelEntry> channels() { return m_channels; };
+    std::vector<ChannelEntry> channels() const;
 
     std::string findTracker(GnuID id);
 
@@ -136,7 +136,7 @@ public:
     std::vector<ChannelFeed> m_feeds;
 
     unsigned int m_lastUpdate;
-    std::recursive_mutex m_lock;
+    mutable std::recursive_mutex m_lock;
 };
 
 #endif

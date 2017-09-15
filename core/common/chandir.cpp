@@ -412,3 +412,9 @@ std::string ChannelFeed::statusToString(ChannelFeed::Status s)
     }
     throw std::logic_error("should be unreachable");
 }
+
+std::vector<ChannelEntry> ChannelDirectory::channels() const
+{
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
+    return m_channels;
+}
