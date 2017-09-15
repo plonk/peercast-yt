@@ -201,10 +201,10 @@ bool Template::writeLoopVariable(Stream &s, const String &varName, int loop)
         }
     }else if (varName.startsWith("loop.externalChannel."))
     {
-        return servMgr->channelDirectory.writeVariable(s, varName + strlen("loop."), loop);
+        return servMgr->channelDirectory->writeVariable(s, varName + strlen("loop."), loop);
     }else if (varName.startsWith("loop.channelFeed."))
     {
-        return servMgr->channelDirectory.writeVariable(s, varName + strlen("loop."), loop);
+        return servMgr->channelDirectory->writeVariable(s, varName + strlen("loop."), loop);
     }else if (varName.startsWith("loop.notification."))
     {
         return g_notificationBuffer.writeVariable(s, varName + strlen("loop."), loop);

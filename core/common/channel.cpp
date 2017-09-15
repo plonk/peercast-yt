@@ -35,6 +35,7 @@
 #include "peercast.h"
 #include "atom.h"
 #include "pcp.h"
+#include "chandir.h"
 
 #include "mp3.h"
 #include "ogg.h"
@@ -570,7 +571,7 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
             // consult channel directory
             if (!ch->sourceHost.host.ip)
             {
-                std::string trackerIP = servMgr->channelDirectory.findTracker(ch->info.id);
+                std::string trackerIP = servMgr->channelDirectory->findTracker(ch->info.id);
                 if (!trackerIP.empty())
                 {
                     peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルフィードで "+chName(ch->info)+" のトラッカーが見付かりました。");

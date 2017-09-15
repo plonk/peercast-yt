@@ -10,6 +10,7 @@
 #include <vector>
 #include <tuple>
 #include "json.hpp"
+#include "chandir.h"
 
 class JrpcApi
 {
@@ -865,7 +866,7 @@ public:
 
     json getYPChannels(json::array_t args)
     {
-        auto channels = servMgr->channelDirectory.channels();
+        auto channels = servMgr->channelDirectory->channels();
         json::array_t res;
 
         for (auto& c : channels)
@@ -894,11 +895,11 @@ public:
 
     json getYPChannelsInternal(json::array_t args = {})
     {
-        auto channels = servMgr->channelDirectory.channels();
+        auto channels = servMgr->channelDirectory->channels();
         json::array_t res;
         std::map<std::string,bool> publicFeed;
 
-        for (auto& feed : servMgr->channelDirectory.feeds())
+        for (auto& feed : servMgr->channelDirectory->feeds())
             publicFeed[feed.url] = feed.isPublic;
 
         for (auto& c : channels)

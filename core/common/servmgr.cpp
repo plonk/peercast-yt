@@ -18,6 +18,8 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
+#include <memory>
+
 #include "servent.h"
 #include "servmgr.h"
 #include "inifile.h"
@@ -27,11 +29,13 @@
 #include "atom.h"
 #include "version2.h"
 #include "rtmpmonit.h"
+#include "chandir.h"
 
 // -----------------------------------
 ServMgr::ServMgr()
     : publicDirectoryEnabled(false)
     , rtmpServerMonitor(std::string(peercastApp->getPath()) + "rtmp-server")
+    , channelDirectory(new ChannelDirectory())
 {
     validBCID = NULL;
 
@@ -1003,7 +1007,7 @@ void ServMgr::saveSettings(const char *fn)
             iniFile.writeLine("[End]");
         }
 
-        for (auto feed : servMgr->channelDirectory.feeds())
+        for (auto feed : servMgr->channelDirectory->feeds())
         {
             iniFile.writeSection("Feed");
             iniFile.writeStrValue("url", feed.url);
@@ -1288,10 +1292,10 @@ void ServMgr::loadSettings(const char *fn)
                     if (iniFile.isName("[End]"))
                         break;
                     else if (iniFile.isName("url"))
-                        servMgr->channelDirectory.addFeed(iniFile.getStrValue());
+                        servMgr->channelDirectory->addFeed(iniFile.getStrValue());
                     else if (iniFile.isName("isPublic"))
                     {
-                        servMgr->channelDirectory.setFeedPublic(feedIndex, iniFile.getBoolValue());
+                        servMgr->channelDirectory->setFeedPublic(feedIndex, iniFile.getBoolValue());
                     }
                 }
                 feedIndex++;
@@ -1912,7 +1916,7 @@ int ServMgr::idleProc(ThreadInfo *thread)
             chanMgr->closeOldestIdle();
 
         // チャンネル一覧を取得する。
-        servMgr->channelDirectory.update();
+        servMgr->channelDirectory->update();
 
         servMgr->rtmpServerMonitor.update();
 
@@ -2234,16 +2238,16 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
             buf = "0";
     }else if (var == "numExternalChannels")
     {
-        buf = to_string(channelDirectory.numChannels());
+        buf = to_string(channelDirectory->numChannels());
     }else if (var == "numChannelFeedsPlusOne")
     {
-        buf = to_string(channelDirectory.numFeeds() + 1);
+        buf = to_string(channelDirectory->numFeeds() + 1);
     }else if (var == "numChannelFeeds")
     {
-        buf = to_string(channelDirectory.numFeeds());
+        buf = to_string(channelDirectory->numFeeds());
     }else if (var.startsWith("channelDirectory."))
     {
-        return channelDirectory.writeVariable(out, var + strlen("channelDirectory."));
+        return channelDirectory->writeVariable(out, var + strlen("channelDirectory."));
     }else if (var == "publicDirectoryEnabled")
     {
         buf = to_string(publicDirectoryEnabled);

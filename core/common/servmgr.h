@@ -21,7 +21,6 @@
 #define _SERVMGR_H
 
 #include "servent.h"
-#include "chandir.h"
 #include "varwriter.h"
 #include "rtmpmonit.h"
 
@@ -385,7 +384,8 @@ public:
 
     String              chanLog;
 
-    ChannelDirectory    channelDirectory;
+    const std::unique_ptr<class ChannelDirectory>
+                        channelDirectory;
     bool                publicDirectoryEnabled;
     FW_STATE            firewalled;
 
