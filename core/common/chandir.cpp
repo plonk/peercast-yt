@@ -351,7 +351,7 @@ std::vector<ChannelFeed> ChannelDirectory::feeds() const
     return m_feeds;
 }
 
-bool ChannelDirectory::addFeed(std::string url)
+bool ChannelDirectory::addFeed(const std::string& url)
 {
     std::lock_guard<std::recursive_mutex> cs(m_lock);
 
@@ -390,7 +390,7 @@ void ChannelDirectory::setFeedPublic(int index, bool isPublic)
         LOG_DEBUG("setFeedPublic: index %d out of range", index);
 }
 
-std::string ChannelDirectory::findTracker(GnuID id) const
+std::string ChannelDirectory::findTracker(const GnuID& id) const
 {
     for (const ChannelEntry& entry : m_channels)
     {

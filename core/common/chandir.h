@@ -114,7 +114,7 @@ public:
     int numChannels() const;
     int numFeeds() const;
     std::vector<ChannelFeed> feeds() const;
-    bool addFeed(std::string url);
+    bool addFeed(const std::string& url);
     void clearFeeds();
     void setFeedPublic(int index, bool isPublic);
 
@@ -130,7 +130,7 @@ public:
 
     std::vector<ChannelEntry> channels() const;
 
-    std::string findTracker(GnuID id) const;
+    std::string findTracker(const GnuID& id) const;
 
     std::vector<ChannelEntry> m_channels;
     std::vector<ChannelFeed> m_feeds;
