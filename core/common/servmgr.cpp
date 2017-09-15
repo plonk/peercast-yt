@@ -968,8 +968,8 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
     iniFile.writeIntValue("firewallTimeout", firewallTimeout);
     iniFile.writeBoolValue("forceNormal", forceNormal);
     iniFile.writeStrValue("rootMsg", rootMsg);
-    iniFile.writeStrValue("authType", servMgr->authType==ServMgr::AUTH_COOKIE?"cookie":"http-basic");
-    iniFile.writeStrValue("cookiesExpire", servMgr->cookieList.neverExpire==true?"never":"session");
+    iniFile.writeStrValue("authType", (servMgr->authType == ServMgr::AUTH_COOKIE) ? "cookie" : "http-basic");
+    iniFile.writeStrValue("cookiesExpire", (servMgr->cookieList.neverExpire == true) ? "never": "session");
     iniFile.writeStrValue("htmlPath", servMgr->htmlPath);
     iniFile.writeIntValue("minPGNUIncoming", servMgr->minGnuIncoming);
     iniFile.writeIntValue("maxPGNUIncoming", servMgr->maxGnuIncoming);
@@ -1008,7 +1008,7 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
     iniFile.writeStrValue("password", servMgr->password);
     iniFile.writeIntValue("maxUptime", chanMgr->maxUptime);
 
-    for (int i=0; i<servMgr->numFilters; i++)
+    for (int i = 0; i < servMgr->numFilters; i++)
     {
         iniFile.writeSection("Filter");
             writeFilterSettings(iniFile, servMgr->filters[i]);
@@ -1024,9 +1024,9 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
     }
 
     iniFile.writeSection("Notify");
-        iniFile.writeBoolValue("PeerCast", notifyMask&NT_PEERCAST);
-        iniFile.writeBoolValue("Broadcasters", notifyMask&NT_BROADCASTERS);
-        iniFile.writeBoolValue("TrackInfo", notifyMask&NT_TRACKINFO);
+        iniFile.writeBoolValue("PeerCast", notifyMask & NT_PEERCAST);
+        iniFile.writeBoolValue("Broadcasters", notifyMask & NT_BROADCASTERS);
+        iniFile.writeBoolValue("TrackInfo", notifyMask & NT_TRACKINFO);
     iniFile.writeLine("[End]");
 
     iniFile.writeSection("Server1");
@@ -1055,7 +1055,7 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
             iniFile.writeBoolValue("valid", bcid->valid);
             iniFile.writeLine("[End]");
 
-            bcid=bcid->next;
+            bcid = bcid->next;
         }
     }
 
@@ -1065,10 +1065,10 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
         if (c->isActive() && c->stayConnected)
             writeRelayChannel(iniFile, c);
 
-        c=c->next;
+        c = c->next;
     }
 
-    for (int i=0; i<ServMgr::MAX_HOSTCACHE; i++)
+    for (int i = 0; i < ServMgr::MAX_HOSTCACHE; i++)
     {
         ServHost *sh = &servMgr->hostCache[i];
         if (sh->type != ServHost::T_NONE)
