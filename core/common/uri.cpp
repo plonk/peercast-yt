@@ -5,14 +5,13 @@
 using namespace LUrlParser;
 
 URI::URI(const std::string& uriString)
-    : m_uri(new clParseURL())
+    : m_uri(std::make_shared<clParseURL>())
 {
     *m_uri = clParseURL::ParseURL(uriString);
 }
 
 URI::~URI()
 {
-    delete m_uri;
 }
 
 bool        URI::isValid()

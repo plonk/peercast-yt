@@ -1,6 +1,7 @@
 #ifndef _URI_H
 #define _URI_H
 
+#include <memory>
 #include <string>
 
 // forward-declare LUrlParser::clParseURL
@@ -21,7 +22,7 @@ public:
     std::string query();
     std::string fragment();
 
-    LUrlParser::clParseURL* m_uri;
+    std::shared_ptr<LUrlParser::clParseURL> m_uri;
 
     static int defaultPort(const std::string&);
 };
