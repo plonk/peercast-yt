@@ -111,15 +111,15 @@ public:
 
     ChannelDirectory();
 
-    int numChannels();
-    int numFeeds();
-    std::vector<ChannelFeed> feeds();
+    int numChannels() const;
+    int numFeeds() const;
+    std::vector<ChannelFeed> feeds() const;
     bool addFeed(std::string url);
     void clearFeeds();
     void setFeedPublic(int index, bool isPublic);
 
-    int totalListeners();
-    int totalRelays();
+    int totalListeners() const;
+    int totalRelays() const;
 
     bool update(UpdateMode mode = kUpdateAuto);
 
@@ -130,7 +130,7 @@ public:
 
     std::vector<ChannelEntry> channels() const;
 
-    std::string findTracker(GnuID id);
+    std::string findTracker(GnuID id) const;
 
     std::vector<ChannelEntry> m_channels;
     std::vector<ChannelFeed> m_feeds;

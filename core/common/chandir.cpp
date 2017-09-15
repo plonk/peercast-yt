@@ -72,13 +72,13 @@ ChannelDirectory::ChannelDirectory()
 {
 }
 
-int ChannelDirectory::numChannels()
+int ChannelDirectory::numChannels() const
 {
     std::lock_guard<std::recursive_mutex> cs(m_lock);
     return m_channels.size();
 }
 
-int ChannelDirectory::numFeeds()
+int ChannelDirectory::numFeeds() const
 {
     std::lock_guard<std::recursive_mutex> cs(m_lock);
     return m_feeds.size();
@@ -323,29 +323,29 @@ bool ChannelDirectory::writeVariable(Stream& out, const String& varName)
     return true;
 }
 
-int ChannelDirectory::totalListeners()
+int ChannelDirectory::totalListeners() const
 {
     std::lock_guard<std::recursive_mutex> cs(m_lock);
     int res = 0;
 
-    for (ChannelEntry& e : m_channels) {
+    for (const ChannelEntry& e : m_channels) {
         res += std::max(0, e.numDirects);
     }
     return res;
 }
 
-int ChannelDirectory::totalRelays()
+int ChannelDirectory::totalRelays() const
 {
     std::lock_guard<std::recursive_mutex> cs(m_lock);
     int res = 0;
 
-    for (ChannelEntry& e : m_channels) {
+    for (const ChannelEntry& e : m_channels) {
         res += std::max(0, e.numRelays);
     }
     return res;
 }
 
-std::vector<ChannelFeed> ChannelDirectory::feeds()
+std::vector<ChannelFeed> ChannelDirectory::feeds() const
 {
     std::lock_guard<std::recursive_mutex> cs(m_lock);
     return m_feeds;
@@ -390,9 +390,9 @@ void ChannelDirectory::setFeedPublic(int index, bool isPublic)
         LOG_DEBUG("setFeedPublic: index %d out of range", index);
 }
 
-std::string ChannelDirectory::findTracker(GnuID id)
+std::string ChannelDirectory::findTracker(GnuID id) const
 {
-    for (ChannelEntry& entry : m_channels)
+    for (const ChannelEntry& entry : m_channels)
     {
         if (entry.id.isSame(id))
             return entry.tip;
