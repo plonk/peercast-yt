@@ -98,3 +98,33 @@ TEST_F(ChannelDirectoryFixture, writeChannelVariable)
     EXPECT_STREQ("1", mem.str().c_str());
 
 }
+
+TEST_F(ChannelDirectoryFixture, numChannels)
+{
+    ASSERT_EQ(0, dir.numChannels());
+}
+
+TEST_F(ChannelDirectoryFixture, numFeeds)
+{
+    ASSERT_EQ(0, dir.numFeeds());
+}
+
+TEST_F(ChannelDirectoryFixture, feeds)
+{
+    ASSERT_TRUE(dir.feeds().empty());
+}
+
+TEST_F(ChannelDirectoryFixture, totalListeners)
+{
+    ASSERT_EQ(0, dir.totalListeners());
+}
+
+TEST_F(ChannelDirectoryFixture, totalRelays)
+{
+    ASSERT_EQ(0, dir.totalRelays());
+}
+
+TEST_F(ChannelDirectoryFixture, channels)
+{
+    ASSERT_TRUE(dir.channels().empty());
+}
