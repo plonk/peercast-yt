@@ -281,6 +281,13 @@ public:
         return res;
     }
 
+    static HTTPResponse badRequest(const std::string& message = "Bad request")
+    {
+        HTTPResponse res(400, {{"Content-Type", "text/html"}});
+        res.body = message;
+        return res;
+    }
+
     std::string body;
     int statusCode;
     HTTPHeaders headers;
