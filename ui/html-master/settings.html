@@ -337,6 +337,36 @@
 
       </td>
     </tr>
+
+    <tr>
+      <td valign=top>
+        <table class="table-panel" width="100%" align=center border=0>
+          <tr align=middle class="normal">
+            <td colspan=2><b>{#Upload Bandwidth Testing}</b></td>
+          </tr>
+          <tr align=middle class="normal">
+            <th>{#URL}</th>
+          </tr>
+          {@loop servMgr.uptestServiceRegistry.numURLs}
+            <tr class="normal">
+              <td>
+                <input size=15 value="{$loop.uptestServiceRegistry.url}" name="uptest_url" style="width: 100%" placeholder="{#URL of yp4g.xml}">
+              </td>
+            </tr>
+          {@end}
+          <tr class="normal">
+            <td>
+              <input size=15 value="" name="uptest_url" style="width: 100%" placeholder="{#URL of yp4g.xml}">
+            </td>
+          </tr>
+        </table>
+      </td>
+
+      <td valign="top">
+      </td>
+    </tr>
+
+
     <tr>
       <td>
         {@if servMgr.isRoot}
