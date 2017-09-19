@@ -7,11 +7,36 @@
 #include "version2.h"
 #include "xml.h"
 #include "sstream.h"
+#include <algorithm>
 
-void UptestServiceRegistry::addURL(const std::string& url)
+std::pair<bool,std::string> UptestServiceRegistry::addURL(const std::string& url)
 {
     std::lock_guard<std::recursive_mutex> cs(m_lock);
+
+    URI uri(url);
+    if (!uri.isValid())
+        return std::make_pair(false, "invalid URL");
+    if (uri.scheme() != "http")
+        return std::make_pair(false, "unsupported protocol");
+    if (0 < std::count_if(m_providers.begin(), m_providers.end(), [url](UptestEndpoint& e) { return e.url == url; }))
+        return std::make_pair(false, "URL already exists");
+
     m_providers.push_back(UptestEndpoint(url));
+    return std::make_pair(true, "");
+}
+
+std::pair<bool,std::string> UptestServiceRegistry::deleteByIndex(int index)
+{
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
+
+    if (index >= 0 && index < m_providers.size())
+    {
+        m_providers.erase(m_providers.begin() + index);
+        return std::make_pair(true, "");
+    }else
+    {
+        return std::make_pair(false, "index out of range");
+    }
 }
 
 std::vector<std::string> UptestServiceRegistry::getURLs() const

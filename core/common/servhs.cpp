@@ -31,6 +31,7 @@
 #include "cgi.h"
 #include "template.h"
 #include "public.h"
+#include "uptest.h"
 
 using namespace std;
 
@@ -1723,6 +1724,55 @@ void Servent::CMD_dump_hitlists(char *cmd, HTTP& http, String& jumpStr)
     http.writeString(buf);
 }
 
+void Servent::CMD_add_speedtest(char *cmd, HTTP& http, String& jumpStr)
+{
+    cgi::Query query(cmd);
+
+    if (query.get("url") == "")
+    {
+        http.send(HTTPResponse::badRequest("empty url"));
+        return;
+    }
+
+    auto status = servMgr->uptestServiceRegistry->addURL(query.get("url"));
+    if (status.first != true)
+    {
+        http.send(HTTPResponse::serverError(status.second));
+    }else
+    {
+        if (!http.headers.get("Referer").empty())
+            http.send(HTTPResponse::redirectTo(http.headers.get("Referer")));
+        else
+            http.send(HTTPResponse::redirectTo("/speedtest.html"));
+    }
+}
+
+void Servent::CMD_delete_speedtest(char *cmd, HTTP& http, String& jumpStr)
+{
+    cgi::Query query(cmd);
+    Regexp decimal("\\A(0|[1-9][0-9]*)\\z");
+
+    if (!decimal.matches(query.get("index")))
+    {
+        http.send(HTTPResponse::badRequest("invalid index"));
+        return;
+    }
+
+    auto index = std::stoi(query.get("index"));
+    auto status = servMgr->uptestServiceRegistry->deleteByIndex(index);
+    if (status.first != true)
+    {
+        http.send(HTTPResponse::serverError(status.second));
+        return;
+    }else
+    {
+        if (!http.headers.get("Referer").empty())
+            http.send(HTTPResponse::redirectTo(http.headers.get("Referer")));
+        else
+            http.send(HTTPResponse::redirectTo("/speedtest.html"));
+    }
+}
+
 void Servent::handshakeCMD(char *query)
 {
     String jumpStr;
@@ -1739,6 +1789,9 @@ void Servent::handshakeCMD(char *query)
         if (cmd == "add_bcid")
         {
             CMD_add_bcid(query, http, jumpStr);
+        }else if (cmd == "add_speedtest")
+        {
+            CMD_add_speedtest(query, http, jumpStr);
         }else if (cmd == "apply")
         {
             CMD_apply(query, http, jumpStr);
@@ -1754,6 +1807,9 @@ void Servent::handshakeCMD(char *query)
         }else if (cmd == "control_rtmp")
         {
             CMD_control_rtmp(query, http, jumpStr);
+        }else if (cmd == "delete_speedtest")
+        {
+            CMD_delete_speedtest(query, http, jumpStr);
         }else if (cmd == "dump_hitlists")
         {
             CMD_dump_hitlists(query, http, jumpStr);

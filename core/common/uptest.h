@@ -56,8 +56,9 @@ public:
 class UptestServiceRegistry : public VariableWriter
 {
 public:
-    void addURL(const std::string&);
+    std::pair<bool,std::string> addURL(const std::string&);
     std::vector<std::string> getURLs() const;
+    std::pair<bool,std::string> deleteByIndex(int index);
     void clear();
 
     bool writeVariable(Stream&, const String&) override;

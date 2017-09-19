@@ -292,11 +292,13 @@ public:
 
 private:
     void CMD_add_bcid(char *cmd, HTTP& http, String& jumpStr);
+    void CMD_add_speedtest(char *cmd, HTTP& http, String& jumpStr);
     void CMD_apply(char *cmd, HTTP& http, String& jumpStr);
     void CMD_bump(char *cmd, HTTP& http, String& jumpStr);
     void CMD_clear(char *cmd, HTTP& http, String& jumpStr);
     void CMD_clearlog(char *cmd, HTTP& http, String& jumpStr);
     void CMD_control_rtmp(char *cmd, HTTP& http, String& jumpStr);
+    void CMD_delete_speedtest(char *cmd, HTTP& http, String& jumpStr);
     void CMD_dump_hitlists(char *cmd, HTTP& http, String& jumpStr);
     void CMD_edit_bcid(char *cmd, HTTP& http, String& jumpStr);
     void CMD_fetch(char *cmd, HTTP& http, String& jumpStr);
