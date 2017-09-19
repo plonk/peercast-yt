@@ -7,7 +7,7 @@
 #include "http.h"
 #include "uri.h"
 
-struct uptestInfo
+struct UptestInfo
 {
     std::string name;
     std::string ip;
@@ -43,9 +43,10 @@ public:
 
     void update();
     std::string download(const std::string& url);
-    HTTPResponse takeSpeedTest(URI uri, size_t size);
-    uptestInfo readInfo(const std::string& body);
+    static HTTPResponse postRandomData(URI uri, size_t size);
+    UptestInfo readInfo(const std::string& body);
     bool isReady();
+    std::pair<bool,std::string> takeSpeedtest();
 
     std::string url;
     Status status;
@@ -59,12 +60,16 @@ public:
     std::pair<bool,std::string> addURL(const std::string&);
     std::vector<std::string> getURLs() const;
     std::pair<bool,std::string> deleteByIndex(int index);
+    std::pair<bool,std::string> takeSpeedtest(int index);
     void clear();
 
     bool writeVariable(Stream&, const String&) override;
     bool writeVariable(Stream&, const String&, int) override;
 
     void update();
+    void forceUpdate();
+
+    bool isIndexValid(int index);
 
     mutable std::recursive_mutex m_lock;
     std::vector<UptestEndpoint> m_providers;

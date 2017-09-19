@@ -307,8 +307,10 @@ private:
     void CMD_login(char *cmd, HTTP& http, String& jumpStr);
     void CMD_logout(char *cmd, HTTP& http, String& jumpStr);
     void CMD_redirect(char *cmd, HTTP& http, String& jumpStr);
+    void CMD_refresh_speedtest(char *cmd, HTTP& http, String& jumpStr);
     void CMD_shutdown(char *cmd, HTTP& http, String& jumpStr);
     void CMD_stop(char *cmd, HTTP& http, String& jumpStr);
+    void CMD_take_speedtest(char *cmd, HTTP& http, String& jumpStr);
     void CMD_update_channel_info(char *cmd, HTTP& http, String& jumpStr);
     void CMD_viewxml(char *cmd, HTTP& http, String& jumpStr);
 };

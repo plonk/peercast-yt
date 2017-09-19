@@ -1747,12 +1747,17 @@ void Servent::CMD_add_speedtest(char *cmd, HTTP& http, String& jumpStr)
     }
 }
 
+static bool isDecimal(const std::string& str)
+{
+    static const Regexp decimal("\\A(0|[1-9][0-9]*)\\z");
+    return decimal.matches(str);
+}
+
 void Servent::CMD_delete_speedtest(char *cmd, HTTP& http, String& jumpStr)
 {
     cgi::Query query(cmd);
-    Regexp decimal("\\A(0|[1-9][0-9]*)\\z");
 
-    if (!decimal.matches(query.get("index")))
+    if (!isDecimal(query.get("index")))
     {
         http.send(HTTPResponse::badRequest("invalid index"));
         return;
@@ -1766,6 +1771,44 @@ void Servent::CMD_delete_speedtest(char *cmd, HTTP& http, String& jumpStr)
         return;
     }else
     {
+        if (!http.headers.get("Referer").empty())
+            http.send(HTTPResponse::redirectTo(http.headers.get("Referer")));
+        else
+            http.send(HTTPResponse::redirectTo("/speedtest.html"));
+    }
+}
+
+void Servent::CMD_refresh_speedtest(char *cmd, HTTP& http, String& jumpStr)
+{
+    servMgr->uptestServiceRegistry->forceUpdate();
+
+    if (!http.headers.get("Referer").empty())
+        http.send(HTTPResponse::redirectTo(http.headers.get("Referer")));
+    else
+        http.send(HTTPResponse::redirectTo("/speedtest.html"));
+}
+
+void Servent::CMD_take_speedtest(char *cmd, HTTP& http, String& jumpStr)
+{
+    cgi::Query query(cmd);
+
+    if (!isDecimal(query.get("index")))
+    {
+        http.send(HTTPResponse::badRequest("invalid index"));
+        return;
+    }
+
+    auto index = std::stoi(query.get("index"));
+    auto status = servMgr->uptestServiceRegistry->takeSpeedtest(index);
+    if (status.first != true)
+    {
+        http.send(HTTPResponse::serverError(status.second));
+        return;
+    }else
+    {
+        // 新しい計測値を読み込む。
+        servMgr->uptestServiceRegistry->forceUpdate();
+
         if (!http.headers.get("Referer").empty())
             http.send(HTTPResponse::redirectTo(http.headers.get("Referer")));
         else
@@ -1831,18 +1874,24 @@ void Servent::handshakeCMD(char *query)
         }else if (cmd == "logout")
         {
             CMD_logout(query, http, jumpStr);
+        }else if (cmd == "redirect")
+        {
+            CMD_redirect(query, http, jumpStr);
+        }else if (cmd == "refresh_speedtest")
+        {
+            CMD_refresh_speedtest(query, http, jumpStr);
         }else if (cmd == "shutdown")
         {
             CMD_shutdown(query, http, jumpStr);
         }else if (cmd == "stop")
         {
             CMD_stop(query, http, jumpStr);
-        }else if (cmd == "redirect")
-        {
-            CMD_redirect(query, http, jumpStr);
         }else if (cmd == "update_channel_info")
         {
             CMD_update_channel_info(query, http, jumpStr);
+        }else if (cmd == "take_speedtest")
+        {
+            CMD_take_speedtest(query, http, jumpStr);
         }else if (cmd == "viewxml")
         {
             CMD_viewxml(query, http, jumpStr);

@@ -25,18 +25,30 @@ std::pair<bool,std::string> UptestServiceRegistry::addURL(const std::string& url
     return std::make_pair(true, "");
 }
 
+bool UptestServiceRegistry::isIndexValid(int index)
+{
+    return index >= 0 && index < m_providers.size();
+}
+
 std::pair<bool,std::string> UptestServiceRegistry::deleteByIndex(int index)
 {
     std::lock_guard<std::recursive_mutex> cs(m_lock);
 
-    if (index >= 0 && index < m_providers.size())
-    {
-        m_providers.erase(m_providers.begin() + index);
-        return std::make_pair(true, "");
-    }else
-    {
+    if (!isIndexValid(index))
         return std::make_pair(false, "index out of range");
-    }
+
+    m_providers.erase(m_providers.begin() + index);
+    return std::make_pair(true, "");
+}
+
+std::pair<bool,std::string> UptestServiceRegistry::takeSpeedtest(int index)
+{
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
+
+    if (!isIndexValid(index))
+        return std::make_pair(false, "index out of range");
+
+    return m_providers[index].takeSpeedtest();
 }
 
 std::vector<std::string> UptestServiceRegistry::getURLs() const
@@ -125,6 +137,14 @@ void UptestServiceRegistry::update()
     }
 }
 
+void UptestServiceRegistry::forceUpdate()
+{
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
+
+    for (auto& provider : m_providers)
+        provider.update();
+}
+
 bool UptestEndpoint::isReady()
 {
     return (status == kUntried) || (sys->getTime() - lastTriedAt > kXmlTryInterval);
@@ -195,9 +215,9 @@ static const char* yesNo(const std::string& number)
                      __LINE__, __FILE__))                               \
      : (p))
 
-uptestInfo UptestEndpoint::readInfo(const std::string& body)
+UptestInfo UptestEndpoint::readInfo(const std::string& body)
 {
-    uptestInfo info;
+    UptestInfo info;
     XML xml;
     StringStream mem(body);
 
@@ -238,7 +258,7 @@ static std::string generateRandomBytes(size_t size)
     return buf;
 }
 
-HTTPResponse UptestEndpoint::takeSpeedTest(URI uri, size_t size)
+HTTPResponse UptestEndpoint::postRandomData(URI uri, size_t size)
 {
     Host host;
     host.fromStrName(uri.host().c_str(), uri.port());
@@ -261,10 +281,50 @@ HTTPResponse UptestEndpoint::takeSpeedTest(URI uri, size_t size)
                         { "Content-Type", "application/octet-stream" }
                     });
     req.body = generateRandomBytes(size);
-    HTTPResponse res = http.send(req);
+    return http.send(req);
+}
 
-    if (res.statusCode != 302)
-        throw std::runtime_error(str::format("unexpected status code %d", res.statusCode));
+static std::string postURL(UptestInfo& info)
+{
+    return str::format("http://%s:%s%s", info.addr.c_str(), info.port.c_str(), info.object.c_str());
+}
 
-    return res;
+std::pair<bool,std::string> UptestEndpoint::takeSpeedtest()
+{
+    // yp4g.xml をダウンロードして状態を得る。
+    UptestInfo info;
+    try
+    {
+        info = readInfo(download(this->url));
+        LOG_DEBUG("Speedtest %s: checkable = %s", url.c_str(), info.checkable.c_str());
+    }catch (std::exception& e)
+    {
+        LOG_ERROR("Speedtest %s: %s", url.c_str(), e.what());
+        return std::make_pair(false, e.what());
+    }
+
+    if (info.checkable != "1")
+    {
+        LOG_ERROR("speedtest server unavailable: checkable != 1");
+        return std::make_pair(false, "speedtest server unavailable");
+    }else
+    {
+        // ランダムデータを POST する。
+        const auto uptest_cgi = postURL(info);
+        try
+        {
+            auto size = atoi(info.post_size.c_str()) * 1000;
+            LOG_DEBUG("Posting %d bytes of random data to %s ...", (int) size, uptest_cgi.c_str());
+            auto res = postRandomData(uptest_cgi, size);
+            LOG_TRACE("... done");
+            if (res.statusCode == 302)
+                return std::make_pair(true, "");
+            else
+                return std::make_pair(false, str::format("unexpected status code %d", res.statusCode));
+        }catch (std::exception& e)
+        {
+            LOG_ERROR("exception occurred while posting: %s", e.what());
+            return std::make_pair(false, "exception occurred while posting");
+        }
+    }
 }
