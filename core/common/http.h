@@ -260,7 +260,7 @@ public:
 
     static HTTPResponse notFound()
     {
-        HTTPResponse res(400, {{"Content-Type", "text/html"}});
+        HTTPResponse res(404, {{"Content-Type", "text/html"}});
         res.body = "File not found";
         return res;
     }
