@@ -215,7 +215,7 @@ void HTTP::send(const HTTPResponse& response)
         headers[pair.first] = pair.second;
 
     for (const auto& pair : headers)
-        writeLineF("%s: %s", pair.first.c_str(), pair.second.c_str());
+        writeLineF("%s: %s", str::capitalize(pair.first).c_str(), pair.second.c_str());
 
     writeLine("");
 
