@@ -9,6 +9,8 @@
 #include "sstream.h"
 #include <algorithm>
 
+// -------- class UptestServiceRegistry --------
+
 std::pair<bool,std::string> UptestServiceRegistry::addURL(const std::string& url)
 {
     std::lock_guard<std::recursive_mutex> cs(m_lock);
@@ -167,6 +169,8 @@ std::pair<bool,std::string> UptestServiceRegistry::getXML(int index, std::string
     return std::make_pair(true, "");
 }
 
+// -------- class UptestEndpoint --------
+
 bool UptestEndpoint::isReady()
 {
     return (status == kUntried) || (sys->getTime() - lastTriedAt > kXmlTryInterval);
@@ -264,7 +268,7 @@ UptestInfo UptestEndpoint::readInfo(const std::string& body)
     return info;
 }
 
-static std::string generateRandomBytes(size_t size)
+std::string UptestEndpoint::generateRandomBytes(size_t size)
 {
     std::string buf;
     peercast::Random r;
@@ -300,11 +304,6 @@ HTTPResponse UptestEndpoint::postRandomData(URI uri, size_t size)
     return http.send(req);
 }
 
-static std::string postURL(UptestInfo& info)
-{
-    return str::format("http://%s:%s%s", info.addr.c_str(), info.port.c_str(), info.object.c_str());
-}
-
 std::pair<bool,std::string> UptestEndpoint::takeSpeedtest()
 {
     // yp4g.xml をダウンロードして状態を得る。
@@ -326,7 +325,7 @@ std::pair<bool,std::string> UptestEndpoint::takeSpeedtest()
     }else
     {
         // ランダムデータを POST する。
-        const auto uptest_cgi = postURL(m_info);
+        const auto uptest_cgi = m_info.postURL();
         try
         {
             auto size = atoi(m_info.post_size.c_str()) * 1000;
@@ -343,4 +342,11 @@ std::pair<bool,std::string> UptestEndpoint::takeSpeedtest()
             return std::make_pair(false, "exception occurred while posting");
         }
     }
+}
+
+// -------- class UptestInfo --------
+
+std::string UptestInfo::postURL()
+{
+    return str::format("http://%s:%s%s", addr.c_str(), port.c_str(), object.c_str());
 }
