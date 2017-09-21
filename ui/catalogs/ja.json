@@ -68,6 +68,7 @@
 
     // speedtest.html
     "Remove"                  : "削除",
+    "Speedtest"               : "帯域チェック",
 
     // channels.html
     "Channel"                 : "チャンネル",

@@ -38,8 +38,7 @@ public:
 
     UptestEndpoint(const std::string& aUrl)
         : url(aUrl)
-        , status(kUntried)
-        , bitrate(0) {}
+        , status(kUntried) {}
 
     void update();
     std::string download(const std::string& url);
@@ -50,8 +49,9 @@ public:
 
     std::string url;
     Status status;
-    int bitrate; // in kbps
+    UptestInfo m_info;
     unsigned int lastTriedAt;
+    std::string m_xml;
 };
 
 class UptestServiceRegistry : public VariableWriter
@@ -61,6 +61,7 @@ public:
     std::vector<std::string> getURLs() const;
     std::pair<bool,std::string> deleteByIndex(int index);
     std::pair<bool,std::string> takeSpeedtest(int index);
+    std::pair<bool,std::string> getXML(int index, std::string&) const;
     void clear();
 
     bool writeVariable(Stream&, const String&) override;
@@ -69,7 +70,7 @@ public:
     void update();
     void forceUpdate();
 
-    bool isIndexValid(int index);
+    bool isIndexValid(int index) const;
 
     mutable std::recursive_mutex m_lock;
     std::vector<UptestEndpoint> m_providers;

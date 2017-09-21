@@ -25,7 +25,7 @@ std::pair<bool,std::string> UptestServiceRegistry::addURL(const std::string& url
     return std::make_pair(true, "");
 }
 
-bool UptestServiceRegistry::isIndexValid(int index)
+bool UptestServiceRegistry::isIndexValid(int index) const
 {
     return index >= 0 && index < m_providers.size();
 }
@@ -112,9 +112,17 @@ bool UptestServiceRegistry::writeVariable(Stream& s, const String& v, int i)
         }
         s.writeString(text);
         return true;
-    }else if (v == "bitrate")
+    }else if (v == "speed")
     {
-        s.writeString(std::to_string(m_providers[i].bitrate));
+        s.writeString(m_providers[i].m_info.speed);
+        return true;
+    }else if (v == "over")
+    {
+        s.writeString(m_providers[i].m_info.over);
+        return true;
+    }else if (v == "checkable")
+    {
+        s.writeString(m_providers[i].m_info.checkable);
         return true;
     }
 
@@ -145,6 +153,20 @@ void UptestServiceRegistry::forceUpdate()
         provider.update();
 }
 
+std::pair<bool,std::string> UptestServiceRegistry::getXML(int index, std::string& out) const
+{
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
+
+    if (!isIndexValid(index))
+        return std::make_pair(false, "index out of range");
+
+    if (m_providers[index].status != UptestEndpoint::kSuccess)
+        return std::make_pair(false, "no XML");
+
+    out = m_providers[index].m_xml;
+    return std::make_pair(true, "");
+}
+
 bool UptestEndpoint::isReady()
 {
     return (status == kUntried) || (sys->getTime() - lastTriedAt > kXmlTryInterval);
@@ -156,15 +178,14 @@ void UptestEndpoint::update()
     LOG_DEBUG("Speedtest: %s", this->url.c_str());
     try
     {
-        auto info = readInfo(download(this->url));
+        m_xml = download(this->url);
+        m_info = readInfo(m_xml);
         this->status = kSuccess;
-        this->bitrate = atoi(info.speed.c_str());
-        LOG_INFO("Speedtest result: %d kbps", bitrate);
+        LOG_INFO("Speedtest result: %s kbps", m_info.speed.c_str());
     }catch (std::exception& e)
     {
         LOG_ERROR("UptestEndpoint %s: %s", this->url.c_str(), e.what());
         this->status = kError;
-        this->bitrate = 0;
     }
 }
 
@@ -292,28 +313,28 @@ static std::string postURL(UptestInfo& info)
 std::pair<bool,std::string> UptestEndpoint::takeSpeedtest()
 {
     // yp4g.xml をダウンロードして状態を得る。
-    UptestInfo info;
     try
     {
-        info = readInfo(download(this->url));
-        LOG_DEBUG("Speedtest %s: checkable = %s", url.c_str(), info.checkable.c_str());
+        m_xml = download(this->url);
+        m_info = readInfo(m_xml);
+        LOG_DEBUG("Speedtest %s: checkable = %s", url.c_str(), m_info.checkable.c_str());
     }catch (std::exception& e)
     {
         LOG_ERROR("Speedtest %s: %s", url.c_str(), e.what());
         return std::make_pair(false, e.what());
     }
 
-    if (info.checkable != "1")
+    if (m_info.checkable != "1")
     {
         LOG_ERROR("speedtest server unavailable: checkable != 1");
         return std::make_pair(false, "speedtest server unavailable");
     }else
     {
         // ランダムデータを POST する。
-        const auto uptest_cgi = postURL(info);
+        const auto uptest_cgi = postURL(m_info);
         try
         {
-            auto size = atoi(info.post_size.c_str()) * 1000;
+            auto size = atoi(m_info.post_size.c_str()) * 1000;
             LOG_DEBUG("Posting %d bytes of random data to %s ...", (int) size, uptest_cgi.c_str());
             auto res = postRandomData(uptest_cgi, size);
             LOG_TRACE("... done");

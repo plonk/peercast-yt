@@ -1816,6 +1816,33 @@ void Servent::CMD_take_speedtest(char *cmd, HTTP& http, String& jumpStr)
     }
 }
 
+void Servent::CMD_speedtest_cached_xml(char *cmd, HTTP& http, String& jumpStr)
+{
+    cgi::Query query(cmd);
+    if (!isDecimal(query.get("index")))
+    {
+        http.send(HTTPResponse::badRequest("invalid index"));
+        return;
+    }
+
+    bool success;
+    std::string reason;
+    std::string xml;
+
+    std::tie(success, reason) = servMgr->uptestServiceRegistry->getXML(std::stoi(query.get("index")), xml);
+    if (success)
+    {
+        http.send(HTTPResponse::ok(
+                      {
+                          {"Content-Type", "application/xml"},
+                          {"Content-Length", std::to_string(xml.size()) }
+                      }, xml));
+    }else
+    {
+        http.send(HTTPResponse::serverError(reason));
+    }
+}
+
 void Servent::handshakeCMD(char *query)
 {
     String jumpStr;
@@ -1883,6 +1910,9 @@ void Servent::handshakeCMD(char *query)
         }else if (cmd == "shutdown")
         {
             CMD_shutdown(query, http, jumpStr);
+        }else if (cmd == "speedtest_cached_xml")
+        {
+            CMD_speedtest_cached_xml(query, http, jumpStr);
         }else if (cmd == "stop")
         {
             CMD_stop(query, http, jumpStr);

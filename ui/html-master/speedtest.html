@@ -19,26 +19,37 @@
       <tr>
         <th>{#URL}</th>
         <th>{#Status}</th>
-        <th>{#Bitrate}</th>
+        <th>{#Speed}</th>
         <th>{#Speedtest}</th>
         <th style="width: 2.5em">{#Remove}</th>
       </tr>
       {@loop servMgr.uptestServiceRegistry.numURLs}
         <tr>
-          <td><a href="{$loop.uptestServiceRegistry.url}" title="{#Show XML}">{$loop.uptestServiceRegistry.url}</a></td>
+          <td>
+            <a href="/admin?cmd=speedtest_cached_xml&amp;index={$loop.index}" title="{#Show cached XML}">
+              {$loop.uptestServiceRegistry.url}
+            </a>
+          </td>
           <td align="center">{$loop.uptestServiceRegistry.status}</td>
           <td style="text-align: right">
-              {@if loop.uptestServiceRegistry.status == "Success"}
-                {$loop.uptestServiceRegistry.bitrate} Kbps
-              {@else}
-                n/a
+            {@if loop.uptestServiceRegistry.status == "Success"}
+              {@if loop.uptestServiceRegistry.over == "1"}
+                ≥
               {@end}
+              {$loop.uptestServiceRegistry.speed} Kbps
+            {@else}
+              n/a
+            {@end}
           </td>
           <td align="center">
             {@if loop.uptestServiceRegistry.status == "Success"}
-              <a href="/admin?cmd=take_speedtest&amp;index={$loop.index}" title="{#Start speedtest}">
+              {@if loop.uptestServiceRegistry.checkable == "1"}
+                <a href="/admin?cmd=take_speedtest&amp;index={$loop.index}" title="{#Start speedtest}">{#Start}</a>
+              {@else}
                 {#Start}
-              </a>
+              {@end}
+            {@else}
+              {#Start}
             {@end}
           </td>
           <td align="center">

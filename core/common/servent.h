@@ -309,6 +309,7 @@ private:
     void CMD_redirect(char *cmd, HTTP& http, String& jumpStr);
     void CMD_refresh_speedtest(char *cmd, HTTP& http, String& jumpStr);
     void CMD_shutdown(char *cmd, HTTP& http, String& jumpStr);
+    void CMD_speedtest_cached_xml(char *cmd, HTTP& http, String& jumpStr);
     void CMD_stop(char *cmd, HTTP& http, String& jumpStr);
     void CMD_take_speedtest(char *cmd, HTTP& http, String& jumpStr);
     void CMD_update_channel_info(char *cmd, HTTP& http, String& jumpStr);
