@@ -93,8 +93,8 @@ bool UptestServiceRegistry::writeVariable(Stream& s, const String& v, int i)
 
     if (v == "url")
     {
-            s.writeString(m_providers[i].url);
-            return true;
+        s.writeString(m_providers[i].url);
+        return true;
     }else if (v == "status")
     {
         std::string text;
