@@ -137,12 +137,12 @@ void UptestServiceRegistry::update()
 
     for (auto& provider : m_providers)
     {
-        if (provider.status != UptestEndpoint::kSuccess && provider.isReady())
+        if (provider.status != UptestEndpoint::kSuccess)
         {
-            provider.update();
-        }else
-        {
-            LOG_TRACE("%s not ready to download", provider.url.c_str());
+            if (provider.isReady())
+                provider.update();
+            else
+                LOG_TRACE("%s not ready to download", provider.url.c_str());
         }
     }
 }
