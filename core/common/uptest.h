@@ -38,7 +38,8 @@ public:
 
     UptestEndpoint(const std::string& aUrl)
         : url(aUrl)
-        , status(kUntried) {}
+        , status(kUntried)
+        , lastTriedAt(0) {}
 
     void update();
     std::string download(const std::string& url);
