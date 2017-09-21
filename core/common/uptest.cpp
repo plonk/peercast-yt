@@ -127,7 +127,7 @@ void UptestServiceRegistry::update()
 
     for (auto& provider : m_providers)
     {
-        if (provider.isReady())
+        if (provider.status != UptestEndpoint::kSuccess && provider.isReady())
         {
             provider.update();
         }else
