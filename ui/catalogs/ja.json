@@ -69,6 +69,11 @@
     // speedtest.html
     "Remove"                  : "削除",
     "Speedtest"               : "帯域チェック",
+    "Not allowed"             : "不可",
+    "Add address"             : "アドレスを追加",
+    "YP4G speedtest addresses" : "YP4G&thinsp;帯域チェックアドレス",
+    "URL of yp4g.xml"         : "yp4g.xmlのURL",
+    "Speed"                   : "速度",
 
     // channels.html
     "Channel"                 : "チャンネル",

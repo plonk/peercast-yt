@@ -46,10 +46,10 @@
               {@if loop.uptestServiceRegistry.checkable == "1"}
                 <a href="/admin?cmd=take_speedtest&amp;index={$loop.index}" title="{#Start speedtest}">{#Start}</a>
               {@else}
-                {#Start}
+                {#Not allowed}
               {@end}
             {@else}
-              {#Start}
+              {#Not allowed}
             {@end}
           </td>
           <td align="center">
@@ -67,11 +67,11 @@
 
     <table class="table-panel" width="100%" border=0>
       <tr>
-        <td colspan="2"><div align="center"><b>{#Add YP4G speedtest address}</b></div></td>
+        <td colspan="2"><div align="center"><b>{#Add address}</b></div></td>
       </tr>
       <tr>
-        <th class="left-heading" style="width: 8em">{#URL}</th>
-        <td><input type=url name="url" style="width: 100%" placeholder="URL of yp4g.xml"></td>
+        <th class="left-heading">{#URL}</th>
+        <td><input type=url name="url" style="width: 100%" placeholder="{#URL of yp4g.xml}"></td>
       </tr>
 
       <tr align="center">
