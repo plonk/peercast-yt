@@ -224,11 +224,6 @@ std::string UptestEndpoint::download(const std::string& url)
     return res.body;
 }
 
-static const char* yesNo(const std::string& number)
-{
-    return (number == "0") ? "No" : "Yes";
-}
-
 #define nonNull(p)                                                      \
     (((p) == nullptr) ?                                                 \
      throw std::runtime_error(                                          \
