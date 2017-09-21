@@ -64,6 +64,17 @@
     "Port"                    : "ポート",
     "Dump"                    : "ダンプ",
 
+    "Refresh"                 : "更新",
+
+    // speedtest.html
+    "Remove"                  : "削除",
+    "Speedtest"               : "帯域チェック",
+    "Not allowed"             : "不可",
+    "Add address"             : "アドレスを追加",
+    "YP4G speedtest addresses" : "YP4G&thinsp;帯域チェックアドレス",
+    "URL of yp4g.xml"         : "yp4g.xmlのURL",
+    "Speed"                   : "速度",
+
     // channels.html
     "Channel"                 : "チャンネル",
     "Bitrate (kb/s)"          : "転送速度 (Kbps)",
@@ -212,6 +223,9 @@
     "Default"                 : "デフォルト",
     "Everything"              : "全て",
     "No logging"              : "ログ無効",
+
+    "Upload Bandwidth Testing" : "アップロード帯域チェック",
+    "URL of yp4g.xml"         : "yp4g.xmlのURL",
 
     // rtmp.html
     "Start"                   : "開始",

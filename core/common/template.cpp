@@ -29,6 +29,7 @@
 #include "str.h"
 #include "jrpc.h"
 #include "regexp.h"
+#include "uptest.h"
 
 using json = nlohmann::json;
 using namespace std;
@@ -208,6 +209,9 @@ bool Template::writeLoopVariable(Stream &s, const String &varName, int loop)
     }else if (varName.startsWith("loop.notification."))
     {
         return g_notificationBuffer.writeVariable(s, varName + strlen("loop."), loop);
+    }else if (varName.startsWith("loop.uptestServiceRegistry."))
+    {
+        return servMgr->uptestServiceRegistry->writeVariable(s, varName + strlen("loop.uptestServiceRegistry."), loop);
     }
 
     return false;

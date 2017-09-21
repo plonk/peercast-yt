@@ -260,7 +260,7 @@ public:
 
     static HTTPResponse notFound()
     {
-        HTTPResponse res(400, {{"Content-Type", "text/html"}});
+        HTTPResponse res(404, {{"Content-Type", "text/html"}});
         res.body = "File not found";
         return res;
     }
@@ -278,6 +278,13 @@ public:
     static HTTPResponse redirectTo(const std::string& url)
     {
         HTTPResponse res(302, {{"Location",url}});
+        return res;
+    }
+
+    static HTTPResponse badRequest(const std::string& message = "Bad request")
+    {
+        HTTPResponse res(400, {{"Content-Type", "text/html"}});
+        res.body = message;
         return res;
     }
 

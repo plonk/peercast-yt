@@ -30,12 +30,14 @@
 #include "version2.h"
 #include "rtmpmonit.h"
 #include "chandir.h"
+#include "uptest.h"
 
 // -----------------------------------
 ServMgr::ServMgr()
     : publicDirectoryEnabled(false)
     , rtmpServerMonitor(std::string(peercastApp->getPath()) + "rtmp-server")
     , channelDirectory(new ChannelDirectory())
+    , uptestServiceRegistry(new UptestServiceRegistry())
 {
     validBCID = NULL;
 
@@ -1015,11 +1017,20 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
         iniFile.writeLine("[End]");
     }
 
+    // チャンネルフィード
     for (auto feed : servMgr->channelDirectory->feeds())
     {
         iniFile.writeSection("Feed");
         iniFile.writeStrValue("url", feed.url);
         iniFile.writeBoolValue("isPublic", feed.isPublic);
+        iniFile.writeLine("[End]");
+    }
+
+    // 帯域チェック
+    for (auto url : servMgr->uptestServiceRegistry->getURLs())
+    {
+        iniFile.writeSection("Uptest");
+        iniFile.writeStrValue("url", url);
         iniFile.writeLine("[End]");
     }
 
@@ -1127,6 +1138,9 @@ void ServMgr::loadSettings(const char *fn)
         saveSettings(fn);
 
     servMgr->numFilters = 0;
+
+    std::lock_guard<std::recursive_mutex> cs(servMgr->uptestServiceRegistry->m_lock);
+    servMgr->uptestServiceRegistry->clear();
 
     if (iniFile.openReadOnly(fn))
     {
@@ -1305,7 +1319,16 @@ void ServMgr::loadSettings(const char *fn)
                 }
                 feedIndex++;
             }
-            else if (iniFile.isName("[Notify]"))
+            else if (iniFile.isName("[Uptest]"))
+            {
+                while (iniFile.readNext())
+                {
+                    if (iniFile.isName("[End]"))
+                        break;
+                    else if (iniFile.isName("url"))
+                        servMgr->uptestServiceRegistry->addURL(iniFile.getStrValue());
+                }
+            }else if (iniFile.isName("[Notify]"))
             {
                 notifyMask = NT_UPGRADE;
                 while (iniFile.readNext())
@@ -1925,6 +1948,8 @@ int ServMgr::idleProc(ThreadInfo *thread)
 
         servMgr->rtmpServerMonitor.update();
 
+        servMgr->uptestServiceRegistry->update();
+
         sys->sleep(500);
     }
 
@@ -2253,6 +2278,9 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var.startsWith("channelDirectory."))
     {
         return channelDirectory->writeVariable(out, var + strlen("channelDirectory."));
+    }else if (var.startsWith("uptestServiceRegistry."))
+    {
+        return uptestServiceRegistry->writeVariable(out, var + strlen("uptestServiceRegistry."));
     }else if (var == "publicDirectoryEnabled")
     {
         buf = to_string(publicDirectoryEnabled);

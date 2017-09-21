@@ -30,7 +30,7 @@ Regexp::~Regexp()
     onig_free(m_reg);
 }
 
-std::vector<std::string> Regexp::exec(const std::string& str)
+std::vector<std::string> Regexp::exec(const std::string& str) const
 {
     int r;
     unsigned char *start, *range, *end;
@@ -69,7 +69,7 @@ std::vector<std::string> Regexp::exec(const std::string& str)
     }
 }
 
-bool Regexp::matches(const std::string& str)
+bool Regexp::matches(const std::string& str) const
 {
     return exec(str).size() > 0;
 }

@@ -292,11 +292,13 @@ public:
 
 private:
     void CMD_add_bcid(char *cmd, HTTP& http, String& jumpStr);
+    void CMD_add_speedtest(char *cmd, HTTP& http, String& jumpStr);
     void CMD_apply(char *cmd, HTTP& http, String& jumpStr);
     void CMD_bump(char *cmd, HTTP& http, String& jumpStr);
     void CMD_clear(char *cmd, HTTP& http, String& jumpStr);
     void CMD_clearlog(char *cmd, HTTP& http, String& jumpStr);
     void CMD_control_rtmp(char *cmd, HTTP& http, String& jumpStr);
+    void CMD_delete_speedtest(char *cmd, HTTP& http, String& jumpStr);
     void CMD_dump_hitlists(char *cmd, HTTP& http, String& jumpStr);
     void CMD_edit_bcid(char *cmd, HTTP& http, String& jumpStr);
     void CMD_fetch(char *cmd, HTTP& http, String& jumpStr);
@@ -305,8 +307,11 @@ private:
     void CMD_login(char *cmd, HTTP& http, String& jumpStr);
     void CMD_logout(char *cmd, HTTP& http, String& jumpStr);
     void CMD_redirect(char *cmd, HTTP& http, String& jumpStr);
+    void CMD_refresh_speedtest(char *cmd, HTTP& http, String& jumpStr);
     void CMD_shutdown(char *cmd, HTTP& http, String& jumpStr);
+    void CMD_speedtest_cached_xml(char *cmd, HTTP& http, String& jumpStr);
     void CMD_stop(char *cmd, HTTP& http, String& jumpStr);
+    void CMD_take_speedtest(char *cmd, HTTP& http, String& jumpStr);
     void CMD_update_channel_info(char *cmd, HTTP& http, String& jumpStr);
     void CMD_viewxml(char *cmd, HTTP& http, String& jumpStr);
 };
