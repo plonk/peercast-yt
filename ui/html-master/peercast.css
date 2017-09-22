@@ -84,6 +84,10 @@ a.button {
 	color: #777;
 }
 
+.text-danger {
+	color: #d00;
+}
+
 table.table-panel {
     font-family: Verdana, Arial, Helvetica, sans-serif;
     font-size: 12px;

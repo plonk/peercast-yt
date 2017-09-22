@@ -35,6 +35,8 @@
 
 using namespace std;
 
+static bool isDecimal(const std::string& str);
+
 // -----------------------------------
 static void termArgs(char *str)
 {
@@ -1310,26 +1312,31 @@ void Servent::CMD_fetch_feeds(char *cmd, HTTP& http, String& jumpStr)
         jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
 }
 
-// サーバントを停止する機能を追加したい時に役に立つかも。
-#if 0
-void Servent::CMD_stopserv(char *cmd, HTTP& http, String& jumpStr)
+// サーバントを停止する。
+void Servent::CMD_stop_servent(char *cmd, HTTP& http, String& jumpStr)
 {
-    char arg[MAX_CGI_LEN];
-    char curr[MAX_CGI_LEN];
+    cgi::Query query(cmd);
 
-    char *cp = cmd;
-    while ((cp = nextCGIarg(cp, curr, arg)) != nullptr)
+    std::string serventIndex = query.get("servent_id");
+
+    if (!isDecimal(serventIndex))
     {
-        if (strcmp(curr, "index") == 0)
-        {
-            Servent *s = servMgr->findServentByIndex(atoi(arg));
-            if (s)
-                s->abort();
-        }
+        http.send(HTTPResponse::badRequest("invalid servent_id"));
+        return;
     }
-    jumpStr.sprintf("/%s/connections.html", servMgr->htmlPath);
+
+    Servent *s = servMgr->findServentByID(std::stoi(serventIndex));
+    if (s)
+    {
+        s->abort();
+        jumpStr.sprintf("/%s/connections.html", servMgr->htmlPath);
+        return;
+    }else
+    {
+        http.send(HTTPResponse::notFound("servent not found"));
+        return;
+    }
 }
-#endif
 
 void Servent::CMD_clear(char *cmd, HTTP& http, String& jumpStr)
 {
@@ -1916,6 +1923,9 @@ void Servent::handshakeCMD(char *query)
         }else if (cmd == "stop")
         {
             CMD_stop(query, http, jumpStr);
+        }else if (cmd == "stop_servent")
+        {
+            CMD_stop_servent(query, http, jumpStr);
         }else if (cmd == "update_channel_info")
         {
             CMD_update_channel_info(query, http, jumpStr);

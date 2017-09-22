@@ -163,6 +163,7 @@ public:
     Servent             *findServent(Servent::TYPE, Host &, GnuID &);
     Servent             *findOldestServent(Servent::TYPE, bool);
     Servent             *findServentByIndex(int);
+    Servent             *findServentByID(int id);
 
     bool                writeVariable(Stream &, const String &) override;
     Servent             *allocServent();

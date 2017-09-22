@@ -42,6 +42,7 @@
         <TD><B>{#Local Relays}</B></TD>
         <TD><B>{#Status}</B></TD>
         <TD><B>{#Keep}</B></TD>
+        <TD><B>{#Stop}</B></TD>
       </TR>
       {@end}
       {@loop chanMgr.numChannels}
@@ -67,7 +68,6 @@
             {@end}
             - <b><a href="/pls/{$loop.channel.id}{$loop.channel.plsExt}?auth={$loop.channel.authToken}">{#Playlist}</a></b>
             - <b><a href="/admin?cmd=bump&amp;id={$loop.channel.id}">{#Bump}</a></b>
-            - <b><a href="/admin?cmd=stop&amp;id={$loop.channel.id}">{#Stop}</a></b>
           </span></TD>
         <TD class="normal" align="center">{$loop.channel.srcrate} / {$loop.channel.bitrate}</TD>
         <TD class="normal" align="center"><a href="/stream/{$loop.channel.id}{$loop.channel.ext}">{$loop.channel.type}</a></TD>
@@ -75,6 +75,7 @@
         <TD class="normal" align="center">{$loop.channel.localListeners} / {$loop.channel.localRelays}</TD>
         <TD class="normal" align="center">{$loop.channel.status}</TD>
         <TD class="normal" align="center"><a href="/admin?cmd=keep&amp;id={$loop.channel.id}">{$loop.channel.keep}</a></TD>
+        <td class="normal" align="center"><a href="/admin?cmd=stop&amp;id={$loop.channel.id}">×</a></td>
       </TR>
       {@end}
     </TBODY>

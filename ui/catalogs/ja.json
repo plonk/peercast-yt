@@ -147,6 +147,7 @@
     "IP:Port"                 : "IP:ポート",
     "Agent"                   : "エージェント",
     "Kbits/s"                 : "Kbps",
+    "Avg."                    : "平均",
 
     // settings.html
     "Basic Settings"          : "基本設定",

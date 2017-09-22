@@ -2536,7 +2536,9 @@ bool    Servent::writeVariable(Stream &s, const String &var)
 
     std::string buf;
 
-    if (var == "type")
+    if (var == "id")
+        buf = std::to_string(serventIndex);
+    else if (var == "type")
         buf = getTypeStr();
     else if (var == "status")
         buf = getStatusStr();

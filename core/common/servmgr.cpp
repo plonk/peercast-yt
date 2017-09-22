@@ -505,6 +505,23 @@ Servent *ServMgr::findServentByIndex(int id)
 }
 
 // -----------------------------------
+Servent *ServMgr::findServentByID(int id)
+{
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
+    Servent *s = servents;
+
+    while (s)
+    {
+        if (s->serventIndex == id)
+            return s;
+        s = s->next;
+    }
+
+    return NULL;
+}
+
+// -----------------------------------
 Servent *ServMgr::allocServent()
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
