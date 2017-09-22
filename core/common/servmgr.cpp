@@ -453,7 +453,8 @@ Servent *ServMgr::findServent(Servent::TYPE type, Host &host, GnuID &netid)
 // -----------------------------------
 Servent *ServMgr::findServent(unsigned int ip, unsigned short port, GnuID &netid)
 {
-    lock.lock();
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     Servent *s = servents;
     while (s)
     {
@@ -462,13 +463,12 @@ Servent *ServMgr::findServent(unsigned int ip, unsigned short port, GnuID &netid
             Host h = s->getHost();
             if ((h.ip == ip) && (h.port == port) && (s->networkID.isSame(netid)))
             {
-                lock.unlock();
                 return s;
             }
         }
         s=s->next;
     }
-    lock.unlock();
+
     return NULL;
 }
 
