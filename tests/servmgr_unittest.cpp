@@ -362,6 +362,29 @@ TEST_F(ServMgrFixture, writeVariable)
     ASSERT_STREQ("かきくけこABCDabcd", mem.str().c_str());
 }
 
+TEST_F(ServMgrFixture, numStreams_nullcase)
+{
+    ASSERT_EQ(nullptr, m.servents);
+
+    ASSERT_EQ(0, m.numStreams(Servent::T_NONE, false));
+    ASSERT_EQ(0, m.numStreams(Servent::T_INCOMING, false));
+    ASSERT_EQ(0, m.numStreams(Servent::T_SERVER, false));
+    ASSERT_EQ(0, m.numStreams(Servent::T_RELAY, false));
+    ASSERT_EQ(0, m.numStreams(Servent::T_DIRECT, false));
+    ASSERT_EQ(0, m.numStreams(Servent::T_COUT, false));
+    ASSERT_EQ(0, m.numStreams(Servent::T_CIN, false));
+    ASSERT_EQ(0, m.numStreams(Servent::T_PGNU, false));
+
+    ASSERT_EQ(0, m.numStreams(Servent::T_NONE, true));
+    ASSERT_EQ(0, m.numStreams(Servent::T_INCOMING, true));
+    ASSERT_EQ(0, m.numStreams(Servent::T_SERVER, true));
+    ASSERT_EQ(0, m.numStreams(Servent::T_RELAY, true));
+    ASSERT_EQ(0, m.numStreams(Servent::T_DIRECT, true));
+    ASSERT_EQ(0, m.numStreams(Servent::T_COUT, true));
+    ASSERT_EQ(0, m.numStreams(Servent::T_CIN, true));
+    ASSERT_EQ(0, m.numStreams(Servent::T_PGNU, true));
+}
+
 TEST_F(ServMgrFixture, isFiltered)
 {
     Host h;
