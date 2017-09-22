@@ -444,7 +444,7 @@ Servent *ServMgr::findServent(Servent::TYPE type, Host &host, GnuID &netid)
                 return s;
             }
         }
-        s=s->next;
+        s = s->next;
     }
 
     return NULL;
@@ -466,7 +466,7 @@ Servent *ServMgr::findServent(unsigned int ip, unsigned short port, GnuID &netid
                 return s;
             }
         }
-        s=s->next;
+        s = s->next;
     }
 
     return NULL;
@@ -475,12 +475,14 @@ Servent *ServMgr::findServent(unsigned int ip, unsigned short port, GnuID &netid
 // -----------------------------------
 Servent *ServMgr::findServent(Servent::TYPE t)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     Servent *s = servents;
     while (s)
     {
         if (s->type == t)
             return s;
-        s=s->next;
+        s = s->next;
     }
     return NULL;
 }
