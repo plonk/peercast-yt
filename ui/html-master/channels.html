@@ -72,7 +72,11 @@
         <TD class="normal" align="center">{$loop.channel.srcrate} / {$loop.channel.bitrate}</TD>
         <TD class="normal" align="center"><a href="/stream/{$loop.channel.id}{$loop.channel.ext}">{$loop.channel.type}</a></TD>
         <TD class="normal" align="center">{$loop.channel.totalListeners} / {$loop.channel.totalRelays}</TD>
-        <TD class="normal" align="center">{$loop.channel.localListeners} / {$loop.channel.localRelays}</TD>
+        <TD class="normal" align="center">
+          <a href="connections.html?id={$loop.channel.id}">
+            {$loop.channel.localListeners} / {$loop.channel.localRelays}
+          </a>
+        </TD>
         <TD class="normal" align="center">{$loop.channel.status}</TD>
         <TD class="normal" align="center"><a href="/admin?cmd=keep&amp;id={$loop.channel.id}">{$loop.channel.keep}</a></TD>
         <td class="normal" align="center"><a href="/admin?cmd=stop&amp;id={$loop.channel.id}">×</a></td>
