@@ -675,21 +675,6 @@ unsigned int ServMgr::totalOutput(bool all)
     return tot;
 }
 
-// -----------------------------------
-unsigned int ServMgr::numOutgoing()
-{
-    int cnt=0;
-
-    Servent *s = servents;
-    while (s)
-    {
-//      if ((s->type == Servent::T_INCOMING) ||
-//          (s->type == Servent::T_OUTGOING))
-//          cnt++;
-        s=s->next;
-    }
-    return cnt;
-}
 
 // -----------------------------------
 bool ServMgr::seenPacket(GnuPacket &p)

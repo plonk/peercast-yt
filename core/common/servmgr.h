@@ -183,7 +183,6 @@ public:
         //return numConnected(Servent::T_OUTGOING) + numConnected(Servent::T_INCOMING);
         return numConnected();
     }
-    unsigned int        numOutgoing();
     bool                isFiltered(int, Host &h);
     bool                addOutgoing(Host, GnuID &, bool);
     Servent             *findConnection(Servent::TYPE, GnuID &);
