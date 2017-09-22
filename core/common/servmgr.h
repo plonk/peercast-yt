@@ -381,7 +381,7 @@ public:
 
     char                htmlPath[128];
 
-    int                 serventNum;
+    std::atomic_int     serventNum;
 
     String              chanLog;
 

@@ -519,11 +519,12 @@ Servent *ServMgr::allocServent()
 
     if (!s)
     {
-        s = new Servent(++serventNum);
+        int num = ++serventNum;
+        s = new Servent(num);
         s->next = servents;
         servents = s;
 
-        LOG_TRACE("allocated servent %d", serventNum);
+        LOG_TRACE("allocated servent %d", num);
     }else
         LOG_TRACE("reused servent %d", s->serventIndex);
 
