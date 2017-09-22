@@ -431,7 +431,8 @@ Servent *ServMgr::findOldestServent(Servent::TYPE type, bool priv)
 // -----------------------------------
 Servent *ServMgr::findServent(Servent::TYPE type, Host &host, GnuID &netid)
 {
-    lock.lock();
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     Servent *s = servents;
     while (s)
     {
@@ -440,13 +441,12 @@ Servent *ServMgr::findServent(Servent::TYPE type, Host &host, GnuID &netid)
             Host h = s->getHost();
             if (h.isSame(host) && s->networkID.isSame(netid))
             {
-                lock.unlock();
                 return s;
             }
         }
         s=s->next;
     }
-    lock.unlock();
+
     return NULL;
 }
 
@@ -488,29 +488,33 @@ Servent *ServMgr::findServent(Servent::TYPE t)
 // -----------------------------------
 Servent *ServMgr::findServentByIndex(int id)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     Servent *s = servents;
-    int cnt=0;
+    int cnt = 0;
+
     while (s)
     {
         if (cnt == id)
             return s;
         cnt++;
-        s=s->next;
+        s = s->next;
     }
+
     return NULL;
 }
 
 // -----------------------------------
 Servent *ServMgr::allocServent()
 {
-    lock.lock();
+    std::lock_guard<std::recursive_mutex> cs(lock);
 
     Servent *s = servents;
     while (s)
     {
         if (s->status == Servent::S_FREE)
             break;
-        s=s->next;
+        s = s->next;
     }
 
     if (!s)
@@ -525,27 +529,29 @@ Servent *ServMgr::allocServent()
 
     s->reset();
 
-    lock.unlock();
-
     return s;
 }
 
 // --------------------------------------------------
 void    ServMgr::closeConnections(Servent::TYPE type)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     Servent *sv = servents;
     while (sv)
     {
         if (sv->isConnected())
             if (sv->type == type)
                 sv->thread.shutdown();
-        sv=sv->next;
+        sv = sv->next;
     }
 }
 
 // -----------------------------------
 unsigned int ServMgr::numConnected(int type, bool priv, unsigned int uptime)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     unsigned int cnt=0;
 
     unsigned int ctime=sys->getTime();
@@ -559,7 +565,7 @@ unsigned int ServMgr::numConnected(int type, bool priv, unsigned int uptime)
                         if ((ctime-s->lastConnect) >= uptime)
                             cnt++;
 
-        s=s->next;
+        s = s->next;
     }
     return cnt;
 }
@@ -567,6 +573,8 @@ unsigned int ServMgr::numConnected(int type, bool priv, unsigned int uptime)
 // -----------------------------------
 unsigned int ServMgr::numConnected()
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     unsigned int cnt=0;
 
     Servent *s = servents;
@@ -576,7 +584,7 @@ unsigned int ServMgr::numConnected()
             if (s->isConnected())
                 cnt++;
 
-        s=s->next;
+        s = s->next;
     }
     return cnt;
 }
@@ -584,13 +592,15 @@ unsigned int ServMgr::numConnected()
 // -----------------------------------
 unsigned int ServMgr::numServents()
 {
-    unsigned int cnt=0;
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
+    unsigned int cnt = 0;
 
     Servent *s = servents;
     while (s)
     {
         cnt++;
-        s=s->next;
+        s = s->next;
     }
     return cnt;
 }
@@ -598,6 +608,8 @@ unsigned int ServMgr::numServents()
 // -----------------------------------
 unsigned int ServMgr::numUsed(int type)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     unsigned int cnt=0;
 
     Servent *s = servents;
@@ -605,7 +617,7 @@ unsigned int ServMgr::numUsed(int type)
     {
         if (s->type == type)
             cnt++;
-        s=s->next;
+        s = s->next;
     }
     return cnt;
 }
@@ -613,6 +625,8 @@ unsigned int ServMgr::numUsed(int type)
 // -----------------------------------
 unsigned int ServMgr::numActiveOnPort(int port)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     unsigned int cnt=0;
 
     Servent *s = servents;
@@ -620,7 +634,7 @@ unsigned int ServMgr::numActiveOnPort(int port)
     {
         if (s->thread.active() && s->sock && (s->servPort == port))
             cnt++;
-        s=s->next;
+        s = s->next;
     }
     return cnt;
 }
@@ -628,6 +642,8 @@ unsigned int ServMgr::numActiveOnPort(int port)
 // -----------------------------------
 unsigned int ServMgr::numActive(Servent::TYPE tp)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     unsigned int cnt=0;
 
     Servent *s = servents;
@@ -635,7 +651,7 @@ unsigned int ServMgr::numActive(Servent::TYPE tp)
     {
         if (s->thread.active() && s->sock && (s->type == tp))
             cnt++;
-        s=s->next;
+        s = s->next;
     }
     return cnt;
 }
@@ -643,6 +659,8 @@ unsigned int ServMgr::numActive(Servent::TYPE tp)
 // -----------------------------------
 unsigned int ServMgr::totalOutput(bool all)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     unsigned int tot = 0;
     Servent *s = servents;
     while (s)
@@ -651,7 +669,7 @@ unsigned int ServMgr::totalOutput(bool all)
             if (all || !s->isPrivate())
                 if (s->sock)
                     tot += s->sock->bytesOutPerSec();
-        s=s->next;
+        s = s->next;
     }
 
     return tot;
@@ -676,6 +694,8 @@ unsigned int ServMgr::numOutgoing()
 // -----------------------------------
 bool ServMgr::seenPacket(GnuPacket &p)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     Servent *s = servents;
     while (s)
     {
@@ -1465,6 +1485,8 @@ void ServMgr::loadSettings(const char *fn)
 // --------------------------------------------------
 unsigned int ServMgr::numStreams(GnuID &cid, Servent::TYPE tp, bool all)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     int cnt = 0;
     Servent *sv = servents;
     while (sv)
@@ -1482,6 +1504,8 @@ unsigned int ServMgr::numStreams(GnuID &cid, Servent::TYPE tp, bool all)
 // --------------------------------------------------
 unsigned int ServMgr::numStreams(Servent::TYPE tp, bool all)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     int cnt = 0;
     Servent *sv = servents;
     while (sv)
@@ -1602,6 +1626,8 @@ bool ServMgr::addOutgoing(Host h, GnuID &netid, bool pri)
 // --------------------------------------------------
 Servent *ServMgr::findConnection(Servent::TYPE t, GnuID &sid)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     Servent *sv = servents;
     while (sv)
     {
@@ -1771,6 +1797,8 @@ int ServMgr::clientProc(ThreadInfo *thread)
 // -----------------------------------
 bool    ServMgr::acceptGIV(ClientSocket *sock)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     Servent *sv = servents;
     while (sv)
     {
@@ -1779,7 +1807,7 @@ bool    ServMgr::acceptGIV(ClientSocket *sock)
             if (sv->acceptGIV(sock))
                 return true;
         }
-        sv=sv->next;
+        sv = sv->next;
     }
     return false;
 }
@@ -1859,6 +1887,8 @@ void ServMgr::broadcastRootSettings(bool getUpdate)
 // --------------------------------------------------
 int ServMgr::broadcastPacket(ChanPacket &pack, GnuID &chanID, GnuID &srcID, GnuID &destID, Servent::TYPE type)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     int cnt=0;
 
     Servent *sv = servents;
@@ -2027,7 +2057,7 @@ int ServMgr::serverProc(ThreadInfo *thread)
             {
                 if (s->type == Servent::T_INCOMING)
                     s->thread.shutdown();
-                s=s->next;
+                s = s->next;
             }
 
             servMgr->setFirewall(ServMgr::FW_ON);
