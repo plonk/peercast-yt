@@ -362,6 +362,19 @@ TEST_F(ServMgrFixture, writeVariable)
     ASSERT_STREQ("かきくけこABCDabcd", mem.str().c_str());
 }
 
+// serventNum がインクリメントされ、サーバントの serventIndex にセットされる。
+TEST_F(ServMgrFixture, allocServent)
+{
+    Servent *s;
+
+    ASSERT_EQ(0, m.serventNum);
+    s = m.allocServent();
+    ASSERT_NE(nullptr, s);
+    ASSERT_EQ(s, m.servents);
+    ASSERT_EQ(1, s->serventIndex);
+    ASSERT_EQ(1, m.serventNum);
+}
+
 TEST_F(ServMgrFixture, numStreams_nullcase)
 {
     ASSERT_EQ(nullptr, m.servents);
@@ -383,6 +396,30 @@ TEST_F(ServMgrFixture, numStreams_nullcase)
     ASSERT_EQ(0, m.numStreams(Servent::T_COUT, true));
     ASSERT_EQ(0, m.numStreams(Servent::T_CIN, true));
     ASSERT_EQ(0, m.numStreams(Servent::T_PGNU, true));
+}
+
+TEST_F(ServMgrFixture, numStreams_connectedRelaysAreCounted)
+{
+    Servent *s;
+
+    s = m.allocServent();
+    ASSERT_EQ(s, m.servents);
+    s->type = Servent::T_RELAY;
+    ASSERT_EQ(0, m.numStreams(Servent::T_RELAY, false));
+    s->status = Servent::S_CONNECTED;
+    ASSERT_EQ(1, m.numStreams(Servent::T_RELAY, false));
+}
+
+TEST_F(ServMgrFixture, numStreams_connectedDirectsAreCounted)
+{
+    Servent *s;
+
+    s = m.allocServent();
+    ASSERT_EQ(s, m.servents);
+    s->type = Servent::T_DIRECT;
+    ASSERT_EQ(0, m.numStreams(Servent::T_DIRECT, false));
+    s->status = Servent::S_CONNECTED;
+    ASSERT_EQ(1, m.numStreams(Servent::T_DIRECT, false));
 }
 
 TEST_F(ServMgrFixture, isFiltered)
