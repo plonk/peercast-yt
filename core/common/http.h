@@ -258,10 +258,10 @@ public:
         return res;
     }
 
-    static HTTPResponse notFound()
+    static HTTPResponse notFound(const std::string message = "File not found")
     {
         HTTPResponse res(404, {{"Content-Type", "text/html"}});
-        res.body = "File not found";
+        res.body = message;
         return res;
     }
 
