@@ -126,6 +126,9 @@ ServMgr::ServMgr()
     wmvProtocol = "http";
 
     rtmpPort = 1935;
+
+    uptestServiceRegistry->addURL("http://bayonet.ddo.jp/sp/yp4g.xml");
+    uptestServiceRegistry->addURL("http://temp.orz.hm/yp/yp4g.xml");
 }
 
 // -----------------------------------
