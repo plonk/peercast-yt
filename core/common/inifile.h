@@ -28,7 +28,7 @@ class IniFileBase
 public:
     IniFileBase(Stream& aStream)
         : stream(aStream)
-        , currLine("")
+        , currLine({})
         , nameStr(NULL)
         , valueStr(NULL)
     {
