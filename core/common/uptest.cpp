@@ -87,7 +87,7 @@ bool UptestServiceRegistry::writeVariable(Stream& s, const String& v, int i)
 
     if (i < 0 || i >= m_providers.size())
     {
-        LOG_ERROR("UptestServiceRegistry: Index out of range");
+        LOG_TRACE("UptestServiceRegistry: Index out of range");
         return false;
     }
 
