@@ -249,11 +249,10 @@ namespace rtmpserver
             Value transaction_id = d.readValue(mem);
             printf("transaction_id = %s\n", transaction_id.inspect().c_str());
             std::vector<Value> params;
-            int i = 1;
-            while (!mem.eof())
+            for (int i = 0; i < 2 && !mem.eof(); i++)
             {
                 Value param = d.readValue(mem);
-                printf("param%d = %s\n", i++, param.inspect().c_str());
+                printf("param%d = %s\n", (i+1), param.inspect().c_str());
                 params.push_back(param);
             }
 
