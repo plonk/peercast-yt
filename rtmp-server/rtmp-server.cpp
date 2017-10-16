@@ -165,7 +165,12 @@ int main(int argc, char* argv[])
         FLVWriter writer(splitter);
 
         Session session(client, writer);
-        session.run();
+        try {
+          session.run();
+        } catch (EOFException& e)
+        {
+          printf("EOFException: %s\n", e.what());
+        }
         client->close();
     }
     return 0;
