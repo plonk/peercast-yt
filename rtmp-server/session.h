@@ -304,6 +304,11 @@ namespace rtmpserver
             flv_writer.writeVideoTag(message.timestamp, message.data);
         }
 
+        void on_window_ack_size(Message& message)
+        {
+            printf("Window Acknowledgement Size: %d\n", to_integer_big_endian(message.data));
+        }
+
         void on_message(Message& message)
         {
             assert(message.remaining() == 0);
@@ -325,8 +330,11 @@ namespace rtmpserver
             case 0x09:
                 on_video_packet(message);
                 break;
+            case 0x05:
+                on_window_ack_size(message);
+                break;
             default:
-                printf("unknown message type id %d", message.type_id);
+                printf("unknown message type id %d\n", message.type_id);
             }
         }
 
