@@ -61,7 +61,7 @@ void HTML::writeOK(const char *content, const std::map<std::string,std::string>&
 }
 
 // --------------------------------------
-void HTML::writeTemplate(const char *fileName, const char *args)
+void HTML::writeTemplate(const char *fileName, const char *args, HTTPRequestScope& reqScope)
 {
     FileStream file;
     try
@@ -73,6 +73,7 @@ void HTML::writeTemplate(const char *fileName, const char *args)
 
         WriteBufferedStream bufferedOut(out);
         Template temp(args);
+        temp.prependScope(reqScope);
         if (args)
         {
             cgi::Query query(args);

@@ -49,7 +49,7 @@ static void termArgs(char *str)
 }
 
 // -----------------------------------
-char *nextCGIarg(char *cp, char *cmd, char *arg)
+const char *nextCGIarg(const char *cp, char *cmd, char *arg)
 {
     if (!*cp)
         return NULL;
@@ -282,7 +282,7 @@ void Servent::handshakeGET(HTTP &http)
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
         LOG_DEBUG("Admin client");
-        handshakeCMD(fn+7);
+        handshakeCMD(http, fn+7);
     }else if (strncmp(fn, "/admin/?", 8) == 0)
     {
         // 上に同じ
@@ -291,7 +291,7 @@ void Servent::handshakeGET(HTTP &http)
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
         LOG_DEBUG("Admin client");
-        handshakeCMD(fn+8);
+        handshakeCMD(http, fn+8);
     }else if (strncmp(fn, "/http/", 6) == 0)
     {
         // peercast.org へのプロキシ接続
@@ -325,7 +325,7 @@ void Servent::handshakeGET(HTTP &http)
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
         if (handshakeAuth(http, fn, true))
-            handshakeLocalFile(dirName);
+            handshakeLocalFile(dirName, http);
     }else if (strncmp(fn, "/admin.cgi", 10) == 0)
     {
         // ShoutCast トラック情報更新用エンドポイント
@@ -915,7 +915,9 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
             if (http.headers.get("X-Requested-With") == "XMLHttpRequest")
                 throw HTTPException(HTTP_SC_FORBIDDEN, 403);
             else
-                handshakeLocalFile(file);
+            {
+                handshakeLocalFile(file, http);
+            }
         }else
             handshakeRemoteFile(file);
     }
@@ -924,10 +926,13 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
 }
 
 // -----------------------------------
-void Servent::CMD_redirect(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_redirect(const char* cmd, HTTP& http, String& jumpStr)
 {
+    char buf[MAX_CGI_LEN];
+    Sys::strcpy_truncate(buf, sizeof(buf), cmd);
+
     HTML html("", *sock);
-    const char *j = getCGIarg(cmd, "url=");
+    const char *j = getCGIarg(buf, "url=");
 
     if (j)
     {
@@ -936,7 +941,7 @@ void Servent::CMD_redirect(char *cmd, HTTP& http, String& jumpStr)
         http.writeLineF("%s %s", HTTP_HS_CONTENT, "text/html");
         http.writeLine("");
 
-        termArgs(cmd);
+        termArgs(buf);
         String url;
         url.set(j, String::T_ESC);
         url.convertTo(String::T_ASCII);
@@ -956,23 +961,23 @@ void Servent::CMD_redirect(char *cmd, HTTP& http, String& jumpStr)
     }
 }
 
-void Servent::CMD_viewxml(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_viewxml(const char* cmd, HTTP& http, String& jumpStr)
 {
     handshakeXML();
 }
 
-void Servent::CMD_clearlog(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_clearlog(const char* cmd, HTTP& http, String& jumpStr)
 {
     sys->logBuf->clear();
     jumpStr.sprintf("/%s/viewlog.html", servMgr->htmlPath);
 }
 
-void Servent::CMD_edit_bcid(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_edit_bcid(const char* cmd, HTTP& http, String& jumpStr)
 {
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
 
-    char *cp = cmd;
+    const char *cp = cmd;
     GnuID id;
     BCID *bcid;
 
@@ -994,14 +999,14 @@ void Servent::CMD_edit_bcid(char *cmd, HTTP& http, String& jumpStr)
     jumpStr.sprintf("/%s/bcid.html", servMgr->htmlPath);
 }
 
-void Servent::CMD_add_bcid(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_add_bcid(const char* cmd, HTTP& http, String& jumpStr)
 {
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
 
     BCID *bcid = new BCID();
 
-    char *cp = cmd;
+    const char *cp = cmd;
     bool result=false;
     while ((cp = nextCGIarg(cp, curr, arg)) != nullptr)
     {
@@ -1033,7 +1038,7 @@ void Servent::CMD_add_bcid(char *cmd, HTTP& http, String& jumpStr)
     }
 }
 
-void Servent::CMD_apply(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
 {
     servMgr->numFilters = 0;
     ServFilter *currFilter = servMgr->filters;
@@ -1050,7 +1055,7 @@ void Servent::CMD_apply(char *cmd, HTTP& http, String& jumpStr)
 
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
-    char *cp = cmd;
+    const char *cp = cmd;
     while ((cp = nextCGIarg(cp, curr, arg)) != nullptr)
     {
         // server
@@ -1245,7 +1250,7 @@ void Servent::CMD_apply(char *cmd, HTTP& http, String& jumpStr)
         servMgr->broadcastRootSettings(getUpd);
 }
 
-void Servent::CMD_fetch(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_fetch(const char* cmd, HTTP& http, String& jumpStr)
 {
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
@@ -1253,7 +1258,7 @@ void Servent::CMD_fetch(char *cmd, HTTP& http, String& jumpStr)
     ChanInfo info;
     String curl;
 
-    char *cp = cmd;
+    const char *cp = cmd;
     while ((cp = nextCGIarg(cp, curr, arg)) != nullptr)
     {
         if (strcmp(curr, "url") == 0)
@@ -1302,7 +1307,7 @@ void Servent::CMD_fetch(char *cmd, HTTP& http, String& jumpStr)
     jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
 }
 
-void Servent::CMD_fetch_feeds(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_fetch_feeds(const char* cmd, HTTP& http, String& jumpStr)
 {
     servMgr->channelDirectory->update(ChannelDirectory::kUpdateManual);
 
@@ -1313,7 +1318,7 @@ void Servent::CMD_fetch_feeds(char *cmd, HTTP& http, String& jumpStr)
 }
 
 // サーバントを停止する。
-void Servent::CMD_stop_servent(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_stop_servent(const char* cmd, HTTP& http, String& jumpStr)
 {
     cgi::Query query(cmd);
 
@@ -1338,12 +1343,12 @@ void Servent::CMD_stop_servent(char *cmd, HTTP& http, String& jumpStr)
     }
 }
 
-void Servent::CMD_clear(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_clear(const char* cmd, HTTP& http, String& jumpStr)
 {
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
 
-    char *cp = cmd;
+    const char *cp = cmd;
     while ((cp = nextCGIarg(cp, curr, arg)) != nullptr)
     {
         if (strcmp(curr, "hostcache") == 0)
@@ -1362,19 +1367,19 @@ void Servent::CMD_clear(char *cmd, HTTP& http, String& jumpStr)
         jumpStr.sprintf("/%s/index.html", servMgr->htmlPath);
 }
 
-void Servent::CMD_shutdown(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_shutdown(const char* cmd, HTTP& http, String& jumpStr)
 {
     http.send(HTTPResponse::ok({}, "Server is shutting down..."));
     servMgr->shutdownTimer = 1;
 }
 
-void Servent::CMD_stop(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_stop(const char* cmd, HTTP& http, String& jumpStr)
 {
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
 
     GnuID id;
-    char *cp = cmd;
+    const char *cp = cmd;
     while ((cp = nextCGIarg(cp, curr, arg)) != nullptr)
     {
         if (strcmp(curr, "id") == 0)
@@ -1389,7 +1394,7 @@ void Servent::CMD_stop(char *cmd, HTTP& http, String& jumpStr)
     jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
 }
 
-void Servent::CMD_bump(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_bump(const char* cmd, HTTP& http, String& jumpStr)
 {
     cgi::Query query(cmd);
     GnuID id;
@@ -1442,13 +1447,13 @@ void Servent::CMD_bump(char *cmd, HTTP& http, String& jumpStr)
     }
 }
 
-void Servent::CMD_keep(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_keep(const char* cmd, HTTP& http, String& jumpStr)
 {
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
 
     GnuID id;
-    char *cp = cmd;
+    const char *cp = cmd;
     while ((cp = nextCGIarg(cp, curr, arg)) != nullptr)
     {
         if (strcmp(curr, "id") == 0)
@@ -1462,14 +1467,16 @@ void Servent::CMD_keep(char *cmd, HTTP& http, String& jumpStr)
     jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
 }
 
-void Servent::CMD_logout(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_logout(const char* cmd, HTTP& http, String& jumpStr)
 {
     jumpStr.sprintf("%s", "/");
     servMgr->cookieList.remove(cookie);
 }
 
-void Servent::CMD_login(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_login(const char* cmd, HTTP& http, String& jumpStr)
 {
+    cgi::Query query(cmd);
+
     GnuID id;
     char idstr[64];
     id.generate();
@@ -1483,14 +1490,15 @@ void Servent::CMD_login(char *cmd, HTTP& http, String& jumpStr)
         http.writeLineF("%s id=%s; path=/; expires=\"Mon, 01-Jan-3000 00:00:00 GMT\";", HTTP_HS_SETCOOKIE, idstr);
     else
         http.writeLineF("%s id=%s; path=/;", HTTP_HS_SETCOOKIE, idstr);
-    if (!http.headers.get("Referer").empty())
-        http.writeLineF("Location: %s", http.headers.get("Referer").c_str());
+
+    if (query.get("requested_path") != "")
+        http.writeLineF("Location: %s", query.get("requested_path").c_str());
     else
         http.writeLineF("Location: /%s/index.html", servMgr->htmlPath);
     http.writeLine("");
 }
 
-void Servent::CMD_control_rtmp(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_control_rtmp(const char* cmd, HTTP& http, String& jumpStr)
 {
     cgi::Query query(cmd);
     auto action = query.get("action");
@@ -1528,7 +1536,7 @@ void Servent::CMD_control_rtmp(char *cmd, HTTP& http, String& jumpStr)
     }
 }
 
-void Servent::CMD_update_channel_info(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_update_channel_info(const char* cmd, HTTP& http, String& jumpStr)
 {
     cgi::Query query(cmd);
 
@@ -1694,7 +1702,7 @@ static std::string dumpHitList(ChanHitList* hitlist)
     return b;
 }
 
-void Servent::CMD_dump_hitlists(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_dump_hitlists(const char* cmd, HTTP& http, String& jumpStr)
 {
     using namespace str;
 
@@ -1731,7 +1739,7 @@ void Servent::CMD_dump_hitlists(char *cmd, HTTP& http, String& jumpStr)
     http.writeString(buf);
 }
 
-void Servent::CMD_add_speedtest(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_add_speedtest(const char* cmd, HTTP& http, String& jumpStr)
 {
     cgi::Query query(cmd);
 
@@ -1760,7 +1768,7 @@ static bool isDecimal(const std::string& str)
     return decimal.matches(str);
 }
 
-void Servent::CMD_delete_speedtest(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_delete_speedtest(const char* cmd, HTTP& http, String& jumpStr)
 {
     cgi::Query query(cmd);
 
@@ -1785,7 +1793,7 @@ void Servent::CMD_delete_speedtest(char *cmd, HTTP& http, String& jumpStr)
     }
 }
 
-void Servent::CMD_refresh_speedtest(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_refresh_speedtest(const char* cmd, HTTP& http, String& jumpStr)
 {
     servMgr->uptestServiceRegistry->forceUpdate();
 
@@ -1795,7 +1803,7 @@ void Servent::CMD_refresh_speedtest(char *cmd, HTTP& http, String& jumpStr)
         http.send(HTTPResponse::redirectTo("/speedtest.html"));
 }
 
-void Servent::CMD_take_speedtest(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_take_speedtest(const char* cmd, HTTP& http, String& jumpStr)
 {
     cgi::Query query(cmd);
 
@@ -1823,7 +1831,7 @@ void Servent::CMD_take_speedtest(char *cmd, HTTP& http, String& jumpStr)
     }
 }
 
-void Servent::CMD_speedtest_cached_xml(char *cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_speedtest_cached_xml(const char* cmd, HTTP& http, String& jumpStr)
 {
     cgi::Query query(cmd);
     if (!isDecimal(query.get("index")))
@@ -1850,13 +1858,15 @@ void Servent::CMD_speedtest_cached_xml(char *cmd, HTTP& http, String& jumpStr)
     }
 }
 
-void Servent::handshakeCMD(char *query)
+void Servent::handshakeCMD(HTTP& http, char *q)
 {
     String jumpStr;
 
-    HTTP http(*sock);
+    // q が http.cmdLine の一部を指しているので、http の操作に伴って変
+    // 更されるため、コピーしておく。
+    std::string query = q;
 
-    if (!handshakeAuth(http, query, true))
+    if (!handshakeAuth(http, query.c_str(), true))
         return;
 
     std::string cmd = cgi::Query(query).get("cmd");
@@ -1865,76 +1875,76 @@ void Servent::handshakeCMD(char *query)
     {
         if (cmd == "add_bcid")
         {
-            CMD_add_bcid(query, http, jumpStr);
+            CMD_add_bcid(query.c_str(), http, jumpStr);
         }else if (cmd == "add_speedtest")
         {
-            CMD_add_speedtest(query, http, jumpStr);
+            CMD_add_speedtest(query.c_str(), http, jumpStr);
         }else if (cmd == "apply")
         {
-            CMD_apply(query, http, jumpStr);
+            CMD_apply(query.c_str(), http, jumpStr);
         }else if (cmd == "bump")
         {
-            CMD_bump(query, http, jumpStr);
+            CMD_bump(query.c_str(), http, jumpStr);
         }else if (cmd == "clear")
         {
-            CMD_clear(query, http, jumpStr);
+            CMD_clear(query.c_str(), http, jumpStr);
         }else if (cmd == "clearlog")
         {
-            CMD_clearlog(query, http, jumpStr);
+            CMD_clearlog(query.c_str(), http, jumpStr);
         }else if (cmd == "control_rtmp")
         {
-            CMD_control_rtmp(query, http, jumpStr);
+            CMD_control_rtmp(query.c_str(), http, jumpStr);
         }else if (cmd == "delete_speedtest")
         {
-            CMD_delete_speedtest(query, http, jumpStr);
+            CMD_delete_speedtest(query.c_str(), http, jumpStr);
         }else if (cmd == "dump_hitlists")
         {
-            CMD_dump_hitlists(query, http, jumpStr);
+            CMD_dump_hitlists(query.c_str(), http, jumpStr);
         }else if (cmd == "edit_bcid")
         {
-            CMD_edit_bcid(query, http, jumpStr);
+            CMD_edit_bcid(query.c_str(), http, jumpStr);
         }else if (cmd == "fetch")
         {
-            CMD_fetch(query, http, jumpStr);
+            CMD_fetch(query.c_str(), http, jumpStr);
         }else if (cmd == "fetch_feeds")
         {
-            CMD_fetch_feeds(query, http, jumpStr);
+            CMD_fetch_feeds(query.c_str(), http, jumpStr);
         }else if (cmd == "keep")
         {
-            CMD_keep(query, http, jumpStr);
+            CMD_keep(query.c_str(), http, jumpStr);
         }else if (cmd == "login")
         {
-            CMD_login(query, http, jumpStr);
+            CMD_login(query.c_str(), http, jumpStr);
         }else if (cmd == "logout")
         {
-            CMD_logout(query, http, jumpStr);
+            CMD_logout(query.c_str(), http, jumpStr);
         }else if (cmd == "redirect")
         {
-            CMD_redirect(query, http, jumpStr);
+            CMD_redirect(query.c_str(), http, jumpStr);
         }else if (cmd == "refresh_speedtest")
         {
-            CMD_refresh_speedtest(query, http, jumpStr);
+            CMD_refresh_speedtest(query.c_str(), http, jumpStr);
         }else if (cmd == "shutdown")
         {
-            CMD_shutdown(query, http, jumpStr);
+            CMD_shutdown(query.c_str(), http, jumpStr);
         }else if (cmd == "speedtest_cached_xml")
         {
-            CMD_speedtest_cached_xml(query, http, jumpStr);
+            CMD_speedtest_cached_xml(query.c_str(), http, jumpStr);
         }else if (cmd == "stop")
         {
-            CMD_stop(query, http, jumpStr);
+            CMD_stop(query.c_str(), http, jumpStr);
         }else if (cmd == "stop_servent")
         {
-            CMD_stop_servent(query, http, jumpStr);
+            CMD_stop_servent(query.c_str(), http, jumpStr);
         }else if (cmd == "update_channel_info")
         {
-            CMD_update_channel_info(query, http, jumpStr);
+            CMD_update_channel_info(query.c_str(), http, jumpStr);
         }else if (cmd == "take_speedtest")
         {
-            CMD_take_speedtest(query, http, jumpStr);
+            CMD_take_speedtest(query.c_str(), http, jumpStr);
         }else if (cmd == "viewxml")
         {
-            CMD_viewxml(query, http, jumpStr);
+            CMD_viewxml(query.c_str(), http, jumpStr);
         }else{
             throw HTTPException(HTTP_SC_BADREQUEST, 400);
         }
@@ -2352,7 +2362,7 @@ void Servent::handshakeICY(Channel::SRC_TYPE type, bool isHTTP)
 }
 
 // -----------------------------------
-void Servent::handshakeLocalFile(const char *fn)
+void Servent::handshakeLocalFile(const char *fn, HTTP& http)
 {
     String fileName;
 
@@ -2384,9 +2394,12 @@ void Servent::handshakeLocalFile(const char *fn)
 
         char *args = strstr(fileName.cstr(), "?");
         if (args)
-            *args++ = 0;
+            *args = '\0';
+
+        auto req = http.getRequest();
         html.writeOK(MIME_HTML);
-        html.writeTemplate(fileName.cstr(), args);
+        HTTPRequestScope scope(req);
+        html.writeTemplate(fileName.cstr(), req.queryString.c_str(), scope);
     }else if (fileName.contains(".css"))
     {
         html.writeRawFile(fileName.cstr(), MIME_CSS);

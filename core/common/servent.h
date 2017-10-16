@@ -148,7 +148,7 @@ public:
 
     void    handshakeHTML(char *);
     void    handshakeXML();
-    void    handshakeCMD(char *);
+    void    handshakeCMD(HTTP&, char *);
     bool    handshakeAuth(HTTP &, const char *, bool);
     void    handshakeIn();
     void    handshakeOut();
@@ -183,7 +183,7 @@ public:
     void    handshakeJRPC(HTTP &http);
 
     void    handshakeRemoteFile(const char *);
-    void    handshakeLocalFile(const char *);
+    void    handshakeLocalFile(const char *, HTTP& http);
     void    invokeCGIScript(HTTP &http, const char* fn);
 
     static void handshakeOutgoingPCP(AtomStream &, Host &, GnuID &, String &, bool);
@@ -291,33 +291,33 @@ public:
     Cookie              cookie;
 
 private:
-    void CMD_add_bcid(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_add_speedtest(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_apply(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_bump(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_clear(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_clearlog(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_control_rtmp(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_delete_speedtest(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_dump_hitlists(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_edit_bcid(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_fetch(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_fetch_feeds(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_keep(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_login(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_logout(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_redirect(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_refresh_speedtest(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_shutdown(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_speedtest_cached_xml(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_stop(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_stop_servent(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_take_speedtest(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_update_channel_info(char *cmd, HTTP& http, String& jumpStr);
-    void CMD_viewxml(char *cmd, HTTP& http, String& jumpStr);
+    void CMD_add_bcid(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_add_speedtest(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_apply(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_bump(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_clear(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_clearlog(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_control_rtmp(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_delete_speedtest(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_dump_hitlists(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_edit_bcid(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_fetch(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_fetch_feeds(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_keep(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_login(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_logout(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_redirect(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_refresh_speedtest(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_shutdown(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_speedtest_cached_xml(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_stop(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_stop_servent(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_take_speedtest(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_update_channel_info(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_viewxml(const char* cmd, HTTP& http, String& jumpStr);
 };
 
-extern char *nextCGIarg(char *cp, char *cmd, char *arg);
+extern const char *nextCGIarg(const char *cp, char *cmd, char *arg);
 
 #endif
 

@@ -1651,9 +1651,12 @@ void ServMgr::procConnectArgs(char *str, ChanInfo &info)
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
 
-    char *args = strstr(str, "?");
+    const char *args = strstr(str, "?");
     if (args)
-        *args++=0;
+    {
+        *strstr(str, "?") = '\0';
+        args++;
+    }
 
     info.initNameID(str);
 

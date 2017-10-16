@@ -31,6 +31,8 @@
 #include "regexp.h"
 #include "uptest.h"
 
+#include <assert.h>
+
 using json = nlohmann::json;
 using namespace std;
 
@@ -248,7 +250,11 @@ bool Template::writePageVariable(Stream &s, const String &varName, int loop)
         const char *a = getCGIarg(tmplArgs, v);
         if (a)
         {
-            s.writeString(a);
+            Regexp pat("\\A([^&]*)");
+            auto vec = pat.exec(a);
+            assert(vec.size() > 0);
+
+            s.writeString(cgi::unescape(vec[0]));
             return true;
         }
     }
