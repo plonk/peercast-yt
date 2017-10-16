@@ -1696,7 +1696,9 @@ void ServMgr::procConnectArgs(char *str, ChanInfo &info)
             {
                 Host h;
                 h.fromStrName(arg, DEFAULT_PORT);
-                chanMgr->addHit(h, info.id, true);
+                auto ch = chanMgr->findChannelByID(info.id);
+                if (!ch || ch->type != Channel::T_BROADCAST)
+                    chanMgr->addHit(h, info.id, true);
             }
         }
     }
