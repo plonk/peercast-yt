@@ -102,7 +102,7 @@ void ChanHit::initLocal(int numl, int numr, int, int uptm, bool connected, unsig
     recv = connected;
 
     direct = !servMgr->directFull();
-    relay = !servMgr->relaysFull();
+    relay = !servMgr->relaysFull2();
     cin = !servMgr->controlInFull();
 
     host = servMgr->serverHost;

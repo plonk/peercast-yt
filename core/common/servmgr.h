@@ -304,6 +304,10 @@ public:
     {
         return numStreams(Servent::T_RELAY, false) >= maxRelays;
     }
+    bool    relaysFull2()
+    {
+      return numStreams(Servent::T_RELAY, false) >= chanMgr->maxRelaysPerChannel;
+    }
     bool    directFull()
     {
         return numStreams(Servent::T_DIRECT, false) >= maxDirect;
