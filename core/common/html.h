@@ -58,8 +58,7 @@ public:
                     const std::map<std::string,std::string>& = {});
     void    locateTo(const char *);
     void    writeRawFile(const char *, const char *);
-
-    void    writeTemplate(const char *, const char *);
+    void    writeTemplate(const char *fileName, const char *args, class HTTPRequestScope& reqScope);
 
     String  title, refreshURL;
     char    currTag[MAX_TAGLEVEL][MAX_TAGLEN];

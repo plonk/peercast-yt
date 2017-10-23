@@ -15,13 +15,13 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
+#include <algorithm>
 #include "gnuid.h" // Host std::string
 #include "sys.h" // sys
 
 // ---------------------------
 void GnuID::encode(Host *h, const char *salt1, const char *salt2, unsigned char salt3)
 {
-    int s1=0, s2=0;
     for (int i=0; i<16; i++)
     {
         unsigned char ipb = id[i];
@@ -29,6 +29,18 @@ void GnuID::encode(Host *h, const char *salt1, const char *salt2, unsigned char 
         // encode with IP address
         if (h)
             ipb ^= ((unsigned char *)&h->ip)[i&3];
+
+        // plus some pepper
+        ipb ^= salt3;
+
+        id[i] = ipb;
+    }
+
+    int s1 = 0, s2 = 0;
+    int n = (std::max(salt1?strlen(salt1):0, salt2?strlen(salt2):0)/16 + 1) * 16;
+    for (int i = 0; i < n; i++)
+    {
+        unsigned char ipb = id[i%16];
 
         // add a bit of salt
         if (salt1)
@@ -48,10 +60,7 @@ void GnuID::encode(Host *h, const char *salt1, const char *salt2, unsigned char 
                 s2=0;
         }
 
-        // plus some pepper
-        ipb ^= salt3;
-
-        id[i] = ipb;
+        id[i%16] = ipb;
     }
 }
 

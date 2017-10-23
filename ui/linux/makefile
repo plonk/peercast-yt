@@ -1,18 +1,35 @@
-CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT $(INCLUDES)
-LDFLAGS = -pthread
-LIBS = 
+# Uncomment following line to enabled RTMP fetch support
+#WITH_RTMP = yes
 
-TAR = peercast-yt-linux-amd64.tar.gz
+CPPFLAGS = -g -Wreturn-type -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT $(INCLUDES)
+ifeq ($(WITH_RTMP),yes)
+  CPPFLAGS += -DWITH_RTMP
+endif
+
+LDFLAGS = -pthread -static-libstdc++ -static-libgcc
+LIBS = -L../../Onigmo/.libs -Wl,-Bstatic -lonigmo -Wl,-Bdynamic
+ifeq ($(WITH_RTMP),yes)
+  LIBS += -lrtmp
+endif
+
+OS = $(shell uname -s | tr A-Z a-z)
+ARCH = $(shell uname -p | tr A-Z a-z)
+
+DISTARCHIVE = peercast-yt-$(OS)-$(ARCH).tar.gz
 AR = ar
 
-INCLUDES = -I../../core -I../../core/common
+INCLUDES = -I../../core -I../../core/common -I../../Onigmo
 
 TARGET = peercast
+RTMPSERVER = rtmp-server
 CORE = ../../core
+RTMP = ../../rtmp-server
 SRCHTMLTAR = ../html.tar
 HTML = html
 SRCPUBLICTAR = ../public.tar
 PUBLIC = public
+ASSETS = assets
+CGIBIN = cgi-bin
 
 LIBOBJSTATIC = libpeercast.a
 
@@ -26,24 +43,26 @@ SYSOBJ = $(notdir $(SYSSOURCE:.cpp=.o))
 LINUXSOURCE = main.cpp
 LINUXOBJ = $(notdir $(LINUXSOURCE:.cpp=.o))
 
+RTMPSOURCE = $(wildcard $(RTMP)/*.cpp)
+RTMPOBJ = $(notdir $(RTMPSOURCE:.cpp=.o))
+
+LIBONIGMO = ../../Onigmo/.libs/libonigmo.a
+
 DEPENDFILE = .deps
 
-.PHONY: all clean build-html deps
+.PHONY: all clean build-html deps $(SRCHTMLTAR) $(SRCPUBLICTAR)
 
 # Here follow the generic build rules.
-all: $(TARGET) build-html $(TAR)
+all: $(TARGET) $(LIBOBJSTATIC) $(DISTARCHIVE) $(RTMPSERVER)
 
 deps: $(DEPENDFILE)
-
-build-html:
-	$(MAKE) -C ..
 
 $(SRCHTMLTAR):
 	$(MAKE) -C .. html.tar
 
 $(HTML): $(SRCHTMLTAR)
 	rm -rf $(HTML)
-	tar xf $(SRCHTMLTAR) $(HTML)
+	tar xf $(SRCHTMLTAR)
 	touch $(HTML)
 
 $(SRCPUBLICTAR):
@@ -51,34 +70,48 @@ $(SRCPUBLICTAR):
 
 $(PUBLIC): $(SRCPUBLICTAR)
 	rm -rf $(PUBLIC)
-	tar xf $(SRCPUBLICTAR) $(PUBLIC)
+	tar xf $(SRCPUBLICTAR)
 	touch $(PUBLIC)
 
-$(TAR): $(TARGET) $(HTML) $(PUBLIC)
+$(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS) $(RTMPSERVER)
 	rm -rf peercast-yt
 	mkdir peercast-yt
-	cp -R $(HTML) $(PUBLIC) $(TARGET) peercast-yt/
+	cp -R $(HTML) $(PUBLIC) $(TARGET) $(ASSETS) $(CGIBIN) $(RTMPSERVER) ../../licenses ../../core/LICENSE peercast-yt/
 	strip peercast-yt/$(TARGET)
-	tar cvzf $(TAR) peercast-yt
+	strip peercast-yt/$(RTMPSERVER)
+	tar czf $(DISTARCHIVE) peercast-yt
 
 clean:
-	rm -f $(LINUXOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE) $(SRCHTMLTAR)
-	rm -rf $(HTML)
+	$(MAKE) -C ../../Onigmo clean
+	$(MAKE) -C .. clean
+	rm -f $(LINUXOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE) $(RTMPSERVER) $(RTMPOBJ)
+	rm -rf $(HTML) $(PUBLIC)
 	rm -rf peercast-yt/
+	rm -f $(DISTARCHIVE)
 
 $(COREOBJ): %.o : $(CORE)/common/%.cpp
-	$(CC) $(CPPFLAGS) -c $< -o $@
+	$(CXX) $(CPPFLAGS) -c $< -o $@
 
 $(SYSOBJ): %.o : $(CORE)/unix/%.cpp
-	$(CC) $(CPPFLAGS) -c $< -o $@
+	$(CXX) $(CPPFLAGS) -c $< -o $@
 
-$(DEPENDFILE): $(CORESOURCE) $(LINUXSOURCE)
-	$(CXX) $(CPPFLAGS) -MM $(CORESOURCE) $(SYSSOURCE) $(LINUXSOURCE) > $(DEPENDFILE)
+$(RTMPOBJ): %.o : $(RTMP)/%.cpp
+	$(CXX) $(CPPFLAGS) -c $< -o $@
+
+$(DEPENDFILE): $(CORESOURCE) $(SYSSOURCE) $(LINUXSOURCE) $(RTMPSOURCE)
+	$(CXX) $(CPPFLAGS) -MM $(CORESOURCE) $(SYSSOURCE) $(LINUXSOURCE) $(RTMPSOURCE) > $(DEPENDFILE)
 
 $(LIBOBJSTATIC): $(COREOBJ) $(SYSOBJ)
 	$(AR) rcs $(LIBOBJSTATIC) $(COREOBJ) $(SYSOBJ)
 
-$(TARGET): $(LINUXOBJ) $(LIBOBJSTATIC)
+$(TARGET): $(LINUXOBJ) $(LIBOBJSTATIC) $(LIBONIGMO)
 	$(CXX) $(LDFLAGS) -o $@ $(LINUXOBJ) $(LIBOBJSTATIC) $(LIBS)
+
+$(RTMPSERVER): $(RTMPOBJ) $(LIBOBJSTATIC) $(LIBONIGMO)
+	$(CXX) $(LDFLAGS) -o $@ $(RTMPOBJ) $(LIBOBJSTATIC) $(LIBS)
+
+$(LIBONIGMO):
+	cd ../../Onigmo; ./configure
+	$(MAKE) -C ../../Onigmo clean all
 
 -include $(DEPENDFILE)

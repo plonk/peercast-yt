@@ -20,7 +20,6 @@
 
 #include "xml.h"
 #include "stream.h"
-#include <stdlib.h>
 #include <stdarg.h>
 
 // ----------------------------------
@@ -121,7 +120,9 @@ void XML::Node::setBinaryContent(void *ptr, int size)
 // ----------------------------------
 void XML::Node::setContent(const char *n)
 {
-    contData = strdup(n);
+    if (contData != nullptr)
+        free(contData);
+    contData = Sys::strdup(n);
 }
 
 // ----------------------------------
@@ -129,7 +130,7 @@ void XML::Node::setAttributes(const char *n)
 {
     char c;
 
-    attrData = strdup(n);
+    attrData = Sys::strdup(n);
 
     // count maximum amount of attributes
     int maxAttr = 1;        // 1 for tag name
@@ -155,7 +156,7 @@ void XML::Node::setAttributes(const char *n)
     i=0;
 
     // skip until whitespace
-    while (c=attrData[i++])
+    while ((c = attrData[i++]) != '\0')
         if (isWhiteSpace(c))
             break;
 
@@ -168,7 +169,10 @@ void XML::Node::setAttributes(const char *n)
         if (!isWhiteSpace(c))
         {
             if (numAttr>=maxAttr)
+            {
+                free(attrData); delete[] attr; // clean up
                 throw StreamException("Too many attributes");
+            }
 
             // get start of tag name
             attr[numAttr].namePos = i;
@@ -198,7 +202,10 @@ void XML::Node::setAttributes(const char *n)
 
             // check for valid start of attribute value - '"'
             if (attrData[i++] != '\"')
+            {
+                free(attrData); delete[] attr; // clean up
                 throw StreamException("Bad tag value");
+            }
 
             attr[numAttr++].valuePos = i;
 
@@ -260,7 +267,7 @@ char *XML::Node::findAttr(const char *name)
     for (int i=1; i<numAttr; i++)
     {
         char *an = getAttrName(i);
-        if (strnicmp(an, name, nlen)==0)
+        if (Sys::strnicmp(an, name, nlen)==0)
             return getAttrValue(i);
     }
     return NULL;
@@ -328,7 +335,7 @@ XML::Node::~Node()
 //  LOG("delete %s", getName());
 
     if (contData)
-        delete [] contData;
+        free(contData);
     if (attrData)
         free(attrData); // strdupped
     if (attr)
@@ -356,7 +363,7 @@ void XML::write(Stream &out)
     if (!root)
         throw StreamException("No XML root");
 
-    out.writeLine("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
+    out.writeString("<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n");
     root->write(out, 1);
 }
 
@@ -366,7 +373,7 @@ void XML::writeCompact(Stream &out)
     if (!root)
         throw StreamException("No XML root");
 
-    out.writeLine("<?xml ?>");
+    out.writeString("<?xml ?>\n");
     root->write(out, 1);
 }
 
@@ -397,7 +404,7 @@ XML::Node *XML::findNode(const char *n)
 // ----------------------------------
 XML::Node *XML::Node::findNode(const char *name)
 {
-    if (stricmp(getName(), name)==0)
+    if (Sys::stricmp(getName(), name)==0)
         return this;
 
     XML::Node *c = child;
@@ -454,7 +461,7 @@ void XML::read(Stream &in)
                 // do nothing
             }else if (buf[0] == '?')            // doc type
             {
-                if (strnicmp(&buf[1], "xml ", 4))
+                if (Sys::strnicmp(&buf[1], "xml ", 4))
                     throw StreamException("Not XML document");
             }else if (buf[0] == '/')            // end tag
             {

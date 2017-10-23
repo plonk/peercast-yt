@@ -4,17 +4,22 @@
 #include "channel.h"
 #include "stream.h"
 #include "matroska.h"
-#include "dmstream.h"
+#include "sstream.h"
 
 using namespace matroska;
 
 // data を type パケットとして送信する
-void MKVStream::sendPacket(ChanPacket::TYPE type, const byte_string& data, bool continuation, Channel* ch)
+void MKVStream::sendPacket(ChanPacket::TYPE type, const byte_string& data, bool continuation, std::shared_ptr<Channel> ch)
 {
-    //LOG_DEBUG("MKV Sending %zu byte %s packet", data.size(), type==ChanPacket::T_HEAD?"HEAD":"DATA");
-
     if (data.size() > ChanPacket::MAX_DATALEN)
         throw StreamException("MKV packet too big");
+
+    if (type == ChanPacket::T_HEAD)
+    {
+        ch->streamIndex++;
+        ch->rawData.init();
+        ch->streamPos = 0;
+    }
 
     ChanPacket pack;
     pack.type = type;
@@ -27,7 +32,8 @@ void MKVStream::sendPacket(ChanPacket::TYPE type, const byte_string& data, bool 
         ch->headPack = pack;
 
     ch->newPacket(pack);
-    ch->checkReadDelay(pack.len);
+    // rateLimit で律速するので checkReadDelay は使わない。
+    //ch->checkReadDelay(pack.len);
     ch->streamPos += pack.len;
 }
 
@@ -68,9 +74,41 @@ bool MKVStream::hasKeyFrame(const byte_string& cluster)
     return false;
 }
 
+uint64_t MKVStream::unpackUnsignedInt(const std::string& bytes)
+{
+    if (bytes.size() == 0)
+        throw std::runtime_error("empty string");
+
+    uint64_t res = 0;
+
+    for (size_t i = 0; i < bytes.size(); i++)
+    {
+        res <<= 8;
+        res |= (uint8_t) bytes[i];
+    }
+
+    return res;
+}
+
+void MKVStream::rateLimit(uint64_t timecode)
+{
+    // Timecode は単調増加ではないが、少しのジッターはバッファーが吸収
+    // してくれるだろう。
+
+    unsigned int secondsFromStart = timecode * m_timecodeScale / 1000000000;
+    unsigned int ctime = sys->getTime();
+
+    if (m_startTime + secondsFromStart > ctime) // if this is into the future
+    {
+        int diff = (m_startTime + secondsFromStart) - ctime;
+        LOG_DEBUG("rateLimit: diff = %d sec", diff);
+        sys->sleep(diff * 1000);
+    }
+}
+
 // 非継続パケットの頭出しができないクライアントのために、なるべく要素
 // をパケットの先頭にして送信する
-void MKVStream::sendCluster(const byte_string& cluster, Channel* ch)
+void MKVStream::sendCluster(const byte_string& cluster, std::shared_ptr<Channel> ch)
 {
     bool continuation;
 
@@ -84,53 +122,50 @@ void MKVStream::sendCluster(const byte_string& cluster, Channel* ch)
             continuation = false;
     }
 
-    // 15KB 以下の場合はそのまま送信
-    if (cluster.size() <= 15*1024)
-    {
-        sendPacket(ChanPacket::T_DATA, cluster, continuation, ch);
-        return;
-    }
-
     MemoryStream in((void*) cluster.data(), cluster.size());
 
     VInt id   = VInt::read(in);
     VInt size = VInt::read(in);
 
-    //LOG_DEBUG("Got %s size=%s", id.toName().c_str(), std::to_string(size.uint()).c_str());
-
     byte_string buffer = id.bytes + size.bytes;
 
     int64_t payloadRemaining = (int64_t) size.uint(); // 負数が取れるように signed にする
+
     if (payloadRemaining < 0)
         throw StreamException("MKV Parse error");
+
     while (payloadRemaining > 0) // for each element in Cluster
     {
         VInt id = VInt::read(in);
         VInt size = VInt::read(in);
 
-        //LOG_DEBUG("Got %s size=%s", id.toName().c_str(), std::to_string(size.uint()).c_str());
+        LOG_DEBUG("Got %s size=%s", id.toName().c_str(), std::to_string(size.uint()).c_str());
 
         if (buffer.size() > 0 &&
             buffer.size() + id.bytes.size() + size.bytes.size() + size.uint() > 15*1024)
         {
-            MemoryStream mem((void*)buffer.data(), buffer.size());
-            VInt id = VInt::read(mem);
-            //LOG_DEBUG("Sending %s", id.toName().c_str());
             sendPacket(ChanPacket::T_DATA, buffer, continuation, ch);
             continuation = true;
             buffer.clear();
+        }
+
+        std::string payload = in.Stream::read((int) size.uint());
+
+        if (id.toName() == "Timecode")
+        {
+            if (ch->readDelay)
+                rateLimit(unpackUnsignedInt(payload));
         }
 
         if (id.bytes.size() + size.bytes.size() + size.uint() > 15*1024)
         {
             if (buffer.size() != 0) throw StreamException("Logic error");
             buffer = id.bytes + size.bytes;
-            auto payload = static_cast<Stream*>(&in)->read((int) size.uint());
             buffer.append(payload.begin(), payload.end());
-            int pos = 0;
+            size_t pos = 0;
             while (pos < buffer.size())
             {
-                int next = std::min(pos + 15*1024, (int)buffer.size());
+                int next = std::min(pos + 15*1024, buffer.size());
                 sendPacket(ChanPacket::T_DATA, buffer.substr(pos, next-pos), continuation, ch);
                 continuation = true;
                 pos = next;
@@ -138,7 +173,6 @@ void MKVStream::sendCluster(const byte_string& cluster, Channel* ch)
             buffer.clear();
         } else {
             buffer += id.bytes + size.bytes;
-            auto payload = static_cast<Stream*>(&in)->read((int) size.uint());
             buffer.append(payload.begin(), payload.end());
             MemoryStream mem((void*)buffer.c_str(), buffer.size());
             mem.rewind();
@@ -156,7 +190,7 @@ void MKVStream::sendCluster(const byte_string& cluster, Channel* ch)
 // Tracks 要素からビデオトラックのトラック番号を調べる。
 void MKVStream::readTracks(const std::string& data)
 {
-    DynamicMemoryStream mem;
+    StringStream mem;
     mem.str(data);
 
     while (!mem.eof())
@@ -189,71 +223,107 @@ void MKVStream::readTracks(const std::string& data)
                 m_videoTrackNumber = trackno;
                 LOG_DEBUG("MKV video track number is %d", trackno);
             }
+        }else
+        {
+            mem.skip(size.uint());
         }
     }
 }
 
-void MKVStream::readHeader(Stream &in, Channel *ch)
+// TimecodeScale の値を調べる。
+void MKVStream::readInfo(const std::string& data)
 {
-    byte_string header;
+    StringStream in;
+    in.str(data);
 
     while (true)
     {
         VInt id   = VInt::read(in);
         VInt size = VInt::read(in);
-        LOG_DEBUG("Got LEVEL0 %s size=%s", id.toName().c_str(), std::to_string(size.uint()).c_str());
 
-        header += id.bytes;
-        header += size.bytes;
-
-        if (id.toName() != "Segment")
+        if (id.toName() == "TimecodeScale")
         {
-            // Segment 以外のレベル 0 要素は単にヘッドパケットに追加す
-            // る
-            auto data = in.read((int) size.uint());
-            header.append(data.begin(), data.end());
-        }else
-        {
-            // Segment 内のレベル 1 要素を読む
-            while (true)
-            {
-                VInt id = VInt::read(in);
-                VInt size = VInt::read(in);
-                LOG_DEBUG("Got LEVEL1 %s size=%s", id.toName().c_str(), std::to_string(size.uint()).c_str());
+            auto data = in.Stream::read((int) size.uint());
 
-                if (id.toName() != "Cluster")
-                {
-                    // Cluster 以外の要素はヘッドパケットに追加する
-                    header += id.bytes;
-                    header += size.bytes;
-
-                    auto data = in.read((int) size.uint());
-
-                    if (id.toName() == "Tracks")
-                        readTracks(data);
-
-                    header.append(data.begin(), data.end());
-                } else
-                {
-                    // ヘッダーパケットを送信
-                    sendPacket(ChanPacket::T_HEAD, header, false, ch);
-
-                    // もうIDとサイズを読んでしまったので、最初のクラ
-                    // スターを送信
-
-                    byte_string cluster = id.bytes + size.bytes;
-                    auto data = in.read((int) size.uint());
-                    cluster.append(data.begin(), data.end());
-                    sendCluster(cluster, ch);
-                    return;
-                }
-            }
+            auto scale = unpackUnsignedInt(data);
+            LOG_DEBUG("TimecodeScale = %d nanoseconds", (int) scale);
+            m_timecodeScale = scale;
+            return;
         }
     }
 }
 
+void MKVStream::readHeader(Stream &in, std::shared_ptr<Channel> ch)
+{
+    try{
+        byte_string header;
+
+        while (true)
+        {
+            VInt id   = VInt::read(in);
+            VInt size = VInt::read(in);
+            LOG_DEBUG("Got LEVEL0 %s size=%s", id.toName().c_str(), std::to_string(size.uint()).c_str());
+
+            header += id.bytes;
+            header += size.bytes;
+
+            if (id.toName() != "Segment")
+            {
+                // Segment 以外のレベル 0 要素は単にヘッドパケットに追加す
+                // る
+                auto data = in.read((int) size.uint());
+                header.append(data.begin(), data.end());
+            }else
+            {
+                // Segment 内のレベル 1 要素を読む
+                while (true)
+                {
+                    VInt id = VInt::read(in);
+                    VInt size = VInt::read(in);
+                    LOG_DEBUG("Got LEVEL1 %s size=%s", id.toName().c_str(), std::to_string(size.uint()).c_str());
+
+                    if (id.toName() != "Cluster")
+                    {
+                        // Cluster 以外の要素はヘッドパケットに追加する
+                        header += id.bytes;
+                        header += size.bytes;
+
+                        auto data = in.read((int) size.uint());
+
+                        if (id.toName() == "Tracks")
+                            readTracks(data);
+
+                        header.append(data.begin(), data.end());
+
+                        if (id.toName() == "Info")
+                            readInfo(data);
+                    } else
+                    {
+                        // ヘッダーパケットを送信
+                        sendPacket(ChanPacket::T_HEAD, header, false, ch);
+
+                        m_startTime = sys->getTime();
+
+                        // もうIDとサイズを読んでしまったので、最初のクラ
+                        // スターを送信
+
+                        byte_string cluster = id.bytes + size.bytes;
+                        auto data = in.read((int) size.uint());
+                        cluster.append(data.begin(), data.end());
+                        sendCluster(cluster, ch);
+                        return;
+                    }
+                }
+            }
+        }
+    }catch (std::runtime_error& e)
+    {
+        throw StreamException(e.what());
+    }
+}
+
 // ビットレートの計測、更新
-void MKVStream::checkBitrate(Stream &in, Channel *ch)
+void MKVStream::checkBitrate(Stream &in, std::shared_ptr<Channel> ch)
 {
     ChanInfo info = ch->info;
     int newBitrate = in.stat.bytesInPerSecAvg() / 1000 * 8;
@@ -264,28 +334,33 @@ void MKVStream::checkBitrate(Stream &in, Channel *ch)
 }
 
 // Cluster 要素を読む
-int MKVStream::readPacket(Stream &in, Channel *ch)
+int MKVStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
 {
-    checkBitrate(in, ch);
+    try {
+        checkBitrate(in, ch);
 
-    VInt id = VInt::read(in);
-    VInt size = VInt::read(in);
+        VInt id = VInt::read(in);
+        VInt size = VInt::read(in);
 
-    if (id.toName() != "Cluster")
+        if (id.toName() != "Cluster")
+        {
+            LOG_ERROR("Cluster expected, but got %s", id.toName().c_str());
+            throw StreamException("Logic error");
+        }
+
+        byte_string cluster = id.bytes + size.bytes;
+        auto data = in.read((int) size.uint());
+        cluster.append(data.begin(), data.end());
+        sendCluster(cluster, ch);
+
+        return 0; // no error
+    }catch (std::runtime_error& e)
     {
-        LOG_ERROR("Cluster expected, but got %s", id.toName().c_str());
-        throw StreamException("Logic error");
+        throw StreamException(e.what());
     }
-
-    byte_string cluster = id.bytes + size.bytes;
-    auto data = in.read((int) size.uint());
-    cluster.append(data.begin(), data.end());
-    sendCluster(cluster, ch);
-
-    return 0; // no error
 }
 
-void MKVStream::readEnd(Stream &, Channel *)
+void MKVStream::readEnd(Stream &, std::shared_ptr<Channel>)
 {
     // we will never reach the end
 }

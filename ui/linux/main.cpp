@@ -44,7 +44,7 @@ String logFileName;
 bool forkDaemon = false;
 bool setPidFile = false;
 bool logToFile = false;
-WLock loglock;
+std::recursive_mutex loglock;
 
 // ---------------------------------
 class MyPeercastInst : public PeercastInstance
@@ -76,7 +76,7 @@ public:
 
     virtual void APICALL printLog(LogBuffer::TYPE t, const char *str)
     {
-        loglock.on();
+	std::lock_guard<std::recursive_mutex> cs(loglock);
 
         char buf[20];
         struct timeval tv;
@@ -99,7 +99,6 @@ public:
         if (logfile != NULL) {
             fprintf(logfile, "%s\n", str);
         }
-        loglock.off();
     }
 };
 
@@ -121,34 +120,33 @@ void sigProc(int sig)
         if (!quit)
             LOG_DEBUG("Received INT signal");
         quit = true;
+        signal(SIGINT, SIG_DFL);
         break;
     case SIGTERM:
         if (!quit)
             LOG_DEBUG("Received TERM signal");
         quit = true;
+        signal(SIGTERM, SIG_DFL);
         break;
     case SIGHUP:
         LOG_DEBUG("Received HUP signal, reloading a new logfile");
         // The aim of this call is to completly reload a new log file.
-        // It can be used in conjonction with logrotate,
+        // It can be used in conjunction with logrotate,
         // to remove the logfile after it has been copied.
         // some data can still be lost, but this way it is reduced to minimun at lost costs..
         if (logToFile) {
-            loglock.on();
+	    std::lock_guard<std::recursive_mutex> cs(loglock);
+
             if (logfile != NULL) {
                 fclose(logfile);
             }
             unlink(logFileName);
             logfile = fopen(logFileName, "a");
-            loglock.off();
         }
+        /* This may be nescessary for some systems... */
+        signal(SIGHUP, sigProc);
         break;
     }
-
-    /* This may be nescessary for some systems... */
-    signal(SIGINT, sigProc);
-    signal(SIGTERM, sigProc);
-    signal(SIGHUP, sigProc);
 }
 
 // ----------------------------------
@@ -248,9 +246,8 @@ int main(int argc, char* argv[])
         sys->sleep(1000);
         if (logfile != NULL)
         {
-            loglock.on();
+            std::lock_guard<std::recursive_mutex> cs(loglock);
             fflush(logfile);
-            loglock.off();
         }
     }
 
@@ -259,11 +256,11 @@ int main(int argc, char* argv[])
     peercastInst->quit();
 
     if (logfile != NULL) {
-        loglock.on();
+        std::lock_guard<std::recursive_mutex> cs(loglock);
+
         fflush(logfile);
         fclose(logfile);
         // Log might continue but will only be written to stdout.
-        loglock.off();
     }
     if (setPidFile) unlink(pidFileName);
 

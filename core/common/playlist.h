@@ -32,7 +32,7 @@ public:
     enum TYPE
     {
         T_NONE,
-        T_SCPLS,
+        T_SCPLS, // SHOUTcast playlist
         T_PLS,
         T_ASX,
         T_RAM,
@@ -45,6 +45,7 @@ public:
         type = t;
         urls = new ::String[max];
         titles = new ::String[max];
+        wmvProtocol = "http";
     }
 
     ~PlayList()
@@ -83,6 +84,7 @@ public:
                 case T_SCPLS: readSCPLS(s); break;
                 case T_PLS: readPLS(s); break;
                 case T_ASX: readASX(s); break;
+                default: throw std::runtime_error("unsupported playlist type for reading");
             }
         }catch (StreamException &) {}    // keep pls regardless of errors (eof isn`t handled properly in sockets)
     }
@@ -95,6 +97,7 @@ public:
             case T_PLS: writePLS(s); break;
             case T_ASX: writeASX(s); break;
             case T_RAM: writeRAM(s); break;
+            default: throw std::runtime_error("unsupported playlist type for writing");
         }
     }
 
@@ -103,6 +106,7 @@ public:
     TYPE        type;
     int         numURLs, maxURLs;
     ::String    *urls, *titles;
+    std::string wmvProtocol;
 };
 
 #endif

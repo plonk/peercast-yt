@@ -4,6 +4,7 @@
 #include <cstring>
 #include <vector>
 #include <cctype>
+#include <stdexcept>
 
 namespace str
 {
@@ -14,7 +15,7 @@ std::string hexdump(const std::string& in)
 {
     std::string res;
 
-    for (int i = 0; i < in.size(); i++) {
+    for (size_t i = 0; i < in.size(); i++) {
         if (i != 0)
             res += ' ';
         char buf[3];
@@ -24,12 +25,11 @@ std::string hexdump(const std::string& in)
     return res;
 }
 
-static std::string inspect(char c)
+static std::string inspect(char c, bool utf8)
 {
     int d = static_cast<unsigned char>(c);
 
-    // FIXME: UTF8 を通す為にしている。
-    if (d >= 0x80)
+    if (utf8 && d >= 0x80)
         return string() + (char) d;
 
     if (isprint(d)) {
@@ -59,10 +59,11 @@ static std::string inspect(char c)
 
 std::string inspect(const std::string str)
 {
+    bool utf8 = validate_utf8(str);
     std::string res = "\"";
 
     for (auto c : str) {
-        res += inspect(c);
+        res += inspect(c, utf8);
     }
     res += "\"";
     return res;
@@ -93,7 +94,7 @@ std::string group_digits(const std::string& in, const std::string& separator)
     std::reverse(integer.begin(), integer.end());
     std::string delim = separator;
     std::reverse(delim.begin(), delim.end());
-    for (int i = 0; i < end; i++)
+    for (size_t i = 0; i < end; i++)
     {
         if (i != 0 && i%3 == 0)
             res += delim;
@@ -130,7 +131,7 @@ std::vector<std::string> split(const std::string& in, const std::string& separat
 std::string codepoint_to_utf8(uint32_t codepoint)
 {
     std::string res;
-    if (codepoint >= 0 && codepoint <= 0x7f) {
+    if (/* codepoint >= 0 && */ codepoint <= 0x7f) {
         res += (char) codepoint;
     } else if (codepoint >= 0x80 && codepoint <= 0x7ff) {
         res += (char) (0xb0 | (codepoint >> 6));
@@ -264,6 +265,19 @@ bool is_prefix_of(const std::string& prefix, const std::string& string)
     return string.substr(0, prefix.size()) == prefix;
 }
 
+bool has_prefix(const std::string& subject, const std::string& prefix)
+{
+    return is_prefix_of(prefix, subject);
+}
+
+bool has_suffix(const std::string& subject, const std::string& suffix)
+{
+    if (subject.size() < suffix.size())
+        return false;
+
+    return subject.substr(subject.size() - suffix.size(), suffix.size()) == suffix;
+}
+
 std::string join(const std::string& delimiter, const std::vector<std::string>& vec)
 {
     std::string res;
@@ -290,6 +304,154 @@ std::string ascii_dump(const std::string& in, const std::string& replacement)
             res += replacement;
     }
     return res;
+}
+
+std::string extension_without_dot(const std::string& filename)
+{
+    auto i = filename.rfind('.');
+    if (i == std::string::npos)
+        return "";
+    else
+        return filename.substr(i + 1);
+}
+
+int count(const std::string& haystack, const std::string& needle)
+{
+    if (needle.empty())
+        throw std::domain_error("cannot count empty strings");
+
+    size_t start = 0;
+    int n = 0;
+
+    while ((start = haystack.find(needle, start)) != std::string::npos)
+    {
+        n++;
+        start++;
+    }
+    return n;
+}
+
+std::string rstrip(const std::string& str)
+{
+    std::string res = str;
+
+    while (!res.empty())
+    {
+        auto c = res.back();
+        if (c == ' ' || (c >= 0x09 && c <= 0x0d) || c == '\0')
+            res.pop_back();
+        else
+            break;
+    }
+
+    return res;
+}
+
+std::string escapeshellarg_unix(const std::string& str)
+{
+    std::string buf = "\'";
+
+    for (char c : str)
+    {
+        if (c == '\'')
+            buf += "\'\"\'\"\'";
+        else
+            buf += c;
+    }
+    buf += "\'";
+    return buf;
+}
+
+std::string STR()
+{
+    return "";
+}
+
+std::vector<std::string> to_lines(const std::string& text)
+{
+    std::vector<std::string> res;
+    std::string line;
+
+    for (auto it = text.begin(); it != text.end(); ++it)
+    {
+        if (*it == '\n')
+        {
+            line += *it;
+            res.push_back(line);
+            line.clear();
+        }else
+        {
+            line.push_back(*it);
+        }
+    }
+    res.push_back(line);
+
+    if (res.back() == "")
+        res.pop_back();
+
+    return res;
+}
+
+std::string indent_tab(const std::string& text, int n)
+{
+    if (n < 0)
+        throw std::domain_error("domain error");
+
+    auto lines = to_lines(text);
+    auto space = repeat("\t", n);
+
+    for (int i = 0; i < lines.size(); ++i)
+        lines[i] = space + lines[i];
+
+    return join("", lines);
+}
+
+bool validate_utf8(const std::string& str)
+{
+    auto it = str.begin();
+    while (it != str.end())
+    {
+        if ((*it & 0x80) == 0) // 0xxx xxxx
+        {
+            it++;
+            continue;
+        }else if ((*it & 0xE0) == 0xC0) // 110x xxxx
+        {
+            it++;
+            if (it == str.end())
+                return false;
+            if ((*it & 0xC0) == 0x80)
+                it++;
+            else
+                return false;
+        }else if ((*it & 0xF0) == 0xE0) // 1110 xxxx
+        {
+            it++;
+            for (int i = 0; i < 2; ++i)
+            {
+                if (it == str.end())
+                    return false;
+                if ((*it & 0xC0) == 0x80)
+                    it++;
+                else
+                    return false;
+            }
+        }else if ((*it & 0xF8) == 0xF0) // 1111 0xxx
+        {
+            it++;
+            for (int i = 0; i < 3; ++i)
+            {
+                if (it == str.end())
+                    return false;
+                if ((*it & 0xC0) == 0x80)
+                    it++;
+                else
+                    return false;
+            }
+        }else
+            return false;
+    }
+    return true;
 }
 
 } // namespace str

@@ -155,7 +155,7 @@ hostent *UClientSocket::resolveHost(const char *hostName)
 }
 
 // --------------------------------------------------
-void UClientSocket::open(Host &rh)
+void UClientSocket::open(const Host &rh)
 {
     sockNum = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
@@ -242,10 +242,9 @@ int UClientSocket::read(void *p, int l)
         {
             // non-blocking sockets always fall through to here
             checkTimeout(true, false);
-
         }else if (r == 0)
         {
-            throw SockException("Closed on read");
+            throw EOFException("Closed on read");
         }else
         {
             stats.add(Stats::BYTESIN, r);
@@ -260,6 +259,7 @@ int UClientSocket::read(void *p, int l)
 
     return bytesRead;
 }
+
 // --------------------------------------------------
 int UClientSocket::readUpto(void *p, int l)
 {
@@ -271,7 +271,6 @@ int UClientSocket::readUpto(void *p, int l)
         {
             // non-blocking sockets always fall through to here
             checkTimeout(true, false);
-
         }else if (r == 0)
         {
             break;
@@ -323,6 +322,9 @@ void UClientSocket::bind(Host &h)
 
     if ((sockNum = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
         throw SockException("Can`t open socket");
+
+    if (fcntl(sockNum, F_SETFD, FD_CLOEXEC) == -1)
+        throw SockException("Can`t set close-on-exec flag");
 
     setReuse(true);
     setBlocking(false);

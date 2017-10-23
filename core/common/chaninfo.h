@@ -85,7 +85,8 @@ public:
         SP_FILE,
         SP_MMS,
         SP_PCP,
-        SP_WMHTTP
+        SP_WMHTTP,
+        SP_RTMP
     };
 
     enum STATUS
@@ -121,18 +122,22 @@ public:
     void    readInfoAtoms(AtomStream &, int);
     void    readTrackAtoms(AtomStream &, int);
 
+    bool    writeVariable(Stream &out, const String &var);
+
     unsigned int        getUptime();
     unsigned int        getAge();
     bool                isActive() { return id.isSet(); }
     bool                isPrivate() { return bcID.getFlags() & 1; }
     const char          *getTypeStr();
+    std::string         getTypeStringLong();
     const char          *getTypeExt();
-    const char          *getMIMEType();
+    const char          *getMIMEType() const;
     static const char   *getTypeStr(TYPE);
     static const char   *getProtocolStr(PROTOCOL);
     static const char   *getTypeExt(TYPE);
     static const char   *getMIMEType(TYPE);
     static TYPE         getTypeFromStr(const char *str);
+    static TYPE         getTypeFromMIME(const std::string& mediaType);
     static PROTOCOL     getProtocolFromStr(const char *str);
     const char*         getPlayListExt();
 

@@ -154,11 +154,68 @@ public:
 };
 
 // --------------------------------------------
+class HTTPHeaders
+{
+public:
+    HTTPHeaders() {}
+
+    HTTPHeaders(const std::initializer_list<std::pair<std::string,std::string> >& aHeaders)
+    {
+        for (auto pair : aHeaders)
+            m_headers[str::upcase(pair.first)] = pair.second;
+    }
+
+    HTTPHeaders(const std::map<std::string,std::string>& aHeaders)
+        : m_headers(aHeaders)
+    {
+    }
+
+    std::map<std::string,std::string>::const_iterator begin() const { return m_headers.cbegin(); }
+    std::map<std::string,std::string>::const_iterator end() const { return m_headers.cend(); }
+
+    void set(const std::string& name, const std::string& value)
+    {
+        m_headers[str::upcase(name)] = value;
+    }
+
+    std::string get(const std::string& name) const
+    {
+        auto it = m_headers.find(str::upcase(name));
+        if (it == m_headers.end())
+            return "";
+        else
+            return it->second;
+    }
+
+    size_t size()
+    {
+        return m_headers.size();
+    }
+
+    void clear()
+    {
+        return m_headers.clear();
+    }
+
+    std::map<std::string,std::string> m_headers;
+};
+
+// --------------------------------------------
 class HTTPRequest
 {
 public:
-    HTTPRequest(const std::string& aMethod, const std::string& aUrl, const std::string& aProtocolVersion,
-        std::map<std::string,std::string>& aHeaders)
+    HTTPRequest()
+        : method("")
+        , url("")
+        , protocolVersion("")
+        , headers()
+    {
+    }
+
+    HTTPRequest(const std::string& aMethod,
+                const std::string& aUrl,
+                const std::string& aProtocolVersion,
+                const HTTPHeaders& aHeaders)
         : method(aMethod)
         , url(aUrl)
         , protocolVersion(aProtocolVersion)
@@ -173,21 +230,13 @@ public:
             path = url;
     }
 
-    std::string getHeader(const std::string& name) const
-    {
-        auto it = headers.find(str::upcase(name));
-        if (it == headers.end())
-            return "";
-        else
-            return it->second;
-    }
-
     std::string method;
     std::string url;
     std::string path;
     std::string queryString;
     std::string protocolVersion;
-    std::map<std::string,std::string> headers;
+    std::string body;
+    HTTPHeaders headers;
 };
 
 // --------------------------------------------
@@ -195,24 +244,34 @@ class HTTPResponse
 {
 public:
 
-    HTTPResponse(int aStatusCode, const std::map<std::string,std::string>& aHeaders)
+    HTTPResponse(int aStatusCode, const HTTPHeaders& aHeaders)
         : statusCode(aStatusCode)
         , headers(aHeaders)
         , stream(NULL)
     {
     }
 
-    static HTTPResponse ok(const std::map<std::string,std::string>& aHeaders, const std::string& body)
+    static HTTPResponse ok(const HTTPHeaders& aHeaders, const std::string& body)
     {
         HTTPResponse res(200, aHeaders);
         res.body = body;
         return res;
     }
 
-    static HTTPResponse notFound()
+    static HTTPResponse notFound(const std::string message = "File not found")
     {
-        HTTPResponse res(400, {{"Content-Type", "text/html"}});
-        res.body = "File not found";
+        HTTPResponse res(404, {{"Content-Type", "text/html"}});
+        res.body = message;
+        return res;
+    }
+
+    static HTTPResponse serverError(const std::string& message = "")
+    {
+        HTTPResponse res(500, {{"Conetnt-Type", "text/html"}});
+        if (!message.empty())
+            res.body = message;
+        else
+            res.body = "Internal server error";
         return res;
     }
 
@@ -222,9 +281,16 @@ public:
         return res;
     }
 
+    static HTTPResponse badRequest(const std::string& message = "Bad request")
+    {
+        HTTPResponse res(400, {{"Content-Type", "text/html"}});
+        res.body = message;
+        return res;
+    }
+
     std::string body;
     int statusCode;
-    std::map<std::string,std::string> headers;
+    HTTPHeaders headers;
     Stream* stream;
 };
 
@@ -284,14 +350,14 @@ public:
     }
 
     void send(const HTTPResponse& response);
+    HTTPResponse send(const HTTPRequest& request);
 
     char    cmdLine[8192], *arg;
 
     std::string method;
     std::string requestUrl;
     std::string protocolVersion;
-    // ヘッダー名と値。ヘッダー名は全て大文字。
-    std::map<std::string,std::string> headers;
+    HTTPHeaders headers;
 };
 
 #endif

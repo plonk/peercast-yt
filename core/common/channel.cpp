@@ -20,8 +20,6 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-#include <string.h>
-#include <stdlib.h>
 #include <algorithm>
 #include <numeric> // accumulate
 
@@ -37,6 +35,7 @@
 #include "peercast.h"
 #include "atom.h"
 #include "pcp.h"
+#include "chandir.h"
 
 #include "mp3.h"
 #include "ogg.h"
@@ -116,9 +115,7 @@ void Channel::endThread()
 
     reset();
 
-    chanMgr->deleteChannel(this);
-
-    sys->endThread(&thread);
+    chanMgr->deleteChannel(shared_from_this());
 }
 
 // -----------------------------------------------------------------------------
@@ -296,7 +293,7 @@ void    Channel::startURL(const char *u)
 // -----------------------------------
 void Channel::startStream()
 {
-    thread.data = this;
+    thread.channel = shared_from_this();
     thread.func = stream;
     if (!sys->startThread(&thread))
         reset();
@@ -331,13 +328,16 @@ void Channel::checkReadDelay(unsigned int len)
 // -----------------------------------
 THREAD_PROC Channel::stream(ThreadInfo *thread)
 {
-    Channel *ch = (Channel *)thread->data;
+    auto ch = thread->channel;
 
-    sys->setThreadName(thread, "CHANNEL");
+    assert(thread->channel != nullptr);
+    thread->channel = nullptr; // make sure to not leave the reference behind
 
-    while (thread->active && !peercastInst->isQuitting)
+    sys->setThreadName("CHANNEL");
+
+    while (thread->active() && !peercastInst->isQuitting)
     {
-        LOG_CHANNEL("Channel started");
+        LOG_INFO("Channel started");
 
         ChanHitList *chl = chanMgr->findHitList(ch->info);
         if (!chl)
@@ -345,7 +345,7 @@ THREAD_PROC Channel::stream(ThreadInfo *thread)
 
         ch->sourceData->stream(ch);
 
-        LOG_CHANNEL("Channel stopped");
+        LOG_INFO("Channel stopped");
 
         if (!ch->stayConnected)
         {
@@ -357,11 +357,13 @@ THREAD_PROC Channel::stream(ThreadInfo *thread)
 
             unsigned int diff = (sys->getTime() - ch->info.lastPlayEnd) + 5;
 
-            LOG_DEBUG("Channel sleeping for %d seconds", diff);
             for (unsigned int i=0; i<diff; i++)
             {
-                if (!thread->active || peercastInst->isQuitting)
+                if (!thread->active() || peercastInst->isQuitting)
                     break;
+
+                if (i == 0)
+                    LOG_DEBUG("Channel sleeping for %d seconds", diff);
                 sys->sleep(1000);
             }
         }
@@ -395,7 +397,7 @@ void Channel::connectFetch()
     {
         sock->setReadTimeout(30000);
         sock->setWriteTimeout(30000);
-        LOG_CHANNEL("Channel using longer timeouts");
+        LOG_INFO("Channel using longer timeouts");
     }
 
     sock->open(sourceHost.host);
@@ -406,13 +408,7 @@ void Channel::connectFetch()
 // -----------------------------------
 int Channel::handshakeFetch()
 {
-    char idStr[64];
-    info.id.toStr(idStr);
-
-    char sidStr[64];
-    servMgr->sessionID.toStr(sidStr);
-
-    sock->writeLineF("GET /channel/%s HTTP/1.0", idStr);
+    sock->writeLineF("GET /channel/%s HTTP/1.0", info.id.str().c_str());
     sock->writeLineF("%s %d", PCX_HS_POS, streamPos);
     sock->writeLineF("%s %d", PCX_HS_PCP, 1);
 
@@ -422,7 +418,7 @@ int Channel::handshakeFetch()
 
     int r = http.readResponse();
 
-    LOG_CHANNEL("Got response: %d", r);
+    LOG_INFO("Got response: %d", r);
 
     while (http.nextHeader())
     {
@@ -435,7 +431,7 @@ int Channel::handshakeFetch()
         else
             Servent::readICYHeader(http, info, NULL, 0);
 
-        LOG_CHANNEL("Channel fetch: %s", http.cmdLine);
+        LOG_INFO("Channel fetch: %s", http.cmdLine);
     }
 
     if ((r != 200) && (r != 503))
@@ -478,7 +474,7 @@ int PeercastSource::getSourceRateAvg()
 }
 
 // -----------------------------------
-ChanHit PeercastSource::pickFromHitList(Channel *ch, ChanHit &oldHit)
+ChanHit PeercastSource::pickFromHitList(std::shared_ptr<Channel> ch, ChanHit &oldHit)
 {
     ChanHit res = oldHit;
     ChanHitList *chl = NULL;
@@ -542,17 +538,17 @@ static std::string chName(ChanInfo& info)
 }
 
 // -----------------------------------
-void PeercastSource::stream(Channel *ch)
+void PeercastSource::stream(std::shared_ptr<Channel> ch)
 {
     m_channel = ch;
 
     int numYPTries=0;
-    while (ch->thread.active)
+    while (ch->thread.active())
     {
         ch->sourceHost.init();
 
         ch->setStatus(Channel::S_SEARCHING);
-        LOG_CHANNEL("Channel searching for hit..");
+        LOG_INFO("Channel searching for hit..");
         do
         {
             if (ch->pushSock)
@@ -575,7 +571,7 @@ void PeercastSource::stream(Channel *ch)
             // consult channel directory
             if (!ch->sourceHost.host.ip)
             {
-                std::string trackerIP = servMgr->channelDirectory.findTracker(ch->info.id);
+                std::string trackerIP = servMgr->channelDirectory->findTracker(ch->info.id);
                 if (!trackerIP.empty())
                 {
                     peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルフィードで "+chName(ch->info)+" のトラッカーが見付かりました。");
@@ -610,7 +606,7 @@ void PeercastSource::stream(Channel *ch)
             }
 
             sys->sleepIdle();
-        }while ((ch->sourceHost.host.ip==0) && (ch->thread.active));
+        }while ((ch->sourceHost.host.ip==0) && (ch->thread.active()));
 
         if (!ch->sourceHost.host.ip)
         {
@@ -621,11 +617,11 @@ void PeercastSource::stream(Channel *ch)
         if (ch->sourceHost.yp)
         {
             numYPTries++;
-            LOG_CHANNEL("Channel contacting YP, try %d", numYPTries);
+            LOG_INFO("Channel contacting YP, try %d", numYPTries);
             peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネル "+chName(ch->info)+" をYPに問い合わせています...");
         }else
         {
-            LOG_CHANNEL("Channel found hit");
+            LOG_INFO("Channel found hit");
             numYPTries=0;
         }
 
@@ -652,7 +648,7 @@ void PeercastSource::stream(Channel *ch)
 
                 if (!ch->sock)
                 {
-                    LOG_CHANNEL("Channel connecting to %s %s", ipstr, type);
+                    LOG_INFO("Channel connecting to %s %s", ipstr, type);
                     ch->connectFetch();
                 }
 
@@ -669,7 +665,7 @@ void PeercastSource::stream(Channel *ch)
                 error = 0;      // no errors, closing normally.
                 ch->setStatus(Channel::S_CLOSING);
 
-                LOG_CHANNEL("Channel closed normally");
+                LOG_INFO("Channel closed normally");
             }catch (StreamException &e)
             {
                 ch->setStatus(Channel::S_ERROR);
@@ -725,7 +721,7 @@ void PeercastSource::stream(Channel *ch)
 
         ch->lastIdleTime = sys->getTime();
         ch->setStatus(Channel::S_IDLE);
-        while ((ch->checkIdle()) && (ch->thread.active))
+        while ((ch->checkIdle()) && (ch->thread.active()))
         {
             sys->sleep(200);
         }
@@ -791,17 +787,6 @@ static char *nextMetaPart(char *str, char delim)
 }
 
 // -----------------------------------
-static void copyStr(char *to, char *from, int max)
-{
-    char c;
-    while ((c=*from++) && (--max))
-        if (c != '\'')
-            *to++ = c;
-
-    *to = 0;
-}
-
-// -----------------------------------
 void Channel::processMp3Metadata(char *str)
 {
     ChanInfo newInfo = info;
@@ -834,12 +819,8 @@ void Channel::processMp3Metadata(char *str)
 // -----------------------------------
 XML::Node *ChanHit::createXML()
 {
-    // IP
-    char ipStr[64];
-    host.toStr(ipStr);
-
     return new XML::Node("host ip=\"%s\" hops=\"%d\" listeners=\"%d\" relays=\"%d\" uptime=\"%d\" push=\"%d\" relay=\"%d\" direct=\"%d\" cin=\"%d\" stable=\"%d\" version=\"%d\" update=\"%d\" tracker=\"%d\"",
-        ipStr,
+        host.str().c_str(),
         numHops,
         numListeners,
         numRelays,
@@ -928,7 +909,7 @@ void ChanMeta::addMem(void *p, int l)
 }
 
 // -----------------------------------
-void Channel::broadcastTrackerUpdate(GnuID &svID, bool force)
+void Channel::broadcastTrackerUpdate(GnuID &svID, bool force /* = false */)
 {
     unsigned int ctime = sys->getTime();
 
@@ -936,7 +917,7 @@ void Channel::broadcastTrackerUpdate(GnuID &svID, bool force)
     {
         ChanPacket pack;
 
-        MemoryStream mem(pack.data, sizeof(pack));
+        MemoryStream mem(pack.data, sizeof(pack.data));
 
         AtomStream atom(mem);
 
@@ -1002,9 +983,11 @@ bool    Channel::sendPacketUp(ChanPacket &pack, GnuID &cid, GnuID &sid, GnuID &d
 void Channel::updateInfo(const ChanInfo &newInfo)
 {
     String oldComment = info.comment;
-    if (!info.update(newInfo))
-        return;
 
+    if (!info.update(newInfo))
+        return; // チャンネル情報は更新されなかった。
+
+    // コメント更新の通知。
     if (!oldComment.isSame(info.comment))
     {
         // Shift_JIS かも知れない文字列を UTF8 に変換したい。
@@ -1022,7 +1005,7 @@ void Channel::updateInfo(const ChanInfo &newInfo)
             lastMetaUpdate = ctime;
 
             ChanPacket pack;
-            MemoryStream mem(pack.data, sizeof(pack));
+            MemoryStream mem(pack.data, sizeof(pack.data));
             AtomStream atom(mem);
 
             atom.writeParent(PCP_BCST, 10);
@@ -1066,18 +1049,18 @@ ChannelStream *Channel::createSource()
 
     if (info.srcProtocol == ChanInfo::SP_PEERCAST)
     {
-        LOG_CHANNEL("Channel is Peercast");
+        LOG_INFO("Channel is Peercast");
         source = new PeercastStream();
     }
     else if (info.srcProtocol == ChanInfo::SP_PCP)
     {
-        LOG_CHANNEL("Channel is PCP");
+        LOG_INFO("Channel is PCP");
         PCPStream *pcp = new PCPStream(remoteID);
         source = pcp;
     }
     else if (info.srcProtocol == ChanInfo::SP_MMS)
     {
-        LOG_CHANNEL("Channel is MMS");
+        LOG_INFO("Channel is MMS");
         source = new MMSStream();
     }else if (info.srcProtocol == ChanInfo::SP_WMHTTP)
     {
@@ -1085,7 +1068,7 @@ ChannelStream *Channel::createSource()
         {
             case ChanInfo::T_WMA:
             case ChanInfo::T_WMV:
-                LOG_CHANNEL("Channel is WMHTTP");
+                LOG_INFO("Channel is WMHTTP");
                 source = new WMHTTPStream();
                 break;
             default:
@@ -1096,37 +1079,37 @@ ChannelStream *Channel::createSource()
         switch (info.contentType)
         {
             case ChanInfo::T_MP3:
-                LOG_CHANNEL("Channel is MP3 - meta: %d", icyMetaInterval);
+                LOG_INFO("Channel is MP3 - meta: %d", icyMetaInterval);
                 source = new MP3Stream();
                 break;
             case ChanInfo::T_NSV:
-                LOG_CHANNEL("Channel is NSV");
+                LOG_INFO("Channel is NSV");
                 source = new NSVStream();
                 break;
             case ChanInfo::T_WMA:
             case ChanInfo::T_WMV:
-                LOG_CHANNEL("Channel is MMS");
+                LOG_INFO("Channel is MMS");
                 source = new MMSStream();
                 break;
             case ChanInfo::T_FLV:
-                LOG_CHANNEL("Channel is FLV");
+                LOG_INFO("Channel is FLV");
                 source = new FLVStream();
                 break;
             case ChanInfo::T_OGG:
             case ChanInfo::T_OGM:
-                LOG_CHANNEL("Channel is OGG");
+                LOG_INFO("Channel is OGG");
                 source = new OGGStream();
                 break;
             case ChanInfo::T_MKV:
-                LOG_CHANNEL("Channel is MKV");
+                LOG_INFO("Channel is MKV");
                 source = new MKVStream();
                 break;
             case ChanInfo::T_WEBM:
-                LOG_CHANNEL("Channel is WebM");
+                LOG_INFO("Channel is WebM");
                 source = new MKVStream();
                 break;
             default:
-                LOG_CHANNEL("Channel is Raw");
+                LOG_INFO("Channel is Raw");
                 source = new RawStream();
                 break;
         }
@@ -1160,7 +1143,7 @@ int Channel::readStream(Stream &in, ChannelStream *source)
 
     info.numSkips = 0;
 
-    source->readHeader(in, this);
+    source->readHeader(in, shared_from_this());
 
     peercastApp->channelStart(&info);
 
@@ -1170,7 +1153,7 @@ int Channel::readStream(Stream &in, ChannelStream *source)
 
     try
     {
-        while (thread.active && !peercastInst->isQuitting)
+        while (thread.active() && !peercastInst->isQuitting)
         {
             if (checkIdle())
             {
@@ -1195,7 +1178,7 @@ int Channel::readStream(Stream &in, ChannelStream *source)
 
             if (in.readReady(sys->idleSleepTime))
             {
-                error = source->readPacket(in, this);
+                error = source->readPacket(in, shared_from_this());
 
                 if (error)
                     break;
@@ -1216,7 +1199,7 @@ int Channel::readStream(Stream &in, ChannelStream *source)
                             peercast::notifyMessage(ServMgr::NT_PEERCAST, info.name.str() + "を受信中です。");
                         setStatus(Channel::S_RECEIVING);
                     }
-                    source->updateStatus(this);
+                    source->updateStatus(shared_from_this());
                 }
             }
         }
@@ -1236,25 +1219,25 @@ int Channel::readStream(Stream &in, ChannelStream *source)
 
     peercastApp->channelStop(&info);
 
-    source->readEnd(in, this);
+    source->readEnd(in, shared_from_this());
 
     return error;
 }
 
 // -----------------------------------
-void PeercastStream::readHeader(Stream &in, Channel *ch)
+void PeercastStream::readHeader(Stream &in, std::shared_ptr<Channel> ch)
 {
     if (in.readTag() != 'PCST')
         throw StreamException("Not PeerCast stream");
 }
 
 // -----------------------------------
-void PeercastStream::readEnd(Stream &, Channel *)
+void PeercastStream::readEnd(Stream &, std::shared_ptr<Channel>)
 {
 }
 
 // -----------------------------------
-int PeercastStream::readPacket(Stream &in, Channel *ch)
+int PeercastStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
 {
     ChanPacket pack;
 
@@ -1300,7 +1283,7 @@ int PeercastStream::readPacket(Stream &in, Channel *ch)
                 unsigned int s = mem.readLong();
                 if ((s-ch->syncPos) != 1)
                 {
-                    LOG_CHANNEL("Ch.%d SKIP: %d to %d (%d)", ch->index, ch->syncPos, s, ch->info.numSkips);
+                    LOG_INFO("Ch.%d SKIP: %d to %d (%d)", ch->index, ch->syncPos, s, ch->info.numSkips);
                     if (ch->syncPos)
                     {
                         ch->info.numSkips++;
@@ -1313,43 +1296,35 @@ int PeercastStream::readPacket(Stream &in, Channel *ch)
             }
             break;
 #endif
+        default:
+            throw StreamException("unknown packet type");
     }
 
     return 0;
 }
 
 // ------------------------------------------
-void RawStream::readHeader(Stream &, Channel *)
+void RawStream::readHeader(Stream &, std::shared_ptr<Channel>)
 {
 }
 
 // ------------------------------------------
-int RawStream::readPacket(Stream &in, Channel *ch)
+int RawStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
 {
     readRaw(in, ch);
     return 0;
 }
 
 // ------------------------------------------
-void RawStream::readEnd(Stream &, Channel *)
+void RawStream::readEnd(Stream &, std::shared_ptr<Channel>)
 {
-}
-
-// -----------------------------------
-void Channel::getStreamPath(char *str)
-{
-    char idStr[64];
-
-    getIDStr(idStr);
-
-    sprintf(str, "/stream/%s%s", idStr, info.getTypeExt());
 }
 
 // -----------------------------------
 std::string Channel::renderHexDump(const std::string& in)
 {
     std::string res;
-    int i;
+    size_t i;
     for (i = 0; i < in.size()/16; i++)
     {
         auto line = in.substr(i*16, 16);
@@ -1365,45 +1340,106 @@ std::string Channel::renderHexDump(const std::string& in)
 }
 
 // -----------------------------------
-bool Channel::writeVariable(Stream &out, const String &var, int index)
+std::string Channel::getSourceString()
 {
-    char buf[1024];
+    std::string buf;
 
-    buf[0]=0;
+    if (sourceURL.isEmpty())
+    {
+        if (srcType == SRC_HTTPPUSH)
+            buf = sock->host.str();
+        else
+        {
+            buf = sourceHost.str(true);
+            if (sourceHost.uphost.ip)
+            {
+                buf += " recv. from ";
+                buf += sourceHost.uphost.str();
+            }
+        }
+    }
+    else
+        buf = sourceURL.c_str();
 
+    return buf;
+}
+
+// -----------------------------------
+std::string Channel::getBufferString()
+{
+    std::string buf;
+    String time;
+    auto lastWritten = (double)sys->getTime() - rawData.lastWriteTime;
+
+    if (lastWritten < 5)
+        time = "< 5 sec";
+    else
+        time.setFromStopwatch(lastWritten);
+
+    auto stat = rawData.getStatistics();
+    auto& lens = stat.packetLengths;
+    double byterate = (sourceData) ? sourceData->getSourceRateAvg() : 0.0;
+    auto sum = std::accumulate(lens.begin(), lens.end(), 0);
+
+    buf = str::format("Length: %s bytes (%.2f sec)\n",
+                      str::group_digits(std::to_string(sum)).c_str(),
+                      sum / byterate);
+    buf += str::format("Packets: %lu (c %d / nc %d)\n",
+                       lens.size(),
+                       stat.continuations,
+                       stat.nonContinuations);
+
+    if (lens.size() > 0)
+    {
+        auto pmax = std::max_element(lens.begin(), lens.end());
+        auto pmin = std::min_element(lens.begin(), lens.end());
+        buf += str::format("Packet length min/avg/max: %u/%lu/%u\n",
+                           *pmin, sum/lens.size(), *pmax);
+    }
+    buf += str::format("Last written: %s", time.str().c_str());
+
+    return buf;
+}
+
+// -----------------------------------
+bool Channel::writeVariable(Stream &out, const String &var)
+{
+    using namespace std;
+
+    string buf;
     String utf8;
 
     if (var == "name")
     {
         utf8 = info.name;
         utf8.convertTo(String::T_UNICODESAFE);
-        strcpy(buf, utf8.cstr());
+        buf = utf8.c_str();
     }else if (var == "bitrate")
     {
-        sprintf(buf, "%d", info.bitrate);
+        buf = to_string(info.bitrate);
     }else if (var == "srcrate")
     {
         if (sourceData)
         {
             unsigned int tot = sourceData->getSourceRate();
-            sprintf(buf, "%.0f", BYTES_TO_KBPS(tot));
+            buf = str::format("%.0f", BYTES_TO_KBPS(tot));
         }else
-            strcpy(buf, "0");
+            buf = "0";
     }else if (var == "genre")
     {
         utf8 = info.genre;
         utf8.convertTo(String::T_UNICODE);
-        strcpy(buf, utf8.cstr());
+        buf = utf8.c_str();
     }else if (var == "desc")
     {
         utf8 = info.desc;
         utf8.convertTo(String::T_UNICODE);
-        strcpy(buf, utf8.cstr());
+        buf = utf8.c_str();
     }else if (var == "comment")
     {
         utf8 = info.comment;
         utf8.convertTo(String::T_UNICODE);
-        strcpy(buf, utf8.cstr());
+        buf = utf8.c_str();
     }else if (var == "uptime")
     {
         String uptime;
@@ -1411,39 +1447,28 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
             uptime.setFromStopwatch(sys->getTime()-info.lastPlayStart);
         else
             uptime.set("-");
-        strcpy(buf, uptime.cstr());
+        buf = uptime.c_str();
     }
     else if (var == "type")
-        strcpy(buf, info.getTypeStr());
+        buf = info.getTypeStr();
     else if (var == "typeLong")
-    {
-        std::string s = std::string() + info.getTypeStr() + " (" + info.getMIMEType() + "; " + info.getTypeExt() + ")";
-
-        if (info.contentTypeStr == "")
-            s += " [contentTypeStr empty]"; // これが起こるのは何かがおかしい
-        if (info.MIMEType == "")
-            s += " [no styp]";
-        if (info.streamExt == "")
-            s += " [no sext]";
-
-        strcpy(buf, s.c_str());
-    }
+        buf = info.getTypeStringLong();
     else if (var == "ext")
-        sprintf(buf, "%s", info.getTypeExt());
+        buf = info.getTypeExt();
     else if (var == "localRelays")
-        sprintf(buf, "%d", localRelays());
+        buf = to_string(localRelays());
     else if (var == "localListeners")
-        sprintf(buf, "%d", localListeners());
+        buf = to_string(localListeners());
     else if (var == "totalRelays")
-        sprintf(buf, "%d", totalRelays());
+        buf = to_string(totalRelays());
     else if (var == "totalListeners")
-        sprintf(buf, "%d", totalListeners());
+        buf = to_string(totalListeners());
     else if (var == "status")
-        sprintf(buf, "%s", getStatusStr());
+        buf = getStatusStr();
     else if (var == "keep")
-        sprintf(buf, "%s", stayConnected?"Yes":"No");
+        buf = stayConnected?"Yes":"No";
     else if (var == "id")
-        info.id.toStr(buf);
+        buf = info.id.str();
     else if (var.startsWith("track."))
     {
         if (var == "track.title")
@@ -1458,68 +1483,23 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
             utf8 = info.track.contact;
 
         utf8.convertTo(String::T_UNICODE);
-        strcpy(buf, utf8.cstr());
+        buf = utf8.c_str();
     }else if (var == "contactURL")
-        sprintf(buf, "%s", info.url.cstr());
+        buf = info.url.cstr();
     else if (var == "streamPos")
-        strcpy(buf, str::group_digits(std::to_string(streamPos), ",").c_str());
+        buf = str::group_digits(std::to_string(streamPos), ",");
     else if (var == "sourceType")
-        strcpy(buf, getSrcTypeStr());
+        buf = getSrcTypeStr();
     else if (var == "sourceProtocol")
-        strcpy(buf, ChanInfo::getProtocolStr(info.srcProtocol));
+        buf = ChanInfo::getProtocolStr(info.srcProtocol);
     else if (var == "sourceURL")
-    {
-        if (sourceURL.isEmpty())
-        {
-            if (srcType == SRC_HTTPPUSH)
-                strcpy(buf, sock->host.str().c_str());
-            else
-            {
-                std::string s;
-                s += sourceHost.str(true);
-                if (sourceHost.uphost.ip)
-                {
-                    s += " recv. from ";
-                    s += sourceHost.uphost.str();
-                }
-                strcpy(buf, s.c_str());
-            }
-        }
-        else
-            strcpy(buf, sourceURL.cstr());
-    }
+        buf = getSourceString();
     else if (var == "headPos")
-        strcpy(buf, str::group_digits(std::to_string(headPack.pos), ",").c_str());
+        buf = str::group_digits(std::to_string(headPack.pos), ",");
     else if (var == "headLen")
-        strcpy(buf, str::group_digits(std::to_string(headPack.len), ",").c_str());
+        buf = str::group_digits(std::to_string(headPack.len), ",");
     else if (var == "buffer")
-    {
-        std::string s;
-        String time;
-        auto lastWritten = (double) sys->getTime() - rawData.lastWriteTime;
-        if (lastWritten < 5)
-            time = "< 5 sec";
-        else
-            time.setFromStopwatch(lastWritten);
-        auto stat = rawData.getStatistics();
-        auto& lens = stat.packetLengths;
-        double byterate = (sourceData) ? sourceData->getSourceRateAvg() : 0.0;
-        auto sum = std::accumulate(lens.begin(), lens.end(), 0);
-
-        s += str::format("Length: %s bytes (%.2f sec)\n", str::group_digits(std::to_string(sum)).c_str(), sum / byterate);
-        s += str::format("Packets: %lu (c %d / nc %d)\n", lens.size(), stat.continuations, stat.nonContinuations);
-        if (lens.size() > 0)
-        {
-            auto pmax = std::max_element(lens.begin(), lens.end());
-            auto pmin = std::min_element(lens.begin(), lens.end());
-            s += str::format("Packet length min/avg/max: %u/%lu/%u\n",
-                             *pmin, sum/lens.size(), *pmax);
-        }
-        s += str::format("Last written: %s", time.str().c_str());
-        // s += str::format("First/Safe/Last/Read/Write: %u/%u/%u/%u/%u",
-        //                  rawData.firstPos, rawData.safePos, rawData.lastPos, rawData.readPos, rawData.writePos);
-        strcpy(buf, s.c_str());
-    }
+        buf = getBufferString();
     else if (var == "headDump")
     {
         out.writeString(renderHexDump(std::string(headPack.data, headPack.data + headPack.len)));
@@ -1527,11 +1507,11 @@ bool Channel::writeVariable(Stream &out, const String &var, int index)
     }else if (var == "numHits")
     {
         ChanHitList *chl = chanMgr->findHitListByID(info.id);
-        sprintf(buf, "%d", (chl) ? chl->numHits() : 0);
+        buf = to_string((chl) ? chl->numHits() : 0);
     }else if (var == "authToken")
-        sprintf(buf, "%s", chanMgr->authToken(info.id).c_str());
+        buf = chanMgr->authToken(info.id).c_str();
     else if (var == "plsExt")
-        sprintf(buf, "%s", info.getPlayListExt());
+        buf = info.getPlayListExt();
     else
         return false;
 

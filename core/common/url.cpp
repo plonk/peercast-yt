@@ -24,12 +24,15 @@
 #include "peercast.h"
 #include "version2.h"
 #include "playlist.h"
+#ifdef WITH_RTMP
+#include "rtmp.h"
+#endif
 
 // ------------------------------------------------
-void URLSource::stream(Channel *ch)
+void URLSource::stream(std::shared_ptr<Channel> ch)
 {
     String url;
-    while (ch->thread.active && !peercastInst->isQuitting)
+    while (ch->thread.active() && !peercastInst->isQuitting)
     {
         if (url.isEmpty())
             url = baseurl;
@@ -57,11 +60,45 @@ int URLSource::getSourceRateAvg()
 }
 
 // ------------------------------------------------
-::String URLSource::streamURL(Channel *ch, const char *url)
+ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
+{
+    if (Sys::strnicmp(fileName, "http://", 7)==0)
+    {
+        fileName += 7;
+        return ChanInfo::SP_HTTP;
+    }
+    else if (Sys::strnicmp(fileName, "mms://", 6)==0)
+    {
+        fileName += 6;
+        return ChanInfo::SP_MMS;
+    }
+    else if (Sys::strnicmp(fileName, "pcp://", 6)==0)
+    {
+        fileName += 6;
+        return ChanInfo::SP_PCP;
+    }
+    else if (Sys::strnicmp(fileName, "file://", 7)==0)
+    {
+        fileName += 7;
+        return ChanInfo::SP_FILE;
+    }
+    else if (Sys::strnicmp(fileName, "rtmp://", 7)==0)
+    {
+        fileName += 7;
+        return ChanInfo::SP_RTMP;
+    }
+    else
+    {
+        return ChanInfo::SP_FILE;
+    }
+}
+
+// ------------------------------------------------
+::String URLSource::streamURL(std::shared_ptr<Channel> ch, const char *url)
 {
     String nextURL;
 
-    if (peercastInst->isQuitting || !ch->thread.active)
+    if (peercastInst->isQuitting || !ch->thread.active())
         return nextURL;
 
     String urlTmp;
@@ -72,39 +109,16 @@ int URLSource::getSourceRateAvg()
     PlayList *pls = NULL;
     ChannelStream *source = NULL;
 
-    LOG_CHANNEL("Fetch URL=%s", fileName);
+    LOG_INFO("Fetch URL=%s", fileName);
 
     try
     {
         // get the source protocol
-        if (strnicmp(fileName, "http://", 7)==0)
-        {
-            ch->info.srcProtocol = ChanInfo::SP_HTTP;
-            fileName += 7;
-        }
-        else if (strnicmp(fileName, "mms://", 6)==0)
-        {
-            ch->info.srcProtocol = ChanInfo::SP_MMS;
-            fileName += 6;
-        }
-        else if (strnicmp(fileName, "pcp://", 6)==0)
-        {
-            ch->info.srcProtocol = ChanInfo::SP_PCP;
-            fileName += 6;
-        }
-        else if (strnicmp(fileName, "file://", 7)==0)
-        {
-            ch->info.srcProtocol = ChanInfo::SP_FILE;
-            fileName += 7;
-        }
-        else
-        {
-            ch->info.srcProtocol = ChanInfo::SP_FILE;
-        }
+        ch->info.srcProtocol = getSourceProtocol(fileName);
 
         // default to mp3 for shoutcast servers
         if (ch->info.contentType == ChanInfo::T_PLS)
-            ch->info.contentType = ChanInfo::T_MP3;
+            ch->info.contentType = ChanInfo::T_MP3; // setContentType?
 
         ch->setStatus(Channel::S_CONNECTING);
 
@@ -113,7 +127,7 @@ int URLSource::getSourceRateAvg()
             if ((ch->info.contentType == ChanInfo::T_WMA) || (ch->info.contentType == ChanInfo::T_WMV))
                 ch->info.srcProtocol = ChanInfo::SP_MMS;
 
-            LOG_CHANNEL("Channel source is HTTP");
+            LOG_INFO("Channel source is HTTP");
 
             ClientSocket *inputSocket = sys->createSocket();
             if (!inputSocket)
@@ -125,9 +139,9 @@ int URLSource::getSourceRateAvg()
             if (dir)
                 *dir++ = 0;
 
-            LOG_CHANNEL("Fetch Host=%s", fileName);
+            LOG_INFO("Fetch Host=%s", fileName);
             if (dir)
-                LOG_CHANNEL("Fetch Dir=%s", dir);
+                LOG_INFO("Fetch Dir=%s", dir);
 
             Host host;
             host.fromStrName(fileName, 80);
@@ -164,7 +178,7 @@ int URLSource::getSourceRateAvg()
 
             while (http.nextHeader())
             {
-                LOG_CHANNEL("Fetch HTTP: %s", http.cmdLine);
+                LOG_INFO("Fetch HTTP: %s", http.cmdLine);
 
                 ChanInfo tmpInfo = ch->info;
                 Servent::readICYHeader(http, ch->info, NULL, 0);
@@ -206,7 +220,7 @@ int URLSource::getSourceRateAvg()
 
             if ((!nextURL.isEmpty()) && (res == 302))
             {
-                LOG_CHANNEL("Channel redirect: %s", nextURL.cstr());
+                LOG_INFO("Channel redirect: %s", nextURL.cstr());
                 inputSocket->close();
                 delete inputSocket;
                 inputSocket = NULL;
@@ -218,9 +232,24 @@ int URLSource::getSourceRateAvg()
                 LOG_ERROR("HTTP response: %d", res);
                 throw StreamException("Bad HTTP connect");
             }
+        }else if (ch->info.srcProtocol == ChanInfo::SP_RTMP)
+        {
+#ifdef WITH_RTMP
+            LOG_INFO("Channel source is RTMP");
+
+            RTMPClientStream *rs = new RTMPClientStream();
+            rs->open(url);
+            inputStream = rs;
+
+            ch->info.setContentType(ChanInfo::T_FLV);
+#else
+            LOG_ERROR("Not compiled with RTMP support");
+
+            throw StreamException("Unsupported URL");
+#endif
         }else if (ch->info.srcProtocol == ChanInfo::SP_FILE)
         {
-            LOG_CHANNEL("Channel source is FILE");
+            LOG_INFO("Channel source is FILE");
 
             FileStream *fs = new FileStream();
             fs->openReadOnly(fileName);
@@ -228,17 +257,9 @@ int URLSource::getSourceRateAvg()
 
             ChanInfo::TYPE fileType = ChanInfo::T_UNKNOWN;
             // if filetype is unknown, try and figure it out from file extension.
-            //if ((info.srcType == ChanInfo::T_UNKNOWN) || (info.srcType == ChanInfo::T_PLAYLIST))
+            //if (ch->info.contentType == ChanInfo::T_UNKNOWN)
             {
-                const char *ext = fileName+strlen(fileName);
-                while (*--ext)
-                    if (*ext == '.')
-                    {
-                        ext++;
-                        break;
-                    }
-
-                fileType = ChanInfo::getTypeFromStr(ext);
+                fileType = ChanInfo::getTypeFromStr(str::extension_without_dot(fileName).c_str());
             }
 
             ch->readDelay = true;
@@ -248,7 +269,7 @@ int URLSource::getSourceRateAvg()
             else if (fileType == ChanInfo::T_ASX)
                 pls = new PlayList(PlayList::T_ASX, 1000);
             else
-                ch->info.contentType = fileType;
+                ch->info.setContentType(fileType);
         }else
         {
             throw StreamException("Unsupported URL");
@@ -256,7 +277,7 @@ int URLSource::getSourceRateAvg()
 
         if (pls)
         {
-            LOG_CHANNEL("Channel is Playlist");
+            LOG_INFO("Channel is Playlist");
 
             pls->read(*inputStream);
 
@@ -267,8 +288,8 @@ int URLSource::getSourceRateAvg()
             int urlNum = 0;
             String url;
 
-            LOG_CHANNEL("Playlist: %d URLs", pls->numURLs);
-            while ((ch->thread.active) && (pls->numURLs) && (!peercastInst->isQuitting))
+            LOG_INFO("Playlist: %d URLs", pls->numURLs);
+            while ((ch->thread.active()) && (pls->numURLs) && (!peercastInst->isQuitting))
             {
                 if (url.isEmpty())
                 {
@@ -297,7 +318,7 @@ int URLSource::getSourceRateAvg()
 
             ch->setStatus(Channel::S_BROADCASTING);
 
-            inputStream->setReadTimeout(60);    // use longer read timeout
+            inputStream->setReadTimeout(60);    // use longer read timeout // 60ミリ秒!?
 
             source = ch->createSource();
 

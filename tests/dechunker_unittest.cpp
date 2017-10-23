@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "dechunker.h"
-#include "dmstream.h"
+#include "sstream.h"
 
 class DechunkerFixture : public ::testing::Test {
 public:
@@ -21,7 +21,7 @@ TEST_F(DechunkerFixture, hexValue)
 
 TEST_F(DechunkerFixture, readChar)
 {
-    DynamicMemoryStream mem;
+    StringStream mem;
 
     mem.writeString("4\r\n"
                     "Wiki\r\n"
@@ -65,7 +65,7 @@ TEST_F(DechunkerFixture, readChar)
 
 TEST_F(DechunkerFixture, read)
 {
-    DynamicMemoryStream mem;
+    StringStream mem;
 
     mem.writeString("4\r\n"
                     "Wiki\r\n"

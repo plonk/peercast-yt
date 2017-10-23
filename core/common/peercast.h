@@ -12,6 +12,7 @@ class ChanInfo;
 class Sys;
 
 #include "servmgr.h"
+#include "logbuf.h"
 
 // ------------------------------------------------------------
 // This is the interface from the application to the core.

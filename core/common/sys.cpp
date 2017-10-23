@@ -23,25 +23,14 @@
 #include "common.h"
 #include "sys.h"
 #include "gnutella.h"
-#include <stdlib.h>
-#include <time.h>
-
-// -----------------------------------
-const char *LogBuffer::logTypes[]=
-{
-    "",
-    "DBUG",
-    "EROR",
-    "GNET",
-    "CHAN",
-};
+#include "logbuf.h"
+#include <chrono>
 
 // ------------------------------------------
 Sys::Sys()
 {
     idleSleepTime = 10;
     logBuf = new LogBuffer(1000, 100);
-    numThreads=0;
 }
 
 // ------------------------------------------
@@ -51,9 +40,31 @@ Sys::~Sys()
 }
 
 // ------------------------------------------
+void Sys::sleep(int ms)
+{
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+}
+
+// ------------------------------------------
 void Sys::sleepIdle()
 {
     sleep(idleSleepTime);
+}
+
+// -----------------------------------
+bool Sys::writeVariable(Stream& s, const String& varName)
+{
+    if (varName == "log.dumpHTML")
+    {
+        logBuf->dumpHTML(s);
+        return true;
+    }else if (varName == "time")
+    {
+        s.writeString(std::to_string(sys->getTime()).c_str());
+        return true;
+    }
+
+    return false;
 }
 
 // -----------------------------------
@@ -71,7 +82,7 @@ char *trimstr(char *s1)
 
     s1 = s1+strlen(s1);
 
-    while (*--s1)
+    while (--s1 >= s)
         if ((*s1 != ' ') && (*s1 != '\t'))
             break;
 
@@ -107,42 +118,6 @@ char *stristr(const char *s1, const char *s2)
 }
 
 // -----------------------------------
-void LogBuffer::write(const char *str, TYPE t)
-{
-    lock.on();
-
-    unsigned int len = strlen(str);
-    int cnt=0;
-    while (len)
-    {
-        unsigned int rlen = len;
-        if (rlen > (lineLen-1))
-            rlen = lineLen-1;
-
-        int i = currLine % maxLines;
-        int bp = i*lineLen;
-        strncpy(&buf[bp], str, rlen);
-        buf[bp+rlen] = 0;
-        if (cnt==0)
-        {
-            times[i] = sys->getTime();
-            types[i] = t;
-        }else
-        {
-            times[i] = 0;
-            types[i] = T_NONE;
-        }
-        currLine++;
-
-        str += rlen;
-        len -= rlen;
-        cnt++;
-    }
-
-    lock.off();
-}
-
-// -----------------------------------
 const char *getCGIarg(const char *str, const char *arg)
 {
     if (!str)
@@ -156,21 +131,6 @@ const char *getCGIarg(const char *str, const char *arg)
     s += strlen(arg);
 
     return s;
-}
-
-// -----------------------------------
-bool cmpCGIarg(const char *str, const char *arg, const char *value)
-{
-    if ((!str) || (!strlen(value)))
-        return false;
-
-    if (strnicmp(str, arg, strlen(arg)) == 0)
-    {
-        str += strlen(arg);
-
-        return strncmp(str, value, strlen(value))==0;
-    }else
-        return false;
 }
 
 // -----------------------------------
@@ -188,81 +148,130 @@ bool hasCGIarg(const char *str, const char *arg)
 }
 
 // ---------------------------
-void LogBuffer::escapeHTML(char* dest, char* src)
+void    ThreadInfo::shutdown() noexcept
 {
-    while (*src)
-    {
-        switch (*src)
-        {
-        case '&':
-            strcpy(dest, "&amp;");
-            dest += 5;
-            break;
-        case '<':
-            strcpy(dest, "&lt;");
-            dest += 4;
-            break;
-        case '>':
-            strcpy(dest, "&gt;");
-            dest += 4;
-            break;
-        default:
-            *dest = *src;
-            dest++;
-        }
-        src++;
-    }
-    *dest = '\0';
-}
-
-// ---------------------------
-void LogBuffer::dumpHTML(Stream &out)
-{
-    lock.on();
-
-    unsigned int nl = currLine;
-    unsigned int sp = 0;
-    if (nl > maxLines)
-    {
-        nl = maxLines-1;
-        sp = (currLine+1)%maxLines;
-    }
-
-    String tim;
-    const size_t BUFSIZE = (lineLen - 1) * 5 + 1;
-    char* escaped = new char [BUFSIZE];
-    if (nl)
-    {
-        for (unsigned int i=0; i<nl; i++)
-        {
-            unsigned int bp = sp*lineLen;
-
-            if (types[sp])
-            {
-                tim.setFromTime(times[sp]);
-
-                out.writeString(tim.cstr());
-                out.writeString(" <b>[");
-                out.writeString(getTypeStr(types[sp]));
-                out.writeString("]</b> ");
-            }
-
-            escapeHTML(escaped, &buf[bp]);
-            out.writeString(escaped);
-            out.writeString("<br>");
-
-            sp++;
-            sp %= maxLines;
-        }
-    }
-    delete[] escaped;
-
-    lock.off();
-}
-
-// ---------------------------
-void    ThreadInfo::shutdown()
-{
-    active = false;
+    m_active.store(false);
     //sys->waitThread(this);
+}
+
+// ---------------------------
+char* Sys::strdup(const char *src)
+{
+    size_t len = strlen(src);
+    char *res = (char*) malloc(len+1);
+    memcpy(res, src, len+1);
+    return res;
+}
+
+// ---------------------------
+int Sys::stricmp(const char* s1, const char* s2)
+{
+    while (*s1 && *s2 && TOUPPER(*s1) == TOUPPER(*s2))
+        s1++, s2++;
+
+    return TOUPPER(*s1) - TOUPPER(*s2);
+}
+
+// ---------------------------
+int Sys::strnicmp(const char* s1, const char* s2, size_t n)
+{
+    while (*s1 && *s2 && n > 0 && TOUPPER(*s1) == TOUPPER(*s2))
+        s1++, s2++, n--;
+
+    if (n == 0)
+        return 0;
+    else
+        return TOUPPER(*s1) - TOUPPER(*s2);
+}
+
+// ---------------------------
+char* Sys::strcpy_truncate(char* dest, size_t destsize, const char* src)
+{
+    if (destsize == 0)
+    {
+        LOG_ERROR("strcpy_truncate: destsize == 0");
+        return dest;
+    }
+
+    if (destsize < strlen(src) + 1)
+    {
+        LOG_ERROR("strcpy_truncate: destsize[%d bytes] not large enough to hold src[%d bytes]",
+                  (int)destsize, (int)strlen(src));
+    }
+
+    strncpy(dest, src, destsize);
+    dest[destsize - 1] = '\0';
+
+    return dest;
+}
+
+// ---------------------------------
+bool    Sys::startThread(ThreadInfo *info)
+{
+    info->m_active.store(true);
+
+    try {
+        info->handle = std::thread([info]()
+                                   {
+                                       try
+                                       {
+                                           sys->setThreadName("new thread");
+                                           info->func(info);
+                                       }catch (std::exception &e)
+                                       {
+                                           // just log it and continue..
+                                           LOG_ERROR("Unexpected exception: %s", e.what());
+                                       }
+                                   });
+        info->handle.detach();
+        return true;
+    } catch (std::system_error& e)
+    {
+        LOG_ERROR("Error creating thread");
+        return false;
+    }
+}
+
+// ---------------------------------
+bool    Sys::startWaitableThread(ThreadInfo *info)
+{
+    info->m_active.store(true);
+
+    try {
+        info->handle = std::thread([info]()
+                                   {
+                                       try
+                                       {
+                                           sys->setThreadName("new thread");
+                                           info->func(info);
+                                       }catch (std::exception &e)
+                                       {
+                                           // just log it and continue..
+                                           LOG_ERROR("Unexpected exception: %s", e.what());
+                                       }
+                                   });
+        return true;
+    } catch (std::system_error& e)
+    {
+        LOG_ERROR("Error creating thread");
+        return false;
+    }
+}
+
+// ---------------------------------
+unsigned int Sys::getTime()
+{
+    return time(NULL);
+}
+
+// ---------------------------------
+void Sys::waitThread(ThreadInfo* info)
+{
+    if (info->handle.joinable())
+    {
+        info->handle.join();
+    }else
+    {
+        LOG_ERROR("waitThread called on non-joinable thread");
+    }
 }

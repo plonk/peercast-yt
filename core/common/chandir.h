@@ -6,7 +6,10 @@
 #include <stdexcept> // runtime_error
 
 #include "cgi.h"
-#include "sys.h" // WLock
+#include "gnuid.h"
+
+#include "varwriter.h"
+#include "threading.h"
 
 class ChannelEntry
 {
@@ -71,21 +74,21 @@ class ChannelFeed
 {
 public:
     enum class Status {
-        UNKNOWN,
-        OK,
-        ERROR,
+        kUnknown,
+        kOk,
+        kError
     };
 
     ChannelFeed()
         : url("")
-        , status(Status::UNKNOWN)
+        , status(Status::kUnknown)
         , isPublic(false)
     {
     }
 
     ChannelFeed(std::string aUrl)
         : url(aUrl)
-        , status(Status::UNKNOWN)
+        , status(Status::kUnknown)
         , isPublic(false)
     {
     }
@@ -98,37 +101,42 @@ public:
 };
 
 // 外部からチャンネルリストを取得して保持する。
-class ChannelDirectory
+class ChannelDirectory : public VariableWriter
 {
 public:
+    enum UpdateMode {
+        kUpdateAuto,
+        kUpdateManual,
+    };
+
     ChannelDirectory();
 
-    int numChannels();
-    int numFeeds();
-    std::vector<ChannelFeed> feeds();
-    bool addFeed(std::string url);
+    int numChannels() const;
+    int numFeeds() const;
+    std::vector<ChannelFeed> feeds() const;
+    bool addFeed(const std::string& url);
     void clearFeeds();
     void setFeedPublic(int index, bool isPublic);
 
-    int totalListeners();
-    int totalRelays();
+    int totalListeners() const;
+    int totalRelays() const;
 
-    bool update();
+    bool update(UpdateMode mode = kUpdateAuto);
 
     bool writeChannelVariable(Stream& out, const String& varName, int index);
     bool writeFeedVariable(Stream& out, const String& varName, int index);
-    bool writeVariable(Stream& out, const String& varName);
-    bool writeVariable(Stream &, const String &, int);
+    bool writeVariable(Stream& out, const String& varName) override;
+    bool writeVariable(Stream &, const String &, int) override;
 
-    std::vector<ChannelEntry> channels() { return m_channels; };
+    std::vector<ChannelEntry> channels() const;
 
-    std::string findTracker(GnuID id);
+    std::string findTracker(const GnuID& id) const;
 
     std::vector<ChannelEntry> m_channels;
     std::vector<ChannelFeed> m_feeds;
 
     unsigned int m_lastUpdate;
-    WLock m_lock;
+    mutable std::recursive_mutex m_lock;
 };
 
 #endif

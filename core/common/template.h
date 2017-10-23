@@ -21,9 +21,9 @@
 #define _TEMPLATE_H
 
 #include <list>
-#include "sys.h"
 #include "stream.h"
 #include "json.hpp"
+#include "varwriter.h"
 
 using json = nlohmann::json;
 
@@ -32,7 +32,7 @@ class Template
 {
 public:
 
-    class Scope
+    class Scope : public VariableWriter
     {
     public:
         virtual bool writeVariable(Stream &, const String &, int) = 0;
@@ -44,31 +44,17 @@ public:
         TMPL_LOOP,
         TMPL_IF,
         TMPL_ELSE,
+        TMPL_ELSIF,
         TMPL_END,
         TMPL_FRAGMENT,
         TMPL_FOREACH
     };
 
-    Template(const char* args = NULL)
-        : currentElement(json::object({}))
-    {
-        if (args)
-            tmplArgs = strdup(args);
-        else
-            tmplArgs = NULL;
-    }
+    Template(const char* args = NULL);
+    Template(const std::string& args);
+    ~Template();
 
-    Template(const std::string& args)
-        : currentElement(json::object({}))
-    {
-        tmplArgs = strdup(args.c_str());
-    }
-
-    ~Template()
-    {
-        if (tmplArgs)
-            free(tmplArgs);
-    }
+    void initVariableWriters();
 
     Template& prependScope(Scope& scope)
     {
@@ -87,6 +73,8 @@ public:
     // 変数
     void    writeVariable(Stream &, const String &, int);
     void    writeGlobalVariable(Stream &, const String &, int);
+    bool    writeLoopVariable(Stream &s, const String &varName, int loop);
+    bool    writePageVariable(Stream &s, const String &varName, int loop);
     int     getIntVariable(const String &, int);
     bool    getBoolVariable(const String &, int);
 
@@ -100,7 +88,7 @@ public:
     void    readVariable(Stream &, Stream *, int);
     void    readVariableJavaScript(Stream &in, Stream *outp, int loop);
     void    readVariableRaw(Stream &in, Stream *outp, int loop);
-    bool    readTemplate(Stream &, Stream *, int);
+    int     readTemplate(Stream &, Stream *, int);
     bool    writeObjectProperty(Stream& s, const String& varName, json::object_t object);
     json::array_t evaluateCollectionVariable(String& varName);
 
@@ -116,6 +104,7 @@ public:
     json currentElement;
 
     std::list<Scope*> m_scopes;
+    std::map<std::string,VariableWriter*> m_variableWriters;
 };
 
 #include "http.h"

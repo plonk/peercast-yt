@@ -23,19 +23,19 @@ class String;
 // ----------------------------------
 class Host
 {
-    inline unsigned int ip3()
+    inline unsigned int ip3() const
     {
         return (ip>>24);
     }
-    inline unsigned int ip2()
+    inline unsigned int ip2() const
     {
         return (ip>>16)&0xff;
     }
-    inline unsigned int ip1()
+    inline unsigned int ip1() const
     {
         return (ip>>8)&0xff;
     }
-    inline unsigned int ip0()
+    inline unsigned int ip0() const
     {
         return ip&0xff;
     }
@@ -46,26 +46,29 @@ public:
     {
         ip = i;
         port = p;
-        value = 0;
     }
+    Host(const std::string& hostname, uint16_t port)
+    {
+        fromStrName(hostname.c_str(), port);
+    }
+
 
     void    init()
     {
         ip = 0;
         port = 0;
-        value = 0;
     }
 
-    bool    isMemberOf(Host &);
+    bool    isMemberOf(const Host &) const;
 
-    bool    isSame(Host &h)
+    bool    isSame(Host &h) const
     {
         return (h.ip == ip) && (h.port == port);
     }
 
-    bool    classType() { return globalIP(); }
+    bool    classType() const { return globalIP(); }
 
-    bool    globalIP()
+    bool    globalIP() const
     {
         // local host
         if ((ip3() == 127) && (ip2() == 0) && (ip1() == 0) && (ip0() == 1))
@@ -85,41 +88,41 @@ public:
 
         return true;
     }
-    bool    localIP()
+
+    bool    localIP() const
     {
         return !globalIP();
     }
 
-    bool    loopbackIP()
+    bool    loopbackIP() const
     {
-//      return ((ipByte[3] == 127) && (ipByte[2] == 0) && (ipByte[1] == 0) && (ipByte[0] == 1));
         return ((ip3() == 127) && (ip2() == 0) && (ip1() == 0) && (ip0() == 1));
     }
 
-    bool    isValid()
+    bool    isValid() const
     {
         return (ip != 0);
     }
 
-    bool    isSameType(Host &h)
+    bool    isSameType(Host &h) const
     {
             return ( (globalIP() && h.globalIP()) ||
                      (!globalIP() && !h.globalIP()) );
     }
 
-    void    IPtoStr(char *str)
+    void    IPtoStr(char *str) const
     {
         sprintf(str, "%d.%d.%d.%d", (ip>>24)&0xff, (ip>>16)&0xff, (ip>>8)&0xff, (ip)&0xff);
     }
 
     ::String IPtoStr();
 
-    void    toStr(char *str)
+    void    toStr(char *str) const
     {
         sprintf(str, "%d.%d.%d.%d:%d", (ip>>24)&0xff, (ip>>16)&0xff, (ip>>8)&0xff, (ip)&0xff, port);
     }
 
-    std::string str(bool withPort = true)
+    std::string str(bool withPort = true) const
     {
         char buf[22];
         if (withPort)
@@ -129,7 +132,7 @@ public:
         return buf;
     }
 
-    operator std::string ()
+    operator std::string () const
     {
         return str();
     }
@@ -152,14 +155,8 @@ public:
 
     bool    isLocalhost();
 
-    union
-    {
-        unsigned int ip;
-//      unsigned char ipByte[4];
-    };
-
+    unsigned int    ip;
     unsigned short  port;
-    unsigned int    value;
 };
 
 #endif

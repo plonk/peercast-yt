@@ -129,3 +129,12 @@ TEST_F(GnuIDFixture, encode_differentSalts)
     ASSERT_STREQ("41004100410041004100410041004100", id.str().c_str());
     ASSERT_STREQ("42004200420042004200420042004200", id2.str().c_str());
 }
+
+TEST_F(GnuIDFixture, encode_prefixSharingSalts)
+{
+    id.encode(NULL, "ナガイナマエ", NULL, 0);
+
+    GnuID id2;
+    id2.encode(NULL, "ナガイナマエ(立て直し)", NULL, 0);
+    ASSERT_FALSE(id.isSame(id2));
+}

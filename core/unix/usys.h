@@ -18,10 +18,9 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-
-
 #ifndef _USYS_H
 #define _USYS_H
+
 // ------------------------------------
 #include "socket.h"
 #include "sys.h"
@@ -33,20 +32,14 @@ public:
     USys();
 
     ClientSocket    *createSocket() override;
-    bool            startThread(ThreadInfo *) override;
-    void            sleep(int ) override;
-    void            appMsg(long, long) override;
-    unsigned int    getTime() override;
     double          getDTime() override;
     unsigned int    rnd() override { return rndGen.next(); }
     void            getURL(const char *) override;
     void            exit() override;
-    bool            hasGUI() override { return false; }
+    bool            hasGUI() override;
     void            callLocalURL(const char *, int) override;
     void            executeFile(const char *) override;
-    void            endThread(ThreadInfo *) override;
-    void            waitThread(ThreadInfo *, int timeout = 30000) override;
-    void            setThreadName(ThreadInfo *, const char* name) override;
+    void            setThreadName(const char* name) override;
 
     peercast::Random rndGen;
 private:
@@ -55,7 +48,6 @@ private:
     void openURL( const char* url );
 #endif
 };
-
 
 // ------------------------------------
 #endif

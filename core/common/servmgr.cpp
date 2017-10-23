@@ -18,7 +18,8 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-#include <stdlib.h>
+#include <memory>
+
 #include "servent.h"
 #include "servmgr.h"
 #include "inifile.h"
@@ -27,12 +28,16 @@
 #include "pcp.h"
 #include "atom.h"
 #include "version2.h"
-
-ThreadInfo ServMgr::serverThread, ServMgr::idleThread;
+#include "rtmpmonit.h"
+#include "chandir.h"
+#include "uptest.h"
 
 // -----------------------------------
 ServMgr::ServMgr()
     : publicDirectoryEnabled(false)
+    , rtmpServerMonitor(std::string(peercastApp->getPath()) + "rtmp-server")
+    , channelDirectory(new ChannelDirectory())
+    , uptestServiceRegistry(new UptestServiceRegistry())
 {
     validBCID = NULL;
 
@@ -79,7 +84,7 @@ ServMgr::ServMgr()
     strcpy(connectHost, "connect1.peercast.org");
     strcpy(htmlPath, "html/en");
 
-    rootHost = "yp.peercast.org";
+    rootHost = "bayonet.ddo.jp:7146";
 
     serverHost.fromStrIP("127.0.0.1", DEFAULT_PORT);
 
@@ -97,7 +102,7 @@ ServMgr::ServMgr()
     totalStreams = 0;
     firewallTimeout = 30;
     pauseLog = false;
-    showLog = 0;
+    m_logLevel = LogBuffer::T_INFO;
 
     shutdownTimer = 0;
 
@@ -113,6 +118,17 @@ ServMgr::ServMgr()
     chanLog="";
 
     serverName = "";
+
+    transcodingEnabled = false;
+    preset = "veryfast";
+    audioCodec = "mp3";
+
+    wmvProtocol = "http";
+
+    rtmpPort = 1935;
+
+    uptestServiceRegistry->addURL("http://bayonet.ddo.jp/sp/yp4g.xml");
+    uptestServiceRegistry->addURL("http://temp.orz.hm/yp/yp4g.xml");
 }
 
 // -----------------------------------
@@ -254,7 +270,6 @@ void ServMgr::addHost(Host &h, ServHost::TYPE type, unsigned int time)
     else
         LOG_DEBUG("Old host: %s - %s", str, ServHost::getTypeStr(type));
 
-    h.value = 0;    // make sure dead count is zero
     if (!sh)
     {
         // find empty slot
@@ -404,7 +419,7 @@ Servent *ServMgr::findOldestServent(Servent::TYPE type, bool priv)
     while (s)
     {
         if (s->type == type)
-            if (s->thread.active)
+            if (s->thread.active())
                 if (s->isOlderThan(oldest))
                     if (s->isPrivate() == priv)
                         oldest = s;
@@ -416,7 +431,8 @@ Servent *ServMgr::findOldestServent(Servent::TYPE type, bool priv)
 // -----------------------------------
 Servent *ServMgr::findServent(Servent::TYPE type, Host &host, GnuID &netid)
 {
-    lock.on();
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     Servent *s = servents;
     while (s)
     {
@@ -425,20 +441,20 @@ Servent *ServMgr::findServent(Servent::TYPE type, Host &host, GnuID &netid)
             Host h = s->getHost();
             if (h.isSame(host) && s->networkID.isSame(netid))
             {
-                lock.off();
                 return s;
             }
         }
-        s=s->next;
+        s = s->next;
     }
-    lock.off();
+
     return NULL;
 }
 
 // -----------------------------------
 Servent *ServMgr::findServent(unsigned int ip, unsigned short port, GnuID &netid)
 {
-    lock.on();
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     Servent *s = servents;
     while (s)
     {
@@ -447,25 +463,26 @@ Servent *ServMgr::findServent(unsigned int ip, unsigned short port, GnuID &netid
             Host h = s->getHost();
             if ((h.ip == ip) && (h.port == port) && (s->networkID.isSame(netid)))
             {
-                lock.off();
                 return s;
             }
         }
-        s=s->next;
+        s = s->next;
     }
-    lock.off();
+
     return NULL;
 }
 
 // -----------------------------------
 Servent *ServMgr::findServent(Servent::TYPE t)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     Servent *s = servents;
     while (s)
     {
         if (s->type == t)
             return s;
-        s=s->next;
+        s = s->next;
     }
     return NULL;
 }
@@ -473,44 +490,64 @@ Servent *ServMgr::findServent(Servent::TYPE t)
 // -----------------------------------
 Servent *ServMgr::findServentByIndex(int id)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     Servent *s = servents;
-    int cnt=0;
+    int cnt = 0;
+
     while (s)
     {
         if (cnt == id)
             return s;
-            cnt++;
-        s=s->next;
+        cnt++;
+        s = s->next;
     }
+
+    return NULL;
+}
+
+// -----------------------------------
+Servent *ServMgr::findServentByID(int id)
+{
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
+    Servent *s = servents;
+
+    while (s)
+    {
+        if (s->serventIndex == id)
+            return s;
+        s = s->next;
+    }
+
     return NULL;
 }
 
 // -----------------------------------
 Servent *ServMgr::allocServent()
 {
-    lock.on();
+    std::lock_guard<std::recursive_mutex> cs(lock);
 
     Servent *s = servents;
     while (s)
     {
         if (s->status == Servent::S_FREE)
             break;
-        s=s->next;
+        s = s->next;
     }
 
     if (!s)
     {
-        s = new Servent(++serventNum);
+        int num = ++serventNum;
+        s = new Servent(num);
         s->next = servents;
         servents = s;
 
-        LOG_DEBUG("allocated servent %d", serventNum);
+        LOG_TRACE("allocated servent %d", num);
     }else
-        LOG_DEBUG("reused servent %d", s->serventIndex);
+        LOG_TRACE("reused servent %d", s->serventIndex);
 
     s->reset();
-
-    lock.off();
 
     return s;
 }
@@ -518,33 +555,37 @@ Servent *ServMgr::allocServent()
 // --------------------------------------------------
 void    ServMgr::closeConnections(Servent::TYPE type)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     Servent *sv = servents;
     while (sv)
     {
         if (sv->isConnected())
             if (sv->type == type)
-                sv->thread.active = false;
-        sv=sv->next;
+                sv->thread.shutdown();
+        sv = sv->next;
     }
 }
 
 // -----------------------------------
 unsigned int ServMgr::numConnected(int type, bool priv, unsigned int uptime)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     unsigned int cnt=0;
 
     unsigned int ctime=sys->getTime();
     Servent *s = servents;
     while (s)
     {
-        if (s->thread.active)
+        if (s->thread.active())
             if (s->isConnected())
                 if (s->type == type)
                     if (s->isPrivate()==priv)
                         if ((ctime-s->lastConnect) >= uptime)
                             cnt++;
 
-        s=s->next;
+        s = s->next;
     }
     return cnt;
 }
@@ -552,16 +593,18 @@ unsigned int ServMgr::numConnected(int type, bool priv, unsigned int uptime)
 // -----------------------------------
 unsigned int ServMgr::numConnected()
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     unsigned int cnt=0;
 
     Servent *s = servents;
     while (s)
     {
-        if (s->thread.active)
+        if (s->thread.active())
             if (s->isConnected())
                 cnt++;
 
-        s=s->next;
+        s = s->next;
     }
     return cnt;
 }
@@ -569,13 +612,15 @@ unsigned int ServMgr::numConnected()
 // -----------------------------------
 unsigned int ServMgr::numServents()
 {
-    unsigned int cnt=0;
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
+    unsigned int cnt = 0;
 
     Servent *s = servents;
     while (s)
     {
         cnt++;
-        s=s->next;
+        s = s->next;
     }
     return cnt;
 }
@@ -583,6 +628,8 @@ unsigned int ServMgr::numServents()
 // -----------------------------------
 unsigned int ServMgr::numUsed(int type)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     unsigned int cnt=0;
 
     Servent *s = servents;
@@ -590,7 +637,7 @@ unsigned int ServMgr::numUsed(int type)
     {
         if (s->type == type)
             cnt++;
-        s=s->next;
+        s = s->next;
     }
     return cnt;
 }
@@ -598,14 +645,16 @@ unsigned int ServMgr::numUsed(int type)
 // -----------------------------------
 unsigned int ServMgr::numActiveOnPort(int port)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     unsigned int cnt=0;
 
     Servent *s = servents;
     while (s)
     {
-        if (s->thread.active && s->sock && (s->servPort == port))
+        if (s->thread.active() && s->sock && (s->servPort == port))
             cnt++;
-        s=s->next;
+        s = s->next;
     }
     return cnt;
 }
@@ -613,14 +662,16 @@ unsigned int ServMgr::numActiveOnPort(int port)
 // -----------------------------------
 unsigned int ServMgr::numActive(Servent::TYPE tp)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     unsigned int cnt=0;
 
     Servent *s = servents;
     while (s)
     {
-        if (s->thread.active && s->sock && (s->type == tp))
+        if (s->thread.active() && s->sock && (s->type == tp))
             cnt++;
-        s=s->next;
+        s = s->next;
     }
     return cnt;
 }
@@ -628,6 +679,8 @@ unsigned int ServMgr::numActive(Servent::TYPE tp)
 // -----------------------------------
 unsigned int ServMgr::totalOutput(bool all)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     unsigned int tot = 0;
     Servent *s = servents;
     while (s)
@@ -636,31 +689,18 @@ unsigned int ServMgr::totalOutput(bool all)
             if (all || !s->isPrivate())
                 if (s->sock)
                     tot += s->sock->bytesOutPerSec();
-        s=s->next;
+        s = s->next;
     }
 
     return tot;
 }
 
-// -----------------------------------
-unsigned int ServMgr::numOutgoing()
-{
-    int cnt=0;
-
-    Servent *s = servents;
-    while (s)
-    {
-//      if ((s->type == Servent::T_INCOMING) ||
-//          (s->type == Servent::T_OUTGOING))
-//          cnt++;
-        s=s->next;
-    }
-    return cnt;
-}
 
 // -----------------------------------
 bool ServMgr::seenPacket(GnuPacket &p)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     Servent *s = servents;
     while (s)
     {
@@ -678,20 +718,18 @@ void ServMgr::quit()
     LOG_DEBUG("ServMgr is quitting..");
 
     serverThread.shutdown();
-
     idleThread.shutdown();
+
+    LOG_DEBUG("Disabling RMTP server..");
+    rtmpServerMonitor.disable();
 
     Servent *s = servents;
     while (s)
     {
-        try
-        {
-            if (s->thread.active)
-                s->thread.shutdown();
-        }catch (StreamException &)
-        {
-        }
-        s=s->next;
+        if (s->thread.active())
+            s->thread.shutdown();
+
+        s = s->next;
     }
 }
 
@@ -720,7 +758,7 @@ int ServMgr::broadcast(GnuPacket &pack, Servent *src)
         }
     }
 
-    LOG_NETWORK("broadcast: %s (%d) to %d servents", GNU_FUNC_STR(pack.func), pack.ttl, cnt);
+    LOG_INFO("broadcast: %s (%d) to %d servents", GNU_FUNC_STR(pack.func), pack.ttl, cnt);
 
     return cnt;
 }
@@ -751,7 +789,7 @@ int ServMgr::route(GnuPacket &pack, GnuID &routeID, Servent *src)
         }
     }
 
-    LOG_NETWORK("route: %s (%d) to %d servents", GNU_FUNC_STR(pack.func), pack.ttl, cnt);
+    LOG_INFO("route: %s (%d) to %d servents", GNU_FUNC_STR(pack.func), pack.ttl, cnt);
     return cnt;
 }
 
@@ -833,9 +871,8 @@ void ServMgr::setFirewall(FW_STATE state)
 bool ServMgr::isFiltered(int fl, Host &h)
 {
     for (int i=0; i<numFilters; i++)
-        if (filters[i].flags & fl)
-            if (h.isMemberOf(filters[i].host))
-                return true;
+        if (filters[i].matches(fl, h))
+            return true;
 
     return false;
 }
@@ -856,7 +893,7 @@ bool ServMgr::canServeHost(Host &h)
 #endif
 
 // --------------------------------------------------
-void writeServerSettings(IniFile &iniFile, unsigned int a)
+void writeServerSettings(IniFileBase &iniFile, unsigned int a)
 {
     iniFile.writeBoolValue("allowHTML", a & Servent::ALLOW_HTML);
     iniFile.writeBoolValue("allowBroadcast", a & Servent::ALLOW_BROADCAST);
@@ -865,7 +902,7 @@ void writeServerSettings(IniFile &iniFile, unsigned int a)
 }
 
 // --------------------------------------------------
-void writeFilterSettings(IniFile &iniFile, ServFilter &f)
+void writeFilterSettings(IniFileBase &iniFile, ServFilter &f)
 {
     char ipstr[64];
     f.host.IPtoStr(ipstr);
@@ -877,15 +914,55 @@ void writeFilterSettings(IniFile &iniFile, ServFilter &f)
 }
 
 // --------------------------------------------------
-static void  writeServHost(IniFile &iniFile, ServHost &sh)
+static void  writeServHost(IniFileBase &iniFile, ServHost &sh)
 {
     iniFile.writeSection("Host");
 
-    char ipStr[64];
-    sh.host.toStr(ipStr);
     iniFile.writeStrValue("type", ServHost::getTypeStr(sh.type));
-    iniFile.writeStrValue("address", ipStr);
+    iniFile.writeStrValue("address", sh.host.str().c_str());
     iniFile.writeIntValue("time", sh.time);
+
+    iniFile.writeLine("[End]");
+}
+
+// --------------------------------------------------
+static void  writeRelayChannel(IniFileBase &iniFile, std::shared_ptr<Channel> c)
+{
+    iniFile.writeSection("RelayChannel");
+
+    iniFile.writeStrValue("name", c->getName());
+    iniFile.writeStrValue("desc", c->info.desc);
+    iniFile.writeStrValue("genre", c->info.genre);
+    iniFile.writeStrValue("contactURL", c->info.url);
+    iniFile.writeStrValue("comment", c->info.comment);
+    if (!c->sourceURL.isEmpty())
+        iniFile.writeStrValue("sourceURL", c->sourceURL);
+    iniFile.writeStrValue("sourceProtocol", ChanInfo::getProtocolStr(c->info.srcProtocol));
+    iniFile.writeStrValue("contentType", c->info.getTypeStr());
+    iniFile.writeStrValue("MIMEType", c->info.MIMEType);
+    iniFile.writeStrValue("streamExt", c->info.streamExt);
+    iniFile.writeIntValue("bitrate", c->info.bitrate);
+    iniFile.writeStrValue("id", c->info.id.str());
+    iniFile.writeBoolValue("stayConnected", c->stayConnected);
+
+    // トラッカーIPの書き出し。
+    ChanHitList *chl = chanMgr->findHitListByID(c->info.id);
+    if (chl)
+    {
+        ChanHitSearch chs;
+        chs.trackersOnly = true;
+        if (chl->pickHits(chs))
+        {
+            iniFile.writeStrValue("tracker", chs.best[0].host.str().c_str());
+        }
+    }
+
+    // トラック情報の書き出し。
+    iniFile.writeStrValue("trackContact", c->info.track.contact);
+    iniFile.writeStrValue("trackTitle", c->info.track.title);
+    iniFile.writeStrValue("trackArtist", c->info.track.artist);
+    iniFile.writeStrValue("trackAlbum", c->info.track.album);
+    iniFile.writeStrValue("trackGenre", c->info.track.genre);
 
     iniFile.writeLine("[End]");
 }
@@ -900,182 +977,146 @@ void ServMgr::saveSettings(const char *fn)
     }else{
         LOG_DEBUG("Saving settings to: %s", fn);
 
-        char idStr[64];
-
-        iniFile.writeSection("Server");
-        iniFile.writeStrValue("serverName", servMgr->serverName);
-        iniFile.writeIntValue("serverPort", servMgr->serverHost.port);
-        iniFile.writeBoolValue("autoServe", servMgr->autoServe);
-        iniFile.writeStrValue("forceIP", servMgr->forceIP);
-        iniFile.writeBoolValue("isRoot", servMgr->isRoot);
-        iniFile.writeIntValue("maxBitrateOut", servMgr->maxBitrateOut);
-        iniFile.writeIntValue("maxRelays", servMgr->maxRelays);
-        iniFile.writeIntValue("maxDirect", servMgr->maxDirect);
-        iniFile.writeIntValue("maxRelaysPerChannel", chanMgr->maxRelaysPerChannel);
-        iniFile.writeIntValue("firewallTimeout", firewallTimeout);
-        iniFile.writeBoolValue("forceNormal", forceNormal);
-        iniFile.writeStrValue("rootMsg", rootMsg.cstr());
-        iniFile.writeStrValue("authType", servMgr->authType==ServMgr::AUTH_COOKIE?"cookie":"http-basic");
-        iniFile.writeStrValue("cookiesExpire", servMgr->cookieList.neverExpire==true?"never":"session");
-        iniFile.writeStrValue("htmlPath", servMgr->htmlPath);
-        iniFile.writeIntValue("minPGNUIncoming", servMgr->minGnuIncoming);
-        iniFile.writeIntValue("maxPGNUIncoming", servMgr->maxGnuIncoming);
-        iniFile.writeIntValue("maxServIn", servMgr->maxServIn);
-        iniFile.writeStrValue("chanLog", servMgr->chanLog.cstr());
-        iniFile.writeBoolValue("publicDirectory", servMgr->publicDirectoryEnabled);
-
-        networkID.toStr(idStr);
-        iniFile.writeStrValue("networkID", idStr);
-
-        iniFile.writeSection("Broadcast");
-        iniFile.writeIntValue("broadcastMsgInterval", chanMgr->broadcastMsgInterval);
-        iniFile.writeStrValue("broadcastMsg", chanMgr->broadcastMsg.cstr());
-        iniFile.writeIntValue("icyMetaInterval", chanMgr->icyMetaInterval);
-        chanMgr->broadcastID.toStr(idStr);
-        iniFile.writeStrValue("broadcastID", idStr);
-        iniFile.writeIntValue("hostUpdateInterval", chanMgr->hostUpdateInterval);
-        iniFile.writeIntValue("maxControlConnections", servMgr->maxControl);
-        iniFile.writeStrValue("rootHost", servMgr->rootHost.cstr());
-
-        iniFile.writeSection("Client");
-        iniFile.writeIntValue("refreshHTML", refreshHTML);
-        iniFile.writeIntValue("relayBroadcast", servMgr->relayBroadcast);
-        iniFile.writeIntValue("minBroadcastTTL", chanMgr->minBroadcastTTL);
-        iniFile.writeIntValue("maxBroadcastTTL", chanMgr->maxBroadcastTTL);
-        iniFile.writeIntValue("pushTries", chanMgr->pushTries);
-        iniFile.writeIntValue("pushTimeout", chanMgr->pushTimeout);
-        iniFile.writeIntValue("maxPushHops", chanMgr->maxPushHops);
-        iniFile.writeIntValue("autoQuery", chanMgr->autoQuery);
-        iniFile.writeIntValue("queryTTL", servMgr->queryTTL);
-
-        iniFile.writeSection("Privacy");
-        iniFile.writeStrValue("password", servMgr->password);
-        iniFile.writeIntValue("maxUptime", chanMgr->maxUptime);
-
-        for (int i=0; i<servMgr->numFilters; i++)
-        {
-            iniFile.writeSection("Filter");
-                writeFilterSettings(iniFile, servMgr->filters[i]);
-            iniFile.writeLine("[End]");
-        }
-
-        for (auto feed : servMgr->channelDirectory.feeds())
-        {
-            iniFile.writeSection("Feed");
-            iniFile.writeStrValue("url", feed.url.c_str());
-            iniFile.writeBoolValue("isPublic", feed.isPublic);
-            iniFile.writeLine("[End]");
-        }
-
-        iniFile.writeSection("Notify");
-            iniFile.writeBoolValue("PeerCast", notifyMask&NT_PEERCAST);
-            iniFile.writeBoolValue("Broadcasters", notifyMask&NT_BROADCASTERS);
-            iniFile.writeBoolValue("TrackInfo", notifyMask&NT_TRACKINFO);
-        iniFile.writeLine("[End]");
-
-        iniFile.writeSection("Server1");
-            writeServerSettings(iniFile, allowServer1);
-        iniFile.writeLine("[End]");
-
-        iniFile.writeSection("Server2");
-            writeServerSettings(iniFile, allowServer2);
-        iniFile.writeLine("[End]");
-
-        iniFile.writeSection("Debug");
-        iniFile.writeBoolValue("logDebug", (showLog&(1<<LogBuffer::T_DEBUG))!=0);
-        iniFile.writeBoolValue("logErrors", (showLog&(1<<LogBuffer::T_ERROR))!=0);
-        iniFile.writeBoolValue("logNetwork", (showLog&(1<<LogBuffer::T_NETWORK))!=0);
-        iniFile.writeBoolValue("logChannel", (showLog&(1<<LogBuffer::T_CHANNEL))!=0);
-        iniFile.writeBoolValue("pauseLog", pauseLog);
-        iniFile.writeIntValue("idleSleepTime", sys->idleSleepTime);
-
-        if (servMgr->validBCID)
-        {
-            BCID *bcid = servMgr->validBCID;
-            while (bcid)
-            {
-                iniFile.writeSection("ValidBCID");
-                char idstr[128];
-                bcid->id.toStr(idstr);
-                iniFile.writeStrValue("id", idstr);
-                iniFile.writeStrValue("name", bcid->name.cstr());
-                iniFile.writeStrValue("email", bcid->email.cstr());
-                iniFile.writeStrValue("url", bcid->url.cstr());
-                iniFile.writeBoolValue("valid", bcid->valid);
-                iniFile.writeLine("[End]");
-
-                bcid=bcid->next;
-            }
-        }
-
-        Channel *c = chanMgr->channel;
-        while (c)
-        {
-            char idstr[64];
-            if (c->isActive() && c->stayConnected)
-            {
-                c->getIDStr(idstr);
-
-                iniFile.writeSection("RelayChannel");
-                iniFile.writeStrValue("name", c->getName());
-                iniFile.writeStrValue("genre", c->info.genre.cstr());
-                if (!c->sourceURL.isEmpty())
-                    iniFile.writeStrValue("sourceURL", c->sourceURL.cstr());
-                iniFile.writeStrValue("sourceProtocol", ChanInfo::getProtocolStr(c->info.srcProtocol));
-                iniFile.writeStrValue("contentType", c->info.getTypeStr());
-                iniFile.writeStrValue("MIMEType", c->info.MIMEType);
-                iniFile.writeStrValue("streamExt", c->info.streamExt);
-                iniFile.writeIntValue("bitrate", c->info.bitrate);
-                iniFile.writeStrValue("contactURL", c->info.url.cstr());
-                iniFile.writeStrValue("id", idstr);
-                iniFile.writeBoolValue("stayConnected", c->stayConnected);
-
-                ChanHitList *chl = chanMgr->findHitListByID(c->info.id);
-                if (chl)
-                {
-                    ChanHitSearch chs;
-                    chs.trackersOnly = true;
-                    if (chl->pickHits(chs))
-                    {
-                        char ipStr[64];
-                        chs.best[0].host.toStr(ipStr);
-                        iniFile.writeStrValue("tracker", ipStr);
-                    }
-                }
-                iniFile.writeLine("[End]");
-            }
-            c=c->next;
-        }
-
-#if 0
-        Servent *s = servents;
-        while (s)
-        {
-            if (s->type == Servent::T_OUTGOING)
-                if (s->isConnected())
-                {
-                    ServHost sh;
-                    Host h = s->getHost();
-                    sh.init(h, ServHost::T_SERVENT, 0, s->networkID);
-                    writeServHost(iniFile, sh);
-                }
-            s=s->next;
-        }
-#endif
-
-        for (int i=0; i<ServMgr::MAX_HOSTCACHE; i++)
-        {
-            ServHost *sh = &servMgr->hostCache[i];
-            if (sh->type != ServHost::T_NONE)
-                writeServHost(iniFile, *sh);
-        }
-
+        doSaveSettings(iniFile);
         iniFile.close();
     }
 }
 
 // --------------------------------------------------
-unsigned int readServerSettings(IniFile &iniFile, unsigned int a)
+void ServMgr::doSaveSettings(IniFileBase& iniFile)
+{
+    iniFile.writeSection("Server");
+    iniFile.writeStrValue("serverName", servMgr->serverName);
+    iniFile.writeIntValue("serverPort", servMgr->serverHost.port);
+    iniFile.writeBoolValue("autoServe", servMgr->autoServe);
+    iniFile.writeStrValue("forceIP", servMgr->forceIP);
+    iniFile.writeBoolValue("isRoot", servMgr->isRoot);
+    iniFile.writeIntValue("maxBitrateOut", servMgr->maxBitrateOut);
+    iniFile.writeIntValue("maxRelays", servMgr->maxRelays);
+    iniFile.writeIntValue("maxDirect", servMgr->maxDirect);
+    iniFile.writeIntValue("maxRelaysPerChannel", chanMgr->maxRelaysPerChannel);
+    iniFile.writeIntValue("firewallTimeout", firewallTimeout);
+    iniFile.writeBoolValue("forceNormal", forceNormal);
+    iniFile.writeStrValue("rootMsg", rootMsg);
+    iniFile.writeStrValue("authType", (servMgr->authType == ServMgr::AUTH_COOKIE) ? "cookie" : "http-basic");
+    iniFile.writeStrValue("cookiesExpire", (servMgr->cookieList.neverExpire == true) ? "never": "session");
+    iniFile.writeStrValue("htmlPath", servMgr->htmlPath);
+    iniFile.writeIntValue("minPGNUIncoming", servMgr->minGnuIncoming);
+    iniFile.writeIntValue("maxPGNUIncoming", servMgr->maxGnuIncoming);
+    iniFile.writeIntValue("maxServIn", servMgr->maxServIn);
+    iniFile.writeStrValue("chanLog", servMgr->chanLog);
+    iniFile.writeBoolValue("publicDirectory", servMgr->publicDirectoryEnabled);
+    iniFile.writeStrValue("genrePrefix", servMgr->genrePrefix);
+
+    iniFile.writeStrValue("networkID", networkID.str());
+
+    iniFile.writeSection("Broadcast");
+    iniFile.writeIntValue("broadcastMsgInterval", chanMgr->broadcastMsgInterval);
+    iniFile.writeStrValue("broadcastMsg", chanMgr->broadcastMsg);
+    iniFile.writeIntValue("icyMetaInterval", chanMgr->icyMetaInterval);
+    iniFile.writeStrValue("broadcastID", chanMgr->broadcastID.str());
+    iniFile.writeIntValue("hostUpdateInterval", chanMgr->hostUpdateInterval);
+    iniFile.writeIntValue("maxControlConnections", servMgr->maxControl);
+    iniFile.writeStrValue("rootHost", servMgr->rootHost);
+
+    iniFile.writeSection("Client");
+    iniFile.writeIntValue("refreshHTML", refreshHTML);
+    iniFile.writeIntValue("relayBroadcast", servMgr->relayBroadcast);
+    iniFile.writeIntValue("minBroadcastTTL", chanMgr->minBroadcastTTL);
+    iniFile.writeIntValue("maxBroadcastTTL", chanMgr->maxBroadcastTTL);
+    iniFile.writeIntValue("pushTries", chanMgr->pushTries);
+    iniFile.writeIntValue("pushTimeout", chanMgr->pushTimeout);
+    iniFile.writeIntValue("maxPushHops", chanMgr->maxPushHops);
+    iniFile.writeIntValue("autoQuery", chanMgr->autoQuery);
+    iniFile.writeIntValue("queryTTL", servMgr->queryTTL);
+    iniFile.writeBoolValue("transcodingEnabled", servMgr->transcodingEnabled);
+    iniFile.writeStrValue("preset", servMgr->preset);
+    iniFile.writeStrValue("audioCodec", servMgr->audioCodec);
+    iniFile.writeStrValue("wmvProtocol", servMgr->wmvProtocol);
+
+    iniFile.writeSection("Privacy");
+    iniFile.writeStrValue("password", servMgr->password);
+    iniFile.writeIntValue("maxUptime", chanMgr->maxUptime);
+
+    for (int i = 0; i < servMgr->numFilters; i++)
+    {
+        iniFile.writeSection("Filter");
+            writeFilterSettings(iniFile, servMgr->filters[i]);
+        iniFile.writeLine("[End]");
+    }
+
+    // チャンネルフィード
+    for (auto feed : servMgr->channelDirectory->feeds())
+    {
+        iniFile.writeSection("Feed");
+        iniFile.writeStrValue("url", feed.url);
+        iniFile.writeBoolValue("isPublic", feed.isPublic);
+        iniFile.writeLine("[End]");
+    }
+
+    // 帯域チェック
+    for (auto url : servMgr->uptestServiceRegistry->getURLs())
+    {
+        iniFile.writeSection("Uptest");
+        iniFile.writeStrValue("url", url);
+        iniFile.writeLine("[End]");
+    }
+
+    iniFile.writeSection("Notify");
+        iniFile.writeBoolValue("PeerCast", notifyMask & NT_PEERCAST);
+        iniFile.writeBoolValue("Broadcasters", notifyMask & NT_BROADCASTERS);
+        iniFile.writeBoolValue("TrackInfo", notifyMask & NT_TRACKINFO);
+    iniFile.writeLine("[End]");
+
+    iniFile.writeSection("Server1");
+        writeServerSettings(iniFile, allowServer1);
+    iniFile.writeLine("[End]");
+
+    iniFile.writeSection("Server2");
+        writeServerSettings(iniFile, allowServer2);
+    iniFile.writeLine("[End]");
+
+    iniFile.writeSection("Debug");
+    iniFile.writeIntValue("logLevel", logLevel());
+    iniFile.writeBoolValue("pauseLog", pauseLog);
+    iniFile.writeIntValue("idleSleepTime", sys->idleSleepTime);
+
+    if (servMgr->validBCID)
+    {
+        BCID *bcid = servMgr->validBCID;
+        while (bcid)
+        {
+            iniFile.writeSection("ValidBCID");
+            iniFile.writeStrValue("id",  bcid->id.str());
+            iniFile.writeStrValue("name", bcid->name);
+            iniFile.writeStrValue("email", bcid->email);
+            iniFile.writeStrValue("url", bcid->url);
+            iniFile.writeBoolValue("valid", bcid->valid);
+            iniFile.writeLine("[End]");
+
+            bcid = bcid->next;
+        }
+    }
+
+    std::shared_ptr<Channel> c = chanMgr->channel;
+    while (c)
+    {
+        if (c->isActive() && c->stayConnected)
+            writeRelayChannel(iniFile, c);
+
+        c = c->next;
+    }
+
+    for (int i = 0; i < ServMgr::MAX_HOSTCACHE; i++)
+    {
+        ServHost *sh = &servMgr->hostCache[i];
+        if (sh->type != ServHost::T_NONE)
+            writeServHost(iniFile, *sh);
+    }
+}
+
+// --------------------------------------------------
+unsigned int readServerSettings(IniFileBase &iniFile, unsigned int a)
 {
     while (iniFile.readNext())
     {
@@ -1094,7 +1135,7 @@ unsigned int readServerSettings(IniFile &iniFile, unsigned int a)
 }
 
 // --------------------------------------------------
-void readFilterSettings(IniFile &iniFile, ServFilter &sv)
+void readFilterSettings(IniFileBase &iniFile, ServFilter &sv)
 {
     sv.host.init();
 
@@ -1125,7 +1166,9 @@ void ServMgr::loadSettings(const char *fn)
         saveSettings(fn);
 
     servMgr->numFilters = 0;
-    showLog = 0;
+
+    std::lock_guard<std::recursive_mutex> cs(servMgr->uptestServiceRegistry->m_lock);
+    servMgr->uptestServiceRegistry->clear();
 
     if (iniFile.openReadOnly(fn))
     {
@@ -1202,17 +1245,20 @@ void ServMgr::loadSettings(const char *fn)
             else if (iniFile.isName("authType"))
             {
                 const char *t = iniFile.getStrValue();
-                if (stricmp(t, "cookie")==0)
+                if (Sys::stricmp(t, "cookie")==0)
                     servMgr->authType = ServMgr::AUTH_COOKIE;
-                else if (stricmp(t, "http-basic")==0)
+                else if (Sys::stricmp(t, "http-basic")==0)
                     servMgr->authType = ServMgr::AUTH_HTTPBASIC;
             }else if (iniFile.isName("cookiesExpire"))
             {
                 const char *t = iniFile.getStrValue();
-                if (stricmp(t, "never")==0)
+                if (Sys::stricmp(t, "never")==0)
                     servMgr->cookieList.neverExpire = true;
-                else if (stricmp(t, "session")==0)
+                else if (Sys::stricmp(t, "session")==0)
                     servMgr->cookieList.neverExpire = false;
+            }else if (iniFile.isName("genrePrefix"))
+            {
+                servMgr->genrePrefix = iniFile.getStrValue();
             }
 
             // privacy settings
@@ -1259,16 +1305,18 @@ void ServMgr::loadSettings(const char *fn)
             {
                 servMgr->queryTTL = iniFile.getIntValue();
             }
+            else if (iniFile.isName("transcodingEnabled"))
+                servMgr->transcodingEnabled = iniFile.getBoolValue();
+            else if (iniFile.isName("preset"))
+                servMgr->preset = iniFile.getStrValue();
+            else if (iniFile.isName("audioCodec"))
+                servMgr->audioCodec = iniFile.getStrValue();
+            else if (iniFile.isName("wmvProtocol"))
+                servMgr->wmvProtocol = iniFile.getStrValue();
 
             // debug
-            else if (iniFile.isName("logDebug"))
-                showLog |= iniFile.getBoolValue() ? 1<<LogBuffer::T_DEBUG:0;
-            else if (iniFile.isName("logErrors"))
-                showLog |= iniFile.getBoolValue() ? 1<<LogBuffer::T_ERROR:0;
-            else if (iniFile.isName("logNetwork"))
-                showLog |= iniFile.getBoolValue() ? 1<<LogBuffer::T_NETWORK:0;
-            else if (iniFile.isName("logChannel"))
-                showLog |= iniFile.getBoolValue() ? 1<<LogBuffer::T_CHANNEL:0;
+            else if (iniFile.isName("logLevel"))
+                logLevel(iniFile.getIntValue());
             else if (iniFile.isName("pauseLog"))
                 pauseLog = iniFile.getBoolValue();
             else if (iniFile.isName("idleSleepTime"))
@@ -1291,15 +1339,24 @@ void ServMgr::loadSettings(const char *fn)
                     if (iniFile.isName("[End]"))
                         break;
                     else if (iniFile.isName("url"))
-                        servMgr->channelDirectory.addFeed(iniFile.getStrValue());
+                        servMgr->channelDirectory->addFeed(iniFile.getStrValue());
                     else if (iniFile.isName("isPublic"))
                     {
-                        servMgr->channelDirectory.setFeedPublic(feedIndex, iniFile.getBoolValue());
+                        servMgr->channelDirectory->setFeedPublic(feedIndex, iniFile.getBoolValue());
                     }
                 }
                 feedIndex++;
             }
-            else if (iniFile.isName("[Notify]"))
+            else if (iniFile.isName("[Uptest]"))
+            {
+                while (iniFile.readNext())
+                {
+                    if (iniFile.isName("[End]"))
+                        break;
+                    else if (iniFile.isName("url"))
+                        servMgr->uptestServiceRegistry->addURL(iniFile.getStrValue());
+                }
+            }else if (iniFile.isName("[Notify]"))
             {
                 notifyMask = NT_UPGRADE;
                 while (iniFile.readNext())
@@ -1325,6 +1382,14 @@ void ServMgr::loadSettings(const char *fn)
                         break;
                     else if (iniFile.isName("name"))
                         info.name.set(iniFile.getStrValue());
+                    else if (iniFile.isName("desc"))
+                        info.desc.set(iniFile.getStrValue());
+                    else if (iniFile.isName("genre"))
+                        info.genre.set(iniFile.getStrValue());
+                    else if (iniFile.isName("contactURL"))
+                        info.url.set(iniFile.getStrValue());
+                    else if (iniFile.isName("comment"))
+                        info.comment.set(iniFile.getStrValue());
                     else if (iniFile.isName("id"))
                         info.id.fromStr(iniFile.getStrValue());
                     else if (iniFile.isName("sourceType"))
@@ -1342,10 +1407,6 @@ void ServMgr::loadSettings(const char *fn)
                         stayConnected = iniFile.getBoolValue();
                     else if (iniFile.isName("sourceURL"))
                         sourceURL.set(iniFile.getStrValue());
-                    else if (iniFile.isName("genre"))
-                        info.genre.set(iniFile.getStrValue());
-                    else if (iniFile.isName("contactURL"))
-                        info.url.set(iniFile.getStrValue());
                     else if (iniFile.isName("bitrate"))
                         info.bitrate = atoi(iniFile.getStrValue());
                     else if (iniFile.isName("tracker"))
@@ -1360,6 +1421,16 @@ void ServMgr::loadSettings(const char *fn)
                         hit.recv = true;
                         chanMgr->addHit(hit);
                     }
+                    else if (iniFile.isName("trackContact"))
+                        info.track.contact = iniFile.getStrValue();
+                    else if (iniFile.isName("trackTitle"))
+                        info.track.title = iniFile.getStrValue();
+                    else if (iniFile.isName("trackArtist"))
+                        info.track.artist = iniFile.getStrValue();
+                    else if (iniFile.isName("trackAlbum"))
+                        info.track.album = iniFile.getStrValue();
+                    else if (iniFile.isName("trackGenre"))
+                        info.track.genre = iniFile.getStrValue();
                 }
                 if (sourceURL.isEmpty())
                 {
@@ -1367,7 +1438,7 @@ void ServMgr::loadSettings(const char *fn)
                 }else
                 {
                     info.bcID = chanMgr->broadcastID;
-                    Channel *c = chanMgr->createChannel(info, NULL);
+                    auto c = chanMgr->createChannel(info, NULL);
                     if (c)
                         c->startURL(sourceURL.cstr());
                 }
@@ -1419,6 +1490,8 @@ void ServMgr::loadSettings(const char *fn)
 // --------------------------------------------------
 unsigned int ServMgr::numStreams(GnuID &cid, Servent::TYPE tp, bool all)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     int cnt = 0;
     Servent *sv = servents;
     while (sv)
@@ -1436,6 +1509,8 @@ unsigned int ServMgr::numStreams(GnuID &cid, Servent::TYPE tp, bool all)
 // --------------------------------------------------
 unsigned int ServMgr::numStreams(Servent::TYPE tp, bool all)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     int cnt = 0;
     Servent *sv = servents;
     while (sv)
@@ -1454,9 +1529,7 @@ bool ServMgr::getChannel(char *str, ChanInfo &info, bool relay)
 {
     procConnectArgs(str, info);
 
-    Channel *ch;
-
-    ch = chanMgr->findChannelByNameID(info);
+    auto ch = chanMgr->findChannelByNameID(info);
     if (ch)
     {
         if (!ch->isPlaying())
@@ -1524,7 +1597,7 @@ int ServMgr::findChannel(ChanInfo &info)
     addReplyID(pack.id);
     int cnt = broadcast(pack, NULL);
 
-    LOG_NETWORK("Querying network: %s %s - %d servents", info.name.cstr(), idStr, cnt);
+    LOG_INFO("Querying network: %s %s - %d servents", info.name.cstr(), idStr, cnt);
 
     return cnt;
 #endif
@@ -1558,6 +1631,8 @@ bool ServMgr::addOutgoing(Host h, GnuID &netid, bool pri)
 // --------------------------------------------------
 Servent *ServMgr::findConnection(Servent::TYPE t, GnuID &sid)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     Servent *sv = servents;
     while (sv)
     {
@@ -1576,15 +1651,18 @@ void ServMgr::procConnectArgs(char *str, ChanInfo &info)
     char arg[MAX_CGI_LEN];
     char curr[MAX_CGI_LEN];
 
-    char *args = strstr(str, "?");
+    const char *args = strstr(str, "?");
     if (args)
-        *args++=0;
+    {
+        *strstr(str, "?") = '\0';
+        args++;
+    }
 
     info.initNameID(str);
 
     if (args)
     {
-        while (args=nextCGIarg(args, curr, arg))
+        while ((args = nextCGIarg(args, curr, arg)) != nullptr)
         {
             LOG_DEBUG("cmd: %s, arg: %s", curr, arg);
 
@@ -1594,14 +1672,14 @@ void ServMgr::procConnectArgs(char *str, ChanInfo &info)
                 Host h;
                 h.fromStrName(arg, DEFAULT_PORT);
                 if (addOutgoing(h, servMgr->networkID, true))
-                    LOG_NETWORK("Added connection: %s", arg);
+                    LOG_INFO("Added connection: %s", arg);
             }else if (strcmp(curr, "pip")==0)
             // pip - add private network connection to client with channel
             {
                 Host h;
                 h.fromStrName(arg, DEFAULT_PORT);
                 if (addOutgoing(h, info.id, true))
-                    LOG_NETWORK("Added private connection: %s", arg);
+                    LOG_INFO("Added private connection: %s", arg);
             }else if (strcmp(curr, "ip")==0)
             // ip - add hit
             {
@@ -1630,21 +1708,18 @@ void ServMgr::procConnectArgs(char *str, ChanInfo &info)
 // --------------------------------------------------
 bool ServMgr::start()
 {
-    char idStr[64];
-
     const char *priv;
 #if PRIVATE_BROADCASTER
     priv = "(private)";
 #else
     priv = "";
 #endif
-    LOG_DEBUG("Peercast %s, %s %s", PCX_VERSTRING, peercastApp->getClientTypeOS(), priv);
+    LOG_INFO("Peercast %s, %s %s", PCX_VERSTRING, peercastApp->getClientTypeOS(), priv);
 
-    sessionID.toStr(idStr);
-    LOG_DEBUG("SessionID: %s", idStr);
+    LOG_INFO("SessionID: %s", sessionID.str().c_str());
 
-    chanMgr->broadcastID.toStr(idStr);
-    LOG_DEBUG("BroadcastID: %s", idStr);
+
+    LOG_INFO("BroadcastID: %s", chanMgr->broadcastID.str().c_str());
 
     checkForceIP();
 
@@ -1715,7 +1790,7 @@ int ServMgr::clientProc(ThreadInfo *thread)
             while (s)
             {
                 if (s->type == Servent::T_OUTGOING)
-                    s->thread.active = false;
+                    s->thread.shutdown();
                 s=s->next;
             }
 #endif
@@ -1730,6 +1805,8 @@ int ServMgr::clientProc(ThreadInfo *thread)
 // -----------------------------------
 bool    ServMgr::acceptGIV(ClientSocket *sock)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     Servent *sv = servents;
     while (sv)
     {
@@ -1738,7 +1815,7 @@ bool    ServMgr::acceptGIV(ClientSocket *sock)
             if (sv->acceptGIV(sock))
                 return true;
         }
-        sv=sv->next;
+        sv = sv->next;
     }
     return false;
 }
@@ -1818,6 +1895,8 @@ void ServMgr::broadcastRootSettings(bool getUpdate)
 // --------------------------------------------------
 int ServMgr::broadcastPacket(ChanPacket &pack, GnuID &chanID, GnuID &srcID, GnuID &destID, Servent::TYPE type)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     int cnt=0;
 
     Servent *sv = servents;
@@ -1833,23 +1912,14 @@ int ServMgr::broadcastPacket(ChanPacket &pack, GnuID &chanID, GnuID &srcID, GnuI
 // --------------------------------------------------
 int ServMgr::idleProc(ThreadInfo *thread)
 {
-    sys->setThreadName(thread, "IDLE");
-
-    //unsigned int lastPasvFind=0;
-    //unsigned int lastBroadcast=0;
-
-    // nothing much to do for the first couple of seconds, so just hang around.
-    sys->sleep(2000);
-
-    //unsigned int lastBWcheck=0;
-    //unsigned int bytesIn=0, bytesOut=0;
+    sys->setThreadName("IDLE");
 
     unsigned int lastBroadcastConnect = 0;
     unsigned int lastRootBroadcast = 0;
 
     unsigned int lastForceIPCheck = 0;
 
-    while (thread->active)
+    while (thread->active())
     {
         stats.update();
 
@@ -1857,7 +1927,7 @@ int ServMgr::idleProc(ThreadInfo *thread)
 
         if (!servMgr->forceIP.isEmpty())
         {
-            if ((ctime-lastForceIPCheck) > 60)
+            if ((ctime - lastForceIPCheck) > 60)
             {
                 if (servMgr->checkForceIP())
                 {
@@ -1870,7 +1940,7 @@ int ServMgr::idleProc(ThreadInfo *thread)
 
         if (chanMgr->isBroadcasting())
         {
-            if ((ctime-lastBroadcastConnect) > 30)
+            if ((ctime - lastBroadcastConnect) > 30)
             {
                 servMgr->connectBroadcaster();
                 lastBroadcastConnect = ctime;
@@ -1879,13 +1949,15 @@ int ServMgr::idleProc(ThreadInfo *thread)
 
         if (servMgr->isRoot)
         {
-            if ((servMgr->lastIncoming) && ((ctime-servMgr->lastIncoming) > 60*60))
+            // 1時間着信がなかったら終了する。…なぜ？
+            if ((servMgr->lastIncoming) && (((int64_t)ctime - servMgr->lastIncoming) > 60*60))
             {
                 peercastInst->saveSettings();
+                peercastInst->quit();
                 sys->exit();
             }
 
-            if ((ctime-lastRootBroadcast) > chanMgr->hostUpdateInterval)
+            if ((ctime - lastRootBroadcast) > chanMgr->hostUpdateInterval)
             {
                 servMgr->broadcastRootSettings(true);
                 lastRootBroadcast = ctime;
@@ -1903,6 +1975,7 @@ int ServMgr::idleProc(ThreadInfo *thread)
             if (--servMgr->shutdownTimer <= 0)
             {
                 peercastInst->saveSettings();
+                peercastInst->quit();
                 sys->exit();
             }
         }
@@ -1912,32 +1985,34 @@ int ServMgr::idleProc(ThreadInfo *thread)
             chanMgr->closeOldestIdle();
 
         // チャンネル一覧を取得する。
-        servMgr->channelDirectory.update();
+        servMgr->channelDirectory->update();
+
+        servMgr->rtmpServerMonitor.update();
+
+        servMgr->uptestServiceRegistry->update();
 
         sys->sleep(500);
     }
 
-    sys->endThread(thread);
     return 0;
 }
 
 // --------------------------------------------------
 int ServMgr::serverProc(ThreadInfo *thread)
 {
-    sys->setThreadName(thread, "SERVER");
+    sys->setThreadName("SERVER");
 
     Servent *serv = servMgr->allocServent();
     Servent *serv2 = servMgr->allocServent();
 
     //unsigned int lastLookupTime=0;
 
-    while (thread->active)
+    while (thread->active())
     {
         if (servMgr->restartServer)
         {
             serv->abort();      // force close
             serv2->abort();     // force close
-            //servMgr->quit();
 
             servMgr->restartServer = false;
         }
@@ -1962,6 +2037,7 @@ int ServMgr::serverProc(ThreadInfo *thread)
                     if (!serv->initServer(h))
                     {
                         LOG_ERROR("Failed to start server on port %d. Exitting...", h.port);
+                        peercastInst->quit();
                         sys->exit();
                     }
 
@@ -1970,8 +2046,13 @@ int ServMgr::serverProc(ThreadInfo *thread)
                     if (!serv2->initServer(h))
                     {
                         LOG_ERROR("Failed to start server on port %d. Exitting...", h.port);
+                        peercastInst->quit();
                         sys->exit();
                     }
+
+                std::string ui = servMgr->htmlPath; // "html/ja" etc.
+                ui += "/index.html";
+                peercastInst->callLocalURL(ui.c_str());
             }
         }else{
             // stop server
@@ -1983,8 +2064,8 @@ int ServMgr::serverProc(ThreadInfo *thread)
             while (s)
             {
                 if (s->type == Servent::T_INCOMING)
-                    s->thread.active = false;
-                s=s->next;
+                    s->thread.shutdown();
+                s = s->next;
             }
 
             servMgr->setFirewall(ServMgr::FW_ON);
@@ -1993,7 +2074,6 @@ int ServMgr::serverProc(ThreadInfo *thread)
         sys->sleepIdle();
     }
 
-    sys->endThread(thread);
     return 0;
 }
 
@@ -2028,15 +2108,15 @@ const char *ServHost::getTypeStr(TYPE t)
 // --------------------------------------------------
 ServHost::TYPE ServHost::getTypeFromStr(const char *s)
 {
-    if (stricmp(s, "NONE")==0)
+    if (Sys::stricmp(s, "NONE")==0)
         return T_NONE;
-    else if (stricmp(s, "SERVENT")==0)
+    else if (Sys::stricmp(s, "SERVENT")==0)
         return T_SERVENT;
-    else if (stricmp(s, "STREAM")==0)
+    else if (Sys::stricmp(s, "STREAM")==0)
         return T_STREAM;
-    else if (stricmp(s, "CHANNEL")==0)
+    else if (Sys::stricmp(s, "CHANNEL")==0)
         return T_CHANNEL;
-    else if (stricmp(s, "TRACKER")==0)
+    else if (Sys::stricmp(s, "TRACKER")==0)
         return T_TRACKER;
 
     return T_NONE;
@@ -2045,18 +2125,18 @@ ServHost::TYPE ServHost::getTypeFromStr(const char *s)
 // --------------------------------------------------
 bool    ServFilter::writeVariable(Stream &out, const String &var)
 {
-    char buf[1024] = "";
+    std::string buf;
 
     if (var == "network")
-        strcpy(buf, (flags & F_NETWORK)?"1":"0");
+        buf = (flags & F_NETWORK) ? "1" : "0";
     else if (var == "private")
-        strcpy(buf, (flags & F_PRIVATE)?"1":"0");
+        buf = (flags & F_PRIVATE) ? "1" : "0";
     else if (var == "direct")
-        strcpy(buf, (flags & F_DIRECT)?"1":"0");
+        buf = (flags & F_DIRECT) ? "1" : "0";
     else if (var == "banned")
-        strcpy(buf, (flags & F_BAN)?"1":"0");
+        buf = (flags & F_BAN) ? "1" : "0";
     else if (var == "ip")
-        host.IPtoStr(buf);
+        buf = host.str(false); // without port
     else
         return false;
 
@@ -2065,20 +2145,26 @@ bool    ServFilter::writeVariable(Stream &out, const String &var)
 }
 
 // --------------------------------------------------
+bool ServFilter::matches(int fl, const Host& h) const
+{
+    return (flags&fl) != 0 && h.isMemberOf(host);
+}
+
+// --------------------------------------------------
 bool    BCID::writeVariable(Stream &out, const String &var)
 {
-    char buf[1024];
+    std::string buf;
 
     if (var == "id")
-        id.toStr(buf);
+        buf = id.str();
     else if (var == "name")
-        strcpy(buf, name.cstr());
+        buf = name.c_str();
     else if (var == "email")
-        strcpy(buf, email.cstr());
+        buf = email.c_str();
     else if (var == "url")
-        strcpy(buf, url.cstr());
+        buf = url.c_str();
     else if (var == "valid")
-        strcpy(buf, valid?"Yes":"No");
+        buf = valid ? "Yes" : "No";
     else
         return false;
 
@@ -2089,77 +2175,79 @@ bool    BCID::writeVariable(Stream &out, const String &var)
 // --------------------------------------------------
 bool ServMgr::writeVariable(Stream &out, const String &var)
 {
-    char buf[1024];
-    String str;
+    using namespace std;
+
+    string buf;
 
     if (var == "version")
-        strcpy(buf, PCX_VERSTRING);
+        buf = PCX_VERSTRING;
     else if (var == "uptime")
     {
+        String str;
         str.setFromStopwatch(getUptime());
-        strcpy(buf, str.cstr());
+        buf = str.c_str();
     }else if (var == "numRelays")
-        sprintf(buf, "%d", numStreams(Servent::T_RELAY, true));
+        buf = to_string(numStreams(Servent::T_RELAY, true));
     else if (var == "numDirect")
-        sprintf(buf, "%d", numStreams(Servent::T_DIRECT, true));
+        buf = to_string(numStreams(Servent::T_DIRECT, true));
     else if (var == "totalConnected")
-        sprintf(buf, "%d", totalConnected());
+        buf = to_string(totalConnected());
     else if (var == "numServHosts")
-        sprintf(buf, "%d", numHosts(ServHost::T_SERVENT));
+        buf = to_string(numHosts(ServHost::T_SERVENT));
     else if (var == "numServents")
-        sprintf(buf, "%d", numServents());
+        buf = to_string(numServents());
     else if (var == "serverName")
-        sprintf(buf, "%s", serverName.cstr());
+        buf = serverName.c_str();
     else if (var == "serverPort")
-        sprintf(buf, "%d", serverHost.port);
+        buf = to_string(serverHost.port);
     else if (var == "serverIP")
-        serverHost.IPtoStr(buf);
+        buf = serverHost.str(false);
     else if (var == "ypAddress")
-        strcpy(buf, rootHost.cstr());
+        buf = rootHost.c_str();
     else if (var == "password")
-        strcpy(buf, password);
+        buf = password;
     else if (var == "isFirewalled")
-        sprintf(buf, "%d", getFirewall()==FW_ON?1:0);
+        buf = getFirewall()==FW_ON ? "1" : "0";
     else if (var == "firewallKnown")
-        sprintf(buf, "%d", getFirewall()==FW_UNKNOWN?0:1);
+        buf = getFirewall()==FW_UNKNOWN ? "0" : "1";
     else if (var == "rootMsg")
-        strcpy(buf, rootMsg);
+        buf = rootMsg.c_str();
     else if (var == "isRoot")
-        sprintf(buf, "%d", isRoot?1:0);
+        buf = to_string(isRoot ? 1 : 0);
     else if (var == "isPrivate")
-        sprintf(buf, "%d", (PCP_BROADCAST_FLAGS&1)?1:0);
+        buf = (PCP_BROADCAST_FLAGS&1) ? "1" : "0";
     else if (var == "forceYP")
-        sprintf(buf, "%d", PCP_FORCE_YP?1:0);
+        buf = PCP_FORCE_YP ? "1" : "0";
     else if (var == "refreshHTML")
-        sprintf(buf, "%d", refreshHTML?refreshHTML:0x0fffffff);
+        buf = to_string(refreshHTML ? refreshHTML : 0x0fffffff);
     else if (var == "maxRelays")
-        sprintf(buf, "%d", maxRelays);
+        buf = to_string(maxRelays);
     else if (var == "maxDirect")
-        sprintf(buf, "%d", maxDirect);
+        buf = to_string(maxDirect);
     else if (var == "maxBitrateOut")
-        sprintf(buf, "%d", maxBitrateOut);
+        buf = to_string(maxBitrateOut);
     else if (var == "maxControlsIn")
-        sprintf(buf, "%d", maxControl);
+        buf = to_string(maxControl);
     else if (var == "maxServIn")
-        sprintf(buf, "%d", maxServIn);
+        buf = to_string(maxServIn);
     else if (var == "numFilters")
-        sprintf(buf, "%d", numFilters+1);
+        buf = to_string(numFilters+1); // 入力用の空欄を生成する為に+1する。
     else if (var == "maxPGNUIn")
-        sprintf(buf, "%d", maxGnuIncoming);
+        buf = to_string(maxGnuIncoming);
     else if (var == "minPGNUIn")
-        sprintf(buf, "%d", minGnuIncoming);
+        buf = to_string(minGnuIncoming);
     else if (var == "numActive1")
-        sprintf(buf, "%d", numActiveOnPort(serverHost.port));
+        buf = to_string(numActiveOnPort(serverHost.port));
     else if (var == "numActive2")
-        sprintf(buf, "%d", numActiveOnPort(serverHost.port+1));
+        buf = to_string(numActiveOnPort(serverHost.port+1));
     else if (var == "numPGNU")
-        sprintf(buf, "%d", numConnected(Servent::T_PGNU));
+        buf = to_string(numConnected(Servent::T_PGNU));
     else if (var == "numCIN")
-        sprintf(buf, "%d", numConnected(Servent::T_CIN));
+        buf = to_string(numConnected(Servent::T_CIN));
     else if (var == "numCOUT")
-        sprintf(buf, "%d", numConnected(Servent::T_COUT));
+        buf = to_string(numConnected(Servent::T_COUT));
     else if (var == "numIncoming")
-        sprintf(buf, "%d", numActive(Servent::T_INCOMING));
+        buf = to_string(numActive(Servent::T_INCOMING));
     else if (var == "numValidBCID")
     {
         int cnt = 0;
@@ -2167,58 +2255,47 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
         while (bcid)
         {
             cnt++;
-            bcid=bcid->next;
+            bcid = bcid->next;
         }
-        sprintf(buf, "%d", cnt);
-    }
-
-    else if (var == "disabled")
-        sprintf(buf, "%d", isDisabled);
-
+        buf = to_string(cnt);
+    }else if (var == "disabled")
+        buf = to_string(isDisabled);
     else if (var == "serverPort1")
-        sprintf(buf, "%d", serverHost.port);
+        buf = to_string(serverHost.port);
     else if (var == "serverLocalIP")
     {
         Host lh(ClientSocket::getIP(NULL), 0);
-        char ipStr[64];
-        lh.IPtoStr(ipStr);
-        strcpy(buf, ipStr);
+        buf = lh.str(false);
     }else if (var == "upgradeURL")
-        strcpy(buf, servMgr->downloadURL);
+        buf = servMgr->downloadURL;
     else if (var == "serverPort2")
-        sprintf(buf, "%d", serverHost.port+1);
+        buf = to_string(serverHost.port+1);
     else if (var.startsWith("allow."))
     {
         if (var == "allow.HTML1")
-            strcpy(buf, (allowServer1&Servent::ALLOW_HTML)?"1":"0");
+            buf = (allowServer1 & Servent::ALLOW_HTML) ? "1" : "0";
         else if (var == "allow.HTML2")
-            strcpy(buf, (allowServer2&Servent::ALLOW_HTML)?"1":"0");
+            buf = (allowServer2 & Servent::ALLOW_HTML) ? "1" : "0";
         else if (var == "allow.broadcasting1")
-            strcpy(buf, (allowServer1&Servent::ALLOW_BROADCAST)?"1":"0");
+            buf = (allowServer1 & Servent::ALLOW_BROADCAST) ? "1" : "0";
         else if (var == "allow.broadcasting2")
-            strcpy(buf, (allowServer2&Servent::ALLOW_BROADCAST)?"1":"0");
+            buf = (allowServer2 & Servent::ALLOW_BROADCAST) ? "1" : "0";
         else if (var == "allow.network1")
-            strcpy(buf, (allowServer1&Servent::ALLOW_NETWORK)?"1":"0");
+            buf = (allowServer1 & Servent::ALLOW_NETWORK) ? "1" : "0";
         else if (var == "allow.direct1")
-            strcpy(buf, (allowServer1&Servent::ALLOW_DIRECT)?"1":"0");
+            buf = (allowServer1 & Servent::ALLOW_DIRECT) ? "1" : "0";
     }else if (var.startsWith("auth."))
     {
         if (var == "auth.useCookies")
-            strcpy(buf, (authType==AUTH_COOKIE)?"1":"0");
+            buf = (authType==AUTH_COOKIE) ? "1" : "0";
         else if (var == "auth.useHTTP")
-            strcpy(buf, (authType==AUTH_HTTPBASIC)?"1":"0");
+            buf = (authType==AUTH_HTTPBASIC) ? "1" : "0";
         else if (var == "auth.useSessionCookies")
-            strcpy(buf, (cookieList.neverExpire==false)?"1":"0");
+            buf = (cookieList.neverExpire==false) ? "1" : "0";
     }else if (var.startsWith("log."))
     {
-        if (var == "log.debug")
-            strcpy(buf, (showLog&(1<<LogBuffer::T_DEBUG))?"1":"0");
-        else if (var == "log.errors")
-            strcpy(buf, (showLog&(1<<LogBuffer::T_ERROR))?"1":"0");
-        else if (var == "log.gnet")
-            strcpy(buf, (showLog&(1<<LogBuffer::T_NETWORK))?"1":"0");
-        else if (var == "log.channel")
-            strcpy(buf, (showLog&(1<<LogBuffer::T_CHANNEL))?"1":"0");
+        if (var == "log.level")
+            buf = std::to_string(logLevel());
         else
             return false;
     }else if (var.startsWith("lang."))
@@ -2227,24 +2304,51 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
 
         if (strrchr(htmlPath, '/') &&
             strcmp(strrchr(htmlPath, '/') + 1, lang) == 0)
-            strcpy(buf, "1");
+            buf = "1";
         else
-            strcpy(buf, "0");
+            buf = "0";
     }else if (var == "numExternalChannels")
     {
-        sprintf(buf, "%d", channelDirectory.numChannels());
+        buf = to_string(channelDirectory->numChannels());
     }else if (var == "numChannelFeedsPlusOne")
     {
-        sprintf(buf, "%d", channelDirectory.numFeeds() + 1);
+        buf = to_string(channelDirectory->numFeeds() + 1);
     }else if (var == "numChannelFeeds")
     {
-        sprintf(buf, "%d", channelDirectory.numFeeds());
+        buf = to_string(channelDirectory->numFeeds());
     }else if (var.startsWith("channelDirectory."))
     {
-        return channelDirectory.writeVariable(out, var + strlen("channelDirectory."));
+        return channelDirectory->writeVariable(out, var + strlen("channelDirectory."));
+    }else if (var.startsWith("uptestServiceRegistry."))
+    {
+        return uptestServiceRegistry->writeVariable(out, var + strlen("uptestServiceRegistry."));
     }else if (var == "publicDirectoryEnabled")
     {
-        sprintf(buf, "%d", publicDirectoryEnabled);
+        buf = to_string(publicDirectoryEnabled);
+    }else if (var == "genrePrefix")
+    {
+        buf = genrePrefix;
+    }else if (var == "transcodingEnabled")
+    {
+        buf = to_string(servMgr->transcodingEnabled);
+    }else if (var == "preset")
+    {
+        buf = servMgr->preset;
+    }else if (var == "audioCodec")
+    {
+        buf = servMgr->audioCodec;
+    }else if (var == "wmvProtocol")
+    {
+        buf = servMgr->wmvProtocol;
+    }else if (var.startsWith("defaultChannelInfo."))
+    {
+        return servMgr->defaultChannelInfo.writeVariable(out, var + strlen("defaultChannelInfo."));
+    }else if (var.startsWith("rtmpServerMonitor."))
+    {
+        return servMgr->rtmpServerMonitor.writeVariable(out, var + strlen("rtmpServerMonitor."));
+    }else if (var == "rtmpPort")
+    {
+        buf = std::to_string(servMgr->rtmpPort);
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);
@@ -2268,4 +2372,14 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
 
     out.writeString(buf);
     return true;
+}
+
+// --------------------------------------------------
+void ServMgr::logLevel(int newLevel)
+{
+    if (1 <= newLevel && newLevel <= 7) // (T_TRACE, T_OFF)
+    {
+        m_logLevel = newLevel;
+    }else
+        LOG_ERROR("Trying to set log level outside valid range. Ignored");
 }

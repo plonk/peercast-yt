@@ -27,7 +27,6 @@
 #include "servent.h"
 #include "servmgr.h"
 #include "stats.h"
-#include <stdlib.h>
 
 // ---------------------------
 const char *GNU_FUNC_STR(int func)
@@ -126,7 +125,7 @@ void GnuPacket::initPush(ChanHit &ch, Host &sh)
 }
 
 // ---------------------------
-bool GnuPacket::initHit(Host &h, Channel *ch, GnuPacket *query, bool push, bool busy, bool stable, bool tracker, int maxttl)
+bool GnuPacket::initHit(Host &h, std::shared_ptr<Channel> ch, GnuPacket *query, bool push, bool busy, bool stable, bool tracker, int maxttl)
 {
     if (!ch)
         return false;
@@ -205,7 +204,7 @@ bool GnuPacket::initHit(Host &h, Channel *ch, GnuPacket *query, bool push, bool 
 
     len = mem.pos;
 
-    LOG_NETWORK("Created Hit packet: %d bytes", len);
+    LOG_INFO("Created Hit packet: %d bytes", len);
 
     if (len >= MAX_DATA)
         return false;
@@ -246,7 +245,7 @@ void GnuStream::ping(int ttl)
     ping.initPing(ttl);
 //  servMgr->addReplyID(ping.id);
     sendPacket(ping);
-    LOG_NETWORK("ping out %02x%02x%02x%02x", ping.id.id[0], ping.id.id[1], ping.id.id[2], ping.id.id[3]);
+    LOG_INFO("ping out %02x%02x%02x%02x", ping.id.id[0], ping.id.id[1], ping.id.id[2], ping.id.id[3]);
 }
 
 // ---------------------------
@@ -254,7 +253,7 @@ void GnuStream::sendPacket(GnuPacket &p)
 {
     try
     {
-        lock.on();
+        lock.lock();
         packetsOut++;
         stats.add(Stats::NUMPACKETSOUT);
 
@@ -279,10 +278,10 @@ void GnuStream::sendPacket(GnuPacket &p)
 
         stats.add(Stats::PACKETDATAOUT, 23+p.len);
 
-        lock.off();
+        lock.unlock();
     }catch (StreamException &e)
     {
-        lock.off();
+        lock.unlock();
         throw e;
     }
 }
@@ -292,7 +291,7 @@ bool GnuStream::readPacket(GnuPacket &p)
 {
     try
     {
-        lock.on();
+        lock.lock();
         packetsIn++;
         stats.add(Stats::NUMPACKETSIN);
 
@@ -323,17 +322,17 @@ bool GnuStream::readPacket(GnuPacket &p)
             {
                 while (p.len--)
                     readChar();
-                lock.off();
+                lock.unlock();
                 return false;
             }
             read(p.data, p.len);
         }
 
-        lock.off();
+        lock.unlock();
         return true;
     }catch (StreamException &e)
     {
-        lock.off();
+        lock.unlock();
         throw e;
     }
 }
@@ -356,7 +355,7 @@ GnuStream::R_TYPE GnuStream::processPacket(GnuPacket &in, Servent *serv, GnuID &
     {
         case GNU_FUNC_PING: // ping
             {
-                LOG_NETWORK("ping: from %d.%d.%d.%d : %02x%02x%02x%02x",
+                LOG_INFO("ping: from %d.%d.%d.%d : %02x%02x%02x%02x",
                             remoteHost.ip>>24&0xff, remoteHost.ip>>16&0xff, remoteHost.ip>>8&0xff, remoteHost.ip&0xff,
                             in.id.id[0], in.id.id[1], in.id.id[2], in.id.id[3]
                     );
@@ -368,7 +367,7 @@ GnuStream::R_TYPE GnuStream::processPacket(GnuPacket &in, Servent *serv, GnuID &
                         GnuPacket pong;
                         pong.initPong(sh, true, in);
                         if (serv->outputPacket(pong, true))
-                            LOG_NETWORK("pong out");
+                            LOG_INFO("pong out");
                     }
                     ret = R_BROADCAST;
                 }
@@ -393,7 +392,7 @@ GnuStream::R_TYPE GnuStream::processPacket(GnuPacket &in, Servent *serv, GnuID &
                     h.toStr(sIP);
                     remoteHost.toStr(rIP);
 
-                    LOG_NETWORK("pong: %s via %s : %02x%02x%02x%02x", sIP, rIP, in.id.id[0], in.id.id[1], in.id.id[2], in.id.id[3]);
+                    LOG_INFO("pong: %s via %s : %02x%02x%02x%02x", sIP, rIP, in.id.id[0], in.id.id[1], in.id.id[2], in.id.id[3]);
 
 
                     ret = R_DISCARD;
@@ -429,7 +428,7 @@ GnuStream::R_TYPE GnuStream::processPacket(GnuPacket &in, Servent *serv, GnuID &
                 MemoryStream xm(&data.buf[data.pos], data.len-data.pos);
                 xm.buf[xm.len] = 0;
 
-                Channel *hits[16];
+                std::shared_ptr<Channel> hits[16];
                 int numHits=0;
 
                 if (strncmp(xm.buf, "<?xml", 5)==0)
@@ -444,7 +443,7 @@ GnuStream::R_TYPE GnuStream::processPacket(GnuPacket &in, Servent *serv, GnuID &
                         info.status = ChanInfo::S_PLAY;
                         numHits = chanMgr->findChannels(info, hits, 16);
                     }
-                    LOG_NETWORK("query XML: %s : found %d", xm.buf, numHits);
+                    LOG_INFO("query XML: %s : found %d", xm.buf, numHits);
                 }else{
                     ChanInfo info;
                     info.name.set(words);
@@ -452,7 +451,7 @@ GnuStream::R_TYPE GnuStream::processPacket(GnuPacket &in, Servent *serv, GnuID &
                     info.id.fromStr(words);
                     info.status = ChanInfo::S_PLAY;
                     numHits = chanMgr->findChannels(info, hits, 16);
-                    LOG_NETWORK("query STR: %s : found %d", words, numHits);
+                    LOG_INFO("query STR: %s : found %d", words, numHits);
                 }
 
                 for (int i=0; i<numHits; i++)
@@ -494,23 +493,23 @@ GnuStream::R_TYPE GnuStream::processPacket(GnuPacket &in, Servent *serv, GnuID &
 
                     if (!c)
                     {
-                        LOG_NETWORK("push 0x%x to %s: Not found", index, hostName);
+                        LOG_INFO("push 0x%x to %s: Not found", index, hostName);
                     }else
                     {
                         if (!c->isFull() && !servMgr->streamFull())
                         {
-                            LOG_NETWORK("push: 0x%x to %s: OK", index, hostName);
+                            LOG_INFO("push: 0x%x to %s: OK", index, hostName);
 
                             Servent *s = servMgr->allocServent();
                             if (s)
                                 s->initGIV(h, c->info.id);
                         }else
-                            LOG_NETWORK("push: 0x%x to %s: FULL", index, hostName);
+                            LOG_INFO("push: 0x%x to %s: FULL", index, hostName);
                     }
 #endif
                     ret = R_ACCEPTED;
                 }else{
-                    LOG_NETWORK("push: 0x%x to %s: ROUTE", index, hostName);
+                    LOG_INFO("push: 0x%x to %s: ROUTE", index, hostName);
                     routeID = pid;
                     ret = R_ROUTE;
                 }
@@ -535,27 +534,27 @@ GnuStream::R_TYPE GnuStream::processPacket(GnuPacket &in, Servent *serv, GnuID &
                         if (servMgr->isReplyID(queryID))
                         {
                             ret = R_ACCEPTED;
-                            LOG_NETWORK("self-hit: %s 0x%02x %s %d chan", hostName, f2, flstr, num);
+                            LOG_INFO("self-hit: %s 0x%02x %s %d chan", hostName, f2, flstr, num);
                         }else
                         {
                             routeID = queryID;
                             ret = R_ROUTE;
-                            LOG_NETWORK("route-hit: %s 0x%02x %s %d chan", hostName, f2, flstr, num);
+                            LOG_INFO("route-hit: %s 0x%02x %s %d chan", hostName, f2, flstr, num);
                         }
                     }else
                     {
                         ret = R_BROADCAST;
-                        LOG_NETWORK("broadcast-hit: %s 0x%02x %s %d chan", hostName, f2, flstr, num);
+                        LOG_INFO("broadcast-hit: %s 0x%02x %s %d chan", hostName, f2, flstr, num);
                     }
 #else
                     ret = R_BROADCAST;
-                    LOG_NETWORK("broadcast-hit: %s", flstr);
+                    LOG_INFO("broadcast-hit: %s", flstr);
 #endif
                 }
             }
             break;
         default:
-            LOG_NETWORK("packet: %d", in.func);
+            LOG_INFO("packet: %d", in.func);
             break;
     }
 
@@ -614,7 +613,7 @@ bool GnuStream::readHit(Stream &data, ChanHit &ch, int hops, GnuID &id)
 
             if ((strncmp(xmlData, "<?xml", 5)==0) && (xlen < GnuPacket::MAX_DATA))
             {
-                //LOG_NETWORK("Hit XML: %s", xmlData);
+                //LOG_INFO("Hit XML: %s", xmlData);
 
                 MemoryStream xm(xmlData, xlen);
                 XML xml;
@@ -625,15 +624,15 @@ bool GnuStream::readHit(Stream &data, ChanHit &ch, int hops, GnuID &id)
                     info.init(n);
                     char idStr[64];
                     info.id.toStr(idStr);
-                    LOG_NETWORK("got hit %s %s", idStr, info.name.cstr());
+                    LOG_INFO("got hit %s %s", idStr, info.name.cstr());
 
                     ch.upTime = n->findAttrInt("uptime");
                 }else
-                    LOG_NETWORK("Missing Channel node");
+                    LOG_INFO("Missing Channel node");
             }else
             {
-                LOG_NETWORK("Missing XML data");
-                //LOG_NETWORK("%s", xmlData);
+                LOG_INFO("Missing XML data");
+                //LOG_INFO("%s", xmlData);
                 dataValid = false;
             }
         }

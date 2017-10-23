@@ -21,7 +21,9 @@
 #define _SERVMGR_H
 
 #include "servent.h"
-#include "chandir.h"
+#include "varwriter.h"
+#include "rtmpmonit.h"
+#include "inifile.h"
 
 // ----------------------------------
 
@@ -30,14 +32,14 @@ const int MIN_TRACKER_RETRY = 10;
 const int MIN_RELAY_RETRY = 5;
 
 // ----------------------------------
-class BCID
+class BCID : public VariableWriter
 {
 public:
     BCID()
     :next(0), valid(true)
     {}
 
-    bool    writeVariable(Stream &, const String &);
+    bool    writeVariable(Stream &, const String &) override;
 
     GnuID   id;
     String  name, email, url;
@@ -85,7 +87,7 @@ public:
 };
 
 // ----------------------------------
-class ServFilter
+class ServFilter : public VariableWriter
 {
 public:
     enum
@@ -102,8 +104,8 @@ public:
         flags = 0;
         host.init();
     }
-
-    bool    writeVariable(Stream &, const String &);
+    bool    writeVariable(Stream &, const String &) override;
+    bool    matches(int fl, const Host& h) const;
 
     Host host;
     unsigned int flags;
@@ -111,7 +113,7 @@ public:
 
 // ----------------------------------
 // ServMgr keeps track of Servents
-class ServMgr
+class ServMgr : public VariableWriter
 {
 public:
     enum NOTIFY_TYPE
@@ -161,8 +163,9 @@ public:
     Servent             *findServent(Servent::TYPE, Host &, GnuID &);
     Servent             *findOldestServent(Servent::TYPE, bool);
     Servent             *findServentByIndex(int);
+    Servent             *findServentByID(int id);
 
-    bool                writeVariable(Stream &, const String &);
+    bool                writeVariable(Stream &, const String &) override;
     Servent             *allocServent();
 
     unsigned int        numUsed(int);
@@ -181,7 +184,6 @@ public:
         //return numConnected(Servent::T_OUTGOING) + numConnected(Servent::T_INCOMING);
         return numConnected();
     }
-    unsigned int        numOutgoing();
     bool                isFiltered(int, Host &h);
     bool                addOutgoing(Host, GnuID &, bool);
     Servent             *findConnection(Servent::TYPE, GnuID &);
@@ -218,6 +220,7 @@ public:
     bool            checkForceIP();
     FW_STATE        getFirewall() { return firewalled; }
     void            saveSettings(const char *);
+    void            doSaveSettings(IniFileBase& iniFile);
     void            loadSettings(const char *);
     void            setPassiveSearch(unsigned int);
     int             findChannel(ChanInfo &);
@@ -311,12 +314,19 @@ public:
         return maxBitrateOut ? (BYTES_TO_KBPS(totalOutput(false))+br) > maxBitrateOut  : false;
     }
 
+    void logLevel(int newLevel);
+    int logLevel()
+    {
+        return m_logLevel;
+    }
+
     unsigned int    totalOutput(bool);
 
-    static ThreadInfo   serverThread, idleThread;
+    ThreadInfo          serverThread;
+    ThreadInfo          idleThread;
 
     Servent             *servents;
-    WLock               lock;
+    std::recursive_mutex lock;
 
     ServHost            hostCache[MAX_HOSTCACHE];
 
@@ -341,7 +351,7 @@ public:
     char                connectHost[128];
     GnuID               networkID;
     unsigned int        firewallTimeout;
-    int                 showLog;
+    std::atomic<int>    m_logLevel;
     int                 shutdownTimer;
     bool                pauseLog;
     bool                forceNormal;
@@ -372,15 +382,32 @@ public:
 
     char                htmlPath[128];
 
-    int                 serventNum;
+    std::atomic_int     serventNum;
 
     String              chanLog;
 
-    ChannelDirectory    channelDirectory;
+    const std::unique_ptr<class ChannelDirectory>
+                        channelDirectory;
     bool                publicDirectoryEnabled;
+
+    const std::unique_ptr<class UptestServiceRegistry>
+                        uptestServiceRegistry;
+
     FW_STATE            firewalled;
 
     String              serverName;
+
+    std::string         genrePrefix;
+
+    bool                transcodingEnabled;
+    std::string         preset;
+    std::string         audioCodec;
+
+    std::string         wmvProtocol;
+
+    RTMPServerMonitor   rtmpServerMonitor;
+    uint16_t            rtmpPort;
+    ChanInfo            defaultChannelInfo;
 };
 
 // ----------------------------------

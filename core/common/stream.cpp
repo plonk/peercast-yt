@@ -18,6 +18,12 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
+#ifdef WIN32
+#undef __STRICT_ANSI__
+#include <stdio.h>
+#endif
+#include <algorithm>
+
 #include "stream.h"
 #include "common.h"
 #include "sys.h"
@@ -51,6 +57,22 @@ void FileStream::openReadOnly(const char *fn)
 }
 
 // -------------------------------------
+void FileStream::openReadOnly(int fd)
+{
+    if (file)
+        close();
+
+#if WIN32
+    file = _fdopen(fd, "rb");
+#else
+    file = fdopen(fd, "rb");
+#endif
+
+    if (!file)
+        throw StreamException("Unable to open file");
+}
+
+// -------------------------------------
 void FileStream::openWriteReplace(const char *fn)
 {
     if (file)
@@ -62,14 +84,27 @@ void FileStream::openWriteReplace(const char *fn)
 }
 
 // -------------------------------------
+void FileStream::openWriteReplace(int fd)
+{
+    if (file)
+        close();
+
+    file = fdopen(fd, "wb");
+
+    if (!file)
+        throw StreamException("Unable to open file");
+}
+
+// -------------------------------------
 void FileStream::openWriteAppend(const char *fn)
 {
     if (file)
         close();
-        file = fopen(fn, "ab");
 
-        if (!file)
-            throw StreamException("Unable to open file");
+    file = fopen(fn, "ab");
+
+    if (!file)
+        throw StreamException("Unable to open file");
 }
 
 // -------------------------------------
@@ -196,20 +231,20 @@ int Stream::writeUTF8(unsigned int code)
     if (code < 0x0800)
     {
         writeChar(code>>6 | 0xC0);
-        writeChar(code & 0x3F | 0x80);
+        writeChar((code & 0x3F) | 0x80);
         return 2;
     }else if (code < 0x10000)
     {
         writeChar(code>>12 | 0xE0);
-        writeChar(code>>6 & 0x3F | 0x80);
-        writeChar(code & 0x3F | 0x80);
+        writeChar((code>>6 & 0x3F) | 0x80);
+        writeChar((code & 0x3F) | 0x80);
         return 3;
     }else
     {
         writeChar(code>>18 | 0xF0);
-        writeChar(code>>12 & 0x3F | 0x80);
-        writeChar(code>>6 & 0x3F | 0x80);
-        writeChar(code & 0x3F | 0x80);
+        writeChar((code>>12 & 0x3F) | 0x80);
+        writeChar((code>>6 & 0x3F) | 0x80);
+        writeChar((code & 0x3F) | 0x80);
         return 4;
     }
 }
@@ -286,6 +321,45 @@ int Stream::readLine(char *in, int max)
     }
     in[i] = 0;
     return i;
+}
+
+// -------------------------------------
+std::string Stream::readLine(size_t max)
+{
+    std::string res;
+
+    while (true)
+    {
+        char c;
+
+        read(&c, 1);
+        if (c == '\n')
+            break;
+        if (c == '\r')
+            continue;
+        if (res.size() == max)
+            throw StreamException("Line too long");
+        res.push_back(c);
+    }
+
+    return res;
+}
+
+// -------------------------------------
+std::string Stream::read(int remaining)
+{
+    std::string res;
+
+    uint8_t buffer[4096];
+
+    while (remaining > 0)
+    {
+        int readSize = std::min(remaining, 4096);
+        int r = read(buffer, readSize);
+        res += std::string(buffer, buffer + r);
+        remaining -= r;
+    }
+    return res;
 }
 
 // -------------------------------------

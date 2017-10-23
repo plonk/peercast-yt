@@ -51,7 +51,7 @@ void PCPStream::readVersion(Stream &in)
 }
 
 // ------------------------------------------
-void PCPStream::readHeader(Stream &in, Channel *)
+void PCPStream::readHeader(Stream &in, std::shared_ptr<Channel>)
 {
 //  AtomStream atom(in);
 
@@ -85,7 +85,7 @@ void PCPStream::flush(Stream &in)
 }
 
 // ------------------------------------------
-int PCPStream::readPacket(Stream &in, Channel *)
+int PCPStream::readPacket(Stream &in, std::shared_ptr<Channel>)
 {
     BroadcastState bcs;
     return readPacket(in, bcs);
@@ -161,7 +161,7 @@ int PCPStream::readPacket(Stream &in, BroadcastState &bcs)
 }
 
 // ------------------------------------------
-void PCPStream::readEnd(Stream &, Channel *)
+void PCPStream::readEnd(Stream &, std::shared_ptr<Channel>)
 {
 }
 
@@ -200,9 +200,9 @@ void PCPStream::readPushAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 
         if (chanID.isSet())
         {
-            Channel *ch = chanMgr->findChannelByID(chanID);
+            auto ch = chanMgr->findChannelByID(chanID);
             if (ch)
-                if (ch->isBroadcasting() || !ch->isFull() && !servMgr->relaysFull() && ch->info.id.isSame(chanID))
+                if (ch->isBroadcasting() || (!ch->isFull() && !servMgr->relaysFull() && ch->info.id.isSame(chanID)))
                     s = servMgr->allocServent();
         }else{
             s = servMgr->allocServent();
@@ -243,7 +243,7 @@ void PCPStream::readRootAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
             unsigned int newVer = atom.readInt();
             if (newVer > PCP_CLIENT_VERSION)
             {
-                strcpy(servMgr->downloadURL, url.cstr());
+                Sys::strcpy_truncate(servMgr->downloadURL, sizeof(servMgr->downloadURL), url.cstr());
                 peercast::notifyMessage(ServMgr::NT_UPGRADE, "There is a new version of PeerCast available, please click here to upgrade your client.");
             }
             LOG_DEBUG("PCP got version check: %d / %d", newVer, PCP_CLIENT_VERSION);
@@ -287,7 +287,7 @@ void PCPStream::readRootAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 }
 
 // ------------------------------------------
-void PCPStream::readPktAtoms(Channel *ch, AtomStream &atom, int numc, BroadcastState &bcs)
+void PCPStream::readPktAtoms(std::shared_ptr<Channel> ch, AtomStream &atom, int numc, BroadcastState &bcs)
 {
     ChanPacket pack;
     ID4 type;
@@ -338,7 +338,7 @@ void PCPStream::readPktAtoms(Channel *ch, AtomStream &atom, int numc, BroadcastS
             // check for stream restart
             if (pack.pos == 0)
             {
-                LOG_CHANNEL("PCP resetting stream");
+                LOG_INFO("PCP resetting stream");
                 ch->streamIndex++;
                 ch->rawData.init();
             }
@@ -446,8 +446,8 @@ void PCPStream::readHostAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 // ------------------------------------------
 void PCPStream::readChanAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 {
-    Channel *ch=NULL;
-    ChanHitList *chl=NULL;
+    std::shared_ptr<Channel> ch = NULL;
+    ChanHitList *chl = NULL;
     ChanInfo newInfo;
 
     ch = chanMgr->findChannelByID(bcs.chanID);
@@ -611,16 +611,7 @@ int PCPStream::readBroadcastAtoms(AtomStream &atom, int numc, BroadcastState &bc
         }
     }
 
-    char fromStr[64];
-    fromStr[0] = 0;
-    if (fromID.isSet())
-        fromID.toStr(fromStr);
-    char destStr[64];
-    destStr[0] = 0;
-    if (destID.isSet())
-        destID.toStr(destStr);
-
-    LOG_DEBUG("PCP bcst: group=%d, hops=%d, ver=%d, from=%s, dest=%s", bcs.group, bcs.numHops, ver, fromStr, destStr);
+    LOG_DEBUG("PCP bcst: group=%d, hops=%d, ver=%d, from=%s, dest=%s", bcs.group, bcs.numHops, ver, fromID.str().c_str(), destID.str().c_str());
     if (fromID.isSet())
         if (fromID.isSame(servMgr->sessionID))
         {
@@ -712,7 +703,7 @@ int PCPStream::procAtom(AtomStream &atom, ID4 id, int numc, int dlen, BroadcastS
     {
         LOG_ERROR("PCP unknown or misplaced atom: %s", id.getString().str());
         throw StreamException("Protocol error");
-        //LOG_CHANNEL("PCP skip: %s", id.getString().str());
+        //LOG_INFO("PCP skip: %s", id.getString().str());
         //atom.skip(numc, dlen);
     }
 

@@ -25,6 +25,7 @@
 #include "xml.h"
 #include "asf.h"
 #include "cstream.h"
+#include "varwriter.h"
 
 // --------------------------------------------------
 struct MP3Header
@@ -76,18 +77,18 @@ public:
 class RawStream : public ChannelStream
 {
 public:
-    void readHeader(Stream &, Channel *) override;
-    int  readPacket(Stream &, Channel *) override;
-    void readEnd(Stream &, Channel *) override;
+    void readHeader(Stream &, std::shared_ptr<Channel>) override;
+    int  readPacket(Stream &, std::shared_ptr<Channel>) override;
+    void readEnd(Stream &, std::shared_ptr<Channel>) override;
 };
 
 // ------------------------------------------
 class PeercastStream : public ChannelStream
 {
 public:
-    void readHeader(Stream &, Channel *) override;
-    int  readPacket(Stream &, Channel *) override;
-    void readEnd(Stream &, Channel *) override;
+    void readHeader(Stream &, std::shared_ptr<Channel>) override;
+    int  readPacket(Stream &, std::shared_ptr<Channel>) override;
+    void readEnd(Stream &, std::shared_ptr<Channel>) override;
 };
 
 // ------------------------------------------
@@ -96,7 +97,7 @@ class ChannelSource
 public:
     virtual ~ChannelSource() {}
 
-    virtual void stream(Channel *) = 0;
+    virtual void stream(std::shared_ptr<Channel>) = 0;
     virtual int getSourceRate() { return 0; }
     virtual int getSourceRateAvg() { return this->getSourceRate(); }
 };
@@ -107,16 +108,17 @@ class PeercastSource : public ChannelSource
 public:
 
     PeercastSource() : m_channel(NULL) {}
-    void    stream(Channel *) override;
+    void    stream(std::shared_ptr<Channel>) override;
     int     getSourceRate() override;
     int     getSourceRateAvg() override;
-    ChanHit pickFromHitList(Channel *ch, ChanHit &oldHit);
+    ChanHit pickFromHitList(std::shared_ptr<Channel> ch, ChanHit &oldHit);
 
-    Channel*        m_channel;
+    std::shared_ptr<Channel> m_channel;
 };
 
 // ----------------------------------
-class Channel
+class Channel : public VariableWriter,
+                public std::enable_shared_from_this<Channel>
 {
 public:
 
@@ -215,13 +217,13 @@ public:
     const char   *getName() { return info.name.cstr(); }
     GnuID        getID() { return info.id; }
     int          getBitrate() { return info.bitrate; }
-    void         getIDStr(char *s) { info.id.toStr(s); }
-    void         getStreamPath(char *);
+    std::string  getSourceString();
+    std::string  getBufferString();
 
     void         broadcastTrackerUpdate(GnuID &, bool = false);
     bool         sendPacketUp(ChanPacket &, GnuID &, GnuID &, GnuID &);
 
-    bool         writeVariable(Stream &, const String &, int);
+    bool         writeVariable(Stream &, const String &) override;
     bool         acceptGIV(ClientSocket *);
     void         updateInfo(const ChanInfo &);
     int          readStream(Stream &, ChannelStream *);
@@ -287,7 +289,7 @@ public:
 
     WEvent              syncEvent;
 
-    Channel             *next;
+    std::shared_ptr<Channel> next;
 };
 
 #include "chanmgr.h"

@@ -1,39 +1,56 @@
-<!-- InstanceBegin template="/Templates/peercast.dwt" codeOutsideHTMLIsLocked="false" -->
-<!-- InstanceBeginEditable name="title" -->
-<title>{#_Connections_navbar} - {#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$servMgr.serverIP}:{$servMgr.serverPort}{@end}</title>
-<!-- InstanceEndEditable -->
-<!-- InstanceBeginEditable name="head" -->
-<!-- InstanceEndEditable -->
-<!-- InstanceBeginEditable name="content" -->
-<DIV class="reloader" data-url="connections.html?fragment=content" data-interval="{$servMgr.refreshHTML}">
+{^define LAYOUT layout.html}
+{^define TITLE}
+{#_Connections_navbar} - {#PeerCast on} {^SERVER_NAME}
+{^end}
+
+{@if page.channel.id != "page.channel.id"}
+  <h3>
+    {$page.channel.name}
+    {$page.channel.bitrate}Kbps
+    ({$page.channel.totalListeners}/{$page.channel.totalRelays})
+    [{$page.channel.localListeners}/{$page.channel.localRelays}]
+  </h3>
+{@end}
+<DIV class="reloader" data-url="connections.html?fragment=content&amp;id={$page.channel.id}" data-interval="{$servMgr.refreshHTML}">
   {@fragment content}
   <FORM action=/admin method=get>
     <TABLE width="95%" align=center border=0>
       <TBODY>
         <TR align=middle bgColor=#cccccc class="normal">
-          <TD><B>{#_Type_connection}<B></B></B></TD>
+          <TD style="width: 1.2em"><B>{#ID}</B></TD>
+          <TD><B>{#_Type_connection}</B></TD>
           <TD><B>{#Status}</B></TD>
           <TD><B>{#Time}</B></TD>
-          <TD><B>{#IP:Port}</B></TD>
+          <TD style="width: 11.5em"><B>{#IP:Port}</B></TD>
+          <td style="width: 6em"><b>{#Category}</b></td>
           <TD><B>{#Agent}</B></TD>
           <TD><B>{#Kbits/s}</B></TD>
-          <TD><B>Avg. bitrate</B></TD>
+          <TD><B>{#Avg.}</B></TD>
+          <td><b>{#Stop}</b></td>
         </TR>
         {@loop servMgr.numServents}
-        <tr class="normal" {@if loop.indexEven} bgColor=#eeeeee {@else} bgColor=#dddddd {@end}>
-          <TD>{$loop.servent.type}</TD>
-          <TD>{$loop.servent.status}</TD>
-          <TD>{$loop.servent.uptime}</TD>
-          <TD>{$loop.servent.address}</TD>
-          <TD>{$loop.servent.agent}</TD>
-          <TD align=right>{$loop.servent.bitrate}</TD>
-          <TD align=right>{$loop.servent.bitrateAvg}</TD>
-        </TR>
-        {@end} </TBODY>
+          <tr class="normal" {@if loop.indexEven} bgColor=#eeeeee {@else} bgColor=#dddddd {@end}
+              {@if page.channel.id != "page.channel.id"}
+                {@if page.channel.id != loop.servent.chanID} style="display: none" {@end}
+              {@end}>
+            <td style="text-align: right">{$loop.servent.id}</td>
+            <TD>{$loop.servent.type}</TD>
+            <TD>{$loop.servent.status}</TD>
+            <TD>{$loop.servent.uptime}</TD>
+            <TD>{$loop.servent.address}</TD>
+            <td>
+              {@if loop.servent.type != "SERVER"}
+                {@if loop.servent.isPrivate}{#Private}{@end}
+              {@end}
+            </td>
+            <TD>{$loop.servent.agent}</TD>
+            <TD align=right>{$loop.servent.bitrate}</TD>
+            <TD align=right>{$loop.servent.bitrateAvg}</TD>
+            <td style="text-align: center"><a class="text-danger" href="/admin?cmd=stop_servent&amp;servent_id={$loop.servent.id}">&#x23f9;<!-- BLACK SQUARE FOR STOP --></a></td>
+          </TR>
+        {@end}
+      </TBODY>
     </TABLE>
   </FORM>
   {@end}
 </DIV>
-<!-- InstanceEndEditable -->
-<!-- InstanceEnd -->
-

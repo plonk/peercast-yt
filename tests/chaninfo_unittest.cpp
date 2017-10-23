@@ -152,7 +152,8 @@ TEST_F(ChanInfoFixture, static_getProtocolFromStr)
     ASSERT_EQ(ChanInfo::SP_WMHTTP, ChanInfo::getProtocolFromStr("WMHTTP"));
 
     ASSERT_EQ(ChanInfo::SP_PEERCAST, ChanInfo::getProtocolFromStr("Peercast")); // type str. is case-insesitive
-    ASSERT_EQ(ChanInfo::SP_UNKNOWN, ChanInfo::getProtocolFromStr("RTMP"));
+    ASSERT_EQ(ChanInfo::SP_RTMP, ChanInfo::getProtocolFromStr("RTMP"));
+    ASSERT_EQ(ChanInfo::SP_UNKNOWN, ChanInfo::getProtocolFromStr("Hoge2.0"));
 }
 
 TEST_F(ChanInfoFixture, setContentType)
@@ -164,4 +165,25 @@ TEST_F(ChanInfoFixture, setContentType)
     ASSERT_STREQ("MKV", info.contentTypeStr.cstr());
     ASSERT_STREQ("video/x-matroska", info.MIMEType.cstr());
     ASSERT_STREQ(".mkv", info.streamExt.cstr());
+}
+
+TEST_F(ChanInfoFixture, getPlayListExt)
+{
+    info.setContentType(ChanInfo::T_MP3);
+    ASSERT_STREQ(".m3u", info.getPlayListExt());
+
+    info.setContentType(ChanInfo::T_OGG);
+    ASSERT_STREQ(".m3u", info.getPlayListExt());
+
+    info.setContentType(ChanInfo::T_OGM);
+    ASSERT_STREQ(".ram", info.getPlayListExt());
+
+    info.setContentType(ChanInfo::T_WMV);
+    ASSERT_STREQ(".asx", info.getPlayListExt());
+
+    info.setContentType(ChanInfo::T_FLV);
+    ASSERT_STREQ(".m3u", info.getPlayListExt());
+
+    info.setContentType(ChanInfo::T_MKV);
+    ASSERT_STREQ(".m3u", info.getPlayListExt());
 }

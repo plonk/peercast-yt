@@ -7,7 +7,6 @@
 #include "version2.h"
 #include "socket.h"
 #include "chandir.h"
-#include "critsec.h"
 #include "uri.h"
 #include "servmgr.h"
 
@@ -73,15 +72,15 @@ ChannelDirectory::ChannelDirectory()
 {
 }
 
-int ChannelDirectory::numChannels()
+int ChannelDirectory::numChannels() const
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
     return m_channels.size();
 }
 
-int ChannelDirectory::numFeeds()
+int ChannelDirectory::numFeeds() const
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
     return m_feeds.size();
 }
 
@@ -111,14 +110,14 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
     WriteBufferedStream brsock(&*rsock);
 
     try {
-        LOG_DEBUG("Connecting to %s ...", feed.host().c_str());
+        LOG_TRACE("Connecting to %s ...", feed.host().c_str());
         rsock->open(host);
         rsock->connect();
 
         HTTP rhttp(brsock);
 
         auto request_line = "GET " + feed.path() + "?host=" + cgi::escape(servMgr->serverHost) + " HTTP/1.0";
-        LOG_DEBUG("Request line: %s", request_line.c_str());
+        LOG_TRACE("Request line to %s: %s", feed.host().c_str(), request_line.c_str());
 
         rhttp.writeLineF("%s", request_line.c_str());
         rhttp.writeLineF("%s %s", HTTP_HS_HOST, feed.host().c_str());
@@ -128,7 +127,7 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
 
         auto code = rhttp.readResponse();
         if (code != 200) {
-            LOG_DEBUG("%s: status code %d", feed.host().c_str(), code);
+            LOG_ERROR("%s: status code %d", feed.host().c_str(), code);
             return false;
         }
 
@@ -143,7 +142,7 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
                 text += line;
                 text += '\n';
             }
-        } catch (SockException& e) {
+        } catch (EOFException& e) {
             // end of body reached.
         }
 
@@ -154,86 +153,109 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
             return false;
         }
         return true;
-    } catch (SockException& e) {
-        LOG_ERROR("%s", e.msg);
-        return false;
-    } catch (TimeoutException& e) {
+    } catch (StreamException& e) {
         LOG_ERROR("%s", e.msg);
         return false;
     }
 }
 
-bool ChannelDirectory::update()
+bool ChannelDirectory::update(UpdateMode mode)
 {
-    CriticalSection cs(m_lock);
+    typedef std::vector<ChannelEntry> ChannelList;
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
 
-    if (sys->getTime() - m_lastUpdate < 5 * 60)
+    const int coolDownTime = (mode==kUpdateManual) ? 30 : 5 * 60;
+    if (sys->getTime() - m_lastUpdate < coolDownTime)
         return false;
 
+    double t0 = sys->getDTime();
+    std::vector<std::thread> workers;
+    std::mutex mutex; // m_channels を保護するミューテックス。
     m_channels.clear();
-    for (auto& feed : m_feeds) {
-        std::vector<ChannelEntry> channels;
-        bool success;
+    for (auto& feed : m_feeds)
+    {
+        std::function<void(void)> getChannels =
+            [&feed, &mutex, this]
+            {
+                ChannelList channels;
+                bool success;
+                double t1 = sys->getDTime();
+                success = getFeed(feed.url, channels);
+                LOG_TRACE("Channel feed: %f sec %s", sys->getDTime() - t1, feed.url.c_str());
 
-        success = getFeed(feed.url, channels);
-
-        if (success) {
-            feed.status = ChannelFeed::Status::OK;
-            LOG_DEBUG("Got %zu channels from %s", channels.size(), feed.url.c_str());
-            for (auto ch : channels) {
-                m_channels.push_back(ch);
-            }
-        } else {
-            feed.status = ChannelFeed::Status::ERROR;
-            LOG_ERROR("Failed to get channels from %s", feed.url.c_str());
-        }
+                if (success) {
+                    feed.status = ChannelFeed::Status::kOk;
+                    LOG_TRACE("Got %zu channels from %s", channels.size(), feed.url.c_str());
+                    {
+                        std::lock_guard<std::mutex> lock(mutex);
+                        for (auto& c : channels) m_channels.push_back(c);
+                    }
+                } else {
+                    feed.status = ChannelFeed::Status::kError;
+                    LOG_ERROR("Failed to get channels from %s", feed.url.c_str());
+                }
+            };
+        workers.push_back(std::thread(getChannels));
     }
-    sort(m_channels.begin(), m_channels.end(), [](ChannelEntry&a, ChannelEntry&b) { return a.numDirects > b.numDirects; });
+
+    for (auto& t : workers)
+        t.join();
+
+    sort(m_channels.begin(), m_channels.end(),
+         [](ChannelEntry& a, ChannelEntry& b)
+         {
+             return a.numDirects > b.numDirects;
+         });
     m_lastUpdate = sys->getTime();
+    LOG_INFO("Channel feed update: total of %zu channels in %f sec",
+             m_channels.size(),
+             sys->getDTime() - t0);
     return true;
 }
 
 // index番目のチャンネル詳細のフィールドを出力する。成功したら true を返す。
 bool ChannelDirectory::writeChannelVariable(Stream& out, const String& varName, int index)
 {
-    CriticalSection cs(m_lock);
+    using namespace std;
 
-    if (!(index >= 0 && index < m_channels.size()))
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
+
+    if (!(index >= 0 && (size_t)index < m_channels.size()))
         return false;
 
-    char buf[1024];
+    string buf;
     ChannelEntry& ch = m_channels[index];
 
     if (varName == "name") {
-        sprintf(buf, "%s", ch.name.c_str());
+        buf = ch.name;
     } else if (varName == "id") {
-        ch.id.toStr(buf);
+        buf = ch.id.str();
     } else if (varName == "bitrate") {
-        sprintf(buf, "%d", ch.bitrate);
+        buf = to_string(ch.bitrate);
     } else if (varName == "contentTypeStr") {
-        sprintf(buf, "%s", ch.contentTypeStr.c_str());
+        buf = ch.contentTypeStr;
     } else if (varName == "desc") {
-        sprintf(buf, "%s", ch.desc.c_str());
+        buf = ch.desc;
     } else if (varName == "genre") {
-        sprintf(buf, "%s", ch.genre.c_str());
+        buf = ch.genre;
     } else if (varName == "url") {
-        sprintf(buf, "%s", ch.url.c_str());
+        buf = ch.url;
     } else if (varName == "tip") {
-        sprintf(buf, "%s", ch.tip.c_str());
+        buf = ch.tip;
     } else if (varName == "encodedName") {
-        sprintf(buf, "%s", ch.encodedName.c_str());
+        buf = ch.encodedName;
     } else if (varName == "uptime") {
-        sprintf(buf, "%s", ch.uptime.c_str());
+        buf = ch.uptime;
     } else if (varName == "numDirects") {
-        sprintf(buf, "%d", ch.numDirects);
+        buf = to_string(ch.numDirects);
     } else if (varName == "numRelays") {
-        sprintf(buf, "%d", ch.numRelays);
+        buf = to_string(ch.numRelays);
     } else if (varName == "chatUrl") {
-        sprintf(buf, "%s", ch.chatUrl().c_str());
+        buf = ch.chatUrl();
     } else if (varName == "statsUrl") {
-        sprintf(buf, "%s", ch.statsUrl().c_str());
+        buf = ch.statsUrl();
     } else if (varName == "isPlayable") {
-        sprintf(buf, "%d", ch.id.isSet());
+        buf = to_string(ch.id.isSet());
     } else {
         return false;
     }
@@ -244,9 +266,9 @@ bool ChannelDirectory::writeChannelVariable(Stream& out, const String& varName, 
 
 bool ChannelDirectory::writeFeedVariable(Stream& out, const String& varName, int index)
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
 
-    if (!(index >= 0 && index < m_feeds.size())) {
+    if (!(index >= 0 && (size_t)index < m_feeds.size())) {
         // empty string
         return true;
     }
@@ -301,37 +323,37 @@ bool ChannelDirectory::writeVariable(Stream& out, const String& varName)
     return true;
 }
 
-int ChannelDirectory::totalListeners()
+int ChannelDirectory::totalListeners() const
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
     int res = 0;
 
-    for (ChannelEntry& e : m_channels) {
+    for (const ChannelEntry& e : m_channels) {
         res += std::max(0, e.numDirects);
     }
     return res;
 }
 
-int ChannelDirectory::totalRelays()
+int ChannelDirectory::totalRelays() const
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
     int res = 0;
 
-    for (ChannelEntry& e : m_channels) {
+    for (const ChannelEntry& e : m_channels) {
         res += std::max(0, e.numRelays);
     }
     return res;
 }
 
-std::vector<ChannelFeed> ChannelDirectory::feeds()
+std::vector<ChannelFeed> ChannelDirectory::feeds() const
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
     return m_feeds;
 }
 
-bool ChannelDirectory::addFeed(std::string url)
+bool ChannelDirectory::addFeed(const std::string& url)
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
 
     auto iter = find_if(m_feeds.begin(), m_feeds.end(), [&](ChannelFeed& f) { return f.url == url;});
 
@@ -352,7 +374,7 @@ bool ChannelDirectory::addFeed(std::string url)
 
 void ChannelDirectory::clearFeeds()
 {
-    CriticalSection cs(m_lock);
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
 
     m_feeds.clear();
     m_channels.clear();
@@ -361,16 +383,16 @@ void ChannelDirectory::clearFeeds()
 
 void ChannelDirectory::setFeedPublic(int index, bool isPublic)
 {
-    CriticalSection cs(m_lock);
-    if (index < m_feeds.size())
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
+    if (index >= 0 && (size_t)index < m_feeds.size())
         m_feeds[index].isPublic = isPublic;
     else
         LOG_DEBUG("setFeedPublic: index %d out of range", index);
 }
 
-std::string ChannelDirectory::findTracker(GnuID id)
+std::string ChannelDirectory::findTracker(const GnuID& id) const
 {
-    for (ChannelEntry& entry : m_channels)
+    for (const ChannelEntry& entry : m_channels)
     {
         if (entry.id.isSame(id))
             return entry.tip;
@@ -381,12 +403,18 @@ std::string ChannelDirectory::findTracker(GnuID id)
 std::string ChannelFeed::statusToString(ChannelFeed::Status s)
 {
     switch (s) {
-    case Status::UNKNOWN:
+    case Status::kUnknown:
         return "UNKNOWN";
-    case Status::OK:
+    case Status::kOk:
         return "OK";
-    case Status::ERROR:
+    case Status::kError:
         return "ERROR";
     }
     throw std::logic_error("should be unreachable");
+}
+
+std::vector<ChannelEntry> ChannelDirectory::channels() const
+{
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
+    return m_channels;
 }

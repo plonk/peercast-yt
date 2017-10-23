@@ -1,5 +1,5 @@
 {
-    // peercast.dwt
+    // layout.html
     "PeerCast on" : "PeerCast -",
     "Please upgrade your client, click here to download the latest version." : "クライアントをアップグレードしてください。ここをクリックで最新バージョンをダウンロード。",
     "_Information_navbar" : "情報",
@@ -11,7 +11,11 @@
     "Notifications" : "通知",
     "_View Log_navbar" : "ログ表示",
     "_Logout_navbar" : "ログアウト",
+    "Help" : "ヘルプ",
+    "Go to the peercast-yt wiki on github" : "github&thinsp;の&thinsp;peercast-yt wiki&thinsp;へ行く",
     "Message from the root server" : "ルートサーバーからのメッセージ",
+    "RTMP Server" : "RTMPサーバー",
+    "Report Issue" : "問題を報告",
 
     // bcid.html
     "New BCID"      : "新規BCID",
@@ -58,8 +62,20 @@
     //"PGNU"                  : "",
     "Incoming"                : "着信",
     "Port"                    : "ポート",
+    "Dump"                    : "ダンプ",
 
-    // relays.html
+    "Refresh"                 : "更新",
+
+    // speedtest.html
+    "Remove"                  : "削除",
+    "Speedtest"               : "帯域チェック",
+    "Not allowed"             : "不可",
+    "Add address"             : "アドレスを追加",
+    "YP4G speedtest addresses" : "YP4G&thinsp;帯域チェックアドレス",
+    "URL of yp4g.xml"         : "yp4g.xmlのURL",
+    "Speed"                   : "速度",
+
+    // channels.html
     "Channel"                 : "チャンネル",
     "Bitrate (kb/s)"          : "転送速度 (Kbps)",
     "Stream"                  : "タイプ",
@@ -71,6 +87,9 @@
     "WWW"                     : "WWW",
     "Bump"                    : "バンプ",
     "Stop"                    : "停止",
+    "Edit"                    : "編集",
+    "Auto-updates every 5 minutes. Manual updates have a cooldown of 30 seconds." : "5分間隔で自動更新。手動更新は30秒のクールダウンが必要です。",
+    "Category"                : "カテゴリー",
 
     // relayinfo.html
     "Channel Information"     : "チャンネル情報",
@@ -99,6 +118,9 @@
 
     "Channel not found."      : "チャンネルが見付かりません。",
 
+    // editinfo.html
+    "Apply"                   : "適用",
+
     // head.html
     "Head Packet"             : "ヘッドパケット",
 
@@ -126,6 +148,7 @@
     "IP:Port"                 : "IP:ポート",
     "Agent"                   : "エージェント",
     "Kbits/s"                 : "Kbps",
+    "Avg."                    : "平均",
 
     // settings.html
     "Basic Settings"          : "基本設定",
@@ -143,7 +166,7 @@
     //"ICY MetaInterval"      : "ICY MetaInterval",
     "Mode"                    : "モード",
     "Normal"                  : "通常",
-    "Refresh HTML (sec)"      : "HTML再読み込み (秒)",
+    "Refresh HTML (sec)"      : "HTML更新 (秒)",
     "Network"                 : "ネットワーク",
     "YP Address"              : "YPアドレス",
     "Max. Output (Kbits/s)"   : "送信速度上限 (Kbps)",
@@ -183,6 +206,32 @@
     "URL of index.txt"        : "index.txtのURL",
     "Public"                  : "公開",
     "Public Directory"        : "公開ディレクトリ",
+    "Genre Prefix"            : "ジャンル接頭辞",
+    "Channels must have their genre string beginning with this prefix to be on this server." : "チャンネル掲載に必要な数文字の接頭辞。",
+    "Transcoding"             : "トランスコード",
+    "x264 Preset"             : "x264プリセット",
+    "Audio Codec"             : "オーディオ・コーデック",
+    "AAC (Experimental)"      : "AAC (実験的)",
+    "WMV Protocol"            : "WMVプロトコル",
+
+    "Level"                   : "レベル",
+    "TRACE"                   : "トレース",
+    "DEBUG"                   : "デバッグ",
+    "INFO"                    : "情報",
+    "WARN"                    : "警告",
+    "ERROR"                   : "エラー",
+    "FATAL"                   : "致命的なエラー",
+    "OFF"                     : "オフ",
+    "Default"                 : "デフォルト",
+    "Everything"              : "全て",
+    "No logging"              : "ログ無効",
+
+    "Upload Bandwidth Testing" : "アップロード帯域チェック",
+    "URL of yp4g.xml"         : "yp4g.xmlのURL",
+
+    // rtmp.html
+    "Start"                   : "開始",
+    "Process ID"              : "プロセスID",
 
     // viewlog.html
     "Clear log"               : "ログをクリア",
@@ -197,7 +246,7 @@
     "Login"                   : "ログイン",
     "_Password_login"         : "パスワード",
 
-    // public/play.html
+    // player.html
     "Playlist"                : "プレイリスト",
     "Your browser doesn't seem to support playback of FLV videos."
                               : "お使いのブラウザは FLV 動画の再生に対応していないようです。",
@@ -215,11 +264,20 @@
                               : "お使いのブラウザは WebM 動画の再生に対応していないようです。",
     "Playback of this type of stream is not supported."
                               : "このタイプのストリームの再生には対応していません。",
+    "Player"                  : "プレーヤー",
+
+    // play.html
+    "Show Chat"               : "チャット表示",
+    "Request Flash-based player" : "Flashベースのプレーヤーにチェンジ",
+    "Request HTML5 player"    : "HTML5プレーヤーにチェンジ",
 
     // public/index.html
     "Local Channels"          : "ローカルチャンネル",
     "Channels from Friendly Stations"
                               : "連携局のチャンネル",
     "Link Status"             : "リンク状態",
+    "Small icon of a megaphone" : "メガホンの小さなアイコン",
+    "Rank" : "順位",
+    "Yellow Pages"            : "イエローページ",
     "":""
 }

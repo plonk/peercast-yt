@@ -2,9 +2,12 @@
 #include "str.h"
 
 #include "servent.h"
-#include "dmstream.h"
+#include "sstream.h"
 
-#include "defer.h"
+#include "regexp.h"
+
+#include "mockclientsocket.h"
+#include "version2.h"
 
 using namespace cgi;
 
@@ -12,7 +15,20 @@ class ServentFixture : public ::testing::Test {
 public:
     ServentFixture()
         : s(0) {}
+
+    void SetUp()
+    {
+        mock = new MockClientSocket();
+        s.sock = mock;
+    }
+
+    void TearDown()
+    {
+        delete mock;
+    }
+
     Servent s;
+    MockClientSocket* mock;
 };
 
 TEST_F(ServentFixture, initialState)
@@ -38,7 +54,7 @@ TEST_F(ServentFixture, initialState)
     ASSERT_STREQ("00000000000000000000000000000000", s.chanID.str().c_str());
     ASSERT_STREQ("00000000000000000000000000000000", s.givID.str().c_str());
 
-    ASSERT_EQ(false, s.thread.active);
+    ASSERT_EQ(false, s.thread.active());
 
     ASSERT_STREQ("", s.loginPassword.cstr());
     ASSERT_STREQ("", s.loginMount.cstr());
@@ -50,14 +66,14 @@ TEST_F(ServentFixture, initialState)
 
     ASSERT_EQ(Servent::ALLOW_ALL, s.allow);
 
-    ASSERT_EQ(nullptr, s.sock);
+    ASSERT_EQ(mock, s.sock);
     ASSERT_EQ(nullptr, s.pushSock);
 
     // WLock               lock;
 
     ASSERT_EQ(true, s.sendHeader);
     // ASSERT_EQ(0, s.syncPos); // 不定
-    // ASSERT_EQ(0, s.streamPos);  // 不定
+    ASSERT_EQ(0, s.streamPos);
     ASSERT_EQ(0, s.servPort);
 
     ASSERT_EQ(ChanInfo::SP_UNKNOWN, s.outputProtocol);
@@ -76,15 +92,8 @@ TEST_F(ServentFixture, initialState)
 
 }
 
-#include "mockclientsocket.h"
-
 TEST_F(ServentFixture, handshakeHTTP)
 {
-    MockClientSocket* mock;
-    Defer reclaim([&]() { delete mock; });
-
-    s.sock = mock = new MockClientSocket();
-
     HTTP http(*mock);
     http.initRequest("GET / HTTP/1.0");
     mock->incoming.str("\r\n");
@@ -97,10 +106,6 @@ TEST_F(ServentFixture, handshakeHTTP)
 
 TEST_F(ServentFixture, handshakeIncomingGetRoot)
 {
-    MockClientSocket* mock;
-    Defer reclaim([&]() { delete mock; });
-
-    s.sock = mock = new MockClientSocket();
     mock->incoming.str("GET / HTTP/1.0\r\n\r\n");
 
     s.handshakeIncoming();
@@ -113,21 +118,13 @@ TEST_F(ServentFixture, handshakeIncomingGetRoot)
 // の放送要求だとして通してしまうが、良いのか？
 TEST_F(ServentFixture, handshakeIncomingBadRequest)
 {
-    MockClientSocket* mock;
-
-    s.sock = mock = new MockClientSocket();
     mock->incoming.str("\r\n");
 
     ASSERT_THROW(s.handshakeIncoming(), StreamException);
-
-    delete mock;
 }
 
 TEST_F(ServentFixture, handshakeIncomingHTMLRoot)
 {
-    MockClientSocket* mock;
-
-    s.sock = mock = new MockClientSocket();
     mock->incoming.str("GET /html/en/index.html HTTP/1.0\r\n\r\n");
 
     s.handshakeIncoming();
@@ -139,15 +136,10 @@ TEST_F(ServentFixture, handshakeIncomingHTMLRoot)
     ASSERT_TRUE(str::contains(output, "Server: "));
     ASSERT_TRUE(str::contains(output, "Date: "));
     ASSERT_TRUE(str::contains(output, "Unable to open file"));
-
-    delete mock;
 }
 
 TEST_F(ServentFixture, handshakeIncomingJRPCGetUnauthorized)
 {
-    MockClientSocket* mock;
-
-    s.sock = mock = new MockClientSocket();
     mock->incoming.str("GET /api/1 HTTP/1.0\r\n\r\n");
 
     ASSERT_NO_THROW(s.handshakeIncoming());
@@ -155,32 +147,26 @@ TEST_F(ServentFixture, handshakeIncomingJRPCGetUnauthorized)
     std::string output = mock->outgoing.str();
 
     ASSERT_STREQ("HTTP/1.0 401 Unauthorized\r\nWWW-Authenticate: Basic realm=\"PeerCast Admin\"\r\n\r\n", output.c_str());
-
-    delete mock;
 }
 
 #include "servmgr.h"
 
-TEST_F(ServentFixture, handshakeIncomingJRPCGetAuthorized)
+TEST_F(ServentFixture, handshakeIncomingJRPCGetAuthorized_noAuthInfoSupplied)
 {
-    MockClientSocket* mock;
-
     strcpy(servMgr->password, "Passw0rd");
 
-    // --------------------------------------------
-    s.sock = mock = new MockClientSocket();
     mock->incoming.str("GET /api/1 HTTP/1.0\r\n"
                        "\r\n");
 
     s.handshakeIncoming();
 
     ASSERT_TRUE(str::contains(mock->outgoing.str(), "401 Unauthorized"));
+}
 
-    delete mock;
+TEST_F(ServentFixture, handshakeIncomingJRPCGetAuthorized_authInfoSupplied)
+{
+    strcpy(servMgr->password, "Passw0rd");
 
-    // --------------------------------------------
-
-    s.sock = mock = new MockClientSocket();
     mock->incoming.str("GET /api/1 HTTP/1.0\r\n"
                        "Authorization: BASIC OlBhc3N3MHJk\r\n" // ruby -rbase64 -e 'p Base64.strict_encode64 ":Passw0rd"'
                        "\r\n");
@@ -189,8 +175,6 @@ TEST_F(ServentFixture, handshakeIncomingJRPCGetAuthorized)
 
     ASSERT_TRUE(str::contains(mock->outgoing.str(), "200 OK"));
     ASSERT_TRUE(str::contains(mock->outgoing.str(), "jsonrpc"));
-
-    delete mock;
 }
 
 //                  |<---------------------- 77 characters long  -------------------------------->|
@@ -223,21 +207,16 @@ TEST_F(ServentFixture, handshakeIncomingLongURI)
 {
     ASSERT_EQ(8470, strlen(LONG_LONG_STRING));
 
-    MockClientSocket* mock;
-
-    s.sock = mock = new MockClientSocket();
     mock->incoming.str("GET /" LONG_LONG_STRING " HTTP/1.0\r\n"
                        "\r\n");
 
     ASSERT_THROW(s.handshakeIncoming(), HTTPException);
-
-    delete mock;
 }
 
 TEST_F(ServentFixture, createChannelInfoNullCase)
 {
     Query query("");
-    auto info = s.createChannelInfo(GnuID(), String(), query);
+    auto info = s.createChannelInfo(GnuID(), String(), query, "");
 
     ASSERT_EQ(ChanInfo::T_UNKNOWN, info.contentType);
     ASSERT_STREQ("", info.name.cstr());
@@ -251,7 +230,7 @@ TEST_F(ServentFixture, createChannelInfoNullCase)
 TEST_F(ServentFixture, createChannelInfoComment)
 {
     Query query("");
-    auto info = s.createChannelInfo(GnuID(), "俺たちみんなトドだぜ (・ω・｀з)3", query);
+    auto info = s.createChannelInfo(GnuID(), "俺たちみんなトドだぜ (・ω・｀з)3", query, "");
 
     ASSERT_STREQ("俺たちみんなトドだぜ (・ω・｀з)3", info.comment);
 }
@@ -259,7 +238,7 @@ TEST_F(ServentFixture, createChannelInfoComment)
 TEST_F(ServentFixture, createChannelInfoCommentOverride)
 {
     Query query("comment=スレなし");
-    auto info = s.createChannelInfo(GnuID(), "俺たちみんなトドだぜ (・ω・｀з)3", query);
+    auto info = s.createChannelInfo(GnuID(), "俺たちみんなトドだぜ (・ω・｀з)3", query, "");
 
     ASSERT_STREQ("スレなし", info.comment);
 }
@@ -267,7 +246,7 @@ TEST_F(ServentFixture, createChannelInfoCommentOverride)
 TEST_F(ServentFixture, createChannelInfoTypicalCase)
 {
     Query query("name=予定地&genre=テスト&desc=てすと&url=http://example.com&comment=スレなし&bitrate=400&type=mkv");
-    auto info = s.createChannelInfo(GnuID(), String(), query);
+    auto info = s.createChannelInfo(GnuID(), String(), query, "");
 
     ASSERT_EQ(ChanInfo::T_MKV, info.contentType);
     ASSERT_STREQ("予定地", info.name.cstr());
@@ -283,7 +262,7 @@ TEST_F(ServentFixture, createChannelInfoNonnumericBitrate)
     Query query("bitrate=BITRATE");
     ChanInfo info;
 
-    ASSERT_NO_THROW(info = s.createChannelInfo(GnuID(), String(), query));
+    ASSERT_NO_THROW(info = s.createChannelInfo(GnuID(), String(), query, ""));
     ASSERT_EQ(0, info.bitrate);
 }
 
@@ -297,4 +276,320 @@ TEST_F(ServentFixture, hasValidAuthToken)
     ASSERT_FALSE(s.hasValidAuthToken("ほげほげ.flv?auth=44d5299e57ad9274fee7960a9fa60bfd"));
     ASSERT_FALSE(s.hasValidAuthToken("ほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげ.flv?auth=44d5299e57ad9274fee7960a9fa60bfd"));
     ASSERT_FALSE(s.hasValidAuthToken("?auth=44d5299e57ad9274fee7960a9fa60bfd"));
+}
+
+TEST_F(ServentFixture, handshakeHTTPBasicAuth_nonlocal_correctpass)
+{
+    ASSERT_EQ(0, s.sock->host.ip);
+    ASSERT_FALSE(s.sock->host.isLocalhost());
+
+    strcpy(servMgr->password, "Passw0rd");
+
+    HTTP http(*mock);
+    http.initRequest("GET / HTTP/1.0");
+    mock->incoming.str("Authorization: BASIC OlBhc3N3MHJk\r\n\r\n");
+
+    ASSERT_TRUE(s.handshakeHTTPBasicAuth(http));
+}
+
+TEST_F(ServentFixture, handshakeHTTPBasicAuth_nonlocal_wrongpass)
+{
+    ASSERT_EQ(0, s.sock->host.ip);
+    ASSERT_FALSE(s.sock->host.isLocalhost());
+
+    strcpy(servMgr->password, "hoge");
+
+    HTTP http(*mock);
+    http.initRequest("GET / HTTP/1.0");
+    mock->incoming.str("Authorization: BASIC OlBhc3N3MHJk\r\n\r\n");
+
+    ASSERT_FALSE(s.handshakeHTTPBasicAuth(http));
+}
+
+TEST_F(ServentFixture, handshakeHTTPBasicAuth_local_correctpass)
+{
+    s.sock->host.ip = 127 << 24 | 1;
+    ASSERT_TRUE(s.sock->host.isLocalhost());
+
+    strcpy(servMgr->password, "Passw0rd");
+
+    HTTP http(*mock);
+    http.initRequest("GET / HTTP/1.0");
+    mock->incoming.str("Authorization: BASIC OlBhc3N3MHJk\r\n\r\n");
+
+    ASSERT_TRUE(s.handshakeHTTPBasicAuth(http));
+}
+
+TEST_F(ServentFixture, handshakeHTTPBasicAuth_local_wrongpass)
+{
+    s.sock->host.ip = 127 << 24 | 1;
+    ASSERT_TRUE(s.sock->host.isLocalhost());
+
+    strcpy(servMgr->password, "hoge");
+
+    HTTP http(*mock);
+    http.initRequest("GET / HTTP/1.0");
+    mock->incoming.str("Authorization: BASIC OlBhc3N3MHJk\r\n\r\n");
+
+    ASSERT_TRUE(s.handshakeHTTPBasicAuth(http));
+}
+
+TEST_F(ServentFixture, handshakeHTTPBasicAuth_noauthorizationheader)
+{
+    ASSERT_FALSE(s.sock->host.isLocalhost());
+
+    strcpy(servMgr->password, "Passw0rd");
+
+    HTTP http(*mock);
+    http.initRequest("GET / HTTP/1.0");
+    mock->incoming.str("\r\n");
+
+    ASSERT_FALSE(s.handshakeHTTPBasicAuth(http));
+    ASSERT_EQ("HTTP/1.0 401 Unauthorized\r\nWWW-Authenticate: Basic realm=\"PeerCast Admin\"\r\n\r\n", mock->outgoing.str());
+}
+
+TEST_F(ServentFixture, writeVariable)
+{
+    StringStream mem;
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "type"));
+    ASSERT_STREQ("NONE", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "status"));
+    ASSERT_STREQ("NONE", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "address"));
+    ASSERT_STREQ("0.0.0.0:0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "agent"));
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "bitrate"));
+    ASSERT_STREQ("0.0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "bitrateAvg"));
+    ASSERT_STREQ("0.0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "uptime"));
+    ASSERT_STREQ("-", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "gnet.packetsIn"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "gnet.packetsInPerSec"));
+    ASSERT_STREQ("0.0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "gnet.packetsOut"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "gnet.packetsOutPerSec"));
+    ASSERT_STREQ("0.0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "gnet.normQueue"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "gnet.priQueue"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "gnet.flowControl"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "gnet.routeTime"));
+    ASSERT_STREQ("-", mem.str().c_str());
+}
+
+TEST_F(ServentFixture, handshakeIncoming_viewxml)
+{
+    s.sock->host = Host("127.0.0.1", 12345);
+    mock->incoming.str("GET /admin?cmd=viewxml HTTP/1.0\r\n"
+                       "\r\n");
+
+    ASSERT_NO_THROW(s.handshakeIncoming());
+
+    ASSERT_TRUE(str::has_prefix(mock->outgoing.str(), "HTTP/1.0 200 OK\r\n"));
+}
+
+TEST_F(ServentFixture, handshakeStream_emptyInput)
+{
+    ChanInfo info;
+
+    ASSERT_THROW(s.handshakeStream(info), StreamException);
+}
+
+TEST_F(ServentFixture, handshakeStream_noHeaders)
+{
+    ChanInfo info;
+
+    mock->incoming.str("\r\n");
+    ASSERT_NO_THROW(s.handshakeStream(info));
+
+    ASSERT_EQ("HTTP/1.0 404 Not Found\r\n\r\n", mock->outgoing.str());
+}
+
+TEST_F(ServentFixture, handshakeStream_returnResponse_channelNotFound)
+{
+    bool gotPCP = false;
+    bool chanFound = false;
+    bool chanReady = false;
+    std::shared_ptr<Channel> ch = nullptr;
+    ChanHitList* chl = nullptr;
+    const ChanInfo chanInfo;
+
+    ASSERT_FALSE(
+        s.handshakeStream_returnResponse(gotPCP, chanFound, chanReady, ch, chl, chanInfo));
+    ASSERT_EQ("HTTP/1.0 404 Not Found\r\n\r\n", mock->outgoing.str());
+}
+
+TEST_F(ServentFixture, handshakeStream_returnResponse_channelNotReady_relay)
+{
+    bool gotPCP = true;
+    bool chanFound = true;
+    bool chanReady = false;
+    std::shared_ptr<Channel> ch = nullptr;
+    ChanHitList* chl = nullptr;
+    const ChanInfo chanInfo;
+
+    s.outputProtocol = ChanInfo::SP_PCP;
+    // PCPハンドシェイクができない。
+    ASSERT_THROW(
+        s.handshakeStream_returnResponse(gotPCP, chanFound, chanReady, ch, chl, chanInfo),
+        StreamException);
+}
+
+TEST_F(ServentFixture, handshakeStream_returnResponse_channelNotReady_direct)
+{
+    bool gotPCP = false;
+    bool chanFound = true;
+    bool chanReady = false;
+    std::shared_ptr<Channel> ch = nullptr;
+    ChanHitList* chl = nullptr;
+    const ChanInfo chanInfo;
+
+    s.outputProtocol = ChanInfo::SP_HTTP;
+    ASSERT_FALSE(
+        s.handshakeStream_returnResponse(gotPCP, chanFound, chanReady, ch, chl, chanInfo));
+    ASSERT_EQ("HTTP/1.0 503 Service Unavailable\r\n\r\n", mock->outgoing.str());
+}
+
+TEST_F(ServentFixture, handshakeStream_returnResponse_channelReady_relay)
+{
+    bool gotPCP = true;
+    bool chanFound = true;
+    bool chanReady = true;
+    std::shared_ptr<Channel> ch = nullptr;
+    ChanHitList* chl = nullptr;
+    const ChanInfo chanInfo;
+
+    s.outputProtocol = ChanInfo::SP_PCP;
+    // PCPハンドシェイクができない。
+    ASSERT_THROW(
+        s.handshakeStream_returnResponse(gotPCP, chanFound, chanReady, ch, chl, chanInfo),
+        StreamException);
+}
+
+TEST_F(ServentFixture, handshakeStream_returnResponse_channelReady_direct)
+{
+    bool gotPCP = false;
+    bool chanFound = true;
+    bool chanReady = true;
+    std::shared_ptr<Channel> ch = nullptr;
+    ChanHitList* chl = nullptr;
+    const ChanInfo chanInfo;
+
+    s.outputProtocol = ChanInfo::SP_HTTP;
+    ASSERT_TRUE(
+        s.handshakeStream_returnResponse(gotPCP, chanFound, chanReady, ch, chl, chanInfo));
+    Regexp regexp("\\A"
+                  "HTTP/1\\.0 200 OK\\r\\n"
+                  "Server: PeerCast/0\\.1218 \\(YT\\d\\d\\)\\r\\n"
+                  "Accept-Ranges: none\\r\\n"
+                  "x-audiocast-name: \\r\\n"
+                  "x-audiocast-bitrate: 0\\r\\n"
+                  "x-audiocast-genre: \\r\\n"
+                  "x-audiocast-description: \\r\\n"
+                  "x-audiocast-url: \\r\\n"
+                  "x-peercast-channelid: 00000000000000000000000000000000\\r\\n"
+                  "Content-Type: application/octet-stream\\r\\n\\r\\n"
+                  "\\z");
+    ASSERT_TRUE(regexp.matches(mock->outgoing.str()));
+}
+
+TEST_F(ServentFixture, handshakeStream_returnHits)
+{
+    AtomStream atom(*mock);
+    GnuID channelID;
+    ChanHitList* chl = nullptr;
+    Host rhost;
+
+    s.handshakeStream_returnHits(atom, channelID, chl, rhost);
+    // quit int 1003
+    ASSERT_EQ(std::string({'q','u','i','t', 4,0,0,0, (char)0xeb,0x03,0,0 }), mock->outgoing.str());
+}
+
+TEST_F(ServentFixture, handshakeStream_returnStreamHeaders)
+{
+    AtomStream atom(*mock);
+    std::shared_ptr<Channel> ch = nullptr;
+    ChanInfo chanInfo;
+
+    s.outputProtocol = ChanInfo::SP_HTTP;
+    s.handshakeStream_returnStreamHeaders(atom, ch, chanInfo);
+
+    ASSERT_EQ("HTTP/1.0 200 OK\r\n"
+              "Server: " PCX_AGENT "\r\n"
+              "Accept-Ranges: none\r\n"
+              "x-audiocast-name: \r\n"
+              "x-audiocast-bitrate: 0\r\n"
+              "x-audiocast-genre: \r\n"
+              "x-audiocast-description: \r\n"
+              "x-audiocast-url: \r\n"
+              "x-peercast-channelid: 00000000000000000000000000000000\r\n"
+              "Content-Type: application/octet-stream\r\n"
+              "\r\n",
+              mock->outgoing.str());
+}
+
+TEST_F(ServentFixture, handshakeStream_returnStreamHeaders_mov)
+{
+    // ストリームタイプが MOV の時は、以下の2つのヘッダーが追加される。
+    // Connection: close
+    // Content-Length: 10000000
+
+    AtomStream atom(*mock);
+    std::shared_ptr<Channel> ch = nullptr;
+    ChanInfo chanInfo;
+
+    s.outputProtocol = ChanInfo::SP_HTTP;
+    chanInfo.contentType = ChanInfo::T_MOV;
+    s.handshakeStream_returnStreamHeaders(atom, ch, chanInfo);
+
+    ASSERT_EQ("HTTP/1.0 200 OK\r\n"
+              "Server: " PCX_AGENT "\r\n"
+              "Accept-Ranges: none\r\n"
+              "x-audiocast-name: \r\n"
+              "x-audiocast-bitrate: 0\r\n"
+              "x-audiocast-genre: \r\n"
+              "x-audiocast-description: \r\n"
+              "x-audiocast-url: \r\n"
+              "x-peercast-channelid: 00000000000000000000000000000000\r\n"
+              "Connection: close\r\n"
+              "Content-Length: 10000000\r\n"
+              "Content-Type: video/quicktime\r\n"
+              "\r\n",
+              mock->outgoing.str());
 }

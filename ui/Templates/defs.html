@@ -1,0 +1,14 @@
+{^define HEAD}
+{^end}
+
+{^define TITLE}
+  {#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$servMgr.serverIP}:{$servMgr.serverPort}{@end}
+{^end}
+
+{^define SERVER_NAME}
+  {@if servMgr.serverName}
+    {$servMgr.serverName}
+  {@else}
+    {$servMgr.serverIP}:{$servMgr.serverPort}
+  {@end}
+{^end}

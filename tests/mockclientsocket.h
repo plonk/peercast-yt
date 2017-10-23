@@ -1,11 +1,11 @@
 #include "common.h"
 #include "socket.h"
-#include "dmstream.h"
+#include "sstream.h"
 
 class MockClientSocket : public ClientSocket
 {
 public:
-    void            open(Host &) override
+    void            open(const Host &) override
     {
     }
 
@@ -49,5 +49,5 @@ public:
         outgoing.write(p, len);
     }
 
-    DynamicMemoryStream incoming, outgoing;
+    StringStream incoming, outgoing;
 };

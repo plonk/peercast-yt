@@ -95,12 +95,12 @@ public:
 
     void    init()
     {
-        lock.on();
+        lock.lock();
         lastPos = firstPos = safePos = 0;
         readPos = writePos = 0;
         accept = 0;
         lastWriteTime = 0;
-        lock.off();
+        lock.unlock();
     }
 
     int     copyFrom(ChanPacketBuffer &, unsigned in);
@@ -152,7 +152,7 @@ public:
     volatile unsigned int   readPos, writePos;
     unsigned int            accept;
     unsigned int            lastWriteTime;
-    WLock                   lock;
+    std::recursive_mutex    lock;
 };
 
 // ----------------------------------
@@ -169,17 +169,17 @@ public:
 
     virtual ~ChannelStream() {}
 
-    void updateStatus(Channel *);
-    bool getStatus(Channel *, ChanPacket &);
+    void updateStatus(std::shared_ptr<Channel>);
+    bool getStatus(std::shared_ptr<Channel>, ChanPacket &);
 
     virtual void kill() {}
     virtual bool sendPacket(ChanPacket &, GnuID &) { return false; }
     virtual void flush(Stream &) {}
-    virtual void readHeader(Stream &, Channel *) = 0;
-    virtual int  readPacket(Stream &, Channel *) = 0;
-    virtual void readEnd(Stream &, Channel *) = 0;
+    virtual void readHeader(Stream &, std::shared_ptr<Channel>) = 0;
+    virtual int  readPacket(Stream &, std::shared_ptr<Channel>) = 0;
+    virtual void readEnd(Stream &, std::shared_ptr<Channel>) = 0;
 
-    void    readRaw(Stream &, Channel *);
+    void    readRaw(Stream &, std::shared_ptr<Channel>);
 
     int             numRelays;
     int             numListeners;

@@ -29,6 +29,7 @@
 #include "pcp.h"
 #include "cgi.h" // Query
 #include "playlist.h"
+#include "varwriter.h"
 
 class HTML;
 
@@ -36,7 +37,7 @@ class AtomStream;
 
 // ----------------------------------
 // Servent handles the actual connection between clients
-class Servent
+class Servent : public VariableWriter
 {
 public:
 
@@ -108,8 +109,8 @@ public:
     bool    initServer(Host &);
     void    initIncoming(ClientSocket *, unsigned int);
     void    initOutgoing(TYPE);
-    void    initGIV(Host &, GnuID &);
-    void    initPCP(Host &);
+    void    initGIV(const Host &, const GnuID &);
+    void    initPCP(const Host &);
 
     void    checkFree();
 
@@ -143,12 +144,11 @@ public:
     bool    getLocalURL(char *);
 
     // various types of handshaking are needed
-    void    handshakePLS(ChanHitList **, int, bool);
-    void    handshakePLS(ChanInfo &, bool);
+    void    handshakePLS(ChanInfo &);
 
     void    handshakeHTML(char *);
     void    handshakeXML();
-    void    handshakeCMD(char *);
+    void    handshakeCMD(HTTP&, char *);
     bool    handshakeAuth(HTTP &, const char *, bool);
     void    handshakeIn();
     void    handshakeOut();
@@ -159,6 +159,14 @@ public:
     void    processOutChannel();
 
     bool    handshakeStream(ChanInfo &);
+    void    handshakeStream_readHeaders(bool& gotPCP, unsigned int& reqPos, int& nsSwitchNum);
+    void    handshakeStream_changeOutputProtocol(bool gotPCP, const ChanInfo& chanInfo);
+    bool    handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool chanReady,
+                                           std::shared_ptr<Channel> ch, ChanHitList* chl,
+                                           const ChanInfo& chanInfo);
+    void    handshakeStream_returnStreamHeaders(AtomStream& atom,
+                                                std::shared_ptr<Channel> ch, const ChanInfo& chanInfo);
+    void    handshakeStream_returnHits(AtomStream& atom, const GnuID& channelID, ChanHitList* chl, Host& rhost);
     void    handshakeGiv(GnuID &);
 
     void    handshakeICY(Channel::SRC_TYPE, bool);
@@ -175,7 +183,8 @@ public:
     void    handshakeJRPC(HTTP &http);
 
     void    handshakeRemoteFile(const char *);
-    void    handshakeLocalFile(const char *);
+    void    handshakeLocalFile(const char *, HTTP& http);
+    void    invokeCGIScript(HTTP &http, const char* fn);
 
     static void handshakeOutgoingPCP(AtomStream &, Host &, GnuID &, String &, bool);
     static void handshakeIncomingPCP(AtomStream &, Host &, GnuID &, String &);
@@ -185,7 +194,7 @@ public:
     bool    waitForChannelHeader(ChanInfo &);
     ChanInfo findChannel(char *str, ChanInfo &);
 
-    bool    writeVariable(Stream &, const String &);
+    bool    writeVariable(Stream &, const String &) override;
 
     // the "mainloop" of servents
     void    processGnutella();
@@ -204,10 +213,9 @@ public:
     void    sendRawChannel(bool, bool);
     void    sendRawMetaChannel(int);
     void    sendPCPChannel();
-    void    checkPCPComms(Channel *, AtomStream &);
 
     static void readICYHeader(HTTP &, ChanInfo &, char *, size_t);
-    bool    canStream(Channel *);
+    bool    canStream(std::shared_ptr<Channel>);
 
     bool    isConnected() { return status == S_CONNECTED; }
     bool    isListening() { return status == S_LISTENING; }
@@ -229,10 +237,12 @@ public:
     bool    acceptGIV(ClientSocket *);
     bool    sendPacket(ChanPacket &, GnuID &, GnuID &, GnuID &, Servent::TYPE);
 
-    ChanInfo createChannelInfo(GnuID broadcastID, const String& broadcastMsg, cgi::Query& query);
+    ChanInfo createChannelInfo(GnuID broadcastID, const String& broadcastMsg, cgi::Query& query, const std::string& contentType);
 
     static bool hasValidAuthToken(const std::string& requestFilename);
     static PlayList::TYPE playListType(ChanInfo &info);
+
+    static std::string formatTimeDifference(unsigned int t, unsigned int currentTime);
 
     TYPE                type;
     STATUS              status;
@@ -249,7 +259,7 @@ public:
 
     GnuID               remoteID;
     GnuID               chanID;
-    GnuID               givID;
+    GnuID               givID; // GIV するチャンネルのID
 
     ThreadInfo          thread;
 
@@ -263,7 +273,7 @@ public:
 
     ClientSocket        *sock, *pushSock;
 
-    WLock               lock;
+    std::recursive_mutex lock;
 
     bool                sendHeader;
     unsigned int        syncPos, streamPos;
@@ -281,31 +291,33 @@ public:
     Cookie              cookie;
 
 private:
-    void CMD_redirect(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_viewxml(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_clearlog(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_save(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_reg(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_edit_bcid(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_add_bcid(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_apply(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_fetch(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_stopserv(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_hitlist(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_clear(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_upgrade(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_connect(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_shutdown(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_stop(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_bump(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_keep(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_relay(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_net_add(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_logout(char *cmd, HTTP& http, HTML& html, String& jumpStr);
-    void CMD_login(char *cmd, HTTP& http, HTML& html, String& jumpStr);
+    void CMD_add_bcid(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_add_speedtest(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_apply(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_bump(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_clear(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_clearlog(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_control_rtmp(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_delete_speedtest(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_dump_hitlists(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_edit_bcid(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_fetch(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_fetch_feeds(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_keep(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_login(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_logout(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_redirect(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_refresh_speedtest(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_shutdown(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_speedtest_cached_xml(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_stop(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_stop_servent(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_take_speedtest(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_update_channel_info(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_viewxml(const char* cmd, HTTP& http, String& jumpStr);
 };
 
-extern char *nextCGIarg(char *cp, char *cmd, char *arg);
+extern const char *nextCGIarg(const char *cp, char *cmd, char *arg);
 
 #endif
 

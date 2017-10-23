@@ -8,7 +8,7 @@
 class FileSystemMapper
 {
 public:
-    FileSystemMapper(const std::string&, const std::string&);
+    FileSystemMapper(const std::string& vpath, const std::string& droot);
 
     std::string toLocalFilePath(const std::string&);
     std::pair<std::string,std::string> toLocalFilePath(const std::string&, const std::vector<std::string>& langExts);

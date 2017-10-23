@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 
-#include "dmstream.h"
+#include "sstream.h"
 #include "servmgr.h"
 
 class ServFilterFixture : public ::testing::Test {
 public:
     ServFilter filter;
-    DynamicMemoryStream mem;
+    StringStream mem;
 };
 
 TEST_F(ServFilterFixture, initialState)
@@ -71,4 +71,14 @@ TEST_F(ServFilterFixture, writeVariableIP)
     filter.host.ip = (127<<24)|1;
     filter.writeVariable(mem, "ip");
     ASSERT_STREQ("127.0.0.1", mem.str().c_str());
+}
+
+TEST_F(ServFilterFixture, matches)
+{
+    filter.flags = ServFilter::F_PRIVATE;
+    filter.host.ip = 192 << 24 | 168 << 16 | 255; // 192.168.0.*
+
+    ASSERT_TRUE( filter.matches(ServFilter::F_PRIVATE, Host(192<<24 | 168<<16 | 1, 0)) );
+    ASSERT_FALSE( filter.matches(ServFilter::F_DIRECT, Host(192<<24 | 168<<16 | 1, 0)) );
+    ASSERT_FALSE( filter.matches(ServFilter::F_PRIVATE, Host(192<<24 | 168<<16 | 1<<8 | 1, 0)) );
 }

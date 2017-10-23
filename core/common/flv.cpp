@@ -18,6 +18,8 @@
 
 #include "channel.h"
 #include "flv.h"
+#include "amf0.h"
+#include <math.h> // ceil
 
 static String timestampToString(uint32_t timestamp)
 {
@@ -29,19 +31,47 @@ static String timestampToString(uint32_t timestamp)
 }
 
 // ------------------------------------------
-void FLVStream::readEnd(Stream &, Channel *)
+void FLVStream::readEnd(Stream &, std::shared_ptr<Channel>)
 {
 }
 
 // ------------------------------------------
-void FLVStream::readHeader(Stream &in, Channel *ch)
+void FLVStream::readHeader(Stream &in, std::shared_ptr<Channel> ch)
 {
     metaBitrate = 0;
     fileHeader.read(in);
+    m_buffer.startTime = sys->getDTime();
+}
+
+// ----------------------------------------------------------
+std::pair<bool,int> FLVStream::readMetaData(void* data, int size)
+{
+    // スクリプトタグのペイロード data が onMetaData ならば、
+    // videodatarate / audiodatarate プロパティから総ビットレートを計
+    // 算して (true, bitrate) を返す。onMetaData でなかった場合や、ど
+    // ちらのプロパティも存在しなかった場合は、(false, _) を返す。
+
+    MemoryStream flvmem(data, size);
+    amf0::Deserializer deserializer;
+    double bitrate = 0;
+    auto cmd = deserializer.readValue(flvmem);
+    if (cmd.string() == "onMetaData")
+    {
+        auto object = deserializer.readValue(flvmem).object();
+
+        if (object.count("videodatarate"))
+            bitrate += object["videodatarate"].number();
+        if (object.count("audiodatarate"))
+            bitrate += object["audiodatarate"].number();
+
+        if (bitrate > 0)
+            return std::make_pair(true, ceil(bitrate));
+    }
+    return std::make_pair(false, 0);
 }
 
 // ------------------------------------------
-int FLVStream::readPacket(Stream &in, Channel *ch)
+int FLVStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
 {
     bool headerUpdate = false;
 
@@ -58,11 +88,13 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
     {
     case FLVTag::T_SCRIPT:
         {
-            AMFObject amf;
-            MemoryStream flvmem(flvTag.data, flvTag.size);
-            if (amf.readMetaData(flvmem)) {
-                flvmem.close();
-                metaBitrate = amf.bitrate;
+            bool success;
+            int bitrate;
+
+            std::tie(success, bitrate) = readMetaData(flvTag.data, flvTag.size);
+            if (success)
+            {
+                metaBitrate = bitrate;
                 metaData = flvTag;
                 headerUpdate = true;
             }
@@ -75,7 +107,7 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
             avcHeader = flvTag;
             if (avcHeader.getTimestamp() != 0)
             {
-                LOG_CHANNEL("AVC header has non-zero timestamp. Cleared to zero.");
+                LOG_INFO("AVC header has non-zero timestamp. Cleared to zero.");
                 avcHeader.setTimestamp(0);
             }
             headerUpdate = true;
@@ -87,7 +119,7 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
             aacHeader = flvTag;
             if (aacHeader.getTimestamp() != 0)
             {
-                LOG_CHANNEL("AAC header has non-zero timestamp. Cleared to zero.");
+                LOG_INFO("AAC header has non-zero timestamp. Cleared to zero.");
                 aacHeader.setTimestamp(0);
             }
             headerUpdate = true;
@@ -129,12 +161,15 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
 
         m_buffer.flush(ch);
 
+        ch->rawData.init();
+        ch->streamIndex++;
+
         ch->headPack.type = ChanPacket::T_HEAD;
         ch->headPack.len = mem.pos;
-        ch->headPack.pos = ch->streamPos;
+        ch->headPack.pos = 0;
         ch->newPacket(ch->headPack);
 
-        ch->streamPos += ch->headPack.len;
+        ch->streamPos = 0 + ch->headPack.len;
     }
     else {
         bool packet_sent;
@@ -148,11 +183,11 @@ int FLVStream::readPacket(Stream &in, Channel *ch)
     return 0;
 }
 
-bool FLVTagBuffer::put(FLVTag& tag, Channel* ch)
+bool FLVTagBuffer::put(FLVTag& tag, std::shared_ptr<Channel> ch)
 {
     if (tag.isKeyFrame())
     {
-        m_hasKeyFrame = true;
+        m_streamHasKeyFrames = true;
 
         if (m_mem.pos > 0)
         {
@@ -162,10 +197,7 @@ bool FLVTagBuffer::put(FLVTag& tag, Channel* ch)
         return true;
     } else if (m_mem.pos + tag.packetSize > MAX_OUTGOING_PACKET_SIZE)
     {
-        if (m_mem.pos > 0)
-        {
-            flush(ch);
-        }
+        flush(ch);
         sendImmediately(tag, ch);
         return true;
     } else if (m_mem.pos + tag.packetSize > FLUSH_THRESHOLD)
@@ -184,8 +216,31 @@ bool FLVTagBuffer::put(FLVTag& tag, Channel* ch)
     }
 }
 
-void FLVTagBuffer::sendImmediately(FLVTag& tag, Channel* ch)
+void FLVTagBuffer::rateLimit(uint32_t timestamp)
 {
+    double diff = (startTime + timestamp/1000.0) - sys->getDTime();
+    if (diff > 10)
+    {
+        // 10秒は長すぎるので、タイムスタンプがジャンプしてるっぽい。
+        // 基準時刻をリセット。
+        LOG_DEBUG("Timestamp way into the future. Resetting referece point.");
+        startTime = sys->getDTime();
+    }else if (diff < -10)
+    {
+        LOG_DEBUG("Timestamp way back in the past. Resetting referece point.");
+        startTime = sys->getDTime();
+    }else if (diff > 0)
+    {
+        LOG_TRACE("Sleeping %.2f s", diff);
+        sys->sleep(diff * 1000);
+    }
+}
+
+void FLVTagBuffer::sendImmediately(FLVTag& tag, std::shared_ptr<Channel> ch)
+{
+    if (ch->readDelay)
+        rateLimit(tag.getTimestamp());
+
     ChanPacket pack;
     MemoryStream mem(tag.packet, tag.packetSize);
 
@@ -202,7 +257,7 @@ void FLVTagBuffer::sendImmediately(FLVTag& tag, Channel* ch)
         pack.type = ChanPacket::T_DATA;
         pack.pos = ch->streamPos;
         pack.len = rl;
-        if (m_hasKeyFrame)
+        if (m_streamHasKeyFrames)
         {
             if (firstTimeRound && tag.isKeyFrame())
                 pack.cont = false;
@@ -212,7 +267,7 @@ void FLVTagBuffer::sendImmediately(FLVTag& tag, Channel* ch)
         mem.read(pack.data, pack.len);
 
         ch->newPacket(pack);
-        ch->checkReadDelay(pack.len);
+        //ch->checkReadDelay(pack.len);
         ch->streamPos += pack.len;
 
         rlen -= rl;
@@ -220,7 +275,7 @@ void FLVTagBuffer::sendImmediately(FLVTag& tag, Channel* ch)
     }
 }
 
-void FLVTagBuffer::flush(Channel* ch)
+void FLVTagBuffer::flush(std::shared_ptr<Channel> ch)
 {
     if (m_mem.pos == 0)
         return;
@@ -228,6 +283,13 @@ void FLVTagBuffer::flush(Channel* ch)
     int length = m_mem.pos;
 
     m_mem.rewind();
+    {
+        FLVTag flvTag;
+        flvTag.read(m_mem);
+        if (ch->readDelay)
+            rateLimit(flvTag.getTimestamp());
+        m_mem.rewind();
+    }
 
     ChanPacket pack;
 
@@ -235,12 +297,12 @@ void FLVTagBuffer::flush(Channel* ch)
     pack.pos = ch->streamPos;
     pack.len = length;
     // キーフレームでないタグだけがバッファリングされる。
-    if (m_hasKeyFrame)
+    if (m_streamHasKeyFrames)
         pack.cont = true;
     m_mem.read(pack.data, length);
 
     ch->newPacket(pack);
-    ch->checkReadDelay(pack.len);
+    //ch->checkReadDelay(pack.len);
     ch->streamPos += pack.len;
 
     m_mem.rewind();

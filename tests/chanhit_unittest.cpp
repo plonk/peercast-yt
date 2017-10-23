@@ -2,6 +2,7 @@
 
 #include "atom.h"
 #include "channel.h"
+#include "sstream.h"
 
 class ChanHitFixture : public ::testing::Test {
 public:
@@ -95,7 +96,7 @@ TEST_F(ChanHitFixture, pickNearestIP)
 
         hit->pickNearestIP(host);
 
-        char ip[16];
+        char ip[32];
         hit->host.toStr(ip);
 
         ASSERT_STREQ("192.168.0.2:8145", ip);
@@ -107,7 +108,7 @@ TEST_F(ChanHitFixture, pickNearestIP)
 
         hit->pickNearestIP(host);
 
-        char ip[16];
+        char ip[32];
         hit->host.toStr(ip);
 
         ASSERT_STREQ("210.210.210.210:8145", ip);
@@ -152,15 +153,6 @@ TEST_F(ChanHitFixture, createXML)
     delete node;
 }
 
-static char* asString(MemoryStream& mem, char* buf)
-{
-    int length = mem.pos;
-    mem.rewind();
-    mem.read(buf, length);
-    buf[length] = '\0';
-    return buf;
-}
-
 TEST_F(ChanHitFixture, writeVariableNonExistent)
 {
     MemoryStream mem(1024);
@@ -174,10 +166,9 @@ TEST_F(ChanHitFixture, writeVariable)
 {
 #define TEST_VARIABLE(name, value)                          \
     do {                                                    \
-        MemoryStream mem(1024);                             \
-        char buf[1025];                                     \
+        StringStream mem;                                   \
         ASSERT_EQ(true, hit->writeVariable(mem, name));     \
-        EXPECT_STREQ(value, (name, asString(mem, buf)));    \
+        EXPECT_EQ(value, mem.str());                        \
     } while (0)
 
     TEST_VARIABLE("rhost0", "0.0.0.0:0");

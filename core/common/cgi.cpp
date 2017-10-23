@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 #include "cgi.h"
 #include "str.h"
 
@@ -34,9 +32,9 @@ std::string unescape(const std::string& in)
 
     while (i < in.size()) {
         if (in[i] == '%') {
-            char c;
-            sscanf(in.substr(i + 1, 2).c_str(), "%hhx", &c);
-            res += c;
+            int c;
+            sscanf(in.substr(i + 1, 2).c_str(), "%x", &c);
+            res += (char) c;
             i += 3;
         } else if (in[i] == '+') {
             res += ' ';
@@ -54,6 +52,9 @@ Query::Query(const std::string& queryString)
     auto assignments = str::split(queryString, "&");
     for (auto& assignment : assignments)
     {
+        if (assignment.empty())
+            continue;
+
         auto sides = str::split(assignment, "=");
         if (sides.size() == 1)
             m_dict[sides[0]] = {};
@@ -94,17 +95,50 @@ std::vector<std::string> Query::getAll(const std::string& key)
     }
 }
 
+std::string Query::str()
+{
+    std::string res;
+    bool firstTime = true;
+    for (auto pair : m_dict)
+    {
+        for (auto value : pair.second)
+        {
+            if (firstTime)
+                firstTime = false;
+            else
+                res += "&";
+
+            res += escape(pair.first) + "=" + escape(value);
+        }
+    }
+    return res;
+}
+
+void Query::add(const std::string& key, const std::string& value)
+{
+    m_dict[key].push_back(value);
+}
+
 static const char* daysOfWeek[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
 static const char* monthNames[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Nov", "Oct", "Dec" };
 
 std::string rfc1123Time(time_t t)
 {
-    tm tm;
     char fmt[30], buf[30];
+#if !defined(WIN32) && (_POSIX_C_SOURCE >= 1 || _XOPEN_SOURCE || _BSD_SOURCE || _SVID_SOURCE || _POSIX_SOURCE)
+    tm tm;
 
     gmtime_r(&t, &tm);
     strftime(fmt, sizeof(fmt), "%%s, %d %%s %Y %H:%M:%S GMT", &tm);
     std::snprintf(buf, sizeof(buf), fmt, daysOfWeek[tm.tm_wday], monthNames[tm.tm_mon]);
+#else
+    // FIXME: The code that follows should have a race!
+    struct tm* ptm;
+
+    ptm = gmtime(&t);
+    strftime(fmt, sizeof(fmt), "%%s, %d %%s %Y %H:%M:%S GMT", ptm);
+    std::snprintf(buf, sizeof(buf), fmt, daysOfWeek[ptm->tm_wday], monthNames[ptm->tm_mon]);
+#endif
 
     return buf;
 }
@@ -376,7 +410,7 @@ std::string unescape_html(const std::string& input)
             if (s[0] != '#')
                 return false;
 
-            for (int i = 1; i < s.size(); i++)
+            for (size_t i = 1; i < s.size(); i++)
             {
                 if (!(s[i] >= '0' && s[i] <= '9'))
                     return false;
@@ -393,7 +427,7 @@ std::string unescape_html(const std::string& input)
             if (s[0] != '#' || !(s[1] == 'x' || s[1] == 'X'))
                 return false;
 
-            for (int i = 2; i < s.size(); i++)
+            for (size_t i = 2; i < s.size(); i++)
             {
                 if (!((s[i] >= '0' && s[i] <= '9') ||
                       (s[i] >= 'a' && s[i] <= 'f') ||
@@ -412,11 +446,24 @@ std::string unescape_html(const std::string& input)
         {
             it++;
             std::string ref;
-            while (it != input.end() && *it != ';')
+            while (it != input.end() &&
+                   ((*it >= '0' && *it <= '9') ||
+                    (*it >= 'a' && *it <= 'z') ||
+                    (*it >= 'A' && *it <= 'Z') ||
+                    *it == '#'))
+            {
                 ref += *it++;
+            }
 
             if (it == input.end())
-                return res + ref;
+                return res + "&" + ref;
+
+            if (*it != ';')
+            {
+                res += '&';
+                res += ref;
+                continue;
+            }
 
             it++; // skip semicolon
 

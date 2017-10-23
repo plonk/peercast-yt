@@ -38,12 +38,12 @@ public:
     virtual ~ClientSocket() {}
 
     // required interface
-    virtual void            open(Host &)   = 0;
-    virtual void            bind(Host &)   = 0;
-    virtual void            connect()      = 0;
-    virtual bool            active()       = 0;
-    virtual ClientSocket    *accept()      = 0;
-    virtual Host            getLocalHost() = 0;
+    virtual void            open(const Host &) = 0;
+    virtual void            bind(Host &)       = 0;
+    virtual void            connect()          = 0;
+    virtual bool            active()           = 0;
+    virtual ClientSocket    *accept()          = 0;
+    virtual Host            getLocalHost()     = 0;
 
     void    setReadTimeout(unsigned int t) override
     {

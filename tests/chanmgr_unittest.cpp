@@ -31,7 +31,7 @@ TEST_F(ChanMgrFixture, initialState)
 
     id.clear();
 
-    ASSERT_EQ(NULL, x->channel);
+    ASSERT_EQ(nullptr, x->channel);
     ASSERT_EQ(NULL, x->hitlist);
     ASSERT_EQ(PCP_BROADCAST_FLAGS, x->broadcastID.getFlags());
 
@@ -67,13 +67,12 @@ TEST_F(ChanMgrFixture, initialState)
 TEST_F(ChanMgrFixture, createChannel)
 {
     ChanInfo info;
-    Channel *c;
 
-    ASSERT_EQ(NULL, x->channel);
+    ASSERT_EQ(nullptr, x->channel);
 
-    c = x->createChannel(info, NULL);
+    auto c = x->createChannel(info, NULL);
 
-    ASSERT_TRUE(c);
+    ASSERT_TRUE(c != nullptr); // ASSERT_TRUE(c) と書くとエラーになるコンパイラがある。
     ASSERT_EQ(c, x->channel);
 
     x->deleteChannel(c);

@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+  <head>
+    <title>{$page.channel.name} - {#PeerCast on} {^SERVER_NAME}</title>
+    <link rel="stylesheet" href="peercast.css">
+    <meta charset="utf-8">
+    <style>
+      body { margin: 0; }
+     .paper {
+       background-color: #eee;
+       margin: 0;
+       padding: 0.5em
+     }
+     object { color: white; font-size: 14px; }
+     .message { color: white; font-size: 14px; }
+
+     video {
+       width: 100%;
+     }
+
+     /* FlowPlayer */
+     object {
+       max-width: calc(100% - 320px);
+     }
+
+     #bbs-view {
+       background-color: #eee;
+       box-sizing: border-box;
+       width: 320px;
+       height: calc(100vh - 34px);
+       margin: 0;
+       padding: 5px 5px 5px 5px;
+       overflow-y: scroll;
+       line-height: 1.33em;
+       word-break: break-all;
+       position: relative;
+     }
+
+     dl.thread dd {
+       margin-left: 1.5em;
+       margin-bottom: 1em;
+     }
+
+     table.layout {
+       width: 100%;
+     }
+     table.layout td {
+       padding: 0;
+     }
+    </style>
+    <script src="/assets/js/jquery-3.2.1.min.js"></script>
+    <script>
+     var CONTACT_URL = "{\page.channel.contactURL}";
+    </script>
+    <script src="bbs.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  </head>
+  <body class="normal" style="background-color: #222">
+
+    <div class="paper" style="height: 1.5em; line-height: 1.5em">
+      <div style="float: left">
+      <b>{$page.channel.name}</b>
+      <a target="_blank"
+         href="/pls/{$page.channel.id}{$page.channel.plsExt}?auth={$page.channel.authToken}">
+        {#Playlist}
+      </a>
+      -
+      {@if page.channel.contactURL}
+      <a target="_blank"
+         href="{$page.channel.contactURL}">
+        {#Contact}
+      </a>
+      {@else}
+      {#Contact}
+      {@end}
+      -
+      <a href="/admin?cmd=bump&amp;id={$page.channel.id}">{#Bump}</a>
+      {@if page.channel.type == "FLV"}
+        -
+        {@if page.player != "flash"}
+        <a href="?id={$page.channel.id}&amp;player=flash" title="{#Request Flash-based player}">Flash</a>
+        {@else}
+        <a href="?id={$page.channel.id}" title="{#Request HTML5 player}">HTML5</a>
+        {@end}
+      {@end}
+      </div>
+
+      <div style="float: right">
+        <label><input type="checkbox" id="chat-visibility" checked style="display: inline"> {#Show Chat}</label>
+        <span id="bbs-title">n/a</span>
+      </div>
+      <br clear=all>
+    </div>
+
+    <table class="layout">
+      <tr>
+        <td valign=middle style="width: 100%">{^include player.html}</td>
+        <td valign=top><div id="bbs-view"></div></td>
+      </tr>
+    </table>
+  </body>
+</html>

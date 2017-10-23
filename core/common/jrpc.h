@@ -4,18 +4,30 @@
 #include "peercast.h"
 #include "channel.h"
 #include "version2.h"
-#include "critsec.h"
 
 #include <stdarg.h>
 #include <string>
 #include <vector>
 #include <tuple>
 #include "json.hpp"
+#include "chandir.h"
 
 class JrpcApi
 {
 public:
     using json = nlohmann::json;
+
+    enum ErrorCode
+    {
+        kParseError = -32700,
+        kInvalidRequest = -32600,
+        kMethodNotFound = -32601,
+        kInvalidParams = -32602,
+        kInternalError = -32603,
+
+        kChannelNotFound = -1,
+        kUnknownError = 0,
+    };
 
     class method_not_found : public std::runtime_error
     {
@@ -39,7 +51,7 @@ public:
     class HostGraph
     {
     public:
-        HostGraph(Channel *ch, ChanHitList *hitList)
+        HostGraph(std::shared_ptr<Channel> ch, ChanHitList *hitList)
         {
             if (ch == nullptr)
                 throw std::invalid_argument("ch");
@@ -178,12 +190,15 @@ public:
         m_methods
         ({
             { "bumpChannel",             &JrpcApi::bumpChannel,             { "channelId" } },
+            { "clearLog",                &JrpcApi::clearLog,                {} },
             { "fetch",                   &JrpcApi::fetch,                   { "url", "name", "desc", "genre", "contact", "bitrate", "type" } },
             { "getChannelConnections",   &JrpcApi::getChannelConnections,   { "channelId" } },
             { "getChannelInfo",          &JrpcApi::getChannelInfo,          { "channelId" } },
             { "getChannelRelayTree",     &JrpcApi::getChannelRelayTree,     { "channelId" } },
             { "getChannelStatus",        &JrpcApi::getChannelStatus,        { "channelId" } },
             { "getChannels",             &JrpcApi::getChannels,             {} },
+            { "getLog",                  &JrpcApi::getLog,                  { "from", "maxLines" } },
+            { "getLogSettings",          &JrpcApi::getLogSettings,          {} },
             { "getNewVersions",          &JrpcApi::getNewVersions,          {} },
             { "getNotificationMessages", &JrpcApi::getNotificationMessages, {} },
             { "getPlugins",              &JrpcApi::getPlugins,              {} },
@@ -195,6 +210,7 @@ public:
             { "getYPChannels",           &JrpcApi::getYPChannels,           {} },
             { "removeYellowPage",        &JrpcApi::removeYellowPage,        { "yellowPageId" } },
             { "setChannelInfo",          &JrpcApi::setChannelInfo,          { "channelId", "info", "track" } },
+            { "setLogSettings",          &JrpcApi::setLogSettings,          { "settings" } },
             { "setSettings",             &JrpcApi::setSettings,             { "settings" } },
             { "stopChannel",             &JrpcApi::stopChannel,             { "channelId" } },
             { "stopChannelConnection",   &JrpcApi::stopChannelConnection,   { "channelId", "connectionId" } },
@@ -213,7 +229,7 @@ public:
     {
         json result = json::array();
 
-        for (int i = 0; i < names.size(); i++)
+        for (size_t i = 0; i < names.size(); i++)
             result.push_back(nullptr);
 
         for (std::pair<std::string, json> pair : named_params.get<json::object_t>())
@@ -232,7 +248,7 @@ public:
     // method_not_found 例外を上げる。
     json dispatch(const json& m, const json& p)
     {
-        for (int i = 0; i < m_methods.size(); i++)
+        for (size_t i = 0; i < m_methods.size(); i++)
         {
             entry& info = m_methods[i];
 
@@ -288,10 +304,10 @@ public:
             info.id = chanMgr->broadcastID;
             info.id.encode(NULL, info.name, info.genre, info.bitrate);
 
-            Channel *c = chanMgr->createChannel(info, NULL); // info, mount
+            auto c = chanMgr->createChannel(info, NULL); // info, mount
             if (!c)
             {
-                throw application_error(0, "failed to create channel");
+                throw application_error(kUnknownError, "failed to create channel");
             }
             c->startURL(url.c_str());
 
@@ -306,7 +322,7 @@ public:
     {
         return {
             { "agentName", PCX_AGENT },
-            { "apiVesion", "1.0.0" },
+            { "apiVersion", "1.0.0" },
             { "jsonrpc", "2.0" }
         };
     }
@@ -370,7 +386,7 @@ public:
         }
     }
 
-    json channelStatus(Channel *c)
+    json channelStatus(std::shared_ptr<Channel> c)
     {
         return {
             {"status", to_json(c->status)},
@@ -387,7 +403,7 @@ public:
         };
     }
 
-    json to_json(Channel *c)
+    json to_json(std::shared_ptr<Channel> c)
     {
         return {
             {"channelId", to_json(c->info.id)},
@@ -406,7 +422,7 @@ public:
         int connectionId = params[1].get<int>();
         bool success = false;
 
-        CriticalSection cs(servMgr->lock);
+        std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
         for (Servent* s = servMgr->servents; s != NULL; s = s->next)
         {
              if (s->serventIndex == connectionId &&
@@ -428,9 +444,9 @@ public:
 
         GnuID id = params[0].get<std::string>();
 
-        Channel *c = chanMgr->findChannelByID(id);
+        auto c = chanMgr->findChannelByID(id);
         if (!c)
-            throw application_error(-1, "Channel not found");
+            throw application_error(kChannelNotFound, "Channel not found");
 
         json remoteEndPoint;
         if (c->sock)
@@ -456,7 +472,7 @@ public:
         };
         result.push_back(sourceConnection);
 
-        CriticalSection cs(servMgr->lock);
+        std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
         for (Servent* s = servMgr->servents; s != NULL; s = s->next)
         {
             if (!s->chanID.isSame(id))
@@ -497,9 +513,9 @@ public:
     {
         GnuID id(params[0].get<std::string>());
 
-        Channel *c = chanMgr->findChannelByID(id);
+        auto c = chanMgr->findChannelByID(id);
         if (!c)
-            throw application_error(-1, "Channel not found");
+            throw application_error(kChannelNotFound, "Channel not found");
 
         json j = {
             { "info", to_json(c->info) },
@@ -514,10 +530,10 @@ public:
     {
         GnuID id(params[0].get<std::string>());
 
-        Channel *c = chanMgr->findChannelByID(id);
+        auto c = chanMgr->findChannelByID(id);
 
         if (!c)
-            throw application_error(-1, "Channel not found");
+            throw application_error(kChannelNotFound, "Channel not found");
 
         return channelStatus(c);
     }
@@ -526,8 +542,8 @@ public:
     {
         json result = json::array();
 
-        CriticalSection cs(chanMgr->lock);
-        for (Channel *c = chanMgr->channel; c != NULL; c = c->next)
+        std::lock_guard<std::recursive_mutex> cs(chanMgr->lock);
+        for (auto c = chanMgr->channel; c != NULL; c = c->next)
         {
             result.push_back(to_json(c));
         }
@@ -603,9 +619,7 @@ public:
     {
         json result = json::array();
 
-        chanMgr->lock.on();
-
-        int publicChannels = chanMgr->numHitLists();
+        chanMgr->lock.lock();
 
         for (ChanHitList *hitList = chanMgr->hitlist;
              hitList;
@@ -615,14 +629,14 @@ public:
                 result.push_back(to_json(hitList));
         }
 
-        chanMgr->lock.off();
+        chanMgr->lock.unlock();
 
         return result;
     }
 
     // 配信中のチャンネルとルートサーバーとの接続状態。
     // 返り値: "Idle" | "Connecting" | "Connected" | "Error"
-    json::string_t announcingChannelStatus(Channel* c)
+    json::string_t announcingChannelStatus(std::shared_ptr<Channel> c)
     {
         return "Connected";
     }
@@ -631,8 +645,8 @@ public:
     {
         json::array_t result;
 
-        CriticalSection cs(chanMgr->lock);
-        for (Channel *c = chanMgr->channel; c != NULL; c = c->next)
+        std::lock_guard<std::recursive_mutex> cs(chanMgr->lock);
+        for (auto c = chanMgr->channel; c != NULL; c = c->next)
         {
             if (!c->isBroadcasting())
                 continue;
@@ -779,9 +793,9 @@ public:
         json info             = args[1];
         json track            = args[2];
 
-        Channel *channel = chanMgr->findChannelByID(channelId);
+        auto channel = chanMgr->findChannelByID(channelId);
         if (!channel)
-            throw application_error(0, "Channel not found");
+            throw application_error(kChannelNotFound, "Channel not found");
 
         channel->updateInfo(mergeChanInfo(channel->info, info, track));
 
@@ -794,10 +808,10 @@ public:
 
         GnuID id(channelId);
 
-        Channel *channel = chanMgr->findChannelByID(id);
+        auto channel = chanMgr->findChannelByID(id);
 
         if (channel)
-            channel->thread.active = false;
+            channel->thread.shutdown();
 
         return nullptr;
     }
@@ -806,13 +820,13 @@ public:
     {
         GnuID id = args[0].get<std::string>();
 
-        Channel *channel = chanMgr->findChannelByID(id);
+        auto channel = chanMgr->findChannelByID(id);
         if (!channel)
-            throw application_error(0, "Channel not found");
+            throw application_error(kChannelNotFound, "Channel not found");
 
         ChanHitList *hitList = chanMgr->findHitListByID(id);
         if (!hitList)
-            throw application_error(0, "Hit list not found");
+            throw application_error(kUnknownError, "Hit list not found");
 
         HostGraph graph(channel, hitList);
 
@@ -823,9 +837,12 @@ public:
     {
         GnuID id = args[0].get<std::string>();
 
-        Channel *channel = chanMgr->findChannelByID(id);
+        if (!id.isSet())
+            throw invalid_params("id");
+
+        auto channel = chanMgr->findChannelByID(id);
         if (!channel)
-            throw application_error(0, "Channel not found");
+            throw application_error(kChannelNotFound, "Channel not found");
 
         channel->bump = true;
 
@@ -834,14 +851,14 @@ public:
 
     json removeYellowPage(json::array_t args)
     {
-        throw application_error(0, "Method unavailable");
+        throw application_error(kUnknownError, "Method unavailable");
     }
 
     static std::string tolower(std::string str)
     {
         std::string res;
 
-        for (int i = 0; i < str.size(); ++i)
+        for (size_t i = 0; i < str.size(); ++i)
             res.push_back(std::tolower(str[i]));
 
         return res;
@@ -849,7 +866,7 @@ public:
 
     json getYPChannels(json::array_t args)
     {
-        auto channels = servMgr->channelDirectory.channels();
+        auto channels = servMgr->channelDirectory->channels();
         json::array_t res;
 
         for (auto& c : channels)
@@ -878,11 +895,11 @@ public:
 
     json getYPChannelsInternal(json::array_t args = {})
     {
-        auto channels = servMgr->channelDirectory.channels();
+        auto channels = servMgr->channelDirectory->channels();
         json::array_t res;
         std::map<std::string,bool> publicFeed;
 
-        for (auto& feed : servMgr->channelDirectory.feeds())
+        for (auto& feed : servMgr->channelDirectory->feeds())
             publicFeed[feed.url] = feed.isPublic;
 
         for (auto& c : channels)
@@ -915,6 +932,11 @@ public:
         }
         return res;
     }
+
+    json getLog(json::array_t args);
+    json clearLog(json::array_t args);
+    json getLogSettings(json::array_t args);
+    json setLogSettings(json::array_t args);
 };
 
 #endif

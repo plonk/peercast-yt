@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "dmstream.h"
+#include "sstream.h"
 #include "http.h"
 
 class HTTPFixture : public ::testing::Test {
@@ -9,7 +9,7 @@ public:
         : http(mem)
     {
     }
-    DynamicMemoryStream mem;
+    StringStream mem;
     HTTP http;
 };
 
@@ -72,8 +72,8 @@ TEST_F(HTTPFixture, nextHeader)
     ASSERT_EQ(2, http.headers.size());
     ASSERT_EQ(NULL, http.arg);
 
-    ASSERT_STREQ("localhost", http.headers["HOST"].c_str());
-    ASSERT_STREQ("close", http.headers["CONNECTION"].c_str());
+    ASSERT_STREQ("localhost", http.headers.get("Host").c_str());
+    ASSERT_STREQ("close", http.headers.get("Connection").c_str());
 }
 
 TEST_F(HTTPFixture, isHeader)
@@ -197,4 +197,28 @@ TEST_F(HTTPFixture, initialState)
     ASSERT_STREQ("", http.cmdLine);
     ASSERT_EQ(NULL, http.arg);
     ASSERT_EQ(0, http.headers.size());
+}
+
+TEST_F(HTTPFixture, send_stringBody)
+{
+    HTTPResponse res(200, {});
+
+    res.body = "hoge";
+    http.send(res);
+    auto output = mem.str();
+    ASSERT_TRUE(str::contains(output, "200 OK"));
+    ASSERT_TRUE(str::has_suffix(output, "hoge"));
+}
+
+TEST_F(HTTPFixture, send_streamBody)
+{
+    HTTPResponse res(200, {});
+    StringStream input;
+
+    input.str("fuga");
+    res.stream = &input;
+    http.send(res);
+    auto output = mem.str();
+    ASSERT_TRUE(str::contains(output, "200 OK"));
+    ASSERT_TRUE(str::has_suffix(output, "fuga"));
 }

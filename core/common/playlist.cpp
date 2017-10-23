@@ -35,7 +35,7 @@ void PlayList::readASX(Stream &in)
         XML::Node *n = xml.root->child;
         while (n)
         {
-            if (stricmp("entry", n->getName())==0)
+            if (Sys::stricmp("entry", n->getName())==0)
             {
                 XML::Node *rf = n->findNode("ref");
                 if (rf)
@@ -59,7 +59,7 @@ void PlayList::readSCPLS(Stream &in)
     char tmp[256];
     while (in.readLine(tmp, sizeof(tmp)))
     {
-        if (strnicmp(tmp, "file", 4)==0)
+        if (Sys::strnicmp(tmp, "file", 4)==0)
         {
             char *p = strstr(tmp, "=");
             if (p)
@@ -115,8 +115,9 @@ void PlayList::writeASX(Stream &out)
     out.writeLine("<ASX Version=\"3.0\">");
     for (int i=0; i<numURLs; i++)
     {
+        auto url = str::replace_prefix(urls[i].cstr(), "http", wmvProtocol);
         out.writeLine("<ENTRY>");
-        out.writeLineF("<REF href=\"mmsh%s\" />", urls[i].cstr() + 4);
+        out.writeLineF("<REF href=\"%s\" />", url.c_str());
         out.writeLine("</ENTRY>");
     }
     out.writeLine("</ASX>");
@@ -127,13 +128,10 @@ void PlayList::addChannel(const char *path, ChanInfo &info)
 {
     String url;
 
-    char idStr[64];
-
-    info.id.toStr(idStr);
-    char *nid = info.id.isSet()?idStr:info.name.cstr();
+    std::string nid = info.id.isSet() ? info.id.str() : info.name;
 
     sprintf(url.cstr(), "%s/stream/%s%s?auth=%s",
-            path, nid, info.getTypeExt(), chanMgr->authToken(info.id).c_str());
+            path, nid.c_str(), info.getTypeExt(), chanMgr->authToken(info.id).c_str());
     addURL(url.cstr(), info.name);
 }
 

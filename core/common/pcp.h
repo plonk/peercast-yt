@@ -183,7 +183,7 @@ class BroadcastState
 {
 public:
     BroadcastState()
-    :numHops(0)
+    : numHops(0)
     , forMe(false)
     , streamPos(0)
     , group(0)
@@ -220,15 +220,15 @@ public:
 
     void    kill() override
     {
-        inData.lock.on();
-        outData.lock.on();
+        inData.lock.lock();
+        outData.lock.lock();
     }
 
     bool    sendPacket(ChanPacket &, GnuID &) override;
     void    flush(Stream &) override;
-    void    readHeader(Stream &, Channel *) override;
-    int     readPacket(Stream &, Channel *) override;
-    void    readEnd(Stream &, Channel *) override;
+    void    readHeader(Stream &, std::shared_ptr<Channel>) override;
+    int     readPacket(Stream &, std::shared_ptr<Channel>) override;
+    void    readEnd(Stream &, std::shared_ptr<Channel>) override;
 
     int             readPacket(Stream &, BroadcastState &);
     void            flushOutput(Stream &in, BroadcastState &);
@@ -240,7 +240,7 @@ public:
     void            readHostAtoms(AtomStream &, int, BroadcastState &);
     void            readPushAtoms(AtomStream &, int, BroadcastState &);
 
-    void            readPktAtoms(Channel *, AtomStream &, int, BroadcastState &);
+    void            readPktAtoms(std::shared_ptr<Channel>, AtomStream &, int, BroadcastState &);
     void            readRootAtoms(AtomStream &, int, BroadcastState &);
 
     int             readBroadcastAtoms(AtomStream &, int, BroadcastState &);

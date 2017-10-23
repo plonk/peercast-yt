@@ -46,6 +46,22 @@ const char *ChanInfo::getTypeStr()
 }
 
 // -----------------------------------
+std::string ChanInfo::getTypeStringLong()
+{
+    std::string buf = std::string(getTypeStr()) +
+        " (" + getMIMEType() + "; " + getTypeExt() + ")";
+
+    if (contentTypeStr == "")
+        buf += " [contentTypeStr empty]"; // これが起こるのは何かがおかしい
+    if (MIMEType == "")
+        buf += " [no styp]";
+    if (streamExt == "")
+        buf += " [no sext]";
+
+    return buf;
+}
+
+// -----------------------------------
 const char *ChanInfo::getTypeExt()
 {
     if (streamExt.isEmpty()) {
@@ -57,13 +73,13 @@ const char *ChanInfo::getTypeExt()
 }
 
 // -----------------------------------
-const char *ChanInfo::getMIMEType()
+const char *ChanInfo::getMIMEType() const
 {
     if (MIMEType.isEmpty()) {
         return getMIMEType(contentType);
     }
     else {
-        return MIMEType.cstr();
+        return MIMEType.c_str();
     }
 }
 
@@ -105,6 +121,7 @@ const char *ChanInfo::getProtocolStr(PROTOCOL t)
         case SP_MMS: return "MMS";
         case SP_PCP: return "PCP";
         case SP_WMHTTP: return "WMHTTP";
+        case SP_RTMP: return "RTMP";
         default: return "UNKNOWN";
     }
 }
@@ -112,18 +129,20 @@ const char *ChanInfo::getProtocolStr(PROTOCOL t)
 // -----------------------------------
 ChanInfo::PROTOCOL ChanInfo::getProtocolFromStr(const char *str)
 {
-    if (stricmp(str, "PEERCAST")==0)
+    if (Sys::stricmp(str, "PEERCAST")==0)
         return SP_PEERCAST;
-    else if (stricmp(str, "HTTP")==0)
+    else if (Sys::stricmp(str, "HTTP")==0)
         return SP_HTTP;
-    else if (stricmp(str, "FILE")==0)
+    else if (Sys::stricmp(str, "FILE")==0)
         return SP_FILE;
-    else if (stricmp(str, "MMS")==0)
+    else if (Sys::stricmp(str, "MMS")==0)
         return SP_MMS;
-    else if (stricmp(str, "PCP")==0)
+    else if (Sys::stricmp(str, "PCP")==0)
         return SP_PCP;
-    else if (stricmp(str, "WMHTTP")==0)
+    else if (Sys::stricmp(str, "WMHTTP")==0)
         return SP_WMHTTP;
+    else if (Sys::stricmp(str, "RTMP")==0)
+        return SP_RTMP;
     else
         return SP_UNKNOWN;
 }
@@ -192,33 +211,64 @@ const char *ChanInfo::getMIMEType(TYPE t)
 }
 
 // -----------------------------------
+ChanInfo::TYPE ChanInfo::getTypeFromMIME(const std::string& mediaType)
+{
+    if (mediaType == MIME_XOGG)
+        return T_OGG;
+    else if (mediaType == MIME_XOGG)
+        return T_OGM;
+    else if (mediaType == MIME_MP3)
+        return T_MP3;
+    else if (mediaType == MIME_MOV)
+        return T_MOV;
+    else if (mediaType == MIME_MPG)
+        return T_MPG;
+    else if (mediaType == MIME_NSV)
+        return T_NSV;
+    else if (mediaType == MIME_ASX)
+        return T_ASX;
+    else if (mediaType == MIME_WMA)
+        return T_WMA;
+    else if (mediaType == MIME_WMV)
+        return T_WMV;
+    else if (mediaType == MIME_FLV)
+        return T_FLV;
+    else if (mediaType == MIME_MKV)
+        return T_MKV;
+    else if (mediaType == MIME_WEBM)
+        return T_WEBM;
+    else
+        return T_UNKNOWN;
+}
+
+// -----------------------------------
 ChanInfo::TYPE ChanInfo::getTypeFromStr(const char *str)
 {
-    if (stricmp(str, "MP3")==0)
+    if (Sys::stricmp(str, "MP3")==0)
         return T_MP3;
-    else if (stricmp(str, "OGG")==0)
+    else if (Sys::stricmp(str, "OGG")==0)
         return T_OGG;
-    else if (stricmp(str, "OGM")==0)
+    else if (Sys::stricmp(str, "OGM")==0)
         return T_OGM;
-    else if (stricmp(str, "RAW")==0)
+    else if (Sys::stricmp(str, "RAW")==0)
         return T_RAW;
-    else if (stricmp(str, "NSV")==0)
+    else if (Sys::stricmp(str, "NSV")==0)
         return T_NSV;
-    else if (stricmp(str, "WMA")==0)
+    else if (Sys::stricmp(str, "WMA")==0)
         return T_WMA;
-    else if (stricmp(str, "WMV")==0)
+    else if (Sys::stricmp(str, "WMV")==0)
         return T_WMV;
-    else if (stricmp(str, "FLV")==0)
+    else if (Sys::stricmp(str, "FLV")==0)
         return T_FLV;
-    else if (stricmp(str, "MKV")==0)
+    else if (Sys::stricmp(str, "MKV")==0)
         return T_MKV;
-    else if (stricmp(str, "WEBM")==0)
+    else if (Sys::stricmp(str, "WEBM")==0)
         return T_WEBM;
-    else if (stricmp(str, "PLS")==0)
+    else if (Sys::stricmp(str, "PLS")==0)
         return T_PLS;
-    else if (stricmp(str, "M3U")==0)
+    else if (Sys::stricmp(str, "M3U")==0)
         return T_PLS;
-    else if (stricmp(str, "ASX")==0)
+    else if (Sys::stricmp(str, "ASX")==0)
         return T_ASX;
     else
         return T_UNKNOWN;
@@ -541,8 +591,6 @@ void ChanInfo::writeTrackAtoms(AtomStream &atom)
 // -----------------------------------
 XML::Node *ChanInfo::createChannelXML()
 {
-    char idStr[64];
-
     String nameUNI = name;
     nameUNI.convertTo(String::T_UNICODESAFE);
 
@@ -559,11 +607,9 @@ XML::Node *ChanInfo::createChannelXML()
     commentUNI = comment;
     commentUNI.convertTo(String::T_UNICODESAFE);
 
-    id.toStr(idStr);
-
     return new XML::Node("channel name=\"%s\" id=\"%s\" bitrate=\"%d\" type=\"%s\" genre=\"%s\" desc=\"%s\" url=\"%s\" uptime=\"%d\" comment=\"%s\" skips=\"%d\" age=\"%d\" bcflags=\"%d\"",
         nameUNI.cstr(),
-        idStr,
+        id.str().c_str(),
         bitrate,
         getTypeStr(),
         genreUNI.cstr(),
@@ -581,7 +627,6 @@ XML::Node *ChanInfo::createChannelXML()
 XML::Node *ChanInfo::createQueryXML()
 {
     char buf[512];
-    char idStr[64];
 
     String nameHTML = name;
     nameHTML.convertTo(String::T_HTML);
@@ -605,9 +650,8 @@ XML::Node *ChanInfo::createQueryXML()
 
     if (id.isSet())
     {
-        id.toStr(idStr);
         strcat(buf, " id=\"");
-        strcat(buf, idStr);
+        strcat(buf, id.str().c_str());
         strcat(buf, "\"");
     }
 
@@ -617,12 +661,8 @@ XML::Node *ChanInfo::createQueryXML()
 // -----------------------------------
 XML::Node *ChanInfo::createRelayChannelXML()
 {
-    char idStr[64];
-
-    id.toStr(idStr);
-
     return new XML::Node("channel id=\"%s\" uptime=\"%d\" skips=\"%d\" age=\"%d\"",
-        idStr,
+        id.str().c_str(),
         getUptime(),
         numSkips,
         getAge()
@@ -773,5 +813,32 @@ const char* ChanInfo::getPlayListExt()
         return ".ram";
     case PlayList::T_PLS:
         return ".m3u"; // or could be .pls ...
+    case PlayList::T_SCPLS:
+        return ".pls";
+    case PlayList::T_NONE:
+    default:
+        return "";
     }
+}
+
+// -----------------------------------
+bool ChanInfo::writeVariable(Stream &out, const String &var)
+{
+    std::string buf;
+
+    if (var == "name")
+        buf = name.c_str();
+    else if (var == "desc")
+        buf = desc.c_str();
+    else if (var == "genre")
+        buf = genre.c_str();
+    else if (var == "url")
+        buf = url.c_str();
+    else if (var == "comment")
+        buf = comment.c_str();
+    else
+        return false;
+
+    out.writeString(buf);
+    return true;
 }

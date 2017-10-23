@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "servmgr.h"
+#include "varwriter.h"
 #include <deque>
 
 class NotificationBuffer;
@@ -41,7 +42,7 @@ public:
     std::string message;
 };
 
-class NotificationBuffer
+class NotificationBuffer : public VariableWriter
 {
 public:
     class Entry
@@ -66,11 +67,11 @@ public:
     Entry getNotification(int index);
     void addNotification(const Notification& notif);
 
-    bool writeVariable(Stream& out, const String& varName);
-    bool writeVariable(Stream& out, const String& varName, int loopCount);
+    bool writeVariable(Stream& out, const String& varName) override;
+    bool writeVariable(Stream& out, const String& varName, int loopCount) override;
 
     std::deque<Entry> notifications;
-    WLock lock;
+    std::recursive_mutex lock;
 };
 
 #endif

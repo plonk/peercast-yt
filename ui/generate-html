@@ -1,7 +1,10 @@
 #!/usr/bin/env ruby
-
 require 'fileutils'
 require 'shellwords'
+
+def shell(cmd)
+  system("sh", "-c", cmd)
+end
 
 def esc(s)
   Shellwords.escape(s)
@@ -21,13 +24,13 @@ languages.each do |lang|
       FileUtils.mkdir_p(outpath)
     elsif path.end_with?('.htm') || path.end_with?('.html')
       cmd = [
-        "./apply-template #{esc path}",
+        "./macro-expand #{esc path}",
         "./message-interpolate -c catalogs/#{esc lang}.json",
-        "sed -z -r 's/<!--[^-]+-->//g'",
+        "sed -r 's/<!--[^-]+-->//g'",
         "sed -r -e 's/^\\s+//g' -e 's/\\r//' -e '/^$/d'",
       ].join(' | ') + " > #{esc outpath}"
       STDERR.puts cmd
-      system(cmd)
+      shell(cmd)
       if $? != 0
         exit 1
       end

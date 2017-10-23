@@ -3,7 +3,7 @@
 
 #include "public.h"
 #include "str.h"
-#include "dmstream.h"
+#include "sstream.h"
 #include "template.h"
 #include "jrpc.h"
 
@@ -16,7 +16,7 @@ PublicController::PublicController(const string& documentRoot)
 }
 
 // ------------------------------------------------------------
-string PublicController::MIMEType(const string& path)
+static string MIMEType(const string& path)
 {
     using namespace str;
 
@@ -144,7 +144,7 @@ PublicController::acceptableLanguages(const string& acceptLanguage)
 // ------------------------------------------------------------
 HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream, Host& remoteHost)
 {
-    vector<string> langs = acceptableLanguages(req.getHeader("Accept-Language"));
+    vector<string> langs = acceptableLanguages(req.headers.get("Accept-Language"));
 
     if (req.path == "/public")
     {
@@ -168,7 +168,7 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
         tie(path, lang) = mapper.toLocalFilePath(req.path, langs);
 
         FileStream file;
-        DynamicMemoryStream mem;
+        StringStream mem;
         HTTPRequestScope scope(req);
 
         file.openReadOnly(path.c_str());
@@ -195,7 +195,7 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
         {
             auto type = MIMEType(path);
 
-            DynamicMemoryStream mem;
+            StringStream mem;
             FileStream file;
             HTTPRequestScope scope(req);
 
@@ -228,4 +228,32 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
             return HTTPResponse::ok(headers, body);
         }
     }
+}
+
+// ------------------------------------------------------------
+AssetsController::AssetsController(const std::string& documentRoot)
+    : mapper("/assets", documentRoot)
+{
+}
+
+// ------------------------------------------------------------
+HTTPResponse AssetsController::operator()(const HTTPRequest& req, Stream& stream, Host& remoteHost)
+{
+    auto path = mapper.toLocalFilePath(req.path);
+
+    if (path.empty())
+        return HTTPResponse::notFound();
+
+    StringStream mem;
+    FileStream   file;
+
+    file.openReadOnly(path.c_str());
+    file.writeTo(mem, file.length());
+
+    string body = mem.str();
+    map<string,string> headers = {
+        {"Content-Type",MIMEType(path)},
+        {"Content-Length",to_string(body.size())}
+    };
+    return HTTPResponse::ok(headers, body);
 }

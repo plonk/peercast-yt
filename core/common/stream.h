@@ -22,12 +22,11 @@
 
 // -------------------------------------
 
-#include <stdio.h>
 #include <stdarg.h>
-#include <string.h>
 #include "common.h"
 #include "sys.h"
 #include "id.h"
+#include "threading.h"
 
 // -------------------------------------
 class Stream
@@ -140,21 +139,9 @@ public:
         return cnt;
     }
 
-    std::string read(int remaining)
-    {
-        std::string res;
+    std::string readLine(size_t);
 
-        uint8_t buffer[4096];
-
-        while (remaining > 0)
-        {
-            int readSize = std::min(remaining, 4096);
-            int r = read(buffer, readSize);
-            res += std::string(buffer, buffer + r);
-            remaining -= r;
-        }
-        return res;
-    }
+    std::string read(int remaining);
 
     virtual bool    readReady(int timeoutMilliseconds = 0) { return true; }
     virtual int numPending() { return 0; }
@@ -311,8 +298,10 @@ public:
 
     void    openReadOnly(const char *);
     void    openReadOnly(const std::string& fn) { openReadOnly(fn.c_str()); }
+    void    openReadOnly(int fd);
     void    openWriteReplace(const char *);
     void    openWriteReplace(const std::string& fn) { openWriteReplace(fn.c_str()); }
+    void    openWriteReplace(int fd);
     void    openWriteAppend(const char *);
     void    openWriteAppend(const std::string& fn) { openWriteAppend(fn.c_str()); }
     bool    isOpen() { return file!=NULL; }

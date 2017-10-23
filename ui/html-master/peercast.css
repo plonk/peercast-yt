@@ -12,8 +12,8 @@ a {
 a:hover {
 	font-family: Verdana, Arial, Helvetica, sans-serif;
 	text-decoration: underline;
-
 }
+
 .normal {
 	font-family: Verdana, Arial, Helvetica, sans-serif;
 	font-size: 12px;
@@ -78,4 +78,57 @@ a.button {
 	padding: 5px;
 	border: solid #ccc 1px;
 	padding: 3px;
+}
+
+.text-muted {
+	color: #777;
+}
+
+.text-danger {
+	color: #d00;
+}
+
+table.table-panel {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    margin-bottom: 1em;
+}
+
+table.table-panel tbody tr:nth-child(odd) {
+	background-color: #eee;
+}
+table.table-panel tbody tr:nth-child(even) {
+	background-color: #ddd;
+}
+
+/* パネルの上部のスパンする見出し行。他の行よりも背景が濃い。 */
+table.table-panel tbody tr:nth-child(1) {
+	background-color: #ccc;
+}
+
+/* 通常、上の指定で十分。 */
+table.table-panel tbody tr.heading-row {
+	background-color: #ccc;
+}
+
+table.table-panel th {
+    text-align: center;
+}
+
+table.table-panel th.left-heading {
+	text-align: right;
+	font-weight: normal;
+}
+
+td.bandwidth-cell {
+    min-width: 4em;
+    text-align: right;
+}
+
+input.fill-parent {
+    width: 100%;
+}
+
+td.checkbox-cell {
+    text-align: center;
 }

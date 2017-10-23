@@ -25,42 +25,37 @@
 #include <ApplicationServices/ApplicationServices.h>
 #endif
 
-
-#include <sys/time.h>
 #include <pthread.h>
 #include <signal.h>
 #include <stdlib.h>
-#include "usys.h"
-#include "usocket.h"
+#include <sys/time.h>
+#include <sys/wait.h> // WIFEXITED, WEXITSTATUS
+#include <thread>
+
 #include "stats.h"
+#include "str.h"
+#include "usocket.h"
+#include "usys.h"
 
 // ---------------------------------
 USys::USys()
 {
     stats.clear();
 
-    rndGen.setSeed(rnd()+getpid());
+    rndGen.setSeed(rnd() + getpid());
     signal(SIGPIPE, SIG_IGN);
     signal(SIGABRT, SIG_IGN);
 
     rndSeed = rnd();
-
 }
+
 // ---------------------------------
 double USys::getDTime()
 {
-  struct timeval tv;
+    struct timeval tv;
 
-  gettimeofday(&tv, 0);
-  return (double)tv.tv_sec + ((double)tv.tv_usec)/1000000;
-}
-
-// ---------------------------------
-unsigned int USys::getTime()
-{
-    time_t ltime;
-    time( &ltime );
-    return ltime;
+    gettimeofday(&tv, 0);
+    return (double)tv.tv_sec + ((double)tv.tv_usec)/1000000;
 }
 
 // ---------------------------------
@@ -69,92 +64,72 @@ ClientSocket *USys::createSocket()
     return new UClientSocket();
 }
 
-
 // ---------------------------------
-void USys::endThread(ThreadInfo *info)
-{
-    numThreads--;
-
-    LOG_DEBUG("End thread: %d", numThreads);
-
-    //pthread_exit(NULL);
-}
-
-// ---------------------------------
-void USys::waitThread(ThreadInfo *info, int timeout)
-{
-    //pthread_join(info->handle, NULL);
-}
-
-
-
-// ---------------------------------
-typedef void *(*THREAD_PTR)(void *);
-bool    USys::startThread(ThreadInfo *info)
-{
-    info->active = true;
-
-
-    LOG_DEBUG("New thread: %d", numThreads);
-
-    pthread_attr_t attr;
-
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-
-    int r = pthread_create(&info->handle, &attr, (THREAD_PTR)info->func, info);
-
-    pthread_attr_destroy(&attr);
-
-    if (r)
-    {
-        LOG_ERROR("Error creating thread %d: %d", numThreads, r);
-        return false;
-    }else
-    {
-        setThreadName(info, String::format("thread %d", numThreads).cstr());
-        numThreads++;
-        return true;
-    }
-}
-// ---------------------------------
-void    USys::setThreadName(ThreadInfo *thread, const char* name)
+void    USys::setThreadName(const char* name)
 {
 #ifdef _GNU_SOURCE
     char buf[16];
     snprintf(buf, 16, "%s", name);
-    pthread_setname_np(thread->handle, buf);
+    pthread_setname_np(pthread_self(), buf);
 #endif
-}
-// ---------------------------------
-void    USys::sleep(int ms)
-{
-    ::usleep(ms*1000);
 }
 
 // ---------------------------------
-void USys::appMsg(long msg, long arg)
+bool USys::hasGUI()
 {
-    //SendMessage(mainWindow, WM_USER, (WPARAM)msg, (LPARAM)arg);
+    return false;
 }
-// ---------------------------------
+
 #ifndef __APPLE__
+
+// ---------------------------------
 void USys::getURL(const char *url)
 {
 }
+
 // ---------------------------------
 void USys::callLocalURL(const char *str, int port)
 {
+    char* disp = getenv("DISPLAY");
+
+    auto localURL = str::format("http://localhost:%d/%s", port, str);
+
+    if (disp == nullptr || disp[0] == '\0')
+    {
+        LOG_WARN("Ignoring openLocalURL request (no DISPLAY environment variable): %s", localURL.c_str());
+        return;
+    }
+
+    int retval;
+    std::string cmdLine = str::format("xdg-open %s", str::escapeshellarg_unix(localURL).c_str());
+    LOG_DEBUG("Calling system(%s)", str::inspect(cmdLine).c_str());
+    retval = system(cmdLine.c_str());
+    if (retval == -1)
+    {
+        LOG_ERROR("USys::callLocalURL: system(3) returned -1");;
+    }else if (!WIFEXITED(retval))
+    {
+        LOG_ERROR("Usys::callLocalURL: Shell terminated abnormally");
+    }else if (WEXITSTATUS(retval) != 0)
+    {
+        LOG_ERROR("Usys::callLocalURL: Shell exited with error status (%d)", WEXITSTATUS(retval));
+    }else
+        ; // Shell exited normally.
 }
+
 // ---------------------------------
 void USys::executeFile( const char *file )
 {
 }
+
+// ---------------------------------
 void USys::exit()
 {
     ::exit(0);
 }
+
 #else
+
 // ---------------------------------
 void USys::openURL( const char* url )
 {
@@ -171,6 +146,7 @@ void USys::openURL( const char* url )
         CFRelease( urlString );
     }
 }
+
 // ---------------------------------
 void USys::callLocalURL(const char *str, int port)
 {
@@ -178,14 +154,16 @@ void USys::callLocalURL(const char *str, int port)
     sprintf(cmd, "http://localhost:%d/%s", port, str);
     openURL( cmd );
 }
+
 // ---------------------------------
 void USys::getURL(const char *url)
 {
-    if (strnicmp(url, "http://", 7) || strnicmp(url, "mailto:", 7))
+    if (Sys::strnicmp(url, "http://", 7) || Sys::strnicmp(url, "mailto:", 7)) // XXX: ==0 が抜けてる？
     {
         openURL( url );
     }
 }
+
 // ---------------------------------
 void USys::executeFile( const char *file )
 {
@@ -204,6 +182,7 @@ void USys::executeFile( const char *file )
         CFRelease( fileString );
     }
 }
+
 // ---------------------------------
 void USys::exit()
 {
@@ -213,4 +192,5 @@ void USys::exit()
     ::exit(0);
 #endif
 }
+
 #endif

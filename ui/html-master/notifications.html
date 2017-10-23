@@ -1,41 +1,30 @@
-<!doctype html>
-<html>
-  <!-- InstanceBegin template="/Templates/peercast.dwt" codeOutsideHTMLIsLocked="false" -->
+{^define LAYOUT layout.html}
+{^define TITLE}
+{#Notifications} - {#PeerCast on} {^SERVER_NAME}
+{^end}
 
-  <!-- InstanceBeginEditable name="title" -->
-  <title>{#Notifications} - {#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$servMgr.serverIP}:{$servMgr.serverPort}{@end}</title>
-  <!-- InstanceEndEditable -->
+<div class="reloader" data-url="notifications.html?fragment=content" data-interval="{$servMgr.refreshHTML}">
+  {@fragment content}
+  <table width="100%" class="table-panel">
+    <tr>
+      <th style="width: 14.5em">{#Time}</th>
+      <th style="width: 3em">{#Type}</th>
+      <th>{#Message}</th>
+    </tr>
 
-  <!-- InstanceBeginEditable name="head" -->
-  <!-- InstanceEndEditable -->
-
-  <!-- InstanceBeginEditable name="content" -->
-  <div class="reloader" data-url="notifications.html?fragment=content" data-interval="{$servMgr.refreshHTML}">
-    {@fragment content}
-    <table width="100%" class="normal">
-      <tr bgcolor="#ccc">
-        <th style="width: 14em">{#Time}</th>
-        <th style="width: 3em">{#Type}</th>
-        <th>{#Message}</th>
-      </tr>
-
-      {@loop notificationBuffer.numNotifications}
-      <tr bgcolor="{@if loop.indexEven}#ddd{@else}#eee{@end}">
-        <td>
-          {$loop.notification.time}
-        </td>
-        <td>
-          {$loop.notification.type}
-        </td>
-        <td>
-          {$loop.notification.message}
-        </td>
-      </tr>
-      {@end}
-    </table>
+    {@loop notificationBuffer.numNotifications}
+    <tr>
+      <td>
+        {$loop.notification.time}
+      </td>
+      <td>
+        {$loop.notification.type}
+      </td>
+      <td>
+        {$loop.notification.message}
+      </td>
+    </tr>
     {@end}
-  </div>
-  <!-- InstanceEndEditable -->
-
-  <!-- InstanceEnd -->
-</html>
+  </table>
+  {@end}
+</div>

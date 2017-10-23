@@ -49,7 +49,7 @@ public:
         close();
     }
 
-    void    open(Host &) override;
+    void    open(const Host &) override;
     int     read(void *, int) override;
     int     readUpto(void *, int) override;
     void    write(const void *, int) override;
@@ -71,7 +71,7 @@ public:
 
     void    checkTimeout(bool, bool);
 
-    unsigned int sockNum;
+    int sockNum;
     struct sockaddr_in remoteAddr;
 };
 

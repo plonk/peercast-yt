@@ -20,8 +20,10 @@
 #ifndef _STATS_H
 #define _STATS_H
 
+#include "varwriter.h"
+
 // ------------------------------------------------------
-class Stats
+class Stats : public VariableWriter
 {
 public:
 
@@ -63,7 +65,7 @@ public:
         MAX
     };
 
-    bool    writeVariable(class Stream &, const class String &);
+    bool    writeVariable(class Stream &, const class String &) override;
 
     void    clearRange(STAT s, STAT e)
     {

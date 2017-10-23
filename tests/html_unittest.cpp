@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "html.h"
-#include "dmstream.h"
+#include "sstream.h"
 #include "version2.h"
 
 class HTMLFixture : public ::testing::Test {
@@ -11,7 +11,7 @@ public:
     {
     }
 
-    DynamicMemoryStream mem;
+    StringStream mem;
     HTML html;
 };
 
@@ -57,10 +57,10 @@ TEST_F(HTMLFixture, addHead)
 }
 
 
-// タイトルはフォーマット文字列として解釈されてはいoけない。
+// タイトルはフォーマット文字列として解釈されてはいけない。
 TEST_F(HTMLFixture, addHead2)
 {
-    DynamicMemoryStream mem2;
+    StringStream mem2;
     HTML html2("%s%s%s%s%s%s", mem2);
 
     html2.addHead();

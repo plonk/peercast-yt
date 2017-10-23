@@ -20,11 +20,12 @@ public:
         return false;
     }
 
-    void sleep(int) override
+    bool startWaitableThread(class ThreadInfo*) override
     {
+        return false;
     }
 
-    void appMsg(long, long = 0) override
+    void sleep(int) override
     {
     }
 
@@ -67,11 +68,7 @@ public:
     {
     }
 
-    void endThread(ThreadInfo*) override
-    {
-    }
-
-    void waitThread(ThreadInfo*, int timeout = 30000) override
+    void waitThread(ThreadInfo*) override
     {
     }
 };

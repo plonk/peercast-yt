@@ -18,13 +18,16 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-#include <stdlib.h>
 #include <cctype>
 
 #include "http.h"
 #include "sys.h"
 #include "common.h"
 #include "str.h"
+
+#include "cgi.h"
+#include "version2.h" // PCX_AGENT
+#include "defer.h"
 
 //-----------------------------------------
 bool HTTP::checkResponse(int r)
@@ -49,7 +52,7 @@ void HTTP::readRequest()
 //-----------------------------------------
 void HTTP::initRequest(const char *r)
 {
-    strcpy(cmdLine, r);
+    Sys::strcpy_truncate(cmdLine, sizeof(cmdLine), r);
     parseRequestLine();
 }
 
@@ -103,9 +106,9 @@ bool    HTTP::nextHeader()
                 if (!(end = strchr(ap, '\n')))
                     end = ap + strlen(ap);
             value = string(ap, end);
-            for (int i = 0; i < name.size(); ++i)
+            for (size_t i = 0; i < name.size(); ++i)
                 name[i] = toupper(name[i]);
-            headers[name] = value;
+            headers.set(name, value);
         }
         return true;
     }else
@@ -173,22 +176,6 @@ void HTTP::getAuthUserPass(char *user, char *pass, size_t ulen, size_t plen)
     }
 }
 
-#include <functional>
-class Defer
-{
-public:
-    Defer(std::function<void()> aCallback)
-        : callback(aCallback)
-    {}
-
-    ~Defer()
-    {
-        callback();
-    }
-
-    std::function<void()> callback;
-};
-
 static const char* statusMessage(int statusCode)
 {
     switch (statusCode)
@@ -201,6 +188,7 @@ static const char* statusMessage(int statusCode)
     case 403: return "Forbidden";
     case 404: return "Not Found";
     case 500: return "Internal Server Error";
+    case 501: return "Not Implemented";
     case 502: return "Bad Gateway";
     case 503: return "Service Unavailable";
     default: return "Unknown";
@@ -208,8 +196,6 @@ static const char* statusMessage(int statusCode)
 }
 
 // -----------------------------------
-#include "cgi.h"
-#include "version2.h" // PCX_AGENT
 void HTTP::send(const HTTPResponse& response)
 {
     bool crlf = writeCRLF;
@@ -229,12 +215,26 @@ void HTTP::send(const HTTPResponse& response)
         headers[pair.first] = pair.second;
 
     for (const auto& pair : headers)
-        writeLineF("%s: %s", pair.first.c_str(), pair.second.c_str());
+        writeLineF("%s: %s", str::capitalize(pair.first).c_str(), pair.second.c_str());
 
     writeLine("");
 
-    if (response.body.size())
+    if (response.stream != nullptr)
+    {
+        try
+        {
+            while (true)
+            {
+                char buf[4096];
+                int r = response.stream->read(buf, 4096);
+                write(buf, r);
+            }
+        } catch (StreamException&) {}
+    }
+    else
+    {
         write(response.body.data(), response.body.size());
+    }
 }
 
 // -----------------------------------
@@ -296,4 +296,44 @@ void    CookieList::remove(Cookie &c)
     for (int i=0; i<MAX_COOKIES; i++)
         if (list[i].compare(c))
             list[i].clear();
+}
+
+// -----------------------------------
+HTTPResponse HTTP::send(const HTTPRequest& request)
+{
+    // send request
+    stream->writeLineF("%s %s %s",
+                       request.method.c_str(),
+                       request.path.c_str(),
+                       request.protocolVersion.c_str());
+    for (auto it = request.headers.begin(); it != request.headers.end(); ++it)
+    {
+        stream->writeLineF("%s: %s",
+                           str::capitalize(it->first).c_str(),
+                           it->second.c_str());
+    }
+    stream->writeLine("");
+
+    if (request.method == "POST" || request.method == "PUT")
+    {
+        if (request.headers.get("Content-Length") != "" &&
+            std::atoi(request.headers.get("Content-Length").c_str()) != request.body.size())
+            throw StreamException("body size mismatch");
+        stream->writeString(request.body);
+    }
+
+    // receive response
+    int status = readResponse();
+    readHeaders();
+    HTTPResponse response(status, headers);
+
+    std::string contentLengthStr = headers.get("Content-Length");
+    if (contentLengthStr.empty())
+        throw StreamException("Content-Length missing");
+    int length = atoi(contentLengthStr.c_str());
+    if (length < 0)
+        throw StreamException("invalid Content-Length value");
+
+    response.body = stream->read(length);
+    return response;
 }

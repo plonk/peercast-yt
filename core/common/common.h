@@ -19,10 +19,9 @@
 #ifndef _COMMON_H
 #define _COMMON_H
 
-#include <stdio.h>
-#include <string.h>
-
+#include <stdio.h> // snprintf
 #include <string>
+#include <assert.h>
 
 #include "gnuid.h"
 #include "host.h"
@@ -32,16 +31,22 @@
 #endif
 
 // ----------------------------------
-class GeneralException
+class GeneralException : public std::exception
 {
 public:
     GeneralException(const char *m, int e = 0)
     {
-        strcpy(msg, m);
-        err=e;
+        std::snprintf(msg, sizeof(msg), "%s", m);
+        err = e;
     }
+
+    const char* what() const throw() override
+    {
+        return msg;
+    }
+
     char msg[128];
-    int err;
+    int  err;
 };
 
 // -------------------------------------
@@ -93,15 +98,16 @@ public:
 
 // -----------------------------------
 const char  *getCGIarg(const char *str, const char *arg);
-bool        cmpCGIarg(const char *str, const char *arg, const char *value);
 bool        hasCGIarg(const char *str, const char *arg);
 
 // ----------------------------------
 extern void LOG(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
-extern void LOG_ERROR(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
+extern void LOG_TRACE(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
 extern void LOG_DEBUG(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
-extern void LOG_NETWORK(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
-extern void LOG_CHANNEL(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
+extern void LOG_INFO(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
+extern void LOG_WARN(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
+extern void LOG_ERROR(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
+extern void LOG_FATAL(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
 
 #endif
 
