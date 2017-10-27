@@ -65,9 +65,14 @@ bool ClientSocket::getHostname(char *str, unsigned int ip)
         return false;
 }
 
+// gethostbyname のデータへのアクセスをシリアライズするためのロック。
+static std::recursive_mutex staticDataLock;
+
 // --------------------------------------------------
 unsigned int ClientSocket::getIP(const char *name)
 {
+    std::lock_guard<std::recursive_mutex> cs(staticDataLock);
+
     char szHostName[256];
 
     if (!name)
