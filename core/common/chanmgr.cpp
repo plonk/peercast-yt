@@ -628,6 +628,8 @@ bool    ChanMgr::isBroadcasting(GnuID &id)
 // -----------------------------------
 bool    ChanMgr::isBroadcasting()
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     auto ch = channel;
     while (ch)
     {
