@@ -28,6 +28,7 @@ Stats stats;
 // ------------------------------------
 void Stats::clear()
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
     for (int i=0; i<Stats::MAX; i++)
     {
         current[i] = 0;
@@ -42,6 +43,7 @@ void    Stats::update()
 {
     unsigned int ctime = sys->getTime();
 
+    std::lock_guard<std::recursive_mutex> cs(lock);
     unsigned int diff = ctime - lastUpdate;
     if (diff >= 5)
     {

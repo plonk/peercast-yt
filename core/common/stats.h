@@ -21,6 +21,7 @@
 #define _STATS_H
 
 #include "varwriter.h"
+#include "threading.h"
 
 // ------------------------------------------------------
 class Stats : public VariableWriter
@@ -69,16 +70,34 @@ public:
 
     void    clearRange(STAT s, STAT e)
     {
+        std::lock_guard<std::recursive_mutex> cs(lock);
         for (int i=s; i<=e; i++)
             current[i] = 0;
     }
-    void    clear(STAT s) { current[s]=0; }
-    void    add(STAT s, int n=1) { current[s]+=n; }
-    unsigned int getPerSecond(STAT s) { return perSec[s]; }
-    unsigned int getCurrent(STAT s) { return current[s]; }
+    void    clear(STAT s)
+    {
+        std::lock_guard<std::recursive_mutex> cs(lock);
+        current[s] = 0;
+    }
+    void    add(STAT s, int n=1)
+    {
+        std::lock_guard<std::recursive_mutex> cs(lock);
+        current[s] += n;
+    }
+    unsigned int getPerSecond(STAT s) const
+    {
+        std::lock_guard<std::recursive_mutex> cs(lock);
+        return perSec[s];
+    }
+    unsigned int getCurrent(STAT s) const
+    {
+        std::lock_guard<std::recursive_mutex> cs(lock);
+        return current[s];
+    }
 
     unsigned int    current[Stats::MAX], last[Stats::MAX], perSec[Stats::MAX];
     unsigned int    lastUpdate;
+    mutable std::recursive_mutex lock;
 };
 
 extern Stats stats;
