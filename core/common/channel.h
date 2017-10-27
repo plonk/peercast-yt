@@ -190,6 +190,7 @@ public:
 
     bool    isBroadcasting()
     {
+        std::lock_guard<std::recursive_mutex> cs(lock);
         return (status == S_BROADCASTING);
     }
 
