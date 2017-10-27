@@ -25,6 +25,8 @@ void ChanMgr::quit()
 // -----------------------------------
 int ChanMgr::numIdleChannels()
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     int cnt = 0;
     auto ch = channel;
     while (ch)
