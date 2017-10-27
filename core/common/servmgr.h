@@ -340,7 +340,7 @@ public:
     unsigned int        maxServIn;
 
     bool                isDisabled;
-    bool                isRoot;
+    std::atomic_bool    isRoot;
     int                 totalStreams;
 
     Host                serverHost;
