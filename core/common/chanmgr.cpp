@@ -648,6 +648,8 @@ bool    ChanMgr::isBroadcasting()
 // -----------------------------------
 int ChanMgr::numChannels()
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     int tot = 0;
     auto ch = channel;
     while (ch)
