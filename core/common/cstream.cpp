@@ -132,10 +132,10 @@ int ChanPacketBuffer::copyFrom(ChanPacketBuffer &buf, unsigned int reqPos)
 // 返す。
 bool ChanPacketBuffer::findPacket(unsigned int spos, ChanPacket &pack)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     if (writePos == 0)
         return false;
-
-    lock.lock();
 
     unsigned int fpos = getStreamPos(firstPos);
     if (spos < fpos)
@@ -149,12 +149,10 @@ bool ChanPacketBuffer::findPacket(unsigned int spos, ChanPacket &pack)
         if (p.pos >= spos)
         {
             pack = p;
-            lock.unlock();
             return true;
         }
     }
 
-    lock.unlock();
     return false;
 }
 
