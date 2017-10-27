@@ -245,7 +245,7 @@ public:
     static std::string formatTimeDifference(unsigned int t, unsigned int currentTime);
 
     TYPE                type;
-    STATUS              status;
+    std::atomic<STATUS> status;
 
     static const char   *statusMsgs[], *typeMsgs[];
     GnuStream           gnuStream;
