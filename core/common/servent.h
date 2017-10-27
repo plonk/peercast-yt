@@ -269,7 +269,7 @@ public:
     bool                addMetadata;
     int                 nsSwitchNum;
 
-    unsigned int        allow;
+    std::atomic<unsigned int> allow;
 
     ClientSocket        *sock, *pushSock;
 
