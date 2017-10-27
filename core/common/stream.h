@@ -236,6 +236,8 @@ public:
 
         void update(unsigned int in, unsigned int out)
         {
+            std::lock_guard<std::recursive_mutex> cs(m_lock);
+
             double now = sys->getDTime();
 
             if (m_lastUpdate == 0.0)
@@ -265,15 +267,55 @@ public:
 
         void update() { update(0, 0); }
 
-        unsigned int    totalBytesIn() { update(); return m_totalBytesIn; }
-        unsigned int    totalBytesOut() { update(); return m_totalBytesOut; }
-        unsigned int    lastBytesIn() { update(); return m_lastBytesIn; }
-        unsigned int    lastBytesOut() { update(); return m_lastBytesOut; }
-        unsigned int    bytesInPerSec() { update(); return m_bytesInPerSec; }
-        unsigned int    bytesOutPerSec() { update(); return m_bytesOutPerSec; }
+        unsigned int    totalBytesIn()
+        {
+            std::lock_guard<std::recursive_mutex> cs(m_lock);
+            update();
+            return m_totalBytesIn;
+        }
+        unsigned int    totalBytesOut()
+        {
+            std::lock_guard<std::recursive_mutex> cs(m_lock);
+            update();
+            return m_totalBytesOut;
+        }
+        unsigned int    lastBytesIn()
+        {
+            std::lock_guard<std::recursive_mutex> cs(m_lock);
+            update();
+            return m_lastBytesIn;
+        }
+        unsigned int    lastBytesOut()
+        {
+            std::lock_guard<std::recursive_mutex> cs(m_lock);
+            update();
+            return m_lastBytesOut;
+        }
+        unsigned int    bytesInPerSec()
+        {
+            std::lock_guard<std::recursive_mutex> cs(m_lock);
+            update();
+            return m_bytesInPerSec;
+        }
+        unsigned int    bytesOutPerSec()
+        {
+            std::lock_guard<std::recursive_mutex> cs(m_lock);
+            update();
+            return m_bytesOutPerSec;
+        }
 
-        unsigned int    bytesInPerSecAvg() { update(); return m_bytesInPerSecAvg; }
-        unsigned int    bytesOutPerSecAvg() { update(); return m_bytesOutPerSecAvg; }
+        unsigned int    bytesInPerSecAvg()
+        {
+            std::lock_guard<std::recursive_mutex> cs(m_lock);
+            update();
+            return m_bytesInPerSecAvg;
+        }
+        unsigned int    bytesOutPerSecAvg()
+        {
+            std::lock_guard<std::recursive_mutex> cs(m_lock);
+            update();
+            return m_bytesOutPerSecAvg;
+        }
 
         unsigned int    m_totalBytesIn, m_totalBytesOut;
         unsigned int    m_lastBytesIn, m_lastBytesOut;
@@ -284,6 +326,8 @@ public:
 
         double          m_lastUpdate;
         double          m_startTime;
+
+        std::recursive_mutex m_lock;
     };
 
     Stat stat;
