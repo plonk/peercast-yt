@@ -207,6 +207,8 @@ void    Servent::abort()
 // -----------------------------------
 void Servent::reset()
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     remoteID.clear();
 
     servPort = 0;
@@ -250,6 +252,8 @@ void Servent::reset()
 // -----------------------------------
 bool Servent::sendPacket(ChanPacket &pack, GnuID &cid, GnuID &sid, GnuID &did, Servent::TYPE t)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     if  (      (type == t)
             && (isConnected())
             && (!cid.isSet() || chanID.isSame(cid))
