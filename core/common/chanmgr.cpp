@@ -579,6 +579,7 @@ ChanHitList *ChanMgr::addHitList(ChanInfo &info)
 // -----------------------------------
 void ChanMgr::clearDeadHits(bool clearTrackers)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
     unsigned int interval;
 
     if (servMgr->isRoot)
@@ -691,6 +692,8 @@ void ChanMgr::addHit(Host &h, GnuID &id, bool tracker)
 // -----------------------------------
 ChanHit *ChanMgr::addHit(ChanHit &h)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     if (searchActive)
         lastHit = sys->getTime();
 
