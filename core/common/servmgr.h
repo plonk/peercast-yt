@@ -185,6 +185,7 @@ public:
         return numConnected();
     }
     bool                isFiltered(int, Host &h);
+    bool                hasUnsafeFilterSettings();
     bool                addOutgoing(Host, GnuID &, bool);
     Servent             *findConnection(Servent::TYPE, GnuID &);
 

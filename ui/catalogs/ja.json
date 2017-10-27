@@ -16,6 +16,7 @@
     "Message from the root server" : "ルートサーバーからのメッセージ",
     "RTMP Server" : "RTMPサーバー",
     "Report Issue" : "問題を報告",
+    "Warning: The whole of the Internet is marked as Private." : "警告: インターネット全体がプライベートに設定されています。",
 
     // bcid.html
     "New BCID"      : "新規BCID",

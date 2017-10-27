@@ -524,3 +524,13 @@ TEST_F(ServMgrFixture, doSaveSettings)
               "pauseLog = No\r\n"
               "idleSleepTime = 10\r\n", mem.str());
 }
+
+TEST_F(ServMgrFixture, hasUnsafeFilterSettings)
+{
+    ASSERT_EQ(1, m.numFilters);
+    ASSERT_STREQ(m.filters[0].host.IPtoStr().c_str(), "255.255.255.255");
+    ASSERT_FALSE(m.hasUnsafeFilterSettings());
+
+    m.filters[0].flags |= ServFilter::F_PRIVATE;
+    ASSERT_TRUE(m.hasUnsafeFilterSettings());
+}

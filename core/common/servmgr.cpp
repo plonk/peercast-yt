@@ -2349,6 +2349,9 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var == "rtmpPort")
     {
         buf = std::to_string(servMgr->rtmpPort);
+    }else if (var == "hasUnsafeFilterSettings")
+    {
+        buf = std::to_string(servMgr->hasUnsafeFilterSettings());
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);
@@ -2382,4 +2385,18 @@ void ServMgr::logLevel(int newLevel)
         m_logLevel = newLevel;
     }else
         LOG_ERROR("Trying to set log level outside valid range. Ignored");
+}
+
+// --------------------------------------------------
+bool ServMgr::hasUnsafeFilterSettings()
+{
+    const std::string global = "255.255.255.255";
+
+    for (int i = 0; i < this->numFilters; ++i)
+    {
+        if (filters[i].host.IPtoStr().c_str() == global &&
+            (filters[i].flags & ServFilter::F_PRIVATE) != 0)
+            return true;
+    }
+    return false;
 }
