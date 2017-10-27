@@ -1497,6 +1497,7 @@ unsigned int ServMgr::numStreams(GnuID &cid, Servent::TYPE tp, bool all)
     Servent *sv = servents;
     while (sv)
     {
+        std::lock_guard<std::recursive_mutex> cs(sv->lock);
         if (sv->isConnected())
             if (sv->type == tp)
                 if (sv->chanID.isSame(cid))
