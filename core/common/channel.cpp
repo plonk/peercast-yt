@@ -127,6 +127,8 @@ void Channel::resetPlayTime()
 // -----------------------------------------------------------------------------
 void Channel::setStatus(STATUS s)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     if (s != status)
     {
         bool wasPlaying = isPlaying();
