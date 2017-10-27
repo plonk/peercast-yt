@@ -2022,6 +2022,8 @@ int ServMgr::serverProc(ThreadInfo *thread)
 
         if (servMgr->autoServe)
         {
+            std::lock_guard<std::recursive_mutex> cs1(serv->lock), cs2(serv2->lock);
+
             // サーバーが既に起動している最中に allow を書き換え続ける
             // の気持ち悪いな。
             serv->allow = servMgr->allowServer1;
