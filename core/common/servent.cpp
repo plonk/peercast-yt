@@ -196,6 +196,7 @@ void    Servent::kill()
 // -----------------------------------
 void    Servent::abort()
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
     thread.shutdown();
     if (sock)
     {
