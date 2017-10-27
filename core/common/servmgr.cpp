@@ -652,6 +652,7 @@ unsigned int ServMgr::numActiveOnPort(int port)
     Servent *s = servents;
     while (s)
     {
+        std::lock_guard<std::recursive_mutex> cs(s->lock);
         if (s->thread.active() && s->sock && (s->servPort == port))
             cnt++;
         s = s->next;
