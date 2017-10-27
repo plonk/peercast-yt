@@ -481,6 +481,8 @@ void Servent::createSocket()
 // -----------------------------------
 void Servent::setStatus(STATUS s)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     if (s != status)
     {
         status = s;
