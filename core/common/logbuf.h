@@ -22,6 +22,7 @@
 
 #include "threading.h"
 #include <vector>
+#include <functional>
 
 class Stream;
 
