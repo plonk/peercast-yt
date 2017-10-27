@@ -1040,6 +1040,8 @@ void Servent::CMD_add_bcid(const char* cmd, HTTP& http, String& jumpStr)
 
 void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
 {
+    std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
+
     servMgr->numFilters = 0;
     ServFilter *currFilter = servMgr->filters;
     servMgr->channelDirectory->clearFeeds();
