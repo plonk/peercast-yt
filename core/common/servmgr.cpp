@@ -2008,8 +2008,10 @@ int ServMgr::serverProc(ThreadInfo *thread)
 
     //unsigned int lastLookupTime=0;
 
+    std::unique_lock<std::recursive_mutex> cs(servMgr->lock, std::defer_lock);
     while (thread->active())
     {
+        cs.lock();
         if (servMgr->restartServer)
         {
             serv->abort();      // force close
@@ -2074,6 +2076,7 @@ int ServMgr::serverProc(ThreadInfo *thread)
             servMgr->setFirewall(ServMgr::FW_ON);
         }
 
+        cs.unlock();
         sys->sleepIdle();
     }
 
