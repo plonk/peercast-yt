@@ -158,6 +158,8 @@ Servent::~Servent()
 // -----------------------------------
 void    Servent::kill()
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     thread.shutdown();
 
     setStatus(S_CLOSING);
@@ -2532,6 +2534,8 @@ int Servent::serverProc(ThreadInfo *thread)
 // -----------------------------------
 bool    Servent::writeVariable(Stream &s, const String &var)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     using namespace std;
 
     std::string buf;
