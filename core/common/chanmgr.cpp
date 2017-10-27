@@ -88,9 +88,11 @@ void ChanMgr::closeAll()
 // -----------------------------------
 std::shared_ptr<Channel>ChanMgr::findChannelByNameID(ChanInfo &info)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
     auto ch = channel;
     while (ch)
     {
+        std::lock_guard<std::recursive_mutex> cs1(ch->lock);
         if (ch->isActive())
             if (ch->info.matchNameID(info))
                 return ch;
