@@ -6,7 +6,7 @@ ifeq ($(WITH_RTMP),yes)
   CPPFLAGS += -DWITH_RTMP
 endif
 
-LDFLAGS = -fsanitize=thread -pthread -static-libstdc++ -static-libgcc
+LDFLAGS = -fuse-ld=gold -fsanitize=thread -pthread -static-libstdc++ -static-libgcc
 LIBS = -L../../Onigmo/.libs -Wl,-Bstatic -lonigmo -Wl,-Bdynamic
 ifeq ($(WITH_RTMP),yes)
   LIBS += -lrtmp
