@@ -844,8 +844,17 @@ void ServMgr::checkFirewall()
 }
 
 // -----------------------------------
+ServMgr::FW_STATE ServMgr::getFirewall()
+{
+    std::lock_guard<std::recursive_mutex> cs(lock);
+    return firewalled;
+}
+
+// -----------------------------------
 void ServMgr::setFirewall(FW_STATE state)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     if (firewalled != state)
     {
         const char *str;

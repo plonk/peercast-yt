@@ -219,7 +219,7 @@ public:
     void            setMaxRelays(int);
     void            setFirewall(FW_STATE);
     bool            checkForceIP();
-    FW_STATE        getFirewall() { return firewalled; }
+    FW_STATE        getFirewall();
     void            saveSettings(const char *);
     void            doSaveSettings(IniFileBase& iniFile);
     void            loadSettings(const char *);
