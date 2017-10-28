@@ -38,6 +38,7 @@ ServMgr::ServMgr()
     , rtmpServerMonitor(std::string(peercastApp->getPath()) + "rtmp-server")
     , channelDirectory(new ChannelDirectory())
     , uptestServiceRegistry(new UptestServiceRegistry())
+    , relayBroadcast(30) // オリジナルでは未初期化。
 {
     validBCID = NULL;
 

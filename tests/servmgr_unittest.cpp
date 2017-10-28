@@ -83,7 +83,7 @@ TEST_F(ServMgrFixture, initialState)
     // unsigned int        refreshHTML;
     ASSERT_EQ(5, m.refreshHTML);
     // unsigned int        relayBroadcast;
-    //ASSERT_EQ(0, m.relayBroadcast); // 不定
+    ASSERT_EQ(30, m.relayBroadcast); // オリジナルでは不定。
     // unsigned int        notifyMask;
     ASSERT_EQ(0xffff, m.notifyMask);
     // BCID                *validBCID;
@@ -474,7 +474,7 @@ TEST_F(ServMgrFixture, doSaveSettings)
               "\r\n"
               "[Client]\r\n"
               "refreshHTML = 5\r\n"
-              "relayBroadcast = 0\r\n"
+              "relayBroadcast = 30\r\n"
               "minBroadcastTTL = 1\r\n"
               "maxBroadcastTTL = 7\r\n"
               "pushTries = 5\r\n"
