@@ -1486,6 +1486,7 @@ void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
                 // グローバルのリモートからプライベートIPを設定されないようにする。
                 if (rhost.globalIP() == thisHost.globalIP())
                 {
+                    std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
                     char ipstr[64];
                     thisHost.toStr(ipstr);
                     LOG_DEBUG("Got new ip: %s", ipstr);
