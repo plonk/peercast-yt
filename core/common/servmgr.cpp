@@ -635,6 +635,7 @@ unsigned int ServMgr::numUsed(int type)
     Servent *s = servents;
     while (s)
     {
+        std::lock_guard<std::recursive_mutex> cs(s->lock);
         if (s->type == type)
             cnt++;
         s = s->next;
