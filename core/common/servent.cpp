@@ -394,6 +394,7 @@ void Servent::initIncoming(ClientSocket *s, unsigned int a)
 // -----------------------------------
 void Servent::initOutgoing(TYPE ty)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
     try
     {
         checkFree();
