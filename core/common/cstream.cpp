@@ -161,6 +161,7 @@ bool ChanPacketBuffer::findPacket(unsigned int spos, ChanPacket &pack)
 // パケットがない場合は 0 を返す。
 unsigned int    ChanPacketBuffer::getLatestPos()
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
     if (!writePos)
         return 0;
     else
@@ -208,6 +209,7 @@ unsigned int    ChanPacketBuffer::getOldestNonContinuationPos()
 // ケットが無い場合は 0 を返す。
 unsigned int    ChanPacketBuffer::getOldestPos()
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
     if (!writePos)
         return 0;
     else
@@ -307,6 +309,7 @@ void    ChanPacketBuffer::readPacket(ChanPacket &pack)
 // バッファーがいっぱいなら true を返す。そうでなければ false。
 bool    ChanPacketBuffer::willSkip()
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
     return ((writePos - readPos) >= MAX_PACKETS);
 }
 
