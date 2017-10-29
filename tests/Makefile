@@ -23,9 +23,9 @@ USER_DIR = ../core/common
 CPPFLAGS += -D_UNIX -I$(GTEST_DIR)/include -I../core/common -I../core/unix -I../Onigmo
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -fsanitize=thread -g -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT
+CXXFLAGS += -g -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT
 
-LDFLAGS = -fuse-ld=gold -fsanitize=thread -pthread
+LDFLAGS = -fuse-ld=gold -pthread
 LIBS = -L../Onigmo/.libs -Wl,-Bstatic -lonigmo -Wl,-Bdynamic
 #LIBS += -lrtmp
 

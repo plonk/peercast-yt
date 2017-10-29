@@ -1,12 +1,12 @@
 # Uncomment following line to enabled RTMP fetch support
 #WITH_RTMP = yes
 
-CPPFLAGS = -fsanitize=thread -g -Wreturn-type -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT $(INCLUDES)
+CPPFLAGS = -g -Wreturn-type -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT $(INCLUDES)
 ifeq ($(WITH_RTMP),yes)
   CPPFLAGS += -DWITH_RTMP
 endif
 
-LDFLAGS = -fuse-ld=gold -fsanitize=thread -pthread -static-libstdc++ -static-libgcc
+LDFLAGS = -fuse-ld=gold -pthread -static-libstdc++ -static-libgcc
 LIBS = -L../../Onigmo/.libs -Wl,-Bstatic -lonigmo -Wl,-Bdynamic
 ifeq ($(WITH_RTMP),yes)
   LIBS += -lrtmp
