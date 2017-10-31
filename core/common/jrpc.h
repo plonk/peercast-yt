@@ -477,6 +477,8 @@ public:
         std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
         for (Servent* s = servMgr->servents; s != NULL; s = s->next)
         {
+            std::lock_guard<std::recursive_mutex> svcs(s->lock);
+
             if (!s->chanID.isSame(id))
                 continue;
 
