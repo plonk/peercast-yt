@@ -1415,6 +1415,8 @@ std::string Channel::getBufferString()
 // -----------------------------------
 bool Channel::writeVariable(Stream &out, const String &var)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     using namespace std;
 
     string buf;
