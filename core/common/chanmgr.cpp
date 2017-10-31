@@ -31,6 +31,10 @@ int ChanMgr::numIdleChannels()
     auto ch = channel;
     while (ch)
     {
+        // XXX: 本来リスト走査の前に全てのチャンネルをロックしないと数
+        // え間違える可能性がある。
+        std::lock_guard<std::recursive_mutex> chcs(lock);
+
         if (ch->isActive())
             if (ch->thread.active())
                 if (ch->status == Channel::S_IDLE)
