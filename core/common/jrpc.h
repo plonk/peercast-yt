@@ -388,6 +388,7 @@ public:
 
     json channelStatus(std::shared_ptr<Channel> c)
     {
+        std::lock_guard<std::recursive_mutex> cs(c->lock);
         return {
             {"status", to_json(c->status)},
             {"source", c->sourceURL.cstr() },
