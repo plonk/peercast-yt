@@ -109,7 +109,11 @@ public:
 
     bool    willSkip();
 
-    int     numPending() { return writePos - readPos; }
+    int     numPending() const
+    {
+        std::lock_guard<std::recursive_mutex> cs(lock);
+        return writePos - readPos;
+    }
 
     unsigned int    getLatestPos();
     unsigned int    getOldestPos();
@@ -151,7 +155,7 @@ public:
     volatile unsigned int   readPos, writePos;
     unsigned int            accept;
     unsigned int            lastWriteTime;
-    std::recursive_mutex    lock;
+    mutable std::recursive_mutex    lock;
 };
 
 // ----------------------------------
