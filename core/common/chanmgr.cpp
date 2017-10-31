@@ -152,6 +152,8 @@ std::shared_ptr<Channel> ChanMgr::findChannelByMount(const char *str)
 // -----------------------------------
 std::shared_ptr<Channel> ChanMgr::findChannelByID(const GnuID &id)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     auto ch = channel;
     while (ch)
     {
