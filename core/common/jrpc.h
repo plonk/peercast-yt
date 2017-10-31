@@ -448,6 +448,8 @@ public:
         if (!c)
             throw application_error(kChannelNotFound, "Channel not found");
 
+        std::lock_guard<std::recursive_mutex> chcs(c->lock);
+
         json remoteEndPoint;
         if (c->sock)
             remoteEndPoint = (std::string) c->sock->host;

@@ -1184,7 +1184,10 @@ int Channel::readStream(Stream &in, ChannelStream *source)
 
             if (in.readReady(sys->idleSleepTime))
             {
-                error = source->readPacket(in, shared_from_this());
+                {
+                    std::lock_guard<std::recursive_mutex> cs(this->lock);
+                    error = source->readPacket(in, shared_from_this());
+                }
 
                 if (error)
                     break;
