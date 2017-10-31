@@ -162,6 +162,8 @@ void Channel::setStatus(STATUS s)
 // -----------------------------------------------------------------------------
 void Channel::reset()
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     sourceHost.init();
     remoteID.clear();
 
