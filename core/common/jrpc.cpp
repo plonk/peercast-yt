@@ -2,6 +2,7 @@
 #include <string>
 
 #include "jrpc.h"
+#include "str.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -422,7 +423,7 @@ json JrpcApi::getChannelConnections(json::array_t params)
 
         json connection = {
             { "connectionId", s->serventIndex },
-            { "type", tolower(s->getTypeStr()) },
+            { "type", str::downcase(s->getTypeStr()) },
             { "status", s->getStatusStr() },
             { "sendRate", bytesOutPerSec },
             { "recvRate", bytesInPerSec },
@@ -785,16 +786,6 @@ json JrpcApi::bumpChannel(json::array_t args)
 json JrpcApi::removeYellowPage(json::array_t args)
 {
     throw application_error(kUnknownError, "Method unavailable");
-}
-
-std::string JrpcApi::tolower(std::string str)
-{
-    std::string res;
-
-    for (size_t i = 0; i < str.size(); ++i)
-        res.push_back(std::tolower(str[i]));
-
-    return res;
 }
 
 json JrpcApi::getYPChannels(json::array_t args)

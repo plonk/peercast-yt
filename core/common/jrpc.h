@@ -256,7 +256,6 @@ public:
     json setChannelInfo(json::array_t args);
     json setLogSettings(json::array_t args);
     json setSettings(json::array_t args);
-    static std::string tolower(std::string str);
     json stopChannel(json::array_t args);
     json stopChannelConnection(json::array_t params);
     json toPositionalArguments(json named_params, std::vector<std::string> names);
