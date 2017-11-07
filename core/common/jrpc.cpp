@@ -372,16 +372,37 @@ json JrpcApi::stopChannelConnection(json::array_t params)
     return success;
 }
 
-json JrpcApi::getChannelConnections(json::array_t params)
+json JrpcApi::toConnection(Servent* s)
 {
-    json result = json::array();
+    unsigned int bytesInPerSec = s->sock ? s->sock->bytesInPerSec() : 0;
+    unsigned int bytesOutPerSec = s->sock ? s->sock->bytesOutPerSec() : 0;
 
-    GnuID id = params[0].get<std::string>();
+    json remoteEndPoint;
+    if (s->sock)
+        remoteEndPoint = (std::string) s->sock->host;
+    else
+        remoteEndPoint = nullptr;
 
-    auto c = chanMgr->findChannelByID(id);
-    if (!c)
-        throw application_error(kChannelNotFound, "Channel not found");
+    return {
+        { "connectionId", s->serventIndex },
+        { "type", str::downcase(s->getTypeStr()) },
+        { "status", s->getStatusStr() },
+        { "sendRate", bytesOutPerSec },
+        { "recvRate", bytesInPerSec },
+        { "protocolName", ChanInfo::getProtocolStr(s->outputProtocol) },
+        { "localRelays", nullptr },
+        { "localDirects", nullptr },
+        { "contentPosition", nullptr },
+        { "agentName", s->agent.cstr() },
+        { "remoteEndPoint", remoteEndPoint },
+        { "remoteHostStatus", json::array() }, // 何を入れたらいいのかわからない。
+        { "remoteName", remoteEndPoint },
+    };
+}
 
+
+json JrpcApi::toSourceConnection(std::shared_ptr<Channel> c)
+{
     json remoteEndPoint;
     if (c->sock)
         remoteEndPoint = (std::string) c->sock->host;
@@ -389,7 +410,7 @@ json JrpcApi::getChannelConnections(json::array_t params)
         remoteEndPoint = nullptr;
     json remoteName = c->sourceURL.isEmpty() ? ((std::string) c->sourceHost.host).c_str() : c->sourceURL.cstr();
 
-    json sourceConnection =  {
+    return {
         { "connectionId", -1 },
         { "type", "source" },
         { "status", to_json(c->status) },
@@ -404,7 +425,19 @@ json JrpcApi::getChannelConnections(json::array_t params)
         { "remoteHostStatus", json::array() }, // 何を入れたらいいのかわからない。
         { "remoteName", remoteName },
     };
-    result.push_back(sourceConnection);
+}
+
+json JrpcApi::getChannelConnections(json::array_t params)
+{
+    json result = json::array();
+
+    GnuID id = params[0].get<std::string>();
+
+    auto c = chanMgr->findChannelByID(id);
+    if (!c)
+        throw application_error(kChannelNotFound, "Channel not found");
+
+    result.push_back(toSourceConnection(c));
 
     std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
     for (Servent* s = servMgr->servents; s != NULL; s = s->next)
@@ -412,32 +445,7 @@ json JrpcApi::getChannelConnections(json::array_t params)
         if (!s->chanID.isSame(id))
             continue;
 
-        unsigned int bytesInPerSec = s->sock ? s->sock->bytesInPerSec() : 0;
-        unsigned int bytesOutPerSec = s->sock ? s->sock->bytesOutPerSec() : 0;
-
-        json remoteEndPoint;
-        if (s->sock)
-            remoteEndPoint = (std::string) s->sock->host;
-        else
-            remoteEndPoint = nullptr;
-
-        json connection = {
-            { "connectionId", s->serventIndex },
-            { "type", str::downcase(s->getTypeStr()) },
-            { "status", s->getStatusStr() },
-            { "sendRate", bytesOutPerSec },
-            { "recvRate", bytesInPerSec },
-            { "protocolName", ChanInfo::getProtocolStr(s->outputProtocol) },
-            { "localRelays", nullptr },
-            { "localDirects", nullptr },
-            { "contentPosition", nullptr },
-            { "agentName", s->agent.cstr() },
-            { "remoteEndPoint", remoteEndPoint },
-            { "remoteHostStatus", json::array() }, // 何を入れたらいいのかわからない。
-            { "remoteName", remoteEndPoint },
-        };
-
-        result.push_back(connection);
+        result.push_back(toConnection(s));
     }
 
     return result;

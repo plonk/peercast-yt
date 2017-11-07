@@ -258,7 +258,9 @@ public:
     json setSettings(json::array_t args);
     json stopChannel(json::array_t args);
     json stopChannelConnection(json::array_t params);
+    json toConnection(Servent* s);
     json toPositionalArguments(json named_params, std::vector<std::string> names);
+    json toSourceConnection(std::shared_ptr<Channel> c);
     json to_json(ChanHit* h);
     json to_json(ChanHitList* hitList);
     json to_json(ChanInfo& info);
