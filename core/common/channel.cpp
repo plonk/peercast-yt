@@ -549,6 +549,7 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
     m_channel = ch;
 
     int numYPTries=0;
+    int numCDTries = 0;
     while (ch->thread.active())
     {
         ch->sourceHost.init();
@@ -580,6 +581,9 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
                 std::string trackerIP = servMgr->channelDirectory->findTracker(ch->info.id);
                 if (!trackerIP.empty())
                 {
+                    if (numCDTries >= 1)
+                        break;
+                    numCDTries++;
                     peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルフィードで "+chName(ch->info)+" のトラッカーが見付かりました。");
 
                     ch->sourceHost.host.fromStrIP(trackerIP.c_str(), DEFAULT_PORT);
