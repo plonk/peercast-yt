@@ -67,3 +67,14 @@ TEST_F(RegexpFixture, matches)
     ASSERT_FALSE(Regexp("def").matches("abc"));
     ASSERT_FALSE(Regexp("def").matches(""));
 }
+
+TEST_F(RegexpFixture, copy)
+{
+    Regexp r1("^$");
+    Regexp r2(r1);
+    ASSERT_TRUE(r1.matches(""));
+    ASSERT_TRUE(r1.matches("\n"));
+    ASSERT_TRUE(r2.matches(""));
+    ASSERT_TRUE(r2.matches("\n"));
+}
+

@@ -5,6 +5,7 @@
 using namespace onig;
 
 Regexp::Regexp(const std::string& exp)
+    : m_exp(exp)
 {
     const UChar *pattern = (decltype(pattern)) exp.c_str();
     int r;
@@ -23,6 +24,11 @@ Regexp::Regexp(const std::string& exp)
         onig_error_code_to_str((OnigUChar*) message, r, &einfo);
         throw std::runtime_error(message);
     }
+}
+
+Regexp::Regexp(const Regexp& orig)
+    : Regexp(orig.m_exp)
+{
 }
 
 Regexp::~Regexp()
