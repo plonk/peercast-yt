@@ -360,7 +360,7 @@ void WSAClientSocket::write(const void *p, int l)
 }
 
 // --------------------------------------------------
-void WSAClientSocket::bind(Host &h)
+void WSAClientSocket::bind(const Host &h)
 {
     struct sockaddr_in localAddr;
 

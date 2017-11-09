@@ -321,7 +321,7 @@ void UClientSocket::write(const void *p, int l)
 }
 
 // --------------------------------------------------
-void UClientSocket::bind(Host &h)
+void UClientSocket::bind(const Host &h)
 {
     struct sockaddr_in localAddr;
 

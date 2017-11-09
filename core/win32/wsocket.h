@@ -40,7 +40,7 @@ public:
     virtual int     read(void *, int);
     virtual int     readUpto(void *, int);
     virtual void    write(const void *, int);
-    virtual void    bind(Host &);
+    virtual void    bind(const Host &);
     virtual void    connect();
     virtual void    close();
     virtual ClientSocket * accept();

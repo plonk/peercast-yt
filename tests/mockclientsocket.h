@@ -9,7 +9,7 @@ public:
     {
     }
 
-    void            bind(Host &) override
+    void            bind(const Host &) override
     {
     }
 

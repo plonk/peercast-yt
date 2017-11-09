@@ -53,7 +53,7 @@ public:
     int     read(void *, int) override;
     int     readUpto(void *, int) override;
     void    write(const void *, int) override;
-    void    bind(Host &) override;
+    void    bind(const Host &) override;
     void    connect() override;
     void    close() override;
     ClientSocket *accept() override;

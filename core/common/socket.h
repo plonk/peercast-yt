@@ -39,7 +39,7 @@ public:
 
     // required interface
     virtual void            open(const Host &) = 0;
-    virtual void            bind(Host &)       = 0;
+    virtual void            bind(const Host &)       = 0;
     virtual void            connect()          = 0;
     virtual bool            active()           = 0;
     virtual ClientSocket    *accept()          = 0;
