@@ -263,6 +263,20 @@ namespace amf0
                 return (m_bool) ? "true" : "false";
             case kDate:
                 return "(" + std::to_string(m_date.unixTime) + ", " + std::to_string(m_date.timezone) + ")";
+            case kStrictArray:
+            {
+                std::string buf = "[";
+                bool first = true;
+                for (auto elt : m_strict_array)
+                {
+                    if (!first)
+                        buf += ",";
+                    first = false;
+                    buf += elt.inspect();
+                }
+                buf += "]";
+                return buf;
+            }
             default:
                 throw std::runtime_error(str::format("inspect: unknown type %d", m_type));
             }
