@@ -1,3 +1,5 @@
+#ifndef _AMF0_H
+#define _AMF0_H
 // ------------------------------------------------
 // File: amf0.h
 // Desc:
@@ -435,3 +437,4 @@ namespace amf0
         }
     };
 } // namespace amf
+#endif
