@@ -89,7 +89,15 @@ void ChanHit::init()
 }
 
 // -----------------------------------
-void ChanHit::initLocal(int numl, int numr, int, int uptm, bool connected, unsigned int oldp, unsigned int newp, const Host& sourceHost)
+void ChanHit::initLocal(
+    int numl,
+    int numr,
+    int,
+    int uptm,
+    bool connected,
+    unsigned int oldp,
+    unsigned int newp,
+    const Host& sourceHost)
 {
     std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
 
