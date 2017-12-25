@@ -31,6 +31,7 @@
 #include <sys/time.h>
 #include <sys/wait.h> // WIFEXITED, WEXITSTATUS
 #include <thread>
+#include <stdio.h>
 
 #include "stats.h"
 #include "str.h"
@@ -42,7 +43,24 @@ USys::USys()
 {
     stats.clear();
 
-    rndGen.setSeed(rnd() + getpid());
+    // 乱数生成器を初期化。urandom の無い環境では PID から一意に決まる。
+    {
+        FILE *fp = fopen("/dev/urandom", "rb");
+        if (fp)
+        {
+            int seed;
+            char *p = (char*) &seed;
+            for (int i = 0; i < sizeof(int); i++)
+            {
+                p[i] = fgetc(fp);
+            }
+            rndGen.setSeed(seed);
+            fclose(fp);
+        }else
+        {
+            rndGen.setSeed(rnd() + getpid());
+        }
+    }
     signal(SIGPIPE, SIG_IGN);
     signal(SIGABRT, SIG_IGN);
 }
