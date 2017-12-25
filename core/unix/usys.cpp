@@ -45,8 +45,6 @@ USys::USys()
     rndGen.setSeed(rnd() + getpid());
     signal(SIGPIPE, SIG_IGN);
     signal(SIGABRT, SIG_IGN);
-
-    rndSeed = rnd();
 }
 
 // ---------------------------------

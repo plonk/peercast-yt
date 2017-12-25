@@ -37,8 +37,6 @@ WSys::WSys(HWND w)
 
     mainWindow = w;
     WSAClientSocket::init();
-
-    rndSeed = rnd();
 }
 
 // ---------------------------------

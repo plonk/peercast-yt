@@ -98,7 +98,6 @@ public:
     static char* strcpy_truncate(char* dest, size_t destsize, const char* src);
 
     unsigned int idleSleepTime;
-    unsigned int rndSeed;
 
     class LogBuffer *logBuf;
 };
