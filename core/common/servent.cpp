@@ -2172,7 +2172,7 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
                     throw TimeoutException();
 
                 bsock.flush();
-                sys->sleep(200);
+                sys->sleep(100);
                 //sys->sleepIdle();
             }
         }
@@ -2460,7 +2460,7 @@ void Servent::sendPCPChannel()
             if (error)
                 throw StreamException("PCP exception");
 
-            sys->sleep(200);
+            sys->sleep(100);
             //sys->sleepIdle();
         }
 
