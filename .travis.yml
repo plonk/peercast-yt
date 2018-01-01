@@ -25,3 +25,5 @@ deploy:
   on:
     repo: plonk/peercast-yt
     tags: true
+notifications:
+  webhooks: https://discordapp.com/api/webhooks/397294790728876052/s087VB-hN8g2r-YvX8_HAUPuZCdZ-OA_g6voqTUNg2SIUDn9FhMQRDmxQRIjWWG8-tse
