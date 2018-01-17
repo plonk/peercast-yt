@@ -80,7 +80,11 @@ bool Subprogram::start(std::initializer_list<std::string> arguments, Environment
         }
         argv[i] = nullptr;
 
+#ifdef __APPLE__
+        int r = execve(m_name.c_str(), (char* const*) argv, (char* const*) env.env());
+#else
         int r = execvpe(m_name.c_str(), (char* const*) argv, (char* const*) env.env());
+#endif
         if (r == -1)
         {
             char *buf = strerror(errno);
