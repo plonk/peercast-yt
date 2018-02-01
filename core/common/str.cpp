@@ -128,6 +128,33 @@ std::vector<std::string> split(const std::string& in, const std::string& separat
     }
 }
 
+std::vector<std::string> split(const std::string& in, const std::string& separator, int limit)
+{
+    if (limit <= 0)
+        throw std::domain_error("limit <= 0");
+
+    std::vector<std::string> res;
+    const char *p = in.c_str();
+    const char *sep = separator.c_str();
+
+    const char *q;
+
+    while (true)
+    {
+        q = strstr(p, sep);
+        if ((int)res.size() < limit-1 && q != nullptr)
+        {
+            res.push_back(std::string(p, q));
+            p = q + std::strlen(sep);
+        }
+        else
+        {
+            res.push_back(std::string(p));
+            return res;
+        }
+    }
+}
+
 std::string codepoint_to_utf8(uint32_t codepoint)
 {
     std::string res;

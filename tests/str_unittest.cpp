@@ -37,6 +37,52 @@ TEST_F(strFixture, split)
     ASSERT_STREQ("a", vec[0].c_str());
     ASSERT_STREQ("b", vec[1].c_str());
     ASSERT_STREQ("c", vec[2].c_str());
+
+    // 末尾空文字列要素の削除は行わない。
+    vec = split("a,b,c,", ",");
+    ASSERT_EQ(4, vec.size());
+    ASSERT_STREQ("a", vec[0].c_str());
+    ASSERT_STREQ("b", vec[1].c_str());
+    ASSERT_STREQ("c", vec[2].c_str());
+    ASSERT_STREQ("", vec[3].c_str());
+}
+
+TEST_F(strFixture, split_with_limit)
+{
+    auto vec = split("a b c", " ", 3);
+
+    ASSERT_EQ(3, vec.size());
+    ASSERT_STREQ("a", vec[0].c_str());
+    ASSERT_STREQ("b", vec[1].c_str());
+    ASSERT_STREQ("c", vec[2].c_str());
+
+    // リミットが実際に分割できる数よりも多い場合。
+    vec = split("a b c", " ", 4);
+    ASSERT_EQ(3, vec.size());
+    ASSERT_STREQ("a", vec[0].c_str());
+    ASSERT_STREQ("b", vec[1].c_str());
+    ASSERT_STREQ("c", vec[2].c_str());
+
+    vec = split("a b c", " ", 2);
+    ASSERT_EQ(2, vec.size());
+    ASSERT_STREQ("a", vec[0].c_str());
+    ASSERT_STREQ("b c", vec[1].c_str());
+
+    vec = split("a b c", " ", 1);
+    ASSERT_EQ(1, vec.size());
+    ASSERT_STREQ("a b c", vec[0].c_str());
+
+    // 0以下のリミットは不正。
+    ASSERT_THROW(split("a b c", " ", 0), std::domain_error);
+    ASSERT_THROW(split("a b c", " ", -1), std::domain_error);
+
+    // 末尾空文字列要素の削除は行わない。
+    vec = split("a,b,c,", ",", 4);
+    ASSERT_EQ(4, vec.size());
+    ASSERT_STREQ("a", vec[0].c_str());
+    ASSERT_STREQ("b", vec[1].c_str());
+    ASSERT_STREQ("c", vec[2].c_str());
+    ASSERT_STREQ("", vec[3].c_str());
 }
 
 TEST_F(strFixture, codepoint_to_utf8)

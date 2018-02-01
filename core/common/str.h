@@ -24,6 +24,7 @@ namespace str
     std::string replace_prefix(const std::string& s, const std::string& prefix, const std::string& replacement);
     std::string replace_suffix(const std::string& s, const std::string& suffix, const std::string& replacement);
     std::vector<std::string> split(const std::string& in, const std::string& separator);
+    std::vector<std::string> split(const std::string& in, const std::string& separator, int limit);
     std::string upcase(const std::string& input);
     std::string extension_without_dot(const std::string& filename);
 
