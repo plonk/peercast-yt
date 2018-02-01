@@ -501,9 +501,9 @@ void Servent::handshakePOST(HTTP &http)
         throw HTTPException(HTTP_SC_BADREQUEST, 400);
 
     std::string args;
-    auto vec2 = str::split(vec[1], "?");
+    auto vec2 = str::split(vec[1], "?", 2);
 
-    if (vec2.size() >= 2)
+    if (vec2.size() == 2)
         args = vec2[1];
 
     std::string path = vec2[0];
