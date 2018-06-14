@@ -770,9 +770,8 @@ void Servent::handshakeStream_readHeaders(bool& gotPCP, unsigned int& reqPos, in
         else if (http.isHeader("Pragma"))
         {
             char *ssc = stristr(arg, "stream-switch-count=");
-            char *so = stristr(arg, "stream-offset");
 
-            if (ssc || so)
+            if (ssc)
             {
                 nsSwitchNum = 1;
                 //nsSwitchNum = atoi(ssc+20);
