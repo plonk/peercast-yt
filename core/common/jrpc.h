@@ -74,6 +74,7 @@ public:
                                ch->isPlaying(),
                                ch->rawData.getOldestPos(),
                                ch->rawData.getLatestPos(),
+                               ch->canAddRelay(),
                                uphost);
 
                 m_hit[endpoint(&self)] = self;
