@@ -97,6 +97,7 @@ void ChanHit::initLocal(
     bool connected,
     unsigned int oldp,
     unsigned int newp,
+    bool canAddRelay,
     const Host& sourceHost)
 {
     std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
@@ -112,7 +113,7 @@ void ChanHit::initLocal(
     recv = connected;
 
     direct = !servMgr->directFull();
-    relay = !servMgr->relaysFull();
+    relay = canAddRelay;
     cin = !servMgr->controlInFull();
 
     host = servMgr->serverHost;

@@ -233,6 +233,18 @@ bool    Channel::isFull()
 }
 
 // -----------------------------------
+bool    Channel::canAddRelay()
+{
+    if  (servMgr->bitrateFull(this->getBitrate()) ||
+         servMgr->relaysFull() ||
+         this->isFull())
+        return false;
+    else
+        return true;
+}
+
+
+// -----------------------------------
 int Channel::localRelays()
 {
     return servMgr->numStreams(info.id, Servent::T_RELAY, true);
@@ -941,7 +953,9 @@ void Channel::broadcastTrackerUpdate(GnuID &svID, bool force /* = false */)
         unsigned int oldp = rawData.getOldestPos();
         unsigned int newp = rawData.getLatestPos();
 
-        hit.initLocal(numListeners, numRelays, info.numSkips, info.getUptime(), isPlaying(), oldp, newp, this->sourceHost.host);
+        // チートしてサーバーのリレー数制限の情報を入れる。
+        auto canAddRelay = !servMgr->relaysFull();
+        hit.initLocal(numListeners, numRelays, info.numSkips, info.getUptime(), isPlaying(), oldp, newp, canAddRelay, this->sourceHost.host);
         hit.tracker = true;
 
         atom.writeParent(PCP_BCST, 10);

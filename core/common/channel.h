@@ -195,6 +195,7 @@ public:
     }
 
     bool    isFull();
+    bool    canAddRelay();
 
     bool    checkBump();
 
