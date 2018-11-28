@@ -71,6 +71,9 @@ public:
     std::string versionString();
     std::string str(bool withPort = false);
 
+    enum class Color { red, purple, blue, green };
+    Color getColor();
+
     ChanHit *next;
 };
 

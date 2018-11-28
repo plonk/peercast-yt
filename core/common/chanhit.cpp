@@ -260,6 +260,27 @@ std::string ChanHit::str(bool withPort)
 }
 
 // -----------------------------------
+ChanHit::Color ChanHit::getColor()
+{
+    if (host.port == 0)
+    {
+        return Color::red;
+    }else if (!relay)
+    {
+        if (numRelays == 0)
+        {
+            return Color::purple;
+        }else
+        {
+            return Color::blue;
+        }
+    }else
+    {
+        return Color::green;
+    }
+}
+
+// -----------------------------------
 int ChanHitList::getTotalListeners()
 {
     int cnt = 0;
