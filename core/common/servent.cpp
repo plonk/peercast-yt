@@ -1110,19 +1110,21 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
             streamPos = ch->rawData.getLatestPos();
         }
 
-        while (true)
+        bool autoManageTried = false;
+        do
         {
             StreamRequestDenialReason reason;
             chanReady = canStream(ch, &reason);
             if (chanReady)
             {
-                LOG_DEBUG("Channel ready");
                 break;
-            }else if (type == T_RELAY &&
+            }else if (!autoManageTried &&
+                      type == T_RELAY &&
                       (reason == StreamRequestDenialReason::InsufficientBandwidth ||
                        reason == StreamRequestDenialReason::RelayLimit ||
                        reason == StreamRequestDenialReason::PerChannelRelayLimit))
             {
+                autoManageTried = true;
                 LOG_DEBUG("Auto-manage relays");
                 ChanHitList* chl = chanMgr->findHitList(chanInfo);
                 if (!chl)
@@ -1133,7 +1135,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                     {
                         for (auto h = chl->hit; h != nullptr; h = h->next)
                         {
-                            if (h->rhost[0] == t->getHost())
+                            if (h->sessionID.isSame(t->remoteID))
                             {
                                 auto color = h->getColor();
                                 if (color == ChanHit::Color::red ||
@@ -1150,8 +1152,10 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                 std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
                 for (Servent* s = servMgr->servents; s != NULL; s = s->next)
                 {
-                    if (s->chanID.isSame(chanInfo.id) &&
-                        s->type == Servent::T_RELAY &&
+                    if (s == this) continue;
+
+                    if (s->type == Servent::T_RELAY &&
+                        s->chanID.isSame(chanInfo.id) &&
                         redOrPurple(s))
                     {
                         s->abort();
@@ -1160,12 +1164,10 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                     }
                 }
             }else {
-                LOG_DEBUG("Denied");
                 break;
             }
-            LOG_DEBUG("Sleeping 200ms");
             sys->sleep(200);
-        }
+        }while (thread.active() && sock->active());
     }
 
     ChanHitList *chl = chanMgr->findHitList(chanInfo);
