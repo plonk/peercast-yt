@@ -1116,12 +1116,14 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
             chanReady = canStream(ch, &reason);
             if (chanReady)
             {
+                LOG_DEBUG("Channel ready");
                 break;
             }else if (type == T_RELAY &&
                       (reason == StreamRequestDenialReason::InsufficientBandwidth ||
                        reason == StreamRequestDenialReason::RelayLimit ||
                        reason == StreamRequestDenialReason::PerChannelRelayLimit))
             {
+                LOG_DEBUG("Auto-manage relays");
                 ChanHitList* chl = chanMgr->findHitList(chanInfo);
                 if (!chl)
                     break;
@@ -1153,12 +1155,15 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                         redOrPurple(s))
                     {
                         s->abort();
+                        LOG_INFO("Terminated servent %d", s->serventIndex);
                         break;
                     }
                 }
             }else {
+                LOG_DEBUG("Denied");
                 break;
             }
+            LOG_DEBUG("Sleeping 200ms");
             sys->sleep(200);
         }
     }
