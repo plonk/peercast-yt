@@ -262,7 +262,7 @@ TEST_F(ChanHitFixture, initLocal)
 
     hit->initLocal(numl, numr, nums, uptm, connected,
                    /* isFull, bitrate, ch, */
-                   oldp, newp);
+                   oldp, newp, true);
 
     ASSERT_EQ(1, hit->numListeners);
     ASSERT_EQ(2, hit->numRelays);
@@ -273,6 +273,7 @@ TEST_F(ChanHitFixture, initLocal)
 
     ASSERT_EQ(6, hit->oldestPos);
     ASSERT_EQ(7, hit->newestPos);
+    ASSERT_EQ(true, hit->relay);
 }
 
 TEST_F(ChanHitFixture, str)
