@@ -1085,7 +1085,8 @@ bool Servent::handshakeStream_returnResponse(bool gotPCP,
 }
 
 // -----------------------------------
-// "/stream/<channel ID>" エンドポイントへの要求に対する反応。
+// "/stream/<channel ID>" あるいは "/channel/<channel ID>" エンドポイ
+// ントへの要求に対する反応。
 bool Servent::handshakeStream(ChanInfo &chanInfo)
 {
     bool gotPCP = false;
@@ -1110,6 +1111,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
             streamPos = ch->rawData.getLatestPos();
         }
 
+        // 自動リレー管理。
         bool autoManageTried = false;
         do
         {
@@ -1148,7 +1150,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                         return false;
                     };
 
-                // 自動リレー管理。
+                // 赤・紫の接続を削除する。
                 std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
                 for (Servent* s = servMgr->servents; s != NULL; s = s->next)
                 {
@@ -1158,8 +1160,8 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                         s->chanID.isSame(chanInfo.id) &&
                         redOrPurple(s))
                     {
+                        LOG_INFO("Terminating relay connection to %s", s->getHost().str().c_str());
                         s->abort();
-                        LOG_INFO("Terminated servent %d", s->serventIndex);
                         break;
                     }
                 }
