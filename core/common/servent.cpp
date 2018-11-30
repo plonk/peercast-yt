@@ -94,6 +94,9 @@ bool    Servent::isFiltered(int f)
 }
 
 // -----------------------------------
+// リレーあるいはダイレクト接続でストリーミングできるかを真偽値で返す。
+// できない場合は reason に理由が設定される。できる場合は reason は変
+// 更されない。
 bool Servent::canStream(std::shared_ptr<Channel> ch, Servent::StreamRequestDenialReason *reason)
 {
     if (ch==NULL)

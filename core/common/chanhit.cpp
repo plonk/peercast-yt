@@ -261,6 +261,7 @@ std::string ChanHit::str(bool withPort)
 }
 
 // -----------------------------------
+// ノードの色。
 ChanHit::Color ChanHit::getColor()
 {
     if (host.port == 0)

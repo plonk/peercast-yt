@@ -71,7 +71,14 @@ public:
     std::string versionString();
     std::string str(bool withPort = false);
 
-    enum class Color { red, purple, blue, green };
+    // ノードの色。リレー能力の区別。
+    enum class Color
+    {
+        red,    // ファイアウォール越し
+        purple, // リソース制限のためリレーできない
+        blue,   // リレーしているがこれ以上リレーできない
+        green   // 追加でリレーすることができる。
+    };
     Color getColor();
 
     ChanHit *next;

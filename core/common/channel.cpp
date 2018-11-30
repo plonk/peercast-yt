@@ -233,6 +233,8 @@ bool    Channel::isFull()
 }
 
 // -----------------------------------
+// 帯域が十分にあり、リレー本数制限以内であるためにリレー接続を追加で
+// きる。
 bool    Channel::canAddRelay()
 {
     if  (servMgr->bitrateFull(this->getBitrate()) ||
