@@ -1118,8 +1118,10 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
         bool autoManageTried = false;
         do
         {
-            StreamRequestDenialReason reason;
+            StreamRequestDenialReason reason = StreamRequestDenialReason::None;
             chanReady = canStream(ch, &reason);
+            LOG_DEBUG("chanReady = %d; reason = %s", chanReady, denialReasonToName(reason));
+
             if (chanReady)
             {
                 break;
@@ -1135,22 +1137,16 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                 if (!chl)
                     break;
 
-                auto redOrPurple =
+                auto chanHitFor =
                     [=](Servent* t)
+                    -> ChanHit*
                     {
                         for (auto h = chl->hit; h != nullptr; h = h->next)
                         {
                             if (h->sessionID.isSame(t->remoteID))
-                            {
-                                auto color = h->getColor();
-                                if (color == ChanHit::Color::red ||
-                                    color == ChanHit::Color::purple)
-                                    return true;
-                                else
-                                    return false;
-                            }
+                                return h;
                         }
-                        return false;
+                        return nullptr;
                     };
 
                 // 赤・紫の接続を削除する。
@@ -1159,11 +1155,17 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                 {
                     if (s == this) continue;
 
+                    ChanHit* hit = chanHitFor(s);
+
                     if (s->type == Servent::T_RELAY &&
                         s->chanID.isSame(chanInfo.id) &&
-                        redOrPurple(s))
+                        hit &&
+                        (hit->getColor() == ChanHit::Color::red ||
+                         hit->getColor() == ChanHit::Color::purple))
                     {
-                        LOG_INFO("Terminating relay connection to %s", s->getHost().str().c_str());
+                        LOG_INFO("Terminating relay connection to %s (color=%s)",
+                                 s->getHost().str().c_str(),
+                                 ChanHit::colorToName(hit->getColor()));
                         s->abort();
                         break;
                     }

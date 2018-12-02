@@ -361,3 +361,12 @@ TEST_F(ChanHitFixture, colorGreen)
     ASSERT_EQ(ChanHit::Color::green, hit->getColor());
 }
 
+
+TEST_F(ChanHitFixture, colorToName)
+{
+    ASSERT_STREQ("red", ChanHit::colorToName(ChanHit::Color::red));
+    ASSERT_STREQ("purple", ChanHit::colorToName(ChanHit::Color::purple));
+    ASSERT_STREQ("blue", ChanHit::colorToName(ChanHit::Color::blue));
+    ASSERT_STREQ("green", ChanHit::colorToName(ChanHit::Color::green));
+    ASSERT_STREQ("unknown", ChanHit::colorToName((ChanHit::Color)100));
+}

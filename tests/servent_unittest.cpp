@@ -593,3 +593,15 @@ TEST_F(ServentFixture, handshakeStream_returnStreamHeaders_mov)
               "\r\n",
               mock->outgoing.str());
 }
+
+TEST_F(ServentFixture, denialReasonToName)
+{
+    ASSERT_STREQ("None", Servent::denialReasonToName(Servent::StreamRequestDenialReason::None));
+    ASSERT_STREQ("InsufficientBandwidth", Servent::denialReasonToName(Servent::StreamRequestDenialReason::InsufficientBandwidth));
+    ASSERT_STREQ("PerChannelRelayLimit", Servent::denialReasonToName(Servent::StreamRequestDenialReason::PerChannelRelayLimit));
+    ASSERT_STREQ("RelayLimit", Servent::denialReasonToName(Servent::StreamRequestDenialReason::RelayLimit));
+    ASSERT_STREQ("DirectLimit", Servent::denialReasonToName(Servent::StreamRequestDenialReason::DirectLimit));
+    ASSERT_STREQ("NotPlaying", Servent::denialReasonToName(Servent::StreamRequestDenialReason::NotPlaying));
+    ASSERT_STREQ("Other", Servent::denialReasonToName(Servent::StreamRequestDenialReason::Other));
+    ASSERT_STREQ("unknown", Servent::denialReasonToName((Servent::StreamRequestDenialReason)100));
+}

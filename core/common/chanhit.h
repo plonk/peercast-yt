@@ -80,6 +80,22 @@ public:
         green   // 追加でリレーすることができる。
     };
     Color getColor();
+    static const char* colorToName(Color c)
+        {
+            switch (c)
+            {
+            case Color::red:
+                return "red";
+            case Color::purple:
+                return "purple";
+            case Color::blue:
+                return "blue";
+            case Color::green:
+                return "green";
+            default:
+                return "unknown";
+            }
+        }
 
     ChanHit *next;
 };
