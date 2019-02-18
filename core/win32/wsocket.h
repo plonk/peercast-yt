@@ -48,6 +48,11 @@ public:
     virtual bool    readReady(int timeoutMilliseconds);
     virtual Host    getLocalHost();
     virtual void    setBlocking(bool);
+    ~WSAClientSocket()
+    {
+        close();
+    }
+
     void    setReuse(bool);
     void    setNagle(bool);
     void    setLinger(int);
