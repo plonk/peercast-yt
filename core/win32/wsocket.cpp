@@ -217,43 +217,6 @@ void WSAClientSocket::checkTimeout(bool r, bool w)
     }
 }
 
-// --------------------------------------------------
-void WSAClientSocket::checkTimeout2(bool r, bool w)
-{
-    timeval timeout;
-    fd_set read_fds;
-    fd_set write_fds;
-
-    timeout.tv_sec = 0;
-    timeout.tv_usec = 0;
-
-    FD_ZERO(&write_fds);
-    if (w)
-    {
-        timeout.tv_sec = (int)this->writeTimeout/1000;
-        FD_SET(sockNum, &write_fds);
-    }
-
-    FD_ZERO(&read_fds);
-    if (r)
-    {
-        timeout.tv_sec = (int)this->readTimeout/1000;
-        FD_SET(sockNum, &read_fds);
-    }
-
-    timeval *tp;
-    if (timeout.tv_sec)
-        tp = &timeout;
-    else
-        tp = NULL;
-
-    int ret = select(0/*IGNORED*/, &read_fds, &write_fds, NULL, tp);
-
-    if (ret == 0)
-        throw TimeoutException();
-    else if (ret == SOCKET_ERROR)
-        throw SockException("select failed.");
-}
 
 // --------------------------------------------------
 Host WSAClientSocket::getLocalHost()

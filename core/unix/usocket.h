@@ -40,8 +40,8 @@ public:
     static void init();
 
     UClientSocket()
+    :sockNum(0)
     {
-        sockNum = 0;
     }
 
     ~UClientSocket()
