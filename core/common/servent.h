@@ -102,6 +102,40 @@ public:
         ALLOW_ALL       = 0xff
     };
 
+    enum class StreamRequestDenialReason
+    {
+        None,
+        InsufficientBandwidth,
+        PerChannelRelayLimit,
+        RelayLimit,
+        DirectLimit,
+        NotPlaying,
+        Other,
+    };
+
+    static const char* denialReasonToName(StreamRequestDenialReason r)
+        {
+            switch (r)
+            {
+            case StreamRequestDenialReason::None:
+                return "None";
+            case StreamRequestDenialReason::InsufficientBandwidth:
+                return "InsufficientBandwidth";
+            case StreamRequestDenialReason::PerChannelRelayLimit:
+                return "PerChannelRelayLimit";
+            case StreamRequestDenialReason::RelayLimit:
+                return "RelayLimit";
+            case StreamRequestDenialReason::DirectLimit:
+                return "DirectLimit";
+            case StreamRequestDenialReason::NotPlaying:
+                return "NotPlaying";
+            case StreamRequestDenialReason::Other:
+                return "Other";
+            default:
+                return "unknown";
+            }
+        }
+
     Servent(int);
     ~Servent();
 
@@ -215,7 +249,7 @@ public:
     void    sendPCPChannel();
 
     static void readICYHeader(HTTP &, ChanInfo &, char *, size_t);
-    bool    canStream(std::shared_ptr<Channel>);
+    bool    canStream(std::shared_ptr<Channel>, StreamRequestDenialReason *);
 
     bool    isConnected() { return status == S_CONNECTED; }
     bool    isListening() { return status == S_LISTENING; }

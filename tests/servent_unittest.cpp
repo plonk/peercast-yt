@@ -593,3 +593,119 @@ TEST_F(ServentFixture, handshakeStream_returnStreamHeaders_mov)
               "\r\n",
               mock->outgoing.str());
 }
+
+TEST_F(ServentFixture, denialReasonToName)
+{
+    ASSERT_STREQ("None", Servent::denialReasonToName(Servent::StreamRequestDenialReason::None));
+    ASSERT_STREQ("InsufficientBandwidth", Servent::denialReasonToName(Servent::StreamRequestDenialReason::InsufficientBandwidth));
+    ASSERT_STREQ("PerChannelRelayLimit", Servent::denialReasonToName(Servent::StreamRequestDenialReason::PerChannelRelayLimit));
+    ASSERT_STREQ("RelayLimit", Servent::denialReasonToName(Servent::StreamRequestDenialReason::RelayLimit));
+    ASSERT_STREQ("DirectLimit", Servent::denialReasonToName(Servent::StreamRequestDenialReason::DirectLimit));
+    ASSERT_STREQ("NotPlaying", Servent::denialReasonToName(Servent::StreamRequestDenialReason::NotPlaying));
+    ASSERT_STREQ("Other", Servent::denialReasonToName(Servent::StreamRequestDenialReason::Other));
+    ASSERT_STREQ("unknown", Servent::denialReasonToName((Servent::StreamRequestDenialReason)100));
+}
+
+TEST_F(ServentFixture, canStream_null_channel)
+{
+    Servent::StreamRequestDenialReason reason = Servent::StreamRequestDenialReason::None;
+
+    ASSERT_FALSE(s.canStream(nullptr, &reason));
+    ASSERT_EQ(Servent::StreamRequestDenialReason::Other, reason);
+}
+
+TEST_F(ServentFixture, canStream_disabled)
+{
+    Servent::StreamRequestDenialReason reason = Servent::StreamRequestDenialReason::None;
+    auto ch = std::make_shared<Channel>();
+    auto prev = servMgr->isDisabled;
+
+    servMgr->isDisabled = true;
+    ASSERT_FALSE(s.canStream(ch, &reason));
+    ASSERT_EQ(Servent::StreamRequestDenialReason::Other, reason);
+    servMgr->isDisabled = prev;
+}
+
+TEST_F(ServentFixture, canStream_notPlaying)
+{
+    Servent::StreamRequestDenialReason reason = Servent::StreamRequestDenialReason::None;
+    auto ch = std::make_shared<Channel>();
+
+    ASSERT_FALSE(s.canStream(ch, &reason));
+    ASSERT_EQ(Servent::StreamRequestDenialReason::NotPlaying, reason);
+}
+
+TEST_F(ServentFixture, canStream_isPrivate)
+{
+    Servent::StreamRequestDenialReason reason = Servent::StreamRequestDenialReason::None;
+    auto ch = std::make_shared<Channel>();
+
+    ASSERT_EQ("0.0.0.0:0", s.sock->host.str());
+    ASSERT_FALSE(s.isPrivate());
+    s.sock->host.fromStrIP("127.0.0.1", 7144);
+    ASSERT_TRUE(s.isPrivate());
+
+    ASSERT_TRUE(s.canStream(ch, &reason));
+    ASSERT_EQ(Servent::StreamRequestDenialReason::None, reason);
+}
+
+TEST_F(ServentFixture, canStream_insufficientBandwidth)
+{
+    Servent::StreamRequestDenialReason reason = Servent::StreamRequestDenialReason::None;
+    auto ch = std::make_shared<Channel>();
+
+    ASSERT_EQ(0, servMgr->maxBitrateOut);
+    servMgr->maxBitrateOut = 1;
+    ch->info.bitrate = 2;
+
+    ASSERT_FALSE(s.canStream(ch, &reason));
+    ASSERT_EQ(Servent::StreamRequestDenialReason::InsufficientBandwidth, reason);
+
+    servMgr->maxBitrateOut = 0;
+}
+
+TEST_F(ServentFixture, canStream_relaysFull)
+{
+    Servent::StreamRequestDenialReason reason = Servent::StreamRequestDenialReason::None;
+    auto ch = std::make_shared<Channel>();
+    auto prev = servMgr->maxRelays;
+
+    s.type = Servent::T_RELAY;
+    servMgr->maxRelays = 0;
+    ASSERT_TRUE(servMgr->relaysFull());
+
+    ASSERT_FALSE(s.canStream(ch, &reason));
+    ASSERT_EQ(Servent::StreamRequestDenialReason::RelayLimit, reason);
+    servMgr->maxRelays = prev;
+}
+
+TEST_F(ServentFixture, canStream_directFull)
+{
+    Servent::StreamRequestDenialReason reason = Servent::StreamRequestDenialReason::None;
+    auto ch = std::make_shared<Channel>();
+    auto prev = servMgr->maxDirect;
+
+    s.type = Servent::T_DIRECT;
+    servMgr->maxDirect = 0;
+    ASSERT_TRUE(servMgr->directFull());
+
+    ASSERT_FALSE(s.canStream(ch, &reason));
+    ASSERT_EQ(Servent::StreamRequestDenialReason::DirectLimit, reason);
+
+    servMgr->maxDirect = prev;
+}
+
+TEST_F(ServentFixture, canStream_perChannelRelayLimit)
+{
+    class MockChannel : public Channel {
+        bool isFull() override { return true; }
+    };
+    Servent::StreamRequestDenialReason reason = Servent::StreamRequestDenialReason::None;
+    auto ch = std::make_shared<MockChannel>();
+
+    s.type = Servent::T_RELAY;
+    ch->status = Channel::S_RECEIVING;
+
+    ASSERT_FALSE(s.canStream(ch, &reason));
+    ASSERT_EQ(Servent::StreamRequestDenialReason::PerChannelRelayLimit, reason);
+}

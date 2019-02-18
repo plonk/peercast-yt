@@ -94,43 +94,57 @@ bool    Servent::isFiltered(int f)
 }
 
 // -----------------------------------
-bool Servent::canStream(std::shared_ptr<Channel> ch)
+// リレーあるいはダイレクト接続でストリーミングできるかを真偽値で返す。
+// できない場合は reason に理由が設定される。できる場合は reason は変
+// 更されない。
+bool Servent::canStream(std::shared_ptr<Channel> ch, Servent::StreamRequestDenialReason *reason)
 {
     if (ch==NULL)
+    {
+        *reason = StreamRequestDenialReason::Other;
         return false;
+    }
 
     if (servMgr->isDisabled)
+    {
+        *reason = StreamRequestDenialReason::Other;
         return false;
+    }
 
     if (!isPrivate())
     {
         if  (servMgr->bitrateFull(ch->getBitrate()))
         {
             LOG_DEBUG("Unable to stream because there is not enough bandwidth left");
+            *reason = StreamRequestDenialReason::InsufficientBandwidth;
             return false;
         }
 
         if ((type == T_RELAY) && servMgr->relaysFull())
         {
             LOG_DEBUG("Unable to stream because server already has max. number of relays");
+            *reason = StreamRequestDenialReason::RelayLimit;
             return false;
         }
 
         if ((type == T_DIRECT) && servMgr->directFull())
         {
             LOG_DEBUG("Unable to stream because server already has max. number of directs");
+            *reason = StreamRequestDenialReason::DirectLimit;
             return false;
         }
 
         if (!ch->isPlaying())
         {
             LOG_DEBUG("Unable to stream because channel is not playing");
+            *reason = StreamRequestDenialReason::NotPlaying;
             return false;
         }
 
         if ((type == T_RELAY) && ch->isFull())
         {
             LOG_DEBUG("Unable to stream because channel already has max. number of relays");
+            *reason = StreamRequestDenialReason::PerChannelRelayLimit;
             return false;
         }
     }
@@ -1021,8 +1035,11 @@ void Servent::handshakeStream_returnHits(AtomStream& atom,
 }
 
 // -----------------------------------
-bool Servent::handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool chanReady,
-                                             std::shared_ptr<Channel> ch, ChanHitList* chl,
+bool Servent::handshakeStream_returnResponse(bool gotPCP,
+                                             bool chanFound, // ヒットリストが存在する。
+                                             bool chanReady, // ストリーム可能である。
+                                             std::shared_ptr<Channel> ch,
+                                             ChanHitList* chl,
                                              const ChanInfo& chanInfo)
 {
     Host rhost = sock->host;
@@ -1071,7 +1088,8 @@ bool Servent::handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool c
 }
 
 // -----------------------------------
-// "/stream/<channel ID>" エンドポイントへの要求に対する反応。
+// "/stream/<channel ID>" あるいは "/channel/<channel ID>" エンドポイ
+// ントへの要求に対する反応。
 bool Servent::handshakeStream(ChanInfo &chanInfo)
 {
     bool gotPCP = false;
@@ -1096,7 +1114,67 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
             streamPos = ch->rawData.getLatestPos();
         }
 
-        chanReady = canStream(ch);
+        // 自動リレー管理。
+        bool autoManageTried = false;
+        do
+        {
+            StreamRequestDenialReason reason = StreamRequestDenialReason::None;
+            chanReady = canStream(ch, &reason);
+            LOG_DEBUG("chanReady = %d; reason = %s", chanReady, denialReasonToName(reason));
+
+            if (chanReady)
+            {
+                break;
+            }else if (!autoManageTried &&
+                      type == T_RELAY &&
+                      (reason == StreamRequestDenialReason::InsufficientBandwidth ||
+                       reason == StreamRequestDenialReason::RelayLimit ||
+                       reason == StreamRequestDenialReason::PerChannelRelayLimit))
+            {
+                autoManageTried = true;
+                LOG_DEBUG("Auto-manage relays");
+                ChanHitList* chl = chanMgr->findHitList(chanInfo);
+                if (!chl)
+                    break;
+
+                auto chanHitFor =
+                    [=](Servent* t)
+                    -> ChanHit*
+                    {
+                        for (auto h = chl->hit; h != nullptr; h = h->next)
+                        {
+                            if (h->sessionID.isSame(t->remoteID))
+                                return h;
+                        }
+                        return nullptr;
+                    };
+
+                // 赤・紫の接続を削除する。
+                std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
+                for (Servent* s = servMgr->servents; s != NULL; s = s->next)
+                {
+                    if (s == this) continue;
+
+                    ChanHit* hit = chanHitFor(s);
+
+                    if (s->type == Servent::T_RELAY &&
+                        s->chanID.isSame(chanInfo.id) &&
+                        hit &&
+                        (hit->getColor() == ChanHit::Color::red ||
+                         hit->getColor() == ChanHit::Color::purple))
+                    {
+                        LOG_INFO("Terminating relay connection to %s (color=%s)",
+                                 s->getHost().str().c_str(),
+                                 ChanHit::colorToName(hit->getColor()));
+                        s->abort();
+                        break;
+                    }
+                }
+            }else {
+                break;
+            }
+            sys->sleep(200);
+        }while (thread.active() && sock->active());
     }
 
     ChanHitList *chl = chanMgr->findHitList(chanInfo);

@@ -331,3 +331,42 @@ TEST_F(ChanHitFixture, versionStringIM)
     hit->versionExNumber = 51;
     ASSERT_STREQ("IM51", hit->versionString().c_str());
 }
+
+TEST_F(ChanHitFixture, colorRed)
+{
+    ASSERT_EQ(0, hit->host.port);
+    ASSERT_EQ(ChanHit::Color::red, hit->getColor());
+}
+
+TEST_F(ChanHitFixture, colorPurple)
+{
+    hit->host.port = 7144;
+    hit->relay = false;
+    hit->numRelays = 0;
+    ASSERT_EQ(ChanHit::Color::purple, hit->getColor());
+}
+
+TEST_F(ChanHitFixture, colorBlue)
+{
+    hit->host.port = 7144;
+    hit->relay = false;
+    hit->numRelays = 1;
+    ASSERT_EQ(ChanHit::Color::blue, hit->getColor());
+}
+
+TEST_F(ChanHitFixture, colorGreen)
+{
+    hit->host.port = 7144;
+    hit->relay = true;
+    ASSERT_EQ(ChanHit::Color::green, hit->getColor());
+}
+
+
+TEST_F(ChanHitFixture, colorToName)
+{
+    ASSERT_STREQ("red", ChanHit::colorToName(ChanHit::Color::red));
+    ASSERT_STREQ("purple", ChanHit::colorToName(ChanHit::Color::purple));
+    ASSERT_STREQ("blue", ChanHit::colorToName(ChanHit::Color::blue));
+    ASSERT_STREQ("green", ChanHit::colorToName(ChanHit::Color::green));
+    ASSERT_STREQ("unknown", ChanHit::colorToName((ChanHit::Color)100));
+}

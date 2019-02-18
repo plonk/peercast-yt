@@ -233,6 +233,8 @@ bool    Channel::isFull()
 }
 
 // -----------------------------------
+// 帯域が十分にあり、リレー本数制限以内であるためにリレー接続を追加で
+// きる。
 bool    Channel::canAddRelay()
 {
     if  (servMgr->bitrateFull(this->getBitrate()) ||
@@ -953,9 +955,7 @@ void Channel::broadcastTrackerUpdate(GnuID &svID, bool force /* = false */)
         unsigned int oldp = rawData.getOldestPos();
         unsigned int newp = rawData.getLatestPos();
 
-        // チートしてサーバーのリレー数制限の情報を入れる。
-        auto canAddRelay = !servMgr->relaysFull();
-        hit.initLocal(numListeners, numRelays, info.numSkips, info.getUptime(), isPlaying(), oldp, newp, canAddRelay, this->sourceHost.host);
+        hit.initLocal(numListeners, numRelays, info.numSkips, info.getUptime(), isPlaying(), oldp, newp, canAddRelay(), this->sourceHost.host);
         hit.tracker = true;
 
         atom.writeParent(PCP_BCST, 10);

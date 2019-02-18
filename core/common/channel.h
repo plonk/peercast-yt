@@ -194,7 +194,7 @@ public:
         return (status == S_BROADCASTING);
     }
 
-    bool    isFull();
+    virtual bool isFull();
     bool    canAddRelay();
 
     bool    checkBump();
