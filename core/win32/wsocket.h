@@ -32,22 +32,26 @@ public:
 
     WSAClientSocket()
     :sockNum(0)
-    ,writeCnt(0)
     {
     }
 
-    virtual void    open(const Host &);
-    virtual int     read(void *, int);
-    virtual int     readUpto(void *, int);
-    virtual void    write(const void *, int);
-    virtual void    bind(const Host &);
-    virtual void    connect();
-    virtual void    close();
-    virtual ClientSocket * accept();
-    virtual bool    active() { return sockNum != 0; }
-    virtual bool    readReady(int timeoutMilliseconds);
-    virtual Host    getLocalHost();
-    virtual void    setBlocking(bool);
+    ~WSAClientSocket()
+    {
+        close();
+    }
+
+    void    open(const Host &) override;
+    int     read(void *, int) override;
+    int     readUpto(void *, int) override;
+    void    write(const void *, int) override;
+    void    bind(const Host &) override;
+    void    connect() override;
+    void    close() override;
+    ClientSocket * accept() override;
+    bool    active() override { return sockNum != 0; }
+    bool    readReady(int timeoutMilliseconds) override;
+    Host    getLocalHost() override;
+    void    setBlocking(bool) override;
     void    setReuse(bool);
     void    setNagle(bool);
     void    setLinger(int);
@@ -55,9 +59,7 @@ public:
     static  HOSTENT     *resolveHost(const char *);
 
     void    checkTimeout(bool,bool);
-    void    checkTimeout2(bool,bool);
 
-    unsigned int writeCnt;
     SOCKET sockNum;
     struct sockaddr_in remoteAddr;
 };
