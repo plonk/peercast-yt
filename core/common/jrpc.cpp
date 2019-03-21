@@ -608,17 +608,22 @@ json JrpcApi::getYellowPages(json::array_t)
     json j;
     const char* root = servMgr->rootHost.cstr();
 
-    j = {
-        { "yellowPageId", 0 },
-        { "name",  root },
-        { "uri", String::format("pcp://%s/", root).cstr() },
-        { "announceUri", String::format("pcp://%s/", root).cstr() },
-        { "channelsUri", nullptr },
-        { "protocol", "pcp" },
-        { "channels", announcingChannels() }
-    };
+    if (strcmp(root, "")==0) {
+        return json::array({});
+    }else
+    {
+        j = {
+            { "yellowPageId", 0 },
+            { "name",  root },
+            { "uri", String::format("pcp://%s/", root).cstr() },
+            { "announceUri", String::format("pcp://%s/", root).cstr() },
+            { "channelsUri", nullptr },
+            { "protocol", "pcp" },
+            { "channels", announcingChannels() }
+        };
 
-    return json::array({j});
+        return json::array({j});
+    }
 }
 
 json JrpcApi::getYellowPageProtocols(json::array_t)
