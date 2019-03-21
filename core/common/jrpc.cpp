@@ -798,7 +798,13 @@ json JrpcApi::bumpChannel(json::array_t args)
 
 json JrpcApi::removeYellowPage(json::array_t args)
 {
-    throw application_error(kUnknownError, "Method unavailable");
+    if (args[0].get<int>() == 0) {
+        std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
+        servMgr->rootHost.clear();
+        return nullptr;
+    } else {
+        throw application_error(kUnknownError, "Unknown yellow page id");
+    }
 }
 
 json JrpcApi::getYPChannels(json::array_t args)
