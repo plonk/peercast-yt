@@ -143,3 +143,46 @@ TEST_F(JrpcApiFixture, call_ArgumentsNotSupplied)
     ASSERT_TRUE(str::contains(res, "-32602"));
     ASSERT_TRUE(str::contains(res, "Wrong number of arguments"));
 }
+
+TEST_F(JrpcApiFixture, removeYellowPage_removeWhenYpIsEmpty)
+{
+    ServMgr* back = servMgr;
+    servMgr = new ServMgr();
+
+    servMgr->rootHost.clear();
+    ASSERT_TRUE(servMgr->rootHost.isEmpty());
+
+    json result = api.removeYellowPage(json::array({0}));
+    ASSERT_TRUE(result.is_null());
+    ASSERT_TRUE(servMgr->rootHost.isEmpty());
+
+    delete servMgr;
+    servMgr = back;
+}
+
+TEST_F(JrpcApiFixture, removeYellowPage_removeWhenYpIsNonEmpty)
+{
+    ServMgr* back = servMgr;
+    servMgr = new ServMgr();
+
+    servMgr->rootHost.set("hogehoge");
+    ASSERT_FALSE(servMgr->rootHost.isEmpty());
+
+    json result = api.removeYellowPage(json::array({0}));
+    ASSERT_TRUE(result.is_null());
+    ASSERT_TRUE(servMgr->rootHost.isEmpty());
+
+    delete servMgr;
+    servMgr = back;
+}
+
+TEST_F(JrpcApiFixture, removeYellowPage_wrongYellowPageId)
+{
+    ServMgr* back = servMgr;
+    servMgr = new ServMgr();
+
+    ASSERT_THROW(api.removeYellowPage(json::array({1234})), JrpcApi::application_error);
+
+    delete servMgr;
+    servMgr = back;
+}
