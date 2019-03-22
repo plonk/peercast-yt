@@ -370,3 +370,18 @@ TEST_F(ChanHitFixture, colorToName)
     ASSERT_STREQ("green", ChanHit::colorToName(ChanHit::Color::green));
     ASSERT_STREQ("unknown", ChanHit::colorToName((ChanHit::Color)100));
 }
+
+TEST_F(ChanHitFixture, canGiv)
+{
+    ASSERT_TRUE(hit->canGiv());
+
+    hit->versionExPrefix[0] = 'S';
+    hit->versionExPrefix[1] = 'T';
+
+    ASSERT_FALSE(hit->canGiv());
+
+    hit->versionExPrefix[0] = 'Y';
+    hit->versionExPrefix[1] = 'T';
+
+    ASSERT_TRUE(hit->canGiv());
+}

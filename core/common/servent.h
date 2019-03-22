@@ -278,6 +278,8 @@ public:
 
     static std::string formatTimeDifference(unsigned int t, unsigned int currentTime);
 
+    static bool isTerminationCandidate(ChanHit* hit);
+
     TYPE                type;
     std::atomic<STATUS> status;
 

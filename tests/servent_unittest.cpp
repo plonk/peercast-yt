@@ -709,3 +709,144 @@ TEST_F(ServentFixture, canStream_perChannelRelayLimit)
     ASSERT_FALSE(s.canStream(ch, &reason));
     ASSERT_EQ(Servent::StreamRequestDenialReason::PerChannelRelayLimit, reason);
 }
+
+TEST_F(ServentFixture, isTerminationCandidate_port7144_nonST)
+{
+    {
+        ChanHit h;
+
+        h.host.port = 7144;
+        h.relay = 1;
+
+        ASSERT_FALSE(Servent::isTerminationCandidate(&h));
+    }
+
+    {
+        ChanHit h;
+
+        h.host.port = 7144;
+        h.relay = 0;
+        h.numRelays = 0;
+
+        ASSERT_TRUE(Servent::isTerminationCandidate(&h));
+    }
+
+    {
+        ChanHit h;
+
+        h.host.port = 7144;
+        h.relay = 0;
+        h.numRelays = 1;
+
+        ASSERT_FALSE(Servent::isTerminationCandidate(&h));
+    }
+}
+
+TEST_F(ServentFixture, isTerminationCandidate_port7144_ST)
+{
+    {
+        ChanHit h;
+
+        h.host.port = 7144;
+        h.relay = 1;
+        h.versionExPrefix[0] = 'S';
+        h.versionExPrefix[1] = 'T';
+
+        ASSERT_FALSE(Servent::isTerminationCandidate(&h));
+    }
+
+    {
+        ChanHit h;
+
+        h.host.port = 7144;
+        h.relay = 0;
+        h.numRelays = 0;
+        h.versionExPrefix[0] = 'S';
+        h.versionExPrefix[1] = 'T';
+
+        ASSERT_TRUE(Servent::isTerminationCandidate(&h));
+    }
+
+    {
+        ChanHit h;
+
+        h.host.port = 7144;
+        h.relay = 0;
+        h.numRelays = 1;
+        h.versionExPrefix[0] = 'S';
+        h.versionExPrefix[1] = 'T';
+
+        ASSERT_FALSE(Servent::isTerminationCandidate(&h));
+    }
+}
+
+TEST_F(ServentFixture, isTerminationCandidate_port0_nonST)
+{
+    {
+        ChanHit h;
+
+        h.host.port = 0;
+        h.relay = 1;
+
+        ASSERT_FALSE(Servent::isTerminationCandidate(&h));
+    }
+
+    {
+        ChanHit h;
+
+        h.host.port = 0;
+        h.relay = 0;
+        h.numRelays = 0;
+
+        ASSERT_TRUE(Servent::isTerminationCandidate(&h));
+    }
+
+    {
+        ChanHit h;
+
+        h.host.port = 0;
+        h.relay = 0;
+        h.numRelays = 1;
+
+        ASSERT_FALSE(Servent::isTerminationCandidate(&h));
+    }
+}
+
+TEST_F(ServentFixture, isTerminationCandidate_port0_ST)
+{
+    {
+        ChanHit h;
+
+        h.host.port = 0;
+        h.relay = 1;
+        h.versionExPrefix[0] = 'S';
+        h.versionExPrefix[1] = 'T';
+
+        ASSERT_TRUE(Servent::isTerminationCandidate(&h));
+    }
+
+    {
+        ChanHit h;
+
+        h.host.port = 0;
+        h.relay = 0;
+        h.numRelays = 0;
+        h.versionExPrefix[0] = 'S';
+        h.versionExPrefix[1] = 'T';
+
+        ASSERT_TRUE(Servent::isTerminationCandidate(&h));
+    }
+
+    {
+        ChanHit h;
+
+        // ありえない…。
+        h.host.port = 0;
+        h.relay = 0;
+        h.numRelays = 1;
+        h.versionExPrefix[0] = 'S';
+        h.versionExPrefix[1] = 'T';
+
+        ASSERT_TRUE(Servent::isTerminationCandidate(&h));
+    }
+}

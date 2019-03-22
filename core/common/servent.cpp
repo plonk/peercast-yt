@@ -1088,6 +1088,16 @@ bool Servent::handshakeStream_returnResponse(bool gotPCP,
 }
 
 // -----------------------------------
+// リレー自動管理で切断の対象になるか。
+bool Servent::isTerminationCandidate(ChanHit* hit)
+{
+    // リレー追加不可で現在リレーしていない。
+    // あるいは、ポート0でGIVメソッドに対応してないクライアントである。
+    return (!hit->relay && hit->numRelays == 0 ||
+            hit->host.port == 0 && !hit->canGiv());
+}
+
+// -----------------------------------
 // "/stream/<channel ID>" あるいは "/channel/<channel ID>" エンドポイ
 // ントへの要求に対する反応。
 bool Servent::handshakeStream(ChanInfo &chanInfo)
@@ -1149,7 +1159,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                         return nullptr;
                     };
 
-                // 赤・紫の接続を削除する。
+                // リレー自動管理。
                 std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
                 for (Servent* s = servMgr->servents; s != NULL; s = s->next)
                 {
@@ -1160,8 +1170,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                     if (s->type == Servent::T_RELAY &&
                         s->chanID.isSame(chanInfo.id) &&
                         hit &&
-                        (hit->getColor() == ChanHit::Color::red ||
-                         hit->getColor() == ChanHit::Color::purple))
+                        Servent::isTerminationCandidate(hit))
                     {
                         LOG_INFO("Terminating relay connection to %s (color=%s)",
                                  s->getHost().str().c_str(),

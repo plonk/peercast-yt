@@ -71,6 +71,8 @@ public:
     std::string versionString();
     std::string str(bool withPort = false);
 
+    bool canGiv();
+
     // ノードの色。リレー能力の区別。
     enum class Color
     {

@@ -283,6 +283,14 @@ ChanHit::Color ChanHit::getColor()
 }
 
 // -----------------------------------
+// GIVメソッドに対応している。
+bool ChanHit::canGiv()
+{
+    // PeerCastStation以外。
+    return std::string(versionExPrefix, versionExPrefix + 2) != "ST";
+}
+
+// -----------------------------------
 int ChanHitList::getTotalListeners()
 {
     int cnt = 0;
