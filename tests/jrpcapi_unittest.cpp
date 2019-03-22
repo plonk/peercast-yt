@@ -186,3 +186,38 @@ TEST_F(JrpcApiFixture, removeYellowPage_wrongYellowPageId)
     delete servMgr;
     servMgr = back;
 }
+
+TEST_F(JrpcApiFixture, getYellowPages_whenYpIsEmpty)
+{
+    ServMgr* back = servMgr;
+    servMgr = new ServMgr();
+
+    servMgr->rootHost.clear();
+    json result = api.getYellowPages(json::array({}));
+
+    ASSERT_TRUE(result == json::array({}));
+
+    delete servMgr;
+    servMgr = back;
+}
+
+TEST_F(JrpcApiFixture, getYellowPages_whenYpIsNonEmpty)
+{
+    ServMgr* back = servMgr;
+    servMgr = new ServMgr();
+
+    servMgr->rootHost.set("hogehoge");
+    json result = api.getYellowPages(json::array({}));
+
+    ASSERT_EQ(1, result.size());
+    ASSERT_EQ(0, result[0]["yellowPageId"]);
+    ASSERT_EQ("hogehoge", result[0]["name"].get<std::string>());
+    ASSERT_EQ("pcp://hogehoge/", result[0]["uri"].get<std::string>());
+    ASSERT_EQ("pcp://hogehoge/", result[0]["announceUri"].get<std::string>());
+    ASSERT_TRUE(result[0]["channelsUri"].is_null());
+    ASSERT_EQ("pcp", result[0]["protocol"].get<std::string>());
+    // そして、announcingChannels キーもある。
+
+    delete servMgr;
+    servMgr = back;
+}
