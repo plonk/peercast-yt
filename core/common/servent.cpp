@@ -1176,13 +1176,14 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                                  s->getHost().str().c_str(),
                                  ChanHit::colorToName(hit->getColor()));
                         s->abort();
+                        // 切断されるのを待つ。
+                        sys->sleep(200);
                         break;
                     }
                 }
             }else {
                 break;
             }
-            sys->sleep(200);
         }while (thread.active() && sock->active());
     }
 
