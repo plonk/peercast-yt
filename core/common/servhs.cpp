@@ -2364,6 +2364,27 @@ void Servent::handshakeICY(Channel::SRC_TYPE type, bool isHTTP)
 }
 
 // -----------------------------------
+const char* Servent::fileNameToMimeType(const String& fileName)
+{
+    if (fileName.contains(".htm"))
+        return MIME_HTML;
+    else if (fileName.contains(".css"))
+        return MIME_CSS;
+    else if (fileName.contains(".jpg"))
+        return MIME_JPEG;
+    else if (fileName.contains(".gif"))
+        return MIME_GIF;
+    else if (fileName.contains(".png"))
+        return MIME_PNG;
+    else if (fileName.contains(".js"))
+        return MIME_JS;
+    else if (fileName.contains(".ico"))
+        return MIME_ICO;
+    else
+        return nullptr;
+}
+
+// -----------------------------------
 void Servent::handshakeLocalFile(const char *fn, HTTP& http)
 {
     String fileName;
@@ -2376,7 +2397,9 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
     WriteBufferedStream bufferedSock(sock);
     HTML html("", bufferedSock);
 
-    if (fileName.contains(".htm"))
+    const char* mimeType = fileNameToMimeType(fileName);
+
+    if (strcmp(mimeType, MIME_HTML) == 0)
     {
         if (str::contains(fn, "play.html"))
         {
@@ -2397,32 +2420,17 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
         char *args = strstr(fileName.cstr(), "?");
         if (args)
             *args = '\0';
-
+ 
         auto req = http.getRequest();
         html.writeOK(MIME_HTML);
         HTTPRequestScope scope(req);
         html.writeTemplate(fileName.cstr(), req.queryString.c_str(), scope);
-    }else if (fileName.contains(".css"))
-    {
-        html.writeRawFile(fileName.cstr(), MIME_CSS);
-    }else if (fileName.contains(".jpg"))
-    {
-        html.writeRawFile(fileName.cstr(), MIME_JPEG);
-    }else if (fileName.contains(".gif"))
-    {
-        html.writeRawFile(fileName.cstr(), MIME_GIF);
-    }else if (fileName.contains(".png"))
-    {
-        html.writeRawFile(fileName.cstr(), MIME_PNG);
-    }else if (fileName.contains(".js"))
-    {
-        html.writeRawFile(fileName.cstr(), MIME_JS);
-    }else if (fileName.contains(".ico"))
-    {
-        html.writeRawFile(fileName.cstr(), MIME_ICO);
-    }else
+    }else if (mimeType == nullptr)
     {
         throw HTTPException(HTTP_SC_NOTFOUND, 404);
+    }else
+    {
+        html.writeRawFile(fileName.cstr(), mimeType);
     }
 }
 

@@ -136,6 +136,8 @@ public:
             }
         }
 
+    static const char* fileNameToMimeType(const String& fileName);
+
     Servent(int);
     ~Servent();
 
