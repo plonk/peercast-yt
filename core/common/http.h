@@ -97,6 +97,7 @@ public:
 #define MIME_GIF             "image/gif"
 #define MIME_PNG             "image/png"
 #define MIME_JS              "application/javascript"
+#define MIME_ICO             "image/vnd.microsoft.icon"
 
 // --------------------------------------------
 class Cookie

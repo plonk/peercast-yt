@@ -2417,6 +2417,9 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
     }else if (fileName.contains(".js"))
     {
         html.writeRawFile(fileName.cstr(), MIME_JS);
+    }else if (fileName.contains(".ico"))
+    {
+        html.writeRawFile(fileName.cstr(), MIME_ICO);
     }else
     {
         throw HTTPException(HTTP_SC_NOTFOUND, 404);
