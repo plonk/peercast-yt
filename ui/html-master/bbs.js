@@ -1,5 +1,5 @@
-var SHITARABA_THREAD_URL_PATTERN = /^http:\/\/jbbs\.shitaraba\.net\/bbs\/read\.cgi\/(\w+)\/(\d+)\/(\d+)(:?|\/.*)$/;
-var SHITARABA_BOARD_URL_PATTERN = /^http:\/\/jbbs\.shitaraba\.net\/(\w+)\/(\d+)\/?$/;
+var SHITARABA_THREAD_URL_PATTERN = /^https?:\/\/jbbs\.shitaraba\.net\/bbs\/read\.cgi\/(\w+)\/(\d+)\/(\d+)(:?|\/.*)$/;
+var SHITARABA_BOARD_URL_PATTERN = /^https?:\/\/jbbs\.shitaraba\.net\/(\w+)\/(\d+)\/?$/;
 
 function renderPost(p, category, board_num, thread_id) {
     var buf = "";
