@@ -2398,6 +2398,8 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
     HTML html("", bufferedSock);
 
     const char* mimeType = fileNameToMimeType(fileName);
+    if (mimeType == nullptr)
+        throw HTTPException(HTTP_SC_NOTFOUND, 404);
 
     if (strcmp(mimeType, MIME_HTML) == 0)
     {
@@ -2420,14 +2422,11 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
         char *args = strstr(fileName.cstr(), "?");
         if (args)
             *args = '\0';
- 
+
         auto req = http.getRequest();
         html.writeOK(MIME_HTML);
         HTTPRequestScope scope(req);
         html.writeTemplate(fileName.cstr(), req.queryString.c_str(), scope);
-    }else if (mimeType == nullptr)
-    {
-        throw HTTPException(HTTP_SC_NOTFOUND, 404);
     }else
     {
         html.writeRawFile(fileName.cstr(), mimeType);
