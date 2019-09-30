@@ -13,7 +13,7 @@ ifeq ($(WITH_RTMP),yes)
 endif
 
 OS = $(shell uname -s | tr A-Z a-z)
-ARCH = $(shell uname -p | tr A-Z a-z)
+ARCH = $(shell uname -m | tr A-Z a-z)
 
 DISTARCHIVE = peercast-yt-$(OS)-$(ARCH).tar.gz
 AR = ar
