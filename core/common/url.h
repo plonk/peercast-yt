@@ -20,6 +20,7 @@
 #define _URL_H
 
 #include "channel.h"
+#include <memory>
 
 // ------------------------------------------------
 class URLSource : public ChannelSource
@@ -38,7 +39,7 @@ public:
 
     static ChanInfo::PROTOCOL getSourceProtocol(char*& fileName);
 
-    Stream          *inputStream;
+    std::shared_ptr<Stream> inputStream;
     ::String        baseurl;
 };
 
