@@ -26,9 +26,7 @@ CORE = ../../core
 RTMP = ../../rtmp-server
 SRCHTMLTAR = ../html.tar
 HTML = html
-SRCPUBLICTAR = ../public.tar
-PUBLIC = public
-ASSETS = assets
+ASSETS = assets/
 CGIBIN = cgi-bin
 
 LIBOBJSTATIC = libpeercast.a
@@ -50,7 +48,7 @@ LIBONIGMO = ../../Onigmo/.libs/libonigmo.a
 
 DEPENDFILE = .deps
 
-.PHONY: all clean build-html deps $(SRCHTMLTAR) $(SRCPUBLICTAR)
+.PHONY: all clean build-html deps $(SRCHTMLTAR)
 
 # Here follow the generic build rules.
 all: $(TARGET) $(LIBOBJSTATIC) $(DISTARCHIVE) $(RTMPSERVER)
@@ -67,11 +65,6 @@ $(HTML): $(SRCHTMLTAR)
 
 $(SRCPUBLICTAR):
 	$(MAKE) -C .. public.tar
-
-$(PUBLIC): $(SRCPUBLICTAR)
-	rm -rf $(PUBLIC)
-	tar xf $(SRCPUBLICTAR)
-	touch $(PUBLIC)
 
 $(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS) $(RTMPSERVER)
 	rm -rf peercast-yt
