@@ -55,7 +55,6 @@ ServMgr::ServMgr()
     clearHostCache(ServHost::T_NONE);
     password[0]=0;
 
-    allowGnutella = false;
     useFlowControl = true;
 
     maxServIn = 50;
