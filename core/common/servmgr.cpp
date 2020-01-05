@@ -2016,7 +2016,6 @@ int ServMgr::serverProc(ThreadInfo *thread)
     sys->setThreadName("SERVER");
 
     Servent *serv = servMgr->allocServent();
-    Servent *serv2 = servMgr->allocServent();
 
     //unsigned int lastLookupTime=0;
 
@@ -2027,21 +2026,19 @@ int ServMgr::serverProc(ThreadInfo *thread)
         if (servMgr->restartServer)
         {
             serv->abort();      // force close
-            serv2->abort();     // force close
 
             servMgr->restartServer = false;
         }
 
         if (servMgr->autoServe)
         {
-            std::lock_guard<std::recursive_mutex> cs1(serv->lock), cs2(serv2->lock);
+            std::lock_guard<std::recursive_mutex> cs1(serv->lock);
 
             // サーバーが既に起動している最中に allow を書き換え続ける
             // の気持ち悪いな。
             serv->allow = servMgr->allowServer1;
-            serv2->allow = servMgr->allowServer2;
 
-            if ((!serv->sock) || (!serv2->sock))
+            if (!serv->sock)
             {
                 LOG_DEBUG("Starting servers");
 
@@ -2060,15 +2057,6 @@ int ServMgr::serverProc(ThreadInfo *thread)
                         sys->exit();
                     }
 
-                h.port++;
-                if (!serv2->sock)
-                    if (!serv2->initServer(h))
-                    {
-                        LOG_ERROR("Failed to start server on port %d. Exitting...", h.port);
-                        peercastInst->quit();
-                        sys->exit();
-                    }
-
                 std::string ui = servMgr->htmlPath; // "html/ja" etc.
                 ui += "/index.html";
                 peercastInst->callLocalURL(ui.c_str());
@@ -2076,7 +2064,6 @@ int ServMgr::serverProc(ThreadInfo *thread)
         }else{
             // stop server
             serv->abort();      // force close
-            serv2->abort();     // force close
 
             // cancel incoming connectuions
             Servent *s = servMgr->servents;
