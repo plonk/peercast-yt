@@ -367,6 +367,7 @@ int ChanMgr::broadcastPacketUp(ChanPacket &pack, GnuID &chanID, GnuID &srcID, Gn
 // -----------------------------------
 void ChanMgr::broadcastRelays(Servent *serv, int minTTL, int maxTTL)
 {
+#if 0
     //if ((servMgr->getFirewall() == ServMgr::FW_OFF) || servMgr->serverHost.localIP())
     {
         Host sh = servMgr->serverHost;
@@ -411,6 +412,7 @@ void ChanMgr::broadcastRelays(Servent *serv, int minTTL, int maxTTL)
         //if (numChans)
         //  LOG_INFO("Sent %d channels to %d servents", numChans, numOut);
     }
+#endif
 }
 
 // -----------------------------------

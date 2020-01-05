@@ -740,28 +740,28 @@ void ServMgr::quit()
 int ServMgr::broadcast(GnuPacket &pack, Servent *src)
 {
     int cnt=0;
-    if (pack.ttl)
-    {
-        Servent *s = servents;
-        while (s)
-        {
-            if (s != src)
-                if (s->isConnected())
-                    if (s->type == Servent::T_PGNU)
-                        if (!s->seenIDs.contains(pack.id))
-                        {
-                            if (src)
-                                if (!src->networkID.isSame(s->networkID))
-                                    continue;
+    // if (pack.ttl)
+    // {
+    //     Servent *s = servents;
+    //     while (s)
+    //     {
+    //         if (s != src)
+    //             if (s->isConnected())
+    //                 if (s->type == Servent::T_PGNU)
+    //                     if (!s->seenIDs.contains(pack.id))
+    //                     {
+    //                         if (src)
+    //                             if (!src->networkID.isSame(s->networkID))
+    //                                 continue;
 
-                            if (s->outputPacket(pack, false))
-                                cnt++;
-                        }
-            s=s->next;
-        }
-    }
+    //                         if (s->outputPacket(pack, false))
+    //                             cnt++;
+    //                     }
+    //         s=s->next;
+    //     }
+    // }
 
-    LOG_INFO("broadcast: %s (%d) to %d servents", GNU_FUNC_STR(pack.func), pack.ttl, cnt);
+    // LOG_INFO("broadcast: %s (%d) to %d servents", GNU_FUNC_STR(pack.func), pack.ttl, cnt);
 
     return cnt;
 }
@@ -770,29 +770,29 @@ int ServMgr::broadcast(GnuPacket &pack, Servent *src)
 int ServMgr::route(GnuPacket &pack, GnuID &routeID, Servent *src)
 {
     int cnt=0;
-    if (pack.ttl)
-    {
-        Servent *s = servents;
-        while (s)
-        {
-            if (s != src)
-                if (s->isConnected())
-                    if (s->type == Servent::T_PGNU)
-                        if (!s->seenIDs.contains(pack.id))
-                            if (s->seenIDs.contains(routeID))
-                            {
-                                if (src)
-                                    if (!src->networkID.isSame(s->networkID))
-                                        continue;
+    // if (pack.ttl)
+    // {
+    //     Servent *s = servents;
+    //     while (s)
+    //     {
+    //         if (s != src)
+    //             if (s->isConnected())
+    //                 if (s->type == Servent::T_PGNU)
+    //                     if (!s->seenIDs.contains(pack.id))
+    //                         if (s->seenIDs.contains(routeID))
+    //                         {
+    //                             if (src)
+    //                                 if (!src->networkID.isSame(s->networkID))
+    //                                     continue;
 
-                                if (s->outputPacket(pack, true))
-                                    cnt++;
-                            }
-            s=s->next;
-        }
-    }
+    //                             if (s->outputPacket(pack, true))
+    //                                 cnt++;
+    //                         }
+    //         s=s->next;
+    //     }
+    // }
 
-    LOG_INFO("route: %s (%d) to %d servents", GNU_FUNC_STR(pack.func), pack.ttl, cnt);
+    // LOG_INFO("route: %s (%d) to %d servents", GNU_FUNC_STR(pack.func), pack.ttl, cnt);
     return cnt;
 }
 
