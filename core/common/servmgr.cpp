@@ -30,13 +30,11 @@
 #include "version2.h"
 #include "rtmpmonit.h"
 #include "chandir.h"
-#include "uptest.h"
 
 // -----------------------------------
 ServMgr::ServMgr()
     : rtmpServerMonitor(std::string(peercastApp->getPath()) + "rtmp-server")
     , channelDirectory(new ChannelDirectory())
-    , uptestServiceRegistry(new UptestServiceRegistry())
     , relayBroadcast(30) // オリジナルでは未初期化。
 {
     validBCID = NULL;
@@ -124,9 +122,6 @@ ServMgr::ServMgr()
     wmvProtocol = "http";
 
     rtmpPort = 1935;
-
-    uptestServiceRegistry->addURL("http://bayonet.ddo.jp/sp/yp4g.xml");
-    uptestServiceRegistry->addURL("http://temp.orz.hm/yp/yp4g.xml");
 }
 
 // -----------------------------------
@@ -1060,14 +1055,6 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
         iniFile.writeLine("[End]");
     }
 
-    // 帯域チェック
-    for (auto url : this->uptestServiceRegistry->getURLs())
-    {
-        iniFile.writeSection("Uptest");
-        iniFile.writeStrValue("url", url);
-        iniFile.writeLine("[End]");
-    }
-
     iniFile.writeSection("Notify");
         iniFile.writeBoolValue("PeerCast", notifyMask & NT_PEERCAST);
         iniFile.writeBoolValue("Broadcasters", notifyMask & NT_BROADCASTERS);
@@ -1169,8 +1156,6 @@ void ServMgr::loadSettings(const char *fn)
 
     servMgr->numFilters = 0;
 
-    std::lock_guard<std::recursive_mutex> cs(servMgr->uptestServiceRegistry->m_lock);
-    servMgr->uptestServiceRegistry->clear();
 
     if (iniFile.openReadOnly(fn))
     {
@@ -1344,16 +1329,6 @@ void ServMgr::loadSettings(const char *fn)
                     }
                 }
                 feedIndex++;
-            }
-            else if (iniFile.isName("[Uptest]"))
-            {
-                while (iniFile.readNext())
-                {
-                    if (iniFile.isName("[End]"))
-                        break;
-                    else if (iniFile.isName("url"))
-                        servMgr->uptestServiceRegistry->addURL(iniFile.getStrValue());
-                }
             }else if (iniFile.isName("[Notify]"))
             {
                 notifyMask = NT_UPGRADE;
@@ -1988,8 +1963,6 @@ int ServMgr::idleProc(ThreadInfo *thread)
 
         servMgr->rtmpServerMonitor.update();
 
-        servMgr->uptestServiceRegistry->update();
-
         sys->sleep(500);
     }
 
@@ -2276,9 +2249,6 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var.startsWith("channelDirectory."))
     {
         return channelDirectory->writeVariable(out, var + strlen("channelDirectory."));
-    }else if (var.startsWith("uptestServiceRegistry."))
-    {
-        return uptestServiceRegistry->writeVariable(out, var + strlen("uptestServiceRegistry."));
     }else if (var == "genrePrefix")
     {
         buf = genrePrefix;

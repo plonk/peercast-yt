@@ -31,7 +31,6 @@
 #include "cgi.h"
 #include "template.h"
 #include "assets.h"
-#include "uptest.h"
 
 using namespace std;
 
@@ -1697,123 +1696,10 @@ void Servent::CMD_dump_hitlists(const char* cmd, HTTP& http, String& jumpStr)
     http.writeString(buf);
 }
 
-void Servent::CMD_add_speedtest(const char* cmd, HTTP& http, String& jumpStr)
-{
-    cgi::Query query(cmd);
-
-    if (query.get("url") == "")
-    {
-        http.send(HTTPResponse::badRequest("empty url"));
-        return;
-    }
-
-    auto status = servMgr->uptestServiceRegistry->addURL(query.get("url"));
-    if (status.first != true)
-    {
-        http.send(HTTPResponse::serverError(status.second));
-    }else
-    {
-        if (!http.headers.get("Referer").empty())
-            http.send(HTTPResponse::redirectTo(http.headers.get("Referer")));
-        else
-            http.send(HTTPResponse::redirectTo("/speedtest.html"));
-    }
-}
-
 static bool isDecimal(const std::string& str)
 {
     static const Regexp decimal("\\A(0|[1-9][0-9]*)\\z");
     return decimal.matches(str);
-}
-
-void Servent::CMD_delete_speedtest(const char* cmd, HTTP& http, String& jumpStr)
-{
-    cgi::Query query(cmd);
-
-    if (!isDecimal(query.get("index")))
-    {
-        http.send(HTTPResponse::badRequest("invalid index"));
-        return;
-    }
-
-    auto index = std::stoi(query.get("index"));
-    auto status = servMgr->uptestServiceRegistry->deleteByIndex(index);
-    if (status.first != true)
-    {
-        http.send(HTTPResponse::serverError(status.second));
-        return;
-    }else
-    {
-        if (!http.headers.get("Referer").empty())
-            http.send(HTTPResponse::redirectTo(http.headers.get("Referer")));
-        else
-            http.send(HTTPResponse::redirectTo("/speedtest.html"));
-    }
-}
-
-void Servent::CMD_refresh_speedtest(const char* cmd, HTTP& http, String& jumpStr)
-{
-    servMgr->uptestServiceRegistry->forceUpdate();
-
-    if (!http.headers.get("Referer").empty())
-        http.send(HTTPResponse::redirectTo(http.headers.get("Referer")));
-    else
-        http.send(HTTPResponse::redirectTo("/speedtest.html"));
-}
-
-void Servent::CMD_take_speedtest(const char* cmd, HTTP& http, String& jumpStr)
-{
-    cgi::Query query(cmd);
-
-    if (!isDecimal(query.get("index")))
-    {
-        http.send(HTTPResponse::badRequest("invalid index"));
-        return;
-    }
-
-    auto index = std::stoi(query.get("index"));
-    auto status = servMgr->uptestServiceRegistry->takeSpeedtest(index);
-    if (status.first != true)
-    {
-        http.send(HTTPResponse::serverError(status.second));
-        return;
-    }else
-    {
-        // 新しい計測値を読み込む。
-        servMgr->uptestServiceRegistry->forceUpdate();
-
-        if (!http.headers.get("Referer").empty())
-            http.send(HTTPResponse::redirectTo(http.headers.get("Referer")));
-        else
-            http.send(HTTPResponse::redirectTo("/speedtest.html"));
-    }
-}
-
-void Servent::CMD_speedtest_cached_xml(const char* cmd, HTTP& http, String& jumpStr)
-{
-    cgi::Query query(cmd);
-    if (!isDecimal(query.get("index")))
-    {
-        http.send(HTTPResponse::badRequest("invalid index"));
-        return;
-    }
-
-    bool success;
-    std::string reason;
-    std::string xml;
-
-    std::tie(success, reason) = servMgr->uptestServiceRegistry->getXML(std::stoi(query.get("index")), xml);
-    if (success)
-    {
-        http.send(HTTPResponse::ok(
-                      {
-                          {"Content-Type", "application/xml"},
-                          {"Content-Length", std::to_string(xml.size()) }
-                      }, xml));
-    }else
-    {
-        http.send(HTTPResponse::serverError(reason));
-    }
 }
 
 void Servent::handshakeCMD(HTTP& http, char *q)
@@ -1834,9 +1720,6 @@ void Servent::handshakeCMD(HTTP& http, char *q)
         if (cmd == "add_bcid")
         {
             CMD_add_bcid(query.c_str(), http, jumpStr);
-        }else if (cmd == "add_speedtest")
-        {
-            CMD_add_speedtest(query.c_str(), http, jumpStr);
         }else if (cmd == "apply")
         {
             CMD_apply(query.c_str(), http, jumpStr);
@@ -1852,9 +1735,6 @@ void Servent::handshakeCMD(HTTP& http, char *q)
         }else if (cmd == "control_rtmp")
         {
             CMD_control_rtmp(query.c_str(), http, jumpStr);
-        }else if (cmd == "delete_speedtest")
-        {
-            CMD_delete_speedtest(query.c_str(), http, jumpStr);
         }else if (cmd == "dump_hitlists")
         {
             CMD_dump_hitlists(query.c_str(), http, jumpStr);
@@ -1879,15 +1759,9 @@ void Servent::handshakeCMD(HTTP& http, char *q)
         }else if (cmd == "redirect")
         {
             CMD_redirect(query.c_str(), http, jumpStr);
-        }else if (cmd == "refresh_speedtest")
-        {
-            CMD_refresh_speedtest(query.c_str(), http, jumpStr);
         }else if (cmd == "shutdown")
         {
             CMD_shutdown(query.c_str(), http, jumpStr);
-        }else if (cmd == "speedtest_cached_xml")
-        {
-            CMD_speedtest_cached_xml(query.c_str(), http, jumpStr);
         }else if (cmd == "stop")
         {
             CMD_stop(query.c_str(), http, jumpStr);
@@ -1897,9 +1771,6 @@ void Servent::handshakeCMD(HTTP& http, char *q)
         }else if (cmd == "update_channel_info")
         {
             CMD_update_channel_info(query.c_str(), http, jumpStr);
-        }else if (cmd == "take_speedtest")
-        {
-            CMD_take_speedtest(query.c_str(), http, jumpStr);
         }else if (cmd == "viewxml")
         {
             CMD_viewxml(query.c_str(), http, jumpStr);

@@ -29,7 +29,6 @@
 #include "str.h"
 #include "jrpc.h"
 #include "regexp.h"
-#include "uptest.h"
 
 #include <assert.h>
 
@@ -211,9 +210,6 @@ bool Template::writeLoopVariable(Stream &s, const String &varName, int loop)
     }else if (varName.startsWith("loop.notification."))
     {
         return g_notificationBuffer.writeVariable(s, varName + strlen("loop."), loop);
-    }else if (varName.startsWith("loop.uptestServiceRegistry."))
-    {
-        return servMgr->uptestServiceRegistry->writeVariable(s, varName + strlen("loop.uptestServiceRegistry."), loop);
     }
 
     return false;
