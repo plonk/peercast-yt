@@ -24,6 +24,7 @@
 #include "varwriter.h"
 #include "rtmpmonit.h"
 #include "inifile.h"
+#include "servfilter.h"
 
 // ----------------------------------
 
@@ -84,31 +85,6 @@ public:
     TYPE            type;
     Host            host;
     unsigned int    time;
-};
-
-// ----------------------------------
-class ServFilter : public VariableWriter
-{
-public:
-    enum
-    {
-        F_PRIVATE  = 0x01,
-        F_BAN      = 0x02,
-        F_NETWORK  = 0x04,
-        F_DIRECT   = 0x08
-    };
-
-    ServFilter() { init(); }
-    void    init()
-    {
-        flags = 0;
-        host.init();
-    }
-    bool    writeVariable(Stream &, const String &) override;
-    bool    matches(int fl, const Host& h) const;
-
-    Host host;
-    unsigned int flags;
 };
 
 // ----------------------------------

@@ -2122,34 +2122,6 @@ ServHost::TYPE ServHost::getTypeFromStr(const char *s)
 }
 
 // --------------------------------------------------
-bool    ServFilter::writeVariable(Stream &out, const String &var)
-{
-    std::string buf;
-
-    if (var == "network")
-        buf = (flags & F_NETWORK) ? "1" : "0";
-    else if (var == "private")
-        buf = (flags & F_PRIVATE) ? "1" : "0";
-    else if (var == "direct")
-        buf = (flags & F_DIRECT) ? "1" : "0";
-    else if (var == "banned")
-        buf = (flags & F_BAN) ? "1" : "0";
-    else if (var == "ip")
-        buf = host.str(false); // without port
-    else
-        return false;
-
-    out.writeString(buf);
-    return true;
-}
-
-// --------------------------------------------------
-bool ServFilter::matches(int fl, const Host& h) const
-{
-    return (flags&fl) != 0 && h.isMemberOf(host);
-}
-
-// --------------------------------------------------
 bool    BCID::writeVariable(Stream &out, const String &var)
 {
     std::string buf;
