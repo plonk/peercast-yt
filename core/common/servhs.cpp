@@ -1190,11 +1190,6 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
         else if (strcmp(curr, "allowDirect1") == 0)
             allowServer1 |= atoi(arg) ? (ALLOW_DIRECT) : 0;
 
-        else if (strcmp(curr, "allowHTML2") == 0)
-            allowServer2 |= atoi(arg) ? (ALLOW_HTML) : 0;
-        else if (strcmp(curr, "allowBroadcast2") == 0)
-            allowServer2 |= atoi(arg) ? (ALLOW_BROADCAST) : 0;
-
         else if (strcmp(curr, "transcoding_enabled") == 0)
             servMgr->transcodingEnabled = getCGIargBOOL(arg);
         else if (strcmp(curr, "preset") == 0)
@@ -1206,7 +1201,6 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
     }
 
     servMgr->allowServer1 = allowServer1;
-    servMgr->allowServer2 = allowServer2;
 
     if (servMgr->serverHost.port != newPort)
     {
