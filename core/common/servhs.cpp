@@ -292,19 +292,6 @@ void Servent::handshakeGET(HTTP &http)
 
         LOG_DEBUG("Admin client");
         handshakeCMD(http, fn+8);
-    }else if (strncmp(fn, "/http/", 6) == 0)
-    {
-        // peercast.org へのプロキシ接続
-
-        String dirName = fn+6;
-
-        if (!isAllowed(ALLOW_HTML))
-            throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
-
-        if (!handshakeAuth(http, fn, false))
-            throw HTTPException(HTTP_SC_UNAUTHORIZED, 401);
-
-        handshakeRemoteFile(dirName);
     }else if (strcmp(fn, "/html/index.html") == 0)
     {
         // PeerCastStation が "/" を "/html/index.html" に 301 Moved
@@ -912,16 +899,13 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
     {
         String file = servMgr->htmlPath;
         file.append("/login.html");
-        if (local)
+        if (http.headers.get("X-Requested-With") == "XMLHttpRequest")
+            throw HTTPException(HTTP_SC_FORBIDDEN, 403);
+        else
         {
-            if (http.headers.get("X-Requested-With") == "XMLHttpRequest")
-                throw HTTPException(HTTP_SC_FORBIDDEN, 403);
-            else
-            {
-                handshakeLocalFile(file, http);
-            }
-        }else
-            handshakeRemoteFile(file);
+            // XXX
+            handshakeLocalFile(file, http);
+        }
     }
 
     return false;
@@ -2435,78 +2419,3 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
     }
 }
 
-// -----------------------------------
-void Servent::handshakeRemoteFile(const char *dirName)
-{
-    ClientSocket *rsock = sys->createSocket();
-    if (!rsock)
-        throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
-
-    const char *hostName = "www.peercast.org";  // hardwired for "security"
-
-    Host host;
-    host.fromStrName(hostName, 80);
-
-    if (host.ip == 0)
-    {
-        LOG_ERROR("handshakeRemoteFile: lookup failed for %s", hostName);
-        throw HTTPException(HTTP_SC_BADGATEWAY, 502);
-    }
-
-    rsock->open(host);
-    rsock->connect();
-
-    HTTP rhttp(*rsock);
-
-    rhttp.writeLineF("GET /%s HTTP/1.0", dirName);
-    rhttp.writeLineF("%s %s", HTTP_HS_HOST, hostName);
-    rhttp.writeLineF("%s %s", HTTP_HS_CONNECTION, "close");
-    rhttp.writeLineF("%s %s", HTTP_HS_ACCEPT, "*/*");
-    rhttp.writeLine("");
-
-    String contentType;
-    bool isTemplate = false;
-    while (rhttp.nextHeader())
-    {
-        char *arg = rhttp.getArgStr();
-        if (arg)
-        {
-            if (rhttp.isHeader("content-type"))
-                contentType = arg;
-        }
-    }
-
-    MemoryStream mem(100*1024);
-    while (!rsock->eof())
-    {
-        int len=0;
-        char buf[4096];
-        len = rsock->readUpto(buf, sizeof(buf));
-        if (len == 0)
-            break;
-        else
-            mem.write(buf, len);
-    }
-    rsock->close();
-
-    int fileLen = mem.getPosition();
-    mem.len = fileLen;
-    mem.rewind();
-
-    if (contentType.contains(MIME_HTML))
-        isTemplate = true;
-
-    sock->writeLine(HTTP_SC_OK);
-    sock->writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
-    sock->writeLineF("%s %s", HTTP_HS_CACHE, "no-cache");
-    sock->writeLineF("%s %s", HTTP_HS_CONNECTION, "close");
-    sock->writeLineF("%s %s", HTTP_HS_CONTENT, contentType.cstr());
-
-    sock->writeLine("");
-
-    if (isTemplate)
-    {
-        Template().readTemplate(mem, sock, 0);
-    }else
-        sock->write(mem.buf, fileLen);
-}
