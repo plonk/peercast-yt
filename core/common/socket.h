@@ -56,7 +56,11 @@ public:
     virtual void    setBlocking(bool) = 0;
 
     static unsigned int getIP(const char *);
-    static bool         getHostname(char *, unsigned int);
+
+    // IPアドレスipを逆引きして名前をstrに格納する。
+    // strは最低256バイトの長さを持つ領域へのポインターでなければならない。
+    // 逆引きに成功した場合はtrueを、失敗した場合はfalseを返す。
+    static bool         getHostname(char * str, unsigned int ip);
 
     bool eof() override
     {
