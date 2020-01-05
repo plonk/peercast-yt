@@ -91,7 +91,7 @@ TEST_F(ServMgrFixture, initialState)
     // GnuID               sessionID;
     ASSERT_STREQ("00151515151515151515151515151515", m.sessionID.str().c_str());
     // ServFilter          filters[MAX_FILTERS];
-    ASSERT_EQ(0xffffffff, m.filters[0].host.ip);
+    ASSERT_EQ("255.255.255.255", m.filters[0].getPattern());
     ASSERT_EQ(ServFilter::F_NETWORK|ServFilter::F_DIRECT, m.filters[0].flags);
     // int                 numFilters;
     ASSERT_EQ(1, m.numFilters);
@@ -517,7 +517,7 @@ TEST_F(ServMgrFixture, doSaveSettings)
 TEST_F(ServMgrFixture, hasUnsafeFilterSettings)
 {
     ASSERT_EQ(1, m.numFilters);
-    ASSERT_STREQ(m.filters[0].host.IPtoStr().c_str(), "255.255.255.255");
+    ASSERT_EQ("255.255.255.255", m.filters[0].getPattern());
     ASSERT_FALSE(m.hasUnsafeFilterSettings());
 
     m.filters[0].flags |= ServFilter::F_PRIVATE;

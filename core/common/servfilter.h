@@ -40,6 +40,13 @@ public:
     bool    writeVariable(Stream &, const String &) override;
     bool    matches(int fl, const Host& h) const;
 
-    Host host;
+    void setPattern(const char* str);
+    std::string getPattern();
+
+    bool isGlobal();
+    bool isSet();
+
     unsigned int flags;
+private:
+    Host host;
 };

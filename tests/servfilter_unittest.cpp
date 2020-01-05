@@ -12,7 +12,7 @@ public:
 TEST_F(ServFilterFixture, initialState)
 {
     ASSERT_EQ(0, filter.flags);
-    ASSERT_EQ(0, filter.host.ip);
+    ASSERT_FALSE(filter.isSet());
 }
 
 TEST_F(ServFilterFixture, writeVariable)
@@ -68,7 +68,7 @@ TEST_F(ServFilterFixture, writeVariableBanned)
 
 TEST_F(ServFilterFixture, writeVariableIP)
 {
-    filter.host.ip = (127<<24)|1;
+    filter.setPattern("127.0.0.1");
     filter.writeVariable(mem, "ip");
     ASSERT_STREQ("127.0.0.1", mem.str().c_str());
 }
@@ -76,9 +76,19 @@ TEST_F(ServFilterFixture, writeVariableIP)
 TEST_F(ServFilterFixture, matches)
 {
     filter.flags = ServFilter::F_PRIVATE;
-    filter.host.ip = 192 << 24 | 168 << 16 | 255; // 192.168.0.*
+    filter.setPattern("192.168.0.255"); // 192.168.0.*
 
     ASSERT_TRUE( filter.matches(ServFilter::F_PRIVATE, Host(192<<24 | 168<<16 | 1, 0)) );
     ASSERT_FALSE( filter.matches(ServFilter::F_DIRECT, Host(192<<24 | 168<<16 | 1, 0)) );
     ASSERT_FALSE( filter.matches(ServFilter::F_PRIVATE, Host(192<<24 | 168<<16 | 1<<8 | 1, 0)) );
+}
+
+TEST_F(ServFilterFixture, emptyStringResets)
+{
+    filter.setPattern("127.0.0.1");
+    ASSERT_TRUE(filter.isSet());
+
+    filter.setPattern("");
+    ASSERT_FALSE(filter.isSet());
+    ASSERT_EQ("0.0.0.0", filter.getPattern());
 }

@@ -219,7 +219,7 @@ void ServMgr::setFilterDefaults()
 {
     numFilters = 0;
 
-    filters[numFilters].host.fromStrIP("255.255.255.255", 0);
+    filters[numFilters].setPattern("255.255.255.255");
     filters[numFilters].flags = ServFilter::F_NETWORK|ServFilter::F_DIRECT;
     numFilters++;
 }
@@ -914,9 +914,7 @@ void writeServerSettings(IniFileBase &iniFile, unsigned int a)
 // --------------------------------------------------
 void writeFilterSettings(IniFileBase &iniFile, ServFilter &f)
 {
-    char ipstr[64];
-    f.host.IPtoStr(ipstr);
-    iniFile.writeStrValue("ip", ipstr);
+    iniFile.writeStrValue("ip", f.getPattern());
     iniFile.writeBoolValue("private", f.flags & ServFilter::F_PRIVATE);
     iniFile.writeBoolValue("ban", f.flags & ServFilter::F_BAN);
     iniFile.writeBoolValue("network", f.flags & ServFilter::F_NETWORK);
@@ -1143,14 +1141,14 @@ unsigned int readServerSettings(IniFileBase &iniFile, unsigned int a)
 // --------------------------------------------------
 void readFilterSettings(IniFileBase &iniFile, ServFilter &sv)
 {
-    sv.host.init();
+    sv.init();
 
     while (iniFile.readNext())
     {
         if (iniFile.isName("[End]"))
             break;
         else if (iniFile.isName("ip"))
-            sv.host.fromStrIP(iniFile.getStrValue(), 0);
+            sv.setPattern(iniFile.getStrValue());
         else if (iniFile.isName("private"))
             sv.flags = (sv.flags & ~ServFilter::F_PRIVATE) | (iniFile.getBoolValue()?ServFilter::F_PRIVATE:0);
         else if (iniFile.isName("ban"))
@@ -2353,12 +2351,9 @@ void ServMgr::logLevel(int newLevel)
 // --------------------------------------------------
 bool ServMgr::hasUnsafeFilterSettings()
 {
-    const std::string global = "255.255.255.255";
-
     for (int i = 0; i < this->numFilters; ++i)
     {
-        if (filters[i].host.IPtoStr().c_str() == global &&
-            (filters[i].flags & ServFilter::F_PRIVATE) != 0)
+        if (filters[i].isGlobal() && (filters[i].flags & ServFilter::F_PRIVATE) != 0)
             return true;
     }
     return false;
