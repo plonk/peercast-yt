@@ -1010,7 +1010,6 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
     servMgr->numFilters = 0;
     ServFilter *currFilter = servMgr->filters;
     servMgr->channelDirectory->clearFeeds();
-    servMgr->publicDirectoryEnabled = false;
     servMgr->transcodingEnabled = false;
 
     bool brRoot = false;
@@ -1139,8 +1138,6 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
             chanMgr->deadHitAge = getCGIargINT(arg);
         else if (strcmp(curr, "refresh") == 0)
             servMgr->refreshHTML = getCGIargINT(arg);
-        else if (strcmp(curr, "public_directory") == 0)
-            servMgr->publicDirectoryEnabled = true;
         else if (strcmp(curr, "genreprefix") == 0)
             servMgr->genrePrefix = arg;
         else if (strcmp(curr, "auth") == 0)
