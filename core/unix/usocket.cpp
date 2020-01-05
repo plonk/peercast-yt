@@ -49,8 +49,14 @@ void UClientSocket::init()
 }
 
 // --------------------------------------------------
+// gethostbyname/gethostbyaddr のデータへのアクセスをシリアライズするためのロック。
+static std::recursive_mutex staticDataLock;
+
+// --------------------------------------------------
 bool ClientSocket::getHostname(char *str, unsigned int ip)
 {
+    std::lock_guard<std::recursive_mutex> cs(staticDataLock);
+
     hostent *he;
 
     ip = htonl(ip);
@@ -64,9 +70,6 @@ bool ClientSocket::getHostname(char *str, unsigned int ip)
     }else
         return false;
 }
-
-// gethostbyname のデータへのアクセスをシリアライズするためのロック。
-static std::recursive_mutex staticDataLock;
 
 // --------------------------------------------------
 unsigned int ClientSocket::getIP(const char *name)
