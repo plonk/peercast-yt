@@ -19,6 +19,11 @@
 #include "servfilter.h"
 #include "_string.h"
 #include "stream.h"
+#include "regexp.h"
+#include "str.h"
+#include "socket.h"
+
+static const Regexp IPV4_PATTERN("\\A\\d+\\.\\d+\\.\\d+\\.\\d+\\z");
 
 bool    ServFilter::writeVariable(Stream &out, const String &var)
 {
@@ -33,7 +38,7 @@ bool    ServFilter::writeVariable(Stream &out, const String &var)
     else if (var == "banned")
         buf = (flags & F_BAN) ? "1" : "0";
     else if (var == "ip")
-        buf = host.str(false); // without port
+        buf = getPattern();
     else
         return false;
 
@@ -44,32 +49,66 @@ bool    ServFilter::writeVariable(Stream &out, const String &var)
 // --------------------------------------------------
 bool ServFilter::matches(int fl, const Host& h) const
 {
-    return (flags&fl) != 0 && h.isMemberOf(host);
+    if ((flags&fl) == 0)
+        return false;
+
+    switch (type)
+    {
+    case T_IP:
+        return h.isMemberOf(host);
+    case T_HOSTNAME:
+        return h.ip == ClientSocket::getIP(pattern.c_str());
+    case T_SUFFIX:
+        char str[256] = "";
+        ClientSocket::getHostname(str, h.ip);
+        return str::has_suffix(str, pattern);
+    }
 }
 
 // --------------------------------------------------
 void ServFilter::setPattern(const char* str)
 {
-    host.fromStrIP(str, 0);
+    if (*str == '\0')
+    {
+        this->init();
+        return;
+    }else if (str[0] == '.')
+    {
+        type = T_SUFFIX;
+        pattern = str;
+    }else if (IPV4_PATTERN.matches(str))
+    {
+        type = T_IP;
+        host.fromStrIP(str, 0);
+    }else
+    {
+        type = T_HOSTNAME;
+        pattern = str;
+    }
 }
 
 // --------------------------------------------------
 std::string ServFilter::getPattern()
 {
-    char ipstr[64];
-    host.IPtoStr(ipstr);
-    return ipstr;
+    switch (type)
+    {
+    case T_IP:
+        return host.str(false);
+    case T_HOSTNAME:
+        return pattern;
+    case T_SUFFIX:
+        return pattern;
+    }
 }
 
 // --------------------------------------------------
 bool ServFilter::isGlobal()
 {
-    const std::string global = "255.255.255.255";
-    return host.IPtoStr().c_str() == global;
+    return type == T_IP && host.str(false) == "255.255.255.255";
 }
 
 // --------------------------------------------------
 bool ServFilter::isSet()
 {
-    return host.ip != 0;
+    return !(type == T_IP && host.ip == 0);
 }
