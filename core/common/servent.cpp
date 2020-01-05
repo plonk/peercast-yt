@@ -1212,6 +1212,7 @@ void Servent::handshakeGiv(GnuID &id)
 }
 
 // -----------------------------------
+#if 0
 void Servent::processGnutella()
 {
     type = T_PGNU;
@@ -1381,8 +1382,10 @@ void Servent::processGnutella()
         sys->sleep(delay);
     }
 }
+#endif
 
 // -----------------------------------
+#if 0
 void Servent::processRoot()
 {
     try
@@ -1468,6 +1471,7 @@ void Servent::processRoot()
         LOG_ERROR("Relay: %s", e.msg);
     }
 }
+#endif
 
 // ------------------------------------------------------------------
 // Pushリレーサーバントのメインプロシージャ。こちらからリモートホスト
@@ -2097,6 +2101,7 @@ int Servent::incomingProc(ThreadInfo *thread)
 }
 
 // -----------------------------------
+#if 0
 void Servent::processServent()
 {
     setStatus(S_HANDSHAKE);
@@ -2108,7 +2113,7 @@ void Servent::processServent()
 
     processGnutella();
 }
-
+#endif
 // -----------------------------------
 void Servent::processStream(bool doneHandshake, ChanInfo &chanInfo)
 {
