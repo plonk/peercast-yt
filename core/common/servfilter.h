@@ -20,6 +20,19 @@
 #include "varwriter.h"
 #include "host.h"
 
+// IPアドレスはパターン文字列に対してマッチされる。パターン文字列は
+// IPv4 アドレス、ホスト名、または . で始まる FQDN のサフィックスであ
+// る。IPv4 アドレスで値が 255 のフィールドはワイルドカードとして扱われる。
+
+// 例:
+// "127.0.0.1" → 127.0.0.1
+// "127.255.255.255" → 127.*.*.*
+// "localhost" → "localhost" のIPv4アドレス。
+// ".jp" → 逆引きホスト名が ".jp" で終わる。
+
+// アドレスは 0.0.0.0 は「リセット状態」として扱われ、また空文字列のセッ
+// トもフィルターをリセットする。
+
 class ServFilter : public VariableWriter
 {
 public:
@@ -31,9 +44,17 @@ public:
         F_DIRECT   = 0x08
     };
 
+    enum Type
+    {
+        T_IP,
+        T_HOSTNAME,
+        T_SUFFIX,
+    };
+
     ServFilter() { init(); }
     void    init()
     {
+        type = T_IP;
         flags = 0;
         host.init();
     }
@@ -46,7 +67,9 @@ public:
     bool isGlobal();
     bool isSet();
 
+    Type type;
     unsigned int flags;
 private:
     Host host;
+    std::string pattern;
 };
