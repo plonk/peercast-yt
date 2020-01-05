@@ -333,8 +333,6 @@ public:
 
     char                password[64];
 
-    bool                allowGnutella;
-
     unsigned int        maxBitrateOut, maxControl, maxRelays, maxDirect;
     unsigned int        minGnuIncoming, maxGnuIncoming;
     unsigned int        maxServIn;
