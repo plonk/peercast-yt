@@ -47,3 +47,29 @@ bool ServFilter::matches(int fl, const Host& h) const
     return (flags&fl) != 0 && h.isMemberOf(host);
 }
 
+// --------------------------------------------------
+void ServFilter::setPattern(const char* str)
+{
+    host.fromStrIP(str, 0);
+}
+
+// --------------------------------------------------
+std::string ServFilter::getPattern()
+{
+    char ipstr[64];
+    host.IPtoStr(ipstr);
+    return ipstr;
+}
+
+// --------------------------------------------------
+bool ServFilter::isGlobal()
+{
+    const std::string global = "255.255.255.255";
+    return host.IPtoStr().c_str() == global;
+}
+
+// --------------------------------------------------
+bool ServFilter::isSet()
+{
+    return host.ip != 0;
+}

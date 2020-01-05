@@ -1114,8 +1114,8 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
             {
                 currFilter = &servMgr->filters[servMgr->numFilters];
                 currFilter->init();
-                currFilter->host.fromStrIP(arg, DEFAULT_PORT);
-                if ((currFilter->host.ip) && (servMgr->numFilters < (ServMgr::MAX_FILTERS-1)))
+                currFilter->setPattern(arg);
+                if (currFilter->isSet() && (servMgr->numFilters < (ServMgr::MAX_FILTERS-1)))
                 {
                     servMgr->numFilters++;
                     servMgr->filters[servMgr->numFilters].init();   // clear new entry
