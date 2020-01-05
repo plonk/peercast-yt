@@ -150,35 +150,24 @@
             <td colspan=3><b>{#Security}</b></td>
           </tr>
           <tr class="normal">
-            <th width="40%">{#Allow on port:}</th>
-            <th>{$servMgr.serverPort1}</th>
-            <th>{$servMgr.serverPort2}</th>
-          </tr>
-          <tr class="normal">
-            <th class="left-heading">HTML</th>
+            <th width="40%" class="left-heading">HTML</th>
             <td class="checkbox-cell"><input type=checkbox {@if servMgr.allow.HTML1}checked{@end} value=1 name=allowHTML1>
-            </td>
-            <td class="checkbox-cell"><input type=checkbox {@if servMgr.allow.HTML2}checked{@end} value=1 name=allowHTML2>
             </td>
           </tr>
           <tr class="normal">
             <th class="left-heading">{#Broadcasting}</th>
             <td class="checkbox-cell"><input type=checkbox {@if servMgr.allow.broadcasting1}checked{@end} value=1 name=allowBroadcast1>
             </td>
-            <td class="checkbox-cell"><input type=checkbox {@if servMgr.allow.broadcasting2}checked{@end} value=1 name=allowBroadcast2>
-            </td>
           </tr>
           <tr class="normal">
             <th class="left-heading">{#Network}</th>
             <td class="checkbox-cell"><input type=checkbox {@if servMgr.allow.network1}checked{@end} value=1 name=allowNetwork1>
             </td>
-            <td></td>
           </tr>
           <tr class="normal">
             <th class="left-heading">{#Direct}</th>
             <td class="checkbox-cell"><input type=checkbox {@if servMgr.allow.direct1}checked{@end} value=1 name=allowDirect1>
             </td>
-            <td> </td>
           </tr>
         </table>
       </td>

@@ -362,7 +362,7 @@ public:
     bool                autoConnect, autoServe, forceLookup;
     int                 queryTTL;
 
-    unsigned int        allowServer1, allowServer2;
+    unsigned int        allowServer1;
     unsigned int        startTime;
     unsigned int        tryoutDelay;
     unsigned int        refreshHTML;

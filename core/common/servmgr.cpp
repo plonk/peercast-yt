@@ -50,7 +50,6 @@ ServMgr::ServMgr()
     startTime = sys->getTime();
 
     allowServer1 = Servent::ALLOW_ALL;
-    allowServer2 = Servent::ALLOW_BROADCAST;
 
     clearHostCache(ServHost::T_NONE);
     password[0]=0;
@@ -1083,10 +1082,6 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
         writeServerSettings(iniFile, allowServer1);
     iniFile.writeLine("[End]");
 
-    iniFile.writeSection("Server2");
-        writeServerSettings(iniFile, allowServer2);
-    iniFile.writeLine("[End]");
-
     iniFile.writeSection("Debug");
     iniFile.writeIntValue("logLevel", logLevel());
     iniFile.writeBoolValue("pauseLog", pauseLog);
@@ -1334,8 +1329,6 @@ void ServMgr::loadSettings(const char *fn)
                 sys->idleSleepTime = iniFile.getIntValue();
             else if (iniFile.isName("[Server1]"))
                 allowServer1 = readServerSettings(iniFile, allowServer1);
-            else if (iniFile.isName("[Server2]"))
-                allowServer2 = readServerSettings(iniFile, allowServer2);
             else if (iniFile.isName("[Filter]"))
             {
                 readFilterSettings(iniFile, filters[numFilters]);
@@ -2244,8 +2237,6 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
         buf = to_string(minGnuIncoming);
     else if (var == "numActive1")
         buf = to_string(numActiveOnPort(serverHost.port));
-    else if (var == "numActive2")
-        buf = to_string(numActiveOnPort(serverHost.port+1));
     else if (var == "numPGNU")
         buf = to_string(numConnected(Servent::T_PGNU));
     else if (var == "numCIN")
@@ -2274,18 +2265,12 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
         buf = lh.str(false);
     }else if (var == "upgradeURL")
         buf = servMgr->downloadURL;
-    else if (var == "serverPort2")
-        buf = to_string(serverHost.port+1);
     else if (var.startsWith("allow."))
     {
         if (var == "allow.HTML1")
             buf = (allowServer1 & Servent::ALLOW_HTML) ? "1" : "0";
-        else if (var == "allow.HTML2")
-            buf = (allowServer2 & Servent::ALLOW_HTML) ? "1" : "0";
         else if (var == "allow.broadcasting1")
             buf = (allowServer1 & Servent::ALLOW_BROADCAST) ? "1" : "0";
-        else if (var == "allow.broadcasting2")
-            buf = (allowServer2 & Servent::ALLOW_BROADCAST) ? "1" : "0";
         else if (var == "allow.network1")
             buf = (allowServer1 & Servent::ALLOW_NETWORK) ? "1" : "0";
         else if (var == "allow.direct1")

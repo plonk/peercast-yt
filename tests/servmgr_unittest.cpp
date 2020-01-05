@@ -18,7 +18,7 @@ TEST_F(ServMgrFixture, initialState)
     // char                password[64];
     ASSERT_STREQ("", m.password);
     // bool                allowGnutella;
-    ASSERT_FALSE(m.allowGnutella);
+    // ASSERT_FALSE(m.allowGnutella);
     // unsigned int        maxBitrateOut, maxControl, maxRelays, maxDirect;
     ASSERT_EQ(0, m.maxBitrateOut);
     ASSERT_EQ(3, m.maxControl);
@@ -75,7 +75,7 @@ TEST_F(ServMgrFixture, initialState)
     ASSERT_EQ(7, m.queryTTL);
     // unsigned int        allowServer1, allowServer2;
     ASSERT_EQ(Servent::ALLOW_ALL, m.allowServer1);
-    ASSERT_EQ(Servent::ALLOW_BROADCAST, m.allowServer2);
+    //ASSERT_EQ(Servent::ALLOW_BROADCAST, m.allowServer2);
     // unsigned int        startTime;
     ASSERT_EQ(0, m.startTime);
     // unsigned int        tryoutDelay;
@@ -252,10 +252,6 @@ TEST_F(ServMgrFixture, writeVariable)
     ASSERT_STREQ("0", mem.str().c_str());
 
     mem.str("");
-    ASSERT_TRUE(m.writeVariable(mem, "numActive2"));
-    ASSERT_STREQ("0", mem.str().c_str());
-
-    mem.str("");
     ASSERT_TRUE(m.writeVariable(mem, "numPGNU"));
     ASSERT_STREQ("0", mem.str().c_str());
 
@@ -292,19 +288,11 @@ TEST_F(ServMgrFixture, writeVariable)
     ASSERT_STREQ("", mem.str().c_str());
 
     mem.str("");
-    ASSERT_TRUE(m.writeVariable(mem, "serverPort2"));
-    ASSERT_STREQ("7145", mem.str().c_str());
-
-    mem.str("");
     ASSERT_TRUE(m.writeVariable(mem, "allow.HTML1"));
     ASSERT_STREQ("1", mem.str().c_str());
 
     mem.str("");
     ASSERT_TRUE(m.writeVariable(mem, "allow.broadcasting1"));
-    ASSERT_STREQ("1", mem.str().c_str());
-
-    mem.str("");
-    ASSERT_TRUE(m.writeVariable(mem, "allow.broadcasting2"));
     ASSERT_STREQ("1", mem.str().c_str());
 
     mem.str("");
@@ -518,13 +506,6 @@ TEST_F(ServMgrFixture, doSaveSettings)
               "allowBroadcast = Yes\r\n"
               "allowNetwork = Yes\r\n"
               "allowDirect = Yes\r\n"
-              "[End]\r\n"
-              "\r\n"
-              "[Server2]\r\n"
-              "allowHTML = No\r\n"
-              "allowBroadcast = Yes\r\n"
-              "allowNetwork = No\r\n"
-              "allowDirect = No\r\n"
               "[End]\r\n"
               "\r\n"
               "[Debug]\r\n"
