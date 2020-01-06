@@ -20,7 +20,6 @@
 
 #include "servent.h"
 #include "servmgr.h"
-#include "html.h"
 #include "stats.h"
 #include "peercast.h"
 #include "pcp.h"
@@ -29,8 +28,6 @@
 #include "playlist.h"
 #include "str.h"
 #include "cgi.h"
-#include "template.h"
-#include "assets.h"
 
 using namespace std;
 
@@ -165,105 +162,6 @@ bool Servent::hasValidAuthToken(const std::string& requestFilename)
 #include "env.h"
 #include "regexp.h"
 
-void Servent::invokeCGIScript(HTTP &http, const char* fn)
-{
-    HTTPRequest req;
-    try {
-        req = http.getRequest();
-    } catch (GeneralException& e) // request not ready
-    {
-        throw HTTPException(HTTP_SC_BADREQUEST, 400);
-    }
-    FileSystemMapper fs("/cgi-bin", (std::string) peercastApp->getPath() + "cgi-bin");
-    std::string filePath = fs.toLocalFilePath(req.path);
-    Environment env;
-
-    env.set("SCRIPT_NAME", req.path);
-    env.set("SCRIPT_FILENAME", filePath);
-    env.set("GATEWAY_INTERFACE", "CGI/1.1");
-    env.set("DOCUMENT_ROOT", peercastApp->getPath());
-    env.set("QUERY_STRING", req.queryString);
-    env.set("REQUEST_METHOD", "GET");
-    env.set("REQUEST_URI", req.url);
-    env.set("SERVER_PROTOCOL", "HTTP/1.0");
-    env.set("SERVER_SOFTWARE", PCX_AGENT);
-    if (!Regexp("[A-Za-z0-9\\-_.]+:\\d+").exec(req.headers.get("Host")).empty())
-    {
-        auto v = str::split(req.headers.get("Host"), ":");
-        env.set("SERVER_NAME", v[0]);
-        env.set("SERVER_PORT", v[1]);
-    }else
-    {
-        LOG_ERROR("Host header missing");
-        env.set("SERVER_NAME", servMgr->serverHost.str(false));
-        env.set("SERVER_PORT", std::to_string(servMgr->serverHost.port));
-    }
-
-    env.set("PATH", getenv("PATH"));
-    // Windows で Ruby が名前引きをするのに必要なので SYSTEMROOT を通す。
-    if (getenv("SYSTEMROOT"))
-        env.set("SYSTEMROOT", getenv("SYSTEMROOT"));
-
-    if (filePath.empty())
-        throw HTTPException(HTTP_SC_NOTFOUND, 404);
-
-    Subprogram script(filePath);
-
-    bool success = script.start({}, env);
-    if (success)
-        LOG_DEBUG("script started (pid = %d)", script.pid());
-    else
-    {
-        LOG_ERROR("failed to start script `%s`", filePath.c_str());
-        throw HTTPException(HTTP_SC_SERVERERROR, 500);
-    }
-    Stream& stream = script.inputStream();
-
-    HTTPHeaders headers;
-    int statusCode = 200;
-    try {
-        Regexp headerPattern("\\A([A-Za-z\\-]+):\\s*(.*)\\z");
-        std::string line;
-        while ((line = stream.readLine(8192)) != "")
-        {
-            LOG_DEBUG("Line: %s", line.c_str());
-            auto caps = headerPattern.exec(line);
-            if (caps.size() == 0)
-            {
-                LOG_ERROR("Invalid header: \"%s\"", line.c_str());
-                continue;
-            }
-            if (str::capitalize(caps[1]) == "Status")
-                statusCode = atoi(caps[2].c_str());
-            else
-                headers.set(caps[1], caps[2]);
-        }
-        if (headers.get("Location") != "")
-            statusCode = 302; // Found
-    } catch (StreamException&)
-    {
-        LOG_ERROR("CGI script did not finish the headers");
-        throw HTTPException(HTTP_SC_SERVERERROR, 500);
-    }
-
-    HTTPResponse res(statusCode, headers);
-
-    res.stream = &stream;
-    http.send(res);
-    stream.close();
-
-    int status;
-    bool normal = script.wait(&status);
-
-    if (!normal)
-    {
-        LOG_ERROR("child process (PID %d) terminated abnormally", script.pid());
-    }else
-    {
-        LOG_DEBUG("child process (PID %d) exited normally (status %d)", script.pid(), status);
-    }
-}
-
 // -----------------------------------
 void Servent::handshakeGET(HTTP &http)
 {
@@ -282,83 +180,6 @@ void Servent::handshakeGET(HTTP &http)
 
         LOG_DEBUG("Admin client");
         handshakeCMD(http, fn+7);
-    }else if (strncmp(fn, "/admin/?", 8) == 0)
-    {
-        // 上に同じ
-
-        if (!isAllowed(ALLOW_HTML))
-            throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
-
-        LOG_DEBUG("Admin client");
-        handshakeCMD(http, fn+8);
-    }else if (strcmp(fn, "/html/index.html") == 0)
-    {
-        // PeerCastStation が "/" を "/html/index.html" に 301 Moved
-        // でリダイレクトするので、ブラウザによっては無期限にキャッシュされる。
-        // "/" に再リダイレクトしてキャッシュを無効化する。
-
-        http.readHeaders();
-        http.writeLine(HTTP_SC_FOUND);
-        http.writeLineF("Location: /");
-        http.writeLine("");
-    }else if (strncmp(fn, "/html/", 6) == 0)
-    {
-        // HTML UI
-
-        String dirName = fn+1;
-
-        if (!isAllowed(ALLOW_HTML))
-            throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
-
-        if (handshakeAuth(http, fn, true))
-            handshakeLocalFile(dirName, http);
-    }else if (strncmp(fn, "/admin.cgi", 10) == 0)
-    {
-        // ShoutCast トラック情報更新用エンドポイント
-
-        if (!isAllowed(ALLOW_BROADCAST))
-            throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
-
-        const char *pwdArg = getCGIarg(fn, "pass=");
-        const char *songArg = getCGIarg(fn, "song=");
-        const char *mountArg = getCGIarg(fn, "mount=");
-        const char *urlArg = getCGIarg(fn, "url=");
-
-        if (pwdArg && songArg)
-        {
-            int slen = strlen(fn);
-            for (int i=0; i<slen; i++)
-                if (fn[i]=='&') fn[i] = 0;
-
-            auto c = chanMgr->channel;
-            while (c)
-            {
-                if ((c->status == Channel::S_BROADCASTING) &&
-                    (c->info.contentType == ChanInfo::T_MP3) )
-                {
-                    // if we have a mount point then check for it, otherwise update all channels.
-
-                    bool match=true;
-
-                    if (mountArg)
-                        match = strcmp(c->mount, mountArg) == 0;
-
-                    if (match)
-                    {
-                        ChanInfo newInfo = c->info;
-                        newInfo.track.title.set(songArg, String::T_ESC);
-                        newInfo.track.title.convertTo(String::T_UNICODE);
-
-                        if (urlArg)
-                            if (urlArg[0])
-                                newInfo.track.contact.set(urlArg, String::T_ESC);
-                        LOG_INFO("Channel Shoutcast update: %s", songArg);
-                        c->updateInfo(newInfo);
-                    }
-                }
-                c = c->next;
-            }
-        }
     }else if (strncmp(fn, "/pls/", 5) == 0)
     {
         // プレイリスト
@@ -411,48 +232,12 @@ void Servent::handshakeGET(HTTP &http)
             http.writeLine("");
             http.writeString(response.c_str());
         }
-    }else if (str::is_prefix_of("/assets/", fn))
-    {
-        // html と public の共有アセット。
-
-        http.readHeaders();
-        try
-        {
-            AssetsController controller(peercastApp->getPath() + std::string("assets"));
-            http.send(controller(http.getRequest(), *sock, sock->host));
-        } catch (GeneralException& e)
-        {
-            LOG_ERROR("Error: %s", e.msg);
-            throw HTTPException(HTTP_SC_SERVERERROR, 500);
-        }
-    }else if (str::is_prefix_of("/cgi-bin/", fn))
-    {
-        // CGI スクリプトの実行
-
-        if (!isAllowed(ALLOW_HTML))
-            throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
-
-        if (str::has_prefix(fn, "/cgi-bin/flv.cgi"))
-        {
-            if (!isPrivate() || !isFiltered(ServFilter::F_DIRECT))
-                throw HTTPException(HTTP_SC_FORBIDDEN, 403);
-            else
-            {
-                http.readHeaders();
-                invokeCGIScript(http, fn);
-            }
-        }else if (handshakeAuth(http, fn, true))
-        {
-            invokeCGIScript(http, fn);
-        }
     }else
     {
         // GET マッチなし
 
         http.readHeaders();
-        http.writeLine(HTTP_SC_FOUND);
-        http.writeLineF("Location: /%s/index.html", servMgr->htmlPath);
-        http.writeLine("");
+        throw HTTPException(HTTP_SC_NOTFOUND, 404);
     }
 }
 
@@ -795,134 +580,6 @@ bool Servent::handshakeHTTPBasicAuth(HTTP &http)
 
     LOG_DEBUG("HTTP Basic Auth: rejected");
     return false;
-}
-
-// -----------------------------------
-bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
-{
-    char user[64], pass[64];
-    user[0] = pass[0] = 0;
-
-    const char *pwd  = getCGIarg(args, "pass=");
-
-    if ((pwd) && strlen(servMgr->password))
-    {
-        String tmp = pwd;
-        char *as = strstr(tmp.cstr(), "&");
-        if (as) *as = 0;
-        if (strcmp(tmp, servMgr->password) == 0)
-        {
-            http.readHeaders();
-            return true;
-        }
-    }
-
-    Cookie gotCookie;
-    cookie.clear();
-
-    while (http.nextHeader())
-    {
-        char *arg = http.getArgStr();
-        if (!arg)
-            continue;
-
-        switch (servMgr->authType)
-        {
-            case ServMgr::AUTH_HTTPBASIC:
-                if (http.isHeader("Authorization"))
-                    http.getAuthUserPass(user, pass, sizeof(user), sizeof(pass));
-                break;
-            case ServMgr::AUTH_COOKIE:
-                if (http.isHeader("Cookie"))
-                {
-                    LOG_DEBUG("Got cookie: %s", arg);
-                    char *idp=arg;
-                    while ((idp = strstr(idp, "id=")))
-                    {
-                        idp+=3;
-                        gotCookie.set(idp, sock->host.ip);
-                        if (servMgr->cookieList.contains(gotCookie))
-                        {
-                            LOG_DEBUG("Cookie found");
-                            cookie = gotCookie;
-                            break;
-                        }
-                    }
-                }
-                break;
-        }
-    }
-
-    if (sock->host.isLocalhost())
-        return true;
-
-    switch (servMgr->authType)
-    {
-        case ServMgr::AUTH_HTTPBASIC:
-            if ((strcmp(pass, servMgr->password) == 0) && strlen(servMgr->password))
-                return true;
-            break;
-        case ServMgr::AUTH_COOKIE:
-            if (servMgr->cookieList.contains(cookie))
-                return true;
-            break;
-    }
-
-    if (servMgr->authType == ServMgr::AUTH_HTTPBASIC)
-    {
-        http.writeLine(HTTP_SC_UNAUTHORIZED);
-        http.writeLine("WWW-Authenticate: Basic realm=\"PeerCast Admin\"");
-        http.writeLine("");
-    }else if (servMgr->authType == ServMgr::AUTH_COOKIE)
-    {
-        String file = servMgr->htmlPath;
-        file.append("/login.html");
-        if (http.headers.get("X-Requested-With") == "XMLHttpRequest")
-            throw HTTPException(HTTP_SC_FORBIDDEN, 403);
-        else
-        {
-            // XXX
-            handshakeLocalFile(file, http);
-        }
-    }
-
-    return false;
-}
-
-// -----------------------------------
-void Servent::CMD_redirect(const char* cmd, HTTP& http, String& jumpStr)
-{
-    char buf[MAX_CGI_LEN];
-    Sys::strcpy_truncate(buf, sizeof(buf), cmd);
-
-    HTML html("", *sock);
-    const char *j = getCGIarg(buf, "url=");
-
-    if (j)
-    {
-        http.writeLine(HTTP_SC_OK);
-        http.writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
-        http.writeLineF("%s %s", HTTP_HS_CONTENT, "text/html");
-        http.writeLine("");
-
-        termArgs(buf);
-        String url;
-        url.set(j, String::T_ESC);
-        url.convertTo(String::T_ASCII);
-
-        if (!url.contains("http://"))
-            url.prepend("http://");
-
-        html.setRefreshURL(url.cstr());
-        html.startHTML();
-            html.addHead();
-            html.startBody();
-                html.startTagEnd("h3", "Please wait...");
-            html.end();
-        html.end();
-    } else {
-        throw HTTPException(HTTP_SC_BADREQUEST, 400);
-    }
 }
 
 void Servent::CMD_viewxml(const char* cmd, HTTP& http, String& jumpStr)
@@ -1672,65 +1329,14 @@ void Servent::handshakeCMD(HTTP& http, char *q)
     // 更されるため、コピーしておく。
     std::string query = q;
 
-    if (!handshakeAuth(http, query.c_str(), true))
+    if (!handshakeHTTPBasicAuth(http))
         return;
 
     std::string cmd = cgi::Query(query).get("cmd");
 
     try
     {
-        if (cmd == "add_bcid")
-        {
-            CMD_add_bcid(query.c_str(), http, jumpStr);
-        }else if (cmd == "apply")
-        {
-            CMD_apply(query.c_str(), http, jumpStr);
-        }else if (cmd == "bump")
-        {
-            CMD_bump(query.c_str(), http, jumpStr);
-        }else if (cmd == "clear")
-        {
-            CMD_clear(query.c_str(), http, jumpStr);
-        }else if (cmd == "clearlog")
-        {
-            CMD_clearlog(query.c_str(), http, jumpStr);
-        }else if (cmd == "dump_hitlists")
-        {
-            CMD_dump_hitlists(query.c_str(), http, jumpStr);
-        }else if (cmd == "edit_bcid")
-        {
-            CMD_edit_bcid(query.c_str(), http, jumpStr);
-        }else if (cmd == "fetch")
-        {
-            CMD_fetch(query.c_str(), http, jumpStr);
-        }else if (cmd == "fetch_feeds")
-        {
-            CMD_fetch_feeds(query.c_str(), http, jumpStr);
-        }else if (cmd == "keep")
-        {
-            CMD_keep(query.c_str(), http, jumpStr);
-        }else if (cmd == "login")
-        {
-            CMD_login(query.c_str(), http, jumpStr);
-        }else if (cmd == "logout")
-        {
-            CMD_logout(query.c_str(), http, jumpStr);
-        }else if (cmd == "redirect")
-        {
-            CMD_redirect(query.c_str(), http, jumpStr);
-        }else if (cmd == "shutdown")
-        {
-            CMD_shutdown(query.c_str(), http, jumpStr);
-        }else if (cmd == "stop")
-        {
-            CMD_stop(query.c_str(), http, jumpStr);
-        }else if (cmd == "stop_servent")
-        {
-            CMD_stop_servent(query.c_str(), http, jumpStr);
-        }else if (cmd == "update_channel_info")
-        {
-            CMD_update_channel_info(query.c_str(), http, jumpStr);
-        }else if (cmd == "viewxml")
+        if (cmd == "viewxml")
         {
             CMD_viewxml(query.c_str(), http, jumpStr);
         }else{
@@ -2168,54 +1774,5 @@ const char* Servent::fileNameToMimeType(const String& fileName)
         return MIME_ICO;
     else
         return nullptr;
-}
-
-// -----------------------------------
-void Servent::handshakeLocalFile(const char *fn, HTTP& http)
-{
-    String fileName;
-
-    fileName = peercastApp->getPath();
-    fileName.append(fn);
-
-    LOG_DEBUG("Writing HTML file: %s", fileName.cstr());
-
-    WriteBufferedStream bufferedSock(sock);
-    HTML html("", bufferedSock);
-
-    const char* mimeType = fileNameToMimeType(fileName);
-    if (mimeType == nullptr)
-        throw HTTPException(HTTP_SC_NOTFOUND, 404);
-
-    if (strcmp(mimeType, MIME_HTML) == 0)
-    {
-        if (str::contains(fn, "play.html"))
-        {
-            auto vec = str::split(fn, "?");
-            if (vec.size() != 2)
-                throw HTTPException(HTTP_SC_BADREQUEST, 400);
-
-            String id = cgi::Query(vec[1]).get("id").c_str();
-
-            if (id.isEmpty())
-                throw HTTPException(HTTP_SC_BADREQUEST, 400);
-
-            ChanInfo info;
-            if (!servMgr->getChannel(id.cstr(), info, true))
-                throw HTTPException(HTTP_SC_NOTFOUND, 404);
-        }
-
-        char *args = strstr(fileName.cstr(), "?");
-        if (args)
-            *args = '\0';
-
-        auto req = http.getRequest();
-        html.writeOK(MIME_HTML);
-        HTTPRequestScope scope(req);
-        html.writeTemplate(fileName.cstr(), req.queryString.c_str(), scope);
-    }else
-    {
-        html.writeRawFile(fileName.cstr(), mimeType);
-    }
 }
 

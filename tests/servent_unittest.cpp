@@ -98,20 +98,14 @@ TEST_F(ServentFixture, handshakeHTTP)
     http.initRequest("GET / HTTP/1.0");
     mock->incoming.str("\r\n");
 
-    s.handshakeHTTP(http, true);
-
-    ASSERT_STREQ("HTTP/1.0 302 Found\r\nLocation: /html/en/index.html\r\n\r\n",
-                 mock->outgoing.str().c_str());
+    ASSERT_THROW(s.handshakeHTTP(http, true), HTTPException);
 }
 
 TEST_F(ServentFixture, handshakeIncomingGetRoot)
 {
     mock->incoming.str("GET / HTTP/1.0\r\n\r\n");
 
-    s.handshakeIncoming();
-
-    ASSERT_STREQ("HTTP/1.0 302 Found\r\nLocation: /html/en/index.html\r\n\r\n",
-                 mock->outgoing.str().c_str());
+    ASSERT_THROW(s.handshakeIncoming(), HTTPException);
 }
 
 // servMgr->password が設定されていない時に ShoutCast クライアントから
@@ -127,15 +121,7 @@ TEST_F(ServentFixture, handshakeIncomingHTMLRoot)
 {
     mock->incoming.str("GET /html/en/index.html HTTP/1.0\r\n\r\n");
 
-    s.handshakeIncoming();
-
-    std::string output = mock->outgoing.str();
-
-    // ファイルが無いのに OK はおかしくないか…
-    ASSERT_TRUE(str::contains(output, "200 OK"));
-    ASSERT_TRUE(str::contains(output, "Server: "));
-    ASSERT_TRUE(str::contains(output, "Date: "));
-    ASSERT_TRUE(str::contains(output, "Unable to open file"));
+    ASSERT_THROW(s.handshakeIncoming(), HTTPException);
 }
 
 TEST_F(ServentFixture, handshakeIncomingJRPCGetUnauthorized)

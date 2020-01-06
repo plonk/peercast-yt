@@ -25,7 +25,6 @@
 #include "sys.h"
 #include "gnutella.h"
 #include "xml.h"
-#include "html.h"
 #include "http.h"
 #include "stats.h"
 #include "servmgr.h"
