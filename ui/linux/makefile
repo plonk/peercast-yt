@@ -1,5 +1,5 @@
 # Uncomment following line to enabled RTMP fetch support
-#WITH_RTMP = yes
+WITH_RTMP = yes
 
 CPPFLAGS = -g -Wreturn-type -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT $(INCLUDES)
 ifeq ($(WITH_RTMP),yes)
