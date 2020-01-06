@@ -1455,44 +1455,6 @@ void Servent::CMD_login(const char* cmd, HTTP& http, String& jumpStr)
     http.writeLine("");
 }
 
-void Servent::CMD_control_rtmp(const char* cmd, HTTP& http, String& jumpStr)
-{
-    cgi::Query query(cmd);
-    auto action = query.get("action");
-
-    if (action == "start")
-    {
-        if (query.get("name") == "")
-            throw HTTPException(HTTP_SC_BADREQUEST, 400); // name required to start RTMP server
-
-        uint16_t port = std::atoi(query.get("port").c_str());
-        {
-            std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
-            ChanInfo& info = servMgr->defaultChannelInfo;
-
-            servMgr->rtmpPort = port;
-
-            info.name    = query.get("name").c_str();
-            info.genre   = query.get("genre").c_str();
-            info.desc    = query.get("desc").c_str();
-            info.url     = query.get("url").c_str();
-            info.comment = query.get("comment").c_str();
-        }
-
-        servMgr->rtmpServerMonitor.enable();
-        // Give serverProc the time to actually start the process.
-        sys->sleep(500);
-        jumpStr.sprintf("/%s/rtmp.html", servMgr->htmlPath);
-    }else if (action == "stop")
-    {
-        servMgr->rtmpServerMonitor.disable();
-        jumpStr.sprintf("/%s/rtmp.html", servMgr->htmlPath);
-    }else
-    {
-        throw HTTPException(HTTP_SC_BADREQUEST, 400);
-    }
-}
-
 void Servent::CMD_update_channel_info(const char* cmd, HTTP& http, String& jumpStr)
 {
     cgi::Query query(cmd);
@@ -1732,9 +1694,6 @@ void Servent::handshakeCMD(HTTP& http, char *q)
         }else if (cmd == "clearlog")
         {
             CMD_clearlog(query.c_str(), http, jumpStr);
-        }else if (cmd == "control_rtmp")
-        {
-            CMD_control_rtmp(query.c_str(), http, jumpStr);
         }else if (cmd == "dump_hitlists")
         {
             CMD_dump_hitlists(query.c_str(), http, jumpStr);

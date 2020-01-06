@@ -21,9 +21,7 @@ AR = ar
 INCLUDES = -I../../core -I../../core/common -I../../Onigmo
 
 TARGET = peercast
-RTMPSERVER = rtmp-server
 CORE = ../../core
-RTMP = ../../rtmp-server
 SRCHTMLTAR = ../html.tar
 HTML = html
 ASSETS = assets/
@@ -51,7 +49,7 @@ DEPENDFILE = .deps
 .PHONY: all clean build-html deps $(SRCHTMLTAR)
 
 # Here follow the generic build rules.
-all: $(TARGET) $(LIBOBJSTATIC) $(DISTARCHIVE) $(RTMPSERVER)
+all: $(TARGET) $(LIBOBJSTATIC) $(DISTARCHIVE)
 
 deps: $(DEPENDFILE)
 
@@ -66,18 +64,17 @@ $(HTML): $(SRCHTMLTAR)
 $(SRCPUBLICTAR):
 	$(MAKE) -C .. public.tar
 
-$(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS) $(RTMPSERVER)
+$(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS)
 	rm -rf peercast-yt
 	mkdir peercast-yt
-	cp -R $(HTML) $(PUBLIC) $(TARGET) $(ASSETS) $(CGIBIN) $(RTMPSERVER) ../../licenses ../../core/LICENSE peercast-yt/
+	cp -R $(HTML) $(PUBLIC) $(TARGET) $(ASSETS) $(CGIBIN) ../../licenses ../../core/LICENSE peercast-yt/
 	strip peercast-yt/$(TARGET)
-	strip peercast-yt/$(RTMPSERVER)
 	tar czf $(DISTARCHIVE) peercast-yt
 
 clean:
 	$(MAKE) -C ../../Onigmo clean
 	$(MAKE) -C .. clean
-	rm -f $(LINUXOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE) $(RTMPSERVER) $(RTMPOBJ)
+	rm -f $(LINUXOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE)
 	rm -rf $(HTML) $(PUBLIC)
 	rm -rf peercast-yt/
 	rm -f $(DISTARCHIVE)
@@ -99,9 +96,6 @@ $(LIBOBJSTATIC): $(COREOBJ) $(SYSOBJ)
 
 $(TARGET): $(LINUXOBJ) $(LIBOBJSTATIC) $(LIBONIGMO)
 	$(CXX) $(LDFLAGS) -o $@ $(LINUXOBJ) $(LIBOBJSTATIC) $(LIBS)
-
-$(RTMPSERVER): $(RTMPOBJ) $(LIBOBJSTATIC) $(LIBONIGMO)
-	$(CXX) $(LDFLAGS) -o $@ $(RTMPOBJ) $(LIBOBJSTATIC) $(LIBS)
 
 $(LIBONIGMO):
 	cd ../../Onigmo; ./configure

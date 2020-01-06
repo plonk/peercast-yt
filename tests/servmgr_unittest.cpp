@@ -126,14 +126,6 @@ TEST_F(ServMgrFixture, initialState)
     // std::string         wmvProtocol;
     ASSERT_EQ("http", m.wmvProtocol);
 
-    // RTMPServerMonitor   rtmpServerMonitor;
-    ASSERT_FALSE(m.rtmpServerMonitor.isEnabled());
-
-    // uint16_t            rtmpPort;
-    ASSERT_EQ(1935, m.rtmpPort);
-
-    // ChanInfo            defaultChannelInfo;
-    ASSERT_FALSE(m.defaultChannelInfo.id.isSet());
 }
 
 TEST_F(ServMgrFixture, writeVariable)

@@ -22,7 +22,6 @@
 
 #include "servent.h"
 #include "varwriter.h"
-#include "rtmpmonit.h"
 #include "inifile.h"
 #include "servfilter.h"
 
@@ -375,10 +374,6 @@ public:
     std::string         audioCodec;
 
     std::string         wmvProtocol;
-
-    RTMPServerMonitor   rtmpServerMonitor;
-    uint16_t            rtmpPort;
-    ChanInfo            defaultChannelInfo;
 };
 
 // ----------------------------------

@@ -23,7 +23,7 @@ public:
 
 TEST_F(VariableWriterFixture, getVariable)
 {
-    ASSERT_EQ("1935", servMgr->getVariable("rtmpPort"));
+    ASSERT_EQ("かきくけこABCDabcd", servMgr->getVariable("test"));
     ASSERT_EQ("nonexistentVariable", servMgr->getVariable("nonexistentVariable"));
 }
 

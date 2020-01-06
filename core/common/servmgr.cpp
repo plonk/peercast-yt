@@ -28,13 +28,11 @@
 #include "pcp.h"
 #include "atom.h"
 #include "version2.h"
-#include "rtmpmonit.h"
 #include "chandir.h"
 
 // -----------------------------------
 ServMgr::ServMgr()
-    : rtmpServerMonitor(std::string(peercastApp->getPath()) + "rtmp-server")
-    , channelDirectory(new ChannelDirectory())
+    : channelDirectory(new ChannelDirectory())
     , relayBroadcast(30) // オリジナルでは未初期化。
 {
     validBCID = NULL;
@@ -120,8 +118,6 @@ ServMgr::ServMgr()
     audioCodec = "mp3";
 
     wmvProtocol = "http";
-
-    rtmpPort = 1935;
 }
 
 // -----------------------------------
@@ -714,9 +710,6 @@ void ServMgr::quit()
 
     serverThread.shutdown();
     idleThread.shutdown();
-
-    LOG_DEBUG("Disabling RMTP server..");
-    rtmpServerMonitor.disable();
 
     Servent *s = servents;
     while (s)
@@ -1961,8 +1954,6 @@ int ServMgr::idleProc(ThreadInfo *thread)
         // チャンネル一覧を取得する。
         servMgr->channelDirectory->update();
 
-        servMgr->rtmpServerMonitor.update();
-
         sys->sleep(500);
     }
 
@@ -2264,15 +2255,6 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var == "wmvProtocol")
     {
         buf = servMgr->wmvProtocol;
-    }else if (var.startsWith("defaultChannelInfo."))
-    {
-        return servMgr->defaultChannelInfo.writeVariable(out, var + strlen("defaultChannelInfo."));
-    }else if (var.startsWith("rtmpServerMonitor."))
-    {
-        return servMgr->rtmpServerMonitor.writeVariable(out, var + strlen("rtmpServerMonitor."));
-    }else if (var == "rtmpPort")
-    {
-        buf = std::to_string(servMgr->rtmpPort);
     }else if (var == "hasUnsafeFilterSettings")
     {
         buf = std::to_string(servMgr->hasUnsafeFilterSettings());
