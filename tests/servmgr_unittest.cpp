@@ -105,8 +105,6 @@ TEST_F(ServMgrFixture, initialState)
     // String              chanLog;
     ASSERT_STREQ("", m.chanLog.cstr());
     // ChannelDirectory    channelDirectory;
-    // bool                publicDirectoryEnabled;
-    ASSERT_FALSE(m.publicDirectoryEnabled);
     // FW_STATE            firewalled;
     ASSERT_EQ(ServMgr::FW_UNKNOWN, m.firewalled);
 
@@ -338,10 +336,6 @@ TEST_F(ServMgrFixture, writeVariable)
     // channelDirectory.*
 
     mem.str("");
-    ASSERT_TRUE(m.writeVariable(mem, "publicDirectoryEnabled"));
-    ASSERT_STREQ("0", mem.str().c_str());
-
-    mem.str("");
     ASSERT_TRUE(m.writeVariable(mem, "genrePrefix"));
     ASSERT_STREQ("", mem.str().c_str());
 
@@ -447,7 +441,6 @@ TEST_F(ServMgrFixture, doSaveSettings)
               "maxPGNUIncoming = 20\r\n"
               "maxServIn = 50\r\n"
               "chanLog = \r\n"
-              "publicDirectory = No\r\n"
               "genrePrefix = \r\n"
               "networkID = 00000000000000000000000000000000\r\n"
               "\r\n"
@@ -487,14 +480,6 @@ TEST_F(ServMgrFixture, doSaveSettings)
               "direct = Yes\r\n"
               "[End]\r\n"
               "\r\n"
-	      "[Uptest]\r\n"
-	      "url = http://bayonet.ddo.jp/sp/yp4g.xml\r\n"
-	      "[End]\r\n"
-	      "\r\n"
-	      "[Uptest]\r\n"
-	      "url = http://temp.orz.hm/yp/yp4g.xml\r\n"
-	      "[End]\r\n"
-	      "\r\n"
               "[Notify]\r\n"
               "PeerCast = Yes\r\n"
               "Broadcasters = Yes\r\n"
