@@ -23,7 +23,6 @@
 // ----------------------------------
 #include "socket.h"
 #include "sys.h"
-#include "gnutella.h"
 #include "channel.h"
 #include "http.h"
 #include "pcp.h"
@@ -268,8 +267,6 @@ public:
 
     Host    getHost();
 
-    bool    outputPacket(GnuPacket &, bool);
-    bool    hasSeenPacket(GnuPacket &p) { return seenIDs.contains(p.id); }
     bool    acceptGIV(ClientSocket *);
     bool    sendPacket(ChanPacket &, GnuID &, GnuID &, GnuID &, Servent::TYPE);
 
@@ -286,12 +283,9 @@ public:
     std::atomic<STATUS> status;
 
     static const char   *statusMsgs[], *typeMsgs[];
-    GnuStream           gnuStream;
-    GnuPacket           pack;
     unsigned int        lastConnect, lastPing, lastPacket;
     String              agent;
 
-    GnuIDList           seenIDs;
     GnuID               networkID;
     const int           serventIndex;
 
@@ -318,8 +312,6 @@ public:
     int                 servPort;
 
     ChanInfo::PROTOCOL  outputProtocol;
-
-    GnuPacketBuffer     outPacketsNorm, outPacketsPri;
 
     bool                flowControl;
 

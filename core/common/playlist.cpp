@@ -18,6 +18,8 @@
 // ------------------------------------------------
 
 #include "playlist.h"
+#include "chaninfo.h"
+#include "chanmgr.h"
 
 // -----------------------------------
 void PlayList::readASX(Stream &in)

@@ -24,6 +24,7 @@
 #include "peercast.h"
 #include "version2.h"
 #include "playlist.h"
+#include "gnutella.h"
 #ifdef WITH_RTMP
 #include "rtmp.h"
 #endif

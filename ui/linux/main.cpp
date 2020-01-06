@@ -33,6 +33,7 @@
 #include <sys/time.h>
 #include <limits.h> // PATH_MAX
 #include <libgen.h> // dirname
+#include "gnutella.h"
 
 // ----------------------------------
 String iniFileName;

@@ -21,7 +21,6 @@
 
 #include "sys.h"
 #include "stream.h"
-#include "gnutella.h"
 #include "xml.h"
 #include "asf.h"
 #include "cstream.h"

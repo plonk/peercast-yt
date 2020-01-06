@@ -22,8 +22,8 @@
 
 #include "common.h"
 #include "sys.h"
-#include "gnutella.h"
 #include "logbuf.h"
+#include "stream.h"
 #include <chrono>
 
 // ------------------------------------------

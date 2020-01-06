@@ -19,10 +19,10 @@
 #ifndef _PLAYLIST_H
 #define _PLAYLIST_H
 
-#include "channel.h"
 #include "stream.h"
+#include "chaninfo.h"
 
-class ChanInfo;
+class Channel;
 
 // ----------------------------------
 class PlayList
