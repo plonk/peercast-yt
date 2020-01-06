@@ -28,6 +28,10 @@
 
 // ----------------------------------
 
+static const int DEFAULT_PORT   = 7144;
+
+// ----------------------------------
+
 const int MIN_YP_RETRY = 20;
 const int MIN_TRACKER_RETRY = 10;
 const int MIN_RELAY_RETRY = 5;
@@ -170,9 +174,6 @@ public:
     static THREAD_PROC  trackerProc(ThreadInfo *);
     static THREAD_PROC  idleProc(ThreadInfo *);
 
-    int                 broadcast(GnuPacket &, Servent * = NULL);
-    int                 route(GnuPacket &, GnuID &, Servent * = NULL);
-
     XML::Node           *createServentXML();
 
     void                connectBroadcaster();
@@ -222,8 +223,6 @@ public:
     {
         return sys->getTime()-startTime;
     }
-
-    bool    seenPacket(GnuPacket &);
 
     bool    needHosts()
     {

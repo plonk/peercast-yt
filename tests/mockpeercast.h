@@ -3,6 +3,7 @@
 
 #include "peercast.h"
 #include "mocksys.h"
+#include "gnutella.h"
 
 class MockPeercastInstance : public PeercastInstance
 {

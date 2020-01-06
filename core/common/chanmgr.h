@@ -22,6 +22,8 @@
 #include "channel.h"
 #include "varwriter.h"
 
+class Servent;
+
 // ----------------------------------
 class ChanMgr : public VariableWriter
 {

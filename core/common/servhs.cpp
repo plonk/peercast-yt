@@ -32,6 +32,7 @@
 #include "template.h"
 #include "assets.h"
 #include "uptest.h"
+#include "gnutella.h"
 
 using namespace std;
 
@@ -614,15 +615,6 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
         processIncomingPCP(true);
-#if 0
-    }else if (http.isRequest("PEERCAST CONNECT"))
-    {
-        if (!isAllowed(ALLOW_NETWORK) || !isFiltered(ServFilter::F_NETWORK))
-            throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
-
-        LOG_DEBUG("PEERCAST client");
-        processServent();
-#endif
     }else if (http.isRequest("SOURCE"))
     {
         // Icecast 放送
