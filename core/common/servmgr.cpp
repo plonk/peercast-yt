@@ -28,12 +28,10 @@
 #include "pcp.h"
 #include "atom.h"
 #include "version2.h"
-#include "chandir.h"
 
 // -----------------------------------
 ServMgr::ServMgr()
-    : channelDirectory(new ChannelDirectory())
-    , relayBroadcast(30) // オリジナルでは未初期化。
+    : relayBroadcast(30) // オリジナルでは未初期化。
 {
     validBCID = NULL;
 
@@ -962,15 +960,6 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
         iniFile.writeLine("[End]");
     }
 
-    // チャンネルフィード
-    for (auto feed : this->channelDirectory->feeds())
-    {
-        iniFile.writeSection("Feed");
-        iniFile.writeStrValue("url", feed.url);
-        iniFile.writeBoolValue("isPublic", feed.isPublic);
-        iniFile.writeLine("[End]");
-    }
-
     iniFile.writeSection("Notify");
         iniFile.writeBoolValue("PeerCast", notifyMask & NT_PEERCAST);
         iniFile.writeBoolValue("Broadcasters", notifyMask & NT_BROADCASTERS);
@@ -1064,14 +1053,12 @@ void readFilterSettings(IniFileBase &iniFile, ServFilter &sv)
 // --------------------------------------------------
 void ServMgr::loadSettings(const char *fn)
 {
-    int feedIndex = 0;
     IniFile iniFile;
 
     if (!iniFile.openReadOnly(fn))
         saveSettings(fn);
 
     servMgr->numFilters = 0;
-
 
     if (iniFile.openReadOnly(fn))
     {
@@ -1230,21 +1217,6 @@ void ServMgr::loadSettings(const char *fn)
 
                 if (numFilters < (MAX_FILTERS-1))
                     numFilters++;
-            }
-            else if (iniFile.isName("[Feed]"))
-            {
-                while (iniFile.readNext())
-                {
-                    if (iniFile.isName("[End]"))
-                        break;
-                    else if (iniFile.isName("url"))
-                        servMgr->channelDirectory->addFeed(iniFile.getStrValue());
-                    else if (iniFile.isName("isPublic"))
-                    {
-                        servMgr->channelDirectory->setFeedPublic(feedIndex, iniFile.getBoolValue());
-                    }
-                }
-                feedIndex++;
             }else if (iniFile.isName("[Notify]"))
             {
                 notifyMask = NT_UPGRADE;
@@ -1874,9 +1846,6 @@ int ServMgr::idleProc(ThreadInfo *thread)
         if (chanMgr->numIdleChannels() > ChanMgr::MAX_IDLE_CHANNELS)
             chanMgr->closeOldestIdle();
 
-        // チャンネル一覧を取得する。
-        servMgr->channelDirectory->update();
-
         sys->sleep(500);
     }
 
@@ -2147,18 +2116,6 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
             buf = "1";
         else
             buf = "0";
-    }else if (var == "numExternalChannels")
-    {
-        buf = to_string(channelDirectory->numChannels());
-    }else if (var == "numChannelFeedsPlusOne")
-    {
-        buf = to_string(channelDirectory->numFeeds() + 1);
-    }else if (var == "numChannelFeeds")
-    {
-        buf = to_string(channelDirectory->numFeeds());
-    }else if (var.startsWith("channelDirectory."))
-    {
-        return channelDirectory->writeVariable(out, var + strlen("channelDirectory."));
     }else if (var == "genrePrefix")
     {
         buf = genrePrefix;

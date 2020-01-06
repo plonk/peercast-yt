@@ -657,7 +657,6 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
 
     servMgr->numFilters = 0;
     ServFilter *currFilter = servMgr->filters;
-    servMgr->channelDirectory->clearFeeds();
     servMgr->transcodingEnabled = false;
 
     bool brRoot = false;
@@ -754,20 +753,6 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
                 currFilter->flags |= ServFilter::F_NETWORK;
             else if (strncmp(fs, "di", 2) == 0)
                 currFilter->flags |= ServFilter::F_DIRECT;
-        }
-        else if (strcmp(curr, "channel_feed_url") == 0)
-        {
-            if (strcmp(arg, "") != 0)
-            {
-                String str(arg, String::T_ESC);
-                str.convertTo(String::T_ASCII);
-                servMgr->channelDirectory->addFeed(str.cstr());
-            }
-        }
-        else if (strncmp(curr, "channel_feed_public", strlen("channel_feed_public")) == 0)
-        {
-            int index = atoi(curr + strlen("channel_feed_public"));
-            servMgr->channelDirectory->setFeedPublic(index, true);
         }
 
         // client
@@ -911,16 +896,6 @@ void Servent::CMD_fetch(const char* cmd, HTTP& http, String& jumpStr)
         c->startURL(curl.cstr());
 
     jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
-}
-
-void Servent::CMD_fetch_feeds(const char* cmd, HTTP& http, String& jumpStr)
-{
-    servMgr->channelDirectory->update(ChannelDirectory::kUpdateManual);
-
-    if (!http.headers.get("Referer").empty())
-        jumpStr.sprintf("%s", http.headers.get("Referer").c_str());
-    else
-        jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
 }
 
 // サーバントを停止する。

@@ -359,9 +359,6 @@ public:
 
     String              chanLog;
 
-    const std::unique_ptr<class ChannelDirectory>
-                        channelDirectory;
-
     FW_STATE            firewalled;
 
     String              serverName;
