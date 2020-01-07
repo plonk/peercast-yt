@@ -54,7 +54,6 @@ public:
         T_DIRECT,           // Outgoing direct connection
         T_COUT,             // PCP out connection
         T_CIN,              // PCP in connection
-        T_PGNU              // old protocol connection
     };
 
     enum STATUS
@@ -177,9 +176,6 @@ public:
     bool    handshakeAuth(HTTP &, const char *, bool);
 
     bool    handshakeHTTPBasicAuth(HTTP &http);
-
-    void    processOutPCP();
-    void    processOutChannel();
 
     bool    handshakeStream(ChanInfo &);
     void    handshakeStream_readHeaders(bool& gotPCP, unsigned int& reqPos, int& nsSwitchNum);

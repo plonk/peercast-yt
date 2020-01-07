@@ -144,12 +144,11 @@ public:
 
     unsigned int        totalConnected()
     {
-        //return numConnected(Servent::T_OUTGOING) + numConnected(Servent::T_INCOMING);
         return numConnected();
     }
     bool                isFiltered(int, Host &h);
     bool                hasUnsafeFilterSettings();
-    bool                addOutgoing(Host, GnuID &, bool);
+
     Servent             *findConnection(Servent::TYPE, GnuID &);
 
     static THREAD_PROC  serverProc(ThreadInfo *);
@@ -170,7 +169,6 @@ public:
     // host cache
     void            addHost(Host &, ServHost::TYPE, unsigned int);
     int             getNewestServents(Host *, int, Host &);
-    ServHost        getOutgoingServent(GnuID &);
     void            deadHost(Host &, ServHost::TYPE);
     unsigned int    numHosts(ServHost::TYPE);
     void            clearHostCache(ServHost::TYPE);
@@ -211,47 +209,9 @@ public:
     unsigned int    numActiveOnPort(int);
     unsigned int    numActive(Servent::TYPE);
 
-    bool    needConnections()
-    {
-        return numConnected(Servent::T_PGNU, 60) < minGnuIncoming;
-    }
-    bool    tryFull()
-    {
-        return false;
-        //return maxTryout ? numUsed(Servent::T_OUTGOING) > maxTryout: false;
-    }
-
-    bool    pubInOver()
-    {
-        return numConnected(Servent::T_PGNU) > maxGnuIncoming;
-//      return maxIncoming ? numConnected(Servent::T_INCOMING, false) > maxIncoming : false;
-    }
-    bool    pubInFull()
-    {
-        return numConnected(Servent::T_PGNU) >= maxGnuIncoming;
-//      return maxIncoming ? numConnected(Servent::T_INCOMING, false) >= maxIncoming : false;
-    }
-
-    bool    outUsedFull()
-    {
-        return false;
-//      return maxOutgoing ? numUsed(Servent::T_OUTGOING) >= maxOutgoing: false;
-    }
-    bool    outOver()
-    {
-        return false;
-//      return maxOutgoing ? numConnected(Servent::T_OUTGOING) > maxOutgoing : false;
-    }
-
     bool    controlInFull()
     {
         return numConnected(Servent::T_CIN)>=maxControl;
-    }
-
-    bool    outFull()
-    {
-        return false;
-//      return maxOutgoing ? numConnected(Servent::T_OUTGOING) >= maxOutgoing : false;
     }
 
     bool    relaysFull()
@@ -287,7 +247,6 @@ public:
     char                password[64];
 
     unsigned int        maxBitrateOut, maxControl, maxRelays, maxDirect;
-    unsigned int        minGnuIncoming, maxGnuIncoming;
     unsigned int        maxServIn;
 
     bool                isDisabled;

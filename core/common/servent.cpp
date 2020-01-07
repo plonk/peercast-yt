@@ -468,11 +468,6 @@ void Servent::setStatus(STATUS s)
 }
 
 // -----------------------------------
-void Servent::processOutChannel()
-{
-}
-
-// -----------------------------------
 bool    Servent::pingHost(Host &rhost, GnuID &rsid)
 {
     char ipstr[64];
@@ -1620,20 +1615,6 @@ int Servent::incomingProc(ThreadInfo *thread)
     return 0;
 }
 
-// -----------------------------------
-#if 0
-void Servent::processServent()
-{
-    setStatus(S_HANDSHAKE);
-
-    handshakeIn();
-
-    if (!sock)
-        throw StreamException("Servent has no socket");
-
-    processGnutella();
-}
-#endif
 // -----------------------------------
 void Servent::processStream(bool doneHandshake, ChanInfo &chanInfo)
 {

@@ -48,8 +48,6 @@ ServMgr::ServMgr()
     useFlowControl = true;
 
     maxServIn = 50;
-    minGnuIncoming = 10;
-    maxGnuIncoming = 20;
 
     lastIncoming = 0;
 
@@ -298,45 +296,6 @@ int ServMgr::getNewestServents(Host *hl, int max, Host &rh)
     }
 
     return cnt;
-}
-
-// -----------------------------------
-ServHost ServMgr::getOutgoingServent(GnuID &netid)
-{
-    ServHost host;
-
-    Host lh(ClientSocket::getIP(NULL), 0);
-
-    // find newest host not in list
-    ServHost *sh=NULL;
-    for (int j=0; j<MAX_HOSTCACHE; j++)
-    {
-        ServHost *hc=&hostCache[j];
-        // find newest servent not already connected.
-        if (hc->type == ServHost::T_SERVENT)
-        {
-            if (!((lh.globalIP() && !hc->host.globalIP()) || lh.isSame(hc->host)))
-            {
-#if 0
-                if (!findServent(Servent::T_OUTGOING, hc->host, netid))
-                {
-                    if (!sh)
-                    {
-                        sh = hc;
-                    }else{
-                        if (hc->time > sh->time)
-                            sh = hc;
-                    }
-                }
-#endif
-            }
-        }
-    }
-
-    if (sh)
-        host = *sh;
-
-    return host;
 }
 
 // -----------------------------------
@@ -737,21 +696,6 @@ bool ServMgr::isFiltered(int fl, Host &h)
     return false;
 }
 
-#if 0
-// -----------------------------------
-bool ServMgr::canServeHost(Host &h)
-{
-    if (server)
-    {
-        Host sh = server->getHost();
-
-        if (sh.globalIP() || (sh.localIP() && h.localIP()))
-            return true;
-    }
-    return false;
-}
-#endif
-
 // --------------------------------------------------
 void writeServerSettings(IniFileBase &iniFile, unsigned int a)
 {
@@ -859,8 +803,6 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
     iniFile.writeStrValue("authType", (this->authType == ServMgr::AUTH_COOKIE) ? "cookie" : "http-basic");
     iniFile.writeStrValue("cookiesExpire", (this->cookieList.neverExpire == true) ? "never": "session");
     iniFile.writeStrValue("htmlPath", this->htmlPath);
-    iniFile.writeIntValue("minPGNUIncoming", this->minGnuIncoming);
-    iniFile.writeIntValue("maxPGNUIncoming", this->maxGnuIncoming);
     iniFile.writeIntValue("maxServIn", this->maxServIn);
     iniFile.writeStrValue("chanLog", this->chanLog);
     iniFile.writeStrValue("genrePrefix", this->genrePrefix);
@@ -1010,11 +952,6 @@ void ServMgr::loadSettings(const char *fn)
                 chanMgr->broadcastID.id[0] = PCP_BROADCAST_FLAGS;           // hacky, but we need to fix old clients
             }else if (iniFile.isName("htmlPath"))
                 strcpy(servMgr->htmlPath, iniFile.getStrValue());
-            else if (iniFile.isName("maxPGNUIncoming"))
-                servMgr->maxGnuIncoming = iniFile.getIntValue();
-            else if (iniFile.isName("minPGNUIncoming"))
-                servMgr->minGnuIncoming = iniFile.getIntValue();
-
             else if (iniFile.isName("maxControlConnections"))
             {
                 servMgr->maxControl = iniFile.getIntValue();
@@ -1342,61 +1279,6 @@ bool ServMgr::getChannel(char *str, ChanInfo &info, bool relay)
 }
 
 // --------------------------------------------------
-int ServMgr::findChannel(ChanInfo &info)
-{
-#if 0
-    char idStr[64];
-    info.id.toStr(idStr);
-
-    if (info.id.isSet())
-    {
-        // if we have an ID then try and connect to known hosts carrying channel.
-        ServHost sh = getOutgoingServent(info.id);
-        addOutgoing(sh.host, info.id, true);
-    }
-
-    GnuPacket pack;
-
-    XML xml;
-    XML::Node *n = info.createQueryXML();
-    xml.setRoot(n);
-    pack.initFind(NULL, &xml, servMgr->queryTTL);
-
-    addReplyID(pack.id);
-    int cnt = broadcast(pack, NULL);
-
-    LOG_INFO("Querying network: %s %s - %d servents", info.name.cstr(), idStr, cnt);
-
-    return cnt;
-#endif
-    return 0;
-}
-
-// --------------------------------------------------
-// add outgoing network connection from string (ip:port format)
-bool ServMgr::addOutgoing(Host h, GnuID &netid, bool pri)
-{
-#if 0
-    if (h.ip)
-    {
-        if (!findServent(h.ip, h.port, netid))
-        {
-            Servent *sv = allocServent();
-            if (sv)
-            {
-                if (pri)
-                    sv->priorityConnect = true;
-                sv->networkID = netid;
-                sv->initOutgoing(h, Servent::T_OUTGOING);
-                return true;
-            }
-        }
-    }
-#endif
-    return false;
-}
-
-// --------------------------------------------------
 Servent *ServMgr::findConnection(Servent::TYPE t, GnuID &sid)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
@@ -1434,21 +1316,7 @@ void ServMgr::procConnectArgs(char *str, ChanInfo &info)
         {
             LOG_DEBUG("cmd: %s, arg: %s", curr, arg);
 
-            if (strcmp(curr, "sip")==0)
-            // sip - add network connection to client with channel
-            {
-                Host h;
-                h.fromStrName(arg, DEFAULT_PORT);
-                if (addOutgoing(h, servMgr->networkID, true))
-                    LOG_INFO("Added connection: %s", arg);
-            }else if (strcmp(curr, "pip")==0)
-            // pip - add private network connection to client with channel
-            {
-                Host h;
-                h.fromStrName(arg, DEFAULT_PORT);
-                if (addOutgoing(h, info.id, true))
-                    LOG_INFO("Added private connection: %s", arg);
-            }else if (strcmp(curr, "ip")==0)
+            if (strcmp(curr, "ip")==0)
             // ip - add hit
             {
                 Host h;
@@ -1933,14 +1801,8 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
         buf = to_string(maxServIn);
     else if (var == "numFilters")
         buf = to_string(numFilters+1); // 入力用の空欄を生成する為に+1する。
-    else if (var == "maxPGNUIn")
-        buf = to_string(maxGnuIncoming);
-    else if (var == "minPGNUIn")
-        buf = to_string(minGnuIncoming);
     else if (var == "numActive1")
         buf = to_string(numActiveOnPort(serverHost.port));
-    else if (var == "numPGNU")
-        buf = to_string(numConnected(Servent::T_PGNU));
     else if (var == "numCIN")
         buf = to_string(numConnected(Servent::T_CIN));
     else if (var == "numCOUT")
