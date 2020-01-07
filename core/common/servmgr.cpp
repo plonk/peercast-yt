@@ -984,7 +984,6 @@ void ServMgr::loadSettings(const char *fn)
             else if (iniFile.isName("broadcastID"))
             {
                 chanMgr->broadcastID.fromStr(iniFile.getStrValue());
-                chanMgr->broadcastID.id[0] = PCP_BROADCAST_FLAGS;           // hacky, but we need to fix old clients
             }else if (iniFile.isName("htmlPath"))
                 strcpy(servMgr->htmlPath, iniFile.getStrValue());
             else if (iniFile.isName("maxControlConnections"))
@@ -1056,8 +1055,7 @@ void ServMgr::loadSettings(const char *fn)
 
             else if (iniFile.isName("rootHost"))
             {
-                if (!PCP_FORCE_YP)
-                    servMgr->rootHost = iniFile.getStrValue();
+                servMgr->rootHost = iniFile.getStrValue();
             }else if (iniFile.isName("deadHitAge"))
                 chanMgr->deadHitAge = iniFile.getIntValue();
             else if (iniFile.isName("tryoutDelay"))
@@ -1404,13 +1402,7 @@ void ServMgr::procConnectArgs(char *str, ChanInfo &info)
 // --------------------------------------------------
 bool ServMgr::start()
 {
-    const char *priv;
-#if PRIVATE_BROADCASTER
-    priv = "(private)";
-#else
-    priv = "";
-#endif
-    LOG_INFO("Peercast %s, %s %s", PCX_VERSTRING, peercastApp->getClientTypeOS(), priv);
+    LOG_INFO("Peercast %s, %s", PCX_VERSTRING, peercastApp->getClientTypeOS());
 
     LOG_INFO("SessionID: %s", sessionID.str().c_str());
 
@@ -1851,9 +1843,9 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     else if (var == "isRoot")
         buf = to_string(isRoot ? 1 : 0);
     else if (var == "isPrivate")
-        buf = (PCP_BROADCAST_FLAGS&1) ? "1" : "0";
+        buf = "0";
     else if (var == "forceYP")
-        buf = PCP_FORCE_YP ? "1" : "0";
+        buf = "0";
     else if (var == "refreshHTML")
         buf = to_string(refreshHTML ? refreshHTML : 0x0fffffff);
     else if (var == "maxRelays")

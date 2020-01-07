@@ -274,7 +274,7 @@ ChanMgr::ChanMgr()
     broadcastMsg.clear();
     broadcastMsgInterval = 10;
 
-    broadcastID.generate(PCP_BROADCAST_FLAGS);
+    broadcastID.generate();
 
     deadHitAge = 600;
 
