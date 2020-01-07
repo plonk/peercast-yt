@@ -49,7 +49,6 @@ public:
 
     void    broadcastTrackerSettings();
     void    setUpdateInterval(unsigned int v);
-    void    broadcastRelays(Servent *, int, int);
 
     int     broadcastPacketUp(ChanPacket &, GnuID &, GnuID &, GnuID &);
     void    broadcastTrackerUpdate(GnuID &, bool = false);

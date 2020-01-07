@@ -362,57 +362,6 @@ int ChanMgr::broadcastPacketUp(ChanPacket &pack, GnuID &chanID, GnuID &srcID, Gn
 }
 
 // -----------------------------------
-void ChanMgr::broadcastRelays(Servent *serv, int minTTL, int maxTTL)
-{
-#if 0
-    //if ((servMgr->getFirewall() == ServMgr::FW_OFF) || servMgr->serverHost.localIP())
-    {
-        Host sh = servMgr->serverHost;
-        bool push = (servMgr->getFirewall() != ServMgr::FW_OFF);
-        bool busy = (servMgr->pubInFull() && servMgr->outFull()) || servMgr->relaysFull();
-        bool stable = servMgr->totalStreams>0;
-
-        GnuPacket hit;
-
-        int numChans = 0;
-
-        auto c = channel;
-        while (c)
-        {
-            if (c->isPlaying())
-            {
-                bool tracker = c->isBroadcasting();
-
-                int ttl = (c->info.getUptime() / servMgr->relayBroadcast);  // 1 hop per N seconds
-
-                if (ttl < minTTL)
-                    ttl = minTTL;
-
-                if (ttl > maxTTL)
-                    ttl = maxTTL;
-
-                if (hit.initHit(sh, c, NULL, push, busy, stable, tracker, ttl))
-                {
-                    int numOut = 0;
-                    numChans++;
-                    if (serv)
-                    {
-                        serv->outputPacket(hit, false);
-                        numOut++;
-                    }
-
-                    LOG_INFO("Sent channel to %d servents, TTL %d", numOut, ttl);
-                }
-            }
-            c = c->next;
-        }
-        //if (numChans)
-        //  LOG_INFO("Sent %d channels to %d servents", numChans, numOut);
-    }
-#endif
-}
-
-// -----------------------------------
 void ChanMgr::setUpdateInterval(unsigned int v)
 {
     hostUpdateInterval = v;
