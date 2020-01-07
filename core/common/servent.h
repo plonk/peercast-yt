@@ -31,7 +31,6 @@
 #include "varwriter.h"
 
 class HTML;
-
 class AtomStream;
 
 // ----------------------------------
@@ -74,13 +73,6 @@ public:
         S_WAIT,
         S_FREE
     };
-
-    // enum PROTOCOL
-    // {
-    //     P_UNKNOWN,
-    //     P_GNUTELLA06,
-    //     P_PCP
-    // };
 
     enum SORT
     {
@@ -171,8 +163,6 @@ public:
     static THREAD_PROC  outgoingProc(ThreadInfo *);
     static THREAD_PROC  incomingProc(ThreadInfo *);
     static THREAD_PROC  givProc(ThreadInfo *);
-    static THREAD_PROC  pcpProc(ThreadInfo *);
-    static THREAD_PROC  fetchProc(ThreadInfo *);
 
     static bool pingHost(Host &, GnuID &);
 
@@ -185,8 +175,6 @@ public:
     void    handshakeXML();
     void    handshakeCMD(HTTP&, char *);
     bool    handshakeAuth(HTTP &, const char *, bool);
-    void    handshakeIn();
-    void    handshakeOut();
 
     bool    handshakeHTTPBasicAuth(HTTP &http);
 
@@ -217,7 +205,6 @@ public:
 
     void    handshakeJRPC(HTTP &http);
 
-    void    handshakeRemoteFile(const char *);
     void    handshakeLocalFile(const char *, HTTP& http);
     void    invokeCGIScript(HTTP &http, const char* fn);
 
@@ -232,16 +219,7 @@ public:
     bool    writeVariable(Stream &, const String &) override;
 
     // the "mainloop" of servents
-    void    processGnutella();
-    void    processRoot();
-    void    processServent();
     void    processStream(bool, ChanInfo &);
-    void    processPCP(bool, bool);
-
-    bool    procAtoms(AtomStream &);
-    void    procRootAtoms(AtomStream &, int);
-    void    procHeloAtoms(AtomStream &, int, bool);
-    void    procGetAtoms(AtomStream &, int);
 
     void    triggerChannel(char *, ChanInfo::PROTOCOL, bool);
     void    sendPeercastChannel();

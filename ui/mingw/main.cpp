@@ -33,6 +33,7 @@
 #include <libgen.h> // dirname
 #include <windows.h> // GetModuleFileName
 #include "threading.h"
+#include "gnutella.h"
 
 // ----------------------------------
 static std::string utf8ToAnsi(const char *utf8);
