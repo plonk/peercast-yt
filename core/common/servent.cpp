@@ -1213,22 +1213,22 @@ void Servent::handshakeIncomingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
             rhost.port = 0;
     }
 
-    if (servMgr->isRoot)
-    {
-        if (bcID.isSet())
-        {
-            if (bcID.getFlags() & 1)    // private
-            {
-                BCID *bcid = servMgr->findValidBCID(bcID);
-                if (!bcid || (bcid && !bcid->valid))
-                {
-                    atom.writeParent(PCP_OLEH, 1);
-                    atom.writeInt(PCP_HELO_DISABLE, 1);
-                    throw StreamException("Client is banned");
-                }
-            }
-        }
-    }
+    // if (servMgr->isRoot)
+    // {
+    //     if (bcID.isSet())
+    //     {
+    //         if (bcID.getFlags() & 1)    // private
+    //         {
+    //             BCID *bcid = servMgr->findValidBCID(bcID);
+    //             if (!bcid || (bcid && !bcid->valid))
+    //             {
+    //                 atom.writeParent(PCP_OLEH, 1);
+    //                 atom.writeInt(PCP_HELO_DISABLE, 1);
+    //                 throw StreamException("Client is banned");
+    //             }
+    //         }
+    //     }
+    // }
 
     atom.writeParent(PCP_OLEH, 5);
         atom.writeString(PCP_HELO_AGENT, PCX_AGENT);

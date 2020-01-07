@@ -39,8 +39,6 @@ ServMgr::ServMgr()
     , uptestServiceRegistry(new UptestServiceRegistry())
     , relayBroadcast(30) // オリジナルでは未初期化。
 {
-    validBCID = NULL;
-
     authType = AUTH_COOKIE;
     cookieList.init();
 
@@ -138,62 +136,6 @@ ServMgr::~ServMgr()
         delete servents;
         servents = next;
     }
-}
-
-// -----------------------------------
-BCID *ServMgr::findValidBCID(int index)
-{
-    int cnt = 0;
-    BCID *bcid = validBCID;
-    while (bcid)
-    {
-        if (cnt == index)
-            return bcid;
-        cnt++;
-        bcid=bcid->next;
-    }
-    return 0;
-}
-
-// -----------------------------------
-BCID *ServMgr::findValidBCID(GnuID &id)
-{
-    BCID *bcid = validBCID;
-    while (bcid)
-    {
-        if (bcid->id.isSame(id))
-            return bcid;
-        bcid=bcid->next;
-    }
-    return 0;
-}
-
-// -----------------------------------
-void ServMgr::removeValidBCID(GnuID &id)
-{
-    BCID *bcid = validBCID, *prev=0;
-    while (bcid)
-    {
-        if (bcid->id.isSame(id))
-        {
-            if (prev)
-                prev->next = bcid->next;
-            else
-                validBCID = bcid->next;
-            return;
-        }
-        prev = bcid;
-        bcid=bcid->next;
-    }
-}
-
-// -----------------------------------
-void ServMgr::addValidBCID(BCID *bcid)
-{
-    removeValidBCID(bcid->id);
-
-    bcid->next = validBCID;
-    validBCID = bcid;
 }
 
 // -----------------------------------
@@ -1006,23 +948,6 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
     iniFile.writeBoolValue("pauseLog", pauseLog);
     iniFile.writeIntValue("idleSleepTime", sys->idleSleepTime);
 
-    if (this->validBCID)
-    {
-        BCID *bcid = this->validBCID;
-        while (bcid)
-        {
-            iniFile.writeSection("ValidBCID");
-            iniFile.writeStrValue("id",  bcid->id.str());
-            iniFile.writeStrValue("name", bcid->name);
-            iniFile.writeStrValue("email", bcid->email);
-            iniFile.writeStrValue("url", bcid->url);
-            iniFile.writeBoolValue("valid", bcid->valid);
-            iniFile.writeLine("[End]");
-
-            bcid = bcid->next;
-        }
-    }
-
     std::shared_ptr<Channel> c = chanMgr->channel;
     while (c)
     {
@@ -1381,25 +1306,6 @@ void ServMgr::loadSettings(const char *fn)
                         time = iniFile.getIntValue();
                 }
                 servMgr->addHost(h, type, time);
-            } else if (iniFile.isName("[ValidBCID]"))
-            {
-                BCID *bcid = new BCID();
-                while (iniFile.readNext())
-                {
-                    if (iniFile.isName("[End]"))
-                        break;
-                    else if (iniFile.isName("id"))
-                        bcid->id.fromStr(iniFile.getStrValue());
-                    else if (iniFile.isName("name"))
-                        bcid->name.set(iniFile.getStrValue());
-                    else if (iniFile.isName("email"))
-                        bcid->email.set(iniFile.getStrValue());
-                    else if (iniFile.isName("url"))
-                        bcid->url.set(iniFile.getStrValue());
-                    else if (iniFile.isName("valid"))
-                        bcid->valid = iniFile.getBoolValue();
-                }
-                servMgr->addValidBCID(bcid);
             }
         }
     }
@@ -2035,28 +1941,6 @@ ServHost::TYPE ServHost::getTypeFromStr(const char *s)
 }
 
 // --------------------------------------------------
-bool    BCID::writeVariable(Stream &out, const String &var)
-{
-    std::string buf;
-
-    if (var == "id")
-        buf = id.str();
-    else if (var == "name")
-        buf = name.c_str();
-    else if (var == "email")
-        buf = email.c_str();
-    else if (var == "url")
-        buf = url.c_str();
-    else if (var == "valid")
-        buf = valid ? "Yes" : "No";
-    else
-        return false;
-
-    out.writeString(buf);
-    return true;
-}
-
-// --------------------------------------------------
 bool ServMgr::writeVariable(Stream &out, const String &var)
 {
     using namespace std;
@@ -2130,17 +2014,7 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
         buf = to_string(numConnected(Servent::T_COUT));
     else if (var == "numIncoming")
         buf = to_string(numActive(Servent::T_INCOMING));
-    else if (var == "numValidBCID")
-    {
-        int cnt = 0;
-        BCID *bcid = validBCID;
-        while (bcid)
-        {
-            cnt++;
-            bcid = bcid->next;
-        }
-        buf = to_string(cnt);
-    }else if (var == "disabled")
+    else if (var == "disabled")
         buf = to_string(isDisabled);
     else if (var == "serverPort1")
         buf = to_string(serverHost.port);

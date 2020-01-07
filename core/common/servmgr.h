@@ -37,22 +37,6 @@ const int MIN_TRACKER_RETRY = 10;
 const int MIN_RELAY_RETRY = 5;
 
 // ----------------------------------
-class BCID : public VariableWriter
-{
-public:
-    BCID()
-    :next(0), valid(true)
-    {}
-
-    bool    writeVariable(Stream &, const String &) override;
-
-    GnuID   id;
-    String  name, email, url;
-    bool    valid;
-    BCID    *next;
-};
-
-// ----------------------------------
 class ServHost
 {
 public:
@@ -214,11 +198,6 @@ public:
 
     int             broadcastPacket(ChanPacket &, GnuID &, GnuID &, GnuID &, Servent::TYPE type);
 
-    void            addValidBCID(BCID *);
-    void            removeValidBCID(GnuID &);
-    BCID            *findValidBCID(GnuID &);
-    BCID            *findValidBCID(int);
-
     unsigned int    getUptime()
     {
         return sys->getTime()-startTime;
@@ -345,7 +324,6 @@ public:
 
     unsigned int        notifyMask;
 
-    BCID                *validBCID;
     GnuID               sessionID;
 
     ServFilter          filters[MAX_FILTERS];
