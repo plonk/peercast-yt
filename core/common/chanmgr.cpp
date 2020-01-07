@@ -298,9 +298,6 @@ ChanMgr::ChanMgr()
 
     bufferTime = 5;
 
-    autoQuery = 0;
-    lastQuery = 0;
-
     lastYPConnect = 0;
 }
 
