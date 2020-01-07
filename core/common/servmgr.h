@@ -272,7 +272,6 @@ public:
     bool                restartServer;
     bool                allowDirect;
     bool                autoConnect, autoServe, forceLookup;
-    int                 queryTTL;
 
     unsigned int        allowServer1;
     unsigned int        startTime;

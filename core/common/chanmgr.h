@@ -108,7 +108,7 @@ public:
     int             numFinds;
     ::String        broadcastMsg;
     unsigned int    broadcastMsgInterval;
-    unsigned int    lastHit, lastQuery;
+    unsigned int    lastHit;
     unsigned int    maxUptime;
     bool            searchActive;
     unsigned int    deadHitAge;
@@ -117,7 +117,6 @@ public:
     std::recursive_mutex lock;
     int             minBroadcastTTL, maxBroadcastTTL;
     int             pushTimeout, pushTries, maxPushHops;
-    unsigned int    autoQuery;
     unsigned int    prefetchTime;
     unsigned int    lastYPConnect;
     unsigned int    icyIndex;

@@ -85,8 +85,6 @@ ServMgr::ServMgr()
 
     maxControl = 3;
 
-    queryTTL = 7;
-
     totalStreams = 0;
     firewallTimeout = 30;
     pauseLog = false;
@@ -826,8 +824,6 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
     iniFile.writeIntValue("pushTries", chanMgr->pushTries);
     iniFile.writeIntValue("pushTimeout", chanMgr->pushTimeout);
     iniFile.writeIntValue("maxPushHops", chanMgr->maxPushHops);
-    iniFile.writeIntValue("autoQuery", chanMgr->autoQuery);
-    iniFile.writeIntValue("queryTTL", this->queryTTL);
     iniFile.writeBoolValue("transcodingEnabled", this->transcodingEnabled);
     iniFile.writeStrValue("preset", this->preset);
     iniFile.writeStrValue("audioCodec", this->audioCodec);
@@ -1043,16 +1039,6 @@ void ServMgr::loadSettings(const char *fn)
                 chanMgr->pushTries = iniFile.getIntValue();
             else if (iniFile.isName("maxPushHops"))
                 chanMgr->maxPushHops = iniFile.getIntValue();
-            else if (iniFile.isName("autoQuery"))
-            {
-                chanMgr->autoQuery = iniFile.getIntValue();
-                if ((chanMgr->autoQuery < 300) && (chanMgr->autoQuery > 0))
-                    chanMgr->autoQuery = 300;
-            }
-            else if (iniFile.isName("queryTTL"))
-            {
-                servMgr->queryTTL = iniFile.getIntValue();
-            }
             else if (iniFile.isName("transcodingEnabled"))
                 servMgr->transcodingEnabled = iniFile.getBoolValue();
             else if (iniFile.isName("preset"))
