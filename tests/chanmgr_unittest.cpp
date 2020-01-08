@@ -33,7 +33,7 @@ TEST_F(ChanMgrFixture, initialState)
 
     ASSERT_EQ(nullptr, x->channel);
     ASSERT_EQ(NULL, x->hitlist);
-    ASSERT_EQ(PCP_BROADCAST_FLAGS, x->broadcastID.getFlags());
+    //ASSERT_EQ(PCP_BROADCAST_FLAGS, x->broadcastID.getFlags());
 
     ASSERT_TRUE(id.isSame(x->searchInfo.id));
     ASSERT_TRUE(id.isSame(x->searchInfo.bcID));
@@ -43,7 +43,7 @@ TEST_F(ChanMgrFixture, initialState)
     ASSERT_EQ(String(), x->broadcastMsg);
     EXPECT_EQ(10, x->broadcastMsgInterval);
     //EXPECT_EQ(0, x->lastHit); // 初期化されない。
-    EXPECT_EQ(0, x->lastQuery);
+    //EXPECT_EQ(0, x->lastQuery);
     EXPECT_EQ(0, x->maxUptime);
     // EXPECT_EQ(true, x->searchActive); // 初期化されない。
     EXPECT_EQ(600, x->deadHitAge);
@@ -54,7 +54,7 @@ TEST_F(ChanMgrFixture, initialState)
     EXPECT_EQ(60, x->pushTimeout);
     EXPECT_EQ(5, x->pushTries);
     EXPECT_EQ(8, x->maxPushHops);
-    EXPECT_EQ(0, x->autoQuery);
+    //EXPECT_EQ(0, x->autoQuery);
     EXPECT_EQ(10, x->prefetchTime);
     EXPECT_EQ(0, x->lastYPConnect);
     // EXPECT_EQ(0, x->lastYPConnect2);

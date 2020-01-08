@@ -25,8 +25,8 @@ TEST_F(ServMgrFixture, initialState)
     ASSERT_EQ(2, m.maxRelays);
     ASSERT_EQ(0, m.maxDirect);
     // unsigned int        minGnuIncoming, maxGnuIncoming;
-    ASSERT_EQ(10, m.minGnuIncoming);
-    ASSERT_EQ(20, m.maxGnuIncoming);
+    //ASSERT_EQ(10, m.minGnuIncoming);
+    //ASSERT_EQ(20, m.maxGnuIncoming);
     // unsigned int        maxServIn;
     ASSERT_EQ(50, m.maxServIn);
     // bool                isDisabled;
@@ -72,7 +72,7 @@ TEST_F(ServMgrFixture, initialState)
     ASSERT_TRUE(m.autoServe);
     ASSERT_TRUE(m.forceLookup);
     // int                 queryTTL;
-    ASSERT_EQ(7, m.queryTTL);
+    //ASSERT_EQ(7, m.queryTTL);
     // unsigned int        allowServer1, allowServer2;
     ASSERT_EQ(Servent::ALLOW_ALL, m.allowServer1);
     //ASSERT_EQ(Servent::ALLOW_BROADCAST, m.allowServer2);
@@ -87,7 +87,7 @@ TEST_F(ServMgrFixture, initialState)
     // unsigned int        notifyMask;
     ASSERT_EQ(0xffff, m.notifyMask);
     // BCID                *validBCID;
-    ASSERT_EQ(nullptr, m.validBCID);
+    //ASSERT_EQ(nullptr, m.validBCID);
     // GnuID               sessionID;
     ASSERT_STREQ("00151515151515151515151515151515", m.sessionID.str().c_str());
     // ServFilter          filters[MAX_FILTERS];
@@ -238,19 +238,7 @@ TEST_F(ServMgrFixture, writeVariable)
     ASSERT_STREQ("2", mem.str().c_str());
 
     mem.str("");
-    ASSERT_TRUE(m.writeVariable(mem, "maxPGNUIn"));
-    ASSERT_STREQ("20", mem.str().c_str());
-
-    mem.str("");
-    ASSERT_TRUE(m.writeVariable(mem, "minPGNUIn"));
-    ASSERT_STREQ("10", mem.str().c_str());
-
-    mem.str("");
     ASSERT_TRUE(m.writeVariable(mem, "numActive1"));
-    ASSERT_STREQ("0", mem.str().c_str());
-
-    mem.str("");
-    ASSERT_TRUE(m.writeVariable(mem, "numPGNU"));
     ASSERT_STREQ("0", mem.str().c_str());
 
     mem.str("");
@@ -263,10 +251,6 @@ TEST_F(ServMgrFixture, writeVariable)
 
     mem.str("");
     ASSERT_TRUE(m.writeVariable(mem, "numIncoming"));
-    ASSERT_STREQ("0", mem.str().c_str());
-
-    mem.str("");
-    ASSERT_TRUE(m.writeVariable(mem, "numValidBCID"));
     ASSERT_STREQ("0", mem.str().c_str());
 
     mem.str("");
@@ -368,7 +352,7 @@ TEST_F(ServMgrFixture, numStreams_nullcase)
     ASSERT_EQ(0, m.numStreams(Servent::T_DIRECT, false));
     ASSERT_EQ(0, m.numStreams(Servent::T_COUT, false));
     ASSERT_EQ(0, m.numStreams(Servent::T_CIN, false));
-    ASSERT_EQ(0, m.numStreams(Servent::T_PGNU, false));
+    //ASSERT_EQ(0, m.numStreams(Servent::T_PGNU, false));
 
     ASSERT_EQ(0, m.numStreams(Servent::T_NONE, true));
     ASSERT_EQ(0, m.numStreams(Servent::T_INCOMING, true));
@@ -377,7 +361,7 @@ TEST_F(ServMgrFixture, numStreams_nullcase)
     ASSERT_EQ(0, m.numStreams(Servent::T_DIRECT, true));
     ASSERT_EQ(0, m.numStreams(Servent::T_COUT, true));
     ASSERT_EQ(0, m.numStreams(Servent::T_CIN, true));
-    ASSERT_EQ(0, m.numStreams(Servent::T_PGNU, true));
+    //ASSERT_EQ(0, m.numStreams(Servent::T_PGNU, true));
 }
 
 TEST_F(ServMgrFixture, numStreams_connectedRelaysAreCounted)
@@ -437,8 +421,6 @@ TEST_F(ServMgrFixture, doSaveSettings)
               "authType = cookie\r\n"
               "cookiesExpire = session\r\n"
               "htmlPath = html/en\r\n"
-              "minPGNUIncoming = 10\r\n"
-              "maxPGNUIncoming = 20\r\n"
               "maxServIn = 50\r\n"
               "chanLog = \r\n"
               "genrePrefix = \r\n"
@@ -461,8 +443,6 @@ TEST_F(ServMgrFixture, doSaveSettings)
               "pushTries = 5\r\n"
               "pushTimeout = 60\r\n"
               "maxPushHops = 8\r\n"
-              "autoQuery = 0\r\n"
-              "queryTTL = 7\r\n"
               "transcodingEnabled = No\r\n"
               "preset = veryfast\r\n"
               "audioCodec = mp3\r\n"
