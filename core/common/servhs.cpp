@@ -548,14 +548,14 @@ void Servent::handshakeGIV(const char *requestLine)
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
         LOG_DEBUG("Accepted GIV channel %s from: %s", idstr, ipstr);
-        sock=NULL;                  // release this servent but dont close socket.
+        sock = NULL;                  // release this servent but dont close socket.
     }else
     {
         if (!servMgr->acceptGIV(sock))
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
         LOG_DEBUG("Accepted GIV PCP from: %s", ipstr);
-        sock=NULL;                  // release this servent but dont close socket.
+        sock = NULL;                  // release this servent but dont close socket.
     }
 }
 
