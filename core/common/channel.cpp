@@ -561,7 +561,7 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
 {
     m_channel = ch;
 
-    int numYPTries=0;
+    int numYPTries = 0;
     int numCDTries = 0;
     while (ch->thread.active())
     {
@@ -597,12 +597,12 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
                 if (numYPTries >= 3)
                     break;
 
-                unsigned int ctime=sys->getTime();
-                if ((ctime-chanMgr->lastYPConnect) > MIN_YP_RETRY)
+                unsigned int ctime = sys->getTime();
+                if ((ctime - chanMgr->lastYPConnect) > MIN_YP_RETRY)
                 {
                     ch->sourceHost.host.fromStrName(servMgr->rootHost.cstr(), DEFAULT_PORT);
                     ch->sourceHost.yp = true;
-                    chanMgr->lastYPConnect=ctime;
+                    chanMgr->lastYPConnect = ctime;
                 }
             }
 
