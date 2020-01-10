@@ -28,7 +28,7 @@ SRCHTMLTAR = ../html.tar
 HTML = html
 SRCPUBLICTAR = ../public.tar
 PUBLIC = public
-ASSETS = assets
+ASSETS = assets/
 CGIBIN = cgi-bin
 
 LIBOBJSTATIC = libpeercast.a
