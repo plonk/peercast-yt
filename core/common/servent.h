@@ -295,7 +295,6 @@ public:
     Cookie              cookie;
 
 private:
-    void CMD_add_bcid(const char* cmd, HTTP& http, String& jumpStr);
     void CMD_add_speedtest(const char* cmd, HTTP& http, String& jumpStr);
     void CMD_apply(const char* cmd, HTTP& http, String& jumpStr);
     void CMD_bump(const char* cmd, HTTP& http, String& jumpStr);
@@ -304,7 +303,6 @@ private:
     void CMD_control_rtmp(const char* cmd, HTTP& http, String& jumpStr);
     void CMD_delete_speedtest(const char* cmd, HTTP& http, String& jumpStr);
     void CMD_dump_hitlists(const char* cmd, HTTP& http, String& jumpStr);
-    void CMD_edit_bcid(const char* cmd, HTTP& http, String& jumpStr);
     void CMD_fetch(const char* cmd, HTTP& http, String& jumpStr);
     void CMD_fetch_feeds(const char* cmd, HTTP& http, String& jumpStr);
     void CMD_keep(const char* cmd, HTTP& http, String& jumpStr);

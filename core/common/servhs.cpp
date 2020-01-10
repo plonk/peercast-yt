@@ -929,72 +929,6 @@ void Servent::CMD_clearlog(const char* cmd, HTTP& http, String& jumpStr)
     jumpStr.sprintf("/%s/viewlog.html", servMgr->htmlPath);
 }
 
-void Servent::CMD_edit_bcid(const char* cmd, HTTP& http, String& jumpStr)
-{
-    char arg[MAX_CGI_LEN];
-    char curr[MAX_CGI_LEN];
-
-    const char *cp = cmd;
-    GnuID id;
-    BCID *bcid;
-
-    while ((cp = nextCGIarg(cp, curr, arg)) != nullptr)
-    {
-        if (strcmp(curr, "id") == 0)
-            id.fromStr(arg);
-        else if (strcmp(curr, "del") == 0)
-            servMgr->removeValidBCID(id);
-        else if (strcmp(curr, "valid") == 0)
-        {
-            bcid = servMgr->findValidBCID(id);
-            if (bcid)
-                bcid->valid = getCGIargBOOL(arg);
-        }
-    }
-
-    peercastInst->saveSettings();
-    jumpStr.sprintf("/%s/bcid.html", servMgr->htmlPath);
-}
-
-void Servent::CMD_add_bcid(const char* cmd, HTTP& http, String& jumpStr)
-{
-    char arg[MAX_CGI_LEN];
-    char curr[MAX_CGI_LEN];
-
-    BCID *bcid = new BCID();
-
-    const char *cp = cmd;
-    bool result=false;
-    while ((cp = nextCGIarg(cp, curr, arg)) != nullptr)
-    {
-        if (strcmp(curr, "id") == 0)
-            bcid->id.fromStr(arg);
-        else if (strcmp(curr, "name") == 0)
-            bcid->name.set(arg);
-        else if (strcmp(curr, "email") == 0)
-            bcid->email.set(arg);
-        else if (strcmp(curr, "url") == 0)
-            bcid->url.set(arg);
-        else if (strcmp(curr, "valid") == 0)
-            bcid->valid = getCGIargBOOL(arg);
-        else if (strcmp(curr, "result") == 0)
-            result = true;
-    }
-
-    LOG_DEBUG("Adding BCID : %s", bcid->name.cstr());
-    servMgr->addValidBCID(bcid);
-    peercastInst->saveSettings();
-    if (result)
-    {
-        http.writeLine(HTTP_SC_OK);
-        http.writeLine("");
-        http.writeString("OK");
-    }else
-    {
-        jumpStr.sprintf("/%s/bcid.html", servMgr->htmlPath);
-    }
-}
-
 void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
 {
     std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
@@ -1057,10 +991,7 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
         {
             servMgr->rootMsg.set(arg, String::T_ESC);
             servMgr->rootMsg.convertTo(String::T_UNICODE);
-        }else if (strcmp(curr, "minpgnu") == 0)
-            servMgr->minGnuIncoming = atoi(arg);
-        else if (strcmp(curr, "maxpgnu") == 0)
-            servMgr->maxGnuIncoming = atoi(arg);
+        }
 
         // connections
         else if (strcmp(curr, "maxcin") == 0)
@@ -1119,12 +1050,9 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
             servMgr->autoConnect = getCGIargBOOL(arg);
         else if (strcmp(curr, "yp") == 0)
         {
-            if (!PCP_FORCE_YP)
-            {
-                String str(arg, String::T_ESC);
-                str.convertTo(String::T_ASCII);
-                servMgr->rootHost = str;
-            }
+            String str(arg, String::T_ESC);
+            str.convertTo(String::T_ASCII);
+            servMgr->rootHost = str;
         }
         else if (strcmp(curr, "deadhitage") == 0)
             chanMgr->deadHitAge = getCGIargINT(arg);
@@ -1823,10 +1751,7 @@ void Servent::handshakeCMD(HTTP& http, char *q)
 
     try
     {
-        if (cmd == "add_bcid")
-        {
-            CMD_add_bcid(query.c_str(), http, jumpStr);
-        }else if (cmd == "add_speedtest")
+        if (cmd == "add_speedtest")
         {
             CMD_add_speedtest(query.c_str(), http, jumpStr);
         }else if (cmd == "apply")
@@ -1850,9 +1775,6 @@ void Servent::handshakeCMD(HTTP& http, char *q)
         }else if (cmd == "dump_hitlists")
         {
             CMD_dump_hitlists(query.c_str(), http, jumpStr);
-        }else if (cmd == "edit_bcid")
-        {
-            CMD_edit_bcid(query.c_str(), http, jumpStr);
         }else if (cmd == "fetch")
         {
             CMD_fetch(query.c_str(), http, jumpStr);

@@ -111,9 +111,6 @@ TEST_F(ServMgrFixture, initialState)
     // String              serverName;
     ASSERT_TRUE(m.serverName == "");
 
-    // std::string         genrePrefix;
-    ASSERT_EQ("", m.genrePrefix);
-
     // bool                transcodingEnabled;
     ASSERT_FALSE(m.transcodingEnabled);
 
@@ -423,7 +420,6 @@ TEST_F(ServMgrFixture, doSaveSettings)
               "htmlPath = html/en\r\n"
               "maxServIn = 50\r\n"
               "chanLog = \r\n"
-              "genrePrefix = \r\n"
               "networkID = 00000000000000000000000000000000\r\n"
               "\r\n"
               "[Broadcast]\r\n"
