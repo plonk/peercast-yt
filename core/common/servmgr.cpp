@@ -803,7 +803,6 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
     iniFile.writeStrValue("htmlPath", this->htmlPath);
     iniFile.writeIntValue("maxServIn", this->maxServIn);
     iniFile.writeStrValue("chanLog", this->chanLog);
-    iniFile.writeStrValue("genrePrefix", this->genrePrefix);
 
     iniFile.writeStrValue("networkID", networkID.str());
 
@@ -1001,9 +1000,6 @@ void ServMgr::loadSettings(const char *fn)
                     servMgr->cookieList.neverExpire = true;
                 else if (Sys::stricmp(t, "session")==0)
                     servMgr->cookieList.neverExpire = false;
-            }else if (iniFile.isName("genrePrefix"))
-            {
-                servMgr->genrePrefix = iniFile.getStrValue();
             }
 
             // privacy settings
@@ -1830,9 +1826,6 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
             buf = "1";
         else
             buf = "0";
-    }else if (var == "genrePrefix")
-    {
-        buf = genrePrefix;
     }else if (var == "transcodingEnabled")
     {
         buf = to_string(servMgr->transcodingEnabled);
