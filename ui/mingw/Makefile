@@ -5,8 +5,8 @@
 # され、libmingwex.a 内の定義と衝突するので未定義にする。
 
 CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -U__STRICT_ANSI__ -DWIN32 -D_REENTRANT $(INCLUDES)
-LDFLAGS = -static-libgcc -static-libstdc++ -pthread -L../../Onigmo/.libs
-LIBS = -Wl,-Bstatic -lonigmo -Wl,-Bdynamic -lws2_32 -lShlwapi
+LDFLAGS = -static-libgcc -static-libstdc++ -L../../Onigmo/.libs
+LIBS = -Wl,-Bstatic -lonigmo -lwinpthread -Wl,-Bdynamic -lws2_32 -lShlwapi
 
 OS = $(shell uname -s | tr A-Z a-z)
 ARCH = $(shell uname -m | tr A-Z a-z)

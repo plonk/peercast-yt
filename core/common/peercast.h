@@ -1,15 +1,10 @@
 #ifndef _PEERCAST_H
 #define _PEERCAST_H
 
-//#define APICALL _stdcall
-#ifdef WIN32
-#define APICALL _cdecl
-#else
-#define APICALL
-#endif
-
 class ChanInfo;
 class Sys;
+
+#define APICALL
 
 #include "servmgr.h"
 #include "logbuf.h"
