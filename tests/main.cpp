@@ -2,7 +2,10 @@
 //#include "channel.h"
 #include "servmgr.h"
 #include "mockpeercast.h"
+
+#if WIN32
 #include "wsocket.h"
+#endif
 
 int main(int argc, char** argv)
 {
