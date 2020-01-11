@@ -133,6 +133,7 @@ bool    IniFileBase::getBoolValue()
 void    IniFileBase::writeIntValue(const char *name, int iv)
 {
     snprintf(currLine, sizeof(currLine), "%s = %d", name, iv);
+    currLine[sizeof(currLine)-1] = '\0'; // for buggy snprintf implementations that don't null-terminate
     stream.writeLine(currLine);
 }
 
@@ -140,6 +141,7 @@ void    IniFileBase::writeIntValue(const char *name, int iv)
 void    IniFileBase::writeStrValue(const char *name, const char *sv)
 {
     snprintf(currLine, sizeof(currLine), "%s = %s", name, sv);
+    currLine[sizeof(currLine)-1] = '\0'; // for buggy snprintf implementations that don't null-terminate
     stream.writeLine(currLine);
 }
 
@@ -148,6 +150,7 @@ void    IniFileBase::writeSection(const char *name)
 {
     stream.writeLine("");
     snprintf(currLine, sizeof(currLine), "[%s]", name);
+    currLine[sizeof(currLine)-1] = '\0'; // for buggy snprintf implementations that don't null-terminate
     stream.writeLine(currLine);
 }
 
@@ -155,6 +158,7 @@ void    IniFileBase::writeSection(const char *name)
 void    IniFileBase::writeBoolValue(const char *name, int v)
 {
     snprintf(currLine, sizeof(currLine), "%s = %s", name, (v!=0)?"Yes":"No");
+    currLine[sizeof(currLine)-1] = '\0'; // for buggy snprintf implementations that don't null-terminate
     stream.writeLine(currLine);
 }
 
