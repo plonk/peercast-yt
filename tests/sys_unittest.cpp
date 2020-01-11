@@ -14,7 +14,7 @@ public:
 #ifdef _UNIX
         m_sys = new USys();
 #else
-        m_sys = new WSys();
+        m_sys = new WSys(0);
 #endif
     }
 
