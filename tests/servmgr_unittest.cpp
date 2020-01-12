@@ -317,10 +317,6 @@ TEST_F(ServMgrFixture, writeVariable)
     // channelDirectory.*
 
     mem.str("");
-    ASSERT_TRUE(m.writeVariable(mem, "genrePrefix"));
-    ASSERT_STREQ("", mem.str().c_str());
-
-    mem.str("");
     ASSERT_TRUE(m.writeVariable(mem, "test"));
     ASSERT_STREQ("かきくけこABCDabcd", mem.str().c_str());
 }
@@ -454,6 +450,14 @@ TEST_F(ServMgrFixture, doSaveSettings)
               "ban = No\r\n"
               "network = Yes\r\n"
               "direct = Yes\r\n"
+              "[End]\r\n"
+              "\r\n"
+              "[Uptest]\r\n"
+              "url = http://bayonet.ddo.jp/sp/yp4g.xml\r\n"
+              "[End]\r\n"
+              "\r\n"
+              "[Uptest]\r\n"
+              "url = http://temp.orz.hm/yp/yp4g.xml\r\n"
               "[End]\r\n"
               "\r\n"
               "[Notify]\r\n"
