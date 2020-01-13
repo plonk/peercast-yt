@@ -157,6 +157,7 @@ bool Template::writeLoopVariable(Stream &s, const String &varName, int loop)
     }else if (varName.startsWith("loop.filter."))
     {
         ServFilter *sf = &servMgr->filters[loop];
+        return sf->writeVariable(s, varName+12);
     }else if (varName == "loop.indexEven")
     {
         s.writeStringF("%d", (loop&1)==0);
