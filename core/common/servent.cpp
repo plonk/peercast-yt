@@ -2087,9 +2087,9 @@ int Servent::serverProc(ThreadInfo *thread)
         sv->setStatus(S_LISTENING);
 
         if (servMgr->isRoot)
-            LOG_DEBUG("Root Server started: %s", sv->sock->host.str().c_str());
+            LOG_INFO("Root Server started: %s", sv->sock->host.str().c_str());
         else
-            LOG_DEBUG("Server started: %s", sv->sock->host.str().c_str());
+            LOG_INFO("Server started: %s", sv->sock->host.str().c_str());
 
         while (thread->active() && sv->sock->active())
         {
@@ -2129,7 +2129,7 @@ int Servent::serverProc(ThreadInfo *thread)
         LOG_ERROR("Server Error: %s:%d", e.msg, e.err);
     }
 
-    LOG_DEBUG("Server stopped: %s", sv->sock->host.str().c_str());
+    LOG_INFO("Server stopped: %s", sv->sock->host.str().c_str());
 
     return 0;
 }
