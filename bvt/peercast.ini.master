@@ -30,7 +30,7 @@ icyMetaInterval = 8192
 broadcastID = 00D67218FD425A17786B476C25E22A34
 hostUpdateInterval = 120
 maxControlConnections = 3
-rootHost = bayonet.ddo.jp:7146
+rootHost = yp.pcgw.pgw.jp:7146
 
 [Client]
 refreshHTML = 5

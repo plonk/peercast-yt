@@ -38,7 +38,7 @@ TEST_F(ServMgrFixture, initialState)
     // Host                serverHost;
     ASSERT_STREQ("127.0.0.1:7144", m.serverHost.str().c_str());
     // String              rootHost;
-    ASSERT_STREQ("bayonet.ddo.jp:7146", m.rootHost.cstr());
+    ASSERT_STREQ("yp.pcgw.pgw.jp:7146", m.rootHost.cstr());
     // char                downloadURL[128];
     ASSERT_STREQ("", m.downloadURL);
     // String              rootMsg;
@@ -180,7 +180,7 @@ TEST_F(ServMgrFixture, writeVariable)
 
     mem.str("");
     ASSERT_TRUE(m.writeVariable(mem, "ypAddress"));
-    ASSERT_STREQ("bayonet.ddo.jp:7146", mem.str().c_str());
+    ASSERT_STREQ("yp.pcgw.pgw.jp:7146", mem.str().c_str());
 
     mem.str("");
     ASSERT_TRUE(m.writeVariable(mem, "password"));
@@ -425,7 +425,7 @@ TEST_F(ServMgrFixture, doSaveSettings)
               "broadcastID = 00151515151515151515151515151515\r\n"
               "hostUpdateInterval = 120\r\n"
               "maxControlConnections = 3\r\n"
-              "rootHost = bayonet.ddo.jp:7146\r\n"
+              "rootHost = yp.pcgw.pgw.jp:7146\r\n"
               "\r\n"
               "[Client]\r\n"
               "refreshHTML = 5\r\n"

@@ -78,7 +78,7 @@ ServMgr::ServMgr()
     strcpy(connectHost, "connect1.peercast.org");
     strcpy(htmlPath, "html/en");
 
-    rootHost = "bayonet.ddo.jp:7146";
+    rootHost = "yp.pcgw.pgw.jp:7146";
 
     serverHost.fromStrIP("127.0.0.1", DEFAULT_PORT);
 
