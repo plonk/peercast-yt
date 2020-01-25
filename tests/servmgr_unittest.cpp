@@ -308,11 +308,11 @@ TEST_F(ServMgrFixture, writeVariable)
 
     mem.str("");
     ASSERT_TRUE(m.writeVariable(mem, "numChannelFeedsPlusOne"));
-    ASSERT_STREQ("1", mem.str().c_str());
+    ASSERT_STREQ("2", mem.str().c_str());
 
     mem.str("");
     ASSERT_TRUE(m.writeVariable(mem, "numChannelFeeds"));
-    ASSERT_STREQ("0", mem.str().c_str());
+    ASSERT_STREQ("1", mem.str().c_str());
 
     // channelDirectory.*
 
@@ -450,6 +450,10 @@ TEST_F(ServMgrFixture, doSaveSettings)
               "ban = No\r\n"
               "network = Yes\r\n"
               "direct = Yes\r\n"
+              "[End]\r\n"
+              "\r\n"
+              "[Feed]\r\n"
+              "url = http://yp.pcgw.pgw.jp/index.txt\r\n"
               "[End]\r\n"
               "\r\n"
               "[Uptest]\r\n"
