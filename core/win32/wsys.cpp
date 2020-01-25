@@ -60,7 +60,7 @@ void WSys::callLocalURL(const char *str,int port)
 {
     char cmd[512];
     sprintf(cmd,"http://localhost:%d/%s",port,str);
-    ShellExecute(mainWindow, NULL, cmd, NULL, NULL, SW_SHOWNORMAL);
+    ShellExecuteA(mainWindow, NULL, cmd, NULL, NULL, SW_SHOWNORMAL);
 }
 
 // ---------------------------------
@@ -68,7 +68,7 @@ void WSys::getURL(const char *url)
 {
     if (mainWindow)
         if (Sys::strnicmp(url,"http://",7) || Sys::strnicmp(url,"mailto:",7)) // XXX: ==0 が抜けてる？
-            ShellExecute(mainWindow, NULL, url, NULL, NULL, SW_SHOWNORMAL);
+            ShellExecuteA(mainWindow, NULL, url, NULL, NULL, SW_SHOWNORMAL);
 }
 
 // ---------------------------------
@@ -83,5 +83,5 @@ void WSys::exit()
 // --------------------------------------------------
 void WSys::executeFile(const char *file)
 {
-    ShellExecute(NULL,"open",file,NULL,NULL,SW_SHOWNORMAL);
+    ShellExecuteA(NULL,"open",file,NULL,NULL,SW_SHOWNORMAL);
 }

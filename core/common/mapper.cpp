@@ -72,7 +72,7 @@ string FileSystemMapper::realPath(const string& path)
         return "";
     }
 
-    if (PathFileExists(resolvedPath))
+    if (PathFileExistsA(resolvedPath))
         return resolvedPath;
     else
         return "";
