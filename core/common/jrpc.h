@@ -248,6 +248,7 @@ public:
     json getStatus(json::array_t);
     json getVersionInfo(json::array_t);
     json getYPChannels(json::array_t args);
+    json getYPChannelsInternal(json::array_t args = {});
     json getYellowPageProtocols(json::array_t);
     json getYellowPages(json::array_t);
     json::array_t hostsToJson(ChanHitList* hitList);

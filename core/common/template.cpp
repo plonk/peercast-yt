@@ -672,6 +672,10 @@ json::array_t Template::evaluateCollectionVariable(String& varName)
                   });
 
         return json::array_t(channels.begin(), newend);
+    }else if (varName == "externalChannels")
+    {
+        auto channels = JrpcApi().getYPChannelsInternal({});
+        return channels;
     }else
     {
         return {};

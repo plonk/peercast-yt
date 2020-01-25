@@ -835,3 +835,38 @@ json JrpcApi::getYPChannels(json::array_t args)
     }
     return res;
 }
+
+json JrpcApi::getYPChannelsInternal(json::array_t args)
+{
+    auto channels = servMgr->channelDirectory->channels();
+    json::array_t res;
+
+    for (auto& c : channels)
+    {
+        res.push_back({
+                { "name",           c.name },
+                { "id",             c.id.str() },
+                { "tip",            c.tip },
+                { "url",            c.url },
+                { "genre",          c.genre },
+                { "desc",           c.desc },
+                { "numDirects",     c.numDirects },
+                { "numRelays",      c.numRelays },
+                { "bitrate",        c.bitrate },
+                { "contentTypeStr", c.contentTypeStr },
+                { "trackArtist",    c.trackArtist },
+                { "trackAlbum",     c.trackAlbum },
+                { "trackName",      c.trackName },
+                { "trackContact",   c.trackContact },
+                { "encodedName",    c.encodedName },
+                { "uptime",         c.uptime },
+                { "status",         c.status },
+                { "comment",        c.comment },
+                { "direct",         c.direct },
+                { "feedUrl",        c.feedUrl },
+                { "chatUrl",        c.chatUrl() },
+                { "statsUrl",       c.statsUrl() },
+            });
+    }
+    return res;
+}
