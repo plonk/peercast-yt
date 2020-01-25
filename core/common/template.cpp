@@ -672,17 +672,6 @@ json::array_t Template::evaluateCollectionVariable(String& varName)
                   });
 
         return json::array_t(channels.begin(), newend);
-    }else if (varName == "externalChannels")
-    {
-        auto channels = JrpcApi().getYPChannelsInternal({});
-        return channels;
-    }else if (varName == "publicExternalChannels")
-    {
-        auto channels = JrpcApi().getYPChannelsInternal({});
-        auto end = std::remove_if(channels.begin(), channels.end(),
-                                  [&] (json c)
-                                  { return !c["isPublic"]; });
-        return json::array_t(channels.begin(), end);
     }else
     {
         return {};

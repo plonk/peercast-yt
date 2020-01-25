@@ -858,7 +858,6 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
     {
         iniFile.writeSection("Feed");
         iniFile.writeStrValue("url", feed.url);
-        iniFile.writeBoolValue("isPublic", feed.isPublic);
         iniFile.writeLine("[End]");
     }
 
@@ -1103,10 +1102,6 @@ void ServMgr::loadSettings(const char *fn)
                         break;
                     else if (iniFile.isName("url"))
                         servMgr->channelDirectory->addFeed(iniFile.getStrValue());
-                    else if (iniFile.isName("isPublic"))
-                    {
-                        servMgr->channelDirectory->setFeedPublic(feedIndex, iniFile.getBoolValue());
-                    }
                 }
                 feedIndex++;
             }
