@@ -119,6 +119,8 @@ ServMgr::ServMgr()
 
     rtmpPort = 1935;
 
+    channelDirectory->addFeed("http://yp.pcgw.pgw.jp/index.txt");
+
     uptestServiceRegistry->addURL("http://bayonet.ddo.jp/sp/yp4g.xml");
     uptestServiceRegistry->addURL("http://temp.orz.hm/yp/yp4g.xml");
 }
@@ -955,6 +957,9 @@ void ServMgr::loadSettings(const char *fn)
 
     std::lock_guard<std::recursive_mutex> cs(servMgr->uptestServiceRegistry->m_lock);
     servMgr->uptestServiceRegistry->clear();
+
+    std::lock_guard<std::recursive_mutex> cs1(servMgr->channelDirectory->m_lock);
+    servMgr->channelDirectory->clearFeeds();
 
     if (iniFile.openReadOnly(fn))
     {
