@@ -78,7 +78,7 @@ bool Subprogram::start(std::initializer_list<std::string> arguments, Environment
     }
 
     PROCESS_INFORMATION procInfo;
-    STARTUPINFO startupInfo;
+    STARTUPINFOA startupInfo;
     bool success;
 
     ZeroMemory(&procInfo, sizeof(PROCESS_INFORMATION));
@@ -94,12 +94,12 @@ bool Subprogram::start(std::initializer_list<std::string> arguments, Environment
 
     std::string cmdline = createCommandLine(m_name, arguments);
     LOG_DEBUG("cmdline: %s", str::inspect(cmdline).c_str());
-    success = CreateProcess(NULL,
+    success = CreateProcessA(NULL,
                             const_cast<char*>( cmdline.c_str() ),
                             NULL,
                             NULL,
                             TRUE,
-                            0,
+                            CREATE_NO_WINDOW,
                             (PVOID) env.windowsEnvironmentBlock().c_str(),
                             NULL,
                             &startupInfo,
