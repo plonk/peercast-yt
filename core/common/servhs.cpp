@@ -1900,26 +1900,6 @@ void Servent::handshakeXML()
         }
     }
 
-#if 0
-    if (servMgr->isRoot)
-    {
-        // add private channels
-        {
-            XML::Node *pn = new XML::Node("priv_channels");
-            rn->add(pn);
-
-            ChanHitList *chl = chanMgr->hitlist;
-            while (chl)
-            {
-                if (chl->isUsed())
-                    if (chl->info.isPrivate())
-                        pn->add(createChannelXML(chl));
-                chl = chl->next;
-            }
-        }
-    }
-#endif
-
     XML::Node *hc = new XML::Node("host_cache");
     for (int i=0; i<ServMgr::MAX_HOSTCACHE; i++)
     {
