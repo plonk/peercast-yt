@@ -63,13 +63,10 @@ $(HTML): $(SRCHTMLTAR)
 	tar xf $(SRCHTMLTAR)
 	touch $(HTML)
 
-$(SRCPUBLICTAR):
-	$(MAKE) -C .. public.tar
-
-$(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS) $(RTMPSERVER)
+$(DISTARCHIVE): $(TARGET) $(HTML) $(ASSETS) $(RTMPSERVER)
 	rm -rf peercast-yt
 	mkdir peercast-yt
-	cp -R $(HTML) $(PUBLIC) $(TARGET) $(ASSETS) $(CGIBIN) $(RTMPSERVER) ../../licenses ../../core/LICENSE peercast-yt/
+	cp -R $(HTML) $(TARGET) $(ASSETS) $(CGIBIN) $(RTMPSERVER) ../../licenses ../../core/LICENSE peercast-yt/
 	strip peercast-yt/$(TARGET)
 	strip peercast-yt/$(RTMPSERVER)
 	tar czf $(DISTARCHIVE) peercast-yt
@@ -78,7 +75,7 @@ clean:
 	$(MAKE) -C ../../Onigmo clean
 	$(MAKE) -C .. clean
 	rm -f $(LINUXOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE) $(RTMPSERVER) $(RTMPOBJ)
-	rm -rf $(HTML) $(PUBLIC)
+	rm -rf $(HTML)
 	rm -rf peercast-yt/
 	rm -f $(DISTARCHIVE)
 
