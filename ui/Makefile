@@ -6,12 +6,12 @@ all: html.tar public.tar
 
 html.tar: $(CATALOGS) $(TEMPLATES)
 	rm -rf html/
-	./generate-html
+	RUBYOPT='--disable-gems' ./generate-html
 	tar cf html.tar html
 
 public.tar: $(CATALOGS) $(PUBLIC_TEMPLATES)
 	rm -rf public/
-	./generate-public
+	RUBYOPT='--disable-gems' ./generate-public
 	tar cf public.tar public
 
 clean:
