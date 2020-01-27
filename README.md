@@ -2,24 +2,20 @@
 
 [![Build Status](https://travis-ci.org/plonk/peercast-yt.svg?branch=master)](https://travis-ci.org/plonk/peercast-yt)
 
-VPS 等の Linux で動かすのに向いている PeerCast です。Web 技術による UI
-に注力しており、プラットフォームネイティブの GUI はありませんが、YPブ
-ラウザ、動画プレーヤー、したらば掲示板ビューワを内蔵しており、ユーザー
-はウェブブラウザさえあれば PeerCast が視聴できます。
+PeerCast のフォークです。
 
-Mono で動かす
-[PeerCastStation](https://github.com/kumaryu/peercaststation/) よりも
-I/O に伴う CPU 負荷が少なくなっており、より多くのリレーに耐えられるは
-ずです。
+## ブラウザインターフェイス
+
+ブラウザインターフェイスは、YPブラウザ、動画プレーヤー、したらば掲示板
+ビューワを実装しており、ユーザーはウェブブラウザさえあれば ローカル/リ
+モートを問わず PeerCast が視聴できます。
 
 ## 多種のエンコーダーに対応
 
-* RTMP に対応しており、OBS などで配信できます。
+* RTMP に対応しており、OBS などのエンコーダーで配信できます。
   →[RTMPプロトコル対応エンコーダーでの配信のやり方](https://github.com/plonk/peercast-yt/wiki/RTMP%E3%83%97%E3%83%AD%E3%83%88%E3%82%B3%E3%83%AB%E5%AF%BE%E5%BF%9C%E3%82%A8%E3%83%B3%E3%82%B3%E3%83%BC%E3%83%80%E3%83%BC%E3%81%A7%E3%81%AE%E9%85%8D%E4%BF%A1%E3%81%AE%E3%82%84%E3%82%8A%E6%96%B9)
-* HTTP Push に対応しており、ffmpeg で直接配信できます。FlazrDumper な
-  どのサーバーを間にはさむ必要がありません。
+* HTTP Push に対応しており、ffmpeg で配信できます。
   →[HTTP Push 配信のやり方](https://github.com/plonk/peercast-yt/wiki/HTTP-Push-%E9%85%8D%E4%BF%A1%E3%81%AE%E3%82%84%E3%82%8A%E6%96%B9)
-  
 * Windows Media HTTP Push 配信プロトコルに対応しており、WME、
   Expression Encoder、KotoEncoder からプッシュ配信できます。(エンコー
   ダーを動かす PC はポートが開いている必要がありません。)
@@ -27,7 +23,7 @@ I/O に伴う CPU 負荷が少なくなっており、より多くのリレー�
 
 ## 多種の動画フォーマットに対応
 
-* 伝統的なフォーマットに加え、FLV、MKV、WebM の配信に対応しています。
+* 従来のフォーマットに加え、FLV、MKV、WebM の配信に対応しています。
 
 ## その他
 
@@ -37,7 +33,7 @@ I/O に伴う CPU 負荷が少なくなっており、より多くのリレー�
   →[JSON RPC API](https://github.com/plonk/peercast-yt/wiki/JSON-RPC-API)
   ([epcyp](https://github.com/mrhorin/epcyp)、
   [ginger](https://github.com/plonk/ginger/) などで使えます)
-* 公開ディレクトリ機能。チャンネルリストやストリームをWebに公開できます。
+* <del>公開ディレクトリ機能。チャンネルリストやストリームをWebに公開できます。</del>
 * HTML UI をメッセージカタログ化。各国語版で機能に違いがないようにしました。
 * Ajax による画面更新。
 
@@ -57,8 +53,8 @@ I/O に伴う CPU 負荷が少なくなっており、より多くのリレー�
 `peercast-yt-linux-x86_64.tar.gz` (CPUアーキテクチャによって名前が変わ
 ります) ができます。
 
-※ make した後、`ui/linux` ディレクトリの `peercast` を実行することも
-できます。
+※ make した後、`ui/linux/peercast-yt` ディレクトリの `peercast` を実行
+することもできます。
 
 # 実行
 
