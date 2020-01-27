@@ -1,19 +1,12 @@
 CATALOGS := $(wildcard catalogs/*.json)
 TEMPLATES := $(wildcard html-master/*.* html-master/images/*.* html-master/js/*.* Templates/*.*)
-PUBLIC_TEMPLATES := $(wildcard public-master/*.* public-master/images/*.* public-master/js/*.* Templates/*.*)
 
-all: html.tar public.tar
+all: html.tar
 
 html.tar: $(CATALOGS) $(TEMPLATES)
 	rm -rf html/
 	RUBYOPT='--disable-gems' ./generate-html
 	tar cf html.tar html
 
-public.tar: $(CATALOGS) $(PUBLIC_TEMPLATES)
-	rm -rf public/
-	RUBYOPT='--disable-gems' ./generate-public
-	tar cf public.tar public
-
 clean:
 	rm -rf html/ html.tar
-	rm -rf public/ public.tar
