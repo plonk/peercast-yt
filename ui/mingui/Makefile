@@ -16,8 +16,6 @@ CORE = ../../core
 RTMP = ../../rtmp-server
 SRCHTMLTAR = ../html.tar
 HTML = html
-SRCPUBLICTAR = ../public.tar
-PUBLIC = public
 ASSETS = ../linux/assets
 CGIBIN = ../linux/cgi-bin
 
@@ -38,7 +36,7 @@ RTMPOBJ = $(notdir $(RTMPSOURCE:.cpp=.o))
 
 DEPENDFILE = .deps
 
-.PHONY: all clean build-html deps $(SRCHTMLTAR) $(SRCPUBLICTAR) $(SRCASSETSTAR)
+.PHONY: all clean build-html deps $(SRCHTMLTAR) $(SRCASSETSTAR)
 
 # Here follow the generic build rules.
 all: $(TARGET) $(LIBOBJSTATIC) $(DISTARCHIVE) $(RTMPSERVER)
@@ -56,21 +54,13 @@ $(HTML): $(SRCHTMLTAR)
 	tar xf $(SRCHTMLTAR)
 	touch $(HTML)
 
-$(SRCPUBLICTAR):
-	$(MAKE) -C .. public.tar
-
-$(PUBLIC): $(SRCPUBLICTAR)
-	rm -rf $(PUBLIC)
-	tar xf $(SRCPUBLICTAR)
-	touch $(PUBLIC)
-
 $(SRCASSETSTAR):
 	$(MAKE) -C .. assets.tar
 
-$(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS) $(RTMPSERVER)
+$(DISTARCHIVE): $(TARGET) $(HTML) $(ASSETS) $(RTMPSERVER)
 	rm -rf peercast-yt
 	mkdir peercast-yt
-	cp -R $(HTML) $(PUBLIC) $(TARGET) $(ASSETS) $(CGIBIN) $(RTMPSERVER) ../../licenses ../../core/LICENSE peercast-yt/
+	cp -R $(HTML) $(TARGET) $(ASSETS) $(CGIBIN) $(RTMPSERVER) ../../licenses ../../core/LICENSE peercast-yt/
 	strip peercast-yt/$(TARGET)
 	strip peercast-yt/$(RTMPSERVER)
 	tar czf $(DISTARCHIVE) peercast-yt
@@ -78,7 +68,7 @@ $(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS) $(RTMPSERVER)
 clean:
 	$(MAKE) -C .. clean
 	rm -f $(WINOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE) $(RTMPSERVER)
-	rm -rf $(HTML) $(PUBLIC)
+	rm -rf $(HTML)
 	rm -rf peercast-yt/
 	rm -f $(DISTARCHIVE)
 
