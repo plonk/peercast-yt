@@ -914,6 +914,10 @@ bool HTTPRequestScope::writeVariable(Stream& s, const String& varName, int loop)
     {
         s.writeString(m_request.path);
         return true;
+    }else if (varName == "request.queryString")
+    {
+        s.writeString(m_request.queryString);
+        return true;
     }
 
     return false;
