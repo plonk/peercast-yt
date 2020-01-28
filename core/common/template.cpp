@@ -918,6 +918,13 @@ bool HTTPRequestScope::writeVariable(Stream& s, const String& varName, int loop)
     {
         s.writeString(m_request.queryString);
         return true;
+    }else if (varName == "request.search")
+    {
+        if (m_request.queryString != "")
+        {
+            s.writeString("?" + m_request.queryString);
+        }
+        return true;
     }
 
     return false;

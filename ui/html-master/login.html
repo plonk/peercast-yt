@@ -29,7 +29,7 @@
       <FORM action="/admin?" method=get>
         <INPUT type=hidden value=login name=cmd>
         {@if page.requested_path == "page.requested_path"}
-          <input type="hidden"  name="requested_path" value="{$request.path}?{$request.queryString}">
+          <input type="hidden"  name="requested_path" value="{$request.path}{$request.search}">
         {@else}
           <input type="hidden"  name="requested_path" value="{$page.requested_path}">
         {@end}
