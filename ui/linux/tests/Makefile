@@ -17,16 +17,16 @@
 GTEST_DIR = /usr/src/gtest
 
 # Where to find user code.
-USER_DIR = ../core/common
+USER_DIR = ../../../tests
 
 # Flags passed to the preprocessor.
-CPPFLAGS += -D_UNIX -I$(GTEST_DIR)/include -I../core/common -I../core/unix -I../Onigmo
+CPPFLAGS += -D_UNIX -I$(GTEST_DIR)/include -I../../../core/common -I../../../core/unix -I../../../Onigmo
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT
 
 LDFLAGS = -fuse-ld=gold -pthread
-LIBS = -L../Onigmo/.libs -Wl,-Bstatic -lonigmo -Wl,-Bdynamic
+LIBS = -L../../../Onigmo/.libs -Wl,-Bstatic -lonigmo -Wl,-Bdynamic
 #LIBS += -lrtmp
 
 # All tests produced by this Makefile.  Remember to add new tests you
@@ -72,12 +72,12 @@ gtest.a : gtest-all.o
 # gtest_main.a, depending on whether it defines its own main()
 # function.
 
-SRC = main.cpp $(wildcard *_unittest.cpp)
+SRC = ../../../tests/main.cpp $(wildcard ../../../tests/*_unittest.cpp)
 
-OBJS = $(SRC:.cpp=.o)
+OBJS = $(notdir $(SRC:.cpp=.o))
 
-%.o : %.cpp $(wildcard $(USER_DIR)/*.h) $(GTEST_HEADERS)
+$(OBJS): %.o : ../../../tests/%.cpp $(wildcard $(USER_DIR)/*.h) $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $<
-
-test-all : $(OBJS) ../ui/linux/libpeercast.a gtest.a
+        
+test-all : $(OBJS) ../libpeercast.a gtest.a
 	$(CXX) $(LDFLAGS) $^ -o $@ $(LIBS)
