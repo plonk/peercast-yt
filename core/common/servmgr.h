@@ -25,6 +25,7 @@
 #include "rtmpmonit.h"
 #include "inifile.h"
 #include "servfilter.h"
+#include "chanmgr.h"
 
 // ----------------------------------
 

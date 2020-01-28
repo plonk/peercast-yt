@@ -18,6 +18,7 @@
 
 #include "channel.h"
 #include "mp3.h"
+#include "chanmgr.h"
 
 // ------------------------------------------
 void MP3Stream::readEnd(Stream &, std::shared_ptr<Channel>)

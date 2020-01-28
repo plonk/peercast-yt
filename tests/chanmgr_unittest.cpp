@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "channel.h"
 #include "version2.h"
 #include "md5.h"
+#include "chanmgr.h"
 
 class ChanMgrFixture : public ::testing::Test {
 public:

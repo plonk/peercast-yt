@@ -296,6 +296,4 @@ public:
     std::shared_ptr<Channel> next;
 };
 
-#include "chanmgr.h"
-
 #endif

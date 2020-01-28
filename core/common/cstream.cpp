@@ -25,6 +25,7 @@
 #include "pcp.h"
 #include "servmgr.h"
 #include "version2.h"
+#include "chanmgr.h"
 
 // -----------------------------------
 void ChanPacket::init(TYPE t, const void *p, unsigned int l, unsigned int _pos)

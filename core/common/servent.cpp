@@ -34,6 +34,7 @@
 #include "version2.h"
 #include "defer.h"
 #include "gnutella.h"
+#include "chanmgr.h"
 
 const int DIRECT_WRITE_TIMEOUT = 60;
 

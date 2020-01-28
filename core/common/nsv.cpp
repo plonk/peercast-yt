@@ -17,6 +17,7 @@
 // ------------------------------------------------
 
 #include "nsv.h"
+#include "chanmgr.h"
 
 // ------------------------------------------
 void NSVStream::readEnd(Stream &, std::shared_ptr<Channel>)
