@@ -1,0 +1,24 @@
+{^define LAYOUT layout.html}
+{^define TITLE}
+{#_Logout_navbar} - {#PeerCast on} {^SERVER_NAME}
+{^end}
+
+<table width="50%" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    {@if servMgr.auth.useCookies}
+    <td><form action=/admin method=get>
+      <div align="center">
+        <input type=hidden value=logout name=cmd>
+        <input type=submit value="{#Logout}" name=logout>
+      </div>
+    </form>
+    </td>
+    {@end}
+    <td><form action=/admin method=get>
+      <div align="center">
+        <input type=hidden value=shutdown name=cmd>
+        <input name=shutdown type=submit id="shutdown" value="{#Shutdown}">
+      </div>
+    </form></td>
+  </tr>
+</table>

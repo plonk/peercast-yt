@@ -1,0 +1,134 @@
+.titlelinks {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 16px;
+	font-weight: bold;
+}
+a {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	color: #0000FF;
+	text-decoration: none;
+
+}
+a:hover {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	text-decoration: underline;
+}
+
+.normal {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+
+}
+.normal-small {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+}
+.titlelinksBig {
+
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 24px;
+	font-weight: bold;
+}
+
+input {
+	font-family: Arial;
+}
+
+input[type=radio] {
+	vertical-align: -3px;
+}
+
+input[type=checkbox] {
+	vertical-align: -3px;
+}
+
+.navbar {
+	margin-top: 10px; margin-bottom: 15px;
+}
+
+td {
+	padding-left: 4px; padding-right: 4px;
+	padding-top: 3px; padding-bottom: 3px;
+}
+th {
+	padding-left: 4px; padding-right: 4px;
+	padding-top: 3px; padding-bottom: 3px;
+}
+
+td.numeric {
+	text-align: right;
+}
+
+td.container {
+	padding: 3px 15px;
+}
+a.button {
+    -webkit-appearance: button;
+    -moz-appearance: button;
+    appearance: button;
+
+    text-decoration: none;
+    color: initial;
+
+    padding: 2px 10px;
+}
+
+.root-message {
+	background-color: #eee;
+	padding: 5px;
+	border: solid #ccc 1px;
+	padding: 3px;
+}
+
+.text-muted {
+	color: #777;
+}
+
+.text-danger {
+	color: #d00;
+}
+
+table.table-panel {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    margin-bottom: 1em;
+}
+
+table.table-panel tbody tr:nth-child(odd) {
+	background-color: #eee;
+}
+table.table-panel tbody tr:nth-child(even) {
+	background-color: #ddd;
+}
+
+/* パネルの上部のスパンする見出し行。他の行よりも背景が濃い。 */
+table.table-panel tbody tr:nth-child(1) {
+	background-color: #ccc;
+}
+
+/* 通常、上の指定で十分。 */
+table.table-panel tbody tr.heading-row {
+	background-color: #ccc;
+}
+
+table.table-panel th {
+    text-align: center;
+}
+
+table.table-panel th.left-heading {
+	text-align: right;
+	font-weight: normal;
+}
+
+td.bandwidth-cell {
+    min-width: 4em;
+    text-align: right;
+}
+
+input.fill-parent {
+    width: 100%;
+}
+
+td.checkbox-cell {
+    text-align: center;
+}

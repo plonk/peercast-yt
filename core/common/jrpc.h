@@ -192,6 +192,7 @@ public:
         ({
             { "bumpChannel",             &JrpcApi::bumpChannel,             { "channelId" } },
             { "clearLog",                &JrpcApi::clearLog,                {} },
+            { "evaluateVariables",       &JrpcApi::evaluateVariables,       { "variables" } },
             { "fetch",                   &JrpcApi::fetch,                   { "url", "name", "desc", "genre", "contact", "bitrate", "type" } },
             { "getChannelConnections",   &JrpcApi::getChannelConnections,   { "channelId" } },
             { "getChannelInfo",          &JrpcApi::getChannelInfo,          { "channelId" } },
@@ -233,6 +234,7 @@ public:
     json clearLog(json::array_t args);
     json dispatch(const json& m, const json& p);
     json fetch(json::array_t params);
+    json evaluateVariables(json::array_t params);
     json getChannelConnections(json::array_t params);
     json getChannelInfo(json::array_t params);
     json getChannelRelayTree(json::array_t args);

@@ -1,0 +1,30 @@
+{^define LAYOUT layout.html}
+{^define TITLE}
+{#Notifications} - {#PeerCast on} {^SERVER_NAME}
+{^end}
+
+<div class="reloader" data-url="notifications.html?fragment=content" data-interval="{$servMgr.refreshHTML}">
+  {@fragment content}
+  <table width="100%" class="table-panel">
+    <tr>
+      <th style="width: 14.5em">{#Time}</th>
+      <th style="width: 3em">{#Type}</th>
+      <th>{#Message}</th>
+    </tr>
+
+    {@loop notificationBuffer.numNotifications}
+    <tr>
+      <td>
+        {$loop.notification.time}
+      </td>
+      <td>
+        {$loop.notification.type}
+      </td>
+      <td>
+        {$loop.notification.message}
+      </td>
+    </tr>
+    {@end}
+  </table>
+  {@end}
+</div>

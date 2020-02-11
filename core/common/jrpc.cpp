@@ -3,6 +3,7 @@
 
 #include "jrpc.h"
 #include "str.h"
+#include "inspector.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -869,4 +870,14 @@ json JrpcApi::getYPChannelsInternal(json::array_t args)
             });
     }
     return res;
+}
+
+json JrpcApi::evaluateVariables(json::array_t params)
+{
+    json vars = params[0];
+    if (!vars.is_array())     throw invalid_params("variables must be an array");
+
+    GlobalObject global;
+
+    return Inspector::inspect(global);
 }

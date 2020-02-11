@@ -44,8 +44,8 @@ public:
     };
 
     LogBuffer(int aMaxLines, int aLineLen)
-        : lineLen(aLineLen)
-        , maxLines(aMaxLines)
+        : maxLines(aMaxLines)
+        , lineLen(aLineLen)
     {
         currLine = 0;
         buf = new char[lineLen*maxLines];

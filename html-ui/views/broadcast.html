@@ -1,0 +1,177 @@
+{^define LAYOUT layout.html}
+{^define TITLE}
+  {#_Broadcast_navbar} - {#PeerCast on} {^SERVER_NAME}
+{^end}
+{^define HEAD}
+  <script src="js/httppush.js"></script>
+  <script src="js/wmhttp.js"></script>
+  <script>SERVER = "{$servMgr.serverIP}:{$servMgr.serverPort}";</script>
+{^end}
+
+<DIV style="margin-left: auto; margin-right: auto; text-align: left; display: inline-block; margin-bottom: 1em;">
+  <ul>
+    <li class="normal"><a href="#external">{#External Source}</a></li>
+    <li class="normal"><a href="#httppush">{#HTTP Push Stream}</a></li>
+    <li class="normal"><a href="#wmhttp">{#Windows Media HTTP Push Stream}</a></li>
+  </ul>
+</DIV>
+
+<br>
+<a name="external"></a>
+<FORM action=/admin method=get>
+  <INPUT type=hidden value=fetch name=cmd>
+  <TABLE align=center border=0>
+    <TBODY>
+      <TR align=middle bgColor=#cccccc class="normal">
+        <TD colSpan=2><B>{#External Source}</B></TD></TR>
+      <TR align=left bgColor=#eeeeee class="normal">
+        <TD>{#URL (Required)}</TD>
+        <TD><INPUT size=40 name=url></TD></TR>
+      <TR align=left bgColor=#dddddd class="normal">
+        <TD>{#Name}</TD>
+        <TD><INPUT size=40 name=name></TD></TR>
+      <TR align=left bgColor=#eeeeee class="normal">
+        <TD>{#Genre}</TD>
+        <TD><INPUT size=40 name=genre></TD></TR>
+      <TR align=left bgColor=#dddddd class="normal">
+        <TD>{#Description}</TD>
+        <TD><INPUT size=40 name=desc></TD></TR>
+      <TR align=left bgColor=#eeeeee class="normal">
+        <TD>{#Contact}</TD>
+        <TD><INPUT size=40 name=contact type="url"></TD></TR>
+      <TR align=left bgColor=#dddddd class="normal">
+        <TD>{#Bitrate (kb/s)}</TD>
+        <TD><INPUT size=40 name=bitrate></TD></TR>
+      <TR align=left bgColor=#eeeeee class="normal">
+        <TD>{#Type}</TD>
+        <TD>
+          <SELECT name=type>
+            <OPTION value=UNKNOWN selected>{#Unknown}</OPTION>
+            <OPTION value=FLV>FLV</OPTION>
+            <OPTION value=MKV>MKV</OPTION>
+            <OPTION value=MP3>MP3</OPTION>
+            <OPTION value=NSV>NSV</OPTION>
+            <OPTION value=OGG>OGG</OPTION>
+            <OPTION value=RAW>RAW</OPTION>
+            <OPTION value=WMA>WMA</OPTION>
+            <OPTION value=WMV>WMV</OPTION>
+            <OPTION value=WEBM>WEBM</OPTION>
+          </SELECT>
+        </TD>
+      </TR>
+      <TR align=left bgColor=#dddddd class="normal">
+        <TD colSpan=2 align=middle><INPUT type=submit value="{#Create Relay}" name=stream></TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+</FORM>
+
+<br>
+<a name="httppush"></a>
+<TABLE align=center border=0>
+  <TBODY>
+    <TR align=middle bgColor=#cccccc class="normal">
+      <TD colSpan=2><B>{#HTTP Push Stream}</B></TD></TR>
+    <TR align=left bgColor=#eeeeee class="normal">
+      <TD>{#Name}</TD>
+      <TD><INPUT size=40 id=name></TD></TR>
+    <TR align=left bgColor=#dddddd class="normal">
+      <TD>{#Genre}</TD>
+      <TD><INPUT size=40 id=genre></TD></TR>
+    <TR align=left bgColor=#eeeeee class="normal">
+      <TD>{#Description}</TD>
+      <TD><INPUT size=40 id=desc></TD></TR>
+    <TR align=left bgColor=#dddddd class="normal">
+      <TD>{#Contact}</TD>
+      <TD><INPUT size=40 id=url type="url"></TD></TR>
+    <TR align=left bgColor=#eeeeee class="normal">
+      <TD>{#Type}</TD>
+      <TD>
+        <SELECT id=type>
+          <OPTION value=UNKNOWN selected>{#Unknown}</OPTION>
+          <OPTION value=FLV>FLV</OPTION>
+          <OPTION value=MKV>MKV</OPTION>
+          <OPTION value=MP3>MP3</OPTION>
+          <OPTION value=NSV>NSV</OPTION>
+          <OPTION value=OGG>OGG</OPTION>
+          <OPTION value=RAW>RAW</OPTION>
+          <OPTION value=WMA>WMA</OPTION>
+          <OPTION value=WMV>WMV</OPTION>
+          <OPTION value=WEBM>WEBM</OPTION>
+        </SELECT>
+      </TD>
+    </TR>
+    <TR align=middle bgColor=#cccccc class="normal">
+      <TD colSpan=2><B>{#Output URL for ffmpeg}</B></TD></TR>
+    <TR align=left bgColor=#eeeeee class="normal">
+      <TD colSpan=2 align=middle>
+        <textarea id="output" class="normal" style="width: 100%; min-height: 4em; font-family: monospace">
+        </textarea>
+      </TD>
+    </TR>
+  </TBODY>
+</TABLE>
+
+<br>
+<a name="wmhttp"></a>
+<TABLE align=center border=0>
+  <TBODY>
+    <TR align=middle bgColor=#cccccc class="normal">
+      <TD colSpan=2><B>{#Windows Media HTTP Push Stream}</B></TD></TR>
+    <TR align=left bgColor=#eeeeee class="normal">
+      <TD>{#Name}</TD>
+      <TD><INPUT size=40 id=wm_name></TD></TR>
+    <TR align=left bgColor=#dddddd class="normal">
+      <TD>{#Genre}</TD>
+      <TD><INPUT size=40 id=wm_genre></TD></TR>
+    <TR align=left bgColor=#eeeeee class="normal">
+      <TD>{#Description}</TD>
+      <TD><INPUT size=40 id=wm_desc></TD></TR>
+    <TR align=left bgColor=#dddddd class="normal">
+      <TD>{#Contact}</TD>
+      <TD><INPUT size=40 id=wm_url type="url"></TD>
+    </TR>
+    <TR align=middle bgColor=#cccccc class="normal">
+      <TD colSpan=2><B>{#Encoder Settings}</B></TD></TR>
+    <TR align=left bgColor=#eeeeee class="normal">
+      <TD>{#Server Name}</TD>
+      <TD><INPUT size=40 id=wm_output_server_name type="text"></TD>
+    </TR>
+    <TR align=left bgColor=#dddddd class="normal">
+      <TD>{#Publishing Point}</TD>
+      <TD>
+        <textarea id="wm_output_publishing_point" class="normal" style="width: 100%; min-height: 4em; font-family: monospace">
+        </textarea>
+      </TD>
+    </TR>
+    <TR align=left bgColor=#eeeeee class="normal">
+      <TD>{#URL}</TD>
+      <TD>
+        <textarea id="wm_output_url" class="normal" style="width: 100%; min-height: 4em; font-family: monospace">
+        </textarea>
+      </TD>
+    </TR>
+  </TBODY>
+</TABLE>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
