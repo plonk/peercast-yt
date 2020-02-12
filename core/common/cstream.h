@@ -130,6 +130,8 @@ public:
 
     Stat getStatistics()
     {
+        std::lock_guard<std::recursive_mutex> cs_(lock);
+
         if (writePos == 0)
             return { {}, 0, 0 };
 

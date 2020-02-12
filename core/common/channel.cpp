@@ -404,6 +404,8 @@ bool Channel::acceptGIV(ClientSocket *givSock)
 // -----------------------------------
 void Channel::connectFetch()
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     sock = sys->createSocket();
 
     if (!sock)
@@ -478,8 +480,11 @@ int Channel::handshakeFetch()
 // -----------------------------------
 int PeercastSource::getSourceRate()
 {
-    if (m_channel && m_channel->sock)
-        return m_channel->sock->bytesInPerSec();
+    if (m_channel)
+        if (m_channel->sock) {
+            std::lock_guard<std::recursive_mutex> cs(m_channel->lock);
+            return m_channel->sock->bytesInPerSec();
+        }
     else
         return 0;
 }
@@ -487,8 +492,11 @@ int PeercastSource::getSourceRate()
 // -----------------------------------
 int PeercastSource::getSourceRateAvg()
 {
-    if (m_channel && m_channel->sock)
-        return m_channel->sock->stat.bytesInPerSecAvg();
+    if (m_channel)
+        if (m_channel->sock) {
+            std::lock_guard<std::recursive_mutex> cs(m_channel->lock);
+            return m_channel->sock->stat.bytesInPerSecAvg();
+        }
     else
         return 0;
 }
@@ -1391,6 +1399,7 @@ std::string Channel::getBufferString()
 {
     std::string buf;
     String time;
+    std::lock_guard<std::recursive_mutex> cs(rawData.lock);
     auto lastWritten = (double)sys->getTime() - rawData.lastWriteTime;
 
     if (lastWritten < 5)

@@ -327,6 +327,8 @@ void PCPStream::readPktAtoms(std::shared_ptr<Channel> ch, AtomStream &atom, int 
 
     if (ch)
     {
+        std::lock_guard<std::recursive_mutex> cs(ch->lock);
+
         int diff = pack.pos - ch->streamPos;
         if (diff)
             LOG_DEBUG("PCP skipping %s%d (%u -> %u)", (diff>0)?"+":"", diff, ch->streamPos, pack.pos);

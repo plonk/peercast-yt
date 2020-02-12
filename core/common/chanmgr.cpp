@@ -31,6 +31,8 @@ int ChanMgr::numIdleChannels()
     auto ch = channel;
     while (ch)
     {
+        std::lock_guard<std::recursive_mutex> cs(ch->lock);
+
         if (ch->isActive())
             if (ch->thread.active())
                 if (ch->status == Channel::S_IDLE)
