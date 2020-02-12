@@ -48,7 +48,7 @@ public:
 
     virtual Sys *   APICALL createSys()=0;
 
-    bool isQuitting;
+    std::atomic_bool isQuitting;
 };
 
 // ------------------------------------------------------------

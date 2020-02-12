@@ -570,6 +570,8 @@ unsigned int ServMgr::numActive(Servent::TYPE tp)
     Servent *s = servents;
     while (s)
     {
+        std::lock_guard<std::recursive_mutex> cs(s->lock);
+
         if (s->thread.active() && s->sock && (s->type == tp))
             cnt++;
         s = s->next;
