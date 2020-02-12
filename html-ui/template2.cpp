@@ -68,7 +68,7 @@ bool Template2::writeObjectProperty(Stream& s, const String& varName, picojson::
                 string str = value.get<std::string>();
                 s.writeString(str.c_str());
             }else
-                s.writeString(value.to_str().c_str());
+                s.writeString(value.serialize().c_str());
         }catch (out_of_range&)
         {
             return false;
@@ -106,7 +106,7 @@ void Template2::writeVariable(Stream &s, const String &varName, int loop)
         if (v.is<std::string>())
             s.writeString(v.get<std::string>());
         else
-            s.writeString(v.to_str());
+            s.writeString(v.serialize());
     } else {
         s.writeString(key);
     }
@@ -522,7 +522,7 @@ void    Template2::readVariable(Stream &in, Stream *outp, int loop)
             {
                 StringStream mem;
 
-                writeVariable(mem, var, loop);
+                writeObjectProperty(mem, var, env_);
                 outp->writeString(cgi::escape_html(mem.str()).c_str());
             }
             return;

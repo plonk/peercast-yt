@@ -7,6 +7,7 @@
 #include <errno.h>
 #include "macro.h"
 #include "server.h"
+#include "remote.h"
 
 using namespace std;
 
@@ -143,18 +144,6 @@ std::string test(std::string str)
 
 int main()
 {
-  Template2 tmpl;
-  StringStream in;
-  StringStream out;
-
-  picojson::value v;
-  picojson::parse(v, R"({"abc":123})");
-  tmpl.env_ = v.get<picojson::object>();
-  in.str("hoge{$abc}piyo");
-  tmpl.readTemplate(in, &out, 0);
-  cout << out.str() << endl;
-
-  exit(0);
   sys = new USys();
 
   using namespace std;
@@ -166,8 +155,22 @@ int main()
           [](std::smatch match, const Server::Request& req, Server::Response& res) {
             auto buf = macro_expand(match[1].str() + ".html");
             buf = test(buf);
-            //res.set_content(buf, "text/html; charset=UTF-8");
-            res.body = buf;
+
+            Remote r("127.0.0.1", 8144);
+            picojson::value v =
+              r.call("evaluateVariables", (picojson::value)picojson::object({
+                    {(std::string)"variables", (picojson::value)picojson::array({})}
+                  }));
+
+            Template2 tmpl;
+            StringStream in;
+            StringStream out;
+
+            tmpl.env_ = v.get<picojson::object>();
+            in.str(buf);
+            tmpl.readTemplate(in, &out, 0);
+
+            res.body = out.str();
           });
   svr.Get("/(.*)", route_static);
 
