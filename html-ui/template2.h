@@ -54,33 +54,41 @@ public:
     }
 
     // 変数
-    void    writeVariable(Stream &, const String &, int);
+    void    writeVariable(Stream &, const String &);
 
     // ディレクティブの実行
-    int     readCmd(Stream &, Stream *, int);
-    void    readIf(Stream &, Stream *, int);
-    void    readLoop(Stream &, Stream *, int);
-    void    readForeach(Stream &, Stream *, int);
-    void    readFragment(Stream &, Stream *, int);
+    int     readCmd(Stream &, Stream *);
+    void    readIf(Stream &, Stream *);
+    void    readForeach(Stream &, Stream *);
+    void    readFragment(Stream &, Stream *);
 
-    void    readVariable(Stream &, Stream *, int);
-    void    readVariableJavaScript(Stream &in, Stream *outp, int loop);
-    void    readVariableRaw(Stream &in, Stream *outp, int loop);
-    int     readTemplate(Stream &, Stream *, int);
-    bool    writeObjectProperty(Stream& s, const String& varName, picojson::object object);
-    picojson::array evaluateCollectionVariable(String& varName);
+    void    readVariable(Stream &, Stream *);
+    void    readVariableJavaScript(Stream &in, Stream *outp);
+    void    readVariableRaw(Stream &in, Stream *outp);
+    int     readTemplate(Stream &, Stream *);
+    picojson::value getObjectProperty(const String& varName, picojson::object& object);
+    bool    writeObjectProperty(Stream& s, const String& varName, const picojson::object& object);
+    picojson::array evaluateCollectionVariable(const String& varName, picojson::object&);
 
-    bool    evalCondition(const std::string& cond, int loop);
+    bool    evalCondition(const std::string& cond);
     std::vector<std::string> tokenize(const std::string& input);
     std::pair<std::string,std::string> readStringLiteral(const std::string& input);
     std::string evalStringLiteral(const std::string& input);
-    std::string getStringVariable(const std::string& varName, int loop);
+    std::string getStringVariable(const std::string& varName);
 
     std::string selectedFragment;
     std::string currentFragment;
     picojson::value currentElement;
 
   picojson::object env_;
+};
+
+class TemplateError : public GeneralException
+{
+public:
+    TemplateError(const char* msg)
+        : GeneralException(msg)
+        {}
 };
 
 #endif

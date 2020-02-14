@@ -53,9 +53,50 @@ Template2::~Template2()
 }
 
 // --------------------------------------
-bool Template2::writeObjectProperty(Stream& s, const String& varName, picojson::object object)
+picojson::value Template2::getObjectProperty(const String& varName, picojson::object& object)
 {
-    // LOG_DEBUG("writeObjectProperty %s", varName.str().c_str());
+    auto names = str::split(varName.str(), ".");
+
+    if (names.size() == 1)
+    {
+        try {
+            return object.at(varName.str());
+        } catch(out_of_range&)
+        {
+            throw TemplateError("lookup error");
+        }
+    }else{
+        picojson::value value;
+        try {
+            value = object.at(names[0]);
+        } catch(out_of_range&)
+        {
+            throw TemplateError("lookup error");
+        }
+
+        if (value.is<picojson::null>() || value.is<std::string>() || value.is<double>() || value.is<picojson::array>())
+        {
+            throw TemplateError("lookup error");
+        }else if (value.is<picojson::object>())
+        {
+            return getObjectProperty(varName + strlen(names[0].c_str()) + 1, value.get<picojson::object>());
+        }
+    }
+}
+
+// --------------------------------------
+static bool isTruish(const picojson::value& v)
+{
+    return (v.is<std::string>() && v.get<std::string>() != "") ||
+        v.is<picojson::array>() ||
+        v.is<picojson::object>() ||
+        (v.is<double>() && v.get<double>() != 0.0) ||
+        (v.is<bool>() && v.get<bool>() != false);
+}
+
+// --------------------------------------
+bool Template2::writeObjectProperty(Stream& s, const String& varName, const picojson::object& object)
+{
     auto names = str::split(varName.str(), ".");
 
     if (names.size() == 1)
@@ -97,12 +138,13 @@ bool Template2::writeObjectProperty(Stream& s, const String& varName, picojson::
 }
 
 // --------------------------------------
-void Template2::writeVariable(Stream &s, const String &varName, int loop)
+void Template2::writeVariable(Stream &s, const String &varName)
 {
     std::string key = varName.str();
 
     if (env_.find(key) != env_.end()) {
         picojson::value v = env_[key];
+
         if (v.is<std::string>())
             s.writeString(v.get<std::string>());
         else
@@ -113,17 +155,17 @@ void Template2::writeVariable(Stream &s, const String &varName, int loop)
 }
 
 // --------------------------------------
-string Template2::getStringVariable(const string& varName, int loop)
+string Template2::getStringVariable(const string& varName)
 {
     StringStream mem;
 
-    writeVariable(mem, varName.c_str(), loop);
+    writeVariable(mem, varName.c_str());
 
     return mem.str();
 }
 
 // --------------------------------------
-void    Template2::readFragment(Stream &in, Stream *outp, int loop)
+void    Template2::readFragment(Stream &in, Stream *outp)
 {
     string fragName;
 
@@ -135,7 +177,7 @@ void    Template2::readFragment(Stream &in, Stream *outp, int loop)
         {
             auto outerFragment = currentFragment;
             currentFragment = fragName;
-            readTemplate(in, outp, loop);
+            readTemplate(in, outp);
             currentFragment = outerFragment;
             return;
         }else
@@ -243,9 +285,7 @@ vector<string> Template2::tokenize(const string& input)
             tie(t, s) = readStringLiteral(s);
             tokens.push_back(t);
         }else if (str::has_prefix(s, "==") ||
-                  str::has_prefix(s, "!=") ||
-                  str::has_prefix(s, "=~") ||
-                  str::has_prefix(s, "!~"))
+                  str::has_prefix(s, "!="))
         {
             tokens.push_back(s.substr(0,2));
             s.erase(0,2);
@@ -280,7 +320,7 @@ vector<string> Template2::tokenize(const string& input)
 }
 
 // --------------------------------------
-bool    Template2::evalCondition(const string& cond, int loop)
+bool    Template2::evalCondition(const string& cond)
 {
     auto tokens = tokenize(cond);
     bool res = false;
@@ -297,12 +337,12 @@ bool    Template2::evalCondition(const string& cond, int loop)
             if (tokens[0][0] == '\"')
                 lhs = evalStringLiteral(tokens[0]);
             else
-                lhs = getStringVariable(tokens[0].c_str(), loop);
+                lhs = getStringVariable(tokens[0].c_str());
 
             if (tokens[2][0] == '\"')
                 rhs = evalStringLiteral(tokens[2]);
             else
-                rhs = getStringVariable(tokens[2].c_str(), loop);
+                rhs = getStringVariable(tokens[2].c_str());
 
             res = ((lhs==rhs) == pred);
         }
@@ -321,8 +361,14 @@ bool    Template2::evalCondition(const string& cond, int loop)
                 varName += c;
         }
 
-        //res = getBoolVariable(varName.c_str(), loop) == pred;
-        res = false;
+        try
+        {
+            res = isTruish(getObjectProperty(varName.c_str(), env_)) == pred;
+        }catch(TemplateError&)
+        {
+            LOG_ERROR("Template error");
+            res = false;
+        }
     }else
     {
         throw StreamException("Malformed condition expression");
@@ -348,7 +394,7 @@ static String readCondition(Stream &in)
 }
 
 // --------------------------------------
-void    Template2::readIf(Stream &in, Stream *outp, int loop)
+void    Template2::readIf(Stream &in, Stream *outp)
 {
     bool hadActive = false;
     int cmd = TMPL_IF;
@@ -357,17 +403,17 @@ void    Template2::readIf(Stream &in, Stream *outp, int loop)
     {
         if (cmd == TMPL_ELSE)
         {
-            cmd = readTemplate(in, hadActive ? NULL : outp, loop);
+            cmd = readTemplate(in, hadActive ? NULL : outp);
         }else if (cmd == TMPL_IF || cmd == TMPL_ELSIF)
         {
             String cond = readCondition(in);
-            if (!hadActive && evalCondition(cond, loop))
+            if (!hadActive && evalCondition(cond))
             {
                 hadActive = true;
-                cmd = readTemplate(in, outp, loop);
+                cmd = readTemplate(in, outp);
             }else
             {
-                cmd = readTemplate(in, NULL, loop);
+                cmd = readTemplate(in, NULL);
             }
         }
     }
@@ -375,52 +421,45 @@ void    Template2::readIf(Stream &in, Stream *outp, int loop)
 }
 
 // --------------------------------------
-void    Template2::readLoop(Stream &in, Stream *outp, int loop)
+picojson::array Template2::evaluateCollectionVariable(const String& varName,
+                                                      picojson::object& object)
 {
-    String var;
-    while (!in.eof())
+    auto names = str::split(varName.str(), ".");
+
+    if (names.size() == 1)
     {
-        char c = in.readChar();
-
-        if (c == '}')
+        try
         {
-            if (!inSelectedFragment() || !outp)
+            picojson::value value = object.at(varName.str());
+            if (value.is<picojson::array>())
             {
-                readTemplate(in, NULL, 0);
-                return;
-            }
-
-            //int cnt = getIntVariable(var, loop);
-            int cnt = 0;
-
-            if (cnt)
-            {
-                int spos = in.getPosition();
-                for (int i=0; i<cnt; i++)
-                {
-                    in.seekTo(spos);
-                    readTemplate(in, outp, i);
-                }
+                return value.get<picojson::array>();
             }else
-            {
-                readTemplate(in, NULL, 0);
-            }
-            return;
-        }else
+                return {};
+        }catch (out_of_range&)
         {
-            var.append(c);
+            return {};
+        }
+    }else{
+        try
+        {
+            picojson::value value = object.at(names[0]);
+            if (value.is<picojson::null>() || value.is<std::string>() || value.is<double>() || value.is<picojson::array>())
+            {
+                return {};
+            }else if (value.is<picojson::object>())
+            {
+                return evaluateCollectionVariable(varName + strlen(names[0].c_str()) + 1, value.get<picojson::object>());
+            }
+        } catch (out_of_range&)
+        {
+            return {};
         }
     }
 }
 
 // --------------------------------------
-picojson::array Template2::evaluateCollectionVariable(String& varName)
-{
-    return {};
-}
-
-// --------------------------------------
-void    Template2::readForeach(Stream &in, Stream *outp, int loop)
+void    Template2::readForeach(Stream &in, Stream *outp)
 {
     String var;
     while (!in.eof())
@@ -431,26 +470,38 @@ void    Template2::readForeach(Stream &in, Stream *outp, int loop)
         {
             if (!inSelectedFragment() || !outp)
             {
-                readTemplate(in, NULL, loop);
+                readTemplate(in, NULL);
                 return;
             }
 
-            auto coll = evaluateCollectionVariable(var);
+            auto coll = evaluateCollectionVariable(var, env_);
 
             if (coll.size() == 0)
             {
-                readTemplate(in, NULL, loop);
+                readTemplate(in, NULL);
             }else
             {
-                auto outer = currentElement;
+                if (env_.find("it") == env_.end()) env_["it"] = picojson::value();
+                if (env_.find("index") == env_.end()) env_["index"] = picojson::value();
+                if (env_.find("indexPlusOne") == env_.end()) env_["indexPlusOne"] = picojson::value();
+
+                picojson::value old = env_["it"];
+                picojson::value oldIndex = env_["index"];
+                picojson::value oldIndexPlusOne = env_["indexPlusOne"];
+
                 int start = in.getPosition();
                 for (size_t i = 0; i < coll.size(); i++)
                 {
                     in.seekTo(start);
-                    currentElement = coll[i];
-                    readTemplate(in, outp, i); // loop
+                    env_["it"] = coll[i];
+                    env_["index"] = (picojson::value) (double) i;
+                    env_["indexPlusOne"] = (picojson::value) (double) (i + 1);
+                    readTemplate(in, outp);
                 }
-                currentElement = outer;
+
+                env_["it"] = old;
+                env_["index"] = oldIndex;
+                env_["indexPlusOne"] = oldIndexPlusOne;
             }
             return;
         }else
@@ -461,7 +512,7 @@ void    Template2::readForeach(Stream &in, Stream *outp, int loop)
 }
 
 // --------------------------------------
-int Template2::readCmd(Stream &in, Stream *outp, int loop)
+int Template2::readCmd(Stream &in, Stream *outp)
 {
     String cmd;
 
@@ -473,32 +524,30 @@ int Template2::readCmd(Stream &in, Stream *outp, int loop)
 
         if (String::isWhitespace(c) || (c=='}'))
         {
-            if (cmd == "loop")
+            if (cmd == "if")
             {
-                readLoop(in, outp, loop);
-                tmpl = TMPL_LOOP;
-            }else if (cmd == "if")
-            {
-                readIf(in, outp, loop);
+                readIf(in, outp);
                 tmpl = TMPL_IF;
             }else if (cmd == "elsif")
             {
                 tmpl = TMPL_ELSIF;
             }else if (cmd == "fragment")
             {
-                readFragment(in, outp, loop);
+                readFragment(in, outp);
                 tmpl = TMPL_FRAGMENT;
             }else if (cmd == "foreach")
             {
-                readForeach(in, outp, loop);
+                readForeach(in, outp);
                 tmpl = TMPL_FOREACH;
             }else if (cmd == "end")
             {
                 tmpl = TMPL_END;
-            }
-            else if (cmd == "else")
+            }else if (cmd == "else")
             {
                 tmpl = TMPL_ELSE;
+            }else
+            {
+                throw TemplateError(str::format("unknown command: %s", cmd.c_str()).c_str());
             }
             break;
         }else
@@ -510,7 +559,7 @@ int Template2::readCmd(Stream &in, Stream *outp, int loop)
 }
 
 // --------------------------------------
-void    Template2::readVariable(Stream &in, Stream *outp, int loop)
+void    Template2::readVariable(Stream &in, Stream *outp)
 {
     String var;
     while (!in.eof())
@@ -534,7 +583,7 @@ void    Template2::readVariable(Stream &in, Stream *outp, int loop)
 }
 
 // --------------------------------------
-void    Template2::readVariableJavaScript(Stream &in, Stream *outp, int loop)
+void    Template2::readVariableJavaScript(Stream &in, Stream *outp)
 {
     String var;
     while (!in.eof())
@@ -546,7 +595,7 @@ void    Template2::readVariableJavaScript(Stream &in, Stream *outp, int loop)
             {
                 StringStream mem;
 
-                writeVariable(mem, var, loop);
+                writeVariable(mem, var);
                 outp->writeString(cgi::escape_javascript(mem.str()).c_str());
             }
             return;
@@ -558,7 +607,7 @@ void    Template2::readVariableJavaScript(Stream &in, Stream *outp, int loop)
 }
 
 // --------------------------------------
-void    Template2::readVariableRaw(Stream &in, Stream *outp, int loop)
+void    Template2::readVariableRaw(Stream &in, Stream *outp)
 {
     String var;
     while (!in.eof())
@@ -568,7 +617,7 @@ void    Template2::readVariableRaw(Stream &in, Stream *outp, int loop)
         {
             if (inSelectedFragment() && outp)
             {
-                writeVariable(*outp, var, loop);
+                writeObjectProperty(*outp, var, env_);
             }
             return;
         }else
@@ -584,7 +633,7 @@ void    Template2::readVariableRaw(Stream &in, Stream *outp, int loop)
 // た場合は TMPL_END を返し、{@else} に当たった場合は TMPL_ELSE、
 // {@elsif ...} に当たった場合は TMPL_ELSIF を返す(条件式を読み込む前
 // に停止する)。
-int Template2::readTemplate(Stream &in, Stream *outp, int loop)
+int Template2::readTemplate(Stream &in, Stream *outp)
 {
     Stream *p = inSelectedFragment() ? outp : NULL;
 
@@ -597,19 +646,19 @@ int Template2::readTemplate(Stream &in, Stream *outp, int loop)
             c = in.readChar();
             if (c == '$')
             {
-                readVariable(in, outp, loop);
+                readVariable(in, outp);
             }
             else if (c == '\\')
             {
-                readVariableJavaScript(in, outp, loop);
+                readVariableJavaScript(in, outp);
             }
             else if (c == '!')
             {
-                readVariableRaw(in, outp, loop);
+                readVariableRaw(in, outp);
             }
             else if (c == '@')
             {
-                int t = readCmd(in, outp, loop);
+                int t = readCmd(in, outp);
                 if (t == TMPL_END || t == TMPL_ELSE || t == TMPL_ELSIF)
                     return t;
             }

@@ -54,10 +54,10 @@
               <th colspan="2">{#Channel Feeds}</th>
             </tr>
 
-            {@loop servMgr.numChannelFeeds}
+            {@foreach servMgr.channelDirectory.feeds}
             <tr>
-              <td>{$loop.channelFeed.url}</td>
-              <td align="center">{$loop.channelFeed.status}</td>
+              <td>{$it.url}</td>
+              <td align="center">{$it.status}</td>
             </tr>
             {@end}
           </table>

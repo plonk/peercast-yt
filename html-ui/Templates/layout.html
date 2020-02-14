@@ -17,10 +17,10 @@
         var notifications = [];
         var t = {!sys.time};
         var r = {!servMgr.refreshHTML};
-        {@loop notificationBuffer.numNotifications}
-          {@if !loop.notification.isRead}
-            if (t - {$loop.notification.unixTime} <= (2*r))
-              notifications.push({ time: "{\loop.notification.time}", type: "{\loop.notification.type}", message: "{\loop.notification.message}" });
+        {@foreach servMgr.notificationBuffer.notifications}
+          {@if !it.isRead}
+            if (t - {$it.unixTime} <= (2*r))
+              notifications.push({ time: "{\it.time}", type: "{\it.type}", message: "{\it.message}" });
           {@end}
         {@end}
 

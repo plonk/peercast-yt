@@ -84,6 +84,8 @@ std::string slurp(FILE *fp)
   return res;
 }
 
+#include "servent.h"
+
 void route_static(std::smatch match, const Server::Request& req, Server::Response& res)
 {
   cout << "public/" + match[1].str() <<endl;
@@ -93,12 +95,14 @@ void route_static(std::smatch match, const Server::Request& req, Server::Respons
   } else {
     FILE *fp = fopen(path.c_str(), "rb");
     if (fp) {
-      // auto type = httplib::detail::find_content_type(req.path, {});
-      // if (!type)
-      //   type = "application/binary";
+      const char* type = Servent::fileNameToMimeType(String(path.c_str()));
+      if (!type)
+        type = "application/binary";
 
       std::string data = slurp(fp);
+      res.headers.set("Content-Type", type);
       res.body = data;
+      res.statusCode = 200;
       fclose(fp);
     } else if (errno == ENOENT) {
       res.statusCode = 404;
@@ -112,12 +116,12 @@ void route_static(std::smatch match, const Server::Request& req, Server::Respons
 
 #include  "picojson.h"
 
-std::string test(std::string str)
+std::string message_interpolate(std::string str, const std::string& lang)
 {
   picojson::value v;
   std::string buf;
 
-  FILE *fp = fopen("catalogs/ja.json", "rb");
+  FILE *fp = fopen(str::format("catalogs/%s.json", lang.c_str()).c_str(), "rb");
   buf = slurp(fp);
   fclose(fp);
 
@@ -137,10 +141,22 @@ std::string test(std::string str)
   return message_interpolate(str, dic);
 }
 
+static picojson::object query_to_object(cgi::Query& query)
+{
+  picojson::object obj;
+
+  for (auto& pair : query.m_dict) {
+    if (pair.second.size() >= 1)
+      obj[pair.first] = (picojson::value) pair.second[0];
+  }
+  return obj;
+}
+
 #include "usys.h"
 #include "template2.h"
 
 #include "sstream.h"
+#include <algorithm>
 
 int main()
 {
@@ -151,26 +167,84 @@ int main()
 
   Server svr;
 
-  svr.Get(R"(/([^\.]+)\.html)",
-          [](std::smatch match, const Server::Request& req, Server::Response& res) {
-            auto buf = macro_expand(match[1].str() + ".html");
-            buf = test(buf);
+  Remote r("127.0.0.1", 8144);
 
-            Remote r("127.0.0.1", 8144);
-            picojson::value v =
-              r.call("evaluateVariables", (picojson::value)picojson::object({
-                    {(std::string)"variables", (picojson::value)picojson::array({})}
-                  }));
-
+  svr.Get(R"(/play\.html)",
+          [&](std::smatch match, const Server::Request& req, Server::Response& res) {
             Template2 tmpl;
             StringStream in;
             StringStream out;
 
+            cout << match[0].str() << endl;
+
+            auto buf = macro_expand(match[1].str() + ".html");
+            buf = message_interpolate(buf, "ja");
+            auto v = r.call("evaluateVariables",
+                            (picojson::value)picojson::object({
+                                {(std::string)"variables", (picojson::value)picojson::array({})}
+                              }));
+
+            cgi::Query query(req.queryString);
+
+            tmpl.selectedFragment = query.get("fragment");
             tmpl.env_ = v.get<picojson::object>();
             in.str(buf);
-            tmpl.readTemplate(in, &out, 0);
+
+            tmpl.env_["page"] = (picojson::value) query_to_object(query);
+            auto& channels = tmpl.env_["chanMgr"].get<picojson::object>()["channels"].get<picojson::array>();
+            auto it = std::find_if(channels.begin(), channels.end(), [&query](picojson::value& ch) { return ch.get<picojson::object>()["id"].get<std::string>() == query.get("id"); });
+            if (it == channels.end()) {
+              res.statusCode = 404;
+              res.body = "Channel not found";
+              return;
+            }
+            tmpl.env_["channel"] = *it;
+
+            try{
+              tmpl.readTemplate(in, &out);
+            }catch (TemplateError& e) {
+              res.statusCode = 500;
+              res.body = e.what();
+              return;
+            }
 
             res.body = out.str();
+            res.headers.set("Content-Type", "text/html; charset=UTF-8");
+            res.statusCode = 200;
+          });
+
+  svr.Get(R"(/([^\.]+)\.html)",
+          [&](std::smatch match, const Server::Request& req, Server::Response& res) {
+            Template2 tmpl;
+            StringStream in;
+            StringStream out;
+
+            cout << match[0].str() << endl;
+
+            auto buf = macro_expand(match[1].str() + ".html");
+            buf = message_interpolate(buf, "ja");
+            auto v = r.call("evaluateVariables",
+                            (picojson::value)picojson::object({
+                                {(std::string)"variables", (picojson::value)picojson::array({})}
+                              }));
+
+            cgi::Query query(req.queryString);
+
+            tmpl.selectedFragment = query.get("fragment");
+            tmpl.env_ = v.get<picojson::object>();
+            in.str(buf);
+
+            try{
+              tmpl.readTemplate(in, &out);
+            }catch (TemplateError& e) {
+              res.statusCode = 500;
+              res.body = e.what();
+              return;
+            }
+
+            res.body = out.str();
+            res.headers.set("Content-Type", "text/html; charset=UTF-8");
+            res.statusCode = 200;
           });
   svr.Get("/(.*)", route_static);
 
