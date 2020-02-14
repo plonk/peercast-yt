@@ -803,6 +803,9 @@ void ServMgr::saveSettings(const char *fn)
 // --------------------------------------------------
 void ServMgr::doSaveSettings(IniFileBase& iniFile)
 {
+    std::lock_guard<std::recursive_mutex> cs1(lock);
+    std::lock_guard<std::recursive_mutex> cs2(chanMgr->lock);
+
     iniFile.writeSection("Server");
     iniFile.writeStrValue("serverName", this->serverName);
     iniFile.writeIntValue("serverPort", this->serverHost.port);
