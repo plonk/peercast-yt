@@ -33,14 +33,18 @@ nlohmann::json Inspector::inspect(ServMgr& m)
   using namespace std;
 
   return {
-    {"allow.HTML1", (bool) (m.allowServer1 & Servent::ALLOW_HTML)},
-    {"allow.broadcasting1", (bool) (m.allowServer1 & Servent::ALLOW_BROADCAST)},
-    {"allow.direct1", (bool) (m.allowServer1 & Servent::ALLOW_DIRECT)},
-    {"allow.network1", (bool) (m.allowServer1 & Servent::ALLOW_NETWORK)},
+    {"allow", nlohmann::json::object_t({
+          {"HTML1", (bool)(m.allowServer1 & Servent::ALLOW_HTML)},
+          {"broadcasting1", (bool)(m.allowServer1 & Servent::ALLOW_BROADCAST)},
+          {"direct1", (bool)(m.allowServer1 & Servent::ALLOW_DIRECT)},
+          {"network1", (bool)(m.allowServer1 & Servent::ALLOW_NETWORK)},
+        })},
     {"audioCodec", m.audioCodec },
-    {"auth.useCookies", (m.authType==ServMgr::AUTH_COOKIE)},
-    {"auth.useHTTP", (m.authType==ServMgr::AUTH_HTTPBASIC)},
-    {"auth.useSessionCookies", (m.cookieList.neverExpire==false)}, //?
+    {"auth", nlohmann::json::object_t({
+          {"useCookies", (m.authType==ServMgr::AUTH_COOKIE)},
+          {"useHTTP", (m.authType==ServMgr::AUTH_HTTPBASIC)},
+          {"useSessionCookies", (m.cookieList.neverExpire==false)}, //?
+        })},
     {"channelDirectory", inspect(*m.channelDirectory)},
     {"defaultChannelInfo", inspect(m.defaultChannelInfo)},
     {"disabled", m.isDisabled},
