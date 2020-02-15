@@ -9,6 +9,12 @@
 #include "server.h"
 #include "remote.h"
 
+#include "usys.h"
+#include "template2.h"
+
+#include "sstream.h"
+#include <algorithm>
+
 using namespace std;
 
 std::string message_interpolate(std::string str, const std::map<std::string,std::string>& dic)
@@ -114,8 +120,6 @@ void route_static(std::smatch match, const Server::Request& req, Server::Respons
   }
 }
 
-#include  "picojson.h"
-
 std::string message_interpolate(std::string str, const std::string& lang)
 {
   picojson::value v;
@@ -152,11 +156,6 @@ static picojson::object query_to_object(cgi::Query& query)
   return obj;
 }
 
-#include "usys.h"
-#include "template2.h"
-
-#include "sstream.h"
-#include <algorithm>
 
 int main()
 {
@@ -181,7 +180,7 @@ int main()
             buf = message_interpolate(buf, "ja");
             auto v = r.call("evaluateVariables",
                             (picojson::value)picojson::object({
-                                {(std::string)"variables", (picojson::value)picojson::array({})}
+                                {"variables", (picojson::value)picojson::array({})}
                               }));
 
             cgi::Query query(req.queryString);

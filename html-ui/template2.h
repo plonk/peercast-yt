@@ -22,6 +22,8 @@
 
 #include <list>
 #include "stream.h"
+
+#define PICOJSON_USE_RVALUE_REFERENCE 0
 #include "picojson.h"
 
 // HTML テンプレートシステム

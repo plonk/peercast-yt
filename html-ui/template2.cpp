@@ -87,11 +87,7 @@ picojson::value Template2::getObjectProperty(const String& varName, picojson::ob
 // --------------------------------------
 static bool isTruish(const picojson::value& v)
 {
-    return (v.is<std::string>() && v.get<std::string>() != "") ||
-        v.is<picojson::array>() ||
-        v.is<picojson::object>() ||
-        (v.is<double>() && v.get<double>() != 0.0) ||
-        (v.is<bool>() && v.get<bool>() != false);
+    return v.evaluate_as_boolean();
 }
 
 // --------------------------------------
@@ -481,10 +477,6 @@ void    Template2::readForeach(Stream &in, Stream *outp)
                 readTemplate(in, NULL);
             }else
             {
-                if (env_.find("it") == env_.end()) env_["it"] = picojson::value();
-                if (env_.find("index") == env_.end()) env_["index"] = picojson::value();
-                if (env_.find("indexPlusOne") == env_.end()) env_["indexPlusOne"] = picojson::value();
-
                 picojson::value old = env_["it"];
                 picojson::value oldIndex = env_["index"];
                 picojson::value oldIndexPlusOne = env_["indexPlusOne"];
@@ -494,8 +486,8 @@ void    Template2::readForeach(Stream &in, Stream *outp)
                 {
                     in.seekTo(start);
                     env_["it"] = coll[i];
-                    env_["index"] = (picojson::value) (double) i;
-                    env_["indexPlusOne"] = (picojson::value) (double) (i + 1);
+                    env_["index"].set<double>(i);
+                    env_["indexPlusOne"].set<double>(i + 1);
                     readTemplate(in, outp);
                 }
 
