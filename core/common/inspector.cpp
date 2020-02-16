@@ -94,7 +94,9 @@ nlohmann::json Inspector::inspect(ServMgr& m)
     {"isFirewalled", m.getFirewall()==ServMgr::FW_ON},
     {"isPrivate", false},
     {"isRoot", m.isRoot},
-    {"log.level", m.logLevel()},
+    {"log", nlohmann::json::object_t({
+          {"level", m.logLevel()},
+        })},
     {"maxBitrateOut", m.maxBitrateOut},
     {"maxControlsIn", m.maxControl},
     {"maxDirect", m.maxDirect},
