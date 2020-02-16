@@ -44,6 +44,7 @@ public:
   static nlohmann::json inspect(TrackInfo& i);
   static nlohmann::json inspect(ChanHitList* l);
   static nlohmann::json inspect(Servent* s);
+  static nlohmann::json inspect(ServFilter& f);
 };
 
 class GlobalObject {

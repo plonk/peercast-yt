@@ -45,6 +45,17 @@ nlohmann::json Inspector::inspect(Servent* s)
   };
 }
 
+nlohmann::json Inspector::inspect(ServFilter& f)
+{
+  return {
+    {"network", !!(f.flags & ServFilter::F_NETWORK)},
+    {"private", !!(f.flags & ServFilter::F_PRIVATE)},
+    {"direct", !!(f.flags & ServFilter::F_DIRECT)},
+    {"banned", !!(f.flags & ServFilter::F_BAN)},
+    {"ip", f.getPattern()},
+  };
+}
+
 nlohmann::json Inspector::inspect(ServMgr& m)
 {
   std::lock_guard<std::recursive_mutex> cs(m.lock);
@@ -54,6 +65,11 @@ nlohmann::json Inspector::inspect(ServMgr& m)
   std::vector<Servent*> servents;
   for (auto s = m.servents; s != nullptr; s = s->next)
     servents.push_back(s);
+
+  std::vector<ServFilter> filters;
+  for (int i = 0; i < m.numFilters; i++) {
+    filters.push_back(m.filters[i]);
+  }
 
   return {
     {"allow", nlohmann::json::object_t({
@@ -71,6 +87,7 @@ nlohmann::json Inspector::inspect(ServMgr& m)
     {"channelDirectory", inspect(*m.channelDirectory)},
     {"defaultChannelInfo", inspect(m.defaultChannelInfo)},
     {"disabled", m.isDisabled},
+    {"filters", inspect(filters)},
     {"firewallKnown", m.getFirewall()!=ServMgr::FW_UNKNOWN},
     {"forceYP", false},
     {"hasUnsafeFilterSettings", m.hasUnsafeFilterSettings()},

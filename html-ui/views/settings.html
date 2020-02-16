@@ -128,17 +128,17 @@
             <th width="17%" style="font-weight: normal; padding: 3px 0; font-size: 85%;">{#Private}</th>
             <th width="17%" style="font-weight: normal; padding: 3px 0; font-size: 85%;">{#Ban}</th>
           </tr>
-          {@loop servMgr.numFilters}
+          {@foreach servMgr.filters}
           <tr align=middle class="normal">
-            <td><input class="fill-parent" size=15 value="{$loop.filter.ip}" name=filt_ip>
+            <td><input class="fill-parent" size=15 value="{$it.ip}" name=filt_ip>
             </td>
-            <td><input type=checkbox {@if loop.filter.network}checked{@end} value=1 name="filt_nw{$loop.index}">
+            <td><input type=checkbox {@if it.network}checked{@end} value=1 name="filt_nw{$index}">
             </td>
-            <td><input type=checkbox {@if loop.filter.direct}checked{@end} value=1 name="filt_di{$loop.index}">
+            <td><input type=checkbox {@if it.direct}checked{@end} value=1 name="filt_di{$index}">
             </td>
-            <td><input type=checkbox {@if loop.filter.private}checked{@end} value=1 name="filt_pr{$loop.index}">
+            <td><input type=checkbox {@if it.private}checked{@end} value=1 name="filt_pr{$index}">
             </td>
-            <td><input type=checkbox {@if loop.filter.banned}checked{@end} value=1 name="filt_bn{$loop.index}">
+            <td><input type=checkbox {@if it.banned}checked{@end} value=1 name="filt_bn{$index}">
             </td>
           </tr>
           {@end}
@@ -231,13 +231,18 @@
           <tr align=middle class="normal">
             <th>{#URL}</th>
           </tr>
-          {@loop servMgr.numChannelFeedsPlusOne}
+          {@foreach servMgr.channelDirectory.feeds}
           <tr class="normal">
             <td>
-              <input size=15 value="{$loop.channelFeed.url}" name="channel_feed_url" style="width: 100%" placeholder="{#URL of index.txt}">
+              <input size=15 value="{$it.url}" name="channel_feed_url" style="width: 100%" placeholder="{#URL of index.txt}">
             </td>
           </tr>
           {@end}
+          <tr class="normal">
+            <td>
+              <input size=15 value="" name="channel_feed_url" style="width: 100%" placeholder="{#URL of index.txt}">
+            </td>
+          </tr>
         </table>
       </td>
     </tr>
