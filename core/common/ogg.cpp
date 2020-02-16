@@ -199,9 +199,9 @@ double OggTheoraSubStream::getTime(OggPage &ogg)
 // -----------------------------------
 void OggTheoraSubStream::readInfo(Stream &in, ChanInfo &info)
 {
-    int verMaj = in.readBits(8);
-    int verMin = in.readBits(8);
-    int verSub = in.readBits(8);
+    in.readBits(8); // verMaj
+    in.readBits(8); // verMin
+    in.readBits(8); // verSub
 
     int encWidth = in.readBits(16) << 4;
     int encHeight = in.readBits(16) << 4;

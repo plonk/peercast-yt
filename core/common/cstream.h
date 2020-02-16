@@ -161,8 +161,8 @@ class ChannelStream
 {
 public:
     ChannelStream()
-    : numListeners(0)
-    , numRelays(0)
+    : numRelays(0)
+    , numListeners(0)
     , isPlaying(false)
     , fwState(0)
     , lastUpdate(0)

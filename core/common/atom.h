@@ -27,7 +27,7 @@
 class AtomStream
 {
 public:
-    AtomStream(Stream &s) : io(s), numChildren(0), numData(0)
+    AtomStream(Stream &s) : numChildren(0), numData(0), io(s)
     {}
 
     void checkData(int d)

@@ -34,6 +34,9 @@ public:
     bool         m_hasKeyFrame;
     uint64_t     m_timecodeScale; // ナノ秒
     unsigned int m_startTime;
+
+private:
+    using ChannelStream::sendPacket;
 };
 
 #endif

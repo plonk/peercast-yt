@@ -49,7 +49,7 @@ class OggSubStream
 {
 public:
     OggSubStream()
-    :maxHeaders(0), serialNo(0), bitrate(0)
+    :bitrate(0), maxHeaders(0), serialNo(0)
     {}
 
     bool    needHeader()

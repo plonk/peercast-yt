@@ -9,8 +9,8 @@ class RTMPClientStream : public Stream
 {
 public:
     RTMPClientStream()
-        : m_eof(false)
-        , m_packetData(new char[kMaxPacketSize])
+        : m_packetData(new char[kMaxPacketSize])
+        , m_eof(false)
     {
         RTMP_Init(&m_rtmp);
     }

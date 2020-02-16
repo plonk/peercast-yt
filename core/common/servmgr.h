@@ -119,7 +119,7 @@ public:
     };
 
     ServMgr();
-    ~ServMgr();
+    ~ServMgr() override;
 
     bool    start();
 

@@ -480,24 +480,22 @@ int Channel::handshakeFetch()
 // -----------------------------------
 int PeercastSource::getSourceRate()
 {
-    if (m_channel)
-        if (m_channel->sock) {
-            std::lock_guard<std::recursive_mutex> cs(m_channel->lock);
-            return m_channel->sock->bytesInPerSec();
-        }
-    else
+    if (m_channel && m_channel->sock)
+    {
+        std::lock_guard<std::recursive_mutex> cs(m_channel->lock);
+        return m_channel->sock->bytesInPerSec();
+    }else
         return 0;
 }
 
 // -----------------------------------
 int PeercastSource::getSourceRateAvg()
 {
-    if (m_channel)
-        if (m_channel->sock) {
-            std::lock_guard<std::recursive_mutex> cs(m_channel->lock);
-            return m_channel->sock->stat.bytesInPerSecAvg();
-        }
-    else
+    if (m_channel && m_channel->sock)
+    {
+        std::lock_guard<std::recursive_mutex> cs(m_channel->lock);
+        return m_channel->sock->stat.bytesInPerSecAvg();
+    }else
         return 0;
 }
 

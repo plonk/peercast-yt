@@ -9,8 +9,8 @@ class Dechunker : public Stream
 {
 public:
     Dechunker(Stream& aStream)
-        : m_stream(aStream)
-        , m_eof(false)
+        : m_eof(false)
+        , m_stream(aStream)
     {
     }
 
