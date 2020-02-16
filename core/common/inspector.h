@@ -43,6 +43,7 @@ public:
   static nlohmann::json inspect(std::shared_ptr<Channel>);
   static nlohmann::json inspect(TrackInfo& i);
   static nlohmann::json inspect(ChanHitList* l);
+  static nlohmann::json inspect(Servent* s);
 };
 
 class GlobalObject {

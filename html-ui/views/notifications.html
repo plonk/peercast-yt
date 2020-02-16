@@ -12,16 +12,16 @@
       <th>{#Message}</th>
     </tr>
 
-    {@loop notificationBuffer.numNotifications}
+    {@foreach servMgr.notificationBuffer.notifications}
     <tr>
       <td>
-        {$loop.notification.time}
+        {$it.time}
       </td>
       <td>
-        {$loop.notification.type}
+        {$it.type}
       </td>
       <td>
-        {$loop.notification.message}
+        {$it.message}
       </td>
     </tr>
     {@end}

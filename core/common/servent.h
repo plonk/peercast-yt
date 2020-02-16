@@ -253,6 +253,10 @@ public:
 
     static bool isTerminationCandidate(ChanHit* hit);
 
+    double bitrate();
+    double bitrateAvg();
+    std::string uptime();
+
     TYPE                type;
     std::atomic<STATUS> status;
 

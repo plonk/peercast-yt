@@ -28,9 +28,32 @@ nlohmann::json Inspector::inspect(GlobalObject& g)
     };
 }
 
+nlohmann::json Inspector::inspect(Servent* s)
+{
+  std::lock_guard<std::recursive_mutex> cs(s->lock);
+
+  return {
+    {"id", s->serventIndex},
+    {"type", s->getTypeStr()},
+    {"status", s->getStatusStr()},
+    {"address", s->getHost().str()},
+    {"agent", s->agent.c_str()},
+    {"bitrate", s->bitrate()},
+    {"bitrateAvg", s->bitrateAvg()},
+    {"uptime", s->uptime()},
+    {"chanID", s->chanID.str()},
+  };
+}
+
 nlohmann::json Inspector::inspect(ServMgr& m)
 {
+  std::lock_guard<std::recursive_mutex> cs(m.lock);
+
   using namespace std;
+
+  std::vector<Servent*> servents;
+  for (auto s = m.servents; s != nullptr; s = s->next)
+    servents.push_back(s);
 
   return {
     {"allow", nlohmann::json::object_t({
@@ -78,6 +101,7 @@ nlohmann::json Inspector::inspect(ServMgr& m)
     {"rootMsg", m.rootMsg.c_str()},
     {"rtmpPort", m.rtmpPort },
     {"rtmpServerMonitor", inspect(m.rtmpServerMonitor)},
+    {"servents", inspect(servents)},
     {"serverIP", m.serverHost.str(false)},
     {"serverLocalIP", Host(ClientSocket::getIP(NULL), 0).str(false)},
     {"serverName", m.serverName.c_str()},

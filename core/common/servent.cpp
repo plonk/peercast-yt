@@ -2138,35 +2138,45 @@ bool    Servent::writeVariable(Stream &s, const String &var)
     else if (var == "agent")
         buf = agent.c_str();
     else if (var == "bitrate")
-    {
-        unsigned int tot = 0;
-        if (sock)
-            tot = sock->bytesInPerSec() + sock->bytesOutPerSec();
-        buf = str::format("%.1f", BYTES_TO_KBPS(tot));
-    }else if (var == "bitrateAvg")
-    {
-        unsigned int tot = 0;
-        if (sock)
-            tot = sock->stat.bytesInPerSecAvg() + sock->stat.bytesOutPerSecAvg();
-        buf = str::format("%.1f", BYTES_TO_KBPS(tot));
-    }else if (var == "uptime")
-    {
-        String uptime;
-        if (lastConnect)
-            uptime.setFromStopwatch(sys->getTime() - lastConnect);
-        else
-            uptime.set("-");
-        buf = uptime.c_str();
-    }else if (var == "chanID")
-    {
+        buf = str::format("%.1f", bitrate());
+    else if (var == "bitrateAvg")
+        buf = str::format("%.1f", bitrateAvg());
+    else if (var == "uptime")
+        buf = uptime();
+    else if (var == "chanID")
         buf = chanID.str();
-    }else if (var == "isPrivate")
-    {
+    else if (var == "isPrivate")
         buf = std::to_string(isPrivate());
-    }else
+    else
         return false;
 
     s.writeString(buf);
 
     return true;
+}
+
+double Servent::bitrate()
+{
+    unsigned int tot = 0;
+    if (sock)
+        tot = sock->bytesInPerSec() + sock->bytesOutPerSec();
+    return BYTES_TO_KBPS(tot);
+}
+
+double Servent::bitrateAvg()
+{
+    unsigned int tot = 0;
+    if (sock)
+        tot = sock->stat.bytesInPerSecAvg() + sock->stat.bytesOutPerSecAvg();
+    return BYTES_TO_KBPS(tot);
+}
+
+std::string Servent::uptime()
+{
+    String uptime;
+    if (lastConnect)
+        uptime.setFromStopwatch(sys->getTime() - lastConnect);
+    else
+        uptime.set("-");
+    return uptime.c_str();
 }

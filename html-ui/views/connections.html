@@ -14,7 +14,7 @@
 <DIV class="reloader" data-url="connections.html?fragment=content&amp;id={$page.channel.id}" data-interval="{$servMgr.refreshHTML}">
   {@fragment content}
   <FORM action=/admin method=get>
-    <TABLE width="95%" align=center border=0>
+    <TABLE width="95%" align=center border=0 class="table-panel">
       <TBODY>
         <TR align=middle bgColor=#cccccc class="normal">
           <TD style="width: 1.2em"><B>{#ID}</B></TD>
@@ -28,25 +28,22 @@
           <TD><B>{#Avg.}</B></TD>
           <td><b>{#Stop}</b></td>
         </TR>
-        {@loop servMgr.numServents}
-          <tr class="normal" {@if loop.indexEven} bgColor=#eeeeee {@else} bgColor=#dddddd {@end}
-              {@if page.channel.id != "page.channel.id"}
-                {@if page.channel.id != loop.servent.chanID} style="display: none" {@end}
-              {@end}>
-            <td style="text-align: right">{$loop.servent.id}</td>
-            <TD>{$loop.servent.type}</TD>
-            <TD>{$loop.servent.status}</TD>
-            <TD>{$loop.servent.uptime}</TD>
-            <TD>{$loop.servent.address}</TD>
+        {@foreach servMgr.servents}
+          <tr class="normal">
+            <td style="text-align: right">{$it.id}</td>
+            <TD>{$it.type}</TD>
+            <TD>{$it.status}</TD>
+            <TD>{$it.uptime}</TD>
+            <TD>{$it.address}</TD>
             <td>
-              {@if loop.servent.type != "SERVER"}
-                {@if loop.servent.isPrivate}{#Private}{@end}
+              {@if it.type != "SERVER"}
+                {@if it.isPrivate}{#Private}{@end}
               {@end}
             </td>
-            <TD>{$loop.servent.agent}</TD>
-            <TD align=right>{$loop.servent.bitrate}</TD>
-            <TD align=right>{$loop.servent.bitrateAvg}</TD>
-            <td style="text-align: center"><a class="text-danger" href="/admin?cmd=stop_servent&amp;servent_id={$loop.servent.id}">&#x23f9;<!-- BLACK SQUARE FOR STOP --></a></td>
+            <TD>{$it.agent}</TD>
+            <TD align=right>{$it.bitrate}</TD>
+            <TD align=right>{$it.bitrateAvg}</TD>
+            <td style="text-align: center"><a class="text-danger" href="/admin?cmd=stop_servent&amp;servent_id={$it.id}">&#x23f9;<!-- BLACK SQUARE FOR STOP --></a></td>
           </TR>
         {@end}
       </TBODY>
