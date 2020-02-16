@@ -24,9 +24,9 @@ namespace rtmpserver
 
         Session(ClientSocket* aClient, FLVWriter& aFlvWriter)
             : client(aClient)
+            , flv_writer(aFlvWriter)
             , max_incoming_chunk_size(128)
             , max_outgoing_chunk_size(128)
-            , flv_writer(aFlvWriter)
             , quitting(false) {}
 
         // 毎回同じ乱数列を生成する。

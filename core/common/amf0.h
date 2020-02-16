@@ -409,7 +409,7 @@ namespace amf0
             }
             case AMF_ARRAY:
             {
-                int len = readInt32(in); // length
+                readInt32(in); // length
                 return Value::array(readObject(in));
             }
             case AMF_STRICTARRAY:

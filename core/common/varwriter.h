@@ -22,6 +22,8 @@ public:
 
     std::string getVariable(const std::string& name);
     std::string getVariable(const std::string& name, int loop);
+
+    virtual ~VariableWriter() {};
 };
 
 #endif

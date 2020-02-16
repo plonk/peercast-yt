@@ -3,8 +3,9 @@
 
 #include "subprog.h"
 
-struct RTMPServerMonitor
+class RTMPServerMonitor
 {
+public:
     RTMPServerMonitor(const std::string& aPath);
 
     std::string status();

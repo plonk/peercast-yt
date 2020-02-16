@@ -940,9 +940,7 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
 
     bool brRoot = false;
     bool getUpd = false;
-    int showLog = 0;
     int allowServer1 = 0;
-    int allowServer2 = 0;
     int newPort = servMgr->serverHost.port;
 
     char arg[MAX_CGI_LEN];

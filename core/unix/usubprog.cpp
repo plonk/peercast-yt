@@ -8,10 +8,10 @@
 #include <signal.h> // kill(2)
 
 Subprogram::Subprogram(const std::string& name, bool receiveData, bool feedData)
-    : m_name(name)
-    , m_pid(-1)
-    , m_receiveData(receiveData)
+    : m_receiveData(receiveData)
     , m_feedData(feedData)
+    , m_name(name)
+    , m_pid(-1)
 {
 }
 

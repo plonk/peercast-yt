@@ -21,14 +21,14 @@
 #include "amf0.h"
 #include <math.h> // ceil
 
-static String timestampToString(uint32_t timestamp)
-{
-    return String::format("%d:%02d:%02d.%03d",
-                          timestamp / 1000 / 3600,
-                          timestamp / 1000 / 60 % 60,
-                          timestamp / 1000 % 60,
-                          timestamp % 1000);
-}
+// static String timestampToString(uint32_t timestamp)
+// {
+//     return String::format("%d:%02d:%02d.%03d",
+//                           timestamp / 1000 / 3600,
+//                           timestamp / 1000 / 60 % 60,
+//                           timestamp / 1000 % 60,
+//                           timestamp % 1000);
+// }
 
 // ------------------------------------------
 void FLVStream::readEnd(Stream &, std::shared_ptr<Channel>)

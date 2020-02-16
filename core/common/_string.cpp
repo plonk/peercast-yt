@@ -452,6 +452,8 @@ void String::convertTo(TYPE t)
             case T_BASE64:
                 tmp.BASE642ASCII(data);
                 break;
+            default:
+                break;
         }
 
         // convert to new format
@@ -481,6 +483,8 @@ void String::convertTo(TYPE t)
                 break;
             case T_METASAFE:
                 ASCII2META(tmp.data, true);
+                break;
+            default:
                 break;
         }
 

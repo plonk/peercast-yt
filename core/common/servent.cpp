@@ -872,8 +872,8 @@ bool Servent::isTerminationCandidate(ChanHit* hit)
 {
     // リレー追加不可で現在リレーしていない。
     // あるいは、ポート0でGIVメソッドに対応してないクライアントである。
-    return (!hit->relay && hit->numRelays == 0 ||
-            hit->host.port == 0 && !hit->canGiv());
+    return (!hit->relay && hit->numRelays == 0) ||
+        (hit->host.port == 0 && !hit->canGiv());
 }
 
 // -----------------------------------

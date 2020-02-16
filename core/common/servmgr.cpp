@@ -34,10 +34,10 @@
 
 // -----------------------------------
 ServMgr::ServMgr()
-    : rtmpServerMonitor(std::string(peercastApp->getPath()) + "rtmp-server")
+    : relayBroadcast(30) // オリジナルでは未初期化。
     , channelDirectory(new ChannelDirectory())
     , uptestServiceRegistry(new UptestServiceRegistry())
-    , relayBroadcast(30) // オリジナルでは未初期化。
+    , rtmpServerMonitor(std::string(peercastApp->getPath()) + "rtmp-server")
 {
     authType = AUTH_COOKIE;
     cookieList.init();

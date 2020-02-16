@@ -130,7 +130,7 @@ ASFInfo parseASFHeader(Stream &in)
                     data.skip(32);
 
                     unsigned int dpLo = data.readLong();
-                    unsigned int dpHi = data.readLong();
+                    data.readLong(); // dpHi
 
                     data.skip(24);
 
@@ -169,6 +169,8 @@ ASFInfo parseASFHeader(Stream &in)
                     asf.streams[s.id].type = s.type;
                     break;
                 }
+                default:
+                    break;
             }
         }
     }catch (StreamException &e)
