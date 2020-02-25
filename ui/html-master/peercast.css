@@ -16,7 +16,7 @@ a:hover {
 
 .normal {
 	font-family: Verdana, Arial, Helvetica, sans-serif;
-	font-size: 12px;
+	font-size: 9pt;
 
 }
 .normal-small {
@@ -53,6 +53,8 @@ td {
 th {
 	padding-left: 4px; padding-right: 4px;
 	padding-top: 3px; padding-bottom: 3px;
+	white-space: nowrap;
+
 }
 
 td.numeric {
@@ -90,7 +92,7 @@ a.button {
 
 table.table-panel {
     font-family: Verdana, Arial, Helvetica, sans-serif;
-    font-size: 12px;
+    font-size: 9pt;
     margin-bottom: 1em;
 }
 
@@ -132,3 +134,28 @@ input.fill-parent {
 td.checkbox-cell {
     text-align: center;
 }
+
+.flex-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.column {
+    flex: 50%;
+    box-sizing: border-box;
+    padding: 0.5em;
+}
+
+@media (max-width: 600px) {
+    .column {
+	flex: 100%;
+    }
+}
+
+.column > table.table-panel {
+    width: 100%;
+}
+
+.hscroll { overflow-x: auto; width: 100%; overflow-y: hidden }

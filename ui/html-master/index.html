@@ -8,110 +8,105 @@
 </div>
 {@end}
 
-<DIV align=center class="reloader" data-url="index.html?fragment=content" data-interval="{$servMgr.refreshHTML}">
+<DIV align=center class="reloader flex-container" data-url="index.html?fragment=content" data-interval="{$servMgr.refreshHTML}">
   {@fragment content}
-  <TABLE align=center border=0>
-    <TBODY>
-      <TR align=middle>
-        <TD vAlign=top>
-          <TABLE class="table-panel" width="100%" align=center border=0>
-            <TR align=middle>
-              <TD colSpan=2 class="normal"><B>{#Information}</B></TD>
-            </TR>
-            <TR align=left>
-              <th class="left-heading">{#Server IP}</th>
-              <TD>{$servMgr.serverIP}</TD>
-            </TR>
-            <TR align=left>
-              <th class="left-heading">{#Uptime}</th>
-              <TD>{$servMgr.uptime}</TD>
-            </TR>
-            <TR align=left>
-              <th class="left-heading">{#Channel cache}</th>
-              <TD>{$chanMgr.numHitLists} - <a href="/admin?cmd=clear&amp;hitlists=1">{#Clear}</a> - <a href="/admin?cmd=dump_hitlists">{#Dump}</a></TD>
-            </TR>
-            <TR align=left>
-              <th class="left-heading">{#Firewalled}</th>
-              <TD>{@if servMgr.firewallKnown} {@if servMgr.isFirewalled}
-                {#Yes} {@else} {#No} {@end} {@else} {#Unknown} {@end} </TD>
-            </TR>
-            <TR align=left>
-              <th class="left-heading">{#XML stats}</th>
-              <TD><A href="/admin?cmd=viewxml">{#View}</A></TD>
-            </TR>
-            <tr align=left>
-              <th class="left-heading">{#YP Address}</th>
-              <td>{$servMgr.ypAddress}</td>
-            </tr>
-            <TR align=left>
-              <th class="left-heading">{#Host options}</th>
-              <TD>{@if servMgr.isRoot}{#Root}{@end} {@if servMgr.isPrivate}{#Licensed}{@end} {@if servMgr.forceYP}{#ForceYP}{@end}</TD>
-            </TR>
-          </TABLE>
-
-          <table class="table-panel" width="100%" class="normal">
-            <tr>
-              <th colspan="2">{#Channel Feeds}</th>
-            </tr>
-
-            {@loop servMgr.numChannelFeeds}
-            <tr>
-              <td>{$loop.channelFeed.url}</td>
-              <td align="center">{$loop.channelFeed.status}</td>
-            </tr>
-            {@end}
-          </table>
-        </TD>
-        <TD vAlign=top>
-          <TABLE class="table-panel" width="100%" align=center border=0>
-            <TR align=middle>
-              <TD colSpan=4 class="normal"><B>{#Bandwidth}</B></TD>
-            </TR>
-            <TR align=left class="normal">
-              <th class="left-heading"></th>
-              <TH>{#In}</TH>
-              <TH>{#Out}</TH>
-            </TR>
-            <TR align=left class="normal">
-              <th class="left-heading">{#Internet (Kbit/s)}</th>
-              <TD class="bandwidth-cell">{$stats.wanInPerSec}</TD>
-              <TD class="bandwidth-cell">{$stats.wanOutPerSec}</TD>
-            </TR>
-            <TR align=left class="normal">
-              <th class="left-heading">{#Total (Kbit/s)}</th>
-              <TD class="bandwidth-cell">{$stats.totalInPerSec}</TD>
-              <TD class="bandwidth-cell">{$stats.totalOutPerSec}</TD>
-            </TR>
-          </TABLE>
-
-          <table class="table-panel" width="100%" border="0">
-            <tr>
-              <td colspan="2"><div align="center" class="normal"><strong>{#Connections}</strong></div></td>
-            </tr>
-            <tr>
-              <th class="left-heading" width="66%">{#Direct}</th>
-              <td width="34%" class="normal">{$servMgr.numDirect}</td>
-            </tr>
-            <tr>
-              <th class="left-heading">{#Relay}</th>
-              <td class="normal">{$servMgr.numRelays}</td>
-            </tr>
-            <tr>
-              <th class="left-heading">{#CIN / COUT}</th>
-              <td>{$servMgr.numCIN} / {$servMgr.numCOUT}</td>
-            </tr>
-            <tr>
-              <th class="left-heading">{#Incoming}</th>
-              <td>{$servMgr.numIncoming}</td>
-            </tr>
-            <tr>
-              <th class="left-heading">{#Port} {$servMgr.serverPort1}</th>
-              <td>{$servMgr.numActive1}</td>
-            </tr>
-          </table>
-        </TD>
-      </TR>
-    </TBODY>
+  <div class="column">
+  <TABLE class="table-panel" align=center border=0>
+    <TR align=middle>
+      <TD colSpan=2 class="normal"><B>{#Information}</B></TD>
+    </TR>
+    <TR align=left>
+      <th class="left-heading">{#Server IP}</th>
+      <TD>{$servMgr.serverIP}</TD>
+    </TR>
+    <TR align=left>
+      <th class="left-heading">{#Uptime}</th>
+      <TD>{$servMgr.uptime}</TD>
+    </TR>
+    <TR align=left>
+      <th class="left-heading">{#Channel cache}</th>
+      <TD>{$chanMgr.numHitLists} - <a href="/admin?cmd=clear&amp;hitlists=1">{#Clear}</a> - <a href="/admin?cmd=dump_hitlists">{#Dump}</a></TD>
+    </TR>
+    <TR align=left>
+      <th class="left-heading">{#Firewalled}</th>
+      <TD>{@if servMgr.firewallKnown} {@if servMgr.isFirewalled}
+        {#Yes} {@else} {#No} {@end} {@else} {#Unknown} {@end} </TD>
+    </TR>
+    <TR align=left>
+      <th class="left-heading">{#XML stats}</th>
+      <TD><A href="/admin?cmd=viewxml">{#View}</A></TD>
+    </TR>
+    <tr align=left>
+      <th class="left-heading">{#YP Address}</th>
+      <td>{$servMgr.ypAddress}</td>
+    </tr>
+    <TR align=left>
+      <th class="left-heading">{#Host options}</th>
+      <TD>{@if servMgr.isRoot}{#Root}{@end} {@if servMgr.isPrivate}{#Licensed}{@end} {@if servMgr.forceYP}{#ForceYP}{@end}</TD>
+    </TR>
   </TABLE>
+
+  <table class="table-panel" class="normal">
+    <tr>
+      <th colspan="2">{#Channel Feeds}</th>
+    </tr>
+
+    {@loop servMgr.numChannelFeeds}
+    <tr>
+      <td>{$loop.channelFeed.url}</td>
+      <td align="center">{$loop.channelFeed.status}</td>
+    </tr>
+    {@end}
+  </table>
+  </div>
+
+  <div class="column">
+  <TABLE class="table-panel" align=center border=0>
+    <TR align=middle>
+      <TD colSpan=4 class="normal"><B>{#Bandwidth}</B></TD>
+    </TR>
+    <TR align=left class="normal">
+      <th class="left-heading"></th>
+      <TH>{#In}</TH>
+      <TH>{#Out}</TH>
+    </TR>
+    <TR align=left class="normal">
+      <th class="left-heading">{#Internet (Kbit/s)}</th>
+      <TD class="bandwidth-cell">{$stats.wanInPerSec}</TD>
+      <TD class="bandwidth-cell">{$stats.wanOutPerSec}</TD>
+    </TR>
+    <TR align=left class="normal">
+      <th class="left-heading">{#Total (Kbit/s)}</th>
+      <TD class="bandwidth-cell">{$stats.totalInPerSec}</TD>
+      <TD class="bandwidth-cell">{$stats.totalOutPerSec}</TD>
+    </TR>
+  </TABLE>
+
+  <table class="table-panel" border="0">
+    <tr>
+      <td colspan="2"><div align="center" class="normal"><strong>{#Connections}</strong></div></td>
+    </tr>
+    <tr>
+      <th class="left-heading" width="66%">{#Direct}</th>
+      <td width="34%" class="normal">{$servMgr.numDirect}</td>
+    </tr>
+    <tr>
+      <th class="left-heading">{#Relay}</th>
+      <td class="normal">{$servMgr.numRelays}</td>
+    </tr>
+    <tr>
+      <th class="left-heading">{#CIN / COUT}</th>
+      <td>{$servMgr.numCIN} / {$servMgr.numCOUT}</td>
+    </tr>
+    <tr>
+      <th class="left-heading">{#Incoming}</th>
+      <td>{$servMgr.numIncoming}</td>
+    </tr>
+    <tr>
+      <th class="left-heading">{#Port} {$servMgr.serverPort1}</th>
+      <td>{$servMgr.numActive1}</td>
+    </tr>
+  </table>
+  </div>
   {@end}
 </DIV>
