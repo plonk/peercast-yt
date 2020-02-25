@@ -131,6 +131,6 @@ $(function(){
         $('#bbs-view').html("コンタクトURLがありません。");
     } else {
         $("#bbs-title").text("n/a");
-        $('#bbs-view').html("対応した掲示板のURLではありません。");
+        $('#bbs-view').html("対応した掲示板のURLではありません:<br>" + h(CONTACT_URL));
     }
 });
