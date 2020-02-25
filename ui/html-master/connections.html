@@ -11,12 +11,12 @@
     [{$page.channel.localListeners}/{$page.channel.localRelays}]
   </h3>
 {@end}
-<DIV class="reloader" data-url="connections.html?fragment=content&amp;id={$page.channel.id}" data-interval="{$servMgr.refreshHTML}">
+<DIV class="reloader hscroll" data-url="connections.html?fragment=content&amp;id={$page.channel.id}" data-interval="{$servMgr.refreshHTML}">
   {@fragment content}
   <FORM action=/admin method=get>
     <TABLE width="95%" align=center border=0>
       <TBODY>
-        <TR align=middle bgColor=#cccccc class="normal">
+        <TR align=middle bgColor=#cccccc class="normal" style="white-space: nowrap">
           <TD style="width: 1.2em"><B>{#ID}</B></TD>
           <TD><B>{#_Type_connection}</B></TD>
           <TD><B>{#Status}</B></TD>

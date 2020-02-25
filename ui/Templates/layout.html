@@ -109,6 +109,7 @@
                               {#Warning: The whole of the Internet is marked as Private.}
                             </span>
                             {@end}
+			    <a class="normal-small" href="logout.html">{#_Logout_navbar}</a>
                           </td>
                         </tr>
                       </table>
@@ -117,32 +118,12 @@
                 </table>
               </div>
 
-              <table class="navbar" width="100%" border="1" cellpadding="1" cellspacing="0">
-                <tr class="normal">
-                  <td width="14.286%"><div align="center"><a href="index.html">{#_Information_navbar}</a></div></td>
-                  <td width="14.286%"><div align="center"><a href="channels.html">{#Channels}</a></div></td>
-                  <td width="14.286%"><div align="center"><a href="notifications.html">{#Notifications}</a></div></td>
-                  <td width="14.286%"><div align="center"><a href="connections.html">{#_Connections_navbar}</a></div></td>
-                  <td width="14.286%"><div align="center"><a href="settings.html">{#_Settings_navbar}</a></div></td>
-                  <td width="14.286%"><div align="center"><a href="viewlog.html">{#_View Log_navbar}</a></div></td>
-                  <td width="14.286%"><div align="center"><a href="logout.html">{#_Logout_navbar}</a></div></td>
-                </tr>
-                <tr class="normal">
-                  <td width="14.286%"><div align="center"></div></td>
-                  <td width="14.286%"><div align="center"><a href="rtmp.html">{#RTMP Server}</a></div></td>
-                  <td width="14.286%"><div align="center"><a href="speedtest.html">{#Speedtest}</a></div></td>
-                  <td width="14.286%"><div align="center"><a href=""></a></div></td>
-                  <td width="14.286%"><div align="center"><a href=""></a></div></td>
-                  <td width="14.286%"><div align="center"><a href="https://github.com/plonk/peercast-yt/issues">{#Report Issue}</a></div></td>
-                  <td width="14.286%"><div align="center"><a href="https://github.com/plonk/peercast-yt/wiki" title="{#Go to the peercast-yt wiki on github}">{#Help}</a></div></td>
-                </tr>
-              </table>
+	      {^include navbar.html}
 
               {^yield}
 
               <hr size="1">
-
-              <div align="center" class="normal-small"> &copy; 2005 peercast.org</div>
+	      {^include footer.html}
             </div>
 
   </body>
