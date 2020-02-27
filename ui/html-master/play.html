@@ -36,7 +36,6 @@
 	  overflow-y: scroll;
 	  word-break: break-all;
 	  flex-grow: 1;
-	  max-height: calc(100vh - 37px);
       }
 
       dl.thread dd {
@@ -60,6 +59,7 @@
 
       #main-area {
 	  flex-grow: 1;
+	  overflow-y: hidden;
 
 	  /* this is itself a flex container */
 	  display: flex;
@@ -69,6 +69,12 @@
       @media (orientation: portrait) {
 	  #main-area {
 	      flex-direction: column;
+	  }
+      }
+
+      @media (orientation: portrait) {
+	  #bbs-indicator {
+	      padding-top: 0.5em;
 	  }
       }
     </style>
@@ -113,7 +119,7 @@
 	  {@end}
 	</div>
 
-	<div style="text-align: right; flex-grow: 1">
+	<div id="bbs-indicator" style="text-align: right; flex-grow: 1">
           <label><input type="checkbox" id="chat-visibility" checked style="display: inline; vertical-align: middle"> {#Show Chat}</label>
           <span id="bbs-title">n/a</span>
 	</div>
