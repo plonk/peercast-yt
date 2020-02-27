@@ -170,6 +170,7 @@
     "Refresh HTML (sec)"      : "HTML更新 (秒)",
     "Network"                 : "ネットワーク",
     "YP Address"              : "YPアドレス",
+    "YP message"              : "YPメッセージ",
     "Max. Output (Kbits/s)"   : "送信速度上限 (Kbps)",
     "Max. Relays Per Channel" : "Ch毎リレー数上限",
     "Max. Controls In"        : "コントロール着信数上限",
