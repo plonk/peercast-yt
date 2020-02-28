@@ -1416,7 +1416,7 @@ std::string Channel::getBufferString()
                       str::group_digits(std::to_string(sum)).c_str(),
                       sum / byterate);
     buf += str::format("Packets: %lu (c %d / nc %d)\n",
-                       lens.size(),
+                       (unsigned long) lens.size(),
                        stat.continuations,
                        stat.nonContinuations);
 
@@ -1425,7 +1425,7 @@ std::string Channel::getBufferString()
         auto pmax = std::max_element(lens.begin(), lens.end());
         auto pmin = std::min_element(lens.begin(), lens.end());
         buf += str::format("Packet length min/avg/max: %u/%lu/%u\n",
-                           *pmin, sum/lens.size(), *pmax);
+                           *pmin, (unsigned long) sum/lens.size(), *pmax);
     }
     buf += str::format("Last written: %s", time.str().c_str());
 
