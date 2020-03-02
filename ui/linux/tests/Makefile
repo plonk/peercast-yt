@@ -20,13 +20,13 @@ GTEST_DIR = /usr/src/gtest
 USER_DIR = ../../../tests
 
 # Flags passed to the preprocessor.
-CPPFLAGS += -D_UNIX -I$(GTEST_DIR)/include -I../../../core/common -I../../../core/unix -I../../../Onigmo
+CPPFLAGS += -D_UNIX -I$(GTEST_DIR)/include -I../../../core/common -I../../../core/unix
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT
 
 LDFLAGS = -fuse-ld=gold -pthread
-LIBS = -L../../../Onigmo/.libs -Wl,-Bstatic -lonigmo -Wl,-Bdynamic
+LIBS = -Wl,-Bstatic -Wl,-Bdynamic
 LIBS += -lrtmp
 
 # All tests produced by this Makefile.  Remember to add new tests you
