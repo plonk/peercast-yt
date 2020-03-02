@@ -482,7 +482,7 @@ TEST_F(ServentFixture, handshakeStream_returnResponse_channelReady_direct)
     s.outputProtocol = ChanInfo::SP_HTTP;
     ASSERT_TRUE(
         s.handshakeStream_returnResponse(gotPCP, chanFound, chanReady, ch, chl, chanInfo));
-    Regexp regexp("\\A"
+    Regexp regexp("^"
                   "HTTP/1\\.0 200 OK\\r\\n"
                   "Server: PeerCast/0\\.1218 \\(YT\\d\\d\\)\\r\\n"
                   "Accept-Ranges: none\\r\\n"
@@ -493,7 +493,7 @@ TEST_F(ServentFixture, handshakeStream_returnResponse_channelReady_direct)
                   "x-audiocast-url: \\r\\n"
                   "x-peercast-channelid: 00000000000000000000000000000000\\r\\n"
                   "Content-Type: application/octet-stream\\r\\n\\r\\n"
-                  "\\z");
+                  "$");
     ASSERT_TRUE(regexp.matches(mock->outgoing.str()));
 }
 

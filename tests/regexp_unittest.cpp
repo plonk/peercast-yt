@@ -45,13 +45,19 @@ TEST_F(RegexpFixture, captures)
     ASSERT_EQ("c", captures[3]);
 }
 
-TEST_F(RegexpFixture, caretMatchesLineBeginning)
+TEST_F(RegexpFixture, caretDoesNotMatchLineBeginning)
 {
     Regexp pat("^a");
     auto captures = pat.exec("b\na");
-    ASSERT_EQ(1, captures.size());
-    ASSERT_EQ("a", captures[0]);
+    ASSERT_EQ(0, captures.size());
 }
+
+// TEST_F(RegexpFixture, backslashCapitalAMatchesStringBeginning)
+// {
+//     Regexp pat("\\Aa");
+//     auto captures = pat.exec("a");
+//     ASSERT_EQ(1, captures.size());
+// }
 
 TEST_F(RegexpFixture, backslashCapitalADoesntMatchLineBeginning)
 {
@@ -73,8 +79,8 @@ TEST_F(RegexpFixture, copy)
     Regexp r1("^$");
     Regexp r2(r1);
     ASSERT_TRUE(r1.matches(""));
-    ASSERT_TRUE(r1.matches("\n"));
+    ASSERT_FALSE(r1.matches("\n"));
     ASSERT_TRUE(r2.matches(""));
-    ASSERT_TRUE(r2.matches("\n"));
+    ASSERT_FALSE(r2.matches("\n"));
 }
 

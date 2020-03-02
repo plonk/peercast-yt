@@ -3,11 +3,7 @@
 
 #include <vector>
 #include <string>
-
-namespace onig
-{
-#include "onigmo.h"
-}
+#include <regex>
 
 class Regexp
 {
@@ -19,7 +15,7 @@ public:
     std::vector<std::string> exec(const std::string& str) const;
     bool matches(const std::string& str) const;
 
-    onig::regex_t *m_reg;
+    std::regex m_reg;
     const std::string m_exp;
 };
 

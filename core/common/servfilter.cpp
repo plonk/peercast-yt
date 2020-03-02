@@ -23,7 +23,7 @@
 #include "str.h"
 #include "socket.h"
 
-static const Regexp IPV4_PATTERN("\\A\\d+\\.\\d+\\.\\d+\\.\\d+\\z");
+static const Regexp IPV4_PATTERN("^\\d+\\.\\d+\\.\\d+\\.\\d+$");
 
 bool    ServFilter::writeVariable(Stream &out, const String &var)
 {
