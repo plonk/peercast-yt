@@ -22,8 +22,6 @@ CORE = ../../core
 RTMP = ../../rtmp-server
 SRCHTMLTAR = ../html.tar
 HTML = html
-SRCPUBLICTAR = ../public.tar
-PUBLIC = public
 ASSETS = ../linux/assets
 CGIBIN = ../linux/cgi-bin
 
@@ -43,7 +41,7 @@ RTMPOBJ = $(notdir $(RTMPSOURCE:.cpp=.o))
 
 DEPENDFILE = .deps
 
-.PHONY: all clean build-html deps $(SRCHTMLTAR) $(SRCPUBLICTAR) $(SRCASSETSTAR)
+.PHONY: all clean build-html deps $(SRCHTMLTAR) $(SRCASSETSTAR)
 
 # Here follow the generic build rules.
 all: $(TARGET) $(LIBOBJSTATIC) $(DISTARCHIVE) $(RTMPSERVER)
@@ -57,14 +55,6 @@ $(HTML): $(SRCHTMLTAR)
 	rm -rf $(HTML)
 	tar xf $(SRCHTMLTAR)
 	touch $(HTML)
-
-$(SRCPUBLICTAR):
-	$(MAKE) -C .. public.tar
-
-$(PUBLIC): $(SRCPUBLICTAR)
-	rm -rf $(PUBLIC)
-	tar xf $(SRCPUBLICTAR)
-	touch $(PUBLIC)
 
 $(SRCASSETSTAR):
 	$(MAKE) -C .. assets.tar
