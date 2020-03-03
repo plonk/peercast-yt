@@ -1,6 +1,6 @@
 CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -U__STRICT_ANSI__ -DWIN32 -D_REENTRANT -D_UNICODE -DUNICODE $(INCLUDES)
-LDFLAGS = -static-libgcc -static-libstdc++ -L../../Onigmo/.libs
-LIBS = -Wl,-Bstatic -lonigmo -lwinpthread -Wl,-Bdynamic -lws2_32 -lShlwapi
+LDFLAGS = -static-libgcc -static-libstdc++
+LIBS = -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic -lws2_32 -lShlwapi
 
 OS = $(shell uname -s | tr A-Z a-z)
 ARCH = $(shell uname -m | tr A-Z a-z)
@@ -8,7 +8,7 @@ ARCH = $(shell uname -m | tr A-Z a-z)
 DISTARCHIVE = peercast-yt-$(OS)-$(ARCH).tar.gz
 AR = ar
 
-INCLUDES = -I../../core -I../../core/common -I../../core/win32 -I../../Onigmo
+INCLUDES = -I../../core -I../../core/common -I../../core/win32
 
 TARGET = peercast.exe
 RTMPSERVER = rtmp-server.exe
@@ -90,7 +90,7 @@ $(LIBOBJSTATIC): $(COREOBJ) $(SYSOBJ)
 $(TARGET): $(WINOBJ) $(LIBOBJSTATIC)
 	$(CXX) -municode -mwindows $(LDFLAGS) -o $@ $(WINOBJ) $(LIBOBJSTATIC) $(LIBS)
 
-$(RTMPSERVER): $(RTMPOBJ) $(LIBOBJSTATIC) $(LIBONIGMO)
+$(RTMPSERVER): $(RTMPOBJ) $(LIBOBJSTATIC)
 	$(CXX) $(LDFLAGS) -o $@ $(RTMPOBJ) $(LIBOBJSTATIC) $(LIBS)
 
 -include $(DEPENDFILE)
