@@ -5,8 +5,8 @@
 # され、libmingwex.a 内の定義と衝突するので未定義にする。
 
 CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -U__STRICT_ANSI__ -DWIN32 -D_REENTRANT $(INCLUDES)
-LDFLAGS = -static-libgcc -static-libstdc++ -L../../Onigmo/.libs
-LIBS = -Wl,-Bstatic -lonigmo -lwinpthread -Wl,-Bdynamic -lws2_32 -lShlwapi
+LDFLAGS = -static-libgcc -static-libstdc++
+LIBS = -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic -lws2_32 -lShlwapi
 
 OS = $(shell uname -s | tr A-Z a-z)
 ARCH = $(shell uname -m | tr A-Z a-z)
@@ -14,7 +14,7 @@ ARCH = $(shell uname -m | tr A-Z a-z)
 DISTARCHIVE = peercast-yt-$(OS)-$(ARCH).tar.gz
 AR = ar
 
-INCLUDES = -I../../core -I../../core/common -I../../core/win32 -I../../Onigmo
+INCLUDES = -I../../core -I../../core/common -I../../core/win32
 
 TARGET = peercast.exe
 RTMPSERVER = rtmp-server.exe
@@ -22,8 +22,6 @@ CORE = ../../core
 RTMP = ../../rtmp-server
 SRCHTMLTAR = ../html.tar
 HTML = html
-SRCPUBLICTAR = ../public.tar
-PUBLIC = public
 ASSETS = ../linux/assets
 CGIBIN = ../linux/cgi-bin
 
@@ -43,7 +41,7 @@ RTMPOBJ = $(notdir $(RTMPSOURCE:.cpp=.o))
 
 DEPENDFILE = .deps
 
-.PHONY: all clean build-html deps $(SRCHTMLTAR) $(SRCPUBLICTAR) $(SRCASSETSTAR)
+.PHONY: all clean build-html deps $(SRCHTMLTAR) $(SRCASSETSTAR)
 
 # Here follow the generic build rules.
 all: $(TARGET) $(LIBOBJSTATIC) $(DISTARCHIVE) $(RTMPSERVER)
@@ -57,14 +55,6 @@ $(HTML): $(SRCHTMLTAR)
 	rm -rf $(HTML)
 	tar xf $(SRCHTMLTAR)
 	touch $(HTML)
-
-$(SRCPUBLICTAR):
-	$(MAKE) -C .. public.tar
-
-$(PUBLIC): $(SRCPUBLICTAR)
-	rm -rf $(PUBLIC)
-	tar xf $(SRCPUBLICTAR)
-	touch $(PUBLIC)
 
 $(SRCASSETSTAR):
 	$(MAKE) -C .. assets.tar
@@ -102,7 +92,7 @@ $(LIBOBJSTATIC): $(COREOBJ) $(SYSOBJ)
 $(TARGET): $(LINUXOBJ) $(LIBOBJSTATIC)
 	$(CXX) $(LDFLAGS) -o $@ $(LINUXOBJ) $(LIBOBJSTATIC) $(LIBS)
 
-$(RTMPSERVER): $(RTMPOBJ) $(LIBOBJSTATIC) $(LIBONIGMO)
+$(RTMPSERVER): $(RTMPOBJ) $(LIBOBJSTATIC)
 	$(CXX) $(LDFLAGS) -o $@ $(RTMPOBJ) $(LIBOBJSTATIC) $(LIBS)
 
 -include $(DEPENDFILE)

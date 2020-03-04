@@ -7,7 +7,7 @@ ifeq ($(WITH_RTMP),yes)
 endif
 
 LDFLAGS = -fuse-ld=gold -pthread -static-libstdc++ -static-libgcc
-LIBS = -L../../Onigmo/.libs -Wl,-Bstatic -lonigmo -Wl,-Bdynamic
+LIBS = -Wl,-Bstatic -Wl,-Bdynamic
 ifeq ($(WITH_RTMP),yes)
   LIBS += -lrtmp
 endif
@@ -18,7 +18,7 @@ ARCH = $(shell uname -m | tr A-Z a-z)
 DISTARCHIVE = peercast-yt-$(OS)-$(ARCH).tar.gz
 AR = ar
 
-INCLUDES = -I../../core -I../../core/common -I../../Onigmo
+INCLUDES = -I../../core -I../../core/common
 
 TARGET = peercast
 RTMPSERVER = rtmp-server
@@ -43,8 +43,6 @@ LINUXOBJ = $(notdir $(LINUXSOURCE:.cpp=.o))
 
 RTMPSOURCE = $(wildcard $(RTMP)/*.cpp)
 RTMPOBJ = $(notdir $(RTMPSOURCE:.cpp=.o))
-
-LIBONIGMO = ../../Onigmo/.libs/libonigmo.a
 
 DEPENDFILE = .deps
 
@@ -72,7 +70,6 @@ $(DISTARCHIVE): $(TARGET) $(HTML) $(ASSETS) $(RTMPSERVER)
 	tar czf $(DISTARCHIVE) peercast-yt
 
 clean:
-	$(MAKE) -C ../../Onigmo clean
 	$(MAKE) -C .. clean
 	rm -f $(LINUXOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE) $(RTMPSERVER) $(RTMPOBJ)
 	rm -rf $(HTML)
@@ -94,14 +91,10 @@ $(DEPENDFILE): $(CORESOURCE) $(SYSSOURCE) $(LINUXSOURCE) $(RTMPSOURCE)
 $(LIBOBJSTATIC): $(COREOBJ) $(SYSOBJ)
 	$(AR) rcs $(LIBOBJSTATIC) $(COREOBJ) $(SYSOBJ)
 
-$(TARGET): $(LINUXOBJ) $(LIBOBJSTATIC) $(LIBONIGMO)
+$(TARGET): $(LINUXOBJ) $(LIBOBJSTATIC)
 	$(CXX) $(LDFLAGS) -o $@ $(LINUXOBJ) $(LIBOBJSTATIC) $(LIBS)
 
-$(RTMPSERVER): $(RTMPOBJ) $(LIBOBJSTATIC) $(LIBONIGMO)
+$(RTMPSERVER): $(RTMPOBJ) $(LIBOBJSTATIC)
 	$(CXX) $(LDFLAGS) -o $@ $(RTMPOBJ) $(LIBOBJSTATIC) $(LIBS)
-
-$(LIBONIGMO):
-	cd ../../Onigmo; ./configure
-	$(MAKE) -C ../../Onigmo clean all
 
 -include $(DEPENDFILE)
