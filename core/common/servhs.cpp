@@ -2248,6 +2248,9 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
     {
         if (str::contains(fn, "play.html"))
         {
+            // 視聴ページだった場合はあらかじめチャンネルのリレーを開
+            // 始しておく。
+
             auto vec = str::split(fn, "?");
             if (vec.size() != 2)
                 throw HTTPException(HTTP_SC_BADREQUEST, 400);
