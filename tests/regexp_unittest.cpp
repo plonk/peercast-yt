@@ -59,6 +59,40 @@ TEST_F(RegexpFixture, pathological2)
     ASSERT_EQ(1, captures.size());
 }
 
+TEST_F(RegexpFixture, quantifiers)
+{
+    Regexp pat1("^a*$");
+    Regexp pat2("^a+$");
+    Regexp pat3("^a?$");
+    Regexp pat4("^a{1}$");
+    Regexp pat5("^a{1,}$");
+    Regexp pat6("^a{0,1}$");
+
+    ASSERT_EQ(1, pat1.exec("").size());
+    ASSERT_EQ(1, pat1.exec("a").size());
+    ASSERT_EQ(1, pat1.exec("aa").size());
+
+    ASSERT_EQ(0, pat2.exec("").size());
+    ASSERT_EQ(1, pat2.exec("a").size());
+    ASSERT_EQ(1, pat2.exec("aa").size());
+
+    ASSERT_EQ(1, pat3.exec("").size());
+    ASSERT_EQ(1, pat3.exec("a").size());
+    ASSERT_EQ(0, pat3.exec("aa").size());
+
+    ASSERT_EQ(0, pat4.exec("").size());
+    ASSERT_EQ(1, pat4.exec("a").size());
+    ASSERT_EQ(0, pat4.exec("aa").size());
+
+    ASSERT_EQ(0, pat5.exec("").size());
+    ASSERT_EQ(1, pat5.exec("a").size());
+    ASSERT_EQ(1, pat5.exec("aa").size());
+
+    ASSERT_EQ(1, pat6.exec("").size());
+    ASSERT_EQ(1, pat6.exec("a").size());
+    ASSERT_EQ(0, pat6.exec("aa").size());
+}
+
 TEST_F(RegexpFixture, caretDoesNotMatchLineBeginning)
 {
     Regexp pat("^a");
