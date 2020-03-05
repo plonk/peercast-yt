@@ -15,6 +15,6 @@ TEST_F(ClientSocketFixture, getHostname)
 {
     char name[256] = "";
 
-    EXPECT_TRUE(ClientSocket::getHostname(name, (127<<24 | 1)));
-    EXPECT_STREQ("localhost", name);
+    EXPECT_TRUE(ClientSocket::getHostname(name, ClientSocket::getIP("8.8.8.8")));
+    EXPECT_STREQ("dns.google", name);
 }
