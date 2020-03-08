@@ -22,7 +22,7 @@
 #include "version2.h"
 
 // ------------------------------------------
-void PCPStream::init(GnuID &rid)
+void PCPStream::init(const GnuID &rid)
 {
     remoteID = rid;
     routeList.clear();
@@ -62,7 +62,7 @@ void PCPStream::readHeader(Stream &in, std::shared_ptr<Channel>)
 }
 
 // ------------------------------------------
-bool PCPStream::sendPacket(ChanPacket &pack, GnuID &destID)
+bool PCPStream::sendPacket(ChanPacket &pack, const GnuID &destID)
 {
     if (destID.isSet())
         if (!destID.isSame(remoteID))

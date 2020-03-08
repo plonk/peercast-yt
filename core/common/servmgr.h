@@ -123,9 +123,9 @@ public:
 
     bool    start();
 
-    Servent             *findServent(unsigned int, unsigned short, GnuID &);
+    Servent             *findServent(unsigned int, unsigned short, const GnuID &);
     Servent             *findServent(Servent::TYPE);
-    Servent             *findServent(Servent::TYPE, Host &, GnuID &);
+    Servent             *findServent(Servent::TYPE, Host &, const GnuID &);
     Servent             *findOldestServent(Servent::TYPE, bool);
     Servent             *findServentByIndex(int);
     Servent             *findServentByID(int id);
@@ -134,7 +134,7 @@ public:
     Servent             *allocServent();
 
     unsigned int        numUsed(int);
-    unsigned int        numStreams(GnuID &, Servent::TYPE, bool);
+    unsigned int        numStreams(const GnuID &, Servent::TYPE, bool);
     unsigned int        numStreams(Servent::TYPE, bool);
     unsigned int        numConnected(int, bool, unsigned int);
     unsigned int        numConnected(int t, int tim = 0)
@@ -151,7 +151,7 @@ public:
     bool                isFiltered(int, Host &h);
     bool                hasUnsafeFilterSettings();
 
-    Servent             *findConnection(Servent::TYPE, GnuID &);
+    Servent             *findConnection(Servent::TYPE, const GnuID &);
 
     static THREAD_PROC  serverProc(ThreadInfo *);
     static THREAD_PROC  clientProc(ThreadInfo *);
@@ -192,10 +192,10 @@ public:
     void            addVersion(unsigned int);
 
     void            broadcastRootSettings(bool);
-    int             broadcastPushRequest(ChanHit &, Host &, GnuID &, Servent::TYPE);
+    int             broadcastPushRequest(ChanHit &, Host &, const GnuID &, Servent::TYPE);
     void            writeRootAtoms(AtomStream &, bool);
 
-    int             broadcastPacket(ChanPacket &, GnuID &, GnuID &, GnuID &, Servent::TYPE type);
+    int             broadcastPacket(ChanPacket &, const GnuID &, const GnuID &, const GnuID &, Servent::TYPE type);
 
     unsigned int    getUptime()
     {

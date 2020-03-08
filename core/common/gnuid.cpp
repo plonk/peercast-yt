@@ -131,7 +131,7 @@ GnuIDList::~GnuIDList()
 }
 
 // ---------------------------
-bool GnuIDList::contains(GnuID &id)
+bool GnuIDList::contains(const GnuID &id)
 {
     for (int i=0; i<maxID; i++)
         if (ids[i].isSame(id))
@@ -161,7 +161,7 @@ unsigned int GnuIDList::getOldest()
 }
 
 // ---------------------------
-void GnuIDList::add(GnuID &id)
+void GnuIDList::add(const GnuID &id)
 {
     unsigned int minTime = (unsigned int) -1;
     int minIndex = 0;

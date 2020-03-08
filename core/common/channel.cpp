@@ -712,8 +712,7 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
                 atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT+PCP_ERROR_OFFAIR);
                 pack.len = mem.pos;
                 pack.type = ChanPacket::T_PCP;
-                GnuID noID;
-                servMgr->broadcastPacket(pack, ch->info.id, ch->remoteID, noID, Servent::T_RELAY);
+                servMgr->broadcastPacket(pack, ch->info.id, ch->remoteID, GnuID(), Servent::T_RELAY);
             }
 
             if (ch->sourceStream)
@@ -937,7 +936,7 @@ void ChanMeta::addMem(void *p, int l)
 }
 
 // -----------------------------------
-void Channel::broadcastTrackerUpdate(GnuID &svID, bool force /* = false */)
+void Channel::broadcastTrackerUpdate(const GnuID &svID, bool force /* = false */)
 {
     unsigned int ctime = sys->getTime();
 
@@ -983,8 +982,7 @@ void Channel::broadcastTrackerUpdate(GnuID &svID, bool force /* = false */)
         pack.len = mem.pos;
         pack.type = ChanPacket::T_PCP;
 
-        GnuID noID;
-        int cnt = servMgr->broadcastPacket(pack, noID, servMgr->sessionID, svID, Servent::T_COUT);
+        int cnt = servMgr->broadcastPacket(pack, GnuID(), servMgr->sessionID, svID, Servent::T_COUT);
 
         if (cnt)
         {
@@ -995,7 +993,7 @@ void Channel::broadcastTrackerUpdate(GnuID &svID, bool force /* = false */)
 }
 
 // -----------------------------------
-bool    Channel::sendPacketUp(ChanPacket &pack, GnuID &cid, GnuID &sid, GnuID &did)
+bool    Channel::sendPacketUp(ChanPacket &pack, const GnuID &cid, const GnuID &sid, const GnuID &did)
 {
     if ( isActive()
         && (!cid.isSet() || info.id.isSame(cid))
@@ -1053,10 +1051,9 @@ void Channel::updateInfo(const ChanInfo &newInfo)
 
             pack.len = mem.pos;
             pack.type = ChanPacket::T_PCP;
-            GnuID noID;
-            servMgr->broadcastPacket(pack, info.id, servMgr->sessionID, noID, Servent::T_RELAY);
+            servMgr->broadcastPacket(pack, info.id, servMgr->sessionID, GnuID(), Servent::T_RELAY);
 
-            broadcastTrackerUpdate(noID);
+            broadcastTrackerUpdate(GnuID());
         }
     }
 
@@ -1217,8 +1214,7 @@ int Channel::readStream(Stream &in, ChannelStream *source)
                     {
                         if ((sys->getTime() - lastTrackerUpdate) >= 120)
                         {
-                            GnuID noID;
-                            broadcastTrackerUpdate(noID);
+                            broadcastTrackerUpdate(GnuID());
                         }
                         wasBroadcasting = true;
                     }else
@@ -1241,8 +1237,7 @@ int Channel::readStream(Stream &in, ChannelStream *source)
 
     if (wasBroadcasting)
     {
-        GnuID noID;
-        broadcastTrackerUpdate(noID, true);
+        broadcastTrackerUpdate(GnuID(), true);
     }
 
     peercastApp->channelStop(&info);

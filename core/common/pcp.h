@@ -210,13 +210,13 @@ public:
 class PCPStream : public ChannelStream
 {
 public:
-    PCPStream(GnuID &rid)
+    PCPStream(const GnuID &rid)
     :routeList(1000)
     {
         init(rid);
     }
 
-    void    init(GnuID &);
+    void    init(const GnuID &);
 
     void    kill() override
     {
@@ -224,7 +224,7 @@ public:
         outData.lock.lock();
     }
 
-    bool    sendPacket(ChanPacket &, GnuID &) override;
+    bool    sendPacket(ChanPacket &, const GnuID &) override;
     void    flush(Stream &) override;
     void    readHeader(Stream &, std::shared_ptr<Channel>) override;
     int     readPacket(Stream &, std::shared_ptr<Channel>) override;

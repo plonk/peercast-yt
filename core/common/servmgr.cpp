@@ -328,7 +328,7 @@ Servent *ServMgr::findOldestServent(Servent::TYPE type, bool priv)
 }
 
 // -----------------------------------
-Servent *ServMgr::findServent(Servent::TYPE type, Host &host, GnuID &netid)
+Servent *ServMgr::findServent(Servent::TYPE type, Host &host, const GnuID &netid)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
 
@@ -350,7 +350,7 @@ Servent *ServMgr::findServent(Servent::TYPE type, Host &host, GnuID &netid)
 }
 
 // -----------------------------------
-Servent *ServMgr::findServent(unsigned int ip, unsigned short port, GnuID &netid)
+Servent *ServMgr::findServent(unsigned int ip, unsigned short port, const GnuID &netid)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
 
@@ -1237,7 +1237,7 @@ void ServMgr::loadSettings(const char *fn)
 }
 
 // --------------------------------------------------
-unsigned int ServMgr::numStreams(GnuID &cid, Servent::TYPE tp, bool all)
+unsigned int ServMgr::numStreams(const GnuID &cid, Servent::TYPE tp, bool all)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
 
@@ -1324,7 +1324,7 @@ bool ServMgr::getChannel(char *str, ChanInfo &info, bool relay)
 }
 
 // --------------------------------------------------
-Servent *ServMgr::findConnection(Servent::TYPE t, GnuID &sid)
+Servent *ServMgr::findConnection(Servent::TYPE t, const GnuID &sid)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
 
@@ -1496,7 +1496,7 @@ bool    ServMgr::acceptGIV(ClientSocket *sock)
 }
 
 // -----------------------------------
-int ServMgr::broadcastPushRequest(ChanHit &hit, Host &to, GnuID &chanID, Servent::TYPE type)
+int ServMgr::broadcastPushRequest(ChanHit &hit, Host &to, const GnuID &chanID, Servent::TYPE type)
 {
     ChanPacket pack;
     MemoryStream pmem(pack.data, sizeof(pack.data));
@@ -1520,9 +1520,7 @@ int ServMgr::broadcastPushRequest(ChanHit &hit, Host &to, GnuID &chanID, Servent
     pack.len = pmem.pos;
     pack.type = ChanPacket::T_PCP;
 
-    GnuID noID;
-
-    return servMgr->broadcastPacket(pack, noID, servMgr->sessionID, hit.sessionID, type);
+    return servMgr->broadcastPacket(pack, GnuID(), servMgr->sessionID, hit.sessionID, type);
 }
 
 // --------------------------------------------------
@@ -1561,14 +1559,12 @@ void ServMgr::broadcastRootSettings(bool getUpdate)
         mem.rewind();
         pack.len = mem.len;
 
-        GnuID noID;
-
-        broadcastPacket(pack, noID, servMgr->sessionID, noID, Servent::T_CIN);
+        broadcastPacket(pack, GnuID(), servMgr->sessionID, GnuID(), Servent::T_CIN);
     }
 }
 
 // --------------------------------------------------
-int ServMgr::broadcastPacket(ChanPacket &pack, GnuID &chanID, GnuID &srcID, GnuID &destID, Servent::TYPE type)
+int ServMgr::broadcastPacket(ChanPacket &pack, const GnuID &chanID, const GnuID &srcID, const GnuID &destID, Servent::TYPE type)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
 
@@ -1606,8 +1602,7 @@ int ServMgr::idleProc(ThreadInfo *thread)
             {
                 if (servMgr->checkForceIP())
                 {
-                    GnuID noID;
-                    chanMgr->broadcastTrackerUpdate(noID, true);
+                    chanMgr->broadcastTrackerUpdate(GnuID(), true);
                 }
                 lastForceIPCheck = ctime;
             }

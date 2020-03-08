@@ -256,7 +256,7 @@ void Servent::reset()
 }
 
 // -----------------------------------
-bool Servent::sendPacket(ChanPacket &pack, GnuID &cid, GnuID &sid, GnuID &did, Servent::TYPE t)
+bool Servent::sendPacket(ChanPacket &pack, const GnuID &cid, const GnuID &sid, const GnuID &did, Servent::TYPE t)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
 
@@ -470,7 +470,7 @@ void Servent::setStatus(STATUS s)
 }
 
 // -----------------------------------
-bool    Servent::pingHost(Host &rhost, GnuID &rsid)
+bool    Servent::pingHost(Host &rhost, const GnuID &rsid)
 {
     char ipstr[64];
     rhost.toStr(ipstr);
@@ -977,7 +977,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 
 // -----------------------------------
 // GIV しにいく
-void Servent::handshakeGiv(GnuID &id)
+void Servent::handshakeGiv(const GnuID &id)
 {
     if (id.isSet())
     {
@@ -1326,8 +1326,7 @@ void Servent::processIncomingPCP(bool suggestOthers)
                 if (!best.host.ip)
                     break;
 
-                GnuID noID;
-                best.writeAtoms(atom, noID);
+                best.writeAtoms(atom, GnuID());
                 cnt++;
             }
 
@@ -1346,8 +1345,7 @@ void Servent::processIncomingPCP(bool suggestOthers)
                 if (chanMgr->pickHits(chs))
                 {
                     best = chs.best[0];
-                    GnuID noID;
-                    int cnt = servMgr->broadcastPushRequest(best, rhost, noID, Servent::T_CIN);
+                    int cnt = servMgr->broadcastPushRequest(best, rhost, GnuID(), Servent::T_CIN);
                     LOG_DEBUG("Broadcasted tracker push request to %d clients for %s", cnt, rstr);
                 }
             }else
@@ -1404,9 +1402,7 @@ int Servent::outgoingProc(ThreadInfo *thread)
     Servent *sv = (Servent*)thread->data;
     Defer cb([sv]() { sv->kill(); });
 
-    GnuID noID;
-    noID.clear();
-    sv->pcpStream = new PCPStream(noID);
+    sv->pcpStream = new PCPStream(GnuID());
 
     while (sv->thread.active())
     {
@@ -1432,8 +1428,7 @@ int Servent::outgoingProc(ThreadInfo *thread)
                     break;
                 }
 
-                GnuID noID;
-                ChanHitList *chl = chanMgr->findHitListByID(noID);
+                ChanHitList *chl = chanMgr->findHitListByID(GnuID());
                 if (chl)
                 {
                     // find local tracker
