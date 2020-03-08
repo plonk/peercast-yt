@@ -1624,14 +1624,6 @@ int ServMgr::idleProc(ThreadInfo *thread)
 
         if (servMgr->isRoot)
         {
-            // 1時間着信がなかったら終了する。…なぜ？
-            if ((servMgr->lastIncoming) && (((int64_t)ctime - servMgr->lastIncoming) > 60*60))
-            {
-                peercastInst->saveSettings();
-                peercastInst->quit();
-                sys->exit();
-            }
-
             if ((ctime - lastRootBroadcast) > chanMgr->hostUpdateInterval)
             {
                 servMgr->broadcastRootSettings(true);
