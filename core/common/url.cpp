@@ -107,7 +107,7 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
 
     char *fileName = urlTmp.cstr();
 
-    PlayList *pls = NULL;
+    std::shared_ptr<PlayList> pls;
     ChannelStream *source = NULL;
 
     LOG_INFO("Fetch URL=%s", fileName);
@@ -205,17 +205,17 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
                     if (http.isHeader("content-type"))
                     {
                         if (stristr(arg, MIME_XSCPLS))
-                            pls = new PlayList(PlayList::T_SCPLS, 1000);
+                            pls = std::make_shared<PlayList>(PlayList::T_SCPLS, 1000);
                         else if (stristr(arg, MIME_PLS))
-                            pls = new PlayList(PlayList::T_PLS, 1000);
+                            pls = std::make_shared<PlayList>(PlayList::T_PLS, 1000);
                         else if (stristr(arg, MIME_XPLS))
-                            pls = new PlayList(PlayList::T_PLS, 1000);
+                            pls = std::make_shared<PlayList>(PlayList::T_PLS, 1000);
                         else if (stristr(arg, MIME_M3U))
-                            pls = new PlayList(PlayList::T_PLS, 1000);
+                            pls = std::make_shared<PlayList>(PlayList::T_PLS, 1000);
                         else if (stristr(arg, MIME_TEXT))
-                            pls = new PlayList(PlayList::T_PLS, 1000);
+                            pls = std::make_shared<PlayList>(PlayList::T_PLS, 1000);
                         else if (stristr(arg, MIME_ASX))
-                            pls = new PlayList(PlayList::T_ASX, 1000);
+                            pls = std::make_shared<PlayList>(PlayList::T_ASX, 1000);
                         else if (stristr(arg, MIME_MMS))
                             ch->info.srcProtocol = ChanInfo::SP_MMS;
                     }
@@ -268,9 +268,9 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
             ch->readDelay = true;
 
             if (fileType == ChanInfo::T_PLS)
-                pls = new PlayList(PlayList::T_PLS, 1000);
+                pls = std::make_shared<PlayList>(PlayList::T_PLS, 1000);
             else if (fileType == ChanInfo::T_ASX)
-                pls = new PlayList(PlayList::T_ASX, 1000);
+                pls = std::make_shared<PlayList>(PlayList::T_ASX, 1000);
             else
                 ch->info.setContentType(fileType);
         }else
@@ -305,7 +305,7 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
                 {}
             }
 
-            delete pls;
+            pls = nullptr;
         }else
         {
             // if we didn`t get a channel id from the source, then create our own (its an original broadcast)
