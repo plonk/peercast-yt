@@ -532,12 +532,7 @@ ChanHitList *ChanMgr::addHitList(ChanInfo &info)
 void ChanMgr::clearDeadHits(bool clearTrackers)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
-    unsigned int interval;
-
-    if (servMgr->isRoot)
-        interval = 1200;        // mainly for old 0.119 clients
-    else
-        interval = 180;
+    constexpr unsigned int interval = 180;
 
     ChanHitList *chl = hitlist, *prev = NULL;
     while (chl)
