@@ -1547,30 +1547,3 @@ bool Channel::writeVariable(Stream &out, const String &var)
     out.writeString(buf);
     return true;
 }
-
-// -----------------------------------
-// message check
-#if 0
-                ChanPacket pack;
-                MemoryStream mem(pack.data, sizeof(pack.data));
-                AtomStream atom(mem);
-                atom.writeParent(PCP_BCST, 3);
-                    atom.writeChar(PCP_BCST_GROUP, PCP_BCST_GROUP_ALL);
-                    atom.writeBytes(PCP_BCST_FROM, servMgr->sessionID.id, 16);
-                    atom.writeParent(PCP_MESG, 1);
-                        atom.writeString(PCP_MESG_DATA, msg.cstr());
-
-                mem.len = mem.pos;
-                mem.rewind();
-                pack.len = mem.len;
-
-                GnuID noID;
-                noID.clear();
-
-                BroadcastState bcs;
-                PCPStream::readAtom(atom, bcs);
-                //int cnt = servMgr->broadcastPacketUp(pack, noID, servMgr->sessionID);
-                //int cnt = servMgr->broadcastPacketDown(pack, noID, servMgr->sessionID);
-                //int cnt = chanMgr->broadcastPacketUp(pack, noID, servMgr->sessionID);
-                //LOG_DEBUG("Sent message to %d clients", cnt);
-#endif
