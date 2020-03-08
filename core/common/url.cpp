@@ -123,9 +123,12 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
 
         ch->setStatus(Channel::S_CONNECTING);
 
-        if ((ch->info.srcProtocol == ChanInfo::SP_HTTP) || (ch->info.srcProtocol == ChanInfo::SP_PCP) || (ch->info.srcProtocol == ChanInfo::SP_MMS))
+        if ((ch->info.srcProtocol == ChanInfo::SP_HTTP) ||
+            (ch->info.srcProtocol == ChanInfo::SP_PCP) ||
+            (ch->info.srcProtocol == ChanInfo::SP_MMS))
         {
-            if ((ch->info.contentType == ChanInfo::T_WMA) || (ch->info.contentType == ChanInfo::T_WMV))
+            if ((ch->info.contentType == ChanInfo::T_WMA) ||
+                (ch->info.contentType == ChanInfo::T_WMV))
                 ch->info.srcProtocol = ChanInfo::SP_MMS;
 
             LOG_INFO("Channel source is HTTP");
