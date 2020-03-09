@@ -51,7 +51,7 @@ public:
     class HostGraph
     {
     public:
-        HostGraph(std::shared_ptr<Channel> ch, ChanHitList *hitList)
+        HostGraph(std::shared_ptr<Channel> ch, std::shared_ptr<ChanHitList> hitList)
         {
             if (ch == nullptr)
                 throw std::invalid_argument("ch");
@@ -251,7 +251,7 @@ public:
     json getYPChannelsInternal(json::array_t args = {});
     json getYellowPageProtocols(json::array_t);
     json getYellowPages(json::array_t);
-    json::array_t hostsToJson(ChanHitList* hitList);
+    json::array_t hostsToJson(std::shared_ptr<ChanHitList> hitList);
     ChanInfo mergeChanInfo(const ChanInfo& orig, json::object_t info, json::object_t track);
     json removeYellowPage(json::array_t args);
     json setChannelInfo(json::array_t args);
@@ -263,7 +263,7 @@ public:
     json toPositionalArguments(json named_params, std::vector<std::string> names);
     json toSourceConnection(std::shared_ptr<Channel> c);
     json to_json(ChanHit* h);
-    json to_json(ChanHitList* hitList);
+    json to_json(std::shared_ptr<ChanHitList> hitList);
     json to_json(ChanInfo& info);
     json to_json(Channel::STATUS status);
     json to_json(GnuID id);

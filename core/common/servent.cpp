@@ -680,7 +680,7 @@ void Servent::handshakeStream_returnStreamHeaders(AtomStream& atom,
 // リレー要求に対してストリームできない時、ノード情報を送信する。
 void Servent::handshakeStream_returnHits(AtomStream& atom,
                                          const GnuID& channelID,
-                                         ChanHitList* chl,
+                                         std::shared_ptr<ChanHitList> chl,
                                          Host& rhost)
 {
     ChanHitSearch chs;
@@ -818,7 +818,7 @@ bool Servent::handshakeStream_returnResponse(bool gotPCP,
                                              bool chanFound, // ヒットリストが存在する。
                                              bool chanReady, // ストリーム可能である。
                                              std::shared_ptr<Channel> ch,
-                                             ChanHitList* chl,
+                                             std::shared_ptr<ChanHitList> chl,
                                              const ChanInfo& chanInfo)
 {
     Host rhost = sock->host;
@@ -922,7 +922,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
             {
                 autoManageTried = true;
                 LOG_DEBUG("Auto-manage relays");
-                ChanHitList* chl = chanMgr->findHitList(chanInfo);
+                auto chl = chanMgr->findHitList(chanInfo);
                 if (!chl)
                     break;
 
@@ -966,7 +966,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
         }while (thread.active() && sock->active());
     }
 
-    ChanHitList *chl = chanMgr->findHitList(chanInfo);
+    auto chl = chanMgr->findHitList(chanInfo);
     if (chl)
     {
         chanFound = true;
@@ -1428,7 +1428,7 @@ int Servent::outgoingProc(ThreadInfo *thread)
                     break;
                 }
 
-                ChanHitList *chl = chanMgr->findHitListByID(GnuID());
+                auto chl = chanMgr->findHitListByID(GnuID());
                 if (chl)
                 {
                     // find local tracker

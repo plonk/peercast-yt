@@ -6,7 +6,7 @@ class ChanHitListFixture : public ::testing::Test {
 public:
     void SetUp()
     {
-        hitlist = new ChanHitList();
+        hitlist = std::make_shared<ChanHitList>();
 
         host.fromStrIP("209.209.209.209", 7144);
         global.fromStrIP("210.210.210.210", 7144);
@@ -20,11 +20,10 @@ public:
 
     void TearDown()
     {
-        delete hitlist;
     }
 
     ChanHit hit;
-    ChanHitList* hitlist;
+    std::shared_ptr<ChanHitList> hitlist;
     Host host;
     Host global;
     Host local;
@@ -46,7 +45,7 @@ TEST_F(ChanHitListFixture, contactTrackers)
 }
 
 template <typename T>
-static int listCount(T* list)
+static int listCount(T list)
 {
     int count = 0;
 

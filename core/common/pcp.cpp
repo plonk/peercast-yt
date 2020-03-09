@@ -449,7 +449,7 @@ void PCPStream::readHostAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 void PCPStream::readChanAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 {
     std::shared_ptr<Channel> ch = NULL;
-    ChanHitList *chl = NULL;
+    std::shared_ptr<ChanHitList> chl = NULL;
     ChanInfo newInfo;
 
     ch = chanMgr->findChannelByID(bcs.chanID);

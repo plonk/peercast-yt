@@ -617,7 +617,7 @@ unsigned int    ChanHitList::newestHit()
 // -----------------------------------
 void ChanHitList::forEachHit(std::function<void(ChanHit*)> block)
 {
-    ChanHitList* chl = this;
+    auto chl = shared_from_this();
 
     while (chl)
     {

@@ -396,12 +396,7 @@ void ChanMgr::clearHitLists()
     while (hitlist)
     {
         peercastApp->delChannel(&hitlist->info);
-
-        ChanHitList *next = hitlist->next;
-
-        delete hitlist;
-
-        hitlist = next;
+        hitlist = hitlist->next;
     }
 }
 
@@ -456,7 +451,7 @@ std::shared_ptr<Channel> ChanMgr::createChannel(ChanInfo &info, const char *moun
 // -----------------------------------
 int ChanMgr::pickHits(ChanHitSearch &chs)
 {
-    ChanHitList *chl = hitlist;
+    auto chl = hitlist;
     while (chl)
     {
         if (chl->isUsed())
@@ -470,9 +465,9 @@ int ChanMgr::pickHits(ChanHitSearch &chs)
 }
 
 // -----------------------------------
-ChanHitList *ChanMgr::findHitList(ChanInfo &info)
+std::shared_ptr<ChanHitList> ChanMgr::findHitList(ChanInfo &info)
 {
-    ChanHitList *chl = hitlist;
+    auto chl = hitlist;
     while (chl)
     {
         if (chl->isUsed())
@@ -485,9 +480,9 @@ ChanHitList *ChanMgr::findHitList(ChanInfo &info)
 }
 
 // -----------------------------------
-ChanHitList *ChanMgr::findHitListByID(const GnuID &id)
+std::shared_ptr<ChanHitList> ChanMgr::findHitListByID(const GnuID &id)
 {
-    ChanHitList *chl = hitlist;
+    auto chl = hitlist;
     while (chl)
     {
         if (chl->isUsed())
@@ -502,7 +497,7 @@ ChanHitList *ChanMgr::findHitListByID(const GnuID &id)
 int ChanMgr::numHitLists()
 {
     int num = 0;
-    ChanHitList *chl = hitlist;
+    auto chl = hitlist;
     while (chl)
     {
         if (chl->isUsed())
@@ -513,9 +508,9 @@ int ChanMgr::numHitLists()
 }
 
 // -----------------------------------
-ChanHitList *ChanMgr::addHitList(ChanInfo &info)
+std::shared_ptr<ChanHitList> ChanMgr::addHitList(ChanInfo &info)
 {
-    ChanHitList *chl = new ChanHitList();
+    auto chl = std::make_shared<ChanHitList>();
 
     chl->next = hitlist;
     hitlist = chl;
@@ -534,7 +529,7 @@ void ChanMgr::clearDeadHits(bool clearTrackers)
     std::lock_guard<std::recursive_mutex> cs(lock);
     constexpr unsigned int interval = 180;
 
-    ChanHitList *chl = hitlist, *prev = NULL;
+    std::shared_ptr<ChanHitList> chl = hitlist, prev = nullptr;
     while (chl)
     {
         if (chl->isUsed())
@@ -547,13 +542,12 @@ void ChanMgr::clearDeadHits(bool clearTrackers)
                     {
                         peercastApp->delChannel(&chl->info);
 
-                        ChanHitList *next = chl->next;
+                        auto next = chl->next;
                         if (prev)
                             prev->next = next;
                         else
                             hitlist = next;
 
-                        delete chl;
                         chl = next;
                         continue;
                     }
@@ -611,7 +605,7 @@ int ChanMgr::numChannels()
 // -----------------------------------
 void ChanMgr::deadHit(ChanHit &hit)
 {
-    ChanHitList *chl = findHitListByID(hit.chanID);
+    auto chl = findHitListByID(hit.chanID);
     if (chl)
         chl->deadHit(hit);
 }
@@ -619,7 +613,7 @@ void ChanMgr::deadHit(ChanHit &hit)
 // -----------------------------------
 void ChanMgr::delHit(ChanHit &hit)
 {
-    ChanHitList *chl = findHitListByID(hit.chanID);
+    auto chl = findHitListByID(hit.chanID);
     if (chl)
         chl->delHit(hit);
 }
@@ -646,7 +640,7 @@ ChanHit *ChanMgr::addHit(ChanHit &h)
     if (searchActive)
         lastHit = sys->getTime();
 
-    ChanHitList *hl = NULL;
+    std::shared_ptr<ChanHitList> hl = NULL;
 
     hl = findHitListByID(h.chanID);
 

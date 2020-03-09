@@ -512,7 +512,7 @@ json JrpcApi::to_json(ChanHit* h)
    };
 }
 
-json::array_t JrpcApi::hostsToJson(ChanHitList* hitList)
+json::array_t JrpcApi::hostsToJson(std::shared_ptr<ChanHitList> hitList)
 {
     json::array_t result;
 
@@ -527,7 +527,7 @@ json::array_t JrpcApi::hostsToJson(ChanHitList* hitList)
     return result;
 }
 
-json JrpcApi::to_json(ChanHitList* hitList)
+json JrpcApi::to_json(std::shared_ptr<ChanHitList> hitList)
 {
     ChanInfo info = hitList->info;
     return {
@@ -563,7 +563,7 @@ json JrpcApi::getChannelsFound(json::array_t)
 
     chanMgr->lock.lock();
 
-    for (ChanHitList *hitList = chanMgr->hitlist;
+    for (auto hitList = chanMgr->hitlist;
          hitList;
          hitList = hitList->next)
     {
@@ -771,7 +771,7 @@ json JrpcApi::getChannelRelayTree(json::array_t args)
     if (!channel)
         throw application_error(kChannelNotFound, "Channel not found");
 
-    ChanHitList *hitList = chanMgr->findHitListByID(id);
+    auto hitList = chanMgr->findHitListByID(id);
     if (!hitList)
         throw application_error(kUnknownError, "Hit list not found");
 

@@ -177,7 +177,7 @@ bool Template::writeLoopVariable(Stream &s, const String &varName, int loop)
         {
             GnuID id;
             id.fromStr(idstr);
-            ChanHitList *chl = chanMgr->findHitListByID(id);
+            auto chl = chanMgr->findHitListByID(id);
             if (chl)
             {
                 int cnt=0;

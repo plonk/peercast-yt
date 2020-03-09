@@ -418,7 +418,7 @@ TEST_F(ServentFixture, handshakeStream_returnResponse_channelNotFound)
     bool chanFound = false;
     bool chanReady = false;
     std::shared_ptr<Channel> ch = nullptr;
-    ChanHitList* chl = nullptr;
+    std::shared_ptr<ChanHitList> chl = nullptr;
     const ChanInfo chanInfo;
 
     ASSERT_FALSE(
@@ -432,7 +432,7 @@ TEST_F(ServentFixture, handshakeStream_returnResponse_channelNotReady_relay)
     bool chanFound = true;
     bool chanReady = false;
     std::shared_ptr<Channel> ch = nullptr;
-    ChanHitList* chl = nullptr;
+    std::shared_ptr<ChanHitList> chl = nullptr;
     const ChanInfo chanInfo;
 
     s.outputProtocol = ChanInfo::SP_PCP;
@@ -448,7 +448,7 @@ TEST_F(ServentFixture, handshakeStream_returnResponse_channelNotReady_direct)
     bool chanFound = true;
     bool chanReady = false;
     std::shared_ptr<Channel> ch = nullptr;
-    ChanHitList* chl = nullptr;
+    std::shared_ptr<ChanHitList> chl = nullptr;
     const ChanInfo chanInfo;
 
     s.outputProtocol = ChanInfo::SP_HTTP;
@@ -463,7 +463,7 @@ TEST_F(ServentFixture, handshakeStream_returnResponse_channelReady_relay)
     bool chanFound = true;
     bool chanReady = true;
     std::shared_ptr<Channel> ch = nullptr;
-    ChanHitList* chl = nullptr;
+    std::shared_ptr<ChanHitList> chl = nullptr;
     const ChanInfo chanInfo;
 
     s.outputProtocol = ChanInfo::SP_PCP;
@@ -479,7 +479,7 @@ TEST_F(ServentFixture, handshakeStream_returnResponse_channelReady_direct)
     bool chanFound = true;
     bool chanReady = true;
     std::shared_ptr<Channel> ch = nullptr;
-    ChanHitList* chl = nullptr;
+    std::shared_ptr<ChanHitList> chl = nullptr;
     const ChanInfo chanInfo;
 
     s.outputProtocol = ChanInfo::SP_HTTP;
@@ -504,7 +504,7 @@ TEST_F(ServentFixture, handshakeStream_returnHits)
 {
     AtomStream atom(*mock);
     GnuID channelID;
-    ChanHitList* chl = nullptr;
+    std::shared_ptr<ChanHitList> chl = nullptr;
     Host rhost;
 
     s.handshakeStream_returnHits(atom, channelID, chl, rhost);

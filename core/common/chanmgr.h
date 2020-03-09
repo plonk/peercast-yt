@@ -72,9 +72,9 @@ public:
     void    deadHit(ChanHit &);
     void    setFirewalled(Host &);
 
-    ChanHitList *findHitList(ChanInfo &);
-    ChanHitList *findHitListByID(const GnuID &);
-    ChanHitList *addHitList(ChanInfo &);
+    std::shared_ptr<ChanHitList> findHitList(ChanInfo &);
+    std::shared_ptr<ChanHitList> findHitListByID(const GnuID &);
+    std::shared_ptr<ChanHitList> addHitList(ChanInfo &);
 
     void        clearHitLists();
     void        clearDeadHits(bool);
@@ -98,7 +98,7 @@ public:
     std::string authToken(const GnuID& id);
 
     std::shared_ptr<Channel> channel;
-    ChanHitList     *hitlist;
+    std::shared_ptr<ChanHitList> hitlist;
 
     GnuID           broadcastID;
 

@@ -764,7 +764,7 @@ static void  writeRelayChannel(IniFileBase &iniFile, std::shared_ptr<Channel> c)
     iniFile.writeBoolValue("stayConnected", c->stayConnected);
 
     // トラッカーIPの書き出し。
-    ChanHitList *chl = chanMgr->findHitListByID(c->info.id);
+    auto chl = chanMgr->findHitListByID(c->info.id);
     if (chl)
     {
         ChanHitSearch chs;

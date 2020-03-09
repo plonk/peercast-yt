@@ -1283,7 +1283,7 @@ void Servent::CMD_bump(const char* cmd, HTTP& http, String& jumpStr)
     {
         if (!ip.empty())
         {
-            ChanHitList* chl = chanMgr->findHitList(c->info);
+            auto chl = chanMgr->findHitList(c->info);
             ChanHit theHit;
 
             if (chl)
@@ -1546,7 +1546,7 @@ static std::string dumpChanInfo(const ChanInfo& info)
     return "ChanInfo\n" + indent_tab(b);
 }
 
-static std::string dumpHitList(ChanHitList* hitlist)
+static std::string dumpHitList(std::shared_ptr<ChanHitList> hitlist)
 {
     using namespace str;
 
@@ -1847,7 +1847,7 @@ static XML::Node *createChannelXML(std::shared_ptr<Channel> c)
 }
 
 // -----------------------------------
-static XML::Node *createChannelXML(ChanHitList *chl)
+static XML::Node *createChannelXML(std::shared_ptr<ChanHitList> chl)
 {
     XML::Node *n = chl->info.createChannelXML();
     n->add(chl->createXML());
@@ -1889,7 +1889,7 @@ void Servent::handshakeXML()
         XML::Node *fn = new XML::Node("channels_found total=\"%d\"", chanMgr->numHitLists());
         rn->add(fn);
 
-        ChanHitList *chl = chanMgr->hitlist;
+        auto chl = chanMgr->hitlist;
         while (chl)
         {
             if (chl->isUsed())

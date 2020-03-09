@@ -103,7 +103,7 @@ public:
 };
 
 // ----------------------------------
-class ChanHitList
+class ChanHitList : public std::enable_shared_from_this<ChanHitList>
 {
 public:
     ChanHitList();
@@ -141,7 +141,7 @@ public:
     ChanInfo     info;
     ChanHit      *hit;
     unsigned int lastHitTime;
-    ChanHitList  *next;
+    std::shared_ptr<ChanHitList> next;
 };
 
 // ----------------------------------
