@@ -203,7 +203,6 @@ void Channel::reset()
     srcType = SRC_NONE;
 
     startTime = 0;
-    syncTime = 0;
 }
 
 // -----------------------------------

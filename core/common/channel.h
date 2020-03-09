@@ -287,9 +287,7 @@ public:
     unsigned int        lastTrackerUpdate;
     unsigned int        lastMetaUpdate;
 
-    double              startTime, syncTime;
-
-    WEvent              syncEvent;
+    double              startTime;
 
     mutable std::recursive_mutex lock;
 
