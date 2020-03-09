@@ -320,7 +320,7 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
 
             ch->setStatus(Channel::S_BROADCASTING);
 
-            inputStream->setReadTimeout(60);    // use longer read timeout // 60ミリ秒!?
+            inputStream->setReadTimeout(60000);    // use longer read timeout
 
             source = ch->createSource();
 
