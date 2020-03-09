@@ -83,11 +83,8 @@ TEST_F(ChannelFixture, initialState)
     // unsigned int        lastMetaUpdate;
     ASSERT_EQ(0, c.lastMetaUpdate);
 
-    // double              startTime, syncTime;
+    // double              startTime;
     ASSERT_EQ(0, c.startTime);
-    ASSERT_EQ(0, c.syncTime);
-
-    // WEvent              syncEvent;
 
     // Channel             *next;
     ASSERT_EQ(nullptr, c.next);
