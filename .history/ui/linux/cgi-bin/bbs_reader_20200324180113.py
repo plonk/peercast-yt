@@ -17,11 +17,11 @@ class Board:
     self.resmax = 1000
     self.urlpath = category + "/" + board_num if len(board_num) != 0 else category
 
-    self.__settings_url = ("http://{0}/bbs/api/setting.cgi/{1}" if self.shitaraba else "http://{0}/{1}/SETTING.TXT").format(self.fqdn, self.urlpath)
-    self.__thread_list_url = "http://{0}/{1}/subject.txt".format(self.fqdn, self.urlpath)
+    self.__settings_url = ("http://{0}/api/setting.cgi/{1}" if self.shitaraba else "http://{0}/{1}/SETTING.TXT").format(self.fqdn, self.urlpath)
+    self.__thread_list_url = ("http://jbbs.shitaraba.net/{0}/{1}/subject.txt" if self.shitaraba else "http://{0}/{1}/subject.txt").format(self.fqdn, self.urlpath)
 
   def dat_url(self, thread_num):
-    return ("http://{0}/bbs/rawmode.cgi/{1}/{2}/" if self.shitaraba else "http://{0}/{1}/dat/{2}.dat").format(self.fqdn, self.urlpath, thread_num)
+    return ("http://{0}/bbs/rawmode.cgi/{1}/{2}/" if self.shitaraba else "http://{0}/bbs/rawmode.cgi/{1}/dat/{2}.dat").format(self.fqdn, self.urlpath, thread_num)
 
   def settings(self):
     str = self.download(self.__settings_url)
@@ -46,7 +46,8 @@ class Board:
     p = re.compile("^(\d+)\.cgi,(.+?)\((\d+)\)$" if self.shitaraba else "^(\d+)\.dat<>(.+?)\s\((\d+)\)$")
     for i, line in enumerate(lines):
       m = p.match(line)
-      self.resmax = max(self.resmax, int(m.group(3)))
+      if self.resmax < m.group(3):
+        self.resmax = m.group(3)
       lines[i] = Thread(self, m.group(1), html.unescape(m.group(2)), m.group(3))
     return lines
 
@@ -92,8 +93,6 @@ class Thread:
     lines = self.dat_for_range(r).splitlines()
     for i, line in enumerate(lines):
       lines[i] = Post.from_line(line, self.board.shitaraba)
-      if lines[i].no == 0:
-        lines[i].no = i
       self.last = max(lines[i].no, self.last)
     return lines
 

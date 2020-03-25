@@ -17,7 +17,7 @@ class Board:
     self.resmax = 1000
     self.urlpath = category + "/" + board_num if len(board_num) != 0 else category
 
-    self.__settings_url = ("http://{0}/bbs/api/setting.cgi/{1}" if self.shitaraba else "http://{0}/{1}/SETTING.TXT").format(self.fqdn, self.urlpath)
+    self.__settings_url = ("http://{0}/bbs/api/setting.cgi/{1}/" if self.shitaraba else "http://{0}/{1}/SETTING.TXT").format(self.fqdn, self.urlpath)
     self.__thread_list_url = "http://{0}/{1}/subject.txt".format(self.fqdn, self.urlpath)
 
   def dat_url(self, thread_num):
@@ -51,6 +51,7 @@ class Board:
     return lines
 
   def download(self, url):
+    print(url)
     response = urllib.request.urlopen(url)
     return response.read()
 

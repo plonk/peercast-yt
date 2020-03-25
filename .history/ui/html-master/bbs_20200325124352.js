@@ -25,11 +25,11 @@ function renderPost(p, url_str) {
 }
 
 function boardCgi(url) {
-    return ("/cgi-bin/board.cgi?fqdn="+url.fqdn+"&category="+url.category+"&board_num="+url.board_num);
+    return ("cgi-bin/board.cgi?fqdn="+url.fqdn+"&category="+url.category+"&board_num="+url.board_num);
 }
 
 function threadCgi(url, id) {
-    return ("/cgi-bin/thread.cgi?fqdn="+url.fqdn+"&category="+url.category+"&board_num="+url.board_num+"&id="+id);
+    return ("cgi-bin/thread.cgi?fqdn="+url.fqdn+"&category="+url.category+"&board_num="+url.board_num+"&id="+id);
 }
 
 function boardUrl(url) {
@@ -37,7 +37,7 @@ function boardUrl(url) {
 }
 
 function threadUrl(url) {
-    return (url.protocol+"://"+url.fqdn+"/"+(url.shitaraba ? "bbs" : "test")+"/read.cgi/"+url.category+(url.shitaraba ? "/"+url.board_num+"/" : "/")+url.thread_id);
+    return (url.protocol+"://"+url.fqdn+"/"+(url.shitaraba ? "bbs" : "test")+"/read.cgi/"+category+(url.shitaraba ? "/"+url.board_num+"/" : "/")+url.thread_id);
 }
 
 function newPostsCallback(url, thread) {
@@ -45,7 +45,7 @@ function newPostsCallback(url, thread) {
 
     for (var i = 0; i < thread.posts.length; i++) {
         var p = thread.posts[i];
-        var elements = $(renderPost(p, threadUrl(url)));
+        var elements = $(render(p, renderPost(p, threadUrl(url))));
         dl.append($(elements).hide().show('highlight'));
     }
 
@@ -82,7 +82,7 @@ function threadLinkCallback(url, board_title) {
             if (e.button === 0) {
                 console.log(e.button);
                 e.preventDefault();
-                boardLinkCallback($(this).data('protocol'), $(this).data('fqdn') ,$(this).data('category'), $(this).data('board_num') );
+                boardLinkCallback($(this).data('protocol'), $(this).data('fqdn') ,$(this).data('category'), +($(this).data('board_num')) );
             }
         });
 
@@ -98,7 +98,7 @@ function boardLinkCallback(protocol, fqdn, category, board_num) {
     $('#bbs-view').text("掲示板を読み込み中…");
     $.getJSON("/cgi-bin/board.cgi?fqdn="+fqdn+"&category="+category+"&board_num="+board_num).done(function (board) {
         console.log(board);
-        var url = {};
+        var url;
         url.shitaraba = ~fqdn.indexOf("shitaraba");
         url.protocol = protocol;
         url.fqdn = fqdn;
@@ -111,7 +111,7 @@ function boardLinkCallback(protocol, fqdn, category, board_num) {
         var buf = "";
         for (var i = 0; i < board.threads.length; i++) {
             var t = board.threads[i];
-            var thread_url = url.protocol+"://"+url.fqdn+"/"+(url.shitaraba ? "bbs" : "test")+"/read.cgi/"+url.category+(url.shitaraba ? "/"+url.board_num+"/" : "/")+t.id+"/l50";
+            var thread_url = protocol+"://"+fqdn+"/"+(shitaraba ? "bbs" : "test")+"/read.cgi/"+category+(shitaraba ? "/"+board_num+"/" : "/")+t.id+"/l50";
             buf += "<a href='"+thread_url+"' class='thread-link' data-thread-id="+t.id+">"+h(t.title)+" ("+t.last+")</a><br>";
         }
         $('#bbs-view').html(buf);

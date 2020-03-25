@@ -12,7 +12,7 @@ if "fqdn" not in form or "category" not in form:
   common.print_bad_request("bad parameter")
   sys.exit()
 
-board_num = form["board_num"].value if "board_num" in form else ""
+board_num = form["board_num"].value if form["board_num"].value else ""
 
 board = bbs_reader.Board(form["fqdn"].value, form["category"].value, board_num)
 settings = board.settings()

@@ -111,7 +111,7 @@ function boardLinkCallback(protocol, fqdn, category, board_num) {
         var buf = "";
         for (var i = 0; i < board.threads.length; i++) {
             var t = board.threads[i];
-            var thread_url = url.protocol+"://"+url.fqdn+"/"+(url.shitaraba ? "bbs" : "test")+"/read.cgi/"+url.category+(url.shitaraba ? "/"+url.board_num+"/" : "/")+t.id+"/l50";
+            var thread_url = protocol+"://"+fqdn+"/"+(shitaraba ? "bbs" : "test")+"/read.cgi/"+category+(shitaraba ? "/"+board_num+"/" : "/")+t.id+"/l50";
             buf += "<a href='"+thread_url+"' class='thread-link' data-thread-id="+t.id+">"+h(t.title)+" ("+t.last+")</a><br>";
         }
         $('#bbs-view').html(buf);

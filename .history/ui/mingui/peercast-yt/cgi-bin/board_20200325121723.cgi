@@ -6,13 +6,23 @@ sys.path.append('cgi-bin')
 
 import bbs_reader
 
-form = cgi.FieldStorage()
+class T:
+  def __init__(self, v):
+    self.value = v
+
+form = {
+  'fqdn' : T("jbbs.shitaraba.jp"),
+  'category' : T("game"),
+  'board_num' : T(49115)
+}
+
+#form = cgi.FieldStorage()
 
 if "fqdn" not in form or "category" not in form:
   common.print_bad_request("bad parameter")
   sys.exit()
 
-board_num = form["board_num"].value if "board_num" in form else ""
+board_num = form["board_num"].value if form["board_num"].value else ""
 
 board = bbs_reader.Board(form["fqdn"].value, form["category"].value, board_num)
 settings = board.settings()

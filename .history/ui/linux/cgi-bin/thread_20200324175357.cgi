@@ -17,9 +17,9 @@ if "first" not in form:
 else:
   first = int(form['first'].value)
 
-board_num = form["board_num"].value if "board_num" in form else ""
+board_num = form["board_num"].value if form["board_num"].value else ""
 
-board = bbs_reader.Board(form["fqdn"].value, form["category"].value, board_num)
+board = bbs_reader.Board(form["category"].value, form["board_num"].value)
 thread = board.thread(form["id"].value)
 
 posts = [{
@@ -28,7 +28,7 @@ posts = [{
   "mail":  post.mail,
   "body":  post.body,
   "date":  post.date
-} for post in thread.posts(range(first, board.resmax))]
+} for post in thread.posts(range(first, 1000))]
 
 print("Content-Type: text/json; charset=UTF-8\n")
 print(json.dumps({

@@ -17,7 +17,7 @@ if "first" not in form:
 else:
   first = int(form['first'].value)
 
-board_num = form["board_num"].value if "board_num" in form else ""
+board_num = form["board_num"].value if form["board_num"].value else ""
 
 board = bbs_reader.Board(form["fqdn"].value, form["category"].value, board_num)
 thread = board.thread(form["id"].value)
