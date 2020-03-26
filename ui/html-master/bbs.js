@@ -1,15 +1,5 @@
-var URL_PATTERN = /^(\w+):\/\/((\w|\.|:)+)(\/(.*))?$/
-
-var SHITARABA_URL_PATTERN = /^https?:\/\/jbbs\.shitaraba\.net.*$/
-
-var SHITARABA_THREAD_URL_PATTERN = /^https?:\/\/jbbs\.shitaraba\.net\/bbs\/read\.cgi\/(\w+)\/(\d+)\/(\d+)(:?|\/.*)$/;
-var SHITARABA_BOARD_URL_PATTERN = /^https?:\/\/jbbs\.shitaraba\.net\/(\w+)\/(\d+)\/?$/;
-
-var NICHAN_THREAD_URL_PATTERN = /^https?:\/\/(?!jbbs\.shitaraba\.net)(.+)\/test\/read\.cgi\/(\w+)\/(\d+)\/(:?|\/.*)$/;
-var NICHAN_BOARD_URL_PATTERN = /^https?:\/\/(?!jbbs\.shitaraba\.net)(.+)\/(\w+)\/?$/;
-
 var THREAD_URL_PATTERN = /^(\w+):\/\/([^\/]+)\/(test|bbs)\/read\.cgi\/(\w+)\/(\d+)(\/(\d+))?(:?|\/.*)$/;
-var BOARD_URL_PATTERN = /^(\w+):\/\/([^\/]+)\/(\w+)(\/\d+)?\/?$/;
+var BOARD_URL_PATTERN = /^(\w+):\/\/([^\/]+)\/(\w+)(\/(\d+))?\/?$/;
 
 function renderPost(p, url_str) {
     var buf = "";
@@ -50,12 +40,11 @@ function newPostsCallback(url, thread) {
     }
 
     // 最下部にスクロール。
-    if (posts.length > 0) {
+    if (thread.posts.length > 0) {
         var view = $('#bbs-view');
         view.animate({ scrollTop: view.prop("scrollHeight") - view.height() }, 0);
     }
 
-//////////
     // 次のレス取得をスケジュールする。
     setTimeout(function () {
         $.getJSON(threadCgi(url, thread.id)+"&first="+(thread.last+1),
@@ -67,11 +56,8 @@ function newPostsCallback(url, thread) {
 }
 
 function threadLinkCallback(url, board_title) {
-    var cgi = threadCgi(url, url.thread_id);
-    console.log(cgi);
-    $.getJSON(cgi, function (thread) {
+    $.getJSON(threadCgi(url, url.thread_id), function (thread) {
         console.log(thread);
-        var posts = thread.posts;
         var buf = "";
 
         var board_url = boardUrl(url);
@@ -96,14 +82,9 @@ function threadLinkCallback(url, board_title) {
 
 function boardLinkCallback(protocol, fqdn, category, board_num) {
     $('#bbs-view').text("掲示板を読み込み中…");
-    $.getJSON("/cgi-bin/board.cgi?fqdn="+fqdn+"&category="+category+"&board_num="+board_num).done(function (board) {
+    var url = match_board(["", protocol, fqdn, category, "", board_num]);
+    $.getJSON(boardCgi(url)).done(function (board) {
         console.log(board);
-        var url = {};
-        url.shitaraba = ~fqdn.indexOf("shitaraba");
-        url.protocol = protocol;
-        url.fqdn = fqdn;
-        url.category = board.category;
-        url.board_num = board.board_num;
 
         var board_url = boardUrl(url);
         $('#bbs-title').html("<a target='_blank' href='"+board_url+"'><b>"+h(board.title)+"</b></a>");
@@ -142,27 +123,21 @@ function h(str) {
     });
 }
 
-var thread = {
-    status: "ok",
-    id: 0,
-    title: "hoge",
-    last: "last",
-    posts: []
-}
-var input_url = {
-    shitaraba: true, //false
-    protocol: "",
-    fqdn: "",
-    category: "",
-    board_num: "",
-    thread_id: 0
-}
-
-function thread_url(match) {
+function match_board(match) {
     var url = {};
     url.protocol = match[1];
-    url.shitaraba = ~match[2].indexOf("shitaraba");
     url.fqdn = match[2];
+    url.shitaraba = ~match[2].indexOf("shitaraba");
+    url.category = match[3];
+    url.board_num = url.shitaraba ? match[5] : "";
+    return url;
+}
+
+function match_thread(match) {
+    var url = {};
+    url.protocol = match[1];
+    url.fqdn = match[2];
+    url.shitaraba = ~match[2].indexOf("shitaraba");
     url.category = match[4];
     url.board_num = url.shitaraba ? match[5] : "";
     url.thread_id = url.shitaraba ? match[7] : match[5];
@@ -181,9 +156,10 @@ $(function(){
 
     var match;
     if (match = BOARD_URL_PATTERN.exec(CONTACT_URL)) {
-
+        // スレッドリストを取得する。
+        boardLinkCallback(match[1], match[2], match[3], match[5] ? match[5] : "");
     } else if (match = THREAD_URL_PATTERN.exec(CONTACT_URL)) {
-        var url = thread_url(match);
+        var url = match_thread(match);
         $.getJSON("/cgi-bin/board.cgi?fqdn="+url.fqdn+"&category="+url.category+"&board_num="+url.board_num).done(function (board) {
                 threadLinkCallback(url, board.title);
             });

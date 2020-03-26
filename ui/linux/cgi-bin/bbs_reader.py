@@ -26,17 +26,14 @@ class Board:
   def settings(self):
     str = self.download(self.__settings_url)
     try:
-      if self.shitaraba:
-        str = str.decode("EUC-JP")
-      else:
-        str = str.decode("Shift_JIS")
+      str = str.decode("EUC-JP" if self.shitaraba else "Shift_JIS")
     except:
       str = str.decode("UTF-8")
     return self.__parse_settings(str)
 
   def thread_list(self):
     str = self.download(self.__thread_list_url)
-    return str.decode("EUC-JP") if self.shitaraba else str.decode("Shift_JIS")
+    return str.decode("EUC-JP" if self.shitaraba else "Shift_JIS")
 
   def thread(self, thread_num):
     return next((t for t in self.threads() if t.id == thread_num), None)
