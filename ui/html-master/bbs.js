@@ -1,9 +1,9 @@
 var THREAD_URL_PATTERN = /^(\w+):\/\/([^\/]+)\/(test|bbs)\/read\.cgi\/(\w+)\/(\d+)(\/(\d+))?(:?|\/.*)$/;
 var BOARD_URL_PATTERN = /^(\w+):\/\/([^\/]+)\/(\w+)(\/(\d+))?\/?$/;
 
-function renderPost(p, url_str) {
+function renderPost(p, url) {
     var buf = "";
-    buf += "<dt><a target='_blank' href='"+url_str+"/"+p.no+"'>"+p.no+"</a>：";
+    buf += "<dt><a target='_blank' href='"+threadUrl(url)+"/"+p.no+"'>"+p.no+"</a>：";
     if (p.mail !== "")
         buf += "<a href='mailto:"+p.mail+"'>";
     buf += "<b>"+p.name+"</b>";
@@ -35,7 +35,7 @@ function newPostsCallback(url, thread) {
 
     for (var i = 0; i < thread.posts.length; i++) {
         var p = thread.posts[i];
-        var elements = $(renderPost(p, threadUrl(url)));
+        var elements = $(renderPost(p, url));
         dl.append($(elements).hide().show('highlight'));
     }
 
