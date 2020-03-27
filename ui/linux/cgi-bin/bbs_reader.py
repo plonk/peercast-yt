@@ -9,35 +9,41 @@ def print_bad_request(message):
 
 class Board:
 
-  def __init__(self, category, board_num):
+  def __init__(self, fqdn, category, board_num):
+    self.fqdn = fqdn
+    self.shitaraba = "jbbs.shitaraba.net" in fqdn
     self.category = category
     self.board_num = board_num
-    self.__settings_url = "http://jbbs.shitaraba.net/bbs/api/setting.cgi/{0}/{1}/".format(category, board_num)
-    self.__thread_list_url = "http://jbbs.shitaraba.net/{0}/{1}/subject.txt".format(category, board_num)
+    self.resmax = 1000
+    self.urlpath = category + "/" + board_num if len(board_num) != 0 else category
+
+    self.__settings_url = ("http://{0}/bbs/api/setting.cgi/{1}" if self.shitaraba else "http://{0}/{1}/SETTING.TXT").format(self.fqdn, self.urlpath)
+    self.__thread_list_url = "http://{0}/{1}/subject.txt".format(self.fqdn, self.urlpath)
 
   def dat_url(self, thread_num):
-    return "http://jbbs.shitaraba.net/bbs/rawmode.cgi/{0}/{1}/{2}/".format(self.category, self.board_num, thread_num)
+    return ("http://{0}/bbs/rawmode.cgi/{1}/{2}/" if self.shitaraba else "http://{0}/{1}/dat/{2}.dat").format(self.fqdn, self.urlpath, thread_num)
 
   def settings(self):
     str = self.download(self.__settings_url)
     try:
-      str = str.decode("EUC-JP")
+      str = str.decode("EUC-JP" if self.shitaraba else "Shift_JIS")
     except:
       str = str.decode("UTF-8")
     return self.__parse_settings(str)
 
   def thread_list(self):
     str = self.download(self.__thread_list_url)
-    return str.decode("EUC-JP")
+    return str.decode("EUC-JP" if self.shitaraba else "Shift_JIS")
 
   def thread(self, thread_num):
     return next((t for t in self.threads() if t.id == thread_num), None)
 
   def threads(self):
     lines = self.thread_list().splitlines()
-    p = re.compile("^(\d+)\.cgi,(.+?)\((\d+)\)$")
+    p = re.compile("^(\d+)\.cgi,(.+?)\((\d+)\)$" if self.shitaraba else "^(\d+)\.dat<>(.+?)\s\((\d+)\)$")
     for i, line in enumerate(lines):
       m = p.match(line)
+      self.resmax = max(self.resmax, int(m.group(3)))
       lines[i] = Thread(self, m.group(1), html.unescape(m.group(2)), m.group(3))
     return lines
 
@@ -53,9 +59,13 @@ class Board:
 class Post:
 
   @classmethod
-  def from_line(cls, line):
-    lines = line.split('<>', 6)
-    return cls(lines[0], lines[1], lines[2], lines[3], lines[4])
+  def from_line(cls, line, shitaraba):
+    if shitaraba:
+      lines = line.split('<>', 6)
+      return cls(lines[0], lines[1], lines[2], lines[3], lines[4])
+    else:
+      lines = line.split('<>', 4)
+      return cls(0, lines[0], lines[1], lines[2], lines[3])
 
   def __init__(self, no, name, mail, date, body):
     self.no = int(no)
@@ -78,14 +88,19 @@ class Thread:
   def posts(self, r):
     lines = self.dat_for_range(r).splitlines()
     for i, line in enumerate(lines):
-      lines[i] = Post.from_line(line)
+      lines[i] = Post.from_line(line, self.board.shitaraba)
+      if lines[i].no == 0:
+        lines[i].no = i+1
       self.last = max(lines[i].no, self.last)
     return lines
 
   def dat_for_range(self, r):
-    if r.stop >= 1000:
-      query = "{0}-".format(r.start)
+    if self.board.shitaraba:
+      if r.stop >= self.board.resmax:
+        query = "{0}-".format(r.start)
+      else:
+        query = "{0}-{1}".format(r.start, r.stop)
+      url = self.dat_url() + query
     else:
-      query = "{0}-{1}".format(r.start, r.stop)
-    url = self.dat_url() + query
-    return self.board.download(url).decode("EUC-JP")
+      url = self.dat_url()
+    return self.board.download(url).decode("EUC-JP" if self.board.shitaraba else "Shift_JIS")

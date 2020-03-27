@@ -1,10 +1,9 @@
-var SHITARABA_THREAD_URL_PATTERN = /^https?:\/\/jbbs\.shitaraba\.net\/bbs\/read\.cgi\/(\w+)\/(\d+)\/(\d+)(:?|\/.*)$/;
-var SHITARABA_BOARD_URL_PATTERN = /^https?:\/\/jbbs\.shitaraba\.net\/(\w+)\/(\d+)\/?$/;
+var THREAD_URL_PATTERN = /^(\w+):\/\/([^\/]+)\/(test|bbs)\/read\.cgi\/(\w+)\/(\d+)(\/(\d+))?(:?|\/.*)$/;
+var BOARD_URL_PATTERN = /^(\w+):\/\/([^\/]+)\/(\w+)(\/(\d+))?\/?$/;
 
-function renderPost(p, category, board_num, thread_id) {
+function renderPost(p, url) {
     var buf = "";
-    var url = "http://jbbs.shitaraba.net/bbs/read.cgi/"+category+"/"+board_num+"/"+thread_id+"/"+p.no;
-    buf += "<dt><a target='_blank' href='"+url+"'>"+p.no+"</a>：";
+    buf += "<dt><a target='_blank' href='"+threadUrl(url)+"/"+p.no+"'>"+p.no+"</a>：";
     if (p.mail !== "")
         buf += "<a href='mailto:"+p.mail+"'>";
     buf += "<b>"+p.name+"</b>";
@@ -15,48 +14,61 @@ function renderPost(p, category, board_num, thread_id) {
     return buf;
 }
 
-function newPostsCallback(posts, category, board_num, thread) {
+function boardCgi(url) {
+    return ("/cgi-bin/board.cgi?fqdn="+url.fqdn+"&category="+url.category+"&board_num="+url.board_num);
+}
+
+function threadCgi(url, id) {
+    return ("/cgi-bin/thread.cgi?fqdn="+url.fqdn+"&category="+url.category+"&board_num="+url.board_num+"&id="+id);
+}
+
+function boardUrl(url) {
+    return (url.protocol+"://"+url.fqdn+"/"+url.category+"/"+url.board_num);
+}
+
+function threadUrl(url) {
+    return (url.protocol+"://"+url.fqdn+"/"+(url.shitaraba ? "bbs" : "test")+"/read.cgi/"+url.category+(url.shitaraba ? "/"+url.board_num+"/" : "/")+url.thread_id);
+}
+
+function newPostsCallback(url, thread) {
     var dl = $('#bbs-view > dl.thread');
 
-    for (var i = 0; i < posts.length; i++) {
-        var p = posts[i];
-        var elements = $(renderPost(p, category, board_num, thread.id));
+    for (var i = 0; i < thread.posts.length; i++) {
+        var p = thread.posts[i];
+        var elements = $(renderPost(p, url));
         dl.append($(elements).hide().show('highlight'));
     }
 
     // 最下部にスクロール。
-    if (posts.length > 0) {
+    if (thread.posts.length > 0) {
         var view = $('#bbs-view');
         view.animate({ scrollTop: view.prop("scrollHeight") - view.height() }, 0);
     }
 
     // 次のレス取得をスケジュールする。
     setTimeout(function () {
-        $.getJSON("/cgi-bin/thread.cgi?category="+category+"&board_num="+board_num+"&id="+thread.id+"&first="+(thread.last+1),
+        $.getJSON(threadCgi(url, thread.id)+"&first="+(thread.last+1),
                   function (thread) {
                       console.log(thread);
-                      newPostsCallback(thread.posts, category, board_num, thread);
+                      newPostsCallback(url, thread);
                   });
     }, 7 * 1000);
 }
 
-function threadLinkCallback(category, board_num, board_title, thread_id) {
-    var url = "/cgi-bin/thread.cgi?category="+category+"&board_num="+board_num+"&id="+thread_id;
-    console.log(url);
-    $.getJSON(url, function (thread) {
+function threadLinkCallback(url, board_title) {
+    $.getJSON(threadCgi(url, url.thread_id), function (thread) {
         console.log(thread);
-        var posts = thread.posts;
         var buf = "";
 
-        var board_url = "http://jbbs.shitaraba.net/"+category+"/"+board_num+"/";
-        var thread_url = "http://jbbs.shitaraba.net/bbs/read.cgi/"+category+"/"+board_num+"/"+thread_id;
-        $('#bbs-title').html("<a class='board-link' href='"+board_url+"' data-category='"+category+"' data-board_num='"+board_num+"'>"+h(board_title)+"</a> &raquo; <b>"+"<a target='_blank' href='"+thread_url+"/l5#form_write'>"+h(thread.title)+"</a></b>");
+        var board_url = boardUrl(url);
+        var thread_url = threadUrl(url);
+        $('#bbs-title').html("<a class='board-link' href='"+board_url+"' data-protocol='"+url.protocol+"' data-fqdn='"+url.fqdn+"' data-category='"+url.category+"' data-board_num='"+url.board_num+"'>"+h(board_title)+"</a> &raquo; <b>"+"<a target='_blank' href='"+thread_url+"/l5#form_write'>"+h(thread.title)+"</a></b>");
 
         $('.board-link').on('click', function (e) {
             if (e.button === 0) {
                 console.log(e.button);
                 e.preventDefault();
-                boardLinkCallback($(this).data('category'), +($(this).data('board_num')));
+                boardLinkCallback($(this).data('protocol'), $(this).data('fqdn') ,$(this).data('category'), $(this).data('board_num') );
             }
         });
 
@@ -64,29 +76,32 @@ function threadLinkCallback(category, board_num, board_title, thread_id) {
         buf += "</dl>";
         $('#bbs-view').html(buf);
 
-        newPostsCallback(posts, category, board_num, thread);
+        newPostsCallback(url, thread);
     });
 }
 
-function boardLinkCallback(category, board_num) {
+function boardLinkCallback(protocol, fqdn, category, board_num) {
     $('#bbs-view').text("掲示板を読み込み中…");
-    $.getJSON("/cgi-bin/board.cgi?category="+category+"&board_num="+board_num).done(function (board) {
+    var url = match_board(["", protocol, fqdn, category, "", board_num]);
+    $.getJSON(boardCgi(url)).done(function (board) {
         console.log(board);
 
-        var board_url = "http://jbbs.shitaraba.net/"+category+"/"+board_num+"/";
+        var board_url = boardUrl(url);
         $('#bbs-title').html("<a target='_blank' href='"+board_url+"'><b>"+h(board.title)+"</b></a>");
 
         var buf = "";
         for (var i = 0; i < board.threads.length; i++) {
             var t = board.threads[i];
-            var thread_url = "http://jbbs.shitaraba.net/bbs/read.cgi/"+category+"/"+board_num+"/"+t.id+"/l50";
+            var thread_url = url.protocol+"://"+url.fqdn+"/"+(url.shitaraba ? "bbs" : "test")+"/read.cgi/"+url.category+(url.shitaraba ? "/"+url.board_num+"/" : "/")+t.id+"/l50";
             buf += "<a href='"+thread_url+"' class='thread-link' data-thread-id="+t.id+">"+h(t.title)+" ("+t.last+")</a><br>";
         }
         $('#bbs-view').html(buf);
 
         $('.thread-link').on('click', function (e) {
             if (e.button === 0) {
-                threadLinkCallback(board.category, board.board_num, board.title, $(this).data("thread-id"));
+                
+                url.thread_id = $(this).data("thread-id");
+                threadLinkCallback(url, board.title);
                 e.preventDefault();
             }
         });
@@ -108,6 +123,27 @@ function h(str) {
     });
 }
 
+function match_board(match) {
+    var url = {};
+    url.protocol = match[1];
+    url.fqdn = match[2];
+    url.shitaraba = ~match[2].indexOf("shitaraba");
+    url.category = match[3];
+    url.board_num = url.shitaraba ? match[5] : "";
+    return url;
+}
+
+function match_thread(match) {
+    var url = {};
+    url.protocol = match[1];
+    url.fqdn = match[2];
+    url.shitaraba = ~match[2].indexOf("shitaraba");
+    url.category = match[4];
+    url.board_num = url.shitaraba ? match[5] : "";
+    url.thread_id = url.shitaraba ? match[7] : match[5];
+    return url;
+}
+
 $(function(){
     // チャット表示切り替えチェックボックスの挙動。
     $('#chat-visibility').on('change', function() {
@@ -119,13 +155,14 @@ $(function(){
     });
 
     var match;
-    if (match = SHITARABA_BOARD_URL_PATTERN.exec(CONTACT_URL)) {
+    if (match = BOARD_URL_PATTERN.exec(CONTACT_URL)) {
         // スレッドリストを取得する。
-        boardLinkCallback(match[1], match[2]);
-    } else if (match = SHITARABA_THREAD_URL_PATTERN.exec(CONTACT_URL)) {
-        $.getJSON("/cgi-bin/board.cgi?category="+match[1]+"&board_num="+match[2]).done(function (board) {
-            threadLinkCallback(match[1], match[2], board.title, match[3]);
-        });
+        boardLinkCallback(match[1], match[2], match[3], match[5] ? match[5] : "");
+    } else if (match = THREAD_URL_PATTERN.exec(CONTACT_URL)) {
+        var url = match_thread(match);
+        $.getJSON("/cgi-bin/board.cgi?fqdn="+url.fqdn+"&category="+url.category+"&board_num="+url.board_num).done(function (board) {
+                threadLinkCallback(url, board.title);
+            });
     } else if (CONTACT_URL === "") {
         $("#bbs-title").text("n/a");
         $('#bbs-view').html("コンタクトURLがありません。");
