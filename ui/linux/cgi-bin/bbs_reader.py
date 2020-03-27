@@ -90,7 +90,7 @@ class Thread:
     for i, line in enumerate(lines):
       lines[i] = Post.from_line(line, self.board.shitaraba)
       if lines[i].no == 0:
-        lines[i].no = i
+        lines[i].no = i+1
       self.last = max(lines[i].no, self.last)
     return lines
 
