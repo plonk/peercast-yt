@@ -224,7 +224,7 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
     HTTPHeaders headers;
     int statusCode = 200;
     try {
-        Regexp headerPattern("\\A([A-Za-z\\-]+):\\s*(.*)\\z");
+        Regexp headerPattern("^([A-Za-z\\-]+):\\s*(.*)$");
         std::string line;
         while ((line = stream.readLine(8192)) != "")
         {
@@ -1635,7 +1635,7 @@ void Servent::CMD_add_speedtest(const char* cmd, HTTP& http, String& jumpStr)
 
 static bool isDecimal(const std::string& str)
 {
-    static const Regexp decimal("\\A(0|[1-9][0-9]*)\\z");
+    static const Regexp decimal("^(0|[1-9][0-9]*)$");
     return decimal.matches(str);
 }
 
