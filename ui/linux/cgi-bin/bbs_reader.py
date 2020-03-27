@@ -19,6 +19,7 @@ class Board:
 
     self.__settings_url = ("http://{0}/bbs/api/setting.cgi/{1}" if self.shitaraba else "http://{0}/{1}/SETTING.TXT").format(self.fqdn, self.urlpath)
     self.__thread_list_url = "http://{0}/{1}/subject.txt".format(self.fqdn, self.urlpath)
+    self.external_encoding = "EUC-JP" if self.shitaraba else "CP932"
 
   def dat_url(self, thread_num):
     return ("http://{0}/bbs/rawmode.cgi/{1}/{2}/" if self.shitaraba else "http://{0}/{1}/dat/{2}.dat").format(self.fqdn, self.urlpath, thread_num)
@@ -26,14 +27,14 @@ class Board:
   def settings(self):
     str = self.download(self.__settings_url)
     try:
-      str = str.decode("EUC-JP" if self.shitaraba else "Shift_JIS")
+      str = str.decode(self.external_encoding)
     except:
       str = str.decode("UTF-8")
     return self.__parse_settings(str)
 
   def thread_list(self):
     str = self.download(self.__thread_list_url)
-    return str.decode("EUC-JP" if self.shitaraba else "Shift_JIS")
+    return str.decode(self.external_encoding)
 
   def thread(self, thread_num):
     return next((t for t in self.threads() if t.id == thread_num), None)
@@ -90,7 +91,7 @@ class Thread:
     for i, line in enumerate(lines):
       lines[i] = Post.from_line(line, self.board.shitaraba)
       if lines[i].no == 0:
-        lines[i].no = i+1
+        lines[i].no = i+r.start
       self.last = max(lines[i].no, self.last)
     return lines
 
@@ -101,6 +102,8 @@ class Thread:
       else:
         query = "{0}-{1}".format(r.start, r.stop)
       url = self.dat_url() + query
+      return self.board.download(url).decode(self.board.external_encoding)
     else:
       url = self.dat_url()
-    return self.board.download(url).decode("EUC-JP" if self.board.shitaraba else "Shift_JIS")
+      lines = self.board.download(url).decode(self.board.external_encoding).splitlines()
+      return "".join(map(lambda line: line + "\n", lines[r.start-1:]))
