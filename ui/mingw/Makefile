@@ -22,8 +22,8 @@ CORE = ../../core
 RTMP = ../../rtmp-server
 SRCHTMLTAR = ../html.tar
 HTML = html
-ASSETS = ../linux/assets
-CGIBIN = ../linux/cgi-bin
+ASSETS = ../assets/
+CGIBIN = ../cgi-bin/
 
 LIBOBJSTATIC = libpeercast.a
 
