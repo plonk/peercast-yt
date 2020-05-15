@@ -42,7 +42,6 @@ void u2t_copy(TCHAR* dest, const char* src);
 // --------------------------------------------------
 static const int logID    = IDC_LIST1,
                  statusID = IDC_LIST2,
-                 hitID    = IDC_LIST4,
                  chanID   = IDC_LIST3;
 
 // --------------------------------------------------
@@ -158,15 +157,6 @@ void ADDCHAN(void *d, const char *fmt, ...)
 }
 
 // --------------------------------------------------
-void ADDHIT(void *d, const char *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    ADDLOG2(fmt, ap, hitID, false, d, LogBuffer::T_NONE);
-    va_end(ap);
-}
-
-// --------------------------------------------------
 void ADDCONN(void *d, const char *fmt, ...)
 {
     va_list ap;
@@ -233,32 +223,6 @@ THREAD_PROC showConnections(ThreadInfo *thread)
                 SendDlgItemMessage(guiWnd, chanID, LB_SETCURSEL, sel, 0);
             if (top >= 0)
                 SendDlgItemMessage(guiWnd, chanID, LB_SETTOPINDEX, top, 0);
-        }
-
-        bool update = ((sys->getTime() - chanMgr->lastHit) < 3)||(!shownChannels);
-        if (update) {
-            shownChannels = true;
-            {
-                sel = SendDlgItemMessage(guiWnd, hitID, LB_GETCURSEL, 0, 0);
-                top = SendDlgItemMessage(guiWnd, hitID, LB_GETTOPINDEX, 0, 0);
-                SendDlgItemMessage(guiWnd, hitID, LB_RESETCONTENT, 0, 0);
-
-                for (auto chl = chanMgr->hitlist; chl; chl = chl->next) {
-                    if (chl->isUsed() && chl->info.match(chanMgr->searchInfo)) {
-                        ADDHIT(chl,
-                               "%s - %d kb/s - %d/%d",
-                               chl->info.name.cstr(),
-                               chl->info.bitrate,
-                               chl->numListeners(),
-                               chl->numHits());
-                    }
-                }
-            }
-
-            if (sel >= 0)
-                SendDlgItemMessage(guiWnd, hitID, LB_SETCURSEL, sel, 0);
-            if (top >= 0)
-                SendDlgItemMessage(guiWnd, hitID, LB_SETTOPINDEX, top, 0);
         }
 
         {
@@ -465,21 +429,6 @@ LRESULT CALLBACK GUIProc (HWND hwnd, UINT message,
             }
 
             break;
-        case IDC_BUTTON4:		// get channel
-            {
-                ChanHitList *chl = (ChanHitList *)getListBoxSelData(hitID);
-                if (chl) {
-                    if (!chanMgr->findChannelByID(chl->info.id)) {
-                        auto c = chanMgr->createChannel(chl->info, NULL);
-                        if (c)
-                            c->startGet();
-                    }
-                }else{
-                    MessageBox(hwnd, TEXT("Please select a channel"), TEXT("PeerCast"), MB_OK);
-                }
-            }
-            break;
-
 
         case IDC_BUTTON1:		// clear log
             SendDlgItemMessage(guiWnd, logID, LB_RESETCONTENT, 0, 0);
@@ -489,7 +438,6 @@ LRESULT CALLBACK GUIProc (HWND hwnd, UINT message,
             {
                 char str[64];
                 SendDlgItemMessage(hwnd, IDC_EDIT2, WM_GETTEXT, 64, (LPARAM)str);
-                SendDlgItemMessage(hwnd, hitID, LB_RESETCONTENT, 0, 0);
                 ChanInfo info;
                 info.init();
                 info.name.set(str);
