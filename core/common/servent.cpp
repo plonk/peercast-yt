@@ -816,7 +816,6 @@ void Servent::handshakeStream_returnHits(AtomStream& atom,
 
 // -----------------------------------
 bool Servent::handshakeStream_returnResponse(bool gotPCP,
-                                             bool chanFound, // ヒットリストが存在する。
                                              bool chanReady, // ストリーム可能である。
                                              std::shared_ptr<Channel> ch,
                                              ChanHitList* chl,
@@ -825,15 +824,13 @@ bool Servent::handshakeStream_returnResponse(bool gotPCP,
     Host rhost = sock->host;
     AtomStream atom(*sock);
 
-    if (!chanFound)
+    if (!chl)
     {
         sock->writeLine(HTTP_SC_NOTFOUND);
         sock->writeLine("");
         LOG_DEBUG("Sending channel not found");
         return false;
-    }
-
-    if (!chanReady)       // cannot stream
+    }else if (!chanReady)       // cannot stream
     {
         if (outputProtocol == ChanInfo::SP_PCP)    // relay stream
         {
@@ -889,7 +886,6 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
     handshakeStream_readHeaders(gotPCP, reqPos, nsSwitchNum);
     handshakeStream_changeOutputProtocol(gotPCP, chanInfo);
 
-    bool chanFound = false;
     bool chanReady = false;
 
     auto ch = chanMgr->findChannelByID(chanInfo.id);
@@ -968,12 +964,8 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
     }
 
     ChanHitList *chl = chanMgr->findHitList(chanInfo);
-    if (chl)
-    {
-        chanFound = true;
-    }
 
-    return handshakeStream_returnResponse(gotPCP, chanFound, chanReady, ch, chl, chanInfo);
+    return handshakeStream_returnResponse(gotPCP, chanReady, ch, chl, chanInfo);
 }
 
 // -----------------------------------

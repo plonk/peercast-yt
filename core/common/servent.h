@@ -180,7 +180,7 @@ public:
     bool    handshakeStream(ChanInfo &);
     void    handshakeStream_readHeaders(bool& gotPCP, unsigned int& reqPos, int& nsSwitchNum);
     void    handshakeStream_changeOutputProtocol(bool gotPCP, const ChanInfo& chanInfo);
-    bool    handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool chanReady,
+    bool    handshakeStream_returnResponse(bool gotPCP, bool chanReady,
                                            std::shared_ptr<Channel> ch, ChanHitList* chl,
                                            const ChanInfo& chanInfo);
     void    handshakeStream_returnStreamHeaders(AtomStream& atom,
