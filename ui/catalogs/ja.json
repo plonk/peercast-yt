@@ -282,5 +282,9 @@
     "Small icon of a megaphone" : "メガホンの小さなアイコン",
     "Rank" : "順位",
     "Yellow Pages"            : "イエローページ",
+
+    // Templates/player.html
+    "Unmute": "ミュート解除",
+    
     "":""
 }
