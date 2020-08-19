@@ -90,7 +90,7 @@ namespace rtmpserver
 
             std::string t = to_bytes_big_endian(timestamp, 3);
             std::string l = to_bytes_big_endian(length, 3);
-            std::string s = to_bytes_big_endian(stream_id, 4);
+            std::string s = to_bytes_little_endian(stream_id, 4);
             return t + l + std::string({ (char)type }) + s;
         }
     };
