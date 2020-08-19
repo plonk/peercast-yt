@@ -102,8 +102,8 @@ int FLVStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
         break;
     case FLVTag::T_VIDEO:
         // AVC Header
-        if (flvTag.data[0] == 0x17 && flvTag.data[1] == 0x00 &&
-            flvTag.data[2] == 0x00 && flvTag.data[3] == 0x00) {
+        if (avcHeader.type == FLVTag::T_UNKNOWN) {
+            LOG_DEBUG("Got AVC header");
             avcHeader = flvTag;
             if (avcHeader.getTimestamp() != 0)
             {
@@ -115,7 +115,8 @@ int FLVStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
         break;
     case FLVTag::T_AUDIO:
         // AAC Header
-        if (flvTag.data[0] == 0xaf && flvTag.data[1] == 0x00) {
+        if (aacHeader.type == FLVTag::T_UNKNOWN) {
+            LOG_DEBUG("Got AAC header");
             aacHeader = flvTag;
             if (aacHeader.getTimestamp() != 0)
             {
