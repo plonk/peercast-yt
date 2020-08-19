@@ -19,30 +19,21 @@ int  RTMPClientStream::read(void *buffer, int len)
 {
     if (len == 0) return 0;
 
-    if (len <= m_buffer.size())
+    int rem = len;
+    while (rem > 0)
     {
-        std::copy(m_buffer.begin(), m_buffer.begin() + len, (char*)buffer);
-        m_buffer.erase(m_buffer.begin(), m_buffer.begin() + len);
-        return len;
-    }else
-    {
-        getNextPacket();
-        return read(buffer, len);
+        int nsize = RTMP_Read(&m_rtmp, (char*) buffer, rem);
+        if (nsize == 0)
+        {
+            m_eof = true;
+            throw StreamException("End of stream");
+        }
+
+        updateTotals(nsize, 0);
+        rem -= nsize;
+        buffer = (char*) buffer + nsize;
     }
-}
-
-void RTMPClientStream::getNextPacket()
-{
-    int nsize = RTMP_Read(&m_rtmp, m_packetData, kMaxPacketSize);
-
-    if (nsize == 0)
-    {
-        m_eof = true;
-        throw StreamException("End of stream");
-    }
-
-    std::copy(m_packetData, m_packetData + nsize, std::back_inserter(m_buffer));
-    updateTotals(nsize, 0);
+    return len;
 }
 
 #endif
