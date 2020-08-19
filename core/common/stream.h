@@ -204,7 +204,7 @@ public:
 
     int     readBits(int);
 
-    void    updateTotals(unsigned int, unsigned int);
+    void    updateTotals(unsigned int in, unsigned int out);
 
     unsigned char   bitsBuffer;
     unsigned int    bitsPos;
