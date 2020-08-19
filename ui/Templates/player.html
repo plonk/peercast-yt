@@ -1,34 +1,36 @@
 {@if page.channel.type == "FLV"}
   {@if page.player != "flash" }
-    <div class="message" style="text-align: center; position: relative">
-    <script src="/assets/js/flv.min.js"></script>
-    <video id="videoElement" controls autoplay>
-      {#Your browser doesn't seem to support playback of FLV videos.} {#Try the playlist link below.}
-    </video>
-    <button id="unmuteButton" style="position: absolute; left: calc(50% - 50px); top: calc(50% - 15px); width: 100px; height: 30px">{#Unmute}</button>
-    <script>
-     if (flvjs.isSupported()) {
-       var videoElement = document.getElementById('videoElement');
-       var unmuteButton = document.getElementById('unmuteButton');
-       unmuteButton.style.visibility = "hidden";
-       unmuteButton.addEventListener('click', function(){
+    <div class="message" style="text-align: center">
+      <script src="/assets/js/flv.min.js"></script>
+      <div style="position: relative">
+        <video id="videoElement" controls autoplay>
+          {#Your browser doesn't seem to support playback of FLV videos.} {#Try the playlist link below.}
+        </video>
+        <button id="unmuteButton" style="position: absolute; left: calc(50% - 75px); top: calc(50% - 15px); width: 150px; height: 30px">{#Unmute}</button>
+      </div>
+      <script>
+       if (flvjs.isSupported()) {
+         var videoElement = document.getElementById('videoElement');
+         var unmuteButton = document.getElementById('unmuteButton');
          unmuteButton.style.visibility = "hidden";
-         videoElement.muted = false;
-       });
-       var flvPlayer = flvjs.createPlayer({
-         type: 'flv',
-         isLive: true,
-         url: '/stream/{$page.channel.id}.flv'
-       });
-       flvPlayer.attachMediaElement(videoElement);
-       flvPlayer.load();
-       flvPlayer.play().catch(error => {
-         videoElement.muted = true;
-         unmuteButton.style.visibility = "visible";
-         flvPlayer.play();
-       });
-     }
-    </script>
+         unmuteButton.addEventListener('click', function(){
+           unmuteButton.style.visibility = "hidden";
+           videoElement.muted = false;
+         });
+         var flvPlayer = flvjs.createPlayer({
+           type: 'flv',
+           isLive: true,
+           url: '/stream/{$page.channel.id}.flv'
+         });
+         flvPlayer.attachMediaElement(videoElement);
+         flvPlayer.load();
+         flvPlayer.play().catch(error => {
+           videoElement.muted = true;
+           unmuteButton.style.visibility = "visible";
+           flvPlayer.play();
+         });
+       }
+      </script>
     </div>
   {@else}
     <div class="message" style="text-align: center">
