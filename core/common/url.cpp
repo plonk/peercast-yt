@@ -28,6 +28,7 @@
 #ifdef WITH_RTMP
 #include "rtmp.h"
 #endif
+#include "dechunker.h"
 
 // ------------------------------------------------
 void URLSource::stream(std::shared_ptr<Channel> ch)
@@ -109,6 +110,8 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
 
     std::shared_ptr<PlayList> pls;
     ChannelStream *source = NULL;
+
+    bool chunkedStream = false;
 
     LOG_INFO("Fetch URL=%s", fileName);
 
@@ -198,6 +201,11 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
                     ch->icyMetaInterval = http.getArgInt();
                 else if (http.isHeader("Location:"))
                     nextURL.set(http.getArgStr());
+                else if (http.isHeader("Transfer-Encoding:")) {
+                    if (strcmp(http.getArgStr(), "chunked") == 0) {
+                        chunkedStream = true;
+                    }
+                }
 
                 char *arg = http.getArgStr();
                 if (arg)
@@ -324,7 +332,13 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
 
             source = ch->createSource();
 
-            ch->readStream(*inputStream, source);
+            if (chunkedStream) {
+                Dechunker dechunker(*inputStream);
+                LOG_DEBUG("Dechunker enabled");
+                ch->readStream(dechunker, source);
+            } else {
+                ch->readStream(*inputStream, source);
+            }
 
             inputStream->close();
         }
