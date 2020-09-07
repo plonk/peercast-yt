@@ -44,6 +44,7 @@
 #include "flv.h"
 #include "mkv.h"
 #include "wmhttp.h"
+#include "mp4.h"
 
 #include "icy.h"
 #include "url.h"
@@ -1127,6 +1128,10 @@ ChannelStream *Channel::createSource()
             case ChanInfo::T_WEBM:
                 LOG_INFO("Channel is WebM");
                 source = new MKVStream();
+                break;
+            case ChanInfo::T_MP4:
+                LOG_INFO("Channel is MP4");
+                source = new MP4Stream();
                 break;
             default:
                 LOG_INFO("Channel is Raw");

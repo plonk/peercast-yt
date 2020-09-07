@@ -69,6 +69,7 @@ public:
         T_FLV,
         T_MKV,
         T_WEBM,
+        T_MP4,
 
         T_WMA,
         T_WMV,

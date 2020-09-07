@@ -102,6 +102,7 @@ const char *ChanInfo::getTypeStr(TYPE t)
         case T_FLV: return "FLV";
         case T_MKV: return "MKV";
         case T_WEBM: return "WEBM";
+        case T_MP4: return "MP4";
 
         case T_PLS: return "PLS";
         case T_ASX: return "ASX";
@@ -171,6 +172,8 @@ const char *ChanInfo::getTypeExt(TYPE t)
             return ".mkv";
         case ChanInfo::T_WEBM:
             return ".webm";
+        case ChanInfo::T_MP4:
+            return ".mp4";
         default:
             return "";
     }
@@ -205,6 +208,8 @@ const char *ChanInfo::getMIMEType(TYPE t)
             return MIME_MKV;
         case ChanInfo::T_WEBM:
             return MIME_WEBM;
+        case ChanInfo::T_MP4:
+            return MIME_MP4;
         default:
             return "application/octet-stream";
     }
@@ -264,6 +269,8 @@ ChanInfo::TYPE ChanInfo::getTypeFromStr(const char *str)
         return T_MKV;
     else if (Sys::stricmp(str, "WEBM")==0)
         return T_WEBM;
+    else if (Sys::stricmp(str, "MP4")==0)
+        return T_MP4;
     else if (Sys::stricmp(str, "PLS")==0)
         return T_PLS;
     else if (Sys::stricmp(str, "M3U")==0)
