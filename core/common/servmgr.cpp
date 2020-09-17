@@ -123,6 +123,8 @@ ServMgr::ServMgr()
 
     uptestServiceRegistry->addURL("http://bayonet.ddo.jp/sp/yp4g.xml");
     uptestServiceRegistry->addURL("http://temp.orz.hm/yp/yp4g.xml");
+
+    chat = true;
 }
 
 // -----------------------------------
@@ -838,6 +840,7 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
 
     iniFile.writeSection("Client");
     iniFile.writeIntValue("refreshHTML", refreshHTML);
+    iniFile.writeBoolValue("chat", chat);
     iniFile.writeIntValue("relayBroadcast", this->relayBroadcast);
     iniFile.writeIntValue("minBroadcastTTL", chanMgr->minBroadcastTTL);
     iniFile.writeIntValue("maxBroadcastTTL", chanMgr->maxBroadcastTTL);
@@ -1063,6 +1066,8 @@ void ServMgr::loadSettings(const char *fn)
                 servMgr->tryoutDelay = iniFile.getIntValue();
             else if (iniFile.isName("refreshHTML"))
                 refreshHTML = iniFile.getIntValue();
+            else if (iniFile.isName("chat"))
+                servMgr->chat = iniFile.getBoolValue();
             else if (iniFile.isName("relayBroadcast"))
             {
                 servMgr->relayBroadcast = iniFile.getIntValue();
@@ -1920,6 +1925,9 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var == "hasUnsafeFilterSettings")
     {
         buf = std::to_string(servMgr->hasUnsafeFilterSettings());
+    }else if (var == "chat")
+    {
+        buf = to_string(servMgr->chat);
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);

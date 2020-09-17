@@ -937,6 +937,7 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
     ServFilter *currFilter = servMgr->filters;
     servMgr->channelDirectory->clearFeeds();
     servMgr->transcodingEnabled = false;
+    servMgr->chat = false;
 
     bool brRoot = false;
     bool getUpd = false;
@@ -1051,6 +1052,8 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
             chanMgr->deadHitAge = getCGIargINT(arg);
         else if (strcmp(curr, "refresh") == 0)
             servMgr->refreshHTML = getCGIargINT(arg);
+        else if (strcmp(curr, "chat") == 0)
+            servMgr->chat = getCGIargBOOL(arg);
         else if (strcmp(curr, "genreprefix") == 0)
             servMgr->genrePrefix = arg;
         else if (strcmp(curr, "auth") == 0)

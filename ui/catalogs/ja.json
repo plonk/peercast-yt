@@ -231,6 +231,8 @@
     "Upload Bandwidth Testing" : "アップロード帯域チェック",
     "URL of yp4g.xml"         : "yp4g.xmlのURL",
 
+    "Chat"                    : "チャット",
+
     // rtmp.html
     "Start"                   : "開始",
     "Process ID"              : "プロセスID",

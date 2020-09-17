@@ -71,10 +71,6 @@
             <label><input name=root type=radio value=1 {@if servMgr.isRoot}checked{@end}>
               <i>{#Root}</i></label></td>
         </tr>
-        <tr class="normal">
-          <th class="left-heading">{#Refresh HTML (sec)}</th>
-          <td><input size=10 value="{$servMgr.refreshHTML}" name=refresh></td>
-        </tr>
       </table>
 
       <table class="table-panel" width="100%" align=center border=0>
@@ -103,7 +99,21 @@
         </tr>
         {@end}
       </table>
-      
+
+      <table class="table-panel" width="100%" align=center border=0>
+        <tr align=middle class="normal">
+          <td colspan=5><b>{#UI}</b></td>
+        </tr>
+        <tr class="normal">
+          <th class="left-heading">{#Refresh HTML (sec)}</th>
+          <td><input size=10 value="{$servMgr.refreshHTML}" name=refresh></td>
+        </tr>
+        <tr class="normal">
+          <th class="left-heading">{#Chat}</th>
+          <td><input type="checkbox" name="chat" value="1" {@if servMgr.chat}checked{@end}></td>
+        </tr>
+      </table>
+
       <table class="table-panel" width="100%" align=center border=0>
         <tr align=middle class="normal">
           <td colspan=2><b>{#Authentication}</b></td>

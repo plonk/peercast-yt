@@ -318,6 +318,8 @@ public:
     RTMPServerMonitor   rtmpServerMonitor;
     uint16_t            rtmpPort;
     ChanInfo            defaultChannelInfo;
+
+    bool                chat;
 };
 
 // ----------------------------------

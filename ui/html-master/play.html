@@ -82,7 +82,9 @@
     <script>
      var CONTACT_URL = "{\page.channel.contactURL}";
     </script>
+    {@if servMgr.chat}
     <script src="bbs.js"></script>
+    {@end}
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
     <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -119,15 +121,19 @@
 	  {@end}
 	</div>
 
+        {@if servMgr.chat}
 	<div id="bbs-indicator" style="text-align: right; flex-grow: 1">
           <label><input type="checkbox" id="chat-visibility" checked style="display: inline; vertical-align: middle"> {#Show Chat}</label>
           <span id="bbs-title">n/a</span>
 	</div>
+        {@end}
       </div>
 
       <div id="main-area">
 	{^include player.html}
+        {@if servMgr.chat}
         <div id="bbs-view"></div>
+        {@end}
       </div>
     </div>
   </body>
