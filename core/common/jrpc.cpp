@@ -227,7 +227,6 @@ json JrpcApi::fetch(json::array_t params)
             auto type = ChanInfo::getTypeFromStr(typeStr.c_str());
 
             info.contentType    = type;
-            info.contentTypeStr = ChanInfo::getTypeStr(type);
             info.MIMEType       = ChanInfo::getMIMEType(type);
             info.streamExt      = ChanInfo::getTypeExt(type);
         }

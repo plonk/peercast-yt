@@ -1168,10 +1168,7 @@ void ServMgr::loadSettings(const char *fn)
                     else if (iniFile.isName("sourceType"))
                         info.srcProtocol = ChanInfo::getProtocolFromStr(iniFile.getStrValue());
                     else if (iniFile.isName("contentType"))
-                    {
-                        info.contentType    = ChanInfo::getTypeFromStr(iniFile.getStrValue());
-                        info.contentTypeStr = iniFile.getStrValue();
-                    }
+                        info.contentType = iniFile.getStrValue();
                     else if (iniFile.isName("MIMEType"))
                         info.MIMEType = iniFile.getStrValue();
                     else if (iniFile.isName("streamExt"))

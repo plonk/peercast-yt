@@ -22,6 +22,23 @@
 #include "chanmgr.h"
 #include "playlist.h"
 
+const ::String ChanInfo::T_UNKNOWN = "UNKNOWN";
+const ::String ChanInfo::T_RAW = "RAW";
+const ::String ChanInfo::T_MP3 = "MP3";
+const ::String ChanInfo::T_OGG = "OGG";
+const ::String ChanInfo::T_OGM = "OGM";
+const ::String ChanInfo::T_MOV = "MOV";
+const ::String ChanInfo::T_MPG = "MPG";
+const ::String ChanInfo::T_NSV = "NSV";
+const ::String ChanInfo::T_FLV = "FLV";
+const ::String ChanInfo::T_MKV = "MKV";
+const ::String ChanInfo::T_WEBM = "WEBM";
+const ::String ChanInfo::T_MP4 = "MP4";
+const ::String ChanInfo::T_WMA = "WMA";
+const ::String ChanInfo::T_WMV = "WMV";
+const ::String ChanInfo::T_PLS = "PLS";
+const ::String ChanInfo::T_ASX = "ASX";
+
 // -----------------------------------
 static void readXMLString(String &str, XML::Node *n, const char *arg)
 {
@@ -37,12 +54,7 @@ static void readXMLString(String &str, XML::Node *n, const char *arg)
 // -----------------------------------
 const char *ChanInfo::getTypeStr()
 {
-    if (contentTypeStr.isEmpty()) {
-        return getTypeStr(contentType);
-    }
-    else {
-        return contentTypeStr.cstr();
-    }
+    return contentType.cstr();
 }
 
 // -----------------------------------
@@ -51,8 +63,6 @@ std::string ChanInfo::getTypeStringLong()
     std::string buf = std::string(getTypeStr()) +
         " (" + getMIMEType() + "; " + getTypeExt() + ")";
 
-    if (contentTypeStr == "")
-        buf += " [contentTypeStr empty]"; // これが起こるのは何かがおかしい
     if (MIMEType == "")
         buf += " [no styp]";
     if (streamExt == "")
@@ -84,31 +94,9 @@ const char *ChanInfo::getMIMEType() const
 }
 
 // -----------------------------------
-const char *ChanInfo::getTypeStr(TYPE t)
+const char *ChanInfo::getTypeStr(const TYPE& t)
 {
-    switch (t)
-    {
-        case T_RAW: return "RAW";
-
-        case T_MP3: return "MP3";
-        case T_OGG: return "OGG";
-        case T_OGM: return "OGM";
-        case T_WMA: return "WMA";
-
-        case T_MOV: return "MOV";
-        case T_MPG: return "MPG";
-        case T_NSV: return "NSV";
-        case T_WMV: return "WMV";
-        case T_FLV: return "FLV";
-        case T_MKV: return "MKV";
-        case T_WEBM: return "WEBM";
-        case T_MP4: return "MP4";
-
-        case T_PLS: return "PLS";
-        case T_ASX: return "ASX";
-
-        default: return "UNKNOWN";
-    }
+    return t.c_str();
 }
 
 // -----------------------------------
@@ -151,68 +139,61 @@ ChanInfo::PROTOCOL ChanInfo::getProtocolFromStr(const char *str)
 // -----------------------------------
 const char *ChanInfo::getTypeExt(TYPE t)
 {
-    switch(t)
-    {
-        case ChanInfo::T_OGM:
-        case ChanInfo::T_OGG:
-            return ".ogg";
-        case ChanInfo::T_MP3:
-            return ".mp3";
-        case ChanInfo::T_MOV:
-            return ".mov";
-        case ChanInfo::T_NSV:
-            return ".nsv";
-        case ChanInfo::T_WMV:
-            return ".wmv";
-        case ChanInfo::T_WMA:
-            return ".wma";
-        case ChanInfo::T_FLV:
-            return ".flv";
-        case ChanInfo::T_MKV:
-            return ".mkv";
-        case ChanInfo::T_WEBM:
-            return ".webm";
-        case ChanInfo::T_MP4:
-            return ".mp4";
-        default:
-            return "";
-    }
+    if (t == ChanInfo::T_OGM || t == ChanInfo::T_OGG)
+        return ".ogg";
+    else if (t == ChanInfo::T_MP3)
+        return ".mp3";
+    else if (t == ChanInfo::T_MOV)
+        return ".mov";
+    else if (t == ChanInfo::T_NSV)
+        return ".nsv";
+    else if (t == ChanInfo::T_WMV)
+        return ".wmv";
+    else if (t == ChanInfo::T_WMA)
+        return ".wma";
+    else if (t == ChanInfo::T_FLV)
+        return ".flv";
+    else if (t == ChanInfo::T_MKV)
+        return ".mkv";
+    else if (t == ChanInfo::T_WEBM)
+        return ".webm";
+    else if (t == ChanInfo::T_MP4)
+        return ".mp4";
+    else
+        return "";
 }
 
 // -----------------------------------
 const char *ChanInfo::getMIMEType(TYPE t)
 {
-    switch(t)
-    {
-        case ChanInfo::T_OGG:
-            return MIME_XOGG;
-        case ChanInfo::T_OGM:
-            return MIME_XOGG;
-        case ChanInfo::T_MP3:
-            return MIME_MP3;
-        case ChanInfo::T_MOV:
-            return MIME_MOV;
-        case ChanInfo::T_MPG:
-            return MIME_MPG;
-        case ChanInfo::T_NSV:
-            return MIME_NSV;
-        case ChanInfo::T_ASX:
-            return MIME_ASX;
-        case ChanInfo::T_WMA:
-            return MIME_WMA;
-        case ChanInfo::T_WMV:
-            return MIME_WMV;
-        case ChanInfo::T_FLV:
-            return MIME_FLV;
-        case ChanInfo::T_MKV:
-            return MIME_MKV;
-        case ChanInfo::T_WEBM:
-            return MIME_WEBM;
-        case ChanInfo::T_MP4:
-            return MIME_MP4;
-        default:
-            return "application/octet-stream";
-    }
+    if (t == ChanInfo::T_OGG)
+        return MIME_XOGG;
+    else if (t == ChanInfo::T_OGM)
+        return MIME_XOGG;
+    else if (t == ChanInfo::T_MP3)
+        return MIME_MP3;
+    else if (t == ChanInfo::T_MOV)
+        return MIME_MOV;
+    else if (t == ChanInfo::T_MPG)
+        return MIME_MPG;
+    else if (t == ChanInfo::T_NSV)
+        return MIME_NSV;
+    else if (t == ChanInfo::T_ASX)
+        return MIME_ASX;
+    else if (t == ChanInfo::T_WMA)
+        return MIME_WMA;
+    else if (t == ChanInfo::T_WMV)
+        return MIME_WMV;
+    else if (t == ChanInfo::T_FLV)
+        return MIME_FLV;
+    else if (t == ChanInfo::T_MKV)
+        return MIME_MKV;
+    else if (t == ChanInfo::T_WEBM)
+        return MIME_WEBM;
+    else if (t == ChanInfo::T_MP4)
+        return MIME_MP4;
+    else
+        return "application/octet-stream";
 }
 
 // -----------------------------------
@@ -376,15 +357,9 @@ bool ChanInfo::update(const ChanInfo &info)
         changed = true;
     }
 
-    if (contentType != info.contentType)
+    if (!contentType.isSame(info.contentType))
     {
         contentType = info.contentType;
-        changed = true;
-    }
-
-    if (!contentTypeStr.isSame(info.contentTypeStr))
-    {
-        contentTypeStr = info.contentTypeStr;
         changed = true;
     }
 
@@ -452,7 +427,6 @@ void ChanInfo::init()
     name.clear();
     bitrate = 0;
     contentType = T_UNKNOWN;
-    contentTypeStr.clear();
     MIMEType.clear();
     streamExt.clear();
     srcProtocol = SP_UNKNOWN;
@@ -550,8 +524,7 @@ void ChanInfo::readInfoAtoms(AtomStream &atom, int numc)
         {
             char type[16];
             atom.readString(type, sizeof(type), d);
-            contentType = ChanInfo::getTypeFromStr(type);
-            contentTypeStr = type;
+            contentType = type;
         }else if (id == PCP_CHAN_INFO_STREAMTYPE)
         {
             atom.readString(MIMEType.data, sizeof(MIMEType.data), d);
@@ -727,8 +700,7 @@ void ChanInfo::updateFromXML(XML::Node *n)
 
     readXMLString(typeStr, n, "type");
     if (!typeStr.isEmpty()) {
-        contentType = getTypeFromStr(typeStr.cstr());
-        contentTypeStr = typeStr;
+        contentType = typeStr;
     }
 
     readXMLString(idStr, n, "id");
@@ -766,7 +738,6 @@ void ChanInfo::init(const char *fn)
 void ChanInfo::setContentType(TYPE type)
 {
     this->contentType    = type;
-    this->contentTypeStr = getTypeStr(type);
     this->MIMEType       = getMIMEType(type);
     this->streamExt      = getTypeExt(type);
 }

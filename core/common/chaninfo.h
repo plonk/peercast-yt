@@ -55,10 +55,9 @@ public:
 class ChanInfo
 {
 public:
-    enum TYPE
-    {
+    typedef ::String TYPE;
+    static const TYPE
         T_UNKNOWN,
-
         T_RAW,
         T_MP3,
         T_OGG,
@@ -70,13 +69,10 @@ public:
         T_MKV,
         T_WEBM,
         T_MP4,
-
         T_WMA,
         T_WMV,
-
         T_PLS,
-        T_ASX
-    };
+        T_ASX;
 
     enum PROTOCOL
     {
@@ -133,7 +129,7 @@ public:
     std::string         getTypeStringLong();
     const char          *getTypeExt();
     const char          *getMIMEType() const;
-    static const char   *getTypeStr(TYPE);
+    static const char   *getTypeStr(const TYPE&);
     static const char   *getProtocolStr(PROTOCOL);
     static const char   *getTypeExt(TYPE);
     static const char   *getMIMEType(TYPE);
@@ -151,8 +147,7 @@ public:
     // TYPE はクローズドだから一般性がなく、プロトコル上は文字列でやり
     // とりするので、冗長な気がする。
 
-    TYPE            contentType;
-    ::String        contentTypeStr; // getTypeStr(contentType) "WMV" など
+    ::String        contentType;
     ::String        MIMEType;       // MIME タイプ
     String          streamExt;      // "." で始まる拡張子
 

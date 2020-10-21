@@ -142,7 +142,7 @@ TEST_F(ChannelFixture, writeVariable)
 
     mem.str("");
     ASSERT_TRUE(c.writeVariable(mem, "typeLong"));
-    ASSERT_STREQ("UNKNOWN (application/octet-stream; ) [contentTypeStr empty] [no styp] [no sext]", mem.str().c_str());
+    ASSERT_STREQ("UNKNOWN (application/octet-stream; ) [no styp] [no sext]", mem.str().c_str());
 
     mem.str("");
     ASSERT_TRUE(c.writeVariable(mem, "ext"));

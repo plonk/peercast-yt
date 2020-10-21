@@ -1085,58 +1085,54 @@ ChannelStream *Channel::createSource()
         source = new MMSStream();
     }else if (info.srcProtocol == ChanInfo::SP_WMHTTP)
     {
-        switch (info.contentType)
+        if (info.contentType == ChanInfo::T_WMA ||
+            info.contentType == ChanInfo::T_WMV)
         {
-            case ChanInfo::T_WMA:
-            case ChanInfo::T_WMV:
-                LOG_INFO("Channel is WMHTTP");
-                source = new WMHTTPStream();
-                break;
-            default:
-                throw StreamException("Channel is WMHTTP - but not WMA/WMV");
-                break;
+            LOG_INFO("Channel is WMHTTP");
+            source = new WMHTTPStream();
+        }else
+        {
+            throw StreamException("Channel is WMHTTP - but not WMA/WMV");
         }
     }else{
-        switch (info.contentType)
+        if (info.contentType == ChanInfo::T_MP3)
         {
-            case ChanInfo::T_MP3:
-                LOG_INFO("Channel is MP3 - meta: %d", icyMetaInterval);
-                source = new MP3Stream();
-                break;
-            case ChanInfo::T_NSV:
-                LOG_INFO("Channel is NSV");
-                source = new NSVStream();
-                break;
-            case ChanInfo::T_WMA:
-            case ChanInfo::T_WMV:
-                LOG_INFO("Channel is MMS");
-                source = new MMSStream();
-                break;
-            case ChanInfo::T_FLV:
-                LOG_INFO("Channel is FLV");
-                source = new FLVStream();
-                break;
-            case ChanInfo::T_OGG:
-            case ChanInfo::T_OGM:
-                LOG_INFO("Channel is OGG");
-                source = new OGGStream();
-                break;
-            case ChanInfo::T_MKV:
-                LOG_INFO("Channel is MKV");
-                source = new MKVStream();
-                break;
-            case ChanInfo::T_WEBM:
-                LOG_INFO("Channel is WebM");
-                source = new MKVStream();
-                break;
-            case ChanInfo::T_MP4:
-                LOG_INFO("Channel is MP4");
-                source = new MP4Stream();
-                break;
-            default:
-                LOG_INFO("Channel is Raw");
-                source = new RawStream();
-                break;
+            LOG_INFO("Channel is MP3 - meta: %d", icyMetaInterval);
+            source = new MP3Stream();
+        }else if (info.contentType == ChanInfo::T_NSV)
+        {
+            LOG_INFO("Channel is NSV");
+            source = new NSVStream();
+        }else if (info.contentType == ChanInfo::T_WMA ||
+                  info.contentType == ChanInfo::T_WMV)
+        {
+            LOG_INFO("Channel is MMS");
+            source = new MMSStream();
+        }else if (info.contentType == ChanInfo::T_FLV)
+        {
+            LOG_INFO("Channel is FLV");
+            source = new FLVStream();
+        }else if (info.contentType == ChanInfo::T_OGG ||
+                  info.contentType == ChanInfo::T_OGM)
+        {
+            LOG_INFO("Channel is OGG");
+            source = new OGGStream();
+        }else if (info.contentType == ChanInfo::T_MKV)
+        {
+            LOG_INFO("Channel is MKV");
+            source = new MKVStream();
+        }else if (info.contentType == ChanInfo::T_WEBM)
+        {
+            LOG_INFO("Channel is WebM");
+            source = new MKVStream();
+        }else if (info.contentType == ChanInfo::T_MP4)
+        {
+            LOG_INFO("Channel is MP4");
+            source = new MP4Stream();
+        }else
+        {
+            LOG_INFO("Channel is Raw");
+            source = new RawStream();
         }
     }
 
