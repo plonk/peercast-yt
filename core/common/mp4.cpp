@@ -30,30 +30,32 @@
 
 static std::shared_ptr<MP4Box> readBox(Stream &in)
 {
-     LOG_DEBUG("readBox");
+    LOG_DEBUG("readBox");
     uint8_t s[4];
     in.read(s, 4);
     size_t size = s[0] << 24 | s[1] << 16 | s[2] << 8 | s[3];
-    LOG_DEBUG("size: %d", size);
+    LOG_DEBUG("size: %d", (int) size);
     uint8_t *data = new uint8_t[size];
     memcpy(data, s, 4);
     in.read(data + 4, size - 4);
     auto box = std::make_shared<MP4Box>();
     box->data(data); // move
     data = nullptr;
+    LOG_TRACE("Box type %s", box->type().c_str());
+    LOG_DEBUG("readBox End");
     return box;
 }
 
 // ------------------------------------------
 void MP4Stream::readEnd(Stream &, std::shared_ptr<Channel>)
 {
-     LOG_DEBUG("MP4Stream::readEnd");
+    LOG_DEBUG("MP4Stream::readEnd");
 }
 
 // ------------------------------------------
 void MP4Stream::readHeader(Stream &in, std::shared_ptr<Channel> ch)
 {
-     LOG_DEBUG("MP4Stream::readHeader");
+    LOG_DEBUG("MP4Stream::readHeader");
     using namespace std;
 
     // read ftyp box
@@ -61,14 +63,14 @@ void MP4Stream::readHeader(Stream &in, std::shared_ptr<Channel> ch)
     if (ftyp->type() != "ftyp") {
         throw StreamException("ftyp expected");
     }
-    LOG_DEBUG("Got ftyp: %d bytes", ftyp->size());
+    LOG_DEBUG("Got ftyp: %d bytes", (int) ftyp->size());
 
     // read moov box
     shared_ptr<MP4Box> moov = readBox(in);
     if (moov->type() != "moov") {
         throw StreamException("moov expected");
     }
-    LOG_DEBUG("Got moov: %d bytes", moov->size());
+    LOG_DEBUG("Got moov: %d bytes", (int) moov->size());
 
     if (ftyp->size() + moov->size() > ChanPacket::MAX_DATALEN) {
         throw StreamException("head packet too large");
@@ -92,8 +94,8 @@ void MP4Stream::readHeader(Stream &in, std::shared_ptr<Channel> ch)
 // ------------------------------------------
 int MP4Stream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
 {
-     LOG_DEBUG("MP4Stream::readPacket");
-     
+    LOG_DEBUG("MP4Stream::readPacket");
+
     using namespace std;
     shared_ptr<MP4Box> moof = readBox(in);
 
@@ -133,7 +135,7 @@ int MP4Stream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
     } else {
          throw StreamException("moof expected");
     }
-    
+
     // ストリームからの実測値が現在の公称値を超えていれば公称値を更新する。
     int newBitrate = in.stat.bytesInPerSecAvg() / 1000 * 8;
     if (newBitrate > ch->info.bitrate) {
