@@ -399,5 +399,5 @@ void ChannelStream::readRaw(Stream &in, std::shared_ptr<Channel> ch)
     ch->newPacket(pack);
     ch->checkReadDelay(pack.len);
 
-    ch->streamPos+=pack.len;
+    ch->streamPos += pack.len;
 }
