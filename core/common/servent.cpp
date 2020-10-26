@@ -1693,6 +1693,7 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
             unsigned int connectTime = sys->getTime();
             unsigned int lastWriteTime = connectTime;
             bool         skipContinuation = true;
+            int          sendSkipCount = 0;
 
             while ((thread.active()) && sock->active())
             {
@@ -1713,7 +1714,15 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
                 while (ch->rawData.findPacket(streamPos, rawPack))
                 {
                     if (syncPos != rawPack.sync)
-                        LOG_ERROR("Send skip: %d", rawPack.sync-syncPos);
+                    {
+                        if (sendSkipCount)
+                        {
+                            LOG_ERROR("Send skip: %d", rawPack.sync - syncPos);
+                            throw TimeoutException();
+                        }else
+                            LOG_DEBUG("First send skip: %d", rawPack.sync - syncPos);
+                        sendSkipCount++;
+                    }
                     syncPos = rawPack.sync + 1;
 
                     if ((rawPack.type == ChanPacket::T_DATA) || (rawPack.type == ChanPacket::T_HEAD))
@@ -1958,6 +1967,7 @@ void Servent::sendPCPChannel()
             }
 
         unsigned int streamIndex = ch->streamIndex;
+        int          sendSkipCount = 0;
 
         while (thread.active())
         {
@@ -1981,6 +1991,18 @@ void Servent::sendPCPChannel()
             // FIXME: ストリームインデックスの変更を確かめずにどんどん読み出して大丈夫？
             while (ch->rawData.findPacket(streamPos, rawPack))
             {
+                if (syncPos != rawPack.sync)
+                {
+                    if (sendSkipCount)
+                    {
+                        LOG_ERROR("PCP send skip: %d", rawPack.sync - syncPos);
+                        throw TimeoutException();
+                    }else
+                        LOG_DEBUG("PCP first send skip: %d", rawPack.sync - syncPos);
+                    sendSkipCount++;
+                }
+                syncPos = rawPack.sync + 1;
+
                 if (rawPack.type == ChanPacket::T_HEAD)
                 {
                     atom.writeParent(PCP_CHAN, 2);
