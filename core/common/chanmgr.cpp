@@ -336,7 +336,7 @@ bool ChanMgr::writeVariable(Stream &out, const String &var)
 }
 
 // -----------------------------------
-void ChanMgr::broadcastTrackerUpdate(GnuID &svID, bool force)
+void ChanMgr::broadcastTrackerUpdate(const GnuID &svID, bool force)
 {
     auto c = channel;
     while (c)
@@ -348,7 +348,7 @@ void ChanMgr::broadcastTrackerUpdate(GnuID &svID, bool force)
 }
 
 // -----------------------------------
-int ChanMgr::broadcastPacketUp(ChanPacket &pack, GnuID &chanID, GnuID &srcID, GnuID &destID)
+int ChanMgr::broadcastPacketUp(ChanPacket &pack, const GnuID &chanID, const GnuID &srcID, const GnuID &destID)
 {
     int cnt = 0;
 
@@ -485,7 +485,7 @@ ChanHitList *ChanMgr::findHitList(ChanInfo &info)
 }
 
 // -----------------------------------
-ChanHitList *ChanMgr::findHitListByID(GnuID &id)
+ChanHitList *ChanMgr::findHitListByID(const GnuID &id)
 {
     ChanHitList *chl = hitlist;
     while (chl)
@@ -532,12 +532,7 @@ ChanHitList *ChanMgr::addHitList(ChanInfo &info)
 void ChanMgr::clearDeadHits(bool clearTrackers)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
-    unsigned int interval;
-
-    if (servMgr->isRoot)
-        interval = 1200;        // mainly for old 0.119 clients
-    else
-        interval = 180;
+    constexpr unsigned int interval = 180;
 
     ChanHitList *chl = hitlist, *prev = NULL;
     while (chl)
@@ -571,7 +566,7 @@ void ChanMgr::clearDeadHits(bool clearTrackers)
 }
 
 // -----------------------------------
-bool    ChanMgr::isBroadcasting(GnuID &id)
+bool    ChanMgr::isBroadcasting(const GnuID &id)
 {
     auto ch = findChannelByID(id);
     if (ch)
@@ -630,7 +625,7 @@ void ChanMgr::delHit(ChanHit &hit)
 }
 
 // -----------------------------------
-void ChanMgr::addHit(Host &h, GnuID &id, bool tracker)
+void ChanMgr::addHit(Host &h, const GnuID &id, bool tracker)
 {
     ChanHit hit;
     hit.init();

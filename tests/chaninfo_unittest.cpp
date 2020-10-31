@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "channel.h"
+#include "chaninfo.h"
 
 class ChanInfoFixture : public ::testing::Test {
 public:
@@ -14,7 +14,6 @@ TEST_F(ChanInfoFixture, initialState)
     ASSERT_STREQ("00000000000000000000000000000000", static_cast<std::string>(info.bcID).c_str());
     ASSERT_EQ(0, info.bitrate);
     ASSERT_EQ(ChanInfo::T_UNKNOWN, info.contentType);
-    ASSERT_STREQ("", info.contentTypeStr.cstr());
     ASSERT_STREQ("", info.MIMEType.cstr());
     ASSERT_STREQ("", info.streamExt.cstr());
     ASSERT_EQ(ChanInfo::PROTOCOL::SP_UNKNOWN, info.srcProtocol);
@@ -162,7 +161,6 @@ TEST_F(ChanInfoFixture, setContentType)
 
     info.setContentType(ChanInfo::T_MKV);
     ASSERT_EQ(ChanInfo::T_MKV, info.contentType);
-    ASSERT_STREQ("MKV", info.contentTypeStr.cstr());
     ASSERT_STREQ("video/x-matroska", info.MIMEType.cstr());
     ASSERT_STREQ(".mkv", info.streamExt.cstr());
 }

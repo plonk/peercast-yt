@@ -123,6 +123,8 @@ ServMgr::ServMgr()
 
     uptestServiceRegistry->addURL("http://bayonet.ddo.jp/sp/yp4g.xml");
     uptestServiceRegistry->addURL("http://temp.orz.hm/yp/yp4g.xml");
+
+    chat = true;
 }
 
 // -----------------------------------
@@ -328,7 +330,7 @@ Servent *ServMgr::findOldestServent(Servent::TYPE type, bool priv)
 }
 
 // -----------------------------------
-Servent *ServMgr::findServent(Servent::TYPE type, Host &host, GnuID &netid)
+Servent *ServMgr::findServent(Servent::TYPE type, Host &host, const GnuID &netid)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
 
@@ -350,7 +352,7 @@ Servent *ServMgr::findServent(Servent::TYPE type, Host &host, GnuID &netid)
 }
 
 // -----------------------------------
-Servent *ServMgr::findServent(unsigned int ip, unsigned short port, GnuID &netid)
+Servent *ServMgr::findServent(unsigned int ip, unsigned short port, const GnuID &netid)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
 
@@ -838,6 +840,7 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
 
     iniFile.writeSection("Client");
     iniFile.writeIntValue("refreshHTML", refreshHTML);
+    iniFile.writeBoolValue("chat", chat);
     iniFile.writeIntValue("relayBroadcast", this->relayBroadcast);
     iniFile.writeIntValue("minBroadcastTTL", chanMgr->minBroadcastTTL);
     iniFile.writeIntValue("maxBroadcastTTL", chanMgr->maxBroadcastTTL);
@@ -1063,6 +1066,8 @@ void ServMgr::loadSettings(const char *fn)
                 servMgr->tryoutDelay = iniFile.getIntValue();
             else if (iniFile.isName("refreshHTML"))
                 refreshHTML = iniFile.getIntValue();
+            else if (iniFile.isName("chat"))
+                servMgr->chat = iniFile.getBoolValue();
             else if (iniFile.isName("relayBroadcast"))
             {
                 servMgr->relayBroadcast = iniFile.getIntValue();
@@ -1163,10 +1168,7 @@ void ServMgr::loadSettings(const char *fn)
                     else if (iniFile.isName("sourceType"))
                         info.srcProtocol = ChanInfo::getProtocolFromStr(iniFile.getStrValue());
                     else if (iniFile.isName("contentType"))
-                    {
-                        info.contentType    = ChanInfo::getTypeFromStr(iniFile.getStrValue());
-                        info.contentTypeStr = iniFile.getStrValue();
-                    }
+                        info.contentType = iniFile.getStrValue();
                     else if (iniFile.isName("MIMEType"))
                         info.MIMEType = iniFile.getStrValue();
                     else if (iniFile.isName("streamExt"))
@@ -1237,7 +1239,7 @@ void ServMgr::loadSettings(const char *fn)
 }
 
 // --------------------------------------------------
-unsigned int ServMgr::numStreams(GnuID &cid, Servent::TYPE tp, bool all)
+unsigned int ServMgr::numStreams(const GnuID &cid, Servent::TYPE tp, bool all)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
 
@@ -1324,7 +1326,7 @@ bool ServMgr::getChannel(char *str, ChanInfo &info, bool relay)
 }
 
 // --------------------------------------------------
-Servent *ServMgr::findConnection(Servent::TYPE t, GnuID &sid)
+Servent *ServMgr::findConnection(Servent::TYPE t, const GnuID &sid)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
 
@@ -1496,7 +1498,7 @@ bool    ServMgr::acceptGIV(ClientSocket *sock)
 }
 
 // -----------------------------------
-int ServMgr::broadcastPushRequest(ChanHit &hit, Host &to, GnuID &chanID, Servent::TYPE type)
+int ServMgr::broadcastPushRequest(ChanHit &hit, Host &to, const GnuID &chanID, Servent::TYPE type)
 {
     ChanPacket pack;
     MemoryStream pmem(pack.data, sizeof(pack.data));
@@ -1520,9 +1522,7 @@ int ServMgr::broadcastPushRequest(ChanHit &hit, Host &to, GnuID &chanID, Servent
     pack.len = pmem.pos;
     pack.type = ChanPacket::T_PCP;
 
-    GnuID noID;
-
-    return servMgr->broadcastPacket(pack, noID, servMgr->sessionID, hit.sessionID, type);
+    return servMgr->broadcastPacket(pack, GnuID(), servMgr->sessionID, hit.sessionID, type);
 }
 
 // --------------------------------------------------
@@ -1561,14 +1561,12 @@ void ServMgr::broadcastRootSettings(bool getUpdate)
         mem.rewind();
         pack.len = mem.len;
 
-        GnuID noID;
-
-        broadcastPacket(pack, noID, servMgr->sessionID, noID, Servent::T_CIN);
+        broadcastPacket(pack, GnuID(), servMgr->sessionID, GnuID(), Servent::T_CIN);
     }
 }
 
 // --------------------------------------------------
-int ServMgr::broadcastPacket(ChanPacket &pack, GnuID &chanID, GnuID &srcID, GnuID &destID, Servent::TYPE type)
+int ServMgr::broadcastPacket(ChanPacket &pack, const GnuID &chanID, const GnuID &srcID, const GnuID &destID, Servent::TYPE type)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
 
@@ -1606,8 +1604,7 @@ int ServMgr::idleProc(ThreadInfo *thread)
             {
                 if (servMgr->checkForceIP())
                 {
-                    GnuID noID;
-                    chanMgr->broadcastTrackerUpdate(noID, true);
+                    chanMgr->broadcastTrackerUpdate(GnuID(), true);
                 }
                 lastForceIPCheck = ctime;
             }
@@ -1624,14 +1621,6 @@ int ServMgr::idleProc(ThreadInfo *thread)
 
         if (servMgr->isRoot)
         {
-            // 1時間着信がなかったら終了する。…なぜ？
-            if ((servMgr->lastIncoming) && (((int64_t)ctime - servMgr->lastIncoming) > 60*60))
-            {
-                peercastInst->saveSettings();
-                peercastInst->quit();
-                sys->exit();
-            }
-
             if ((ctime - lastRootBroadcast) > chanMgr->hostUpdateInterval)
             {
                 servMgr->broadcastRootSettings(true);
@@ -1639,11 +1628,7 @@ int ServMgr::idleProc(ThreadInfo *thread)
             }
         }
 
-        // デッドヒットをクリアする。オリジナルはトラッカーをクリアす
-        // るが、開くチャンネルがこのサーバーに設定されている YP に掲
-        // 載されているとは限らないので、トラッカーが消えると再び開く
-        // ことができないので、トラッカーを残す。
-        chanMgr->clearDeadHits(false);
+        chanMgr->clearDeadHits(true);
 
         if (servMgr->shutdownTimer)
         {
@@ -1937,6 +1922,9 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var == "hasUnsafeFilterSettings")
     {
         buf = std::to_string(servMgr->hasUnsafeFilterSettings());
+    }else if (var == "chat")
+    {
+        buf = to_string(servMgr->chat);
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);

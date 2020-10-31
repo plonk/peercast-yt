@@ -245,7 +245,7 @@ bool Template::writePageVariable(Stream &s, const String &varName, int loop)
         const char *a = getCGIarg(tmplArgs, v);
         if (a)
         {
-            Regexp pat("\\A([^&]*)");
+            Regexp pat("^([^&]*)");
             auto vec = pat.exec(a);
             assert(vec.size() > 0);
 

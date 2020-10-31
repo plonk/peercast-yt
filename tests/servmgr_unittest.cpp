@@ -429,6 +429,7 @@ TEST_F(ServMgrFixture, doSaveSettings)
               "\r\n"
               "[Client]\r\n"
               "refreshHTML = 5\r\n"
+              "chat = Yes\r\n"
               "relayBroadcast = 30\r\n"
               "minBroadcastTTL = 1\r\n"
               "maxBroadcastTTL = 7\r\n"

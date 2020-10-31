@@ -75,6 +75,19 @@ namespace iohelpers
         return res;
     }
 
+    std::string
+    to_bytes_little_endian(int integer,
+                           int nbytes)
+    {
+        std::string res;
+        for (int i = 0; i < nbytes; ++i)
+        {
+            res.push_back(integer & 0xff);
+            integer >>= 8;
+        }
+        return res;
+    }
+
     void test()
     {
         if (to_integer_big_endian({ 0x01, 0x00 }) != 256)

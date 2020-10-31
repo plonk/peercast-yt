@@ -256,7 +256,7 @@ void Servent::reset()
 }
 
 // -----------------------------------
-bool Servent::sendPacket(ChanPacket &pack, GnuID &cid, GnuID &sid, GnuID &did, Servent::TYPE t)
+bool Servent::sendPacket(ChanPacket &pack, const GnuID &cid, const GnuID &sid, const GnuID &did, Servent::TYPE t)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
 
@@ -470,7 +470,7 @@ void Servent::setStatus(STATUS s)
 }
 
 // -----------------------------------
-bool    Servent::pingHost(Host &rhost, GnuID &rsid)
+bool    Servent::pingHost(Host &rhost, const GnuID &rsid)
 {
     char ipstr[64];
     rhost.toStr(ipstr);
@@ -645,6 +645,7 @@ void Servent::handshakeStream_returnStreamHeaders(AtomStream& atom,
                 sock->writeLine("Connection: close");
                 sock->writeLine("Content-Length: 10000000");
             }
+            sock->writeLine("Access-Control-Allow-Origin: *");
             sock->writeLineF("%s %s", HTTP_HS_CONTENT, chanInfo.getMIMEType());
         }else if (outputProtocol == ChanInfo::SP_MMS)
         {
@@ -815,7 +816,6 @@ void Servent::handshakeStream_returnHits(AtomStream& atom,
 
 // -----------------------------------
 bool Servent::handshakeStream_returnResponse(bool gotPCP,
-                                             bool chanFound, // ヒットリストが存在する。
                                              bool chanReady, // ストリーム可能である。
                                              std::shared_ptr<Channel> ch,
                                              ChanHitList* chl,
@@ -824,15 +824,13 @@ bool Servent::handshakeStream_returnResponse(bool gotPCP,
     Host rhost = sock->host;
     AtomStream atom(*sock);
 
-    if (!chanFound)
+    if (!chl)
     {
         sock->writeLine(HTTP_SC_NOTFOUND);
         sock->writeLine("");
         LOG_DEBUG("Sending channel not found");
         return false;
-    }
-
-    if (!chanReady)       // cannot stream
+    }else if (!chanReady)       // cannot stream
     {
         if (outputProtocol == ChanInfo::SP_PCP)    // relay stream
         {
@@ -888,7 +886,6 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
     handshakeStream_readHeaders(gotPCP, reqPos, nsSwitchNum);
     handshakeStream_changeOutputProtocol(gotPCP, chanInfo);
 
-    bool chanFound = false;
     bool chanReady = false;
 
     auto ch = chanMgr->findChannelByID(chanInfo.id);
@@ -967,17 +964,13 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
     }
 
     ChanHitList *chl = chanMgr->findHitList(chanInfo);
-    if (chl)
-    {
-        chanFound = true;
-    }
 
-    return handshakeStream_returnResponse(gotPCP, chanFound, chanReady, ch, chl, chanInfo);
+    return handshakeStream_returnResponse(gotPCP, chanReady, ch, chl, chanInfo);
 }
 
 // -----------------------------------
 // GIV しにいく
-void Servent::handshakeGiv(GnuID &id)
+void Servent::handshakeGiv(const GnuID &id)
 {
     if (id.isSet())
     {
@@ -1326,8 +1319,7 @@ void Servent::processIncomingPCP(bool suggestOthers)
                 if (!best.host.ip)
                     break;
 
-                GnuID noID;
-                best.writeAtoms(atom, noID);
+                best.writeAtoms(atom, GnuID());
                 cnt++;
             }
 
@@ -1346,8 +1338,7 @@ void Servent::processIncomingPCP(bool suggestOthers)
                 if (chanMgr->pickHits(chs))
                 {
                     best = chs.best[0];
-                    GnuID noID;
-                    int cnt = servMgr->broadcastPushRequest(best, rhost, noID, Servent::T_CIN);
+                    int cnt = servMgr->broadcastPushRequest(best, rhost, GnuID(), Servent::T_CIN);
                     LOG_DEBUG("Broadcasted tracker push request to %d clients for %s", cnt, rstr);
                 }
             }else
@@ -1404,9 +1395,7 @@ int Servent::outgoingProc(ThreadInfo *thread)
     Servent *sv = (Servent*)thread->data;
     Defer cb([sv]() { sv->kill(); });
 
-    GnuID noID;
-    noID.clear();
-    sv->pcpStream = new PCPStream(noID);
+    sv->pcpStream = new PCPStream(GnuID());
 
     while (sv->thread.active())
     {
@@ -1432,8 +1421,7 @@ int Servent::outgoingProc(ThreadInfo *thread)
                     break;
                 }
 
-                GnuID noID;
-                ChanHitList *chl = chanMgr->findHitListByID(noID);
+                ChanHitList *chl = chanMgr->findHitListByID(GnuID());
                 if (chl)
                 {
                     // find local tracker
@@ -1705,6 +1693,7 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
             unsigned int connectTime = sys->getTime();
             unsigned int lastWriteTime = connectTime;
             bool         skipContinuation = true;
+            int          sendSkipCount = 0;
 
             while ((thread.active()) && sock->active())
             {
@@ -1725,7 +1714,15 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
                 while (ch->rawData.findPacket(streamPos, rawPack))
                 {
                     if (syncPos != rawPack.sync)
-                        LOG_ERROR("Send skip: %d", rawPack.sync-syncPos);
+                    {
+                        if (sendSkipCount)
+                        {
+                            LOG_ERROR("Send skip: %d", rawPack.sync - syncPos);
+                            throw TimeoutException();
+                        }else
+                            LOG_DEBUG("First send skip: %d", rawPack.sync - syncPos);
+                        sendSkipCount++;
+                    }
                     syncPos = rawPack.sync + 1;
 
                     if ((rawPack.type == ChanPacket::T_DATA) || (rawPack.type == ChanPacket::T_HEAD))
@@ -1970,6 +1967,7 @@ void Servent::sendPCPChannel()
             }
 
         unsigned int streamIndex = ch->streamIndex;
+        int          sendSkipCount = 0;
 
         while (thread.active())
         {
@@ -1993,6 +1991,18 @@ void Servent::sendPCPChannel()
             // FIXME: ストリームインデックスの変更を確かめずにどんどん読み出して大丈夫？
             while (ch->rawData.findPacket(streamPos, rawPack))
             {
+                if (syncPos != rawPack.sync)
+                {
+                    if (sendSkipCount)
+                    {
+                        LOG_ERROR("PCP send skip: %d", rawPack.sync - syncPos);
+                        throw TimeoutException();
+                    }else
+                        LOG_DEBUG("PCP first send skip: %d", rawPack.sync - syncPos);
+                    sendSkipCount++;
+                }
+                syncPos = rawPack.sync + 1;
+
                 if (rawPack.type == ChanPacket::T_HEAD)
                 {
                     atom.writeParent(PCP_CHAN, 2);

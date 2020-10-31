@@ -21,6 +21,7 @@ public:
     }
 };
 
+#ifndef WIN32
 TEST_F(SubprogramFixture, echo)
 {
     Environment env;
@@ -61,3 +62,4 @@ TEST_F(SubprogramFixture, cat)
     EXPECT_EQ(0, status);
     EXPECT_EQ(buf, "hoge");
 }
+#endif

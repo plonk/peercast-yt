@@ -174,7 +174,7 @@ public:
     bool getStatus(std::shared_ptr<Channel>, ChanPacket &);
 
     virtual void kill() {}
-    virtual bool sendPacket(ChanPacket &, GnuID &) { return false; }
+    virtual bool sendPacket(ChanPacket &, const GnuID &) { return false; }
     virtual void flush(Stream &) {}
     virtual void readHeader(Stream &, std::shared_ptr<Channel>) = 0;
     virtual int  readPacket(Stream &, std::shared_ptr<Channel>) = 0;

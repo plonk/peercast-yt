@@ -37,6 +37,20 @@ PeerCast のフォークです。
 * HTML UI をメッセージカタログ化。各国語版で機能に違いがないようにしました。
 * Ajax による画面更新。
 
+# バイナリのダウンロード
+
+https://github.com/plonk/peercast-yt/releases/ に各プラットフォーム用
+のバイナリがあります。
+
+また、Docker HubにDockerイメージがあります。
+
+<dl>
+    <dt>AMD64版</dt>
+    <dd>https://hub.docker.com/r/plonk/peercast-yt</dd>
+    <dt>ARM版 (Raspbian用)</dt>
+    <dd>https://hub.docker.com/r/plonk/peercast-yt-arm</dd>
+</dl>
+
 # Linuxでのビルド
 
 ## 必要なもの

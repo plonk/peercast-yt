@@ -93,8 +93,8 @@ public:
     ~GnuIDList();
 
     void            clear();
-    void            add(GnuID &);
-    bool            contains(GnuID &);
+    void            add(const GnuID &);
+    bool            contains(const GnuID &);
     int             numUsed();
     unsigned int    getOldest();
 

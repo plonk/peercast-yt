@@ -224,7 +224,7 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
     HTTPHeaders headers;
     int statusCode = 200;
     try {
-        Regexp headerPattern("\\A([A-Za-z\\-]+):\\s*(.*)\\z");
+        Regexp headerPattern("^([A-Za-z\\-]+):\\s*(.*)$");
         std::string line;
         while ((line = stream.readLine(8192)) != "")
         {
@@ -937,6 +937,7 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
     ServFilter *currFilter = servMgr->filters;
     servMgr->channelDirectory->clearFeeds();
     servMgr->transcodingEnabled = false;
+    servMgr->chat = false;
 
     bool brRoot = false;
     bool getUpd = false;
@@ -1051,6 +1052,8 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
             chanMgr->deadHitAge = getCGIargINT(arg);
         else if (strcmp(curr, "refresh") == 0)
             servMgr->refreshHTML = getCGIargINT(arg);
+        else if (strcmp(curr, "chat") == 0)
+            servMgr->chat = getCGIargBOOL(arg);
         else if (strcmp(curr, "genreprefix") == 0)
             servMgr->genrePrefix = arg;
         else if (strcmp(curr, "auth") == 0)
@@ -1157,9 +1160,8 @@ void Servent::CMD_fetch(const char* cmd, HTTP& http, String& jumpStr)
             info.bitrate = atoi(arg);
         }else if (strcmp(curr, "type") == 0)
         {
-            ChanInfo::TYPE type = ChanInfo::getTypeFromStr(arg);
+            auto type = arg;
             info.contentType = type;
-            info.contentTypeStr = ChanInfo::getTypeStr(type);
             info.MIMEType = ChanInfo::getMIMEType(type);
             info.streamExt = ChanInfo::getTypeExt(type);
         }
@@ -1524,8 +1526,7 @@ static std::string dumpChanInfo(const ChanInfo& info)
     b += STR("id = ", info.id.str(), "\n");
     b += STR("bcID = ", info.bcID.str(), "\n");
     b += STR("bitrate = ", info.bitrate, "\n");
-    b += STR("contentType = ", info.contentType, "\n");
-    b += STR("contentTypeStr = ", inspect(info.contentTypeStr), "\n");
+    b += STR("contentType = ", info.contentType.c_str(), "\n");
     b += STR("MIMEType = ", inspect(info.MIMEType), "\n");
     b += STR("streamExt = ", inspect(info.streamExt), "\n");
     b += STR("srcProtocol = ", info.srcProtocol, "\n");
@@ -1635,7 +1636,7 @@ void Servent::CMD_add_speedtest(const char* cmd, HTTP& http, String& jumpStr)
 
 static bool isDecimal(const std::string& str)
 {
-    static const Regexp decimal("\\A(0|[1-9][0-9]*)\\z");
+    static const Regexp decimal("^(0|[1-9][0-9]*)$");
     return decimal.matches(str);
 }
 
@@ -2248,6 +2249,9 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
     {
         if (str::contains(fn, "play.html"))
         {
+            // 視聴ページだった場合はあらかじめチャンネルのリレーを開
+            // 始しておく。
+
             auto vec = str::split(fn, "?");
             if (vec.size() != 2)
                 throw HTTPException(HTTP_SC_BADREQUEST, 400);

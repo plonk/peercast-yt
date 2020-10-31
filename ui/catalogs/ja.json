@@ -170,6 +170,7 @@
     "Refresh HTML (sec)"      : "HTML更新 (秒)",
     "Network"                 : "ネットワーク",
     "YP Address"              : "YPアドレス",
+    "YP message"              : "YPメッセージ",
     "Max. Output (Kbits/s)"   : "送信速度上限 (Kbps)",
     "Max. Relays Per Channel" : "Ch毎リレー数上限",
     "Max. Controls In"        : "コントロール着信数上限",
@@ -230,6 +231,8 @@
     "Upload Bandwidth Testing" : "アップロード帯域チェック",
     "URL of yp4g.xml"         : "yp4g.xmlのURL",
 
+    "Chat"                    : "チャット",
+
     // rtmp.html
     "Start"                   : "開始",
     "Process ID"              : "プロセスID",
@@ -268,6 +271,7 @@
     "Player"                  : "プレーヤー",
 
     // play.html
+    "Back"                    : "戻る",
     "Show Chat"               : "チャット表示",
     "Request Flash-based player" : "Flashベースのプレーヤーにチェンジ",
     "Request HTML5 player"    : "HTML5プレーヤーにチェンジ",
@@ -280,5 +284,9 @@
     "Small icon of a megaphone" : "メガホンの小さなアイコン",
     "Rank" : "順位",
     "Yellow Pages"            : "イエローページ",
+
+    // Templates/player.html
+    "Unmute": "ミュート解除",
+    
     "":""
 }

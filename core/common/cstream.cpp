@@ -355,8 +355,6 @@ bool ChannelStream::getStatus(std::shared_ptr<Channel> ch, ChanPacket &pack)
         MemoryStream pmem(pack.data, sizeof(pack.data));
         AtomStream atom(pmem);
 
-        GnuID noID;
-
         atom.writeParent(PCP_BCST, 10);
             atom.writeChar(PCP_BCST_GROUP, PCP_BCST_GROUP_TRACKERS);
             atom.writeChar(PCP_BCST_HOPS, 0);
@@ -367,7 +365,7 @@ bool ChannelStream::getStatus(std::shared_ptr<Channel> ch, ChanPacket &pack)
             atom.writeBytes(PCP_BCST_VERSION_EX_PREFIX, PCP_CLIENT_VERSION_EX_PREFIX, 2);
             atom.writeShort(PCP_BCST_VERSION_EX_NUMBER, PCP_CLIENT_VERSION_EX_NUMBER);
             atom.writeBytes(PCP_BCST_CHANID, ch->info.id.id, 16);
-            hit.writeAtoms(atom, noID);
+            hit.writeAtoms(atom, GnuID());
 
         pack.len = pmem.pos;
         pack.type = ChanPacket::T_PCP;
@@ -384,8 +382,7 @@ void ChannelStream::updateStatus(std::shared_ptr<Channel> ch)
     {
         if (!ch->isBroadcasting())
         {
-            GnuID noID;
-            int cnt = chanMgr->broadcastPacketUp(pack, ch->info.id, servMgr->sessionID, noID);
+            int cnt = chanMgr->broadcastPacketUp(pack, ch->info.id, servMgr->sessionID, GnuID());
             LOG_INFO("Sent channel status update to %d clients", cnt);
         }
     }
@@ -402,5 +399,5 @@ void ChannelStream::readRaw(Stream &in, std::shared_ptr<Channel> ch)
     ch->newPacket(pack);
     ch->checkReadDelay(pack.len);
 
-    ch->streamPos+=pack.len;
+    ch->streamPos += pack.len;
 }

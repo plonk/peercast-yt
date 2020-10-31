@@ -83,11 +83,8 @@ TEST_F(ChannelFixture, initialState)
     // unsigned int        lastMetaUpdate;
     ASSERT_EQ(0, c.lastMetaUpdate);
 
-    // double              startTime, syncTime;
+    // double              startTime;
     ASSERT_EQ(0, c.startTime);
-    ASSERT_EQ(0, c.syncTime);
-
-    // WEvent              syncEvent;
 
     // Channel             *next;
     ASSERT_EQ(nullptr, c.next);
@@ -145,7 +142,7 @@ TEST_F(ChannelFixture, writeVariable)
 
     mem.str("");
     ASSERT_TRUE(c.writeVariable(mem, "typeLong"));
-    ASSERT_STREQ("UNKNOWN (application/octet-stream; ) [contentTypeStr empty] [no styp] [no sext]", mem.str().c_str());
+    ASSERT_STREQ("UNKNOWN (application/octet-stream; ) [no styp] [no sext]", mem.str().c_str());
 
     mem.str("");
     ASSERT_TRUE(c.writeVariable(mem, "ext"));

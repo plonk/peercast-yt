@@ -152,5 +152,8 @@
     // "Login"                   : null,
     // "_Password_login"          : null,
 
+    // Templates/player.html
+    "Unmute": null,
+
     null:null
 }

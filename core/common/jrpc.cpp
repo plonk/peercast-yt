@@ -30,7 +30,7 @@ json JrpcApi::call_internal(const string& input)
 
     try {
         j = json::parse(input);
-    } catch (std::invalid_argument&) {
+    } catch (json::parse_error&) {
         return error_object(kParseError, "Parse error");
     }
 
@@ -43,13 +43,13 @@ json JrpcApi::call_internal(const string& input)
 
     try {
         id = j.at("id");
-    } catch (std::out_of_range) {
+    } catch (json::out_of_range) {
         return error_object(kInvalidRequest, "Invalid Request");
     }
 
     try {
         method = j.at("method");
-    } catch (std::out_of_range) {
+    } catch (json::out_of_range) {
         return error_object(kInvalidRequest, "Invalid Request", id);
     }
 
@@ -228,7 +228,6 @@ json JrpcApi::fetch(json::array_t params)
             auto type = ChanInfo::getTypeFromStr(typeStr.c_str());
 
             info.contentType    = type;
-            info.contentTypeStr = ChanInfo::getTypeStr(type);
             info.MIMEType       = ChanInfo::getMIMEType(type);
             info.streamExt      = ChanInfo::getTypeExt(type);
         }

@@ -50,8 +50,8 @@ public:
     void    broadcastTrackerSettings();
     void    setUpdateInterval(unsigned int v);
 
-    int     broadcastPacketUp(ChanPacket &, GnuID &, GnuID &, GnuID &);
-    void    broadcastTrackerUpdate(GnuID &, bool = false);
+    int     broadcastPacketUp(ChanPacket &, const GnuID &, const GnuID &, const GnuID &);
+    void    broadcastTrackerUpdate(const GnuID &, bool = false);
 
     bool    writeVariable(Stream &, const String &) override;
 
@@ -66,14 +66,14 @@ public:
     void    closeAll();
     void    quit();
 
-    void    addHit(Host &, GnuID &, bool);
+    void    addHit(Host &, const GnuID &, bool);
     ChanHit *addHit(ChanHit &);
     void    delHit(ChanHit &);
     void    deadHit(ChanHit &);
     void    setFirewalled(Host &);
 
     ChanHitList *findHitList(ChanInfo &);
-    ChanHitList *findHitListByID(GnuID &);
+    ChanHitList *findHitListByID(const GnuID &);
     ChanHitList *addHitList(ChanInfo &);
 
     void        clearHitLists();
@@ -89,7 +89,7 @@ public:
     void        playChannel(ChanInfo &);
     void        findAndPlayChannel(ChanInfo &, bool);
 
-    bool        isBroadcasting(GnuID &);
+    bool        isBroadcasting(const GnuID &);
     bool        isBroadcasting();
 
     int         pickHits(ChanHitSearch &);

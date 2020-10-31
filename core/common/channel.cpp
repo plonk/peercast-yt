@@ -44,6 +44,7 @@
 #include "flv.h"
 #include "mkv.h"
 #include "wmhttp.h"
+#include "mp4.h"
 
 #include "icy.h"
 #include "url.h"
@@ -203,7 +204,6 @@ void Channel::reset()
     srcType = SRC_NONE;
 
     startTime = 0;
-    syncTime = 0;
 }
 
 // -----------------------------------
@@ -569,7 +569,6 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
     m_channel = ch;
 
     int numYPTries = 0;
-    int numCDTries = 0;
     while (ch->thread.active())
     {
         ch->sourceHost.init();
@@ -601,9 +600,6 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
                 std::string trackerIP = servMgr->channelDirectory->findTracker(ch->info.id);
                 if (!trackerIP.empty())
                 {
-                    if (numCDTries >= 1)
-                        break;
-                    numCDTries++;
                     peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルフィードで "+chName(ch->info)+" のトラッカーが見付かりました。");
 
                     ch->sourceHost.host.fromStrIP(trackerIP.c_str(), DEFAULT_PORT);
@@ -712,8 +708,7 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
                 atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT+PCP_ERROR_OFFAIR);
                 pack.len = mem.pos;
                 pack.type = ChanPacket::T_PCP;
-                GnuID noID;
-                servMgr->broadcastPacket(pack, ch->info.id, ch->remoteID, noID, Servent::T_RELAY);
+                servMgr->broadcastPacket(pack, ch->info.id, ch->remoteID, GnuID(), Servent::T_RELAY);
             }
 
             if (ch->sourceStream)
@@ -937,7 +932,7 @@ void ChanMeta::addMem(void *p, int l)
 }
 
 // -----------------------------------
-void Channel::broadcastTrackerUpdate(GnuID &svID, bool force /* = false */)
+void Channel::broadcastTrackerUpdate(const GnuID &svID, bool force /* = false */)
 {
     unsigned int ctime = sys->getTime();
 
@@ -983,8 +978,7 @@ void Channel::broadcastTrackerUpdate(GnuID &svID, bool force /* = false */)
         pack.len = mem.pos;
         pack.type = ChanPacket::T_PCP;
 
-        GnuID noID;
-        int cnt = servMgr->broadcastPacket(pack, noID, servMgr->sessionID, svID, Servent::T_COUT);
+        int cnt = servMgr->broadcastPacket(pack, GnuID(), servMgr->sessionID, svID, Servent::T_COUT);
 
         if (cnt)
         {
@@ -995,7 +989,7 @@ void Channel::broadcastTrackerUpdate(GnuID &svID, bool force /* = false */)
 }
 
 // -----------------------------------
-bool    Channel::sendPacketUp(ChanPacket &pack, GnuID &cid, GnuID &sid, GnuID &did)
+bool    Channel::sendPacketUp(ChanPacket &pack, const GnuID &cid, const GnuID &sid, const GnuID &did)
 {
     if ( isActive()
         && (!cid.isSet() || info.id.isSame(cid))
@@ -1053,10 +1047,9 @@ void Channel::updateInfo(const ChanInfo &newInfo)
 
             pack.len = mem.pos;
             pack.type = ChanPacket::T_PCP;
-            GnuID noID;
-            servMgr->broadcastPacket(pack, info.id, servMgr->sessionID, noID, Servent::T_RELAY);
+            servMgr->broadcastPacket(pack, info.id, servMgr->sessionID, GnuID(), Servent::T_RELAY);
 
-            broadcastTrackerUpdate(noID);
+            broadcastTrackerUpdate(GnuID());
         }
     }
 
@@ -1092,54 +1085,54 @@ ChannelStream *Channel::createSource()
         source = new MMSStream();
     }else if (info.srcProtocol == ChanInfo::SP_WMHTTP)
     {
-        switch (info.contentType)
+        if (info.contentType == ChanInfo::T_WMA ||
+            info.contentType == ChanInfo::T_WMV)
         {
-            case ChanInfo::T_WMA:
-            case ChanInfo::T_WMV:
-                LOG_INFO("Channel is WMHTTP");
-                source = new WMHTTPStream();
-                break;
-            default:
-                throw StreamException("Channel is WMHTTP - but not WMA/WMV");
-                break;
+            LOG_INFO("Channel is WMHTTP");
+            source = new WMHTTPStream();
+        }else
+        {
+            throw StreamException("Channel is WMHTTP - but not WMA/WMV");
         }
     }else{
-        switch (info.contentType)
+        if (info.contentType == ChanInfo::T_MP3)
         {
-            case ChanInfo::T_MP3:
-                LOG_INFO("Channel is MP3 - meta: %d", icyMetaInterval);
-                source = new MP3Stream();
-                break;
-            case ChanInfo::T_NSV:
-                LOG_INFO("Channel is NSV");
-                source = new NSVStream();
-                break;
-            case ChanInfo::T_WMA:
-            case ChanInfo::T_WMV:
-                LOG_INFO("Channel is MMS");
-                source = new MMSStream();
-                break;
-            case ChanInfo::T_FLV:
-                LOG_INFO("Channel is FLV");
-                source = new FLVStream();
-                break;
-            case ChanInfo::T_OGG:
-            case ChanInfo::T_OGM:
-                LOG_INFO("Channel is OGG");
-                source = new OGGStream();
-                break;
-            case ChanInfo::T_MKV:
-                LOG_INFO("Channel is MKV");
-                source = new MKVStream();
-                break;
-            case ChanInfo::T_WEBM:
-                LOG_INFO("Channel is WebM");
-                source = new MKVStream();
-                break;
-            default:
-                LOG_INFO("Channel is Raw");
-                source = new RawStream();
-                break;
+            LOG_INFO("Channel is MP3 - meta: %d", icyMetaInterval);
+            source = new MP3Stream();
+        }else if (info.contentType == ChanInfo::T_NSV)
+        {
+            LOG_INFO("Channel is NSV");
+            source = new NSVStream();
+        }else if (info.contentType == ChanInfo::T_WMA ||
+                  info.contentType == ChanInfo::T_WMV)
+        {
+            LOG_INFO("Channel is MMS");
+            source = new MMSStream();
+        }else if (info.contentType == ChanInfo::T_FLV)
+        {
+            LOG_INFO("Channel is FLV");
+            source = new FLVStream();
+        }else if (info.contentType == ChanInfo::T_OGG ||
+                  info.contentType == ChanInfo::T_OGM)
+        {
+            LOG_INFO("Channel is OGG");
+            source = new OGGStream();
+        }else if (info.contentType == ChanInfo::T_MKV)
+        {
+            LOG_INFO("Channel is MKV");
+            source = new MKVStream();
+        }else if (info.contentType == ChanInfo::T_WEBM)
+        {
+            LOG_INFO("Channel is WebM");
+            source = new MKVStream();
+        }else if (info.contentType == ChanInfo::T_MP4)
+        {
+            LOG_INFO("Channel is MP4");
+            source = new MP4Stream();
+        }else
+        {
+            LOG_INFO("Channel is Raw");
+            source = new RawStream();
         }
     }
 
@@ -1217,8 +1210,7 @@ int Channel::readStream(Stream &in, ChannelStream *source)
                     {
                         if ((sys->getTime() - lastTrackerUpdate) >= 120)
                         {
-                            GnuID noID;
-                            broadcastTrackerUpdate(noID);
+                            broadcastTrackerUpdate(GnuID());
                         }
                         wasBroadcasting = true;
                     }else
@@ -1241,8 +1233,7 @@ int Channel::readStream(Stream &in, ChannelStream *source)
 
     if (wasBroadcasting)
     {
-        GnuID noID;
-        broadcastTrackerUpdate(noID, true);
+        broadcastTrackerUpdate(GnuID(), true);
     }
 
     peercastApp->channelStop(&info);
@@ -1414,7 +1405,7 @@ std::string Channel::getBufferString()
                       str::group_digits(std::to_string(sum)).c_str(),
                       sum / byterate);
     buf += str::format("Packets: %lu (c %d / nc %d)\n",
-                       lens.size(),
+                       (unsigned long) lens.size(),
                        stat.continuations,
                        stat.nonContinuations);
 
@@ -1423,7 +1414,7 @@ std::string Channel::getBufferString()
         auto pmax = std::max_element(lens.begin(), lens.end());
         auto pmin = std::min_element(lens.begin(), lens.end());
         buf += str::format("Packet length min/avg/max: %u/%lu/%u\n",
-                           *pmin, sum/lens.size(), *pmax);
+                           *pmin, (unsigned long) sum/lens.size(), *pmax);
     }
     buf += str::format("Last written: %s", time.str().c_str());
 
@@ -1547,30 +1538,3 @@ bool Channel::writeVariable(Stream &out, const String &var)
     out.writeString(buf);
     return true;
 }
-
-// -----------------------------------
-// message check
-#if 0
-                ChanPacket pack;
-                MemoryStream mem(pack.data, sizeof(pack.data));
-                AtomStream atom(mem);
-                atom.writeParent(PCP_BCST, 3);
-                    atom.writeChar(PCP_BCST_GROUP, PCP_BCST_GROUP_ALL);
-                    atom.writeBytes(PCP_BCST_FROM, servMgr->sessionID.id, 16);
-                    atom.writeParent(PCP_MESG, 1);
-                        atom.writeString(PCP_MESG_DATA, msg.cstr());
-
-                mem.len = mem.pos;
-                mem.rewind();
-                pack.len = mem.len;
-
-                GnuID noID;
-                noID.clear();
-
-                BroadcastState bcs;
-                PCPStream::readAtom(atom, bcs);
-                //int cnt = servMgr->broadcastPacketUp(pack, noID, servMgr->sessionID);
-                //int cnt = servMgr->broadcastPacketDown(pack, noID, servMgr->sessionID);
-                //int cnt = chanMgr->broadcastPacketUp(pack, noID, servMgr->sessionID);
-                //LOG_DEBUG("Sent message to %d clients", cnt);
-#endif

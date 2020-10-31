@@ -163,7 +163,7 @@ public:
     static THREAD_PROC  incomingProc(ThreadInfo *);
     static THREAD_PROC  givProc(ThreadInfo *);
 
-    static bool pingHost(Host &, GnuID &);
+    static bool pingHost(Host &, const GnuID &);
 
     bool    getLocalURL(char *);
 
@@ -180,13 +180,13 @@ public:
     bool    handshakeStream(ChanInfo &);
     void    handshakeStream_readHeaders(bool& gotPCP, unsigned int& reqPos, int& nsSwitchNum);
     void    handshakeStream_changeOutputProtocol(bool gotPCP, const ChanInfo& chanInfo);
-    bool    handshakeStream_returnResponse(bool gotPCP, bool chanFound, bool chanReady,
+    bool    handshakeStream_returnResponse(bool gotPCP, bool chanReady,
                                            std::shared_ptr<Channel> ch, ChanHitList* chl,
                                            const ChanInfo& chanInfo);
     void    handshakeStream_returnStreamHeaders(AtomStream& atom,
                                                 std::shared_ptr<Channel> ch, const ChanInfo& chanInfo);
     void    handshakeStream_returnHits(AtomStream& atom, const GnuID& channelID, ChanHitList* chl, Host& rhost);
-    void    handshakeGiv(GnuID &);
+    void    handshakeGiv(const GnuID &);
 
     void    handshakeICY(Channel::SRC_TYPE, bool);
     void    handshakeIncoming();
@@ -242,7 +242,7 @@ public:
     Host    getHost();
 
     bool    acceptGIV(ClientSocket *);
-    bool    sendPacket(ChanPacket &, GnuID &, GnuID &, GnuID &, Servent::TYPE);
+    bool    sendPacket(ChanPacket &, const GnuID &, const GnuID &, const GnuID &, Servent::TYPE);
 
     ChanInfo createChannelInfo(GnuID broadcastID, const String& broadcastMsg, cgi::Query& query, const std::string& contentType);
 

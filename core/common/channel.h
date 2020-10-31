@@ -222,8 +222,8 @@ public:
     std::string  getSourceString();
     std::string  getBufferString();
 
-    void         broadcastTrackerUpdate(GnuID &, bool = false);
-    bool         sendPacketUp(ChanPacket &, GnuID &, GnuID &, GnuID &);
+    void         broadcastTrackerUpdate(const GnuID &, bool = false);
+    bool         sendPacketUp(ChanPacket &, const GnuID &, const GnuID &, const GnuID &);
 
     bool         writeVariable(Stream &, const String &) override;
     bool         acceptGIV(ClientSocket *);
@@ -287,9 +287,7 @@ public:
     unsigned int        lastTrackerUpdate;
     unsigned int        lastMetaUpdate;
 
-    double              startTime, syncTime;
-
-    WEvent              syncEvent;
+    double              startTime;
 
     mutable std::recursive_mutex lock;
 
