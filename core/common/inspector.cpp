@@ -93,7 +93,7 @@ nlohmann::json Inspector::inspect(ServMgr& m)
     {"hasUnsafeFilterSettings", m.hasUnsafeFilterSettings()},
     {"isFirewalled", m.getFirewall()==ServMgr::FW_ON},
     {"isPrivate", false},
-    {"isRoot", m.isRoot},
+    {"isRoot", m.isRoot.load()},
     {"log", nlohmann::json::object_t({
           {"level", m.logLevel()},
         })},
