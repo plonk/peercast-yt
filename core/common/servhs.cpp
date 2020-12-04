@@ -903,7 +903,7 @@ void Servent::CMD_redirect(const char* cmd, HTTP& http, String& jumpStr)
         url.set(j, String::T_ESC);
         url.convertTo(String::T_ASCII);
 
-        if (!url.contains("http://"))
+        if (!url.startsWith("http://") && !url.startsWith("https://"))
             url.prepend("http://");
 
         html.setRefreshURL(url.cstr());
