@@ -25,6 +25,7 @@
 #include "channel.h"
 
 // -----------------------------------
+// 9バイトのFLVファイルヘッダーと4バイトのPreviousTagSizeを読み込むクラス。
 class FLVFileHeader
 {
 public:
