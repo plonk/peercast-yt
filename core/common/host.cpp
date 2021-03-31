@@ -23,7 +23,7 @@
 // ------------------------------------------
 bool Host::isLocalhost()
 {
-    return loopbackIP() || (ip == ClientSocket::getIP(NULL));
+    return loopbackIP() || (ip == IP(ClientSocket::getIP(NULL)));
 }
 
 // ------------------------------------------
@@ -46,10 +46,9 @@ void Host::fromStrName(const char *str, int p)
 }
 
 // ------------------------------------------
-::String Host::IPtoStr()
+::String Host::IPtoStr() const
 {
-    ::String result;
-    this->IPtoStr(result.data);
+    ::String result = ip.str().c_str();
     return result;
 }
 
@@ -82,16 +81,16 @@ void Host::fromStrIP(const char *str, int p)
 // -----------------------------------
 bool Host::isMemberOf(const Host &h) const
 {
-    if (h.ip==0)
+    if (!h.ip)
         return false;
 
-    if ( h.ip0() != 255 && ip0() != h.ip0() )
+    if ( h.ip.ip0() != 255 && ip.ip0() != h.ip.ip0() )
         return false;
-    if ( h.ip1() != 255 && ip1() != h.ip1() )
+    if ( h.ip.ip1() != 255 && ip.ip1() != h.ip.ip1() )
         return false;
-    if ( h.ip2() != 255 && ip2() != h.ip2() )
+    if ( h.ip.ip2() != 255 && ip.ip2() != h.ip.ip2() )
         return false;
-    if ( h.ip3() != 255 && ip3() != h.ip3() )
+    if ( h.ip.ip3() != 255 && ip.ip3() != h.ip.ip3() )
         return false;
 
     return true;

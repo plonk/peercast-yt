@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "common.h"
+#include "host.h"
 
 TEST(HostTest, initialState)
 {
@@ -87,17 +88,17 @@ TEST(HostTest, fromStrName_localhost)
 
     host.fromStrName("localhost", 0);
 
-    ASSERT_EQ(127<<24 | 1, host.ip);
+    ASSERT_EQ(127<<24 | 1, host.ip.ipv4());
     ASSERT_EQ(0, host.port);
 
     host.fromStrName("localhost", 7144);
 
-    ASSERT_EQ(127<<24 | 1, host.ip);
+    ASSERT_EQ(127<<24 | 1, host.ip.ipv4());
     ASSERT_EQ(7144, host.port);
 
     host.fromStrName("localhost:8144", 7144);
 
-    ASSERT_EQ(127<<24 | 1, host.ip);
+    ASSERT_EQ(127<<24 | 1, host.ip.ipv4());
     ASSERT_EQ(8144, host.port);
 }
 

@@ -57,10 +57,10 @@ bool ServFilter::matches(int fl, const Host& h) const
     case T_IP:
         return h.isMemberOf(host);
     case T_HOSTNAME:
-        return h.ip == ClientSocket::getIP(pattern.c_str());
+        return h.ip == IP(ClientSocket::getIP(pattern.c_str()));
     case T_SUFFIX:
         char str[256] = "";
-        ClientSocket::getHostname(str, h.ip);
+        ClientSocket::getHostname(str, h.ip.ipv4());
         return str::has_suffix(str, pattern);
     }
 }
@@ -110,5 +110,5 @@ bool ServFilter::isGlobal()
 // --------------------------------------------------
 bool ServFilter::isSet()
 {
-    return !(type == T_IP && host.ip == 0);
+    return !(type == T_IP && !host.ip);
 }

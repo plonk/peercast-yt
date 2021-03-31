@@ -165,7 +165,7 @@ hostent *UClientSocket::resolveHost(const char *hostName)
 // --------------------------------------------------
 void UClientSocket::open(const Host &rh)
 {
-    sockNum = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    sockNum = socket (AF_INET6, SOCK_STREAM, 0);
 
     if (sockNum == INVALID_SOCKET)
         throw SockException("Can`t open socket");
@@ -179,9 +179,9 @@ void UClientSocket::open(const Host &rh)
 
     memset(&remoteAddr, 0, sizeof(remoteAddr));
 
-    remoteAddr.sin_family = AF_INET;
-    remoteAddr.sin_port = htons(host.port);
-    remoteAddr.sin_addr.s_addr = htonl(host.ip);
+    remoteAddr.sin6_family = AF_INET6;
+    remoteAddr.sin6_port = htons(host.port);
+    remoteAddr.sin6_addr = host.ip.serialize();
 }
 
 // --------------------------------------------------
@@ -326,9 +326,9 @@ void UClientSocket::write(const void *p, int l)
 // --------------------------------------------------
 void UClientSocket::bind(const Host &h)
 {
-    struct sockaddr_in localAddr;
+    struct sockaddr_in6 localAddr = {};
 
-    if ((sockNum = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
+    if ((sockNum = socket (AF_INET6, SOCK_STREAM, 0)) == -1)
         throw SockException("Can`t open socket");
 
     if (fcntl(sockNum, F_SETFD, FD_CLOEXEC) == -1)
@@ -338,9 +338,9 @@ void UClientSocket::bind(const Host &h)
     setBlocking(false);
 
     memset(&localAddr, 0, sizeof(localAddr));
-    localAddr.sin_family = AF_INET;
-    localAddr.sin_port = htons(h.port);
-    localAddr.sin_addr.s_addr = INADDR_ANY;
+    localAddr.sin6_family = AF_INET6;
+    localAddr.sin6_port = htons(h.port);
+    localAddr.sin6_addr = in6addr_any;
 
     if ( ::bind (sockNum, (sockaddr *)&localAddr, sizeof(localAddr)) == -1)
         throw SockException("Can`t bind socket");
@@ -354,8 +354,8 @@ void UClientSocket::bind(const Host &h)
 // --------------------------------------------------
 ClientSocket *UClientSocket::accept()
 {
-    socklen_t fromSize = sizeof(sockaddr_in);
-    sockaddr_in from;
+    socklen_t fromSize = sizeof(sockaddr_in6);
+    sockaddr_in6 from;
 
     int conSock = ::accept(sockNum, (sockaddr *)&from, &fromSize);
 
@@ -365,8 +365,8 @@ ClientSocket *UClientSocket::accept()
     UClientSocket *cs = new UClientSocket();
     cs->sockNum = conSock;
 
-    cs->host.port = from.sin_port;
-    cs->host.ip = ntohl(from.sin_addr.s_addr);
+    cs->host.port = from.sin6_port;
+    cs->host.ip = IP(from.sin6_addr);
 
     cs->setBlocking(false);
 #ifdef DISABLE_NAGLE
@@ -379,11 +379,11 @@ ClientSocket *UClientSocket::accept()
 // --------------------------------------------------
 Host UClientSocket::getLocalHost()
 {
-    struct sockaddr_in localAddr;
+    struct sockaddr_in6 localAddr;
 
     socklen_t len = sizeof(localAddr);
     if (getsockname(sockNum, (sockaddr *)&localAddr, &len) == 0)
-        return Host(ntohl(localAddr.sin_addr.s_addr), 0);
+        return Host(IP(localAddr.sin6_addr), 0);
     else
         return Host(0, 0);
 }

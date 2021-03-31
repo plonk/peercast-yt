@@ -13,8 +13,7 @@ TEST_F(ChanHitSearchFixture, initialState)
     GnuID zero_id;
     zero_id.clear();
 
-    chs.matchHost.toStr(buf);
-    ASSERT_STREQ("0.0.0.0:0", buf);
+    ASSERT_EQ("0.0.0.0:0", chs.matchHost.str());
 
     ASSERT_EQ(0, chs.waitDelay);
     ASSERT_EQ(false, chs.useFirewalled);

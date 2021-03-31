@@ -21,6 +21,7 @@
 
 #include <functional>
 
+#include "host.h"
 #include "chaninfo.h"
 #include "xml.h"
 

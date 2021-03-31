@@ -193,9 +193,6 @@ void PCPStream::readPushAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 
     if (bcs.forMe)
     {
-        char ipstr[64];
-        host.toStr(ipstr);
-
         Servent *s = NULL;
 
         if (chanID.isSet())
@@ -210,7 +207,7 @@ void PCPStream::readPushAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 
         if (s)
         {
-            LOG_DEBUG("GIVing to %s", ipstr);
+            LOG_DEBUG("GIVing to %s", host.str().c_str());
             s->initGIV(host, chanID);
         }
     }

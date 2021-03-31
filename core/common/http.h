@@ -22,6 +22,7 @@
 
 #include <map>
 
+#include "host.h"
 #include "stream.h"
 #include "str.h"
 

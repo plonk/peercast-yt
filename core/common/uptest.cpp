@@ -205,7 +205,7 @@ std::string UptestEndpoint::download(const std::string& url)
     Host host;
     host.fromStrName(uri.host().c_str(), uri.port());
 
-    if (host.ip == 0)
+    if (!host.ip)
         throw std::runtime_error("could not resolve host name");
 
     ClientSocket* rsock = sys->createSocket();
@@ -283,7 +283,7 @@ HTTPResponse UptestEndpoint::postRandomData(URI uri, size_t size)
     Host host;
     host.fromStrName(uri.host().c_str(), uri.port());
 
-    if (host.ip == 0)
+    if (!host.ip)
         throw std::runtime_error("Could not resolve host name");
 
     ClientSocket* rsock = sys->createSocket();

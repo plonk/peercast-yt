@@ -23,9 +23,6 @@
 #include <string>
 #include <assert.h>
 
-#include "gnuid.h"
-#include "host.h"
-
 #ifndef __GNUC__
 #define __attribute__(x)
 #endif
