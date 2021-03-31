@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "common.h"
+#include "gnuid.h"
 #include "mocksys.h"
 
 #include <gtest/gtest.h>

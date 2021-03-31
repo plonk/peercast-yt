@@ -72,7 +72,7 @@ public:
     void    checkTimeout(bool, bool);
 
     int sockNum;
-    struct sockaddr_in remoteAddr;
+    struct sockaddr_in6 remoteAddr;
 };
 
 #endif

@@ -202,13 +202,10 @@ void ServMgr::addHost(Host &h, ServHost::TYPE type, unsigned int time)
                 break;
             }
 
-    char str[64];
-    h.toStr(str);
-
     if (!sh)
-        LOG_DEBUG("New host: %s - %s", str, ServHost::getTypeStr(type));
+        LOG_DEBUG("New host: %s - %s", h.str().c_str(), ServHost::getTypeStr(type));
     else
-        LOG_DEBUG("Old host: %s - %s", str, ServHost::getTypeStr(type));
+        LOG_DEBUG("Old host: %s - %s", h.str().c_str(), ServHost::getTypeStr(type));
 
     if (!sh)
     {
@@ -355,14 +352,14 @@ Servent *ServMgr::findServent(Servent::TYPE type, Host &host, const GnuID &netid
 Servent *ServMgr::findServent(unsigned int ip, unsigned short port, const GnuID &netid)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
+    Host target(ip, port);
 
     Servent *s = servents;
     while (s)
     {
         if (s->type != Servent::T_NONE)
         {
-            Host h = s->getHost();
-            if ((h.ip == ip) && (h.port == port) && (s->networkID.isSame(netid)))
+            if (s->getHost() == target && (s->networkID.isSame(netid)))
             {
                 return s;
             }
@@ -630,9 +627,7 @@ bool ServMgr::checkForceIP()
         if (serverHost.ip != newIP)
         {
             serverHost.ip = newIP;
-            char ipstr[64];
-            serverHost.IPtoStr(ipstr);
-            LOG_DEBUG("Server IP changed to %s", ipstr);
+            LOG_DEBUG("Server IP changed to %s", serverHost.str().c_str());
             return true;
         }
     }

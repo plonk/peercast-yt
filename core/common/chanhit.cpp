@@ -367,10 +367,7 @@ ChanHit *ChanHitList::deleteHit(ChanHit *ch)
 // -----------------------------------
 ChanHit *ChanHitList::addHit(ChanHit &h)
 {
-    char ip0str[64], ip1str[64];
-    h.rhost[0].toStr(ip0str);
-    h.rhost[1].toStr(ip1str);
-    LOG_DEBUG("Add hit: %s/%s", ip0str, ip1str);
+    LOG_DEBUG("Add hit: %s/%s", h.rhost[0].str().c_str(), h.rhost[1].str().c_str());
 
     // dont add our own hits
     if (servMgr->sessionID.isSame(h.sessionID))
@@ -455,10 +452,7 @@ int ChanHitList::clearDeadHits(unsigned int timeout, bool clearTrackers)
 // -----------------------------------
 void    ChanHitList::deadHit(ChanHit &h)
 {
-    char ip0str[64], ip1str[64];
-    h.rhost[0].toStr(ip0str);
-    h.rhost[1].toStr(ip1str);
-    LOG_DEBUG("Dead hit: %s/%s", ip0str, ip1str);
+    LOG_DEBUG("Dead hit: %s/%s", h.rhost[0].str().c_str(), h.rhost[1].str().c_str());
 
     ChanHit *ch = hit;
     while (ch)
@@ -475,10 +469,7 @@ void    ChanHitList::deadHit(ChanHit &h)
 // -----------------------------------
 void    ChanHitList::delHit(ChanHit &h)
 {
-    char ip0str[64], ip1str[64];
-    h.rhost[0].toStr(ip0str);
-    h.rhost[1].toStr(ip1str);
-    LOG_DEBUG("Del hit: %s/%s", ip0str, ip1str);
+    LOG_DEBUG("Del hit: %s/%s", h.rhost[0].str().c_str(), h.rhost[1].str().c_str());
 
     ChanHit *ch = hit;
     while (ch)

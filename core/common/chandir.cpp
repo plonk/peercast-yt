@@ -101,7 +101,7 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
 
     Host host;
     host.fromStrName(feed.host().c_str(), feed.port());
-    if (host.ip==0) {
+    if (!host.ip) {
         LOG_ERROR("Could not resolve %s", feed.host().c_str());
         return false;
     }

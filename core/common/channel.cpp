@@ -632,7 +632,7 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
             }
 
             sys->sleepIdle();
-        }while ((ch->sourceHost.host.ip==0) && (ch->thread.active()));
+        }while ((!ch->sourceHost.host.ip) && (ch->thread.active()));
 
         if (!ch->sourceHost.host.ip)
         {
@@ -659,7 +659,7 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
                 peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネル "+chName(ch->info)+" をトラッカーに問い合わせています...");
 
             char ipstr[64];
-            ch->sourceHost.host.toStr(ipstr);
+            strcpy(ipstr, ch->sourceHost.host.str().c_str());
 
             const char *type = "";
             if (ch->sourceHost.tracker)

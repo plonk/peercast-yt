@@ -16,6 +16,7 @@
 // ------------------------------------------------
 
 #include <algorithm>
+#include "host.h"
 #include "gnuid.h" // Host std::string
 #include "sys.h" // sys
 

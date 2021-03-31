@@ -89,7 +89,7 @@ public:
 
                 LOG_DEBUG("HostGraph: endpoint = %s", h.IPtoStr().cstr());
 
-                if (h.ip == 0)
+                if (!h.ip)
                     continue;
 
                 m_hit[h] = *p;

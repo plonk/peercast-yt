@@ -473,7 +473,7 @@ void Servent::setStatus(STATUS s)
 bool    Servent::pingHost(Host &rhost, const GnuID &rsid)
 {
     char ipstr[64];
-    rhost.toStr(ipstr);
+    strcpy(ipstr, rhost.str().c_str());
     LOG_DEBUG("Ping host %s: trying..", ipstr);
     ClientSocket *s=NULL;
     bool hostOK=false;
@@ -1089,9 +1089,7 @@ void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
                 if (rhost.globalIP() == thisHost.globalIP())
                 {
                     std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
-                    char ipstr[64];
-                    thisHost.toStr(ipstr);
-                    LOG_DEBUG("Got new ip: %s", ipstr);
+                    LOG_DEBUG("Got new ip: %s", thisHost.str().c_str());
                     servMgr->serverHost.ip = thisHost.ip;
                 }
             }
@@ -1250,7 +1248,7 @@ void Servent::processIncomingPCP(bool suggestOthers)
     bool offair           = !servMgr->isRoot && !chanMgr->isBroadcasting();
 
     char rstr[64];
-    rhost.toStr(rstr);
+    strcpy(rstr, rhost.str().c_str());
 
     // 接続を断わる場合の処理。コントロール接続数が上限に達しているか、
     // リモートホストとのコントロール接続が既にあるか、自分は放送中の

@@ -534,7 +534,7 @@ void Servent::handshakeGIV(const char *requestLine)
         id.fromStr(idstr+1);
 
     char ipstr[64];
-    sock->host.toStr(ipstr);
+    strcpy(ipstr, sock->host.str().c_str());
 
     if (id.isSet())
     {
@@ -1905,10 +1905,7 @@ void Servent::handshakeXML()
         ServHost *sh = &servMgr->hostCache[i];
         if (sh->type != ServHost::T_NONE)
         {
-            char ipstr[64];
-            sh->host.toStr(ipstr);
-
-            hc->add(new XML::Node("host ip=\"%s\" type=\"%s\" time=\"%d\"", ipstr, ServHost::getTypeStr(sh->type), sh->time));
+            hc->add(new XML::Node("host ip=\"%s\" type=\"%s\" time=\"%d\"", sh->host.str().c_str(), ServHost::getTypeStr(sh->type), sh->time));
         }
     }
     rn->add(hc);

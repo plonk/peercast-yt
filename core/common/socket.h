@@ -20,9 +20,11 @@
 #ifndef _SOCKET_H
 #define _SOCKET_H
 
+#include "host.h"
 #include "common.h"
 #include "stream.h"
 #include "config.h"
+#include "ip.h"
 
 // --------------------------------------------------
 class ClientSocket : public Stream

@@ -21,6 +21,7 @@
 
 #include <vector>
 
+#include "gnuid.h"
 #include "atom.h"
 #include "sys.h"
 

@@ -20,6 +20,7 @@
 #define __STRING_H
 
 #include <string>
+#include <string.h>
 #include "sys.h"
 
 // ------------------------------------

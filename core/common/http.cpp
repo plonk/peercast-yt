@@ -260,12 +260,10 @@ bool    CookieList::contains(Cookie &c)
 // -----------------------------------
 void    Cookie::logDebug(const char *str, int ind)
 {
-    char ipstr[64];
     Host h;
     h.ip = ip;
-    h.IPtoStr(ipstr);
 
-    LOG_DEBUG("%s %d: %s - %s", str, ind, ipstr, id);
+    LOG_DEBUG("%s %d: %s - %s", str, ind, h.str().c_str(), id);
 }
 
 // -----------------------------------
