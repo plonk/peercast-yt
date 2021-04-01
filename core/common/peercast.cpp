@@ -18,6 +18,35 @@ void APICALL PeercastInstance::init()
 {
     sys = createSys();
     servMgr = new ServMgr();
+
+    Subprogram hostname("hostname", true, false);
+    Environment env;
+    hostname.start({"-I"}, env);
+    Stream& pipe = hostname.inputStream();
+    std::string buf;
+    try {
+        while (!pipe.eof())
+            buf += pipe.readChar();
+    } catch (StreamException& e) {
+    }
+    if (buf[buf.size()-1] == '\n') {
+        buf.resize(buf.size()-1);
+    }
+
+    std::vector<std::string> ips = str::split(buf, " ");
+    for (auto it = ips.begin(); it != ips.end(); ++it) {
+        IP ip;
+        if (IP::tryParse(*it, ip)) {
+            if (ip.isIPv4Mapped()) {
+                //if (!servMgr->serverHost.ip)
+                servMgr->serverHost.ip = ip;
+            } else {
+                //if (!servMgr->serverHostIPv6.ip)
+                servMgr->serverHostIPv6.ip = ip;
+            }
+        }
+    }
+
     chanMgr = new ChanMgr();
 
     if (peercastApp->getIniFilename())
