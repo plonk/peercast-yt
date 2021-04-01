@@ -31,6 +31,9 @@ TEST_F(IPFixture, tryParse)
     IP ip;
 
     ASSERT_TRUE(IP::tryParse("127.0.0.1", ip));
+    ASSERT_TRUE(ip);
     ASSERT_TRUE(IP::tryParse("::1", ip));
+    ASSERT_TRUE(ip);
     ASSERT_FALSE(IP::tryParse("foo", ip));
+    ASSERT_FALSE(ip);
 }
