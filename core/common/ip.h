@@ -4,6 +4,7 @@
 #include "common.h"
 #include <arpa/inet.h>
 #include <memory.h>
+#include <algorithm>
 
 class IP
 {
@@ -157,6 +158,27 @@ class IP
             throw GeneralException("ipv4: Not an IPv4 address");
         }
         return addr[12]<<24 | addr[13]<<16 | addr[14]<<8 | addr[15];
+    }
+
+    static bool tryParse(const std::string& str, IP& ip)
+    {
+        if (std::find(str.begin(), str.end(), ':') != str.end()) {
+            in6_addr addr;
+            if (inet_pton(AF_INET6, str.c_str(), addr.s6_addr) == 1) {
+                // success
+                ip = IP(addr);
+                return true;
+            }
+        } else {
+            // str could be an IPv4 address
+            in6_addr addr;
+            if (inet_pton(AF_INET6, ("::FFFF:" + str).c_str(), addr.s6_addr) == 1) {
+                ip = IP(addr);
+                return true;
+            }
+        }
+        ip = IP();
+        return false;
     }
 
     unsigned char addr[16];
