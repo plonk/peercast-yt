@@ -256,6 +256,7 @@ public:
     int                 totalStreams;
 
     Host                serverHost;
+    Host                serverHostIPv6;
     String              rootHost;
 
     char                downloadURL[128];

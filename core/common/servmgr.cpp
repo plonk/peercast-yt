@@ -81,6 +81,8 @@ ServMgr::ServMgr()
     rootHost = "yp.pcgw.pgw.jp:7146";
 
     serverHost.fromStrIP("127.0.0.1", DEFAULT_PORT);
+    IP::tryParse("::1", serverHostIPv6.ip);
+    serverHostIPv6.port = DEFAULT_PORT;
 
     firewalled = FW_UNKNOWN;
     allowDirect = true;
@@ -1797,6 +1799,8 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
         buf = to_string(serverHost.port);
     else if (var == "serverIP")
         buf = serverHost.str(false);
+    else if (var == "serverIPv6")
+        buf = serverHostIPv6.str(false);
     else if (var == "ypAddress")
         buf = rootHost.c_str();
     else if (var == "password")
