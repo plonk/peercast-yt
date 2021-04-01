@@ -376,8 +376,7 @@ void PCPStream::readHostAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 
         if (id == PCP_HOST_IP)
         {
-            unsigned int ip = atom.readInt();
-            hit.rhost[ipNum].ip = ip;
+            hit.rhost[ipNum].ip = atom.readAddress();
         }else if (id == PCP_HOST_PORT)
         {
             int port = atom.readShort();

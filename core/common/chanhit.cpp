@@ -163,9 +163,9 @@ void ChanHit::writeAtoms(AtomStream &atom, const GnuID &chanID)
         if (addChan)
             atom.writeBytes(PCP_HOST_CHANID, chanID.id, 16);
         atom.writeBytes(PCP_HOST_ID, sessionID.id, 16);
-        atom.writeInt(PCP_HOST_IP, rhost[0].ip);
+        atom.writeAddress(PCP_HOST_IP, rhost[0].ip);
         atom.writeShort(PCP_HOST_PORT, rhost[0].port);
-        atom.writeInt(PCP_HOST_IP, rhost[1].ip);
+        atom.writeAddress(PCP_HOST_IP, rhost[1].ip);
         atom.writeShort(PCP_HOST_PORT, rhost[1].port);
         atom.writeInt(PCP_HOST_NUML, numListeners);
         atom.writeInt(PCP_HOST_NUMR, numRelays);

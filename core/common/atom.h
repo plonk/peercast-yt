@@ -22,6 +22,9 @@
 #include "stream.h"
 
 #include "id.h"
+#include "ip.h"
+
+#include <algorithm>
 
 // ------------------------------------------------
 class AtomStream
@@ -54,6 +57,20 @@ public:
         io.writeID4(id);
         io.writeInt(4);
         io.writeID4(d);
+    }
+
+    void writeAddress(ID4 id, const IP& ip)
+    {
+        io.writeID4(id);
+        if (ip.isIPv4Mapped()) {
+            io.writeInt(4);
+            io.writeInt(ip.ipv4());
+        } else {
+            io.writeInt(16);
+            in6_addr addr = ip.serialize();
+            std::reverse(addr.s6_addr, addr.s6_addr + 16);
+            io.write(addr.s6_addr, 16);
+        }
     }
 
     void writeShort(ID4 id, short d)
@@ -133,6 +150,21 @@ public:
     {
         checkData(4);
         return io.readID4();
+    }
+
+    IP readAddress()
+    {
+        if (numData == 4) {
+            unsigned int ipv4 = readInt();
+            return ipv4;
+        } else if (numData == 16) {
+            in6_addr addr;
+            readBytes(addr.s6_addr, 16, 16);
+            std::reverse(addr.s6_addr, addr.s6_addr + 16);
+            return addr;
+        } else {
+            throw StreamException("Bad atom data");
+        }
     }
 
     int     readShort()
