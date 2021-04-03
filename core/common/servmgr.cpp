@@ -1377,8 +1377,9 @@ void ServMgr::procConnectArgs(char *str, ChanInfo &info)
             }else if (strcmp(curr, "tip")==0)
             // tip - add tracker hit
             {
-                Host h;
-                h.fromStrName(arg, DEFAULT_PORT);
+                Host h = Host::fromString(arg);
+                if (h.port == 0)
+                    h.port = DEFAULT_PORT;
                 chanMgr->addHit(h, info.id, true);
             }
         }

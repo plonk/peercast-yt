@@ -127,6 +127,8 @@ public:
     // should go to IP
     bool    isLocalhost();
 
+    static Host fromString(const std::string& str);
+
     IP              ip;
     unsigned short  port;
 };
