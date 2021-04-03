@@ -182,6 +182,15 @@ class IP
         return false;
     }
 
+    static IP parse(const std::string& str)
+    {
+        IP ip;
+        if (tryParse(str, ip))
+            return ip;
+        else
+            throw FormatException(("Invalid IP address: " + str).c_str());
+    }
+
     unsigned char addr[16];
 };
 

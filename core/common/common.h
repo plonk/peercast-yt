@@ -47,6 +47,14 @@ public:
 };
 
 // -------------------------------------
+class FormatException : public GeneralException
+{
+public:
+    FormatException(const char *m) : GeneralException(m) {}
+    FormatException(const char *m, int e) : GeneralException(m, e) {}
+};
+
+// -------------------------------------
 class StreamException : public GeneralException
 {
 public:

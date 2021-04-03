@@ -111,3 +111,33 @@ TEST(HostTest, fromStrName_localhost)
     ASSERT_EQ(8144, host.port);
 }
 
+TEST(HostTest, fromString)
+{
+    Host host;
+
+    host = Host::fromString("localhost");
+    ASSERT_EQ(IP::parse("127.0.0.1"), host.ip);
+    ASSERT_EQ(0, host.port);
+    host = Host::fromString("localhost:7144");
+    ASSERT_EQ(IP::parse("127.0.0.1"), host.ip);
+    ASSERT_EQ(7144, host.port);
+
+    host = Host::fromString("192.168.0.1");
+    ASSERT_EQ(IP::parse("192.168.0.1"), host.ip);
+    ASSERT_EQ(0, host.port);
+    host = Host::fromString("192.168.0.1:7144");
+    ASSERT_EQ(IP::parse("192.168.0.1"), host.ip);
+    ASSERT_EQ(7144, host.port);
+
+    host = Host::fromString("[::1]");
+    ASSERT_EQ(IP::parse("::1"), host.ip);
+    ASSERT_EQ(0, host.port);
+    host = Host::fromString("[::1]:7144");
+    ASSERT_EQ(IP::parse("::1"), host.ip);
+    ASSERT_EQ(7144, host.port);
+
+    // "::1" は解釈できないことにしよう。
+    host = Host::fromString("::1");
+    ASSERT_EQ(0, host.ip);
+    ASSERT_EQ(0, host.port);
+}
