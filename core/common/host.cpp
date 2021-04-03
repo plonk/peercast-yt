@@ -27,6 +27,41 @@ bool Host::isLocalhost()
 }
 
 // ------------------------------------------
+Host Host::fromString(const std::string& str)
+{
+    uint16_t port = 0;
+    IP ip = 0;
+
+    auto it = str.begin();
+
+    if (*it == '[') {
+        // ipv6?
+        ++it;
+        it = std::find(it, str.end(), ']');
+        if (it != str.end()) {
+            IP::tryParse(std::string(str.begin() + 1, it), ip);
+            ++it;
+            if (*it == ':') {
+                ++it;
+                port = atoi(std::string(it, str.end()).c_str());
+            }
+        }
+    } else {
+        // ipv4
+        auto it2 = std::find(it, str.end(), ':');
+        if (it2 != str.end()) {
+            ip = ClientSocket::getIP(std::string(it, it2).c_str());
+            ++it2;
+            port = atoi(std::string(it2, str.end()).c_str());
+        } else {
+            ip = ClientSocket::getIP(std::string(it, it2).c_str());
+        }
+    }
+
+    return Host(ip, port);
+}
+
+// ------------------------------------------
 void Host::fromStrName(const char *str, int p)
 {
     if (!strlen(str))
