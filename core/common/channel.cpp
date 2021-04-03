@@ -421,6 +421,9 @@ void Channel::connectFetch()
         LOG_INFO("Channel using longer timeouts");
     }
 
+    if (!sourceHost.host.ip.isIPv4Mapped())
+        this->ipVersion = IP_V6;
+
     sock->open(sourceHost.host);
 
     sock->connect();
@@ -431,7 +434,7 @@ int Channel::handshakeFetch()
 {
     sock->writeLineF("GET /channel/%s HTTP/1.0", info.id.str().c_str());
     sock->writeLineF("%s %d", PCX_HS_POS, streamPos);
-    sock->writeLineF("%s %d", PCX_HS_PCP, 1);
+    sock->writeLineF("%s %d", PCX_HS_PCP, (this->ipVersion == IP_V4) ? 1 : 100);
 
     sock->writeLine("");
 
@@ -605,8 +608,12 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
                 {
                     peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルフィードで "+chName(ch->info)+" のトラッカーが見付かりました。");
 
-                    ch->sourceHost.host.fromStrIP(trackerIP.c_str(), DEFAULT_PORT);
-                    ch->sourceHost.rhost[0].fromStrIP(trackerIP.c_str(), DEFAULT_PORT);
+                    Host host = Host::fromString(trackerIP.c_str());
+                    if (!host.port)
+                        host.port = DEFAULT_PORT;
+
+                    ch->sourceHost.host = host;
+                    ch->sourceHost.rhost[0] = host;
                     ch->sourceHost.tracker = true;
 
                     auto chl = chanMgr->findHitList(ch->info);
