@@ -56,7 +56,7 @@ TEST_F(JrpcApiFixture, getStatus)
         { "uptime", 0 },
     };
 
-    ASSERT_TRUE(expected == result);
+    ASSERT_EQ(expected.dump(), result.dump());
 }
 
 TEST_F(JrpcApiFixture, getChannelRelayTree)
