@@ -98,7 +98,8 @@ void ChanHit::initLocal(
     unsigned int oldp,
     unsigned int newp,
     bool canAddRelay,
-    const Host& sourceHost)
+    const Host& sourceHost,
+    bool ipv6)
 {
     std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
 
@@ -116,7 +117,10 @@ void ChanHit::initLocal(
     relay = canAddRelay;
     cin = !servMgr->controlInFull();
 
-    host = servMgr->serverHost;
+    if (ipv6)
+        host = servMgr->serverHostIPv6;
+    else
+        host = servMgr->serverHost;
 
     version = PCP_CLIENT_VERSION;
     versionVP = PCP_CLIENT_VERSION_VP;

@@ -35,7 +35,7 @@ public:
     ChanHit () { init(); }
 
     void    init();
-    void    initLocal(int numl, int numr, int nums, int uptm, bool, unsigned int, unsigned int, bool canAddRelay, const Host& = Host());
+    void    initLocal(int numl, int numr, int nums, int uptm, bool, unsigned int, unsigned int, bool canAddRelay, const Host& = Host(), bool ipv6 = false);
     XML::Node *createXML();
 
     void    writeAtoms(AtomStream &, const GnuID &);

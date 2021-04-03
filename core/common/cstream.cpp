@@ -349,7 +349,7 @@ bool ChannelStream::getStatus(std::shared_ptr<Channel> ch, ChanPacket &pack)
         unsigned int oldp = ch->rawData.getOldestPos();
         unsigned int newp = ch->rawData.getLatestPos();
 
-        hit.initLocal(numListeners, numRelays, ch->info.numSkips, ch->info.getUptime(), isPlaying, oldp, newp, ch->canAddRelay(), ch->sourceHost.host);
+        hit.initLocal(numListeners, numRelays, ch->info.numSkips, ch->info.getUptime(), isPlaying, oldp, newp, ch->canAddRelay(), ch->sourceHost.host, true /* IPv6 */);
         hit.tracker = ch->isBroadcasting();
 
         MemoryStream pmem(pack.data, sizeof(pack.data));

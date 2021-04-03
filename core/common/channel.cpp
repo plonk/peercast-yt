@@ -204,6 +204,8 @@ void Channel::reset()
     srcType = SRC_NONE;
 
     startTime = 0;
+
+    ipVersion = IP_V4;
 }
 
 // -----------------------------------
@@ -297,6 +299,7 @@ void    Channel::startURL(const char *u)
 
     srcType = SRC_URL;
     type = T_BROADCAST;
+    ipVersion = IP_V6; // XXX
     stayConnected = true;
 
     resetPlayTime();
@@ -956,7 +959,7 @@ void Channel::broadcastTrackerUpdate(const GnuID &svID, bool force /* = false */
         unsigned int oldp = rawData.getOldestPos();
         unsigned int newp = rawData.getLatestPos();
 
-        hit.initLocal(numListeners, numRelays, info.numSkips, info.getUptime(), isPlaying(), oldp, newp, canAddRelay(), this->sourceHost.host);
+        hit.initLocal(numListeners, numRelays, info.numSkips, info.getUptime(), isPlaying(), oldp, newp, canAddRelay(), this->sourceHost.host, true /* IPv6 */);
         hit.tracker = true;
 
         atom.writeParent(PCP_BCST, 10);
@@ -1532,6 +1535,8 @@ bool Channel::writeVariable(Stream &out, const String &var)
         buf = chanMgr->authToken(info.id).c_str();
     else if (var == "plsExt")
         buf = info.getPlayListExt();
+    else if (var == "ipVersion")
+        buf = std::to_string((int)ipVersion);
     else
         return false;
 

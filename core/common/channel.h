@@ -156,6 +156,12 @@ public:
         SRC_HTTPPUSH
     };
 
+    enum IP_VERSION
+    {
+        IP_V4 = 4,
+        IP_V6 = 6
+    };
+
     Channel();
     void    reset();
     void    endThread();
@@ -288,6 +294,8 @@ public:
     unsigned int        lastMetaUpdate;
 
     double              startTime;
+
+    IP_VERSION          ipVersion;
 
     mutable std::recursive_mutex lock;
 
