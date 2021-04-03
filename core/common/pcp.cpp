@@ -418,7 +418,7 @@ void PCPStream::readHostAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
         else if (id == PCP_HOST_CHANID)
             atom.readBytes(chanID.id, 16);
         else if (id == PCP_HOST_UPHOST_IP)
-            hit.uphost.ip = atom.readInt();
+            hit.uphost.ip = atom.readAddress();
         else if (id == PCP_HOST_UPHOST_PORT)
             hit.uphost.port = atom.readInt();
         else if (id == PCP_HOST_UPHOST_HOPS)

@@ -974,7 +974,7 @@ void ServMgr::loadSettings(const char *fn)
             if (iniFile.isName("serverName"))
                 servMgr->serverName = iniFile.getStrValue();
             else if (iniFile.isName("serverPort"))
-                servMgr->serverHost.port = iniFile.getIntValue();
+                servMgr->serverHostIPv6.port = servMgr->serverHost.port = iniFile.getIntValue();
             else if (iniFile.isName("autoServe"))
                 servMgr->autoServe = iniFile.getBoolValue();
             else if (iniFile.isName("autoConnect"))

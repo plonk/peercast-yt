@@ -1056,7 +1056,7 @@ void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
             agent.set(arg);
         }else if (id == PCP_HELO_REMOTEIP)
         {
-            thisHost.ip = atom.readInt();
+            thisHost.ip = atom.readAddress();
         }else if (id == PCP_HELO_PORT)
         {
             thisHost.port = atom.readShort();
@@ -1204,7 +1204,7 @@ void Servent::handshakeIncomingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
         atom.writeString(PCP_HELO_AGENT, PCX_AGENT);
         atom.writeBytes(PCP_HELO_SESSIONID, servMgr->sessionID.id, 16);
         atom.writeInt(PCP_HELO_VERSION, PCP_CLIENT_VERSION);
-        atom.writeInt(PCP_HELO_REMOTEIP, rhost.ip);
+        atom.writeAddress(PCP_HELO_REMOTEIP, rhost.ip);
         atom.writeShort(PCP_HELO_PORT, rhost.port);
 
     if (version)

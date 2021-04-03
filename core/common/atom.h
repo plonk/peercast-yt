@@ -36,7 +36,7 @@ public:
     void checkData(int d)
     {
         if (numData != d)
-            throw StreamException("Bad atom data");
+            throw StreamException("checkData: Bad atom data");
     }
 
     void writeParent(ID4 id, int nc)
@@ -163,7 +163,7 @@ public:
             std::reverse(addr.s6_addr, addr.s6_addr + 16);
             return addr;
         } else {
-            throw StreamException("Bad atom data");
+            throw StreamException("readAddress: Bad atom data");
         }
     }
 
