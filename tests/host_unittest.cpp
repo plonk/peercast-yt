@@ -68,6 +68,15 @@ TEST(HostTest, strUlimit)
     ASSERT_STREQ("255.255.255.255", host.str(false).c_str());
 }
 
+TEST(HostTest, strIPv6)
+{
+    IP ip;
+    ASSERT_TRUE(IP::tryParse("::1", ip));
+    Host host(ip, 7144);
+    ASSERT_STREQ("[::1]:7144", host.str().c_str());
+    ASSERT_STREQ("::1", host.str(false).c_str());
+}
+
 // 128 バイトのホスト名で内部バッファーが NUL終端されなくなるバグを発
 // 現させるテスト。valgrind などで検知せよ。
 TEST(HostTest, fromStrName_128bytes)

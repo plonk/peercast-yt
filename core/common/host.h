@@ -91,10 +91,15 @@ public:
 
     std::string str(bool withPort = true) const
     {
-        if (withPort)
-            return ip.str() + ":" + std::to_string(static_cast<int>(port));
-        else
+        if (withPort) {
+            if (ip.isIPv4Mapped()) {
+                return ip.str() + ":" + std::to_string(static_cast<int>(port));
+            } else {
+                return "[" + ip.str() + "]:" + std::to_string(static_cast<int>(port));
+            }
+        } else {
             return ip.str();
+        }
     }
 
     operator std::string () const
