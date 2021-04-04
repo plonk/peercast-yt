@@ -38,6 +38,7 @@ ServMgr::ServMgr()
     , channelDirectory(new ChannelDirectory())
     , uptestServiceRegistry(new UptestServiceRegistry())
     , rtmpServerMonitor(std::string(peercastApp->getPath()) + "rtmp-server")
+    , randomizeBroadcastingChannelID(true)
 {
     authType = AUTH_COOKIE;
     cookieList.init();

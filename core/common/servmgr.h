@@ -321,6 +321,8 @@ public:
     ChanInfo            defaultChannelInfo;
 
     bool                chat;
+
+    std::atomic_bool    randomizeBroadcastingChannelID;
 };
 
 // ----------------------------------

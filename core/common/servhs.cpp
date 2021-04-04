@@ -1170,8 +1170,12 @@ void Servent::CMD_fetch(const char* cmd, HTTP& http, String& jumpStr)
     info.bcID = chanMgr->broadcastID;
     // id がセットされていないチャンネルがあるといろいろまずいので、事
     // 前に設定してから登録する。
-    info.id = chanMgr->broadcastID;
-    info.id.encode(NULL, info.name, info.genre, info.bitrate);
+    if (servMgr->randomizeBroadcastingChannelID) {
+        info.id = GnuID::random();
+    } else {
+        info.id = chanMgr->broadcastID;
+        info.id.encode(NULL, info.name, info.genre, info.bitrate);
+    }
 
     auto c = chanMgr->createChannel(info, NULL);
     if (c)
@@ -2065,8 +2069,12 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
     if (vec.size() > 2) info.desc  = vec[2];
     if (vec.size() > 3) info.url   = vec[3];
 
-    info.id = chanMgr->broadcastID;
-    info.id.encode(NULL, info.name.cstr(), info.genre.cstr(), info.bitrate);
+    if (servMgr->randomizeBroadcastingChannelID) {
+        info.id = GnuID::random();
+    } else {
+        info.id = chanMgr->broadcastID;
+        info.id.encode(NULL, info.name.cstr(), info.genre.cstr(), info.bitrate);
+    }
 
     auto c = chanMgr->findChannelByID(info.id);
     if (c)
@@ -2104,8 +2112,12 @@ ChanInfo Servent::createChannelInfo(GnuID broadcastID, const String& broadcastMs
     info.bitrate = atoi(query.get("bitrate").c_str());
     info.comment = query.get("comment").empty() ? broadcastMsg : query.get("comment");
 
-    info.id = broadcastID;
-    info.id.encode(NULL, info.name.cstr(), info.genre.cstr(), info.bitrate);
+    if (servMgr->randomizeBroadcastingChannelID) {
+        info.id = GnuID::random();
+    } else {
+        info.id = broadcastID;
+        info.id.encode(NULL, info.name.cstr(), info.genre.cstr(), info.bitrate);
+    }
     info.bcID = broadcastID;
 
     return info;
@@ -2178,8 +2190,12 @@ void Servent::handshakeICY(Channel::SRC_TYPE type, bool isHTTP)
     // attach channel ID to name, channel ID is also encoded with IP address
     // to help prevent channel hijacking.
 
-    info.id = chanMgr->broadcastID;
-    info.id.encode(NULL, info.name.cstr(), loginMount.cstr(), info.bitrate);
+    if (servMgr->randomizeBroadcastingChannelID) {
+        info.id = GnuID::random();
+    } else {
+        info.id = chanMgr->broadcastID;
+        info.id.encode(NULL, info.name.cstr(), loginMount.cstr(), info.bitrate);
+    }
 
     LOG_DEBUG("Incoming source: %s : %s", info.name.cstr(), info.getTypeStr());
     if (isHTTP)

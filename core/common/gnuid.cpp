@@ -111,6 +111,21 @@ void GnuID::generate(unsigned char flags)
 }
 
 // ---------------------------
+GnuID GnuID::random()
+{
+    GnuID instance;
+
+    for (int i=0; i<16; i++)
+        instance.id[i] = sys->rnd();
+
+    // セットされたIDが返ることを保証したい。
+    if (!instance.isSet())
+        instance.id[15] = 1;
+
+    return instance;
+}
+
+// ---------------------------
 unsigned char GnuID::getFlags()
 {
     return id[0];
