@@ -3,6 +3,7 @@
 
 RTMPServerMonitor::RTMPServerMonitor(const std::string& aPath)
     : m_rtmpServer(aPath, false, false)
+    , ipVersion(4)
     , m_enabled(false)
 {
 }
@@ -92,6 +93,7 @@ std::string RTMPServerMonitor::makeEndpointURL()
     query.add("url", info.url.c_str());
     query.add("comment", info.comment.c_str());
     query.add("type", "FLV");
+    query.add("ipv", std::to_string(ipVersion));
 
     return "http://localhost:" + std::to_string(servMgr->serverHost.port) + "/?" + query.str();
 }

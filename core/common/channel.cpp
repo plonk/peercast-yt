@@ -299,7 +299,6 @@ void    Channel::startURL(const char *u)
 
     srcType = SRC_URL;
     type = T_BROADCAST;
-    ipVersion = IP_V6; // XXX
     stayConnected = true;
 
     resetPlayTime();

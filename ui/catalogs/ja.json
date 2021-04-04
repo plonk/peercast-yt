@@ -119,6 +119,8 @@
 
     "Channel not found."      : "チャンネルが見付かりません。",
 
+    "IP Version"              : "IPバージョン",
+
     // editinfo.html
     "Apply"                   : "適用",
 

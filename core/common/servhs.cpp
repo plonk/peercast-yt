@@ -1126,46 +1126,19 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
 
 void Servent::CMD_fetch(const char* cmd, HTTP& http, String& jumpStr)
 {
-    char arg[MAX_CGI_LEN];
-    char curr[MAX_CGI_LEN];
-
+    cgi::Query query(cmd);
     ChanInfo info;
-    String curl;
 
-    const char *cp = cmd;
-    while ((cp = nextCGIarg(cp, curr, arg)) != nullptr)
-    {
-        if (strcmp(curr, "url") == 0)
-        {
-            curl.set(arg, String::T_ESC);
-            curl.convertTo(String::T_UNICODE);
-        }else if (strcmp(curr, "name") == 0)
-        {
-            info.name.set(arg, String::T_ESC);
-            info.name.convertTo(String::T_UNICODE);
-        }else if (strcmp(curr, "desc") == 0)
-        {
-            info.desc.set(arg, String::T_ESC);
-            info.desc.convertTo(String::T_UNICODE);
-        }else if (strcmp(curr, "genre") == 0)
-        {
-            info.genre.set(arg, String::T_ESC);
-            info.genre.convertTo(String::T_UNICODE);
-        }else if (strcmp(curr, "contact") == 0)
-        {
-            info.url.set(arg, String::T_ESC);
-            info.url.convertTo(String::T_UNICODE);
-        }else if (strcmp(curr, "bitrate") == 0)
-        {
-            info.bitrate = atoi(arg);
-        }else if (strcmp(curr, "type") == 0)
-        {
-            auto type = arg;
-            info.contentType = type;
-            info.MIMEType = ChanInfo::getMIMEType(type);
-            info.streamExt = ChanInfo::getTypeExt(type);
-        }
-    }
+    auto curl = query.get("url");
+    info.name = query.get("name");
+    info.desc = query.get("desc");
+    info.genre = query.get("genre");
+    info.url = query.get("contact");
+    info.bitrate = atoi(query.get("bitrate").c_str());
+    auto type = query.get("type");
+    info.contentType = type;
+    info.MIMEType = ChanInfo::getMIMEType(type.c_str());
+    info.streamExt = ChanInfo::getTypeExt(type.c_str());
 
     info.bcID = chanMgr->broadcastID;
     // id がセットされていないチャンネルがあるといろいろまずいので、事
@@ -1178,8 +1151,13 @@ void Servent::CMD_fetch(const char* cmd, HTTP& http, String& jumpStr)
     }
 
     auto c = chanMgr->createChannel(info, NULL);
-    if (c)
-        c->startURL(curl.cstr());
+    if (c) {
+        if (query.get("ipv") == "6") {
+            c->ipVersion = Channel::IP_V6;
+            LOG_INFO("Channel IP version set to 6");
+        }
+        c->startURL(curl.c_str());
+    }
 
     jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
 }
@@ -1399,6 +1377,7 @@ void Servent::CMD_control_rtmp(const char* cmd, HTTP& http, String& jumpStr)
             info.comment = query.get("comment").c_str();
         }
 
+        servMgr->rtmpServerMonitor.ipVersion = (query.get("ipv") == "6") ? 6 : 4;
         servMgr->rtmpServerMonitor.enable();
         // Give serverProc the time to actually start the process.
         sys->sleep(500);
@@ -2156,6 +2135,10 @@ void Servent::handshakeHTTPPush(const std::string& args)
         throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
     bool chunked = (http.headers.get("Transfer-Encoding") == "chunked");
+    if (query.get("ipv") == "6") {
+        c->ipVersion = Channel::IP_V6;
+        LOG_INFO("Channel IP version set to 6");
+    }
     c->startHTTPPush(sock, chunked);
     sock = NULL;    // socket is taken over by channel, so don`t close it
 }
