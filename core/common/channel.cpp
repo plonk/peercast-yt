@@ -965,7 +965,7 @@ void Channel::broadcastTrackerUpdate(const GnuID &svID, bool force /* = false */
         unsigned int oldp = rawData.getOldestPos();
         unsigned int newp = rawData.getLatestPos();
 
-        hit.initLocal(numListeners, numRelays, info.numSkips, info.getUptime(), isPlaying(), oldp, newp, canAddRelay(), this->sourceHost.host, true /* IPv6 */);
+        hit.initLocal(numListeners, numRelays, info.numSkips, info.getUptime(), isPlaying(), oldp, newp, canAddRelay(), this->sourceHost.host, (ipVersion == IP_V6));
         hit.tracker = true;
 
         atom.writeParent(PCP_BCST, 10);
