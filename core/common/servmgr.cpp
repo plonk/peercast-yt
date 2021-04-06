@@ -781,6 +781,8 @@ static void  writeRelayChannel(IniFileBase &iniFile, std::shared_ptr<Channel> c)
     iniFile.writeStrValue("trackAlbum", c->info.track.album);
     iniFile.writeStrValue("trackGenre", c->info.track.genre);
 
+    iniFile.writeIntValue("ipVersion", c->ipVersion);
+
     iniFile.writeLine("[End]");
 }
 
@@ -1146,6 +1148,8 @@ void ServMgr::loadSettings(const char *fn)
                 ChanInfo info;
                 bool stayConnected=false;
                 String sourceURL;
+                Channel::IP_VERSION ipv = Channel::IP_V4;
+
                 while (iniFile.readNext())
                 {
                     if (iniFile.isName("[End]"))
@@ -1198,6 +1202,8 @@ void ServMgr::loadSettings(const char *fn)
                         info.track.album = iniFile.getStrValue();
                     else if (iniFile.isName("trackGenre"))
                         info.track.genre = iniFile.getStrValue();
+                    else if (iniFile.isName("ipVersion"))
+                        ipv = (iniFile.getIntValue() == 6) ? Channel::IP_V6 : Channel::IP_V4;
                 }
                 if (sourceURL.isEmpty())
                 {
@@ -1206,6 +1212,7 @@ void ServMgr::loadSettings(const char *fn)
                 {
                     info.bcID = chanMgr->broadcastID;
                     auto c = chanMgr->createChannel(info, NULL);
+                    c->ipVersion = ipv;
                     if (c)
                         c->startURL(sourceURL.cstr());
                 }

@@ -59,6 +59,8 @@ bool RTMPServerMonitor::writeVariable(Stream &out, const String &var)
         buf = status();
     else if (var == "processID")
         buf = std::to_string( m_rtmpServer.pid() );
+    else if (var == "ipVersion")
+        buf = std::to_string(ipVersion);
     else
         return false;
 
