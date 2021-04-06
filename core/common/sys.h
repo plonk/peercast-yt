@@ -83,6 +83,7 @@ public:
 
     virtual std::string     getHostname() = 0;
     virtual std::vector<std::string> getIPAddresses(const std::string& name) = 0;
+    virtual std::vector<std::string> getAllIPAddresses() = 0;
 
 #ifdef __BIG_ENDIAN__
     unsigned short  convertEndian(unsigned short v) { return SWAP2(v); }

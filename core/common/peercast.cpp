@@ -23,8 +23,7 @@ void APICALL PeercastInstance::init()
     if (peercastApp->getIniFilename())
         servMgr->loadSettings(peercastApp->getIniFilename());
 
-    LOG_INFO("hostname: %s", sys->getHostname().c_str());
-    auto v = sys->getIPAddresses(sys->getHostname());
+    auto v = sys->getAllIPAddresses();
     for (auto it = v.begin(); it != v.end(); ++it) {
         IP ip;
         if (IP::tryParse(*it, ip)) {

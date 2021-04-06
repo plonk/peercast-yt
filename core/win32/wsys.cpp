@@ -131,3 +131,9 @@ std::vector<std::string> WSys::getIPAddresses(const std::string& name)
     }
     return addrs;
 }
+
+// --------------------------------------------------
+std::vector<std::string> WSys::getAllIPAddresses()
+{
+    return getIPAddresses(getHostname());
+}
