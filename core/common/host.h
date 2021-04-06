@@ -39,7 +39,7 @@ public:
     {
         fromStrName(hostname.c_str(), port);
     }
-    Host(IP& anIp, unsigned short p)
+    Host(const IP& anIp, unsigned short p)
         : ip(anIp)
     {
         port = p;

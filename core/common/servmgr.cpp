@@ -82,8 +82,7 @@ ServMgr::ServMgr()
     rootHost = "yp.pcgw.pgw.jp:7146";
 
     serverHost.fromStrIP("127.0.0.1", DEFAULT_PORT);
-    IP::tryParse("::1", serverHostIPv6.ip);
-    serverHostIPv6.port = DEFAULT_PORT;
+    serverHostIPv6 = Host(IP::parse("::1"), DEFAULT_PORT);
 
     firewalled = FW_UNKNOWN;
     allowDirect = true;
