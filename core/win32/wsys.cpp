@@ -19,10 +19,10 @@
 // ------------------------------------------------
 
 #include <process.h>
-#include <windows.h>
 #include <time.h>
 #include "win32/wsys.h"
 #include "win32/wsocket.h"
+#include <windows.h>
 #include "stats.h"
 #include "peercast.h"
 #include <sys/timeb.h>

@@ -18,7 +18,7 @@
 #ifndef _HOST_H
 #define _HOST_H
 
-#include <netinet/in.h>
+//#include <netinet/in.h>
 #include "common.h"
 #include "ip.h"
 #include <string>

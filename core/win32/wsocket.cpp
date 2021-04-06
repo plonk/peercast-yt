@@ -152,10 +152,15 @@ HOSTENT *WSAClientSocket::resolveHost(const char *hostName)
 // --------------------------------------------------
 void WSAClientSocket::open(const Host &rh)
 {
-    sockNum = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    sockNum = socket(AF_INET6, SOCK_STREAM, 0);
 
     if (sockNum == INVALID_SOCKET)
         throw SockException("Can`t open socket");
+
+    int disable = 0;
+    if (setsockopt(sockNum, IPPROTO_IPV6,  IPV6_V6ONLY, (char*) &disable, sizeof(disable)) == SOCKET_ERROR) {
+        throw SockException("Can't reset V6ONLY");
+    }
 
     setBlocking(false);
 #ifdef DISABLE_NAGLE
@@ -166,9 +171,9 @@ void WSAClientSocket::open(const Host &rh)
 
     memset(&remoteAddr,0,sizeof(remoteAddr));
 
-    remoteAddr.sin_family = AF_INET;
-    remoteAddr.sin_port = htons(host.port);
-    remoteAddr.sin_addr.S_un.S_addr = htonl(host.ip);
+    remoteAddr.sin6_family = AF_INET6;
+    remoteAddr.sin6_port = htons(host.port);
+    remoteAddr.sin6_addr = host.ip.serialize();
 }
 
 // --------------------------------------------------
@@ -325,18 +330,18 @@ void WSAClientSocket::write(const void *p, int l)
 // --------------------------------------------------
 void WSAClientSocket::bind(const Host &h)
 {
-    struct sockaddr_in localAddr;
+    struct sockaddr_in6 localAddr;
 
-    if ((sockNum = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET)
+    if ((sockNum = socket(PF_INET6, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET)
         throw SockException("Can`t open socket");
 
     setBlocking(false);
     setReuse(true);
 
     memset(&localAddr,0,sizeof(localAddr));
-    localAddr.sin_family = AF_INET;
-    localAddr.sin_port = htons(h.port);
-    localAddr.sin_addr.s_addr = INADDR_ANY;
+    localAddr.sin6_family = AF_INET6;
+    localAddr.sin6_port = htons(h.port);
+    localAddr.sin6_addr = IN6ADDR_ANY_INIT;
 
     if(::bind(sockNum, (sockaddr *)&localAddr, sizeof(localAddr)) == -1)
         throw SockException("Can`t bind socket");
@@ -350,8 +355,8 @@ void WSAClientSocket::bind(const Host &h)
 // --------------------------------------------------
 ClientSocket *WSAClientSocket::accept()
 {
-    int fromSize = sizeof(sockaddr_in);
-    sockaddr_in from;
+    int fromSize = sizeof(sockaddr_in6);
+    sockaddr_in6 from;
 
     SOCKET conSock = ::accept(sockNum,(sockaddr *)&from,&fromSize);
 
@@ -361,11 +366,8 @@ ClientSocket *WSAClientSocket::accept()
     WSAClientSocket *cs = new WSAClientSocket();
     cs->sockNum = conSock;
 
-    cs->host.port = from.sin_port;
-    cs->host.ip = from.sin_addr.S_un.S_un_b.s_b1<<24 |
-                  from.sin_addr.S_un.S_un_b.s_b2<<16 |
-                  from.sin_addr.S_un.S_un_b.s_b3<<8 |
-                  from.sin_addr.S_un.S_un_b.s_b4;
+    cs->host.port = ntohs(from.sin6_port);
+    cs->host.ip = IP(from.sin6_addr);
 
     cs->setBlocking(false);
 #ifdef DISABLE_NAGLE

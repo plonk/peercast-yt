@@ -1,8 +1,13 @@
 #ifndef _IP_H
 #define _IP_H
 
-#include "common.h"
+#ifdef WIN32
+#include <ws2tcpip.h>
+#else
 #include <arpa/inet.h>
+#endif
+
+#include "common.h"
 #include <memory.h>
 #include <algorithm>
 

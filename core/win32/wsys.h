@@ -22,6 +22,7 @@
 #define _WSYS_H
 
 // ------------------------------------
+#include <winsock2.h>
 #include <windows.h>
 #include "socket.h"
 #include "sys.h"
