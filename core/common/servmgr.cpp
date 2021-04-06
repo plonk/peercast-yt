@@ -167,10 +167,12 @@ bool ServMgr::updateIPAddress(const IP& newIP)
         auto score = [](const IP& ip) -> int {
             if (ip.isIPv6Loopback())
                 return 0;
-            else if (ip.isIPv6UniqueLocal())
+            else if (ip.isIPv6LinkLocal())
                 return 1;
-            else
+            else if (ip.isIPv6UniqueLocal())
                 return 2;
+            else
+                return 3;
         };
         if (score(serverHostIPv6.ip) < score(newIP)) {
             IP oldIP = serverHostIPv6.ip;

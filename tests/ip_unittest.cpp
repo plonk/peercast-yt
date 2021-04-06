@@ -51,3 +51,24 @@ TEST_F(IPFixture, parse)
     ASSERT_TRUE(ip.isIPv6Loopback());
 
 }
+
+TEST_F(IPFixture, linkLocal)
+{
+    auto ip = IP::parse("fe80::1d3d:5c5:f1a5:afec");
+    ASSERT_EQ(0xfe, ip.addr[0]);
+    ASSERT_EQ(0x80, ip.addr[1]);
+    ASSERT_FALSE(ip.isIPv4Mapped());
+    ASSERT_FALSE(ip.isIPv6Loopback());
+    ASSERT_TRUE(ip.isIPv6LinkLocal());
+    ASSERT_FALSE(ip.isIPv6UniqueLocal());
+}
+
+
+TEST_F(IPFixture, uniqueLocal)
+{
+    auto ip = IP::parse("fd44:7144:7144::6");
+    ASSERT_FALSE(ip.isIPv4Mapped());
+    ASSERT_FALSE(ip.isIPv6Loopback());
+    ASSERT_FALSE(ip.isIPv6LinkLocal());
+    ASSERT_TRUE(ip.isIPv6UniqueLocal());
+}

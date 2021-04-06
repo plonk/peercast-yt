@@ -105,7 +105,7 @@ class IP
 
     bool isIPv6LinkLocal() const
     {
-        return (addr[0] == 0x80 && addr[1] & 0xc0 == 0x80);
+        return (addr[0] == 0xfe && (addr[1] & 0xc0) == 0x80);
     }
 
     bool isIPv6UniqueLocal() const

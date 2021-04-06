@@ -42,6 +42,9 @@ public:
     void            callLocalURL(const char *str, int port) override;
     void            executeFile(const char *) override;
 
+    std::string     getHostname() override;
+    std::vector<std::string> getIPAddresses(const std::string& name) override;
+
     HWND    mainWindow;
     peercast::Random rndGen;
 };

@@ -18,23 +18,14 @@ void APICALL PeercastInstance::init()
 {
     sys = createSys();
     servMgr = new ServMgr();
+    chanMgr = new ChanMgr();
 
-    Subprogram hostname("hostname", true, false);
-    Environment env;
-    hostname.start({"-I"}, env);
-    Stream& pipe = hostname.inputStream();
-    std::string buf;
-    try {
-        while (!pipe.eof())
-            buf += pipe.readChar();
-    } catch (StreamException& e) {
-    }
-    if (buf[buf.size()-1] == '\n') {
-        buf.resize(buf.size()-1);
-    }
+    if (peercastApp->getIniFilename())
+        servMgr->loadSettings(peercastApp->getIniFilename());
 
-    std::vector<std::string> ips = str::split(buf, " ");
-    for (auto it = ips.begin(); it != ips.end(); ++it) {
+    LOG_INFO("hostname: %s", sys->getHostname().c_str());
+    auto v = sys->getIPAddresses(sys->getHostname());
+    for (auto it = v.begin(); it != v.end(); ++it) {
         IP ip;
         if (IP::tryParse(*it, ip)) {
             LOG_DEBUG("New address discovered: %s", it->c_str());
@@ -43,11 +34,6 @@ void APICALL PeercastInstance::init()
             LOG_DEBUG("\"%s\" could not be parsed", it->c_str());
         }
     }
-
-    chanMgr = new ChanMgr();
-
-    if (peercastApp->getIniFilename())
-        servMgr->loadSettings(peercastApp->getIniFilename());
 
     servMgr->start();
 }

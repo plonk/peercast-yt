@@ -71,6 +71,17 @@ public:
     void waitThread(ThreadInfo*) override
     {
     }
+
+    std::string getHostname() override
+    {
+        return "localhost";
+    }
+
+    std::vector<std::string> getIPAddresses(const std::string& name) override
+    {
+        return {};
+    }
+
 };
 
 #endif
