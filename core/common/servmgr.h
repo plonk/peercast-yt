@@ -238,6 +238,8 @@ public:
 
     unsigned int    totalOutput(bool);
 
+    bool updateIPAddress(const IP& newIP);
+
     ThreadInfo          serverThread;
     ThreadInfo          idleThread;
 

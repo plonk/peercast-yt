@@ -78,26 +78,52 @@ class IP
     {
         if (isIPv4Mapped()) {
             // local host
-            if ((ip3() == 127) && (ip2() == 0) && (ip1() == 0) && (ip0() == 1))
+            if (isIPv4Loopback())
                 return false;
 
-            // class A
-            if (ip3() == 10)
-                return false;
-
-            // class B
-            if ((ip3() == 172) && (ip2() >= 16) && (ip2() <= 31))
-                return false;
-
-            // class C
-            if ((ip3() == 192) && (ip2() == 168))
+            if (isIPv4Private())
                 return false;
         } else {
+            // local host
             if (isIPv6Loopback())
                 return false;
 
-            // XXX: etc...
+            if (isIPv6LinkLocal())
+                return false;
+
+            if (isIPv6UniqueLocal())
+                return false;
         }
+
+        return true;
+    }
+
+    bool isIPv6LinkLocal() const
+    {
+        return (addr[0] == 0x80 && addr[1] & 0xc0 == 0x80);
+    }
+
+    bool isIPv6UniqueLocal() const
+    {
+        return (addr[0] == 0xfc || addr[0] == 0xfd);
+    }
+
+    bool isIPv4Private() const 
+    {
+        if (!isIPv4Mapped())
+            return false;
+        
+        // class A
+        if (ip3() == 10)
+            return false;
+
+        // class B
+        if ((ip3() == 172) && (ip2() >= 16) && (ip2() <= 31))
+            return false;
+
+        // class C
+        if ((ip3() == 192) && (ip2() == 168))
+            return false;
 
         return true;
     }

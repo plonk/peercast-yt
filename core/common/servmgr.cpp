@@ -140,6 +140,50 @@ ServMgr::~ServMgr()
     }
 }
 
+// ------------------------------------
+bool ServMgr::updateIPAddress(const IP& newIP)
+{
+    std::lock_guard<std::recursive_mutex> cs(lock);
+    bool success = false;
+
+    if (newIP.isIPv4Mapped()) {
+        auto score = [](const IP& ip) -> int {
+            if (ip.isIPv4Loopback())
+                return 0;
+            else if (ip.isIPv4Private())
+                return 1;
+            else
+                return 2;
+        };
+        if (score(serverHost.ip) < score(newIP)) {
+            IP oldIP = serverHost.ip;
+            serverHost.ip = newIP;
+            LOG_INFO("Server IPv4 address changed to %s (was %s)",
+                     newIP.str().c_str(),
+                     oldIP.str().c_str());
+            success = true;
+        }
+    } else {
+        auto score = [](const IP& ip) -> int {
+            if (ip.isIPv6Loopback())
+                return 0;
+            else if (ip.isIPv6UniqueLocal())
+                return 1;
+            else
+                return 2;
+        };
+        if (score(serverHostIPv6.ip) < score(newIP)) {
+            IP oldIP = serverHostIPv6.ip;
+            serverHostIPv6.ip = newIP;
+            LOG_INFO("Server IPv6 address changed to %s (was %s)",
+                     newIP.str().c_str(),
+                     oldIP.str().c_str());
+            success = true;
+        }
+    }
+    return success;
+}
+
 // -----------------------------------
 void    ServMgr::connectBroadcaster()
 {

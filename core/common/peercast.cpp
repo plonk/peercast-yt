@@ -37,13 +37,10 @@ void APICALL PeercastInstance::init()
     for (auto it = ips.begin(); it != ips.end(); ++it) {
         IP ip;
         if (IP::tryParse(*it, ip)) {
-            if (ip.isIPv4Mapped()) {
-                //if (!servMgr->serverHost.ip)
-                servMgr->serverHost.ip = ip;
-            } else {
-                //if (!servMgr->serverHostIPv6.ip)
-                servMgr->serverHostIPv6.ip = ip;
-            }
+            LOG_DEBUG("New address discovered: %s", it->c_str());
+            servMgr->updateIPAddress(ip);
+        } else {
+            LOG_DEBUG("\"%s\" could not be parsed", it->c_str());
         }
     }
 

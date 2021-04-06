@@ -2079,9 +2079,9 @@ int Servent::serverProc(ThreadInfo *thread)
         sv->setStatus(S_LISTENING);
 
         if (servMgr->isRoot)
-            LOG_INFO("Root Server started: %s", sv->sock->host.str().c_str());
+            LOG_INFO("Root Server started on port %d", (int) sv->sock->host.port);
         else
-            LOG_INFO("Server started: %s", sv->sock->host.str().c_str());
+            LOG_INFO("Server started on port %d", (int) sv->sock->host.port);
 
         while (thread->active() && sv->sock->active())
         {
