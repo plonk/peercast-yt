@@ -1280,7 +1280,7 @@ void Servent::CMD_bump(const char* cmd, HTTP& http, String& jumpStr)
                     });
             }
 
-            if (theHit.host.ip != 0)
+            if (theHit.host.ip)
             {
                 c->designatedHost = theHit;
             } else

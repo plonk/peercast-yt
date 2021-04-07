@@ -115,7 +115,7 @@ public:
 
         Host endpoint(ChanHit *hit)
         {
-            if (hit->rhost[0].ip != 0)
+            if (hit->rhost[0].ip)
                 return hit->rhost[0];
             else
                 return hit->rhost[1];

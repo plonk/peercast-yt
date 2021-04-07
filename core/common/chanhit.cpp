@@ -162,7 +162,7 @@ void ChanHit::writeAtoms(AtomStream &atom, const GnuID &chanID)
     atom.writeParent(PCP_HOST,
                      13  +
                      (addChan ? 1 : 0) +
-                     (uphost.ip != 0 ? 3 : 0) +
+                     (uphost.ip ? 3 : 0) +
                      (versionExNumber != 0 ? 2 : 0));
         if (addChan)
             atom.writeBytes(PCP_HOST_CHANID, chanID.id, 16);
@@ -184,7 +184,7 @@ void ChanHit::writeAtoms(AtomStream &atom, const GnuID &chanID)
         atom.writeChar(PCP_HOST_FLAGS1, flags1(this));
         atom.writeInt(PCP_HOST_OLDPOS, oldestPos);
         atom.writeInt(PCP_HOST_NEWPOS, newestPos);
-        if (uphost.ip != 0)
+        if (uphost.ip)
         {
             atom.writeInt(PCP_HOST_UPHOST_IP, uphost.ip);
             atom.writeInt(PCP_HOST_UPHOST_PORT, uphost.port);

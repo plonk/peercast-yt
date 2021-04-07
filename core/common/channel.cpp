@@ -590,7 +590,7 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
                 break;
             }
 
-            if (ch->designatedHost.host.ip != 0)
+            if (ch->designatedHost.host.ip)
             {
                 ch->sourceHost = ch->designatedHost;
                 ch->designatedHost.init();

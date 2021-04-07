@@ -74,6 +74,11 @@ class IP
         return memcmp(addr, other.addr, 16) == 0;
     }
 
+    bool operator !=(const IP& other) const
+    {
+        return !(*this == other);
+    }
+
     bool operator <(const IP& other) const
     {
         return memcmp(addr, other.addr, 16) < 0;

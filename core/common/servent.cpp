@@ -1085,13 +1085,8 @@ void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
         {
             if ((servMgr->serverHost.ip != thisHost.ip) && (servMgr->forceIP.isEmpty()))
             {
-                // グローバルのリモートからプライベートIPを設定されないようにする。
-                if (rhost.globalIP() == thisHost.globalIP())
-                {
-                    std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
-                    LOG_DEBUG("Got new ip: %s", thisHost.str().c_str());
-                    servMgr->serverHost.ip = thisHost.ip;
-                }
+                LOG_DEBUG("Got new ip: %s", thisHost.str().c_str());
+                servMgr->updateIPAddress(thisHost.ip);
             }
 
             if (servMgr->getFirewall() == ServMgr::FW_UNKNOWN)

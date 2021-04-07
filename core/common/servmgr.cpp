@@ -671,7 +671,7 @@ bool ServMgr::checkForceIP()
 {
     if (!forceIP.isEmpty())
     {
-        unsigned int newIP = ClientSocket::getIP(forceIP.cstr());
+        IP newIP(ClientSocket::getIP(forceIP.cstr()));
         if (serverHost.ip != newIP)
         {
             serverHost.ip = newIP;
