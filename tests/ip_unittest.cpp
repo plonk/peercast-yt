@@ -72,3 +72,22 @@ TEST_F(IPFixture, uniqueLocal)
     ASSERT_FALSE(ip.isIPv6LinkLocal());
     ASSERT_TRUE(ip.isIPv6UniqueLocal());
 }
+
+TEST_F(IPFixture, isIPv4Private)
+{
+    ASSERT_FALSE(IP::parse("127.0.0.1").isIPv4Private());
+    ASSERT_TRUE(IP::parse("192.168.0.1").isIPv4Private());
+    ASSERT_TRUE(IP::parse("172.16.0.1").isIPv4Private());
+    ASSERT_TRUE(IP::parse("10.0.0.1").isIPv4Private());
+    ASSERT_FALSE(IP::parse("8.8.8.8").isIPv4Private());
+}
+
+TEST_F(IPFixture, isIPv4Loopback)
+{
+    ASSERT_TRUE(IP::parse("127.0.0.1").isIPv4Loopback());
+    ASSERT_TRUE(IP::parse("127.0.1.1").isIPv4Loopback());
+    ASSERT_FALSE(IP::parse("192.168.0.1").isIPv4Loopback());
+    ASSERT_FALSE(IP::parse("172.16.0.1").isIPv4Loopback());
+    ASSERT_FALSE(IP::parse("10.0.0.1").isIPv4Loopback());
+    ASSERT_FALSE(IP::parse("8.8.8.8").isIPv4Loopback());
+}

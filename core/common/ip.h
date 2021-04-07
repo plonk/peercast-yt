@@ -125,23 +125,22 @@ class IP
         
         // class A
         if (ip3() == 10)
-            return false;
+            return true;
 
         // class B
         if ((ip3() == 172) && (ip2() >= 16) && (ip2() <= 31))
-            return false;
+            return true;
 
         // class C
         if ((ip3() == 192) && (ip2() == 168))
-            return false;
+            return true;
 
-        return true;
+        return false;
     }
 
     bool isIPv4Loopback() const
     {
-        return isIPv4Mapped() &&
-            ((ip3() == 127) && (ip2() == 0) && (ip1() == 0) && (ip0() == 1));
+        return isIPv4Mapped() && (ip3() == 127);
     }
 
     bool isIPv6Loopback() const
