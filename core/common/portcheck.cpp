@@ -3,6 +3,8 @@
 #include <memory>
 #include "portcheck.h"
 #include "servmgr.h"
+#include "str.h"
+#include "version2.h"
 
 IPv6PortChecker::IPv6PortChecker(const URI& uri)
     : m_uri(uri)
@@ -11,6 +13,7 @@ IPv6PortChecker::IPv6PortChecker(const URI& uri)
 
 PortCheckResult IPv6PortChecker::run(const std::vector<int>& ports)
 {
+    using json = nlohmann::json;
     std::shared_ptr<ClientSocket> sock(sys->createSocket());
 
     if (!sock)
@@ -32,19 +35,25 @@ PortCheckResult IPv6PortChecker::run(const std::vector<int>& ports)
 
     HTTP http(*sock);
 
+    std::string reqbody = json({{"instanceId",servMgr->sessionID.str()}, {"ports",json::array({servMgr->serverHostIPv6.port})}}).dump();
     HTTPRequest req("POST", "/portcheck", "HTTP/1.1",
-                    {{"Host","v6.api.pecastation.org"}, {"Content-Type","application/json"}});
+                    {{"Host", "v6.api.pecastation.org"},
+                     {"Content-Type", "application/json"},
+                     {"User-Agent", PCX_AGENT},
+                     {"Content-Length", std::to_string(reqbody.size())}});
 
-    req.body = str::STR("{instanceId:\"", servMgr->sessionID.str(), "\",ports:[", servMgr->serverHostIPv6.port, "]}");
+    req.body = reqbody;
+    LOG_DEBUG("req: %s", req.body.c_str());
     auto res = http.send(req);
     if (res.statusCode != 200) {
-        throw GeneralException("HTTP request failed", res.statusCode);
+        throw GeneralException(str::STR("HTTP request failed: ", res.statusCode).c_str(), res.statusCode);
     }
 
-    auto data = nlohmann::json::parse(res.body);
+    auto data = json::parse(res.body);
+    LOG_DEBUG("res: %s", res.body.c_str());
     PortCheckResult result;
     result.ip = IP::parse(data["ip"]);
-    for (nlohmann::json& j : data["ports"]) {
+    for (json& j : data["ports"]) {
         result.ports.push_back(j.get<int>());
     }
 

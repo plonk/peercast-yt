@@ -2141,6 +2141,9 @@ void Servent::handshakeHTTPPush(const std::string& args)
     if (query.get("ipv") == "6") {
         c->ipVersion = Channel::IP_V6;
         LOG_INFO("Channel IP version set to 6");
+
+        // YPv6ではIPv6のポートチェックができないのでがんばる。
+        servMgr->checkFirewallIPv6();
     }
     c->startHTTPPush(sock, chunked);
     sock = NULL;    // socket is taken over by channel, so don`t close it
