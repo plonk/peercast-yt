@@ -81,9 +81,9 @@ public:
     virtual void            executeFile(const char *) = 0;
     virtual void            setThreadName(const char* name) {}
 
-    virtual std::string     getHostname() = 0;
-    virtual std::vector<std::string> getIPAddresses(const std::string& name) = 0;
-    virtual std::vector<std::string> getAllIPAddresses() = 0;
+    virtual std::string     getHostname() { return "localhost"; }
+    virtual std::vector<std::string> getIPAddresses(const std::string& name) { return {}; }
+    virtual std::vector<std::string> getAllIPAddresses() { return {}; }
 
 #ifdef __BIG_ENDIAN__
     unsigned short  convertEndian(unsigned short v) { return SWAP2(v); }
