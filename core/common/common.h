@@ -47,6 +47,14 @@ public:
 };
 
 // -------------------------------------
+class ArgumentException : public GeneralException
+{
+public:
+    ArgumentException(const char *m) : GeneralException(m) {}
+    ArgumentException(const char *m, int e) : GeneralException(m, e) {}
+};
+
+// -------------------------------------
 class FormatException : public GeneralException
 {
 public:

@@ -37,6 +37,11 @@
         {#Yes} {@else} {#No} {@end} {@else} {#Unknown} {@end} </TD>
     </TR>
     <TR align=left>
+      <th class="left-heading">{#Firewalled} (IPV6)</th>
+      <TD>{@if servMgr.firewallKnownIPv6} {@if servMgr.isFirewalledIPv6}
+        {#Yes} {@else} {#No} {@end} {@else} {#Unknown} {@end} </TD>
+    </TR>
+    <TR align=left>
       <th class="left-heading">{#XML stats}</th>
       <TD><A href="/admin?cmd=viewxml">{#View}</A></TD>
     </TR>

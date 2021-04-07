@@ -332,7 +332,7 @@ bool ChannelStream::getStatus(std::shared_ptr<Channel> ch, ChanPacket &pack)
         (numListeners != newLocalListeners)
         || (numRelays != newLocalRelays)
         || (ch->isPlaying() != isPlaying)
-        || (servMgr->getFirewall() != fwState)
+        || (servMgr->getFirewall(ch->ipVersion) != fwState)
         || ((ctime - lastUpdate) > 120)
         )
         && ((ctime - lastUpdate) > 10)
@@ -341,7 +341,7 @@ bool ChannelStream::getStatus(std::shared_ptr<Channel> ch, ChanPacket &pack)
         numListeners = newLocalListeners;
         numRelays = newLocalRelays;
         isPlaying = ch->isPlaying();
-        fwState = servMgr->getFirewall();
+        fwState = servMgr->getFirewall(ch->ipVersion);
         lastUpdate = ctime;
 
         ChanHit hit;

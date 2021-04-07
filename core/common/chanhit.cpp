@@ -105,7 +105,7 @@ void ChanHit::initLocal(
 
     init();
 
-    firewalled = (servMgr->getFirewall() != ServMgr::FW_OFF);
+    firewalled = (servMgr->getFirewall(ipv6 ? 6 : 4) != ServMgr::FW_OFF);
     numListeners = numl;
     numRelays = numr;
     upTime = uptm;

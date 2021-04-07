@@ -85,6 +85,7 @@ ServMgr::ServMgr()
     serverHostIPv6 = Host(IP::parse("::1"), DEFAULT_PORT);
 
     firewalled = FW_UNKNOWN;
+    firewalledIPv6 = FW_UNKNOWN;
     allowDirect = true;
     autoConnect = true;
     forceLookup = true;
@@ -685,7 +686,7 @@ bool ServMgr::checkForceIP()
 // -----------------------------------
 void ServMgr::checkFirewall()
 {
-    if ((getFirewall() == FW_UNKNOWN) && !servMgr->rootHost.isEmpty())
+    if ((getFirewall(4) == FW_UNKNOWN) && !servMgr->rootHost.isEmpty())
     {
         LOG_DEBUG("Checking firewall..");
         Host host;
@@ -714,37 +715,95 @@ void ServMgr::checkFirewall()
 }
 
 // -----------------------------------
-ServMgr::FW_STATE ServMgr::getFirewall()
+ServMgr::FW_STATE ServMgr::getFirewall(int ipv)
 {
+    if (ipv != 4 && ipv != 6)
+        throw ArgumentException("getFirewall: Invalid IP version");
+        
     std::lock_guard<std::recursive_mutex> cs(lock);
-    return firewalled;
+    if (ipv == 4)
+        return firewalled;
+    else
+        return firewalledIPv6;
 }
 
 // -----------------------------------
-void ServMgr::setFirewall(FW_STATE state)
+void ServMgr::setFirewall(int ipv, FW_STATE state)
 {
+    if (ipv != 4 && ipv != 6)
+        throw ArgumentException("setFirewall: Invalid IP version");
+
     std::lock_guard<std::recursive_mutex> cs(lock);
 
-    if (firewalled != state)
+    const char *str;
+    switch (state)
     {
-        const char *str;
-        switch (state)
-        {
-            case FW_ON:
-                str = "ON";
-                break;
-            case FW_OFF:
-                str = "OFF";
-                break;
-            case FW_UNKNOWN:
-            default:
-                str = "UNKNOWN";
-                break;
-        }
-
-        LOG_DEBUG("Firewall is set to %s", str);
-        firewalled = state;
+    case FW_ON:
+        str = "ON";
+        break;
+    case FW_OFF:
+        str = "OFF";
+        break;
+    case FW_UNKNOWN:
+    default:
+        str = "UNKNOWN";
+        break;
     }
+
+    if (ipv == 4) {
+        if (firewalled != state)
+        {
+            LOG_DEBUG("Firewall is set to %s (IPv4)", str);
+            firewalled = state;
+        }
+    }else {
+        if (firewalledIPv6 != state)
+        {
+            LOG_DEBUG("Firewall is set to %s (IPv6)", str);
+            firewalledIPv6 = state;
+        }
+    }
+}
+
+// -----------------------------------
+void ServMgr::checkFirewallIPv6()
+{
+    /* IPv6 で繋げられるYPが出現したら、以下のやり方で十分だろう。 */
+#if 0
+    if ((getFirewallIPv6() == FW_UNKNOWN) && !servMgr->rootHost.isEmpty())
+    {
+        LOG_DEBUG("Checking firewall..");
+        Host host;
+        host.fromStrName(servMgr->rootHost.cstr(), DEFAULT_PORT);
+
+        ClientSocket *sock = sys->createSocket();
+        if (!sock)
+            throw StreamException("Unable to create socket");
+        sock->setReadTimeout(30000);
+        sock->open(host);
+        sock->connect();
+
+        AtomStream atom(*sock);
+
+        atom.writeInt(PCP_CONNECT, 1);
+
+        GnuID remoteID;
+        String agent;
+        Servent::handshakeOutgoingPCP(atom, sock->host, remoteID, agent, true);
+
+        atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT);
+
+        sock->close();
+        delete sock;
+    }
+#endif
+
+    if (getFirewall(6) != FW_UNKNOWN) // is this reasonable?
+        return;
+
+    IPv6PortChecker checker;
+    auto result = checker.run({serverHost.port});
+    LOG_DEBUG("%s %s", result.ip.str().c_str(), std::to_string(result.ports.size()).c_str());
 }
 
 // -----------------------------------
@@ -1741,9 +1800,9 @@ int ServMgr::serverProc(ThreadInfo *thread)
                 LOG_DEBUG("Starting servers");
 
                 if (servMgr->forceNormal)
-                    servMgr->setFirewall(ServMgr::FW_OFF);
+                    servMgr->setFirewall(4, ServMgr::FW_OFF);
                 else
-                    servMgr->setFirewall(ServMgr::FW_UNKNOWN);
+                    servMgr->setFirewall(4, ServMgr::FW_UNKNOWN);
 
                 Host h = servMgr->serverHost;
 
@@ -1768,7 +1827,8 @@ int ServMgr::serverProc(ThreadInfo *thread)
                 s = s->next;
             }
 
-            servMgr->setFirewall(ServMgr::FW_ON);
+            servMgr->setFirewall(4, ServMgr::FW_ON);
+            servMgr->setFirewall(6, ServMgr::FW_ON);
         }
 
         cs.unlock();
@@ -1860,9 +1920,13 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     else if (var == "password")
         buf = password;
     else if (var == "isFirewalled")
-        buf = getFirewall()==FW_ON ? "1" : "0";
+        buf = getFirewall(4)==FW_ON ? "1" : "0";
     else if (var == "firewallKnown")
-        buf = getFirewall()==FW_UNKNOWN ? "0" : "1";
+        buf = getFirewall(4)==FW_UNKNOWN ? "0" : "1";
+    else if (var == "isFirewalledIPv6")
+        buf = getFirewall(6)==FW_ON ? "1" : "0";
+    else if (var == "firewallKnownIPv6")
+        buf = getFirewall(6)==FW_UNKNOWN ? "0" : "1";
     else if (var == "rootMsg")
         buf = rootMsg.c_str();
     else if (var == "isRoot")

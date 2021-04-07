@@ -1009,8 +1009,9 @@ int Servent::givProc(ThreadInfo *thread)
 // -----------------------------------
 void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, String &agent, bool isTrusted)
 {
-    bool nonFW = (servMgr->getFirewall() != ServMgr::FW_ON);
-    bool testFW = (servMgr->getFirewall() == ServMgr::FW_UNKNOWN);
+    int ipv = rhost.ip.isIPv4Mapped() ? 4 : 6;
+    bool nonFW = (servMgr->getFirewall(ipv) != ServMgr::FW_ON);
+    bool testFW = (servMgr->getFirewall(ipv) == ServMgr::FW_UNKNOWN);
     bool sendBCID = isTrusted && chanMgr->isBroadcasting();
 
     atom.writeParent(PCP_HELO, 3 + (testFW?1:0) + (nonFW?1:0) + (sendBCID?1:0));
@@ -1089,12 +1090,12 @@ void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
                 servMgr->updateIPAddress(thisHost.ip);
             }
 
-            if (servMgr->getFirewall() == ServMgr::FW_UNKNOWN)
+            if (servMgr->getFirewall(ipv) == ServMgr::FW_UNKNOWN)
             {
                 if (thisHost.port && thisHost.globalIP())
-                    servMgr->setFirewall(ServMgr::FW_OFF);
+                    servMgr->setFirewall(ipv, ServMgr::FW_OFF);
                 else
-                    servMgr->setFirewall(ServMgr::FW_ON);
+                    servMgr->setFirewall(ipv, ServMgr::FW_ON);
             }
         }
 
