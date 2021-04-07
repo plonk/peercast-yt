@@ -31,6 +31,7 @@
 #include "rtmpmonit.h"
 #include "chandir.h"
 #include "uptest.h"
+#include "portcheck.h"
 
 // -----------------------------------
 ServMgr::ServMgr()
@@ -802,6 +803,7 @@ void ServMgr::checkFirewallIPv6()
         return;
 
     IPv6PortChecker checker;
+    LOG_DEBUG("Checking firewall.. (IPv6)");
     auto result = checker.run({serverHost.port});
     LOG_DEBUG("%s %s", result.ip.str().c_str(), std::to_string(result.ports.size()).c_str());
 }
@@ -1760,6 +1762,8 @@ int ServMgr::idleProc(ThreadInfo *thread)
         servMgr->rtmpServerMonitor.update();
 
         servMgr->uptestServiceRegistry->update();
+
+        servMgr->checkFirewallIPv6();
 
         sys->sleep(500);
     }

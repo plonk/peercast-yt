@@ -169,6 +169,7 @@ public:
     void                checkFirewall();
     void                setFirewall(int, FW_STATE);
     FW_STATE            getFirewall(int);
+    void                checkFirewallIPv6();
 
     // host cache
     void            addHost(Host &, ServHost::TYPE, unsigned int);

@@ -1139,8 +1139,8 @@ void Servent::CMD_fetch(const char* cmd, HTTP& http, String& jumpStr)
     info.contentType = type;
     info.MIMEType = ChanInfo::getMIMEType(type.c_str());
     info.streamExt = ChanInfo::getTypeExt(type.c_str());
-
     info.bcID = chanMgr->broadcastID;
+
     // id がセットされていないチャンネルがあるといろいろまずいので、事
     // 前に設定してから登録する。
     if (servMgr->randomizeBroadcastingChannelID) {
@@ -1155,6 +1155,9 @@ void Servent::CMD_fetch(const char* cmd, HTTP& http, String& jumpStr)
         if (query.get("ipv") == "6") {
             c->ipVersion = Channel::IP_V6;
             LOG_INFO("Channel IP version set to 6");
+
+            // YPv6ではIPv6のポートチェックができないのでがんばる。
+            servMgr->checkFirewallIPv6();
         }
         c->startURL(curl.c_str());
     }
