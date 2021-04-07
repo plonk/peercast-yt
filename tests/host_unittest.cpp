@@ -17,10 +17,12 @@ TEST(HostTest, loopbackIP)
     host.fromStrIP("127.0.0.1", 0);
     ASSERT_TRUE( host.loopbackIP() );
 
-    // 127 で始まるクラスAのネットワーク全部がループバックとして機能す
-    // るが、loopbackIP は 127.0.0.1 以外には FALSE を返す。
+    // 127 で始まるクラスAのネットワーク全部がループバックとして機能する。
     host.fromStrIP("127.99.99.99", 0);
-    ASSERT_FALSE( host.loopbackIP() );
+    ASSERT_TRUE( host.loopbackIP() );
+
+    // host.fromStrIP("[::1]", 0);
+    // ASSERT_TRUE( host.loopbackIP() );
 }
 
 TEST(HostTest, isMemberOf)
