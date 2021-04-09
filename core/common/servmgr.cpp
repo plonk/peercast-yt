@@ -937,8 +937,8 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
     iniFile.writeStrValue("htmlPath", this->htmlPath);
     iniFile.writeIntValue("maxServIn", this->maxServIn);
     iniFile.writeStrValue("chanLog", this->chanLog);
-
     iniFile.writeStrValue("networkID", networkID.str());
+    iniFile.writeBoolValue("randomizeBroadcastingChannelID", randomizeBroadcastingChannelID);
 
     iniFile.writeSection("Broadcast");
     iniFile.writeIntValue("broadcastMsgInterval", chanMgr->broadcastMsgInterval);
@@ -1104,6 +1104,8 @@ void ServMgr::loadSettings(const char *fn)
                 chanMgr->broadcastID.fromStr(iniFile.getStrValue());
             }else if (iniFile.isName("htmlPath"))
                 strcpy(servMgr->htmlPath, iniFile.getStrValue());
+            else if (iniFile.isName("randomizeBroadcastingChannelID"))
+                servMgr->randomizeBroadcastingChannelID = iniFile.getBoolValue();
             else if (iniFile.isName("maxControlConnections"))
             {
                 servMgr->maxControl = iniFile.getIntValue();
@@ -2049,6 +2051,9 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var == "chat")
     {
         buf = to_string(servMgr->chat);
+    }else if (var == "randomizeBroadcastingChannelID")
+    {
+        buf = to_string(servMgr->randomizeBroadcastingChannelID);
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);

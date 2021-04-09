@@ -234,6 +234,7 @@
     "URL of yp4g.xml"         : "yp4g.xmlのURL",
 
     "Chat"                    : "チャット",
+    "Randomize broadcasting channel ID" : "配信するチャンネルのIDをランダム化",
 
     // rtmp.html
     "Start"                   : "開始",

@@ -938,6 +938,7 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
     servMgr->channelDirectory->clearFeeds();
     servMgr->transcodingEnabled = false;
     servMgr->chat = false;
+    servMgr->randomizeBroadcastingChannelID = false;
 
     bool brRoot = false;
     bool getUpd = false;
@@ -1054,6 +1055,8 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
             servMgr->refreshHTML = getCGIargINT(arg);
         else if (strcmp(curr, "chat") == 0)
             servMgr->chat = getCGIargBOOL(arg);
+        else if (strcmp(curr, "randomizechid") == 0)
+            servMgr->randomizeBroadcastingChannelID = getCGIargBOOL(arg);
         else if (strcmp(curr, "genreprefix") == 0)
             servMgr->genrePrefix = arg;
         else if (strcmp(curr, "auth") == 0)
