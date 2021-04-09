@@ -24,6 +24,7 @@
 #include "socket.h"
 
 static const Regexp IPV4_PATTERN("^\\d+\\.\\d+\\.\\d+\\.\\d+$");
+static const Regexp IPV6_PATTERN("^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|[fF][eE]80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::([fF][fF][fF][fF](:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$");
 
 bool    ServFilter::writeVariable(Stream &out, const String &var)
 {
@@ -56,6 +57,8 @@ bool ServFilter::matches(int fl, const Host& h) const
     {
     case T_IP:
         return h.isMemberOf(host);
+    case T_IPV6:
+        return host.ip == h.ip;
     case T_HOSTNAME:
         return h.ip == IP(ClientSocket::getIP(pattern.c_str()));
     case T_SUFFIX:
@@ -80,6 +83,10 @@ void ServFilter::setPattern(const char* str)
     {
         type = T_IP;
         host.fromStrIP(str, 0);
+    }else if (IPV6_PATTERN.matches(str))
+    {
+        type = T_IPV6;
+        host = Host(IP::parse(str), 0);
     }else
     {
         type = T_HOSTNAME;
@@ -94,6 +101,8 @@ std::string ServFilter::getPattern()
     {
     case T_IP:
         return host.str(false);
+    case T_IPV6:
+        return host.ip.str();
     case T_HOSTNAME:
         return pattern;
     case T_SUFFIX:

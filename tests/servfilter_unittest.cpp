@@ -129,3 +129,40 @@ TEST_F(ServFilterFixture, matchSuffixPattern)
     filter.flags = ServFilter::F_DIRECT;
     EXPECT_TRUE(filter.matches(ServFilter::F_DIRECT, Host("dns.google", 0)));
 }
+
+TEST_F(ServFilterFixture, setIPv6)
+{
+    filter.setPattern("::1");
+    ASSERT_EQ(ServFilter::T_IPV6, filter.type);
+    ASSERT_EQ("::1", filter.getPattern());
+
+    filter.setPattern("fd44:7144:7144::1");
+    ASSERT_EQ(ServFilter::T_IPV6, filter.type);
+    ASSERT_EQ("fd44:7144:7144::1", filter.getPattern());
+}
+
+TEST_F(ServFilterFixture, matchIPv6)
+{
+    filter.flags = ServFilter::F_DIRECT;
+    filter.setPattern("::1");
+    ASSERT_TRUE(filter.matches(ServFilter::F_DIRECT, Host(IP::parse("::1"), 0)));
+    ASSERT_FALSE(filter.matches(ServFilter::F_DIRECT, Host(IP::parse("fd44:7144:7144::1"), 0)));
+}
+
+TEST_F(ServFilterFixture, matchIPv4MappedIPv6)
+{
+    filter.flags = ServFilter::F_DIRECT;
+    filter.setPattern("::ffff:192.168.0.1");
+    ASSERT_EQ(ServFilter::T_IPV6, filter.type);
+    ASSERT_TRUE(filter.matches(ServFilter::F_DIRECT, Host(IP::parse("192.168.0.1"), 0)));
+    ASSERT_FALSE(filter.matches(ServFilter::F_DIRECT, Host(IP::parse("192.168.0.2"), 0)));
+}
+
+TEST_F(ServFilterFixture, matchIPv4MappedIPv6UpperCase)
+{
+    filter.flags = ServFilter::F_DIRECT;
+    filter.setPattern("::FFFF:192.168.0.1");
+    ASSERT_EQ(ServFilter::T_IPV6, filter.type);
+    ASSERT_TRUE(filter.matches(ServFilter::F_DIRECT, Host(IP::parse("192.168.0.1"), 0)));
+    ASSERT_FALSE(filter.matches(ServFilter::F_DIRECT, Host(IP::parse("192.168.0.2"), 0)));
+}
