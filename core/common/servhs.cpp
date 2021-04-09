@@ -829,10 +829,10 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
                 if (http.isHeader("Cookie"))
                 {
                     LOG_DEBUG("Got cookie: %s", arg);
-                    char *idp=arg;
+                    char *idp = arg;
                     while ((idp = strstr(idp, "id=")))
                     {
-                        idp+=3;
+                        idp += 3;
                         gotCookie.set(idp, sock->host.ip);
                         if (servMgr->cookieList.contains(gotCookie))
                         {
