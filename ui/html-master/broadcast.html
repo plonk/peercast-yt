@@ -60,7 +60,16 @@
           </SELECT>
         </TD>
       </TR>
-      <TR align=left bgColor=#dddddd class="normal">
+      <TR align=left bgColor=#ddd class="normal">
+        <TD>{#IP Version}</TD>
+        <TD>
+          <SELECT name=ipv>
+            <OPTION value=4>IPv4</OPTION>
+            <OPTION value=6>IPv6</OPTION>
+          </SELECT>
+        </TD>
+      </TR>
+      <TR align=left bgColor=#eee class="normal">
         <TD colSpan=2 align=middle><INPUT type=submit value="{#Create Relay}" name=stream></TD>
       </TR>
     </TBODY>
@@ -99,6 +108,16 @@
           <OPTION value=WMA>WMA</OPTION>
           <OPTION value=WMV>WMV</OPTION>
           <OPTION value=WEBM>WEBM</OPTION>
+          <OPTION value=MP4>MP4</OPTION>
+        </SELECT>
+      </TD>
+    </TR>
+    <TR align=left bgColor=#ddd class="normal">
+      <TD>{#IP Version}</TD>
+      <TD>
+        <SELECT id=ipv>
+          <OPTION value=4>IPv4</OPTION>
+          <OPTION value=6>IPv6</OPTION>
         </SELECT>
       </TD>
     </TR>

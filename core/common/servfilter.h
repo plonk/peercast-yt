@@ -49,6 +49,7 @@ public:
         T_IP,
         T_HOSTNAME,
         T_SUFFIX,
+        T_IPV6,
     };
 
     ServFilter() { init(); }
@@ -66,7 +67,6 @@ public:
 
     bool isGlobal();
     bool isSet();
-
     Type type;
     unsigned int flags;
 private:

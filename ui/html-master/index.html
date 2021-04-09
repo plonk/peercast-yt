@@ -16,8 +16,12 @@
       <TD colSpan=2 class="normal"><B>{#Information}</B></TD>
     </TR>
     <TR align=left>
-      <th class="left-heading">{#Server IP}</th>
+      <th class="left-heading">{#Server IP} (IPv4)</th>
       <TD>{$servMgr.serverIP}</TD>
+    </TR>
+    <TR align=left>
+      <th class="left-heading">{#Server IP} (IPv6)</th>
+      <TD>{$servMgr.serverIPv6}</TD>
     </TR>
     <TR align=left>
       <th class="left-heading">{#Uptime}</th>
@@ -28,8 +32,13 @@
       <TD>{$chanMgr.numHitLists} - <a href="/admin?cmd=clear&amp;hitlists=1">{#Clear}</a> - <a href="/admin?cmd=dump_hitlists">{#Dump}</a></TD>
     </TR>
     <TR align=left>
-      <th class="left-heading">{#Firewalled}</th>
+      <th class="left-heading">{#Firewalled} (IPv4)</th>
       <TD>{@if servMgr.firewallKnown} {@if servMgr.isFirewalled}
+        {#Yes} {@else} {#No} {@end} {@else} {#Unknown} {@end} </TD>
+    </TR>
+    <TR align=left>
+      <th class="left-heading">{#Firewalled} (IPv6)</th>
+      <TD>{@if servMgr.firewallKnownIPv6} {@if servMgr.isFirewalledIPv6}
         {#Yes} {@else} {#No} {@end} {@else} {#Unknown} {@end} </TD>
     </TR>
     <TR align=left>

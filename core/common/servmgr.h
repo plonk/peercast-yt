@@ -167,6 +167,9 @@ public:
     void                closeConnections(Servent::TYPE);
 
     void                checkFirewall();
+    void                setFirewall(int, FW_STATE);
+    FW_STATE            getFirewall(int);
+    void                checkFirewallIPv6();
 
     // host cache
     void            addHost(Host &, ServHost::TYPE, unsigned int);
@@ -177,9 +180,7 @@ public:
     bool            seenHost(Host &, ServHost::TYPE, unsigned int);
 
     void            setMaxRelays(int);
-    void            setFirewall(FW_STATE);
     bool            checkForceIP();
-    FW_STATE        getFirewall();
     void            saveSettings(const char *);
     void            doSaveSettings(IniFileBase& iniFile);
     void            loadSettings(const char *);
@@ -238,6 +239,8 @@ public:
 
     unsigned int    totalOutput(bool);
 
+    bool updateIPAddress(const IP& newIP);
+
     ThreadInfo          serverThread;
     ThreadInfo          idleThread;
 
@@ -256,6 +259,7 @@ public:
     int                 totalStreams;
 
     Host                serverHost;
+    Host                serverHostIPv6;
     String              rootHost;
 
     char                downloadURL[128];
@@ -304,6 +308,7 @@ public:
                         uptestServiceRegistry;
 
     FW_STATE            firewalled;
+    FW_STATE            firewalledIPv6;
 
     String              serverName;
 
@@ -320,6 +325,8 @@ public:
     ChanInfo            defaultChannelInfo;
 
     bool                chat;
+
+    std::atomic_bool    randomizeBroadcastingChannelID;
 };
 
 // ----------------------------------

@@ -28,6 +28,7 @@
 #include "cgi.h"
 #include "version2.h" // PCX_AGENT
 #include "defer.h"
+#include "dechunker.h"
 
 //-----------------------------------------
 bool HTTP::checkResponse(int r)
@@ -238,67 +239,6 @@ void HTTP::send(const HTTPResponse& response)
 }
 
 // -----------------------------------
-void    CookieList::init()
-{
-    for (int i=0; i<MAX_COOKIES; i++)
-        list[i].clear();
-
-    neverExpire = false;
-}
-
-// -----------------------------------
-bool    CookieList::contains(Cookie &c)
-{
-    if ((c.id[0]) && (c.ip))
-        for (int i=0; i<MAX_COOKIES; i++)
-            if (list[i].compare(c))
-                return true;
-
-    return false;
-}
-
-// -----------------------------------
-void    Cookie::logDebug(const char *str, int ind)
-{
-    char ipstr[64];
-    Host h;
-    h.ip = ip;
-    h.IPtoStr(ipstr);
-
-    LOG_DEBUG("%s %d: %s - %s", str, ind, ipstr, id);
-}
-
-// -----------------------------------
-bool    CookieList::add(Cookie &c)
-{
-    if (contains(c))
-        return false;
-
-    unsigned int oldestTime=(unsigned int)-1;
-    int oldestIndex=0;
-
-    for (int i=0; i<MAX_COOKIES; i++)
-        if (list[i].time <= oldestTime)
-        {
-            oldestIndex = i;
-            oldestTime = list[i].time;
-        }
-
-    c.logDebug("Added cookie", oldestIndex);
-    c.time = sys->getTime();
-    list[oldestIndex]=c;
-    return true;
-}
-
-// -----------------------------------
-void    CookieList::remove(Cookie &c)
-{
-    for (int i=0; i<MAX_COOKIES; i++)
-        if (list[i].compare(c))
-            list[i].clear();
-}
-
-// -----------------------------------
 HTTPResponse HTTP::send(const HTTPRequest& request)
 {
     // send request
@@ -327,13 +267,25 @@ HTTPResponse HTTP::send(const HTTPRequest& request)
     readHeaders();
     HTTPResponse response(status, headers);
 
-    std::string contentLengthStr = headers.get("Content-Length");
-    if (contentLengthStr.empty())
-        throw StreamException("Content-Length missing");
-    int length = atoi(contentLengthStr.c_str());
-    if (length < 0)
-        throw StreamException("invalid Content-Length value");
+    if (headers.get("Transfer-Encoding") == "chunked") {
+        Dechunker stream1(*stream);
 
-    response.body = stream->read(length);
+        try {
+            while (true)
+                response.body += stream1.readChar();
+        }catch(StreamException& e)
+        {
+        }
+    }else
+    {
+        std::string contentLengthStr = headers.get("Content-Length");
+        if (contentLengthStr.empty())
+            throw StreamException("Content-Length missing");
+        int length = atoi(contentLengthStr.c_str());
+        if (length < 0)
+            throw StreamException("invalid Content-Length value");
+
+        response.body = stream->read(length);
+    }
     return response;
 }

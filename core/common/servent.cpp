@@ -473,7 +473,7 @@ void Servent::setStatus(STATUS s)
 bool    Servent::pingHost(Host &rhost, const GnuID &rsid)
 {
     char ipstr[64];
-    rhost.toStr(ipstr);
+    strcpy(ipstr, rhost.str().c_str());
     LOG_DEBUG("Ping host %s: trying..", ipstr);
     ClientSocket *s=NULL;
     bool hostOK=false;
@@ -1009,8 +1009,9 @@ int Servent::givProc(ThreadInfo *thread)
 // -----------------------------------
 void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, String &agent, bool isTrusted)
 {
-    bool nonFW = (servMgr->getFirewall() != ServMgr::FW_ON);
-    bool testFW = (servMgr->getFirewall() == ServMgr::FW_UNKNOWN);
+    int ipv = rhost.ip.isIPv4Mapped() ? 4 : 6;
+    bool nonFW = (servMgr->getFirewall(ipv) != ServMgr::FW_ON);
+    bool testFW = (servMgr->getFirewall(ipv) == ServMgr::FW_UNKNOWN);
     bool sendBCID = isTrusted && chanMgr->isBroadcasting();
 
     atom.writeParent(PCP_HELO, 3 + (testFW?1:0) + (nonFW?1:0) + (sendBCID?1:0));
@@ -1056,7 +1057,7 @@ void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
             agent.set(arg);
         }else if (id == PCP_HELO_REMOTEIP)
         {
-            thisHost.ip = atom.readInt();
+            thisHost.ip = atom.readAddress();
         }else if (id == PCP_HELO_PORT)
         {
             thisHost.port = atom.readShort();
@@ -1085,23 +1086,16 @@ void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
         {
             if ((servMgr->serverHost.ip != thisHost.ip) && (servMgr->forceIP.isEmpty()))
             {
-                // グローバルのリモートからプライベートIPを設定されないようにする。
-                if (rhost.globalIP() == thisHost.globalIP())
-                {
-                    std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
-                    char ipstr[64];
-                    thisHost.toStr(ipstr);
-                    LOG_DEBUG("Got new ip: %s", ipstr);
-                    servMgr->serverHost.ip = thisHost.ip;
-                }
+                LOG_DEBUG("Got new ip: %s", thisHost.str().c_str());
+                servMgr->updateIPAddress(thisHost.ip);
             }
 
-            if (servMgr->getFirewall() == ServMgr::FW_UNKNOWN)
+            if (servMgr->getFirewall(ipv) == ServMgr::FW_UNKNOWN)
             {
                 if (thisHost.port && thisHost.globalIP())
-                    servMgr->setFirewall(ServMgr::FW_OFF);
+                    servMgr->setFirewall(ipv, ServMgr::FW_OFF);
                 else
-                    servMgr->setFirewall(ServMgr::FW_ON);
+                    servMgr->setFirewall(ipv, ServMgr::FW_ON);
             }
         }
 
@@ -1206,7 +1200,7 @@ void Servent::handshakeIncomingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
         atom.writeString(PCP_HELO_AGENT, PCX_AGENT);
         atom.writeBytes(PCP_HELO_SESSIONID, servMgr->sessionID.id, 16);
         atom.writeInt(PCP_HELO_VERSION, PCP_CLIENT_VERSION);
-        atom.writeInt(PCP_HELO_REMOTEIP, rhost.ip);
+        atom.writeAddress(PCP_HELO_REMOTEIP, rhost.ip);
         atom.writeShort(PCP_HELO_PORT, rhost.port);
 
     if (version)
@@ -1250,7 +1244,7 @@ void Servent::processIncomingPCP(bool suggestOthers)
     bool offair           = !servMgr->isRoot && !chanMgr->isBroadcasting();
 
     char rstr[64];
-    rhost.toStr(rstr);
+    strcpy(rstr, rhost.str().c_str());
 
     // 接続を断わる場合の処理。コントロール接続数が上限に達しているか、
     // リモートホストとのコントロール接続が既にあるか、自分は放送中の
@@ -2081,9 +2075,9 @@ int Servent::serverProc(ThreadInfo *thread)
         sv->setStatus(S_LISTENING);
 
         if (servMgr->isRoot)
-            LOG_INFO("Root Server started: %s", sv->sock->host.str().c_str());
+            LOG_INFO("Root Server started on port %d", (int) sv->sock->host.port);
         else
-            LOG_INFO("Server started: %s", sv->sock->host.str().c_str());
+            LOG_INFO("Server started on port %d", (int) sv->sock->host.port);
 
         while (thread->active() && sv->sock->active())
         {

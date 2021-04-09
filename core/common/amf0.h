@@ -241,7 +241,7 @@ namespace amf0
             switch (m_type)
             {
             case kNumber:
-                return std::to_string(m_number);
+                return str::format("%g", m_number);
             case kObject:
             case kArray:
             {

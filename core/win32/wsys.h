@@ -22,6 +22,7 @@
 #define _WSYS_H
 
 // ------------------------------------
+#include <winsock2.h>
 #include <windows.h>
 #include "socket.h"
 #include "sys.h"
@@ -40,6 +41,10 @@ public:
     bool            hasGUI() override { return mainWindow!=NULL; }
     void            callLocalURL(const char *str, int port) override;
     void            executeFile(const char *) override;
+
+    std::string     getHostname() override;
+    std::vector<std::string> getIPAddresses(const std::string& name) override;
+    std::vector<std::string> getAllIPAddresses() override;
 
     HWND    mainWindow;
     peercast::Random rndGen;

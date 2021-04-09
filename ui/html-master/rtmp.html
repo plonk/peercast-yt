@@ -100,5 +100,14 @@
                  {@if servMgr.rtmpServerMonitor.status == "UP"}disabled{@end}>
         </td>
       </tr>
+      <tr>
+        <th class="left-heading">{#IP Version}</th>
+        <td>
+          <select name="ipv" {@if servMgr.rtmpServerMonitor.status == "UP"}disabled{@end}>>
+            <option value="4" {@if servMgr.rtmpServerMonitor.ipVersion == "4"}selected{@end}>IPv4</option>
+            <option value="6" {@if servMgr.rtmpServerMonitor.ipVersion == "6"}selected{@end}>IPv6</option>
+          </select>
+        </td>
+      </tr>
     </table>
   </form>

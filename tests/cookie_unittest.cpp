@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "http.h"
+#include "cookie.h"
 
 class CookieFixture : public ::testing::Test {
 public:
@@ -11,13 +11,13 @@ TEST_F(CookieFixture, initialState)
 {
     ASSERT_EQ(0, c.ip);
     ASSERT_STREQ("", c.id);
-    ASSERT_EQ(0, c.time);
 }
 
 TEST_F(CookieFixture, set)
 {
     c.set("hoge", 0xffffffff);
-    ASSERT_EQ(0xffffffff, c.ip);
+    ASSERT_EQ(IP(0xffffffff), c.ip);
+    ASSERT_NE(0xffffffff, c.ip);
     ASSERT_STREQ("hoge", c.id);
 }
 
@@ -32,15 +32,15 @@ TEST_F(CookieFixture, compare)
     f.set("fuga", 0xffffffff);
     g.set("fuga", 0xfffffffe);
 
-    ASSERT_TRUE(c.compare(d));
-    ASSERT_TRUE(d.compare(c));
+    ASSERT_TRUE(c == d);
+    ASSERT_TRUE(d == c);
 
-    ASSERT_FALSE(c.compare(e));
-    ASSERT_FALSE(e.compare(c));
+    ASSERT_FALSE(c == e);
+    ASSERT_FALSE(e == c);
 
-    ASSERT_FALSE(c.compare(f));
-    ASSERT_FALSE(f.compare(c));
+    ASSERT_FALSE(c == f);
+    ASSERT_FALSE(f == c);
 
-    ASSERT_FALSE(c.compare(g));
-    ASSERT_FALSE(g.compare(c));
+    ASSERT_FALSE(c == g);
+    ASSERT_FALSE(g == c);
 }

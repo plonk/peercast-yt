@@ -191,8 +191,6 @@ THREAD_PROC showConnections(ThreadInfo *thread)
                 continue;
 
             Host h = s->getHost();
-            char hostName[64];
-            h.toStr(hostName);
 
             unsigned int tnum = 0;
             char tdef = 's';
@@ -202,13 +200,13 @@ THREAD_PROC showConnections(ThreadInfo *thread)
             if ((s->type == Servent::T_RELAY) || (s->type == Servent::T_DIRECT)) {
                 ADDCONN(s, "%s-%s-%d%c  -  %s  -  %d ",
                         s->getTypeStr(), s->getStatusStr(), tnum, tdef,
-                        hostName,
+                        h.str().c_str(),
                         s->syncPos
                         );
             }else{
                 ADDCONN(s, "%s-%s-%d%c  -  %s",
                         s->getTypeStr(), s->getStatusStr(), tnum, tdef,
-                        hostName
+                        h.str().c_str()
                         );
             }
         }
@@ -262,7 +260,7 @@ THREAD_PROC showConnections(ThreadInfo *thread)
         }
 
         {
-            switch (servMgr->getFirewall()) {
+            switch (servMgr->getFirewall(4)) {
             case ServMgr::FW_ON:
                 SendDlgItemMessage(guiWnd, IDC_EDIT4, WM_SETTEXT, 0, (LPARAM)"Firewalled");
                 break;

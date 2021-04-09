@@ -3,6 +3,7 @@
 
 RTMPServerMonitor::RTMPServerMonitor(const std::string& aPath)
     : m_rtmpServer(aPath, false, false)
+    , ipVersion(4)
     , m_enabled(false)
 {
 }
@@ -58,6 +59,8 @@ bool RTMPServerMonitor::writeVariable(Stream &out, const String &var)
         buf = status();
     else if (var == "processID")
         buf = std::to_string( m_rtmpServer.pid() );
+    else if (var == "ipVersion")
+        buf = std::to_string(ipVersion);
     else
         return false;
 
@@ -92,6 +95,7 @@ std::string RTMPServerMonitor::makeEndpointURL()
     query.add("url", info.url.c_str());
     query.add("comment", info.comment.c_str());
     query.add("type", "FLV");
+    query.add("ipv", std::to_string(ipVersion));
 
     return "http://localhost:" + std::to_string(servMgr->serverHost.port) + "/?" + query.str();
 }

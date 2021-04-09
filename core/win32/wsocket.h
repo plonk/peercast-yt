@@ -21,8 +21,8 @@
 #ifndef _WSOCKET_H
 #define _WSOCKET_H
 
-#include <windows.h>
 #include "socket.h"
+#include <windows.h>
 
 // --------------------------------------------------
 class WSAClientSocket : public ClientSocket
@@ -61,7 +61,7 @@ public:
     void    checkTimeout(bool,bool);
 
     SOCKET sockNum;
-    struct sockaddr_in remoteAddr;
+    struct sockaddr_in6 remoteAddr;
 };
 
 #endif

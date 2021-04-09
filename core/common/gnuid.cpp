@@ -16,6 +16,7 @@
 // ------------------------------------------------
 
 #include <algorithm>
+#include "host.h"
 #include "gnuid.h" // Host std::string
 #include "sys.h" // sys
 
@@ -107,6 +108,21 @@ void GnuID::generate(unsigned char flags)
         id[i] = sys->rnd();
 
     id[0] = flags;
+}
+
+// ---------------------------
+GnuID GnuID::random()
+{
+    GnuID instance;
+
+    for (int i=0; i<16; i++)
+        instance.id[i] = sys->rnd();
+
+    // セットされたIDが返ることを保証したい。
+    if (!instance.isSet())
+        instance.id[15] = 1;
+
+    return instance;
 }
 
 // ---------------------------

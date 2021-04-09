@@ -31,6 +31,7 @@
 #include "rtmpmonit.h"
 #include "chandir.h"
 #include "uptest.h"
+#include "portcheck.h"
 
 // -----------------------------------
 ServMgr::ServMgr()
@@ -38,6 +39,7 @@ ServMgr::ServMgr()
     , channelDirectory(new ChannelDirectory())
     , uptestServiceRegistry(new UptestServiceRegistry())
     , rtmpServerMonitor(std::string(peercastApp->getPath()) + "rtmp-server")
+    , randomizeBroadcastingChannelID(true)
 {
     authType = AUTH_COOKIE;
     cookieList.init();
@@ -81,8 +83,10 @@ ServMgr::ServMgr()
     rootHost = "yp.pcgw.pgw.jp:7146";
 
     serverHost.fromStrIP("127.0.0.1", DEFAULT_PORT);
+    serverHostIPv6 = Host(IP::parse("::1"), DEFAULT_PORT);
 
     firewalled = FW_UNKNOWN;
+    firewalledIPv6 = FW_UNKNOWN;
     allowDirect = true;
     autoConnect = true;
     forceLookup = true;
@@ -136,6 +140,52 @@ ServMgr::~ServMgr()
         delete servents;
         servents = next;
     }
+}
+
+// ------------------------------------
+bool ServMgr::updateIPAddress(const IP& newIP)
+{
+    std::lock_guard<std::recursive_mutex> cs(lock);
+    bool success = false;
+
+    if (newIP.isIPv4Mapped()) {
+        auto score = [](const IP& ip) -> int {
+            if (ip.isIPv4Loopback())
+                return 0;
+            else if (ip.isIPv4Private())
+                return 1;
+            else
+                return 2;
+        };
+        if (score(serverHost.ip) < score(newIP)) {
+            IP oldIP = serverHost.ip;
+            serverHost.ip = newIP;
+            LOG_INFO("Server IPv4 address changed to %s (was %s)",
+                     newIP.str().c_str(),
+                     oldIP.str().c_str());
+            success = true;
+        }
+    } else {
+        auto score = [](const IP& ip) -> int {
+            if (ip.isIPv6Loopback())
+                return 0;
+            else if (ip.isIPv6LinkLocal())
+                return 1;
+            else if (ip.isIPv6UniqueLocal())
+                return 2;
+            else
+                return 3;
+        };
+        if (score(serverHostIPv6.ip) < score(newIP)) {
+            IP oldIP = serverHostIPv6.ip;
+            serverHostIPv6.ip = newIP;
+            LOG_INFO("Server IPv6 address changed to %s (was %s)",
+                     newIP.str().c_str(),
+                     oldIP.str().c_str());
+            success = true;
+        }
+    }
+    return success;
 }
 
 // -----------------------------------
@@ -202,13 +252,10 @@ void ServMgr::addHost(Host &h, ServHost::TYPE type, unsigned int time)
                 break;
             }
 
-    char str[64];
-    h.toStr(str);
-
     if (!sh)
-        LOG_DEBUG("New host: %s - %s", str, ServHost::getTypeStr(type));
+        LOG_DEBUG("New host: %s - %s", h.str().c_str(), ServHost::getTypeStr(type));
     else
-        LOG_DEBUG("Old host: %s - %s", str, ServHost::getTypeStr(type));
+        LOG_DEBUG("Old host: %s - %s", h.str().c_str(), ServHost::getTypeStr(type));
 
     if (!sh)
     {
@@ -355,14 +402,14 @@ Servent *ServMgr::findServent(Servent::TYPE type, Host &host, const GnuID &netid
 Servent *ServMgr::findServent(unsigned int ip, unsigned short port, const GnuID &netid)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
+    Host target(ip, port);
 
     Servent *s = servents;
     while (s)
     {
         if (s->type != Servent::T_NONE)
         {
-            Host h = s->getHost();
-            if ((h.ip == ip) && (h.port == port) && (s->networkID.isSame(netid)))
+            if (s->getHost() == target && (s->networkID.isSame(netid)))
             {
                 return s;
             }
@@ -626,13 +673,11 @@ bool ServMgr::checkForceIP()
 {
     if (!forceIP.isEmpty())
     {
-        unsigned int newIP = ClientSocket::getIP(forceIP.cstr());
+        IP newIP(ClientSocket::getIP(forceIP.cstr()));
         if (serverHost.ip != newIP)
         {
             serverHost.ip = newIP;
-            char ipstr[64];
-            serverHost.IPtoStr(ipstr);
-            LOG_DEBUG("Server IP changed to %s", ipstr);
+            LOG_DEBUG("Server IP changed to %s", serverHost.str().c_str());
             return true;
         }
     }
@@ -642,7 +687,7 @@ bool ServMgr::checkForceIP()
 // -----------------------------------
 void ServMgr::checkFirewall()
 {
-    if ((getFirewall() == FW_UNKNOWN) && !servMgr->rootHost.isEmpty())
+    if ((getFirewall(4) == FW_UNKNOWN) && !servMgr->rootHost.isEmpty())
     {
         LOG_DEBUG("Checking firewall..");
         Host host;
@@ -671,36 +716,100 @@ void ServMgr::checkFirewall()
 }
 
 // -----------------------------------
-ServMgr::FW_STATE ServMgr::getFirewall()
+ServMgr::FW_STATE ServMgr::getFirewall(int ipv)
 {
+    if (ipv != 4 && ipv != 6)
+        throw ArgumentException("getFirewall: Invalid IP version");
+        
     std::lock_guard<std::recursive_mutex> cs(lock);
-    return firewalled;
+    if (ipv == 4)
+        return firewalled;
+    else
+        return firewalledIPv6;
 }
 
 // -----------------------------------
-void ServMgr::setFirewall(FW_STATE state)
+void ServMgr::setFirewall(int ipv, FW_STATE state)
 {
+    if (ipv != 4 && ipv != 6)
+        throw ArgumentException("setFirewall: Invalid IP version");
+
     std::lock_guard<std::recursive_mutex> cs(lock);
 
-    if (firewalled != state)
+    const char *str;
+    switch (state)
     {
-        const char *str;
-        switch (state)
-        {
-            case FW_ON:
-                str = "ON";
-                break;
-            case FW_OFF:
-                str = "OFF";
-                break;
-            case FW_UNKNOWN:
-            default:
-                str = "UNKNOWN";
-                break;
-        }
+    case FW_ON:
+        str = "ON";
+        break;
+    case FW_OFF:
+        str = "OFF";
+        break;
+    case FW_UNKNOWN:
+    default:
+        str = "UNKNOWN";
+        break;
+    }
 
-        LOG_DEBUG("Firewall is set to %s", str);
-        firewalled = state;
+    if (ipv == 4) {
+        if (firewalled != state)
+        {
+            LOG_DEBUG("Firewall is set to %s (IPv4)", str);
+            firewalled = state;
+        }
+    }else {
+        if (firewalledIPv6 != state)
+        {
+            LOG_DEBUG("Firewall is set to %s (IPv6)", str);
+            firewalledIPv6 = state;
+        }
+    }
+}
+
+// -----------------------------------
+void ServMgr::checkFirewallIPv6()
+{
+    /* IPv6 で繋げられるYPが出現したら、以下のやり方で十分だろう。 */
+#if 0
+    if ((getFirewallIPv6() == FW_UNKNOWN) && !servMgr->rootHost.isEmpty())
+    {
+        LOG_DEBUG("Checking firewall..");
+        Host host;
+        host.fromStrName(servMgr->rootHost.cstr(), DEFAULT_PORT);
+
+        ClientSocket *sock = sys->createSocket();
+        if (!sock)
+            throw StreamException("Unable to create socket");
+        sock->setReadTimeout(30000);
+        sock->open(host);
+        sock->connect();
+
+        AtomStream atom(*sock);
+
+        atom.writeInt(PCP_CONNECT, 1);
+
+        GnuID remoteID;
+        String agent;
+        Servent::handshakeOutgoingPCP(atom, sock->host, remoteID, agent, true);
+
+        atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT);
+
+        sock->close();
+        delete sock;
+    }
+#endif
+
+    if (getFirewall(6) != FW_UNKNOWN) // is this reasonable?
+        return;
+
+    IPv6PortChecker checker;
+    LOG_DEBUG("Checking firewall.. (IPv6)");
+    auto result = checker.run({serverHost.port});
+    LOG_DEBUG("%s %s", result.ip.str().c_str(), std::to_string(result.ports.size()).c_str());
+    if (result.ports.size()) {
+        setFirewall(6, FW_OFF);
+    } else {
+        setFirewall(6, FW_ON);
     }
 }
 
@@ -784,6 +893,8 @@ static void  writeRelayChannel(IniFileBase &iniFile, std::shared_ptr<Channel> c)
     iniFile.writeStrValue("trackAlbum", c->info.track.album);
     iniFile.writeStrValue("trackGenre", c->info.track.genre);
 
+    iniFile.writeIntValue("ipVersion", c->ipVersion);
+
     iniFile.writeLine("[End]");
 }
 
@@ -826,8 +937,8 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
     iniFile.writeStrValue("htmlPath", this->htmlPath);
     iniFile.writeIntValue("maxServIn", this->maxServIn);
     iniFile.writeStrValue("chanLog", this->chanLog);
-
     iniFile.writeStrValue("networkID", networkID.str());
+    iniFile.writeBoolValue("randomizeBroadcastingChannelID", randomizeBroadcastingChannelID);
 
     iniFile.writeSection("Broadcast");
     iniFile.writeIntValue("broadcastMsgInterval", chanMgr->broadcastMsgInterval);
@@ -977,7 +1088,7 @@ void ServMgr::loadSettings(const char *fn)
             if (iniFile.isName("serverName"))
                 servMgr->serverName = iniFile.getStrValue();
             else if (iniFile.isName("serverPort"))
-                servMgr->serverHost.port = iniFile.getIntValue();
+                servMgr->serverHostIPv6.port = servMgr->serverHost.port = iniFile.getIntValue();
             else if (iniFile.isName("autoServe"))
                 servMgr->autoServe = iniFile.getBoolValue();
             else if (iniFile.isName("autoConnect"))
@@ -993,6 +1104,8 @@ void ServMgr::loadSettings(const char *fn)
                 chanMgr->broadcastID.fromStr(iniFile.getStrValue());
             }else if (iniFile.isName("htmlPath"))
                 strcpy(servMgr->htmlPath, iniFile.getStrValue());
+            else if (iniFile.isName("randomizeBroadcastingChannelID"))
+                servMgr->randomizeBroadcastingChannelID = iniFile.getBoolValue();
             else if (iniFile.isName("maxControlConnections"))
             {
                 servMgr->maxControl = iniFile.getIntValue();
@@ -1149,6 +1262,8 @@ void ServMgr::loadSettings(const char *fn)
                 ChanInfo info;
                 bool stayConnected=false;
                 String sourceURL;
+                Channel::IP_VERSION ipv = Channel::IP_V4;
+
                 while (iniFile.readNext())
                 {
                     if (iniFile.isName("[End]"))
@@ -1201,6 +1316,8 @@ void ServMgr::loadSettings(const char *fn)
                         info.track.album = iniFile.getStrValue();
                     else if (iniFile.isName("trackGenre"))
                         info.track.genre = iniFile.getStrValue();
+                    else if (iniFile.isName("ipVersion"))
+                        ipv = (iniFile.getIntValue() == 6) ? Channel::IP_V6 : Channel::IP_V4;
                 }
                 if (sourceURL.isEmpty())
                 {
@@ -1209,6 +1326,7 @@ void ServMgr::loadSettings(const char *fn)
                 {
                     info.bcID = chanMgr->broadcastID;
                     auto c = chanMgr->createChannel(info, NULL);
+                    c->ipVersion = ipv;
                     if (c)
                         c->startURL(sourceURL.cstr());
                 }
@@ -1380,8 +1498,9 @@ void ServMgr::procConnectArgs(char *str, ChanInfo &info)
             }else if (strcmp(curr, "tip")==0)
             // tip - add tracker hit
             {
-                Host h;
-                h.fromStrName(arg, DEFAULT_PORT);
+                Host h = Host::fromString(arg);
+                if (h.port == 0)
+                    h.port = DEFAULT_PORT;
                 chanMgr->addHit(h, info.id, true);
             }
         }
@@ -1690,9 +1809,9 @@ int ServMgr::serverProc(ThreadInfo *thread)
                 LOG_DEBUG("Starting servers");
 
                 if (servMgr->forceNormal)
-                    servMgr->setFirewall(ServMgr::FW_OFF);
+                    servMgr->setFirewall(4, ServMgr::FW_OFF);
                 else
-                    servMgr->setFirewall(ServMgr::FW_UNKNOWN);
+                    servMgr->setFirewall(4, ServMgr::FW_UNKNOWN);
 
                 Host h = servMgr->serverHost;
 
@@ -1717,7 +1836,8 @@ int ServMgr::serverProc(ThreadInfo *thread)
                 s = s->next;
             }
 
-            servMgr->setFirewall(ServMgr::FW_ON);
+            servMgr->setFirewall(4, ServMgr::FW_ON);
+            servMgr->setFirewall(6, ServMgr::FW_ON);
         }
 
         cs.unlock();
@@ -1802,14 +1922,20 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
         buf = to_string(serverHost.port);
     else if (var == "serverIP")
         buf = serverHost.str(false);
+    else if (var == "serverIPv6")
+        buf = serverHostIPv6.str(false);
     else if (var == "ypAddress")
         buf = rootHost.c_str();
     else if (var == "password")
         buf = password;
     else if (var == "isFirewalled")
-        buf = getFirewall()==FW_ON ? "1" : "0";
+        buf = getFirewall(4)==FW_ON ? "1" : "0";
     else if (var == "firewallKnown")
-        buf = getFirewall()==FW_UNKNOWN ? "0" : "1";
+        buf = getFirewall(4)==FW_UNKNOWN ? "0" : "1";
+    else if (var == "isFirewalledIPv6")
+        buf = getFirewall(6)==FW_ON ? "1" : "0";
+    else if (var == "firewallKnownIPv6")
+        buf = getFirewall(6)==FW_UNKNOWN ? "0" : "1";
     else if (var == "rootMsg")
         buf = rootMsg.c_str();
     else if (var == "isRoot")
@@ -1925,6 +2051,9 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var == "chat")
     {
         buf = to_string(servMgr->chat);
+    }else if (var == "randomizeBroadcastingChannelID")
+    {
+        buf = to_string(servMgr->randomizeBroadcastingChannelID);
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);

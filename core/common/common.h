@@ -23,9 +23,6 @@
 #include <string>
 #include <assert.h>
 
-#include "gnuid.h"
-#include "host.h"
-
 #ifndef __GNUC__
 #define __attribute__(x)
 #endif
@@ -47,6 +44,22 @@ public:
 
     char msg[128];
     int  err;
+};
+
+// -------------------------------------
+class ArgumentException : public GeneralException
+{
+public:
+    ArgumentException(const char *m) : GeneralException(m) {}
+    ArgumentException(const char *m, int e) : GeneralException(m, e) {}
+};
+
+// -------------------------------------
+class FormatException : public GeneralException
+{
+public:
+    FormatException(const char *m) : GeneralException(m) {}
+    FormatException(const char *m, int e) : GeneralException(m, e) {}
 };
 
 // -------------------------------------

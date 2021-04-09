@@ -204,6 +204,8 @@ void Channel::reset()
     srcType = SRC_NONE;
 
     startTime = 0;
+
+    ipVersion = IP_V4;
 }
 
 // -----------------------------------
@@ -418,6 +420,9 @@ void Channel::connectFetch()
         LOG_INFO("Channel using longer timeouts");
     }
 
+    if (!sourceHost.host.ip.isIPv4Mapped())
+        this->ipVersion = IP_V6;
+
     sock->open(sourceHost.host);
 
     sock->connect();
@@ -428,7 +433,7 @@ int Channel::handshakeFetch()
 {
     sock->writeLineF("GET /channel/%s HTTP/1.0", info.id.str().c_str());
     sock->writeLineF("%s %d", PCX_HS_POS, streamPos);
-    sock->writeLineF("%s %d", PCX_HS_PCP, 1);
+    sock->writeLineF("%s %d", PCX_HS_PCP, (this->ipVersion == IP_V4) ? 1 : 100);
 
     sock->writeLine("");
 
@@ -585,7 +590,7 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
                 break;
             }
 
-            if (ch->designatedHost.host.ip != 0)
+            if (ch->designatedHost.host.ip)
             {
                 ch->sourceHost = ch->designatedHost;
                 ch->designatedHost.init();
@@ -602,8 +607,12 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
                 {
                     peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルフィードで "+chName(ch->info)+" のトラッカーが見付かりました。");
 
-                    ch->sourceHost.host.fromStrIP(trackerIP.c_str(), DEFAULT_PORT);
-                    ch->sourceHost.rhost[0].fromStrIP(trackerIP.c_str(), DEFAULT_PORT);
+                    Host host = Host::fromString(trackerIP.c_str());
+                    if (!host.port)
+                        host.port = DEFAULT_PORT;
+
+                    ch->sourceHost.host = host;
+                    ch->sourceHost.rhost[0] = host;
                     ch->sourceHost.tracker = true;
 
                     auto chl = chanMgr->findHitList(ch->info);
@@ -632,7 +641,7 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
             }
 
             sys->sleepIdle();
-        }while ((ch->sourceHost.host.ip==0) && (ch->thread.active()));
+        }while ((!ch->sourceHost.host.ip) && (ch->thread.active()));
 
         if (!ch->sourceHost.host.ip)
         {
@@ -659,7 +668,7 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
                 peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネル "+chName(ch->info)+" をトラッカーに問い合わせています...");
 
             char ipstr[64];
-            ch->sourceHost.host.toStr(ipstr);
+            strcpy(ipstr, ch->sourceHost.host.str().c_str());
 
             const char *type = "";
             if (ch->sourceHost.tracker)
@@ -956,7 +965,7 @@ void Channel::broadcastTrackerUpdate(const GnuID &svID, bool force /* = false */
         unsigned int oldp = rawData.getOldestPos();
         unsigned int newp = rawData.getLatestPos();
 
-        hit.initLocal(numListeners, numRelays, info.numSkips, info.getUptime(), isPlaying(), oldp, newp, canAddRelay(), this->sourceHost.host);
+        hit.initLocal(numListeners, numRelays, info.numSkips, info.getUptime(), isPlaying(), oldp, newp, canAddRelay(), this->sourceHost.host, (ipVersion == IP_V6));
         hit.tracker = true;
 
         atom.writeParent(PCP_BCST, 10);
@@ -1532,6 +1541,8 @@ bool Channel::writeVariable(Stream &out, const String &var)
         buf = chanMgr->authToken(info.id).c_str();
     else if (var == "plsExt")
         buf = info.getPlayListExt();
+    else if (var == "ipVersion")
+        buf = std::to_string((int)ipVersion);
     else
         return false;
 

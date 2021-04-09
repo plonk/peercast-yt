@@ -534,7 +534,7 @@ void Servent::handshakeGIV(const char *requestLine)
         id.fromStr(idstr+1);
 
     char ipstr[64];
-    sock->host.toStr(ipstr);
+    strcpy(ipstr, sock->host.str().c_str());
 
     if (id.isSet())
     {
@@ -829,10 +829,10 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
                 if (http.isHeader("Cookie"))
                 {
                     LOG_DEBUG("Got cookie: %s", arg);
-                    char *idp=arg;
+                    char *idp = arg;
                     while ((idp = strstr(idp, "id=")))
                     {
-                        idp+=3;
+                        idp += 3;
                         gotCookie.set(idp, sock->host.ip);
                         if (servMgr->cookieList.contains(gotCookie))
                         {
@@ -938,6 +938,7 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
     servMgr->channelDirectory->clearFeeds();
     servMgr->transcodingEnabled = false;
     servMgr->chat = false;
+    servMgr->randomizeBroadcastingChannelID = false;
 
     bool brRoot = false;
     bool getUpd = false;
@@ -1054,6 +1055,8 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
             servMgr->refreshHTML = getCGIargINT(arg);
         else if (strcmp(curr, "chat") == 0)
             servMgr->chat = getCGIargBOOL(arg);
+        else if (strcmp(curr, "randomizechid") == 0)
+            servMgr->randomizeBroadcastingChannelID = getCGIargBOOL(arg);
         else if (strcmp(curr, "genreprefix") == 0)
             servMgr->genrePrefix = arg;
         else if (strcmp(curr, "auth") == 0)
@@ -1126,56 +1129,41 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
 
 void Servent::CMD_fetch(const char* cmd, HTTP& http, String& jumpStr)
 {
-    char arg[MAX_CGI_LEN];
-    char curr[MAX_CGI_LEN];
-
+    cgi::Query query(cmd);
     ChanInfo info;
-    String curl;
 
-    const char *cp = cmd;
-    while ((cp = nextCGIarg(cp, curr, arg)) != nullptr)
-    {
-        if (strcmp(curr, "url") == 0)
-        {
-            curl.set(arg, String::T_ESC);
-            curl.convertTo(String::T_UNICODE);
-        }else if (strcmp(curr, "name") == 0)
-        {
-            info.name.set(arg, String::T_ESC);
-            info.name.convertTo(String::T_UNICODE);
-        }else if (strcmp(curr, "desc") == 0)
-        {
-            info.desc.set(arg, String::T_ESC);
-            info.desc.convertTo(String::T_UNICODE);
-        }else if (strcmp(curr, "genre") == 0)
-        {
-            info.genre.set(arg, String::T_ESC);
-            info.genre.convertTo(String::T_UNICODE);
-        }else if (strcmp(curr, "contact") == 0)
-        {
-            info.url.set(arg, String::T_ESC);
-            info.url.convertTo(String::T_UNICODE);
-        }else if (strcmp(curr, "bitrate") == 0)
-        {
-            info.bitrate = atoi(arg);
-        }else if (strcmp(curr, "type") == 0)
-        {
-            auto type = arg;
-            info.contentType = type;
-            info.MIMEType = ChanInfo::getMIMEType(type);
-            info.streamExt = ChanInfo::getTypeExt(type);
-        }
-    }
-
+    auto curl = query.get("url");
+    info.name = query.get("name");
+    info.desc = query.get("desc");
+    info.genre = query.get("genre");
+    info.url = query.get("contact");
+    info.bitrate = atoi(query.get("bitrate").c_str());
+    auto type = query.get("type");
+    info.contentType = type;
+    info.MIMEType = ChanInfo::getMIMEType(type.c_str());
+    info.streamExt = ChanInfo::getTypeExt(type.c_str());
     info.bcID = chanMgr->broadcastID;
+
     // id がセットされていないチャンネルがあるといろいろまずいので、事
     // 前に設定してから登録する。
-    info.id = chanMgr->broadcastID;
-    info.id.encode(NULL, info.name, info.genre, info.bitrate);
+    if (servMgr->randomizeBroadcastingChannelID) {
+        info.id = GnuID::random();
+    } else {
+        info.id = chanMgr->broadcastID;
+        info.id.encode(NULL, info.name, info.genre, info.bitrate);
+    }
 
     auto c = chanMgr->createChannel(info, NULL);
-    if (c)
-        c->startURL(curl.cstr());
+    if (c) {
+        if (query.get("ipv") == "6") {
+            c->ipVersion = Channel::IP_V6;
+            LOG_INFO("Channel IP version set to 6");
+
+            // YPv6ではIPv6のポートチェックができないのでがんばる。
+            servMgr->checkFirewallIPv6();
+        }
+        c->startURL(curl.c_str());
+    }
 
     jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
 }
@@ -1298,7 +1286,7 @@ void Servent::CMD_bump(const char* cmd, HTTP& http, String& jumpStr)
                     });
             }
 
-            if (theHit.host.ip != 0)
+            if (theHit.host.ip)
             {
                 c->designatedHost = theHit;
             } else
@@ -1395,6 +1383,7 @@ void Servent::CMD_control_rtmp(const char* cmd, HTTP& http, String& jumpStr)
             info.comment = query.get("comment").c_str();
         }
 
+        servMgr->rtmpServerMonitor.ipVersion = (query.get("ipv") == "6") ? 6 : 4;
         servMgr->rtmpServerMonitor.enable();
         // Give serverProc the time to actually start the process.
         sys->sleep(500);
@@ -1905,10 +1894,7 @@ void Servent::handshakeXML()
         ServHost *sh = &servMgr->hostCache[i];
         if (sh->type != ServHost::T_NONE)
         {
-            char ipstr[64];
-            sh->host.toStr(ipstr);
-
-            hc->add(new XML::Node("host ip=\"%s\" type=\"%s\" time=\"%d\"", ipstr, ServHost::getTypeStr(sh->type), sh->time));
+            hc->add(new XML::Node("host ip=\"%s\" type=\"%s\" time=\"%d\"", sh->host.str().c_str(), ServHost::getTypeStr(sh->type), sh->time));
         }
     }
     rn->add(hc);
@@ -2068,8 +2054,12 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
     if (vec.size() > 2) info.desc  = vec[2];
     if (vec.size() > 3) info.url   = vec[3];
 
-    info.id = chanMgr->broadcastID;
-    info.id.encode(NULL, info.name.cstr(), info.genre.cstr(), info.bitrate);
+    if (servMgr->randomizeBroadcastingChannelID) {
+        info.id = GnuID::random();
+    } else {
+        info.id = chanMgr->broadcastID;
+        info.id.encode(NULL, info.name.cstr(), info.genre.cstr(), info.bitrate);
+    }
 
     auto c = chanMgr->findChannelByID(info.id);
     if (c)
@@ -2107,8 +2097,12 @@ ChanInfo Servent::createChannelInfo(GnuID broadcastID, const String& broadcastMs
     info.bitrate = atoi(query.get("bitrate").c_str());
     info.comment = query.get("comment").empty() ? broadcastMsg : query.get("comment");
 
-    info.id = broadcastID;
-    info.id.encode(NULL, info.name.cstr(), info.genre.cstr(), info.bitrate);
+    if (servMgr->randomizeBroadcastingChannelID) {
+        info.id = GnuID::random();
+    } else {
+        info.id = broadcastID;
+        info.id.encode(NULL, info.name.cstr(), info.genre.cstr(), info.bitrate);
+    }
     info.bcID = broadcastID;
 
     return info;
@@ -2147,6 +2141,13 @@ void Servent::handshakeHTTPPush(const std::string& args)
         throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
     bool chunked = (http.headers.get("Transfer-Encoding") == "chunked");
+    if (query.get("ipv") == "6") {
+        c->ipVersion = Channel::IP_V6;
+        LOG_INFO("Channel IP version set to 6");
+
+        // YPv6ではIPv6のポートチェックができないのでがんばる。
+        servMgr->checkFirewallIPv6();
+    }
     c->startHTTPPush(sock, chunked);
     sock = NULL;    // socket is taken over by channel, so don`t close it
 }
@@ -2181,8 +2182,12 @@ void Servent::handshakeICY(Channel::SRC_TYPE type, bool isHTTP)
     // attach channel ID to name, channel ID is also encoded with IP address
     // to help prevent channel hijacking.
 
-    info.id = chanMgr->broadcastID;
-    info.id.encode(NULL, info.name.cstr(), loginMount.cstr(), info.bitrate);
+    if (servMgr->randomizeBroadcastingChannelID) {
+        info.id = GnuID::random();
+    } else {
+        info.id = chanMgr->broadcastID;
+        info.id.encode(NULL, info.name.cstr(), loginMount.cstr(), info.bitrate);
+    }
 
     LOG_DEBUG("Incoming source: %s : %s", info.name.cstr(), info.getTypeStr());
     if (isHTTP)

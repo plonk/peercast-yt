@@ -692,7 +692,7 @@ json JrpcApi::getStatus(json::array_t)
 
     json j = {
         { "uptime", servMgr->getUptime() },
-        { "isFirewalled", to_json(servMgr->getFirewall()) },
+        { "isFirewalled", to_json(servMgr->getFirewall(4)) },
         { "globalRelayEndPoint", { globalIP, port } },
         { "globalDirectEndPoint", { globalIP, port } },
         { "localRelayEndPoint", { localIP, port } },

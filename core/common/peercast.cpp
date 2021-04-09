@@ -23,6 +23,17 @@ void APICALL PeercastInstance::init()
     if (peercastApp->getIniFilename())
         servMgr->loadSettings(peercastApp->getIniFilename());
 
+    auto v = sys->getAllIPAddresses();
+    for (auto it = v.begin(); it != v.end(); ++it) {
+        IP ip;
+        if (IP::tryParse(*it, ip)) {
+            LOG_DEBUG("New address discovered: %s", it->c_str());
+            servMgr->updateIPAddress(ip);
+        } else {
+            LOG_DEBUG("\"%s\" could not be parsed", it->c_str());
+        }
+    }
+
     servMgr->start();
 }
 

@@ -18,44 +18,37 @@
 #ifndef _HOST_H
 #define _HOST_H
 
+//#include <netinet/in.h>
+#include "common.h"
+#include "ip.h"
+#include <string>
+
 class String;
 
 // ----------------------------------
 class Host
 {
-    inline unsigned int ip3() const
-    {
-        return (ip>>24);
-    }
-    inline unsigned int ip2() const
-    {
-        return (ip>>16)&0xff;
-    }
-    inline unsigned int ip1() const
-    {
-        return (ip>>8)&0xff;
-    }
-    inline unsigned int ip0() const
-    {
-        return ip&0xff;
-    }
-
 public:
     Host() { init(); }
     Host(unsigned int i, unsigned short p)
+        : ip(i)
     {
-        ip = i;
         port = p;
     }
     Host(const std::string& hostname, uint16_t port)
     {
         fromStrName(hostname.c_str(), port);
     }
+    Host(const IP& anIp, unsigned short p)
+        : ip(anIp)
+    {
+        port = p;
+    }
 
-
+    // can this be private?
     void    init()
     {
-        ip = 0;
+        ip = IP(0);
         port = 0;
     }
 
@@ -70,23 +63,7 @@ public:
 
     bool    globalIP() const
     {
-        // local host
-        if ((ip3() == 127) && (ip2() == 0) && (ip1() == 0) && (ip0() == 1))
-            return false;
-
-        // class A
-        if (ip3() == 10)
-            return false;
-
-        // class B
-        if ((ip3() == 172) && (ip2() >= 16) && (ip2() <= 31))
-            return false;
-
-        // class C
-        if ((ip3() == 192) && (ip2() == 168))
-            return false;
-
-        return true;
+        return ip.isGlobal();
     }
 
     bool    localIP() const
@@ -96,12 +73,12 @@ public:
 
     bool    loopbackIP() const
     {
-        return ((ip3() == 127) && (ip2() == 0) && (ip1() == 0) && (ip0() == 1));
+        return ip.isIPv4Loopback() || ip.isIPv6Loopback();
     }
 
     bool    isValid() const
     {
-        return (ip != 0);
+        return !ip.isAny();
     }
 
     bool    isSameType(Host &h) const
@@ -110,26 +87,19 @@ public:
                      (!globalIP() && !h.globalIP()) );
     }
 
-    void    IPtoStr(char *str) const
-    {
-        sprintf(str, "%d.%d.%d.%d", (ip>>24)&0xff, (ip>>16)&0xff, (ip>>8)&0xff, (ip)&0xff);
-    }
-
-    ::String IPtoStr();
-
-    void    toStr(char *str) const
-    {
-        sprintf(str, "%d.%d.%d.%d:%d", (ip>>24)&0xff, (ip>>16)&0xff, (ip>>8)&0xff, (ip)&0xff, port);
-    }
+    ::String IPtoStr() const;
 
     std::string str(bool withPort = true) const
     {
-        char buf[22];
-        if (withPort)
-            toStr(buf);
-        else
-            IPtoStr(buf);
-        return buf;
+        if (withPort) {
+            if (ip.isIPv4Mapped()) {
+                return ip.str() + ":" + std::to_string(static_cast<int>(port));
+            } else {
+                return "[" + ip.str() + "]:" + std::to_string(static_cast<int>(port));
+            }
+        } else {
+            return ip.str();
+        }
     }
 
     operator std::string () const
@@ -137,6 +107,7 @@ public:
         return str();
     }
 
+    // why is this needed?
     bool operator < (const Host& other) const
     {
         if (ip == other.ip)
@@ -153,9 +124,12 @@ public:
     void    fromStrIP(const char *, int);
     void    fromStrName(const char *, int);
 
+    // should go to IP
     bool    isLocalhost();
 
-    unsigned int    ip;
+    static Host fromString(const std::string& str);
+
+    IP              ip;
     unsigned short  port;
 };
 

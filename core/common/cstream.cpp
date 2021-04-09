@@ -332,7 +332,7 @@ bool ChannelStream::getStatus(std::shared_ptr<Channel> ch, ChanPacket &pack)
         (numListeners != newLocalListeners)
         || (numRelays != newLocalRelays)
         || (ch->isPlaying() != isPlaying)
-        || (servMgr->getFirewall() != fwState)
+        || (servMgr->getFirewall(ch->ipVersion) != fwState)
         || ((ctime - lastUpdate) > 120)
         )
         && ((ctime - lastUpdate) > 10)
@@ -341,7 +341,7 @@ bool ChannelStream::getStatus(std::shared_ptr<Channel> ch, ChanPacket &pack)
         numListeners = newLocalListeners;
         numRelays = newLocalRelays;
         isPlaying = ch->isPlaying();
-        fwState = servMgr->getFirewall();
+        fwState = servMgr->getFirewall(ch->ipVersion);
         lastUpdate = ctime;
 
         ChanHit hit;
@@ -349,7 +349,7 @@ bool ChannelStream::getStatus(std::shared_ptr<Channel> ch, ChanPacket &pack)
         unsigned int oldp = ch->rawData.getOldestPos();
         unsigned int newp = ch->rawData.getLatestPos();
 
-        hit.initLocal(numListeners, numRelays, ch->info.numSkips, ch->info.getUptime(), isPlaying, oldp, newp, ch->canAddRelay(), ch->sourceHost.host);
+        hit.initLocal(numListeners, numRelays, ch->info.numSkips, ch->info.getUptime(), isPlaying, oldp, newp, ch->canAddRelay(), ch->sourceHost.host, (ch->ipVersion == Channel::IP_V6));
         hit.tracker = ch->isBroadcasting();
 
         MemoryStream pmem(pack.data, sizeof(pack.data));

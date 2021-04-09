@@ -19,10 +19,10 @@
 // ------------------------------------------------
 
 #include <process.h>
-#include <windows.h>
 #include <time.h>
 #include "win32/wsys.h"
 #include "win32/wsocket.h"
+#include <windows.h>
 #include "stats.h"
 #include "peercast.h"
 #include <sys/timeb.h>
@@ -84,4 +84,56 @@ void WSys::exit()
 void WSys::executeFile(const char *file)
 {
     ShellExecuteA(NULL,"open",file,NULL,NULL,SW_SHOWNORMAL);
+}
+
+// --------------------------------------------------
+std::string WSys::getHostname()
+{
+    char buf[256];
+ 
+    if (gethostname(buf, 256) == SOCKET_ERROR) {
+        throw GeneralException("gethostname", WSAGetLastError());
+    } else {
+        return buf;
+    }
+}
+
+// --------------------------------------------------
+std::vector<std::string> WSys::getIPAddresses(const std::string& name)
+{
+    std::vector<std::string> addrs;
+    struct addrinfo hints = {}, *result;
+
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+
+    int err = getaddrinfo(name.c_str(), NULL, &hints, &result);
+    if (err) {
+        throw GeneralException("getaddrinfo", err);
+    }
+
+    for (auto p = result; p; p = p->ai_next) {
+        switch (p->ai_family) {
+        case AF_INET:
+            addrs.push_back(inet_ntoa(((sockaddr_in *) p->ai_addr)->sin_addr));
+            break;
+        case AF_INET6:
+            {
+                char buf[46];
+                inet_ntop(AF_INET6, &((sockaddr_in6 *) p->ai_addr)->sin6_addr, buf, 46);
+                addrs.push_back(buf);
+            }
+            break;
+        default:
+            break;
+        }
+    }
+    return addrs;
+}
+
+// --------------------------------------------------
+std::vector<std::string> WSys::getAllIPAddresses()
+{
+    return getIPAddresses(getHostname());
 }

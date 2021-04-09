@@ -41,6 +41,10 @@ public:
     void            executeFile(const char *) override;
     void            setThreadName(const char* name) override;
 
+    std::string     getHostname() override;
+    std::vector<std::string> getIPAddresses(const std::string& name) override;
+    std::vector<std::string> getAllIPAddresses() override;
+
     peercast::Random rndGen;
 private:
 

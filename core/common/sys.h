@@ -21,6 +21,7 @@
 #define _SYS_H
 
 #include <string>
+#include <vector>
 
 #include "common.h"
 
@@ -79,6 +80,10 @@ public:
     virtual void            callLocalURL(const char *, int)=0;
     virtual void            executeFile(const char *) = 0;
     virtual void            setThreadName(const char* name) {}
+
+    virtual std::string     getHostname() { return "localhost"; }
+    virtual std::vector<std::string> getIPAddresses(const std::string& name) { return {}; }
+    virtual std::vector<std::string> getAllIPAddresses() { return {}; }
 
 #ifdef __BIG_ENDIAN__
     unsigned short  convertEndian(unsigned short v) { return SWAP2(v); }

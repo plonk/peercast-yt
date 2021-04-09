@@ -417,6 +417,7 @@ TEST_F(ServMgrFixture, doSaveSettings)
               "maxServIn = 50\r\n"
               "chanLog = \r\n"
               "networkID = 00000000000000000000000000000000\r\n"
+              "randomizeBroadcastingChannelID = Yes\r\n"
               "\r\n"
               "[Broadcast]\r\n"
               "broadcastMsgInterval = 10\r\n"

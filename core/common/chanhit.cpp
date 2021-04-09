@@ -98,13 +98,14 @@ void ChanHit::initLocal(
     unsigned int oldp,
     unsigned int newp,
     bool canAddRelay,
-    const Host& sourceHost)
+    const Host& sourceHost,
+    bool ipv6)
 {
     std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
 
     init();
 
-    firewalled = (servMgr->getFirewall() != ServMgr::FW_OFF);
+    firewalled = (servMgr->getFirewall(ipv6 ? 6 : 4) != ServMgr::FW_OFF);
     numListeners = numl;
     numRelays = numr;
     upTime = uptm;
@@ -116,7 +117,10 @@ void ChanHit::initLocal(
     relay = canAddRelay;
     cin = !servMgr->controlInFull();
 
-    host = servMgr->serverHost;
+    if (ipv6)
+        host = servMgr->serverHostIPv6;
+    else
+        host = servMgr->serverHost;
 
     version = PCP_CLIENT_VERSION;
     versionVP = PCP_CLIENT_VERSION_VP;
@@ -158,14 +162,14 @@ void ChanHit::writeAtoms(AtomStream &atom, const GnuID &chanID)
     atom.writeParent(PCP_HOST,
                      13  +
                      (addChan ? 1 : 0) +
-                     (uphost.ip != 0 ? 3 : 0) +
+                     (uphost.ip ? 3 : 0) +
                      (versionExNumber != 0 ? 2 : 0));
         if (addChan)
             atom.writeBytes(PCP_HOST_CHANID, chanID.id, 16);
         atom.writeBytes(PCP_HOST_ID, sessionID.id, 16);
-        atom.writeInt(PCP_HOST_IP, rhost[0].ip);
+        atom.writeAddress(PCP_HOST_IP, rhost[0].ip);
         atom.writeShort(PCP_HOST_PORT, rhost[0].port);
-        atom.writeInt(PCP_HOST_IP, rhost[1].ip);
+        atom.writeAddress(PCP_HOST_IP, rhost[1].ip);
         atom.writeShort(PCP_HOST_PORT, rhost[1].port);
         atom.writeInt(PCP_HOST_NUML, numListeners);
         atom.writeInt(PCP_HOST_NUMR, numRelays);
@@ -180,7 +184,7 @@ void ChanHit::writeAtoms(AtomStream &atom, const GnuID &chanID)
         atom.writeChar(PCP_HOST_FLAGS1, flags1(this));
         atom.writeInt(PCP_HOST_OLDPOS, oldestPos);
         atom.writeInt(PCP_HOST_NEWPOS, newestPos);
-        if (uphost.ip != 0)
+        if (uphost.ip)
         {
             atom.writeInt(PCP_HOST_UPHOST_IP, uphost.ip);
             atom.writeInt(PCP_HOST_UPHOST_PORT, uphost.port);
@@ -367,10 +371,7 @@ ChanHit *ChanHitList::deleteHit(ChanHit *ch)
 // -----------------------------------
 ChanHit *ChanHitList::addHit(ChanHit &h)
 {
-    char ip0str[64], ip1str[64];
-    h.rhost[0].toStr(ip0str);
-    h.rhost[1].toStr(ip1str);
-    LOG_DEBUG("Add hit: %s/%s", ip0str, ip1str);
+    LOG_DEBUG("Add hit: %s/%s", h.rhost[0].str().c_str(), h.rhost[1].str().c_str());
 
     // dont add our own hits
     if (servMgr->sessionID.isSame(h.sessionID))
@@ -455,10 +456,7 @@ int ChanHitList::clearDeadHits(unsigned int timeout, bool clearTrackers)
 // -----------------------------------
 void    ChanHitList::deadHit(ChanHit &h)
 {
-    char ip0str[64], ip1str[64];
-    h.rhost[0].toStr(ip0str);
-    h.rhost[1].toStr(ip1str);
-    LOG_DEBUG("Dead hit: %s/%s", ip0str, ip1str);
+    LOG_DEBUG("Dead hit: %s/%s", h.rhost[0].str().c_str(), h.rhost[1].str().c_str());
 
     ChanHit *ch = hit;
     while (ch)
@@ -475,10 +473,7 @@ void    ChanHitList::deadHit(ChanHit &h)
 // -----------------------------------
 void    ChanHitList::delHit(ChanHit &h)
 {
-    char ip0str[64], ip1str[64];
-    h.rhost[0].toStr(ip0str);
-    h.rhost[1].toStr(ip1str);
-    LOG_DEBUG("Del hit: %s/%s", ip0str, ip1str);
+    LOG_DEBUG("Del hit: %s/%s", h.rhost[0].str().c_str(), h.rhost[1].str().c_str());
 
     ChanHit *ch = hit;
     while (ch)

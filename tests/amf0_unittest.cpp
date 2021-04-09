@@ -35,7 +35,7 @@ TEST_F(amf0Fixture, Number)
     ASSERT_FALSE(v.isString());
     ASSERT_FALSE(v.isObject());
     ASSERT_TRUE(v.isNumber());
-    ASSERT_EQ("1.500000", v.inspect());
+    ASSERT_EQ("1.5", v.inspect());
     ASSERT_EQ(1.5, v.number());
 }
 
@@ -139,7 +139,7 @@ TEST_F(amf0Fixture, Deserializer_Object)
     StringStream mem;
     mem.str(std::string(data, data + sizeof(data)));
     Value v = d.readValue(mem);
-    ASSERT_EQ("{\"age\":30.000000,\"alias\":\"Mike\",\"name\":\"Mike\"}", v.inspect());
+    ASSERT_EQ("{\"age\":30,\"alias\":\"Mike\",\"name\":\"Mike\"}", v.inspect());
 }
 
 TEST_F(amf0Fixture, compare_Number)

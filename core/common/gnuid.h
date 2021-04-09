@@ -79,6 +79,8 @@ public:
     void    toStr(char *) const;
     void    fromStr(const char *);
 
+    static GnuID random();
+
     unsigned char   getFlags();
 
     unsigned char id[16];

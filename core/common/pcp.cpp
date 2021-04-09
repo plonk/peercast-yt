@@ -193,9 +193,6 @@ void PCPStream::readPushAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 
     if (bcs.forMe)
     {
-        char ipstr[64];
-        host.toStr(ipstr);
-
         Servent *s = NULL;
 
         if (chanID.isSet())
@@ -210,7 +207,7 @@ void PCPStream::readPushAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 
         if (s)
         {
-            LOG_DEBUG("GIVing to %s", ipstr);
+            LOG_DEBUG("GIVing to %s", host.str().c_str());
             s->initGIV(host, chanID);
         }
     }
@@ -379,8 +376,7 @@ void PCPStream::readHostAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 
         if (id == PCP_HOST_IP)
         {
-            unsigned int ip = atom.readInt();
-            hit.rhost[ipNum].ip = ip;
+            hit.rhost[ipNum].ip = atom.readAddress();
         }else if (id == PCP_HOST_PORT)
         {
             int port = atom.readShort();
@@ -422,7 +418,7 @@ void PCPStream::readHostAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
         else if (id == PCP_HOST_CHANID)
             atom.readBytes(chanID.id, 16);
         else if (id == PCP_HOST_UPHOST_IP)
-            hit.uphost.ip = atom.readInt();
+            hit.uphost.ip = atom.readAddress();
         else if (id == PCP_HOST_UPHOST_PORT)
             hit.uphost.port = atom.readInt();
         else if (id == PCP_HOST_UPHOST_HOPS)

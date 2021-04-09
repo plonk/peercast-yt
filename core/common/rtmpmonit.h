@@ -21,7 +21,9 @@ public:
     std::string makeEndpointURL();
 
     Subprogram m_rtmpServer;
+    int ipVersion;
     bool m_enabled;
+
     std::recursive_mutex m_lock;
 };
 

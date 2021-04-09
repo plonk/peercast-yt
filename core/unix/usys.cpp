@@ -37,6 +37,7 @@
 #include "str.h"
 #include "usocket.h"
 #include "usys.h"
+#include "subprog.h"
 
 // ---------------------------------
 USys::USys()
@@ -94,6 +95,74 @@ void    USys::setThreadName(const char* name)
 bool USys::hasGUI()
 {
     return false;
+}
+
+// --------------------------------------------------
+std::string USys::getHostname()
+{
+    char buf[256];
+ 
+    if (gethostname(buf, 256) == -1) {
+        throw GeneralException(strerror(errno));
+    } else {
+        return buf;
+    }
+}
+
+// --------------------------------------------------
+std::vector<std::string> USys::getIPAddresses(const std::string& name)
+{
+    std::vector<std::string> addrs;
+    struct addrinfo hints = {}, *result;
+
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+
+    int err = getaddrinfo(name.c_str(), NULL, &hints, &result);
+    if (err) {
+        throw GeneralException("getaddrinfo", err);
+    }
+
+    for (auto p = result; p; p = p->ai_next) {
+        switch (p->ai_family) {
+        case AF_INET:
+            addrs.push_back(inet_ntoa(((sockaddr_in *) p->ai_addr)->sin_addr));
+            break;
+        case AF_INET6:
+            {
+                char buf[46];
+                inet_ntop(AF_INET6, &((sockaddr_in6 *) p->ai_addr)->sin6_addr, buf, 46);
+                addrs.push_back(buf);
+            }
+            break;
+        default:
+            break;
+        }
+    }
+    return addrs;
+}
+
+// --------------------------------------------------
+std::vector<std::string> USys::getAllIPAddresses()
+{
+    Subprogram hostname("hostname", true, false);
+    Environment env;
+    if (!hostname.start({"-I"}, env)) {
+        return {};
+    }
+    Stream& pipe = hostname.inputStream();
+    std::string buf;
+    try {
+        while (!pipe.eof())
+            buf += pipe.readChar();
+    } catch (StreamException& e) {
+    }
+    while (isspace(buf[buf.size()-1]))
+        buf.resize(buf.size()-1);
+
+    std::vector<std::string> ips = str::split(buf, " ");
+    return ips;
 }
 
 #ifndef __APPLE__

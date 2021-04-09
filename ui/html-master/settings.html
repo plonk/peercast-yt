@@ -71,6 +71,12 @@
             <label><input name=root type=radio value=1 {@if servMgr.isRoot}checked{@end}>
               <i>{#Root}</i></label></td>
         </tr>
+        <tr class="normal">
+          <th class="left-heading">{#Randomize broadcasting channel ID}</th>
+          <td>
+            <input type="checkbox" name=randomizechid value=1 {@if servMgr.randomizeBroadcastingChannelID}checked{@end}>
+          </td>
+        </tr>
       </table>
 
       <table class="table-panel" width="100%" align=center border=0>

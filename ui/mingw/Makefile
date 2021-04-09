@@ -59,10 +59,10 @@ $(HTML): $(SRCHTMLTAR)
 $(SRCASSETSTAR):
 	$(MAKE) -C .. assets.tar
 
-$(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS) $(RTMPSERVER)
+$(DISTARCHIVE): $(TARGET) $(HTML) $(ASSETS) $(RTMPSERVER)
 	rm -rf peercast-yt
 	mkdir peercast-yt
-	cp -R $(HTML) $(PUBLIC) $(TARGET) $(ASSETS) $(CGIBIN) $(RTMPSERVER) ../../licenses ../../core/LICENSE peercast-yt/
+	cp -R $(HTML) $(TARGET) $(ASSETS) $(CGIBIN) $(RTMPSERVER) ../../licenses ../../core/LICENSE peercast-yt/
 	strip peercast-yt/$(TARGET)
 	strip peercast-yt/$(RTMPSERVER)
 	tar czf $(DISTARCHIVE) peercast-yt
@@ -70,7 +70,7 @@ $(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS) $(RTMPSERVER)
 clean:
 	$(MAKE) -C .. clean
 	rm -f $(LINUXOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE) $(RTMPSERVER)
-	rm -rf $(HTML) $(PUBLIC)
+	rm -rf $(HTML)
 	rm -rf peercast-yt/
 	rm -f $(DISTARCHIVE)
 

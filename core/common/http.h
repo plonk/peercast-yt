@@ -22,6 +22,7 @@
 
 #include <map>
 
+#include "host.h"
 #include "stream.h"
 #include "str.h"
 
@@ -99,61 +100,6 @@ public:
 #define MIME_PNG             "image/png"
 #define MIME_JS              "application/javascript"
 #define MIME_ICO             "image/vnd.microsoft.icon"
-
-// --------------------------------------------
-class Cookie
-{
-public:
-    Cookie()
-    {
-        clear();
-    }
-
-    void    clear()
-    {
-        time = 0;
-        ip = 0;
-        id[0]=0;
-    }
-
-    void    set(const char *i, unsigned int nip)
-    {
-        strncpy(id, i, sizeof(id)-1);
-        id[sizeof(id)-1]=0;
-        ip = nip;
-    }
-    bool    compare(Cookie &c)
-    {
-        if (c.ip == ip)
-            if (strcmp(c.id, id)==0)
-                return true;
-
-        return false;
-    }
-
-    void    logDebug(const char *, int);
-
-    unsigned int    ip;
-    char            id[64];
-    unsigned int    time;
-};
-
-// --------------------------------------------
-class CookieList
-{
-public:
-    enum {
-        MAX_COOKIES = 32
-    };
-
-    void    init();
-    bool    add(Cookie &);
-    void    remove(Cookie &);
-    bool    contains(Cookie &);
-
-    Cookie  list[MAX_COOKIES];
-    bool    neverExpire;
-};
 
 // --------------------------------------------
 class HTTPHeaders

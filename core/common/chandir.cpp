@@ -101,53 +101,37 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
 
     Host host;
     host.fromStrName(feed.host().c_str(), feed.port());
-    if (host.ip==0) {
+    if (!host.ip) {
         LOG_ERROR("Could not resolve %s", feed.host().c_str());
         return false;
     }
 
     unique_ptr<ClientSocket> rsock(sys->createSocket());
-    WriteBufferedStream brsock(&*rsock);
 
     try {
         LOG_TRACE("Connecting to %s ...", feed.host().c_str());
         rsock->open(host);
         rsock->connect();
 
-        HTTP rhttp(brsock);
+        HTTP rhttp(*rsock);
 
-        auto request_line = "GET " + feed.path() + "?host=" + cgi::escape(servMgr->serverHost) + " HTTP/1.0";
-        LOG_TRACE("Request line to %s: %s", feed.host().c_str(), request_line.c_str());
-
-        rhttp.writeLineF("%s", request_line.c_str());
-        rhttp.writeLineF("%s %s", HTTP_HS_HOST, feed.host().c_str());
-        rhttp.writeLineF("%s %s", HTTP_HS_CONNECTION, "close");
-        rhttp.writeLineF("%s %s", HTTP_HS_AGENT, PCX_AGENT);
-        rhttp.writeLine("");
-
-        auto code = rhttp.readResponse();
-        if (code != 200) {
-            LOG_ERROR("%s: status code %d", feed.host().c_str(), code);
+        HTTPRequest req("GET",
+                        feed.path() + "?host=" + cgi::escape(servMgr->serverHost),
+                        "HTTP/1.1",
+                        {
+                            { "Host", feed.host() },
+                            { "Connection", "close" },
+                            { "User-Agent", PCX_AGENT }
+                        });
+        
+        HTTPResponse res = rhttp.send(req);
+        if (res.statusCode != 200) {
+            LOG_ERROR("%s: status code %d", feed.host().c_str(), res.statusCode);
             return false;
         }
 
-        while (rhttp.nextHeader())
-            ;
-
-        std::string text;
-        char line[1024];
-
         try {
-            while (rhttp.readLine(line, 1024)) {
-                text += line;
-                text += '\n';
-            }
-        } catch (EOFException& e) {
-            // end of body reached.
-        }
-
-        try {
-            out = ChannelEntry::textToChannelEntries(text, url);
+            out = ChannelEntry::textToChannelEntries(res.body, url);
         } catch (std::runtime_error& e) {
             LOG_ERROR("%s", e.what());
             return false;
