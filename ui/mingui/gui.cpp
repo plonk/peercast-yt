@@ -260,7 +260,7 @@ THREAD_PROC showConnections(ThreadInfo *thread)
         }
 
         {
-            switch (servMgr->getFirewall()) {
+            switch (servMgr->getFirewall(4)) {
             case ServMgr::FW_ON:
                 SendDlgItemMessage(guiWnd, IDC_EDIT4, WM_SETTEXT, 0, (LPARAM)"Firewalled");
                 break;
