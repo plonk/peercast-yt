@@ -117,7 +117,7 @@ public:
         id[0]=0;
     }
 
-    void    set(const char *i, unsigned int nip)
+    void    set(const char *i, const IP& nip)
     {
         strncpy(id, i, sizeof(id)-1);
         id[sizeof(id)-1]=0;
@@ -134,7 +134,7 @@ public:
 
     void    logDebug(const char *, int);
 
-    unsigned int    ip;
+    IP    ip;
     char            id[64];
     unsigned int    time;
 };

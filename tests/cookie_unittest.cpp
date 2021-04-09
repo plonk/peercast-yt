@@ -17,7 +17,8 @@ TEST_F(CookieFixture, initialState)
 TEST_F(CookieFixture, set)
 {
     c.set("hoge", 0xffffffff);
-    ASSERT_EQ(0xffffffff, c.ip);
+    ASSERT_EQ(IP(0xffffffff), c.ip);
+    ASSERT_NE(0xffffffff, c.ip);
     ASSERT_STREQ("hoge", c.id);
 }
 
