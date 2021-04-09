@@ -102,61 +102,6 @@ public:
 #define MIME_ICO             "image/vnd.microsoft.icon"
 
 // --------------------------------------------
-class Cookie
-{
-public:
-    Cookie()
-    {
-        clear();
-    }
-
-    void    clear()
-    {
-        time = 0;
-        ip = 0;
-        id[0]=0;
-    }
-
-    void    set(const char *i, const IP& nip)
-    {
-        strncpy(id, i, sizeof(id)-1);
-        id[sizeof(id)-1]=0;
-        ip = nip;
-    }
-    bool    compare(Cookie &c)
-    {
-        if (c.ip == ip)
-            if (strcmp(c.id, id)==0)
-                return true;
-
-        return false;
-    }
-
-    void    logDebug(const char *, int);
-
-    IP    ip;
-    char            id[64];
-    unsigned int    time;
-};
-
-// --------------------------------------------
-class CookieList
-{
-public:
-    enum {
-        MAX_COOKIES = 32
-    };
-
-    void    init();
-    bool    add(Cookie &);
-    void    remove(Cookie &);
-    bool    contains(Cookie &);
-
-    Cookie  list[MAX_COOKIES];
-    bool    neverExpire;
-};
-
-// --------------------------------------------
 class HTTPHeaders
 {
 public:

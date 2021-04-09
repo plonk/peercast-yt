@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "http.h"
+#include "cookie.h"
 
 class CookieFixture : public ::testing::Test {
 public:

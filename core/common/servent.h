@@ -25,6 +25,7 @@
 #include "sys.h"
 #include "channel.h"
 #include "http.h"
+#include "cookie.h"
 #include "pcp.h"
 #include "cgi.h" // Query
 #include "playlist.h"

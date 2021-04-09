@@ -238,65 +238,6 @@ void HTTP::send(const HTTPResponse& response)
 }
 
 // -----------------------------------
-void    CookieList::init()
-{
-    for (int i=0; i<MAX_COOKIES; i++)
-        list[i].clear();
-
-    neverExpire = false;
-}
-
-// -----------------------------------
-bool    CookieList::contains(Cookie &c)
-{
-    if ((c.id[0]) && (c.ip))
-        for (int i=0; i<MAX_COOKIES; i++)
-            if (list[i].compare(c))
-                return true;
-
-    return false;
-}
-
-// -----------------------------------
-void    Cookie::logDebug(const char *str, int ind)
-{
-    Host h;
-    h.ip = ip;
-
-    LOG_DEBUG("%s %d: %s - %s", str, ind, h.str().c_str(), id);
-}
-
-// -----------------------------------
-bool    CookieList::add(Cookie &c)
-{
-    if (contains(c))
-        return false;
-
-    unsigned int oldestTime=(unsigned int)-1;
-    int oldestIndex=0;
-
-    for (int i=0; i<MAX_COOKIES; i++)
-        if (list[i].time <= oldestTime)
-        {
-            oldestIndex = i;
-            oldestTime = list[i].time;
-        }
-
-    c.logDebug("Added cookie", oldestIndex);
-    c.time = sys->getTime();
-    list[oldestIndex]=c;
-    return true;
-}
-
-// -----------------------------------
-void    CookieList::remove(Cookie &c)
-{
-    for (int i=0; i<MAX_COOKIES; i++)
-        if (list[i].compare(c))
-            list[i].clear();
-}
-
-// -----------------------------------
 HTTPResponse HTTP::send(const HTTPRequest& request)
 {
     // send request
