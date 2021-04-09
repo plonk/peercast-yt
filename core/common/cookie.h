@@ -21,6 +21,7 @@
 #ifndef _COOKIE_H
 #define _COOKIE_H
 
+#include <list>
 #include "ip.h"
 
 // --------------------------------------------
@@ -31,12 +32,10 @@ public:
 
     void    clear();
     void    set(const char *i, const IP& nip);
-    bool    compare(Cookie &c);
-    void    logDebug(const char *, int);
+    bool    operator ==(const Cookie &c);
 
     IP            ip;
     char          id[64];
-    unsigned int  time;
 };
 
 // --------------------------------------------
@@ -52,7 +51,7 @@ public:
     void    remove(Cookie &);
     bool    contains(Cookie &);
 
-    Cookie  list[MAX_COOKIES];
+    std::list<Cookie> list;
     bool    neverExpire;
 };
 

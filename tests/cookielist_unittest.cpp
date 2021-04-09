@@ -69,17 +69,26 @@ TEST_F(CookieListFixture, containsDifferentIDs)
     ASSERT_TRUE(ls.contains(d));
 }
 
-TEST_F(CookieListFixture, containsSameIDs)
+TEST_F(CookieListFixture, maxCookies)
 {
+    for (int i = 1; i <= CookieList::MAX_COOKIES; ++i) {
+        Cookie c;
+        c.set("12345678901234567890123456789012", IP::parse("192.168.0." + std::to_string(i)));
+        ls.add(c);
+    }
     Cookie c;
     c.set("12345678901234567890123456789012", IP::parse("192.168.0.1"));
-    Cookie d;
-    d.set("12345678901234567890123456789012; hoge=fuga", IP::parse("192.168.0.1"));
-
-    ASSERT_FALSE(ls.contains(c));
-    ASSERT_FALSE(ls.contains(d));
-
-    ASSERT_TRUE(ls.add(c));
     ASSERT_TRUE(ls.contains(c));
-    ASSERT_TRUE(ls.contains(d));
+}
+
+TEST_F(CookieListFixture, maxPlus1Cookies)
+{
+    for (int i = 1; i <= CookieList::MAX_COOKIES + 1; ++i) {
+        Cookie c;
+        c.set("12345678901234567890123456789012", IP::parse("192.168.0." + std::to_string(i)));
+        ls.add(c);
+    }
+    Cookie c;
+    c.set("12345678901234567890123456789012", IP::parse("192.168.0.1"));
+    ASSERT_FALSE(ls.contains(c));
 }

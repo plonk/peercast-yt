@@ -25,8 +25,7 @@
 // -----------------------------------
 void    CookieList::init()
 {
-    for (int i=0; i<MAX_COOKIES; i++)
-        list[i].clear();
+    list.clear();
 
     neverExpire = false;
 }
@@ -34,21 +33,12 @@ void    CookieList::init()
 // -----------------------------------
 bool    CookieList::contains(Cookie &c)
 {
-    if ((c.id[0]) && (c.ip))
-        for (int i=0; i<MAX_COOKIES; i++)
-            if (list[i].compare(c))
-                return true;
+    if ((c.id[0]) && (c.ip)) {
+        auto it = std::find(list.begin(), list.end(), c);
+        return (it != list.end());
+    }
 
     return false;
-}
-
-// -----------------------------------
-void    Cookie::logDebug(const char *str, int ind)
-{
-    Host h;
-    h.ip = ip;
-
-    LOG_DEBUG("%s %d: %s - %s", str, ind, h.str().c_str(), id);
 }
 
 // -----------------------------------
@@ -57,38 +47,24 @@ bool    CookieList::add(Cookie &c)
     if (contains(c))
         return false;
 
-    unsigned int oldestTime=(unsigned int)-1;
-    int oldestIndex=0;
-
-    for (int i=0; i<MAX_COOKIES; i++)
-        if (list[i].time <= oldestTime)
-        {
-            oldestIndex = i;
-            oldestTime = list[i].time;
-        }
-
-    c.logDebug("Added cookie", oldestIndex);
-    c.time = sys->getTime();
-    list[oldestIndex]=c;
+    list.push_back(c);
+    LOG_DEBUG("Added cookie: %s - %s", c.ip.str().c_str(), c.id);
+    while (list.size() > MAX_COOKIES)
+        list.pop_front();
+    
     return true;
 }
 
 // -----------------------------------
 void    CookieList::remove(Cookie &c)
 {
-    for (int i=0; i<MAX_COOKIES; i++)
-        if (list[i].compare(c))
-            list[i].clear();
+    list.remove(c);
 }
 
 // -----------------------------------
-bool Cookie::compare(Cookie &c)
+bool Cookie::operator ==(const Cookie &c)
 {
-    if (c.ip == ip)
-        if (strcmp(c.id, id)==0)
-            return true;
-
-    return false;
+    return (c.ip == ip && strcmp(c.id, id)==0);
 }
 
 // -----------------------------------
@@ -102,7 +78,6 @@ void Cookie::set(const char *i, const IP& nip)
 // -----------------------------------
 void Cookie::clear()
 {
-    time = 0;
     ip = 0;
     id[0]=0;
 }

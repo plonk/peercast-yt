@@ -85,7 +85,6 @@ TEST_F(ServentFixture, initialState)
 
     ASSERT_EQ(nullptr, s.pcpStream);
 
-    ASSERT_EQ(0, s.cookie.time);
     ASSERT_STREQ("", s.cookie.id);
     ASSERT_EQ(0, s.cookie.ip);
 
