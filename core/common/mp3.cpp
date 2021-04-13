@@ -33,8 +33,6 @@ void MP3Stream::readHeader(Stream &, std::shared_ptr<Channel>)
 // ------------------------------------------
 int MP3Stream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
 {
-    ChanPacket pack;
-
     if (ch->icyMetaInterval)
     {
         int rlen = ch->icyMetaInterval;
@@ -45,13 +43,14 @@ int MP3Stream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
             if (rl > ChanMgr::MAX_METAINT)
                 rl = ChanMgr::MAX_METAINT;
 
-            pack.init(ChanPacket::T_DATA, pack.data, rl, ch->streamPos);
-            in.read(pack.data, pack.len);
+            auto pack = std::make_shared<ChanPacket>();
+            pack->init(ChanPacket::T_DATA, pack->data, rl, ch->streamPos);
+            in.read(pack->data, pack->len);
             ch->newPacket(pack);
-            ch->checkReadDelay(pack.len);
-            ch->streamPos+=pack.len;
+            ch->checkReadDelay(pack->len);
+            ch->streamPos += pack->len;
 
-            rlen-=rl;
+            rlen -= rl;
         }
 
         unsigned char len;
@@ -64,12 +63,13 @@ int MP3Stream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
             ch->processMp3Metadata(buf);
         }
     }else{
-        pack.init(ChanPacket::T_DATA, pack.data, ChanMgr::MAX_METAINT, ch->streamPos);
-        in.read(pack.data, pack.len);
+        auto pack = std::make_shared<ChanPacket>();
+        pack->init(ChanPacket::T_DATA, pack->data, ChanMgr::MAX_METAINT, ch->streamPos);
+        in.read(pack->data, pack->len);
         ch->newPacket(pack);
-        ch->checkReadDelay(pack.len);
+        ch->checkReadDelay(pack->len);
 
-        ch->streamPos += pack.len;
+        ch->streamPos += pack->len;
     }
     return 0;
 }

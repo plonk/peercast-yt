@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <mutex>
+#include <memory>
 
 // ----------------------------------
 class Stream;
@@ -47,6 +48,11 @@ public:
     ChanPacket()
     {
         init();
+    }
+
+    ChanPacket(const ChanPacket& other)
+    {
+        *this = other;
     }
 
     void    init()
@@ -95,12 +101,16 @@ public:
         readPos = writePos = 0;
         accept = 0;
         lastWriteTime = 0;
+
+        for (int i = 0; i < MAX_PACKETS; ++i) {
+            packets[i] = std::make_shared<ChanPacket>();
+        }
     }
 
     int     copyFrom(ChanPacketBuffer &, unsigned in);
 
-    bool    writePacket(ChanPacket &, bool = false);
-    void    readPacket(ChanPacket &);
+    bool    writePacket(std::shared_ptr<ChanPacket>, bool = false);
+    void    readPacket(std::shared_ptr<ChanPacket> &);
 
     bool    willSkip();
 
@@ -109,7 +119,7 @@ public:
     unsigned int    getLatestPos();
     unsigned int    getOldestPos();
     unsigned int    findOldestPos(unsigned int);
-    bool            findPacket(unsigned int, ChanPacket &);
+    bool            findPacket(unsigned int, std::shared_ptr<ChanPacket> &);
     unsigned int    getStreamPos(unsigned int);
     unsigned int    getStreamPosEnd(unsigned int);
     unsigned int    getLastSync();
@@ -134,8 +144,8 @@ public:
         int cs = 0, ncs = 0;
         for (unsigned int i = firstPos; i <= lastPos; i++)
         {
-            lens.push_back(packets[i % MAX_PACKETS].len);
-            if (packets[i % MAX_PACKETS].cont)
+            lens.push_back(packets[i % MAX_PACKETS]->len);
+            if (packets[i % MAX_PACKETS]->cont)
                 cs++;
             else
                 ncs++;
@@ -143,7 +153,7 @@ public:
         return { lens, cs, ncs };
     }
 
-    ChanPacket              packets[MAX_PACKETS];
+    std::shared_ptr<ChanPacket> packets[MAX_PACKETS];
     volatile unsigned int   lastPos, firstPos, safePos;
     volatile unsigned int   readPos, writePos;
     unsigned int            accept;

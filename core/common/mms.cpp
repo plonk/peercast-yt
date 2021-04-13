@@ -62,7 +62,7 @@ void MMSStream::processChunk(Stream &in, std::shared_ptr<Channel> ch, ASFChunk& 
             ch->headPack.type = ChanPacket::T_HEAD;
             ch->headPack.len = mem.pos;
             ch->headPack.pos = ch->streamPos;
-            ch->newPacket(ch->headPack);
+            ch->newPacket(std::make_shared<ChanPacket>(ch->headPack));
 
             ch->streamPos += ch->headPack.len;
 
@@ -70,18 +70,18 @@ void MMSStream::processChunk(Stream &in, std::shared_ptr<Channel> ch, ASFChunk& 
         }
         case 0x4424:        // asf data
         {
-            ChanPacket pack;
+            auto pack = std::make_shared<ChanPacket>();
 
-            MemoryStream mem(pack.data, sizeof(pack.data));
+            MemoryStream mem(pack->data, sizeof(pack->data));
 
             chunk.write(mem);
 
-            pack.type = ChanPacket::T_DATA;
-            pack.len = mem.pos;
-            pack.pos = ch->streamPos;
+            pack->type = ChanPacket::T_DATA;
+            pack->len = mem.pos;
+            pack->pos = ch->streamPos;
 
             ch->newPacket(pack);
-            ch->streamPos += pack.len;
+            ch->streamPos += pack->len;
 
             break;
         }

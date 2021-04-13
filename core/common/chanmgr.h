@@ -50,7 +50,7 @@ public:
     void    broadcastTrackerSettings();
     void    setUpdateInterval(unsigned int v);
 
-    int     broadcastPacketUp(ChanPacket &, const GnuID &, const GnuID &, const GnuID &);
+    int     broadcastPacketUp(std::shared_ptr<ChanPacket>, const GnuID &, const GnuID &, const GnuID &);
     void    broadcastTrackerUpdate(const GnuID &, bool = false);
 
     bool    writeVariable(Stream &, const String &) override;

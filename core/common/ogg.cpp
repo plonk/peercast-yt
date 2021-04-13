@@ -36,7 +36,6 @@ void OGGStream::readEnd(Stream &, std::shared_ptr<Channel>)
 int OGGStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
 {
     OggPage ogg;
-    ChanPacket pack;
 
     ogg.read(in);
 
@@ -96,15 +95,16 @@ int OGGStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
 
             ch->streamPos += ch->headPack.len;
 
-            ch->newPacket(ch->headPack);
+            ch->newPacket(std::make_shared<ChanPacket>(ch->headPack));
             LOG_INFO("Got %d bytes of headers", ch->headPack.len);
         }
     }else
     {
-        pack.init(ChanPacket::T_DATA, ogg.data, ogg.headLen+ogg.bodyLen, ch->streamPos);
+        auto pack = std::make_shared<ChanPacket>();
+        pack->init(ChanPacket::T_DATA, ogg.data, ogg.headLen+ogg.bodyLen, ch->streamPos);
         ch->newPacket(pack);
 
-        ch->streamPos+=pack.len;
+        ch->streamPos+=pack->len;
 
         if (theora.isActive())
         {

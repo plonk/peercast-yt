@@ -1619,8 +1619,8 @@ bool    ServMgr::acceptGIV(ClientSocket *sock)
 // -----------------------------------
 int ServMgr::broadcastPushRequest(ChanHit &hit, Host &to, const GnuID &chanID, Servent::TYPE type)
 {
-    ChanPacket pack;
-    MemoryStream pmem(pack.data, sizeof(pack.data));
+    auto pack = std::make_shared<ChanPacket>();
+    MemoryStream pmem(pack->data, sizeof(pack->data));
     AtomStream atom(pmem);
 
     atom.writeParent(PCP_BCST, 10);
@@ -1638,8 +1638,8 @@ int ServMgr::broadcastPushRequest(ChanHit &hit, Host &to, const GnuID &chanID, S
             atom.writeShort(PCP_PUSH_PORT, to.port);
             atom.writeBytes(PCP_PUSH_CHANID, chanID.id, 16);
 
-    pack.len = pmem.pos;
-    pack.type = ChanPacket::T_PCP;
+    pack->len = pmem.pos;
+    pack->type = ChanPacket::T_PCP;
 
     return servMgr->broadcastPacket(pack, GnuID(), servMgr->sessionID, hit.sessionID, type);
 }
@@ -1662,8 +1662,8 @@ void ServMgr::broadcastRootSettings(bool getUpdate)
 {
     if (isRoot)
     {
-        ChanPacket pack;
-        MemoryStream mem(pack.data, sizeof(pack.data));
+        auto pack = std::make_shared<ChanPacket>();
+        MemoryStream mem(pack->data, sizeof(pack->data));
         AtomStream atom(mem);
         atom.writeParent(PCP_BCST, 9);
             atom.writeChar(PCP_BCST_GROUP, PCP_BCST_GROUP_TRACKERS);
@@ -1678,14 +1678,14 @@ void ServMgr::broadcastRootSettings(bool getUpdate)
 
         mem.len = mem.pos;
         mem.rewind();
-        pack.len = mem.len;
+        pack->len = mem.len;
 
         broadcastPacket(pack, GnuID(), servMgr->sessionID, GnuID(), Servent::T_CIN);
     }
 }
 
 // --------------------------------------------------
-int ServMgr::broadcastPacket(ChanPacket &pack, const GnuID &chanID, const GnuID &srcID, const GnuID &destID, Servent::TYPE type)
+int ServMgr::broadcastPacket(std::shared_ptr<ChanPacket> pack, const GnuID &chanID, const GnuID &srcID, const GnuID &destID, Servent::TYPE type)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
 

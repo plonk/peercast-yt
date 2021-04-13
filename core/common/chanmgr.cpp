@@ -348,7 +348,7 @@ void ChanMgr::broadcastTrackerUpdate(const GnuID &svID, bool force)
 }
 
 // -----------------------------------
-int ChanMgr::broadcastPacketUp(ChanPacket &pack, const GnuID &chanID, const GnuID &srcID, const GnuID &destID)
+int ChanMgr::broadcastPacketUp(std::shared_ptr<ChanPacket> pack, const GnuID &chanID, const GnuID &srcID, const GnuID &destID)
 {
     int cnt = 0;
 

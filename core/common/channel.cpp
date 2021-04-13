@@ -209,9 +209,9 @@ void Channel::reset()
 }
 
 // -----------------------------------
-void    Channel::newPacket(ChanPacket &pack)
+void    Channel::newPacket(std::shared_ptr<ChanPacket> pack)
 {
-    if (pack.type == ChanPacket::T_PCP)
+    if (pack->type == ChanPacket::T_PCP)
         return;
 
     rawData.writePacket(pack, true);
@@ -711,12 +711,12 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
 
             // broadcast quit to any connected downstream servents
             {
-                ChanPacket pack;
-                MemoryStream mem(pack.data, sizeof(pack.data));
+                auto pack = std::make_shared<ChanPacket>();
+                MemoryStream mem(pack->data, sizeof(pack->data));
                 AtomStream atom(mem);
                 atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT+PCP_ERROR_OFFAIR);
-                pack.len = mem.pos;
-                pack.type = ChanPacket::T_PCP;
+                pack->len = mem.pos;
+                pack->type = ChanPacket::T_PCP;
                 servMgr->broadcastPacket(pack, ch->info.id, ch->remoteID, GnuID(), Servent::T_RELAY);
             }
 
@@ -947,9 +947,9 @@ void Channel::broadcastTrackerUpdate(const GnuID &svID, bool force /* = false */
 
     if (((ctime-lastTrackerUpdate) > 30) || (force))
     {
-        ChanPacket pack;
+        auto pack = std::make_shared<ChanPacket>();
 
-        MemoryStream mem(pack.data, sizeof(pack.data));
+        MemoryStream mem(pack->data, sizeof(pack->data));
 
         AtomStream atom(mem);
 
@@ -984,8 +984,8 @@ void Channel::broadcastTrackerUpdate(const GnuID &svID, bool force /* = false */
                 info.writeTrackAtoms(atom);
             hit.writeAtoms(atom, info.id);
 
-        pack.len = mem.pos;
-        pack.type = ChanPacket::T_PCP;
+        pack->len = mem.pos;
+        pack->type = ChanPacket::T_PCP;
 
         int cnt = servMgr->broadcastPacket(pack, GnuID(), servMgr->sessionID, svID, Servent::T_COUT);
 
@@ -998,7 +998,7 @@ void Channel::broadcastTrackerUpdate(const GnuID &svID, bool force /* = false */
 }
 
 // -----------------------------------
-bool    Channel::sendPacketUp(ChanPacket &pack, const GnuID &cid, const GnuID &sid, const GnuID &did)
+bool    Channel::sendPacketUp(std::shared_ptr<ChanPacket> pack, const GnuID &cid, const GnuID &sid, const GnuID &did)
 {
     if ( isActive()
         && (!cid.isSet() || info.id.isSame(cid))
@@ -1035,8 +1035,8 @@ void Channel::updateInfo(const ChanInfo &newInfo)
         {
             lastMetaUpdate = ctime;
 
-            ChanPacket pack;
-            MemoryStream mem(pack.data, sizeof(pack.data));
+            auto pack = std::make_shared<ChanPacket>();
+            MemoryStream mem(pack->data, sizeof(pack->data));
             AtomStream atom(mem);
 
             atom.writeParent(PCP_BCST, 10);
@@ -1054,8 +1054,8 @@ void Channel::updateInfo(const ChanInfo &newInfo)
                     info.writeInfoAtoms(atom);
                     info.writeTrackAtoms(atom);
 
-            pack.len = mem.pos;
-            pack.type = ChanPacket::T_PCP;
+            pack->len = mem.pos;
+            pack->type = ChanPacket::T_PCP;
             servMgr->broadcastPacket(pack, info.id, servMgr->sessionID, GnuID(), Servent::T_RELAY);
 
             broadcastTrackerUpdate(GnuID());
@@ -1267,29 +1267,29 @@ void PeercastStream::readEnd(Stream &, std::shared_ptr<Channel>)
 // -----------------------------------
 int PeercastStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
 {
-    ChanPacket pack;
+    auto pack = std::make_shared<ChanPacket>();
 
-    pack.readPeercast(in);
+    pack->readPeercast(in);
 
-    MemoryStream mem(pack.data, pack.len);
+    MemoryStream mem(pack->data, pack->len);
 
-    switch(pack.type)
+    switch(pack->type)
     {
         case ChanPacket::T_HEAD:
             // update sync pos
-            ch->headPack = pack;
-            pack.pos = ch->streamPos;
+            ch->headPack = *pack;
+            pack->pos = ch->streamPos;
             ch->newPacket(pack);
-            ch->streamPos += pack.len;
+            ch->streamPos += pack->len;
             break;
         case ChanPacket::T_DATA:
-            pack.pos = ch->streamPos;
+            pack->pos = ch->streamPos;
             ch->newPacket(pack);
-            ch->streamPos += pack.len;
+            ch->streamPos += pack->len;
             break;
         case ChanPacket::T_META:
-            ch->insertMeta.fromMem(pack.data, pack.len);
-            if (pack.len)
+            ch->insertMeta.fromMem(pack->data, pack->len);
+            if (pack->len)
             {
                 XML xml;
                 xml.read(mem);

@@ -28,7 +28,7 @@
 #include "chanmgr.h"
 
 // ------------------------------------------
-bool ChannelStream::getStatus(std::shared_ptr<Channel> ch, ChanPacket &pack)
+bool ChannelStream::getStatus(std::shared_ptr<Channel> ch, std::shared_ptr<ChanPacket> &pack)
 {
     unsigned int ctime = sys->getTime();
 
@@ -65,7 +65,7 @@ bool ChannelStream::getStatus(std::shared_ptr<Channel> ch, ChanPacket &pack)
         hit.initLocal(numListeners, numRelays, ch->info.numSkips, ch->info.getUptime(), isPlaying, oldp, newp, ch->canAddRelay(), ch->sourceHost.host, (ch->ipVersion == Channel::IP_V6));
         hit.tracker = ch->isBroadcasting();
 
-        MemoryStream pmem(pack.data, sizeof(pack.data));
+        MemoryStream pmem(pack->data, sizeof(pack->data));
         AtomStream atom(pmem);
 
         atom.writeParent(PCP_BCST, 10);
@@ -80,8 +80,8 @@ bool ChannelStream::getStatus(std::shared_ptr<Channel> ch, ChanPacket &pack)
             atom.writeBytes(PCP_BCST_CHANID, ch->info.id.id, 16);
             hit.writeAtoms(atom, GnuID());
 
-        pack.len = pmem.pos;
-        pack.type = ChanPacket::T_PCP;
+        pack->len = pmem.pos;
+        pack->type = ChanPacket::T_PCP;
         return true;
     }else
         return false;
@@ -90,7 +90,7 @@ bool ChannelStream::getStatus(std::shared_ptr<Channel> ch, ChanPacket &pack)
 // ------------------------------------------
 void ChannelStream::updateStatus(std::shared_ptr<Channel> ch)
 {
-    ChanPacket pack;
+    auto pack = std::make_shared<ChanPacket>();
     if (getStatus(ch, pack))
     {
         if (!ch->isBroadcasting())
@@ -104,13 +104,13 @@ void ChannelStream::updateStatus(std::shared_ptr<Channel> ch)
 // -----------------------------------
 void ChannelStream::readRaw(Stream &in, std::shared_ptr<Channel> ch)
 {
-    ChanPacket pack;
     const int readLen = 8192;
 
-    pack.init(ChanPacket::T_DATA, pack.data, readLen, ch->streamPos);
-    in.read(pack.data, pack.len);
+    auto pack = std::make_shared<ChanPacket>();
+    pack->init(ChanPacket::T_DATA, pack->data, readLen, ch->streamPos);
+    in.read(pack->data, pack->len);
     ch->newPacket(pack);
-    ch->checkReadDelay(pack.len);
+    ch->checkReadDelay(pack->len);
 
-    ch->streamPos += pack.len;
+    ch->streamPos += pack->len;
 }

@@ -106,13 +106,13 @@ int ChanPacketBuffer::copyFrom(ChanPacketBuffer &buf, unsigned int reqPos)
 
     for (unsigned int i = buf.firstPos; i <= buf.lastPos; i++)
     {
-        ChanPacket *src = &buf.packets[i%MAX_PACKETS];
+        auto src = buf.packets[i%MAX_PACKETS];
         if (src->type & accept)
         {
             if (src->pos >= reqPos)
             {
                 lastPos = writePos;
-                packets[writePos++] = *src;
+                packets[writePos++] = src;
             }
         }
     }
@@ -126,7 +126,7 @@ int ChanPacketBuffer::copyFrom(ChanPacketBuffer &buf, unsigned int reqPos)
 // ストリームポジションが spos か、それよりも新しいパケットが見付かれ
 // ば pack に代入する。見付かった場合は true, そうでなければ false を
 // 返す。
-bool ChanPacketBuffer::findPacket(unsigned int spos, ChanPacket &pack)
+bool ChanPacketBuffer::findPacket(unsigned int spos, std::shared_ptr<ChanPacket> &pack)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
 
@@ -141,8 +141,8 @@ bool ChanPacketBuffer::findPacket(unsigned int spos, ChanPacket &pack)
     // ケットも送らないか。
     for (unsigned int i = firstPos; i <= lastPos; i++)
     {
-        ChanPacket &p = packets[i%MAX_PACKETS];
-        if (p.pos >= spos)
+        auto p = packets[i%MAX_PACKETS];
+        if (p->pos >= spos)
         {
             pack = p;
             return true;
@@ -174,9 +174,9 @@ unsigned int    ChanPacketBuffer::getLatestNonContinuationPos()
 
     for (int64_t i = lastPos; i >= firstPos; i--)
     {
-        ChanPacket &p = packets[i%MAX_PACKETS];
-        if (!p.cont)
-            return p.pos;
+        auto p = packets[i%MAX_PACKETS];
+        if (!p->cont)
+            return p->pos;
     }
 
     return 0;
@@ -192,9 +192,9 @@ unsigned int    ChanPacketBuffer::getOldestNonContinuationPos()
 
     for (int64_t i = firstPos; i <= lastPos; i++)
     {
-        ChanPacket &p = packets[i%MAX_PACKETS];
-        if (!p.cont)
-            return p.pos;
+        auto p = packets[i%MAX_PACKETS];
+        if (!p->cont)
+            return p->pos;
     }
 
     return 0;
@@ -231,7 +231,7 @@ unsigned int    ChanPacketBuffer::findOldestPos(unsigned int spos)
 // パケットインデックス index のパケットのストリームポジションを返す。
 unsigned int    ChanPacketBuffer::getStreamPos(unsigned int index)
 {
-    return packets[index%MAX_PACKETS].pos;
+    return packets[index%MAX_PACKETS]->pos;
 }
 
 // -------------------------------------------------------------------
@@ -239,20 +239,20 @@ unsigned int    ChanPacketBuffer::getStreamPos(unsigned int index)
 // ションを計算する。
 unsigned int    ChanPacketBuffer::getStreamPosEnd(unsigned int index)
 {
-    return packets[index%MAX_PACKETS].pos + packets[index%MAX_PACKETS].len;
+    return packets[index%MAX_PACKETS]->pos + packets[index%MAX_PACKETS]->len;
 }
 
 // -----------------------------------
-bool ChanPacketBuffer::writePacket(ChanPacket &pack, bool updateReadPos)
+bool ChanPacketBuffer::writePacket(std::shared_ptr<ChanPacket> pack, bool updateReadPos)
 {
-    if (pack.len)
+    if (pack->len)
     {
         if (willSkip()) // too far behind
             return false;
 
         lock.lock();
 
-        pack.sync = writePos;
+        pack->sync = writePos;
         packets[writePos%MAX_PACKETS] = pack;
         lastPos = writePos;
         writePos++;
@@ -280,7 +280,7 @@ bool ChanPacketBuffer::writePacket(ChanPacket &pack, bool updateReadPos)
 }
 
 // -----------------------------------
-void    ChanPacketBuffer::readPacket(ChanPacket &pack)
+void    ChanPacketBuffer::readPacket(std::shared_ptr<ChanPacket> &pack)
 {
     unsigned int tim = sys->getTime();
 

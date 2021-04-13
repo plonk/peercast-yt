@@ -196,7 +196,7 @@ public:
     int             broadcastPushRequest(ChanHit &, Host &, const GnuID &, Servent::TYPE);
     void            writeRootAtoms(AtomStream &, bool);
 
-    int             broadcastPacket(ChanPacket &, const GnuID &, const GnuID &, const GnuID &, Servent::TYPE type);
+    int             broadcastPacket(std::shared_ptr<ChanPacket>, const GnuID &, const GnuID &, const GnuID &, Servent::TYPE type);
 
     unsigned int    getUptime()
     {

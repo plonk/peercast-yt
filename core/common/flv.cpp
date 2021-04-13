@@ -168,7 +168,7 @@ int FLVStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
         ch->headPack.type = ChanPacket::T_HEAD;
         ch->headPack.len = mem.pos;
         ch->headPack.pos = 0;
-        ch->newPacket(ch->headPack);
+        ch->newPacket(std::make_shared<ChanPacket>(ch->headPack));
 
         ch->streamPos = 0 + ch->headPack.len;
     }
@@ -242,7 +242,6 @@ void FLVTagBuffer::sendImmediately(FLVTag& tag, std::shared_ptr<Channel> ch)
     if (ch->readDelay)
         rateLimit(tag.getTimestamp());
 
-    ChanPacket pack;
     MemoryStream mem(tag.packet, tag.packetSize);
 
     int rlen = tag.packetSize;
@@ -255,21 +254,22 @@ void FLVTagBuffer::sendImmediately(FLVTag& tag, std::shared_ptr<Channel> ch)
             rl = MAX_OUTGOING_PACKET_SIZE;
         }
 
-        pack.type = ChanPacket::T_DATA;
-        pack.pos = ch->streamPos;
-        pack.len = rl;
+        auto pack = std::make_shared<ChanPacket>();
+        pack->type = ChanPacket::T_DATA;
+        pack->pos = ch->streamPos;
+        pack->len = rl;
         if (m_streamHasKeyFrames)
         {
             if (firstTimeRound && tag.isKeyFrame())
-                pack.cont = false;
+                pack->cont = false;
             else
-                pack.cont = true;
+                pack->cont = true;
         }
-        mem.read(pack.data, pack.len);
+        mem.read(pack->data, pack->len);
 
         ch->newPacket(pack);
-        //ch->checkReadDelay(pack.len);
-        ch->streamPos += pack.len;
+        //ch->checkReadDelay(pack->len);
+        ch->streamPos += pack->len;
 
         rlen -= rl;
         firstTimeRound = false;
@@ -292,19 +292,19 @@ void FLVTagBuffer::flush(std::shared_ptr<Channel> ch)
         m_mem.rewind();
     }
 
-    ChanPacket pack;
+    auto pack = std::make_shared<ChanPacket>();
 
-    pack.type = ChanPacket::T_DATA;
-    pack.pos = ch->streamPos;
-    pack.len = length;
+    pack->type = ChanPacket::T_DATA;
+    pack->pos = ch->streamPos;
+    pack->len = length;
     // キーフレームでないタグだけがバッファリングされる。
     if (m_streamHasKeyFrames)
-        pack.cont = true;
-    m_mem.read(pack.data, length);
+        pack->cont = true;
+    m_mem.read(pack->data, length);
 
     ch->newPacket(pack);
-    //ch->checkReadDelay(pack.len);
-    ch->streamPos += pack.len;
+    //ch->checkReadDelay(pack->len);
+    ch->streamPos += pack->len;
 
     m_mem.rewind();
 }

@@ -46,10 +46,10 @@ public:
     virtual ~ChannelStream() {}
 
     void updateStatus(std::shared_ptr<Channel>);
-    bool getStatus(std::shared_ptr<Channel>, ChanPacket &);
+    bool getStatus(std::shared_ptr<Channel>, std::shared_ptr<ChanPacket> &);
 
     virtual void kill() {}
-    virtual bool sendPacket(ChanPacket &, const GnuID &) { return false; }
+    virtual bool sendPacket(std::shared_ptr<ChanPacket>, const GnuID &) { return false; }
     virtual void flush(Stream &) {}
     virtual void readHeader(Stream &, std::shared_ptr<Channel>) = 0;
     virtual int  readPacket(Stream &, std::shared_ptr<Channel>) = 0;

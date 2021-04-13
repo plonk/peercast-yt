@@ -225,7 +225,7 @@ public:
         outData.lock.lock();
     }
 
-    bool    sendPacket(ChanPacket &, const GnuID &) override;
+    bool    sendPacket(std::shared_ptr<ChanPacket>, const GnuID &) override;
     void    flush(Stream &) override;
     void    readHeader(Stream &, std::shared_ptr<Channel>) override;
     int     readPacket(Stream &, std::shared_ptr<Channel>) override;

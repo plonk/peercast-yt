@@ -21,20 +21,20 @@ void MKVStream::sendPacket(ChanPacket::TYPE type, const byte_string& data, bool 
         ch->streamPos = 0;
     }
 
-    ChanPacket pack;
-    pack.type = type;
-    pack.pos  = ch->streamPos;
-    pack.len  = data.size();
-    pack.cont = continuation;
-    memcpy(pack.data, data.data(), data.size());
+    auto pack = std::make_shared<ChanPacket>();
+    pack->type = type;
+    pack->pos  = ch->streamPos;
+    pack->len  = data.size();
+    pack->cont = continuation;
+    memcpy(pack->data, data.data(), data.size());
 
     if (type == ChanPacket::T_HEAD)
-        ch->headPack = pack;
+        ch->headPack = *pack;
 
     ch->newPacket(pack);
     // rateLimit で律速するので checkReadDelay は使わない。
-    //ch->checkReadDelay(pack.len);
-    ch->streamPos += pack.len;
+    //ch->checkReadDelay(pack->len);
+    ch->streamPos += pack->len;
 }
 
 bool MKVStream::hasKeyFrame(const byte_string& cluster)

@@ -230,7 +230,7 @@ public:
     std::string  getBufferString();
 
     void         broadcastTrackerUpdate(const GnuID &, bool = false);
-    bool         sendPacketUp(ChanPacket &, const GnuID &, const GnuID &, const GnuID &);
+    bool         sendPacketUp(std::shared_ptr<ChanPacket>, const GnuID &, const GnuID &, const GnuID &);
 
     bool         writeVariable(Stream &, const String &) override;
     bool         acceptGIV(ClientSocket *);
@@ -243,7 +243,7 @@ public:
 
     XML::Node    *createRelayXML(bool);
 
-    void         newPacket(ChanPacket &);
+    void         newPacket(std::shared_ptr<ChanPacket>);
 
     int          localListeners();
     int          localRelays();

@@ -243,7 +243,7 @@ public:
     Host    getHost();
 
     bool    acceptGIV(ClientSocket *);
-    bool    sendPacket(ChanPacket &, const GnuID &, const GnuID &, const GnuID &, Servent::TYPE);
+    bool    sendPacket(std::shared_ptr<ChanPacket>, const GnuID &, const GnuID &, const GnuID &, Servent::TYPE);
 
     ChanInfo createChannelInfo(GnuID broadcastID, const String& broadcastMsg, cgi::Query& query, const std::string& contentType);
 

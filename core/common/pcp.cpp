@@ -62,7 +62,7 @@ void PCPStream::readHeader(Stream &in, std::shared_ptr<Channel>)
 }
 
 // ------------------------------------------
-bool PCPStream::sendPacket(ChanPacket &pack, const GnuID &destID)
+bool PCPStream::sendPacket(std::shared_ptr<ChanPacket> pack, const GnuID &destID)
 {
     if (destID.isSet())
         if (!destID.isSame(remoteID))
@@ -75,12 +75,12 @@ bool PCPStream::sendPacket(ChanPacket &pack, const GnuID &destID)
 // ------------------------------------------
 void PCPStream::flush(Stream &in)
 {
-    ChanPacket pack;
+    std::shared_ptr<ChanPacket> pack;
     // send outward packets
     while (outData.numPending())
     {
         outData.readPacket(pack);
-        pack.writeRaw(in);
+        pack->writeRaw(in);
     }
 }
 
@@ -99,8 +99,8 @@ int PCPStream::readPacket(Stream &in, BroadcastState &bcs)
     {
         AtomStream atom(in);
 
-        ChanPacket pack;
-        MemoryStream mem(pack.data, sizeof(pack.data));
+        std::shared_ptr<ChanPacket> pack = std::make_shared<ChanPacket>();;
+        MemoryStream mem(pack->data, sizeof(pack->data));
         AtomStream patom(mem);
 
         // send outward packets
@@ -108,7 +108,7 @@ int PCPStream::readPacket(Stream &in, BroadcastState &bcs)
         if (outData.numPending())
         {
             outData.readPacket(pack);
-            pack.writeRaw(in);
+            pack->writeRaw(in);
         }
         error = PCP_ERROR_GENERAL;
 
@@ -128,8 +128,8 @@ int PCPStream::readPacket(Stream &in, BroadcastState &bcs)
             id = atom.read(numc, numd);
 
             mem.rewind();
-            pack.len = patom.writeAtoms(id, in, numc, numd);
-            pack.type = ChanPacket::T_PCP;
+            pack->len = patom.writeAtoms(id, in, numc, numd);
+            pack->type = ChanPacket::T_PCP;
 
             inData.writePacket(pack);
         }
@@ -286,7 +286,7 @@ void PCPStream::readRootAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 // ------------------------------------------
 void PCPStream::readPktAtoms(std::shared_ptr<Channel> ch, AtomStream &atom, int numc, BroadcastState &bcs)
 {
-    ChanPacket pack;
+    auto pack = std::make_shared<ChanPacket>();
     ID4 type;
 
     for (int i=0; i<numc; i++)
@@ -299,25 +299,25 @@ void PCPStream::readPktAtoms(std::shared_ptr<Channel> ch, AtomStream &atom, int 
             type = atom.readID4();
 
             if (type == PCP_CHAN_PKT_HEAD)
-                pack.type = ChanPacket::T_HEAD;
+                pack->type = ChanPacket::T_HEAD;
             else if (type == PCP_CHAN_PKT_DATA)
-                pack.type = ChanPacket::T_DATA;
+                pack->type = ChanPacket::T_DATA;
             else
-                pack.type = ChanPacket::T_UNKNOWN;
+                pack->type = ChanPacket::T_UNKNOWN;
         }else if (id == PCP_CHAN_PKT_POS)
         {
-            pack.pos = atom.readInt();
+            pack->pos = atom.readInt();
         }else if (id == PCP_CHAN_PKT_CONTINUATION)
         {
-            pack.cont = atom.readChar();
+            pack->cont = atom.readChar();
         }else if (id == PCP_CHAN_PKT_DATA)
         {
             if (d > ChanPacket::MAX_DATALEN)
             {
                 throw StreamException("Data size too large");
             }
-            pack.len = d;
-            atom.readBytes(pack.data, pack.len);
+            pack->len = d;
+            atom.readBytes(pack->data, pack->len);
         }
         else
         {
@@ -330,36 +330,36 @@ void PCPStream::readPktAtoms(std::shared_ptr<Channel> ch, AtomStream &atom, int 
     {
         std::lock_guard<std::recursive_mutex> cs(ch->lock);
 
-        int diff = pack.pos - ch->streamPos;
+        int diff = pack->pos - ch->streamPos;
         if (diff)
-            LOG_DEBUG("PCP skipping %s%d (%u -> %u)", (diff>0)?"+":"", diff, ch->streamPos, pack.pos);
+            LOG_DEBUG("PCP skipping %s%d (%u -> %u)", (diff>0)?"+":"", diff, ch->streamPos, pack->pos);
 
-        if (pack.type == ChanPacket::T_HEAD)
+        if (pack->type == ChanPacket::T_HEAD)
         {
-            LOG_DEBUG("New head packet at %u", pack.pos);
+            LOG_DEBUG("New head packet at %u", pack->pos);
 
             // check for stream restart
-            if (pack.pos == 0)
+            if (pack->pos == 0)
             {
                 LOG_INFO("PCP resetting stream");
                 ch->streamIndex++;
                 ch->rawData.init();
             }
 
-            ch->headPack = pack;
+            ch->headPack = *pack;
 
             ch->rawData.writePacket(pack, true);
-            ch->streamPos = pack.pos+pack.len;
-        }else if (pack.type == ChanPacket::T_DATA)
+            ch->streamPos = pack->pos + pack->len;
+        }else if (pack->type == ChanPacket::T_DATA)
         {
             ch->rawData.writePacket(pack, true);
-            ch->streamPos = pack.pos+pack.len;
+            ch->streamPos = pack->pos + pack->len;
         }
     }
 
     // update this parent packet stream position
-    if ((pack.pos) && (!bcs.streamPos || (pack.pos < bcs.streamPos)))
-        bcs.streamPos = pack.pos;
+    if ((pack->pos) && (!bcs.streamPos || (pack->pos < bcs.streamPos)))
+        bcs.streamPos = pack->pos;
 }
 
 // -----------------------------------
@@ -533,7 +533,7 @@ void PCPStream::readChanAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 // ------------------------------------------
 int PCPStream::readBroadcastAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 {
-    ChanPacket pack;
+    auto pack = std::make_shared<ChanPacket>();
     int ttl=1;
     int ver=0;
     char ver_ex_prefix[3] = { '*', '*', '\0' };
@@ -544,7 +544,7 @@ int PCPStream::readBroadcastAtoms(AtomStream &atom, int numc, BroadcastState &bc
 
     bcs.initPacketSettings();
 
-    MemoryStream pmem(pack.data, sizeof(pack.data));
+    MemoryStream pmem(pack->data, sizeof(pack->data));
     AtomStream patom(pmem);
 
     patom.writeParent(PCP_BCST, numc);
@@ -624,8 +624,8 @@ int PCPStream::readBroadcastAtoms(AtomStream &atom, int numc, BroadcastState &bc
     // broadcast back out if ttl > 0
     if ((ttl>0) && (!bcs.forMe))
     {
-        pack.len = pmem.pos;
-        pack.type = ChanPacket::T_PCP;
+        pack->len = pmem.pos;
+        pack->type = ChanPacket::T_PCP;
 
         if (bcs.group & (PCP_BCST_GROUP_ROOT|PCP_BCST_GROUP_TRACKERS|PCP_BCST_GROUP_RELAYS))
         {

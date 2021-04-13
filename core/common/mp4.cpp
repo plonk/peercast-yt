@@ -86,7 +86,7 @@ void MP4Stream::readHeader(Stream &in, std::shared_ptr<Channel> ch)
     ch->headPack.type = ChanPacket::T_HEAD;
     ch->headPack.len = mem.pos;
     ch->headPack.pos = 0;
-    ch->newPacket(ch->headPack);
+    ch->newPacket(std::make_shared<ChanPacket>(ch->headPack));
 
     ch->streamPos = ch->headPack.len;
 }
@@ -109,7 +109,7 @@ int MP4Stream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
         memcpy(m_buffer + moof->size(), mdat->data(), mdat->size());
 
         MemoryStream mem(m_buffer, moof->size() + mdat->size());
-        ChanPacket pack;
+        auto pack = std::make_shared<ChanPacket>();
         int rlen = moof->size() + mdat->size();
         bool firstTime = true;
 
@@ -118,16 +118,16 @@ int MP4Stream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
              int rl = (rlen > MAX_OUTGOING_PACKET_SIZE) ?
                   MAX_OUTGOING_PACKET_SIZE :
                   rlen;
-             pack.type = ChanPacket::T_DATA;
-             pack.pos = ch->streamPos;
-             pack.len = rl;
-             pack.cont = !firstTime;
-             mem.read(pack.data, rl);
+             pack->type = ChanPacket::T_DATA;
+             pack->pos = ch->streamPos;
+             pack->len = rl;
+             pack->cont = !firstTime;
+             mem.read(pack->data, rl);
 
              // copy to channel buffer
              LOG_TRACE("newPacket");
              ch->newPacket(pack);
-             ch->streamPos += pack.len;
+             ch->streamPos += pack->len;
 
              rlen -= rl;
              firstTime = false;

@@ -256,7 +256,7 @@ void Servent::reset()
 }
 
 // -----------------------------------
-bool Servent::sendPacket(ChanPacket &pack, const GnuID &cid, const GnuID &sid, const GnuID &did, Servent::TYPE t)
+bool Servent::sendPacket(std::shared_ptr<ChanPacket> pack, const GnuID &cid, const GnuID &sid, const GnuID &did, Servent::TYPE t)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
 
@@ -1704,37 +1704,37 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
                     LOG_DEBUG("sendRaw got new stream index");
                 }
 
-                ChanPacket rawPack;
+                std::shared_ptr<ChanPacket> rawPack;
                 while (ch->rawData.findPacket(streamPos, rawPack))
                 {
-                    if (syncPos != rawPack.sync)
+                    if (syncPos != rawPack->sync)
                     {
                         if (sendSkipCount)
                         {
-                            LOG_ERROR("Send skip: %d", rawPack.sync - syncPos);
+                            LOG_ERROR("Send skip: %d", rawPack->sync - syncPos);
                             throw TimeoutException();
                         }else
-                            LOG_DEBUG("First send skip: %d", rawPack.sync - syncPos);
+                            LOG_DEBUG("First send skip: %d", rawPack->sync - syncPos);
                         sendSkipCount++;
                     }
-                    syncPos = rawPack.sync + 1;
+                    syncPos = rawPack->sync + 1;
 
-                    if ((rawPack.type == ChanPacket::T_DATA) || (rawPack.type == ChanPacket::T_HEAD))
+                    if ((rawPack->type == ChanPacket::T_DATA) || (rawPack->type == ChanPacket::T_HEAD))
                     {
-                        if (!skipContinuation || !rawPack.cont)
+                        if (!skipContinuation || !rawPack->cont)
                         {
                             skipContinuation = false;
-                            rawPack.writeRaw(bsock);
+                            rawPack->writeRaw(bsock);
                             lastWriteTime = sys->getTime();
                         }else
                         {
-                            LOG_DEBUG("raw: skip continuation %s packet pos=%d", rawPack.type==ChanPacket::T_DATA?"DATA":"HEAD", rawPack.pos);
+                            LOG_DEBUG("raw: skip continuation %s packet pos=%d", rawPack->type==ChanPacket::T_DATA?"DATA":"HEAD", rawPack->pos);
                         }
                     }
 
-                    if (rawPack.pos < streamPos)
-                        LOG_DEBUG("raw: skip back %d", rawPack.pos - streamPos);
-                    streamPos = rawPack.pos + rawPack.len;
+                    if (rawPack->pos < streamPos)
+                        LOG_DEBUG("raw: skip back %d", rawPack->pos - streamPos);
+                    streamPos = rawPack->pos + rawPack->len;
                 }
 
                 if ((sys->getTime() - lastWriteTime) > DIRECT_WRITE_TIMEOUT)
@@ -1790,19 +1790,19 @@ void Servent::sendRawMetaChannel(int interval)
                 throw StreamException("Channel not found");
             }
 
-            ChanPacket rawPack;
+            std::shared_ptr<ChanPacket> rawPack;
             if (ch->rawData.findPacket(streamPos, rawPack))
             {
-                if (syncPos != rawPack.sync)
-                    LOG_ERROR("Send skip: %d", rawPack.sync-syncPos);
-                syncPos = rawPack.sync+1;
+                if (syncPos != rawPack->sync)
+                    LOG_ERROR("Send skip: %d", rawPack->sync-syncPos);
+                syncPos = rawPack->sync+1;
 
-                MemoryStream mem(rawPack.data, rawPack.len);
+                MemoryStream mem(rawPack->data, rawPack->len);
 
-                if (rawPack.type == ChanPacket::T_DATA)
+                if (rawPack->type == ChanPacket::T_DATA)
                 {
-                    int len = rawPack.len;
-                    char *p = rawPack.data;
+                    int len = rawPack->len;
+                    char *p = rawPack->data;
                     while (len)
                     {
                         int rl = len;
@@ -1857,7 +1857,7 @@ void Servent::sendRawMetaChannel(int interval)
                         }
                     }
                 }
-                streamPos = rawPack.pos + rawPack.len;
+                streamPos = rawPack->pos + rawPack->len;
             }
 
             if ((sys->getTime()-lastWriteTime) > DIRECT_WRITE_TIMEOUT)
@@ -1903,10 +1903,10 @@ void Servent::sendPeercastChannel()
                 throw StreamException("Channel not found");
             }
 
-            ChanPacket rawPack;
+            std::shared_ptr<ChanPacket> rawPack;
             if (ch->rawData.findPacket(streamPos, rawPack))
             {
-                if ((rawPack.type == ChanPacket::T_DATA) || (rawPack.type == ChanPacket::T_HEAD))
+                if ((rawPack->type == ChanPacket::T_DATA) || (rawPack->type == ChanPacket::T_HEAD))
                 {
                     sock->writeTag("SYNC");
                     sock->writeShort(4);
@@ -1914,9 +1914,9 @@ void Servent::sendPeercastChannel()
                     sock->write(&syncPos, 4);
                     syncPos++;
 
-                    rawPack.writePeercast(*sock);
+                    rawPack->writePeercast(*sock);
                 }
-                streamPos = rawPack.pos + rawPack.len;
+                streamPos = rawPack->pos + rawPack->len;
             }
             sys->sleepIdle();
         }
@@ -1980,59 +1980,59 @@ void Servent::sendPCPChannel()
                 LOG_DEBUG("sendPCPStream got new stream index");
             }
 
-            ChanPacket rawPack;
+            std::shared_ptr<ChanPacket> rawPack;
 
             // FIXME: ストリームインデックスの変更を確かめずにどんどん読み出して大丈夫？
             while (ch->rawData.findPacket(streamPos, rawPack))
             {
-                if (syncPos != rawPack.sync)
+                if (syncPos != rawPack->sync)
                 {
                     if (sendSkipCount)
                     {
-                        LOG_ERROR("PCP send skip: %d", rawPack.sync - syncPos);
+                        LOG_ERROR("PCP send skip: %d", rawPack->sync - syncPos);
                         throw TimeoutException();
                     }else
-                        LOG_DEBUG("PCP first send skip: %d", rawPack.sync - syncPos);
+                        LOG_DEBUG("PCP first send skip: %d", rawPack->sync - syncPos);
                     sendSkipCount++;
                 }
-                syncPos = rawPack.sync + 1;
+                syncPos = rawPack->sync + 1;
 
-                if (rawPack.type == ChanPacket::T_HEAD)
+                if (rawPack->type == ChanPacket::T_HEAD)
                 {
                     atom.writeParent(PCP_CHAN, 2);
                         atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
                         atom.writeParent(PCP_CHAN_PKT, 3);
                             atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_HEAD);
-                            atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
-                            atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
-                }else if (rawPack.type == ChanPacket::T_DATA)
+                            atom.writeInt(PCP_CHAN_PKT_POS, rawPack->pos);
+                            atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack->data, rawPack->len);
+                }else if (rawPack->type == ChanPacket::T_DATA)
                 {
-                    if (rawPack.cont)
+                    if (rawPack->cont)
                     {
                         atom.writeParent(PCP_CHAN, 2);
                             atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
                             atom.writeParent(PCP_CHAN_PKT, 4);
                                 atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_DATA);
-                                atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
+                                atom.writeInt(PCP_CHAN_PKT_POS, rawPack->pos);
                                 atom.writeChar(PCP_CHAN_PKT_CONTINUATION, true);
-                                atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
+                                atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack->data, rawPack->len);
                     }else
                     {
                         atom.writeParent(PCP_CHAN, 2);
                             atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
                             atom.writeParent(PCP_CHAN_PKT, 3);
                                 atom.writeID4(PCP_CHAN_PKT_TYPE, PCP_CHAN_PKT_DATA);
-                                atom.writeInt(PCP_CHAN_PKT_POS, rawPack.pos);
-                                atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack.data, rawPack.len);
+                                atom.writeInt(PCP_CHAN_PKT_POS, rawPack->pos);
+                                atom.writeBytes(PCP_CHAN_PKT_DATA, rawPack->data, rawPack->len);
                     }
                 }
 
-                if (rawPack.pos < streamPos)
-                    LOG_DEBUG("pcp: skip back %d", rawPack.pos-streamPos);
+                if (rawPack->pos < streamPos)
+                    LOG_DEBUG("pcp: skip back %d", rawPack->pos-streamPos);
 
-                //LOG_DEBUG("Sending %d-%d (%d, %d, %d)", rawPack.pos, rawPack.pos+rawPack.len, ch->streamPos, ch->rawData.getLatestPos(), ch->rawData.getOldestPos());
+                //LOG_DEBUG("Sending %d-%d (%d, %d, %d)", rawPack->pos, rawPack->pos+rawPack->len, ch->streamPos, ch->rawData.getLatestPos(), ch->rawData.getOldestPos());
 
-                streamPos = rawPack.pos + rawPack.len;
+                streamPos = rawPack->pos + rawPack->len;
             }
             bsock.flush();
 
