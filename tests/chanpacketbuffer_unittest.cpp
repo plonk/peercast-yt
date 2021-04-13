@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "cstream.h"
+#include "chanpacket.h"
 
 class ChanPacketBufferFixture : public ::testing::Test {
 public:

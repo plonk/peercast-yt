@@ -312,6 +312,10 @@ void PCPStream::readPktAtoms(std::shared_ptr<Channel> ch, AtomStream &atom, int 
             pack.cont = atom.readChar();
         }else if (id == PCP_CHAN_PKT_DATA)
         {
+            if (d > ChanPacket::MAX_DATALEN)
+            {
+                throw StreamException("Data size too large");
+            }
             pack.len = d;
             atom.readBytes(pack.data, pack.len);
         }
