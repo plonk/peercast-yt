@@ -23,6 +23,7 @@
 
 #include "id.h"
 #include "cstream.h"
+#include "chanpacket.h"
 
 // ------------------------------------------------
 

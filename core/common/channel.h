@@ -24,6 +24,7 @@
 #include "xml.h"
 #include "asf.h"
 #include "cstream.h"
+#include "chanpacket.h"
 #include "varwriter.h"
 
 // --------------------------------------------------
