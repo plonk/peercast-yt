@@ -133,3 +133,18 @@ TEST_F(SysFixture, waitThread)
     m_sys->waitThread(&info);
     ASSERT_TRUE(m_done);
 }
+
+
+TEST_F(SysFixture, getHostnameByAddressIPv4)
+{
+    std::string str;
+    EXPECT_TRUE(m_sys->getHostnameByAddress(IP::parse("8.8.4.4"), str));
+    EXPECT_STREQ("dns.google", str.c_str());
+}
+
+TEST_F(SysFixture, getHostnameByAddressIPv6)
+{
+    std::string str;
+    EXPECT_TRUE(m_sys->getHostnameByAddress(IP::parse("2001:4860:4860::8844"), str));
+    EXPECT_STREQ("dns.google", str.c_str());
+}

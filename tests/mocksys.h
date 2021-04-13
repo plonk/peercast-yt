@@ -82,6 +82,18 @@ public:
         return {};
     }
 
+    bool getHostnameByAddress(const IP& ip, std::string& out) override
+    {
+        if (ip.str() == "127.0.0.1") {
+            out = "localhost"; return true;
+        } else if (ip.str() == "::1") {
+            out = "ip6-localhost"; return true;
+        } else if (ip.str() == "8.8.4.4") {
+            out = "dns.google"; return true;
+        } else {
+            out = ""; return false;
+        }
+    }
 };
 
 #endif
