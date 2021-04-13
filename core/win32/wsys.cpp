@@ -137,3 +137,48 @@ std::vector<std::string> WSys::getAllIPAddresses()
 {
     return getIPAddresses(getHostname());
 }
+
+// --------------------------------------------------
+bool WSys::getHostnameByAddress(const IP& ip, std::string& out)
+{
+    char hbuf[NI_MAXHOST];
+
+    if (ip.isIPv4Mapped()) {
+        sockaddr_in addr = { AF_INET };
+        unsigned int i = htonl(ip.ipv4());
+        memcpy(&addr.sin_addr, &i, 4);
+
+        if (int errcode = getnameinfo((struct sockaddr *) &addr,
+                        sizeof(addr),
+                        hbuf,
+                        sizeof(hbuf),
+                        NULL,
+                        0,
+                        NI_NAMEREQD)) {
+            LOG_ERROR("%s", gai_strerror(errcode));
+            out = "";
+            return false;
+        } else {
+            out = hbuf;
+            return true;
+        }
+    } else {
+        sockaddr_in6 addr = { AF_INET6 };
+        addr.sin6_addr = ip.serialize();
+
+        if (int errcode = getnameinfo((struct sockaddr *) &addr,
+                        sizeof(addr),
+                        hbuf,
+                        sizeof(hbuf),
+                        NULL,
+                        0,
+                        NI_NAMEREQD)) {
+            LOG_ERROR("%s", gai_strerror(errcode));
+            out = "";
+            return false;
+        } else {
+            out = hbuf;
+            return true;
+        }
+    }
+}

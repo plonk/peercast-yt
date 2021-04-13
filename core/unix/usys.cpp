@@ -183,7 +183,7 @@ bool USys::getHostnameByAddress(const IP& ip, std::string& out)
                         NULL,
                         0,
                         NI_NAMEREQD)) {
-            printf("%s\n", gai_strerror(errcode));
+            LOG_ERROR("%s", gai_strerror(errcode));
             out = "";
             return false;
         } else {
@@ -191,7 +191,7 @@ bool USys::getHostnameByAddress(const IP& ip, std::string& out)
             return true;
         }
     } else {
-        sockaddr_in6 addr = { AF_INET6};
+        sockaddr_in6 addr = { AF_INET6 };
         addr.sin6_addr = ip.serialize();
 
         if (int errcode = getnameinfo((struct sockaddr *) &addr,
@@ -201,7 +201,7 @@ bool USys::getHostnameByAddress(const IP& ip, std::string& out)
                         NULL,
                         0,
                         NI_NAMEREQD)) {
-            printf("%s\n", gai_strerror(errcode));
+            LOG_ERROR("%s", gai_strerror(errcode));
             out = "";
             return false;
         } else {

@@ -90,6 +90,8 @@ public:
             out = "ip6-localhost"; return true;
         } else if (ip.str() == "8.8.4.4") {
             out = "dns.google"; return true;
+        } else if (ip.str() == "8.8.8.8") {
+            out = "dns.google"; return true;
         } else {
             out = ""; return false;
         }
