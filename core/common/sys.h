@@ -35,6 +35,8 @@ extern char *trimstr(char *s);
 #include "_string.h"
 #include "varwriter.h"
 
+#include "ip.h"
+
 // ------------------------------------
 namespace peercast {
 class Random {
@@ -84,7 +86,12 @@ public:
     virtual std::string     getHostname() { return "localhost"; }
     virtual std::vector<std::string> getIPAddresses(const std::string& name) { return {}; }
     virtual std::vector<std::string> getAllIPAddresses() { return {}; }
-
+    virtual bool getHostnameByAddress(const IP& ip, std::string& out)
+    {
+        out = "";
+        return false;
+    }
+    
 #ifdef __BIG_ENDIAN__
     unsigned short  convertEndian(unsigned short v) { return SWAP2(v); }
     unsigned int    convertEndian(unsigned int v) { return SWAP4(v); }

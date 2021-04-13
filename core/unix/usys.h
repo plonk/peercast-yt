@@ -44,7 +44,8 @@ public:
     std::string     getHostname() override;
     std::vector<std::string> getIPAddresses(const std::string& name) override;
     std::vector<std::string> getAllIPAddresses() override;
-
+    bool getHostnameByAddress(const IP& ip, std::string& out) override;
+    
     peercast::Random rndGen;
 private:
 

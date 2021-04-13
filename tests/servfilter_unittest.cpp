@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "sstream.h"
-#include "servmgr.h"
+#include "servfilter.h"
 
 class ServFilterFixture : public ::testing::Test {
 public:

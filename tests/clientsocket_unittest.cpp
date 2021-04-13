@@ -18,3 +18,18 @@ TEST_F(ClientSocketFixture, getHostname)
     EXPECT_TRUE(ClientSocket::getHostname(name, ClientSocket::getIP("8.8.8.8")));
     EXPECT_STREQ("dns.google", name);
 }
+
+TEST_F(ClientSocketFixture, getHostnameByAddress)
+{
+    {
+        std::string str;
+        EXPECT_TRUE(ClientSocket::getHostnameByAddress(IP::parse("127.0.0.1"), str));
+        EXPECT_STREQ("localhost", str.c_str());
+    }
+
+    {
+        std::string str;
+        EXPECT_TRUE(ClientSocket::getHostnameByAddress(IP::parse("::1"), str));
+        EXPECT_STREQ("localhost", str.c_str());
+    }
+}
