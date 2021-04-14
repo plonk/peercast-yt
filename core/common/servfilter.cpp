@@ -98,7 +98,7 @@ void ServFilter::setPattern(const char* str)
 }
 
 // --------------------------------------------------
-std::string ServFilter::getPattern()
+std::string ServFilter::getPattern() const
 {
     switch (type)
     {

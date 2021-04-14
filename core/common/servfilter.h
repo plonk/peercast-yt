@@ -63,7 +63,7 @@ public:
     bool    matches(int fl, const Host& h) const;
 
     void setPattern(const char* str);
-    std::string getPattern();
+    std::string getPattern() const;
 
     bool isGlobal();
     bool isSet();
