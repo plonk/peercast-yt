@@ -810,9 +810,6 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
         }
     }
 
-    Cookie gotCookie;
-    cookie.clear();
-
     while (http.nextHeader())
     {
         char *arg = http.getArgStr();
@@ -829,15 +826,20 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
                 if (http.isHeader("Cookie"))
                 {
                     LOG_DEBUG("Got cookie: %s", arg);
-                    char *idp = arg;
-                    while ((idp = strstr(idp, "id=")))
-                    {
-                        idp += 3;
-                        gotCookie.set(idp, sock->host.ip);
-                        if (servMgr->cookieList.contains(gotCookie))
-                        {
-                            LOG_DEBUG("Cookie found");
-                            cookie = gotCookie;
+                    auto assignments = str::split(arg, "; ");
+                    for (auto assignment : assignments) {
+                        auto sides = str::split(assignment, "=", 2);
+                        if (sides.size() != 2) {
+                            LOG_ERROR("Invalid Cookie header: expected '='");
+                            break;
+                        } else if (sides[0] == "id") {
+                            Cookie gotCookie;
+                            gotCookie.set(sides[1].c_str(), sock->host.ip);
+
+                            if (servMgr->cookieList.contains(gotCookie)) {
+                                LOG_DEBUG("Cookie found");
+                                cookie = gotCookie;
+                            }
                             break;
                         }
                     }
