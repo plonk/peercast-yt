@@ -90,6 +90,17 @@ TEST_F(ServentFixture, initialState)
 
 }
 
+TEST_F(ServentFixture, resetResetsCookie)
+{
+    strcpy(s.cookie.id, "hoge");
+    s.cookie.ip = IP(127 << 3 | 1);
+
+    s.reset();
+
+    ASSERT_STREQ("", s.cookie.id);
+    ASSERT_EQ(0, s.cookie.ip);
+}
+
 TEST_F(ServentFixture, handshakeHTTP)
 {
     HTTP http(*mock);
