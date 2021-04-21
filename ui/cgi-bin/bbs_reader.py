@@ -46,7 +46,7 @@ class Board:
       m = p.match(line)
       self.resmax = max(self.resmax, int(m.group(3)))
       lines[i] = Thread(self, m.group(1), html.unescape(m.group(2)), m.group(3))
-    if self.shitaraba:
+    if self.shitaraba and len(lines) > 1:
       lines.pop(len(lines) - 1)
     return lines
 
