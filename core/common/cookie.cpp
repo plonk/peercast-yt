@@ -1,5 +1,5 @@
 // ------------------------------------------------
-// File : http.cpp
+// File : cookie.cpp
 // Date: 4-apr-2002
 // Author: giles
 // Desc:

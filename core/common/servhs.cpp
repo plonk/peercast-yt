@@ -810,9 +810,6 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
         }
     }
 
-    Cookie gotCookie;
-    cookie.clear();
-
     while (http.nextHeader())
     {
         char *arg = http.getArgStr();
@@ -829,15 +826,20 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
                 if (http.isHeader("Cookie"))
                 {
                     LOG_DEBUG("Got cookie: %s", arg);
-                    char *idp = arg;
-                    while ((idp = strstr(idp, "id=")))
-                    {
-                        idp += 3;
-                        gotCookie.set(idp, sock->host.ip);
-                        if (servMgr->cookieList.contains(gotCookie))
-                        {
-                            LOG_DEBUG("Cookie found");
-                            cookie = gotCookie;
+                    auto assignments = str::split(arg, "; ");
+                    for (auto assignment : assignments) {
+                        auto sides = str::split(assignment, "=", 2);
+                        if (sides.size() != 2) {
+                            LOG_ERROR("Invalid Cookie header: expected '='");
+                            break;
+                        } else if (sides[0] == "id") {
+                            Cookie gotCookie;
+                            gotCookie.set(sides[1].c_str(), sock->host.ip);
+
+                            if (servMgr->cookieList.contains(gotCookie)) {
+                                LOG_DEBUG("Cookie found");
+                                cookie = gotCookie;
+                            }
                             break;
                         }
                     }
@@ -1348,9 +1350,9 @@ void Servent::CMD_login(const char* cmd, HTTP& http, String& jumpStr)
 
     http.writeLine(HTTP_SC_FOUND);
     if (servMgr->cookieList.neverExpire)
-        http.writeLineF("%s id=%s; path=/; expires=\"Mon, 01-Jan-3000 00:00:00 GMT\";", HTTP_HS_SETCOOKIE, idstr);
+        http.writeLineF("%s id=%s; path=/; expires=\"Mon, 01-Jan-3000 00:00:00 GMT\"", HTTP_HS_SETCOOKIE, idstr);
     else
-        http.writeLineF("%s id=%s; path=/;", HTTP_HS_SETCOOKIE, idstr);
+        http.writeLineF("%s id=%s; path=/", HTTP_HS_SETCOOKIE, idstr);
 
     if (query.get("requested_path") != "")
         http.writeLineF("Location: %s", query.get("requested_path").c_str());
