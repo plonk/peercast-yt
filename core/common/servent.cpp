@@ -253,6 +253,8 @@ void Servent::reset()
     type = T_NONE;
 
     streamPos = 0;
+
+    cookie.clear();
 }
 
 // -----------------------------------
