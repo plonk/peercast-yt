@@ -270,6 +270,7 @@ public:
     json to_json(ServMgr::FW_STATE state);
     json to_json(TrackInfo& track);
     json to_json(std::shared_ptr<Channel> c);
+    json to_json(Channel::IP_VERSION ipVersion);
 };
 
 #endif

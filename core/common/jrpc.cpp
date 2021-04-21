@@ -296,6 +296,19 @@ json JrpcApi::to_json(TrackInfo& track)
     };
 }
 
+json JrpcApi::to_json(Channel::IP_VERSION ipVersion)
+{
+    switch (ipVersion)
+    {
+    case Channel::IP_V4:
+        return "ipv4";
+    case Channel::IP_V6:
+        return "ipv6";
+    default:
+        return "unknown";
+    }
+}
+
 // PeerCastStation では Receiving, Searching, Error, Idle のどれか
 // が返る。peercast では NONE, WAIT, CONNECT, REQUEST, CLOSE,
 // RECEIVE, BROADCAST, ABORT, SEARCH, NOHOSTS, IDLE, ERROR,
@@ -333,6 +346,7 @@ json JrpcApi::channelStatus(std::shared_ptr<Channel> c)
         {"isRelayFull", c->isFull()},
         {"isDirectFull", nullptr},
         {"isReceiving", c->isReceiving()},
+        {"network", to_json(c->ipVersion)},
     };
 }
 
