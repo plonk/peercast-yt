@@ -620,7 +620,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
         // Icecast 放送
 
         handshakeSOURCE(http.cmdLine, isHTTP);
-    }else if (http.isRequest(servMgr->password)) // FIXME: check for empty password!
+    }else if (servMgr->password[0] != '\0' && http.isRequest(servMgr->password))
     {
         // ShoutCast broadcast
 
