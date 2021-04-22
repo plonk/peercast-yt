@@ -288,8 +288,6 @@ public:
 
     ChanInfo::PROTOCOL  outputProtocol;
 
-    bool                flowControl;
-
     Servent             *next;
 
     PCPStream           *pcpStream;

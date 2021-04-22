@@ -227,7 +227,6 @@ void Servent::reset()
 
     pcpStream = NULL;
 
-    flowControl = false;
     networkID.clear();
 
     chanID.clear();
