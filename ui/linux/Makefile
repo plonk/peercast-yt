@@ -6,8 +6,8 @@ ifeq ($(WITH_RTMP),yes)
   CPPFLAGS += -DWITH_RTMP
 endif
 
-LDFLAGS = -fuse-ld=gold -pthread -static-libstdc++ -static-libgcc
-LIBS = -Wl,-Bstatic -Wl,-Bdynamic
+LDFLAGS = -fuse-ld=gold -pthread
+LIBS = 
 ifeq ($(WITH_RTMP),yes)
   LIBS += -lrtmp
 endif
