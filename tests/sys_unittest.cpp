@@ -176,7 +176,7 @@ TEST_F(SysFixture, createSocket)
         std::thread serverThread(serverProc, m_sys);
         sock = m_sys->createSocket();
         ASSERT_NO_THROW(sock->open(Host(127 << 24 | 1, 7144)));
-        m_sys->sleep(50); // let the server bind
+        m_sys->sleep(500); // let the server bind
         ASSERT_NO_THROW(sock->connect());
         ASSERT_NO_THROW(h = sock->getLocalHost());
         ASSERT_EQ("127.0.0.1:0", h.str());
@@ -189,7 +189,7 @@ TEST_F(SysFixture, createSocket)
         std::thread serverThread(serverProc, m_sys);
         sock = m_sys->createSocket();
         ASSERT_NO_THROW(sock->open(Host(IP::parse("::1"), 7144)));
-        m_sys->sleep(50); // let the server bind
+        m_sys->sleep(500); // let the server bind
         ASSERT_NO_THROW(sock->connect());
         ASSERT_NO_THROW(h = sock->getLocalHost());
         ASSERT_EQ("[::1]:0", h.str());
