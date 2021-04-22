@@ -216,6 +216,11 @@ json JrpcApi::fetch(json::array_t params)
         std::string contact = params[4];
         int bitrate         = params[5];
         std::string typeStr = params[6];
+        std::string network;
+        if (params[7].is_null())
+            network = "ipv4";
+        else
+            network = params[7];
 
         ChanInfo info;
         info.name    = name.c_str();
@@ -241,6 +246,9 @@ json JrpcApi::fetch(json::array_t params)
         if (!c)
         {
             throw application_error(kUnknownError, "failed to create channel");
+        }
+        if (network == "ipv6") {
+            c->ipVersion = Channel::IP_V6;
         }
         c->startURL(url.c_str());
 
