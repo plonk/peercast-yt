@@ -79,8 +79,6 @@ TEST_F(ServentFixture, initialState)
 
     // GnuPacketBuffer     outPacketsNorm, outPacketsPri;
 
-    ASSERT_EQ(false, s.flowControl);
-
     ASSERT_EQ(nullptr, s.next);
 
     ASSERT_EQ(nullptr, s.pcpStream);
