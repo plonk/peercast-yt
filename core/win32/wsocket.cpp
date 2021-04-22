@@ -335,6 +335,11 @@ void WSAClientSocket::bind(const Host &h)
     if ((sockNum = socket(PF_INET6, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET)
         throw SockException("Can`t open socket");
 
+    int disable = 0;
+    if (setsockopt(sockNum, IPPROTO_IPV6,  IPV6_V6ONLY, (char*) &disable, sizeof(disable)) == SOCKET_ERROR) {
+        throw SockException("Can't reset V6ONLY");
+    }
+
     setBlocking(false);
     setReuse(true);
 
