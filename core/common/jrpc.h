@@ -192,7 +192,7 @@ public:
         ({
             { "bumpChannel",             &JrpcApi::bumpChannel,             { "channelId" } },
             { "clearLog",                &JrpcApi::clearLog,                {} },
-            { "fetch",                   &JrpcApi::fetch,                   { "url", "name", "desc", "genre", "contact", "bitrate", "type" } },
+            { "fetch",                   &JrpcApi::fetch,                   { "url", "name", "desc", "genre", "contact", "bitrate", "type", "network" } },
             { "getChannelConnections",   &JrpcApi::getChannelConnections,   { "channelId" } },
             { "getChannelInfo",          &JrpcApi::getChannelInfo,          { "channelId" } },
             { "getChannelRelayTree",     &JrpcApi::getChannelRelayTree,     { "channelId" } },
