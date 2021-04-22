@@ -226,13 +226,15 @@ void WSAClientSocket::checkTimeout(bool r, bool w)
 // --------------------------------------------------
 Host WSAClientSocket::getLocalHost()
 {
-    struct sockaddr_in localAddr;
+    struct sockaddr_in6 localAddr;
 
-    int len = sizeof(localAddr);
-    if (getsockname(sockNum, (sockaddr *)&localAddr, &len) == 0)
-        return Host(SWAP4(localAddr.sin_addr.s_addr),0);
-    else
-        return Host(0,0);
+    socklen_t len = sizeof(localAddr);
+    if (getsockname(sockNum, (sockaddr *)&localAddr, &len) == 0) {
+        return Host(IP(localAddr.sin6_addr), 0);
+    } else {
+        int err = WSAGetLastError();
+        throw SockException("getsockname failed", err);
+    }
 }
 
 // --------------------------------------------------
