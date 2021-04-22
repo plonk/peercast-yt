@@ -47,6 +47,14 @@ public:
 };
 
 // -------------------------------------
+class LogicError : public GeneralException
+{
+public:
+    LogicError(const char *m) : GeneralException(m) {}
+    LogicError(const char *m, int e) : GeneralException(m, e) {}
+};
+
+// -------------------------------------
 class ArgumentException : public GeneralException
 {
 public:

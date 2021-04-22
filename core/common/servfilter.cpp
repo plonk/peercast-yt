@@ -62,12 +62,16 @@ bool ServFilter::matches(int fl, const Host& h) const
     case T_HOSTNAME:
         return h.ip == IP(ClientSocket::getIP(pattern.c_str()));
     case T_SUFFIX:
-        std::string str;
-        if (sys->getHostnameByAddress(h.ip, str)) {
-            return str::has_suffix(str, pattern);
-        } else {
-            return false;
+        {
+            std::string str;
+            if (sys->getHostnameByAddress(h.ip, str)) {
+                return str::has_suffix(str, pattern);
+            } else {
+                return false;
+            }
         }
+    default:
+        throw LogicError("matches: Unknown ServFilter type");
     }
 }
 
@@ -110,6 +114,8 @@ std::string ServFilter::getPattern() const
         return pattern;
     case T_SUFFIX:
         return pattern;
+    default:
+        throw LogicError("getPattern: Unknown ServFilter type");
     }
 }
 
