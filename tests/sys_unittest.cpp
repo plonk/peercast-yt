@@ -181,8 +181,8 @@ TEST_F(SysFixture, createSocket)
         ASSERT_NO_THROW(h = sock->getLocalHost());
         ASSERT_EQ("127.0.0.1:0", h.str());
         serverThread.join();
-        delete serv;
         delete sock;
+        delete serv;
     }
 
     {
@@ -194,8 +194,8 @@ TEST_F(SysFixture, createSocket)
         ASSERT_NO_THROW(h = sock->getLocalHost());
         ASSERT_EQ("[::1]:0", h.str());
         serverThread.join();
-        delete serv;
         delete sock;
+        delete serv;
     }
 }
 
