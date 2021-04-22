@@ -67,6 +67,8 @@
 
     "Refresh"                 : "更新",
 
+    "Build date and time"    : "ビルド日時",
+
     // speedtest.html
     "Remove"                  : "削除",
     "Speedtest"               : "帯域チェック",

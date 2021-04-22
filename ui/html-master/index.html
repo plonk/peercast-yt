@@ -57,6 +57,10 @@
       <th class="left-heading">{#Host options}</th>
       <TD>{@if servMgr.isRoot}{#Root}{@end} {@if servMgr.isPrivate}{#Licensed}{@end} {@if servMgr.forceYP}{#ForceYP}{@end}</TD>
     </TR>
+    <tr align=left>
+      <th class="left-heading">{#Build date and time}</th>
+      <td>{$servMgr.buildDateTime}</td>
+    </tr>
   </TABLE>
 
   <table class="table-panel" class="normal">
