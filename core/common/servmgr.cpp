@@ -1901,6 +1901,8 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
 
     if (var == "version")
         buf = PCX_VERSTRING;
+    else if (var == "buildDateTime")
+        buf = __DATE__ " " __TIME__;
     else if (var == "uptime")
     {
         String str;
