@@ -148,3 +148,54 @@ TEST_F(SysFixture, getHostnameByAddressIPv6)
     EXPECT_TRUE(m_sys->getHostnameByAddress(IP::parse("2001:4860:4860::8844"), str));
     EXPECT_STREQ("dns.google", str.c_str());
 }
+
+#include <thread>
+
+static ClientSocket* serv;
+static void serverProc(Sys* sys)
+{
+    serv = sys->createSocket();
+    Host servhost(0, 7144);
+    serv->bind(servhost);
+    serv->accept();
+}
+
+TEST_F(SysFixture, createSocket)
+{
+    ClientSocket* sock;
+
+    ASSERT_NO_THROW(sock = m_sys->createSocket());
+    ASSERT_NE(nullptr, sock);
+
+    Host h;
+    ASSERT_THROW(h = sock->getLocalHost(), SockException);
+
+    delete sock;
+
+    {
+        std::thread serverThread(serverProc, m_sys);
+        sock = m_sys->createSocket();
+        ASSERT_NO_THROW(sock->open(Host(127 << 24 | 1, 7144)));
+        m_sys->sleep(50); // let the server bind
+        ASSERT_NO_THROW(sock->connect());
+        ASSERT_NO_THROW(h = sock->getLocalHost());
+        ASSERT_EQ("127.0.0.1:0", h.str());
+        serverThread.join();
+        delete serv;
+        delete sock;
+    }
+
+    {
+        std::thread serverThread(serverProc, m_sys);
+        sock = m_sys->createSocket();
+        ASSERT_NO_THROW(sock->open(Host(IP::parse("::1"), 7144)));
+        m_sys->sleep(50); // let the server bind
+        ASSERT_NO_THROW(sock->connect());
+        ASSERT_NO_THROW(h = sock->getLocalHost());
+        ASSERT_EQ("[::1]:0", h.str());
+        serverThread.join();
+        delete serv;
+        delete sock;
+    }
+}
+
