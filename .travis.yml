@@ -1,14 +1,10 @@
-dist: trusty
+dist: xenial
 sudo: false
 language: cpp
 compiler: gcc
 addons:
   apt:
-    sources:
-    - ubuntu-toolchain-r-test
     packages:
-    - gcc-6
-    - g++-6
     - libgtest-dev
     - librtmp-dev
 script: export CC=gcc-6 CXX=g++-6; make -C ui/linux && make -C ui/linux/tests && cd ui/linux/tests && ./test-all && cd ../../../bvt && cp -R ../ui/linux/peercast-yt . && ruby test-all.rb
