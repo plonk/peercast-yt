@@ -28,3 +28,30 @@ def assert(actual, opts = {})
     fail "#{actual.inspect} is not true-ish#{context}"
   end
 end
+
+require 'net/http'
+require 'ostruct'
+
+def http_get(url)
+  uri = URI(url)
+  Net::HTTP.start(uri.host, uri.port) do |http|
+    path = if uri.path.empty? then "/" else uri.path end
+    res = http.request_get(path)
+    return OpenStruct.new(code: res.code.to_i,
+                          headers: res,
+                          body: res.body)
+  end
+end
+
+def http_post(url, opts)
+  data = opts[:body] || ""
+  
+  uri = URI(url)
+  Net::HTTP.start(uri.host, uri.port) do |http|
+    path = if uri.path.empty? then "/" else uri.path end
+    res = http.request_post(path, data)
+    return OpenStruct.new(code: res.code.to_i,
+                          headers: res,
+                          body: res.body)
+  end
+end
