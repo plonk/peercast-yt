@@ -3,7 +3,9 @@ require 'json'
 
 spawn_peercast
 
-["127.0.0.1", "[::1]"].each do |host|
+["127.0.0.1",
+ #"[::1]"
+].each do |host|
   response = http_get("http://#{host}:7144/api/1")
   assert_eq(200, response.code)
   json = JSON.parse(response.body)

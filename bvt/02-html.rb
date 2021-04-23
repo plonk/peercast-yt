@@ -2,7 +2,9 @@ require_relative 'common'
 
 spawn_peercast
 
-["127.0.0.1", "[::1]"].each do |host|
+["127.0.0.1",
+ #"[::1]"
+].each do |host|
   response = http_get("http://#{host}:7144")
   assert_eq(302, response.code)
   assert_eq('/html/en/index.html', response.headers["Location"])
