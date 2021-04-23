@@ -34,7 +34,7 @@ require 'ostruct'
 
 def http_get(url)
   uri = URI(url)
-  Net::HTTP.start(uri.host, uri.port) do |http|
+  Net::HTTP.start(uri.host.gsub(/[\[\]]/,''), uri.port) do |http|
     path = if uri.path.empty? then "/" else uri.path end
     res = http.request_get(path)
     return OpenStruct.new(code: res.code.to_i,
@@ -47,7 +47,7 @@ def http_post(url, opts)
   data = opts[:body] || ""
   
   uri = URI(url)
-  Net::HTTP.start(uri.host, uri.port) do |http|
+  Net::HTTP.start(uri.host.gsub(/[\[\]]/,''), uri.port) do |http|
     path = if uri.path.empty? then "/" else uri.path end
     res = http.request_post(path, data)
     return OpenStruct.new(code: res.code.to_i,
