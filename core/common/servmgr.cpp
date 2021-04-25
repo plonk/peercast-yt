@@ -40,6 +40,7 @@ ServMgr::ServMgr()
     , uptestServiceRegistry(new UptestServiceRegistry())
     , rtmpServerMonitor(std::string(peercastApp->getPath()) + "rtmp-server")
     , randomizeBroadcastingChannelID(true)
+    , sendPortAtomWhenFirewallUnknown(true)
 {
     authType = AUTH_COOKIE;
     cookieList.init();
@@ -938,7 +939,6 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
     iniFile.writeIntValue("maxServIn", this->maxServIn);
     iniFile.writeStrValue("chanLog", this->chanLog);
     iniFile.writeStrValue("networkID", networkID.str());
-    iniFile.writeBoolValue("randomizeBroadcastingChannelID", randomizeBroadcastingChannelID);
 
     iniFile.writeSection("Broadcast");
     iniFile.writeIntValue("broadcastMsgInterval", chanMgr->broadcastMsgInterval);
@@ -1020,6 +1020,10 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
         if (sh->type != ServHost::T_NONE)
             writeServHost(iniFile, *sh);
     }
+
+    iniFile.writeSection("Flags");
+    iniFile.writeBoolValue("randomizeBroadcastingChannelID", randomizeBroadcastingChannelID);
+    iniFile.writeBoolValue("sendPortAtomWhenFirewallUnknown", sendPortAtomWhenFirewallUnknown);
 }
 
 // --------------------------------------------------
@@ -1104,8 +1108,6 @@ void ServMgr::loadSettings(const char *fn)
                 chanMgr->broadcastID.fromStr(iniFile.getStrValue());
             }else if (iniFile.isName("htmlPath"))
                 strcpy(servMgr->htmlPath, iniFile.getStrValue());
-            else if (iniFile.isName("randomizeBroadcastingChannelID"))
-                servMgr->randomizeBroadcastingChannelID = iniFile.getBoolValue();
             else if (iniFile.isName("maxControlConnections"))
             {
                 servMgr->maxControl = iniFile.getIntValue();
@@ -1349,6 +1351,12 @@ void ServMgr::loadSettings(const char *fn)
                 }
                 servMgr->addHost(h, type, time);
             }
+
+            // Experimental feature flags
+            else if (iniFile.isName("randomizeBroadcastingChannelID"))
+                servMgr->randomizeBroadcastingChannelID = iniFile.getBoolValue();
+            else if (iniFile.isName("sendPortAtomWhenFirewallUnknown"))
+                servMgr->sendPortAtomWhenFirewallUnknown = iniFile.getBoolValue();
         }
     }
 

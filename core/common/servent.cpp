@@ -1026,9 +1026,16 @@ void Servent::writeHeloAtom(AtomStream &atom, bool sendPort, bool sendPing, bool
 void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, String &agent, bool isTrusted)
 {
     int ipv = rhost.ip.isIPv4Mapped() ? 4 : 6;
-
+    if (servMgr->sendPortAtomWhenFirewallUnknown)
     {
         bool sendPort = (servMgr->getFirewall(ipv) != ServMgr::FW_ON);
+        bool testFW   = (servMgr->getFirewall(ipv) == ServMgr::FW_UNKNOWN);
+        bool sendBCID = isTrusted && chanMgr->isBroadcasting();
+
+        writeHeloAtom(atom, sendPort, testFW, sendBCID, servMgr->sessionID, servMgr->serverHost.port, chanMgr->broadcastID);
+    }else
+    {
+        bool sendPort = (servMgr->getFirewall(ipv) == ServMgr::FW_OFF);
         bool testFW   = (servMgr->getFirewall(ipv) == ServMgr::FW_UNKNOWN);
         bool sendBCID = isTrusted && chanMgr->isBroadcasting();
 
