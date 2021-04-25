@@ -382,10 +382,11 @@ Host UClientSocket::getLocalHost()
     struct sockaddr_in6 localAddr;
 
     socklen_t len = sizeof(localAddr);
-    if (getsockname(sockNum, (sockaddr *)&localAddr, &len) == 0)
+    if (getsockname(sockNum, (sockaddr *)&localAddr, &len) == 0) {
         return Host(IP(localAddr.sin6_addr), 0);
-    else
-        return Host(0, 0);
+    } else {
+        throw SockException("getsockname failed", errno);
+    }
 }
 
 // --------------------------------------------------

@@ -226,13 +226,15 @@ void WSAClientSocket::checkTimeout(bool r, bool w)
 // --------------------------------------------------
 Host WSAClientSocket::getLocalHost()
 {
-    struct sockaddr_in localAddr;
+    struct sockaddr_in6 localAddr;
 
-    int len = sizeof(localAddr);
-    if (getsockname(sockNum, (sockaddr *)&localAddr, &len) == 0)
-        return Host(SWAP4(localAddr.sin_addr.s_addr),0);
-    else
-        return Host(0,0);
+    socklen_t len = sizeof(localAddr);
+    if (getsockname(sockNum, (sockaddr *)&localAddr, &len) == 0) {
+        return Host(IP(localAddr.sin6_addr), 0);
+    } else {
+        int err = WSAGetLastError();
+        throw SockException("getsockname failed", err);
+    }
 }
 
 // --------------------------------------------------
@@ -334,6 +336,11 @@ void WSAClientSocket::bind(const Host &h)
 
     if ((sockNum = socket(PF_INET6, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET)
         throw SockException("Can`t open socket");
+
+    int disable = 0;
+    if (setsockopt(sockNum, IPPROTO_IPV6,  IPV6_V6ONLY, (char*) &disable, sizeof(disable)) == SOCKET_ERROR) {
+        throw SockException("Can't reset V6ONLY");
+    }
 
     setBlocking(false);
     setReuse(true);
