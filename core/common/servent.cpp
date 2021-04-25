@@ -1008,23 +1008,32 @@ int Servent::givProc(ThreadInfo *thread)
 }
 
 // -----------------------------------
+void Servent::writeHeloAtom(AtomStream &atom, bool sendPort, bool sendPing, bool sendBCID, const GnuID& sessionID, uint16_t port, const GnuID& broadcastID)
+{
+     atom.writeParent(PCP_HELO, 3 + (sendPort?1:0) + (sendPing?1:0) + (sendBCID?1:0));
+         atom.writeString(PCP_HELO_AGENT, PCX_AGENT);
+         atom.writeInt(PCP_HELO_VERSION, PCP_CLIENT_VERSION);
+         atom.writeBytes(PCP_HELO_SESSIONID, sessionID.id, 16);
+         if (sendPort)
+              atom.writeShort(PCP_HELO_PORT, port);
+         if (sendPing)
+              atom.writeShort(PCP_HELO_PING, port);
+         if (sendBCID)
+              atom.writeBytes(PCP_HELO_BCID, broadcastID.id, 16);
+}
+
+// -----------------------------------
 void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, String &agent, bool isTrusted)
 {
     int ipv = rhost.ip.isIPv4Mapped() ? 4 : 6;
-    bool nonFW = (servMgr->getFirewall(ipv) != ServMgr::FW_ON);
-    bool testFW = (servMgr->getFirewall(ipv) == ServMgr::FW_UNKNOWN);
-    bool sendBCID = isTrusted && chanMgr->isBroadcasting();
 
-    atom.writeParent(PCP_HELO, 3 + (testFW?1:0) + (nonFW?1:0) + (sendBCID?1:0));
-        atom.writeString(PCP_HELO_AGENT, PCX_AGENT);
-        atom.writeInt(PCP_HELO_VERSION, PCP_CLIENT_VERSION);
-        atom.writeBytes(PCP_HELO_SESSIONID, servMgr->sessionID.id, 16);
-        if (nonFW)
-            atom.writeShort(PCP_HELO_PORT, servMgr->serverHost.port);
-        if (testFW)
-            atom.writeShort(PCP_HELO_PING, servMgr->serverHost.port);
-        if (sendBCID)
-            atom.writeBytes(PCP_HELO_BCID, chanMgr->broadcastID.id, 16);
+    {
+        bool sendPort = (servMgr->getFirewall(ipv) != ServMgr::FW_ON);
+        bool testFW   = (servMgr->getFirewall(ipv) == ServMgr::FW_UNKNOWN);
+        bool sendBCID = isTrusted && chanMgr->isBroadcasting();
+
+        writeHeloAtom(atom, sendPort, testFW, sendBCID, servMgr->sessionID, servMgr->serverHost.port, chanMgr->broadcastID);
+    }
 
     LOG_DEBUG("PCP outgoing waiting for OLEH..");
 
