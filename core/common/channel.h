@@ -254,6 +254,8 @@ public:
     std::string  authSecret();
     static std::string renderHexDump(const std::string& in);
 
+    static const char* guessContentType(const std::string& data);
+
     ::String            mount;
     ChanMeta            insertMeta;
     ChanPacket          headPack;

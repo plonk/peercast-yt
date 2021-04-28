@@ -1429,6 +1429,14 @@ std::string Channel::getBufferString()
 
     return buf;
 }
+// -----------------------------------
+const char* Channel::guessContentType(const std::string& data)
+{
+    if (str::has_prefix(data, "FLV\x01"))
+        return "FLV";
+    else
+        return "UNKNOWN";
+}
 
 // -----------------------------------
 bool Channel::writeVariable(Stream &out, const String &var)
@@ -1480,7 +1488,13 @@ bool Channel::writeVariable(Stream &out, const String &var)
     }
     else if (var == "type")
         buf = info.getTypeStr();
-    else if (var == "typeLong")
+    else if (var == "typeWithGuess")
+    {
+        if (info.contentType == "UNKNOWN")
+            buf = guessContentType(std::string(headPack.data, headPack.data + headPack.len));
+        else
+            buf = info.getTypeStr();
+    }else if (var == "typeLong")
         buf = info.getTypeStringLong();
     else if (var == "ext")
         buf = info.getTypeExt();
