@@ -849,3 +849,111 @@ TEST_F(ServentFixture, fileNameToMimeType)
     ASSERT_STREQ(MIME_ICO, Servent::fileNameToMimeType("a.ico"));
     ASSERT_STREQ(nullptr, Servent::fileNameToMimeType("a.txt"));
 }
+
+#include "atom2.h"
+#include "pcp.h"
+
+TEST_F(ServentFixture, writeHeloAtom_all)
+{
+    StringStream s;
+    AtomStream atom(s);
+
+    //void Servent::writeHeloAtom(AtomStream &atom, bool sendPort, bool sendPing, bool sendBCID, const GnuID& sessionID, uint16_t port, const GnuID& broadcastID)
+    Servent::writeHeloAtom(atom, true, true, true, GnuID("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"), 7144, GnuID("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"));
+
+    Atom expected {
+        "helo", {
+            { "agnt", PCX_AGENT },
+            { "ver", PCP_CLIENT_VERSION },
+            { "sid", GnuID("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA") },
+            { "port", (short) 7144 },
+            { "ping", (short) 7144 },
+            { "bcid", GnuID("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF") }
+        }
+    };
+    ASSERT_EQ(expected.serialize(), s.str());
+
+    s.rewind();
+
+    int nchildren, size;
+    ID4 id;
+    char buf[17] = "";
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("helo", id.getString().str());
+    ASSERT_EQ(6, nchildren);
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("agnt", id.getString().str());
+    ASSERT_TRUE( size > 0 );
+    atom.skip(0, size);
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("ver", id.getString().str());
+    ASSERT_EQ(4, size);
+    atom.skip(0, 4);
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("sid", id.getString().str());
+    ASSERT_EQ(16, size);
+    atom.readBytes(buf, 16);
+    ASSERT_STREQ("\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa",
+                 buf);
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("port", id.getString().str());
+    ASSERT_EQ(2, size);
+    ASSERT_EQ(7144, atom.readShort());
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("ping", id.getString().str());
+    ASSERT_EQ(2, size);
+    ASSERT_EQ(7144, atom.readShort());
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("bcid", id.getString().str());
+    ASSERT_EQ(16, size);
+    atom.readBytes(buf, 16);
+    ASSERT_STREQ("\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff",
+                 buf);
+
+    ASSERT_EQ(s.str().size(), s.getPosition());
+}
+
+TEST_F(ServentFixture, writeHeloAtom_none)
+{
+    StringStream s;
+    AtomStream atom(s);
+
+    //void Servent::writeHeloAtom(AtomStream &atom, bool sendPort, bool sendPing, bool sendBCID, const GnuID& sessionID, uint16_t port, const GnuID& broadcastID)
+    Servent::writeHeloAtom(atom, false, false, false, GnuID("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"), 7144, GnuID("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"));
+
+    s.rewind();
+
+    int nchildren, size;
+    ID4 id;
+    char buf[17] = "";
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("helo", id.getString().str());
+    ASSERT_EQ(3, nchildren);
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("agnt", id.getString().str());
+    ASSERT_TRUE( size > 0 );
+    atom.skip(0, size);
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("ver", id.getString().str());
+    ASSERT_EQ(4, size);
+    atom.skip(0, 4);
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("sid", id.getString().str());
+    ASSERT_EQ(16, size);
+    atom.readBytes(buf, 16);
+    ASSERT_STREQ("\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa",
+                 buf);
+
+    ASSERT_EQ(s.str().size(), s.getPosition());
+}
