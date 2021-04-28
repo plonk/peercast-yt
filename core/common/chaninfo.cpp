@@ -522,9 +522,7 @@ void ChanInfo::readInfoAtoms(AtomStream &atom, int numc)
             atom.readString(comment.data, sizeof(comment.data), d);
         }else if (id == PCP_CHAN_INFO_TYPE)
         {
-            char type[16];
-            atom.readString(type, sizeof(type), d);
-            contentType = type;
+            atom.readString(contentType.data, sizeof(contentType.data), d);
         }else if (id == PCP_CHAN_INFO_STREAMTYPE)
         {
             atom.readString(MIMEType.data, sizeof(MIMEType.data), d);
