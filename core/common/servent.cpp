@@ -1599,6 +1599,8 @@ int Servent::incomingProc(ThreadInfo *thread)
 // -----------------------------------
 void Servent::processStream(bool doneHandshake, ChanInfo &chanInfo)
 {
+    ASSERT(doneHandshake == false);
+
     if (!doneHandshake)
     {
         setStatus(S_HANDSHAKE);

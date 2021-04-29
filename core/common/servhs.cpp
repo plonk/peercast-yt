@@ -1993,12 +1993,11 @@ void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd, size_t plen)
 
 // -----------------------------------
 // Windows Media HTTP Push Distribution Protocol
-#define ASSERT(x)
 void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
 {
     // At this point, http has read all the headers.
 
-    ASSERT(http.headers["CONTENT-TYPE"] == "application/x-wms-pushsetup");
+    ASSERT(http.headers.get("CONTENT-TYPE") == "application/x-wms-pushsetup");
     LOG_DEBUG("%s", nlohmann::json(http.headers.m_headers).dump().c_str());
 
     int size = std::atoi(http.headers.get("Content-Length").c_str());
@@ -2037,7 +2036,7 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
     http.readHeaders();
     LOG_DEBUG("Setup: %s", nlohmann::json(http.headers.m_headers).dump().c_str());
 
-    ASSERT(http.headers["CONTENT-TYPE"] == "application/x-wms-pushstart");
+    ASSERT(http.headers.get("CONTENT-TYPE") == "application/x-wms-pushstart");
 
     // -----------------------------------------
 
