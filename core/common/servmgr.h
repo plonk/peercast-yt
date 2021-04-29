@@ -200,7 +200,7 @@ public:
 
     unsigned int    getUptime()
     {
-        return sys->getTime()-startTime;
+        return sys->getTime() - startTime;
     }
 
     bool    needHosts()
@@ -214,7 +214,7 @@ public:
 
     bool    controlInFull()
     {
-        return numConnected(Servent::T_CIN)>=maxControl;
+        return numConnected(Servent::T_CIN) >= maxControl;
     }
 
     bool    relaysFull()
@@ -228,7 +228,7 @@ public:
 
     bool    bitrateFull(unsigned int br)
     {
-        return maxBitrateOut ? (BYTES_TO_KBPS(totalOutput(false))+br) > maxBitrateOut  : false;
+        return maxBitrateOut ? (BYTES_TO_KBPS(totalOutput(false)) + br) > maxBitrateOut  : false;
     }
 
     void logLevel(int newLevel);
