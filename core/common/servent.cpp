@@ -906,7 +906,19 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
         do
         {
             StreamRequestDenialReason reason = StreamRequestDenialReason::None;
-            chanReady = canStream(ch, &reason);
+            {
+                static std::mutex streamRequestMutex;
+                std::lock_guard<std::mutex> lock(streamRequestMutex);
+
+                chanReady = canStream(ch, &reason);
+                if (chanReady)
+                {
+                    // リソース制約の計算のために、この時点で該当チャ
+                    // ンネルをリレー・視聴している servent であると設
+                    // 定する。
+                    chanID = chanInfo.id;
+                }
+            }
             LOG_DEBUG("chanReady = %d; reason = %s", chanReady, denialReasonToName(reason));
 
             if (chanReady)
@@ -1611,6 +1623,8 @@ void Servent::processStream(bool doneHandshake, ChanInfo &chanInfo)
         if (!handshakeStream(chanInfo))
             return;
     }
+
+    ASSERT(chanID.isSet());
 
     if (chanInfo.id.isSet())
     {
