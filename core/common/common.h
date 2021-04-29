@@ -130,5 +130,8 @@ extern void LOG_WARN(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)
 extern void LOG_ERROR(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
 extern void LOG_FATAL(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
 
+// ----------------------------------
+#define ASSERT(expr) do{if(!(expr))LOG_WARN("Assertion failed: " #expr " at " __FILE__ ":%d", __LINE__);}while(0)
+
 #endif
 
