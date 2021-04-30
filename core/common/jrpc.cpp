@@ -249,6 +249,7 @@ json JrpcApi::fetch(json::array_t params)
         }
         if (network == "ipv6") {
             c->ipVersion = Channel::IP_V6;
+            servMgr->checkFirewallIPv6();
         }
         c->startURL(url.c_str());
 
