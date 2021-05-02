@@ -826,13 +826,15 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
                 if (http.isHeader("Cookie"))
                 {
                     LOG_DEBUG("Got cookie: %s", arg);
+                    const std::string idKey = str::STR(servMgr->serverHost.port, "_id");
                     auto assignments = str::split(arg, "; ");
+
                     for (auto assignment : assignments) {
                         auto sides = str::split(assignment, "=", 2);
                         if (sides.size() != 2) {
                             LOG_ERROR("Invalid Cookie header: expected '='");
                             break;
-                        } else if (sides[0] == "id") {
+                        } else if (sides[0] == idKey) {
                             Cookie gotCookie;
                             gotCookie.set(sides[1].c_str(), sock->host.ip);
 
@@ -1350,9 +1352,9 @@ void Servent::CMD_login(const char* cmd, HTTP& http, String& jumpStr)
 
     http.writeLine(HTTP_SC_FOUND);
     if (servMgr->cookieList.neverExpire)
-        http.writeLineF("%s id=%s; path=/; expires=\"Mon, 01-Jan-3000 00:00:00 GMT\"", HTTP_HS_SETCOOKIE, idstr);
+        http.writeLineF("%s %d_id=%s; path=/; expires=\"Mon, 01-Jan-3000 00:00:00 GMT\"", HTTP_HS_SETCOOKIE, (int) servMgr->serverHost.port, idstr);
     else
-        http.writeLineF("%s id=%s; path=/", HTTP_HS_SETCOOKIE, idstr);
+        http.writeLineF("%s %d_id=%s; path=/", HTTP_HS_SETCOOKIE, (int) servMgr->serverHost.port, idstr);
 
     if (query.get("requested_path") != "")
         http.writeLineF("Location: %s", query.get("requested_path").c_str());
