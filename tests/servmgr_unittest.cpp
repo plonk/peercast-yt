@@ -105,6 +105,8 @@ TEST_F(ServMgrFixture, initialState)
     // String              chanLog;
     ASSERT_STREQ("", m.chanLog.cstr());
     // ChannelDirectory    channelDirectory;
+    // bool                publicDirectoryEnabled;
+    ASSERT_FALSE(m.publicDirectoryEnabled);
     // FW_STATE            firewalled;
     ASSERT_EQ(ServMgr::FW_UNKNOWN, m.firewalled);
 
@@ -317,6 +319,14 @@ TEST_F(ServMgrFixture, writeVariable)
     // channelDirectory.*
 
     mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "publicDirectoryEnabled"));
+    ASSERT_STREQ("0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(m.writeVariable(mem, "genrePrefix"));
+    ASSERT_STREQ("", mem.str().c_str());
+
+    mem.str("");
     ASSERT_TRUE(m.writeVariable(mem, "test"));
     ASSERT_STREQ("かきくけこABCDabcd", mem.str().c_str());
 }
@@ -416,6 +426,8 @@ TEST_F(ServMgrFixture, doSaveSettings)
               "htmlPath = html/en\r\n"
               "maxServIn = 50\r\n"
               "chanLog = \r\n"
+              "publicDirectory = No\r\n"
+              "genrePrefix = \r\n"
               "networkID = 00000000000000000000000000000000\r\n"
               "randomizeBroadcastingChannelID = Yes\r\n"
               "\r\n"
