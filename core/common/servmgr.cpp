@@ -36,6 +36,7 @@
 // -----------------------------------
 ServMgr::ServMgr()
     : relayBroadcast(30) // オリジナルでは未初期化。
+    , publicDirectoryEnabled(false)
     , channelDirectory(new ChannelDirectory())
     , uptestServiceRegistry(new UptestServiceRegistry())
     , rtmpServerMonitor(std::string(peercastApp->getPath()) + "rtmp-server")
@@ -938,6 +939,8 @@ void ServMgr::doSaveSettings(IniFileBase& iniFile)
     iniFile.writeStrValue("htmlPath", this->htmlPath);
     iniFile.writeIntValue("maxServIn", this->maxServIn);
     iniFile.writeStrValue("chanLog", this->chanLog);
+    iniFile.writeBoolValue("publicDirectory", this->publicDirectoryEnabled);
+
     iniFile.writeStrValue("networkID", networkID.str());
 
     iniFile.writeSection("Broadcast");
@@ -1144,6 +1147,8 @@ void ServMgr::loadSettings(const char *fn)
                 servMgr->maxServIn = iniFile.getIntValue();
             else if (iniFile.isName("chanLog"))
                 servMgr->chanLog.set(iniFile.getStrValue(), String::T_ASCII);
+            else if (iniFile.isName("publicDirectory"))
+                servMgr->publicDirectoryEnabled = iniFile.getBoolValue();
 
             else if (iniFile.isName("rootMsg"))
                 rootMsg.set(iniFile.getStrValue());
@@ -2039,6 +2044,12 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var.startsWith("uptestServiceRegistry."))
     {
         return uptestServiceRegistry->writeVariable(out, var + strlen("uptestServiceRegistry."));
+    }else if (var == "publicDirectoryEnabled")
+    {
+        buf = to_string(publicDirectoryEnabled);
+    }else if (var == "genrePrefix")
+    {
+        buf = genrePrefix;
     }else if (var == "transcodingEnabled")
     {
         buf = to_string(servMgr->transcodingEnabled);
