@@ -30,7 +30,7 @@
 #include "str.h"
 #include "cgi.h"
 #include "template.h"
-#include "assets.h"
+#include "public.h"
 #include "uptest.h"
 #include "gnutella.h"
 
@@ -412,6 +412,27 @@ void Servent::handshakeGET(HTTP &http)
             http.writeLineF("%s %zu", HTTP_HS_LENGTH, response.size());
             http.writeLine("");
             http.writeString(response.c_str());
+        }
+    }else if (strcmp(fn, "/public")== 0 ||
+              strncmp(fn, "/public/", strlen("/public/"))==0)
+    {
+        // 公開ディレクトリ
+
+        http.readHeaders();
+
+        if (!servMgr->publicDirectoryEnabled)
+        {
+            throw HTTPException(HTTP_SC_FORBIDDEN, 403);
+        }
+
+        try
+        {
+            PublicController controller(peercastApp->getPath() + std::string("public"));
+            http.send(controller(http.getRequest(), *sock, sock->host));
+        } catch (GeneralException& e)
+        {
+            LOG_ERROR("Error: %s", e.msg);
+            throw HTTPException(HTTP_SC_SERVERERROR, 500);
         }
     }else if (str::is_prefix_of("/assets/", fn))
     {
