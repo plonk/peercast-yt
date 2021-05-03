@@ -1043,6 +1043,11 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
                 servMgr->channelDirectory->addFeed(str.cstr());
             }
         }
+        else if (strncmp(curr, "channel_feed_public", strlen("channel_feed_public")) == 0)
+        {
+            int index = atoi(curr + strlen("channel_feed_public"));
+            servMgr->channelDirectory->setFeedPublic(index, true);
+        }
 
         // client
         else if (strcmp(curr, "clientactive") == 0)
