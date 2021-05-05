@@ -365,7 +365,7 @@ ClientSocket *UClientSocket::accept()
     UClientSocket *cs = new UClientSocket();
     cs->sockNum = conSock;
 
-    cs->host.port = from.sin6_port;
+    cs->host.port = ntohs(from.sin6_port);
     cs->host.ip = IP(from.sin6_addr);
 
     cs->setBlocking(false);
