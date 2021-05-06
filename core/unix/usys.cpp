@@ -219,6 +219,78 @@ bool USys::getHostnameByAddress(const IP& ip, std::string& out)
     }
 }
 
+// ---------------------------------
+std::string USys::getExecutablePath()
+{
+    // readlink does not append a null byte to the buffer, so we zero it out beforehand.
+    char path[PATH_MAX + 1] = "";
+    if (readlink("/proc/self/exe", path, PATH_MAX) == -1) {
+        throw GeneralException(str::format("%s: %s", __func__, strerror(errno)).c_str());
+    }
+    return path;
+}
+
+// ---------------------------------
+std::string USys::dirname(const std::string& path)
+{
+    std::string normal;
+
+    // 連続するスラッシュを１つにする。
+    for (int i = 0; i < path.size(); i++) {
+        if (path[i] == '/') {
+            if (path[i+1] != '/')
+                normal.push_back(path[i]);
+        } else {
+            normal.push_back(path[i]);
+        }
+    }
+
+    // ディレクトリ名末尾のスラッシュを削除する。
+    if (normal.size() > 1 && normal[normal.size() - 1] == '/')
+        normal.pop_back();
+
+    while (normal.size() && normal[normal.size() - 1] != '/')
+        normal.pop_back();
+
+    if (normal.empty()) {
+        return ".";
+    } else if (normal != "/") {
+        // ディレクトリ名末尾のスラッシュを削除する。
+        if (normal[normal.size() - 1] == '/')
+            normal.pop_back();
+    }
+
+    return normal;
+}
+
+// ---------------------------------
+std::string USys::joinPath(const std::vector<std::string>& vec)
+{
+    std::string result;
+
+    for (int i = 0; i < vec.size(); i++) {
+        std::string frag = vec[i];
+        if (frag.empty()) {
+            // 空文字列の要素はスキップする。
+        } else {
+            if (i == 0) {
+            } else {
+                while (frag[0] == '/') {
+                    frag.erase(0, 1);
+                }
+                if (frag.empty())
+                    continue;
+                result += "/";
+            }
+            while (frag.back() == '/') {
+                frag.pop_back();
+            }
+            result += frag;
+        }
+    }
+    return result;
+}
+
 #ifndef __APPLE__
 
 // ---------------------------------

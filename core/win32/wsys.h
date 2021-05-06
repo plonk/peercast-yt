@@ -47,6 +47,8 @@ public:
     std::vector<std::string> getAllIPAddresses() override;
     bool getHostnameByAddress(const IP& ip, std::string& out) override;
 
+    std::string getExecutablePath() override;
+
     HWND    mainWindow;
     peercast::Random rndGen;
 };

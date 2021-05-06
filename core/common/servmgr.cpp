@@ -38,7 +38,11 @@ ServMgr::ServMgr()
     : relayBroadcast(30) // オリジナルでは未初期化。
     , channelDirectory(new ChannelDirectory())
     , uptestServiceRegistry(new UptestServiceRegistry())
+#ifdef WIN32
     , rtmpServerMonitor(std::string(peercastApp->getPath()) + "rtmp-server")
+#else
+    , rtmpServerMonitor(sys->joinPath({ sys->dirname(sys->getExecutablePath()), "rtmp-server" }))
+#endif
     , randomizeBroadcastingChannelID(true)
     , sendPortAtomWhenFirewallUnknown(true)
 {

@@ -47,6 +47,14 @@ public:
 };
 
 // -------------------------------------
+class NotImplementedException : public GeneralException
+{
+public:
+    NotImplementedException(const char *m) : GeneralException(m) {}
+    NotImplementedException(const char *m, int e) : GeneralException(m, e) {}
+};
+
+// -------------------------------------
 class LogicError : public GeneralException
 {
 public:

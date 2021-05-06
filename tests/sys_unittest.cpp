@@ -201,3 +201,29 @@ TEST_F(SysFixture, createSocket)
     }
 }
 #endif
+
+TEST_F(SysFixture, getExecutablePath)
+{
+    std::string str;
+    ASSERT_NO_THROW(str = m_sys->getExecutablePath());
+    ASSERT_EQ('/', str[0]);
+    ASSERT_TRUE(str.size() > 1);
+}
+
+TEST_F(SysFixture, dirname)
+{
+    ASSERT_EQ("/usr", m_sys->dirname("/usr/lib"));
+    ASSERT_EQ("/", m_sys->dirname("/usr/"));
+    ASSERT_EQ(".", m_sys->dirname("usr"));
+    ASSERT_EQ("/", m_sys->dirname("/"));
+}
+
+TEST_F(SysFixture, joinPath)
+{
+    ASSERT_EQ("/etc/passwd", m_sys->joinPath( {"/etc", "passwd"} ));
+    ASSERT_EQ("/etc/passwd", m_sys->joinPath( {"/etc", "", "passwd"} ));
+    ASSERT_EQ("/etc/passwd", m_sys->joinPath( {"/etc/", "passwd"} ));
+    ASSERT_EQ("/etc/passwd", m_sys->joinPath( {"/etc/", "/passwd"} ));
+    ASSERT_EQ("/etc/passwd", m_sys->joinPath( {"/etc/", "/", "/passwd"} ));
+    ASSERT_EQ("./passwd", m_sys->joinPath( {".", "passwd"} ));
+}

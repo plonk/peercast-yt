@@ -109,6 +109,21 @@ public:
     static int   strnicmp(const char* s1, const char* s2, size_t n);
     static char* strcpy_truncate(char* dest, size_t destsize, const char* src);
 
+    virtual std::string getExecutablePath()
+    {
+        throw NotImplementedException(__func__);
+    }
+
+    virtual std::string dirname(const std::string&)
+    {
+        throw NotImplementedException(__func__);
+    }
+
+    virtual std::string joinPath(const std::vector<std::string>&)
+    {
+        throw NotImplementedException(__func__);
+    }
+
     unsigned int idleSleepTime;
 
     class LogBuffer *logBuf;
