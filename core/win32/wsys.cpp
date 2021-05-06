@@ -188,7 +188,7 @@ std::string WSys::getExecutablePath()
 {
     char path[1024];
     if (GetModuleFileNameA(NULL, path, sizeof(path)) == 0) {
-        throw GeneralException(std::format(__FUNCTION__ ": %d", GetLastError()));
+        throw GeneralException(std::format("%s: %d", __func__, GetLastError()));
     }
     return path;
 }
