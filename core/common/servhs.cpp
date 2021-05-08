@@ -1975,8 +1975,6 @@ void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd, size_t plen)
             info.srcProtocol = ChanInfo::SP_MMS;
         else if (stristr(arg, MIME_XPCP))
             info.srcProtocol = ChanInfo::SP_PCP;
-        else if (stristr(arg, MIME_XPEERCAST))
-            info.srcProtocol = ChanInfo::SP_PEERCAST;
 
         else if (stristr(arg, MIME_XSCPLS))
             info.contentType = ChanInfo::T_PLS;

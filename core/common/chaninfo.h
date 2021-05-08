@@ -78,7 +78,6 @@ public:
     enum PROTOCOL
     {
         SP_UNKNOWN,
-        SP_PEERCAST,
         SP_HTTP,
         SP_FILE,
         SP_MMS,

@@ -104,7 +104,6 @@ const char *ChanInfo::getProtocolStr(PROTOCOL t)
 {
     switch (t)
     {
-        case SP_PEERCAST: return "PEERCAST";
         case SP_HTTP: return "HTTP";
         case SP_FILE: return "FILE";
         case SP_MMS: return "MMS";
@@ -118,9 +117,7 @@ const char *ChanInfo::getProtocolStr(PROTOCOL t)
 // -----------------------------------
 ChanInfo::PROTOCOL ChanInfo::getProtocolFromStr(const char *str)
 {
-    if (Sys::stricmp(str, "PEERCAST")==0)
-        return SP_PEERCAST;
-    else if (Sys::stricmp(str, "HTTP")==0)
+    if (Sys::stricmp(str, "HTTP")==0)
         return SP_HTTP;
     else if (Sys::stricmp(str, "FILE")==0)
         return SP_FILE;

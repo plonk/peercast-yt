@@ -83,15 +83,6 @@ public:
 };
 
 // ------------------------------------------
-class PeercastStream : public ChannelStream
-{
-public:
-    void readHeader(Stream &, std::shared_ptr<Channel>) override;
-    int  readPacket(Stream &, std::shared_ptr<Channel>) override;
-    void readEnd(Stream &, std::shared_ptr<Channel>) override;
-};
-
-// ------------------------------------------
 class ChannelSource
 {
 public:

@@ -581,10 +581,6 @@ void Servent::handshakeStream_readHeaders(bool& gotPCP, unsigned int& reqPos, in
 // 状況に応じて this->outputProtocol を設定する。
 void Servent::handshakeStream_changeOutputProtocol(bool gotPCP, const ChanInfo& chanInfo)
 {
-    // 旧プロトコルへの切り替え？
-    if ((!gotPCP) && (outputProtocol == ChanInfo::SP_PCP))
-        outputProtocol = ChanInfo::SP_PEERCAST;
-
     // WMV ならば MMS(MMSH)
     if (outputProtocol == ChanInfo::SP_HTTP)
     {
@@ -670,9 +666,6 @@ void Servent::handshakeStream_returnStreamHeaders(AtomStream& atom,
         {
             sock->writeLineF("%s %d", PCX_HS_POS, streamPos);
             sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XPCP);
-        }else if (outputProtocol == ChanInfo::SP_PEERCAST)
-        {
-            sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XPEERCAST);
         }
     }
     sock->writeLine("");
@@ -1659,9 +1652,6 @@ void Servent::processStream(bool doneHandshake, ChanInfo &chanInfo)
         }else if (outputProtocol  == ChanInfo::SP_PCP)
         {
             sendPCPChannel();
-        }else if (outputProtocol  == ChanInfo::SP_PEERCAST)
-        {
-            sendPeercastChannel();
         }
     }
 
@@ -1896,61 +1886,6 @@ void Servent::sendRawMetaChannel(int interval)
             if ((sys->getTime()-lastWriteTime) > DIRECT_WRITE_TIMEOUT)
                 throw TimeoutException();
 
-            sys->sleepIdle();
-        }
-    }catch (StreamException &e)
-    {
-        LOG_ERROR("Stream channel: %s", e.msg);
-    }
-}
-
-// -----------------------------------
-void Servent::sendPeercastChannel()
-{
-    try
-    {
-        setStatus(S_CONNECTED);
-
-        auto ch = chanMgr->findChannelByID(chanID);
-        if (!ch)
-            throw StreamException("Channel not found");
-
-        LOG_DEBUG("Starting PeerCast stream: %s", ch->info.name.cstr());
-
-        sock->writeTag("PCST");
-
-        ChanPacket pack;
-
-        ch->headPack.writePeercast(*sock);
-
-        pack.init(ChanPacket::T_META, ch->insertMeta.data, ch->insertMeta.len, ch->streamPos);
-        pack.writePeercast(*sock);
-
-        streamPos = 0;
-        unsigned int syncPos=0;
-        while ((thread.active()) && sock->active())
-        {
-            ch = chanMgr->findChannelByID(chanID);
-            if (!ch)
-            {
-                throw StreamException("Channel not found");
-            }
-
-            ChanPacket rawPack;
-            if (ch->rawData.findPacket(streamPos, rawPack))
-            {
-                if ((rawPack.type == ChanPacket::T_DATA) || (rawPack.type == ChanPacket::T_HEAD))
-                {
-                    sock->writeTag("SYNC");
-                    sock->writeShort(4);
-                    sock->writeShort(0);
-                    sock->write(&syncPos, 4);
-                    syncPos++;
-
-                    rawPack.writePeercast(*sock);
-                }
-                streamPos = rawPack.pos + rawPack.len;
-            }
             sys->sleepIdle();
         }
     }catch (StreamException &e)
