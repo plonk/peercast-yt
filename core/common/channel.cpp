@@ -1063,8 +1063,10 @@ void Channel::updateInfo(const ChanInfo &newInfo)
     }
 
     ChanHitList *chl = chanMgr->findHitList(info);
-    if (chl)
+    if (chl) {
+        std::lock_guard<std::recursive_mutex> lock(chl->lock);
         chl->info = info;
+    }
 
     peercastApp->channelUpdate(&info);
 }

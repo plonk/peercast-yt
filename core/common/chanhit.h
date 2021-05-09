@@ -138,6 +138,8 @@ public:
 
     void         forEachHit(std::function<void(ChanHit*)> block);
 
+    std::recursive_mutex lock;
+
     bool         used;
     ChanInfo     info;
     ChanHit      *hit;
