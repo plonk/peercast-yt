@@ -51,20 +51,21 @@ public:
     class HostGraph
     {
     public:
-        HostGraph(std::shared_ptr<Channel> ch, ChanHitList *hitList)
+        HostGraph(std::shared_ptr<Channel> ch, ChanHitList *hitList, int ipVersion)
         {
             if (ch == nullptr)
                 throw std::invalid_argument("ch");
 
-            if (ch == nullptr)
+            if (hitList == nullptr)
                 throw std::invalid_argument("hitList");
 
             // 自分を追加する。
             {
                 Host uphost;
                 ChanHit self;
+                bool isTracker = ch->isBroadcasting();
 
-                if (!ch->isBroadcasting())
+                if (!isTracker)
                     uphost = ch->sourceHost.host;
 
                 self.initLocal(ch->localListeners(),
@@ -75,7 +76,9 @@ public:
                                ch->rawData.getOldestPos(),
                                ch->rawData.getLatestPos(),
                                ch->canAddRelay(),
-                               uphost);
+                               uphost,
+                               (ipVersion == 6));
+                self.tracker = isTracker;
 
                 m_hit[endpoint(&self)] = self;
                 m_children[self.uphost].push_back(endpoint(&self));
@@ -98,19 +101,20 @@ public:
                 m_children[p->uphost].push_back(h);
             }
 
-            // // 上流の項目が見付からないノードはルートにする。
-            // for (auto it = m_children.begin(); it != m_children.end(); ++it)
-            // {
-            //     try
-            //     {
-            //         m_hit.at(it->first);
-            //     }
-            //     catch (std::out_of_range&)
-            //     {
-            //         for (auto i : it->second)
-            //             m_children[Host()].push_back(i);
-            //     }
-            // }
+            // 上流の項目が見付からないノードはルートにする。
+            for (auto it = m_children.begin(); it != m_children.end(); ++it)
+            {
+                try
+                {
+                    if (it->first != Host())
+                        m_hit.at(it->first);
+                }
+                catch (std::out_of_range&)
+                {
+                    for (auto i : it->second)
+                        m_children[Host()].push_back(i);
+                }
+            }
         }
 
         Host endpoint(ChanHit *hit)
