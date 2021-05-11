@@ -309,6 +309,7 @@ private:
     void CMD_login(const char* cmd, HTTP& http, String& jumpStr);
     void CMD_logout(const char* cmd, HTTP& http, String& jumpStr);
     void CMD_redirect(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_portcheck4(const char* cmd, HTTP& http, String& jumpStr);
     void CMD_portcheck6(const char* cmd, HTTP& http, String& jumpStr);
     void CMD_refresh_speedtest(const char* cmd, HTTP& http, String& jumpStr);
     void CMD_shutdown(const char* cmd, HTTP& http, String& jumpStr);

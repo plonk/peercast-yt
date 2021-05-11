@@ -887,6 +887,19 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
 }
 
 // -----------------------------------
+void Servent::CMD_portcheck4(const char* cmd, HTTP& http, String& jumpStr)
+{
+    servMgr->checkFirewall();
+    if (!http.headers.get("Referer").empty())
+    {
+        jumpStr.sprintf("%s", http.headers.get("Referer").c_str());
+    }else
+    {
+        jumpStr.sprintf("/%s/index.html", servMgr->htmlPath);
+    }
+}
+
+// -----------------------------------
 void Servent::CMD_portcheck6(const char* cmd, HTTP& http, String& jumpStr)
 {
     servMgr->checkFirewallIPv6();
@@ -1790,6 +1803,9 @@ void Servent::handshakeCMD(HTTP& http, char *q)
         }else if (cmd == "logout")
         {
             CMD_logout(query.c_str(), http, jumpStr);
+        }else if (cmd == "portcheck4")
+        {
+            CMD_portcheck4(query.c_str(), http, jumpStr);
         }else if (cmd == "portcheck6")
         {
             CMD_portcheck6(query.c_str(), http, jumpStr);
