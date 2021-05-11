@@ -48,9 +48,12 @@ GeneralException::GeneralException(const char *m, int e)
             std::string fname(a + 1, b);
             if (!fname.empty()) {
                 int status;
-                char *demangled = abi::__cxa_demangle(fname.c_str(), NULL, NULL, &status);
+                char *demangled;
+                demangled = abi::__cxa_demangle(fname.c_str(), NULL, NULL, &status);
                 if (status == 0) {
-                    backtrace.push_back(str::STR(std::string(strings[i], a + 1), demangled, b));
+                    backtrace.push_back(std::string(strings[i], a + 1)
+                                        + demangled
+                                        + b);
                 } else {
                     backtrace.push_back(strings[i]);
                 }
@@ -59,6 +62,8 @@ GeneralException::GeneralException(const char *m, int e)
             } else {
                 backtrace.push_back(strings[i]);
             }
+        } else {
+            backtrace.push_back(strings[i]);
         }
     }
 #endif
