@@ -18,17 +18,16 @@ public:
 
     void SetUp()
     {
-        mock = new MockClientSocket();
+        mock = std::make_shared<MockClientSocket>();
         s.sock = mock;
     }
 
     void TearDown()
     {
-        delete mock;
     }
 
     Servent s;
-    MockClientSocket* mock;
+    std::shared_ptr<MockClientSocket> mock;
 };
 
 TEST_F(ServentFixture, initialState)

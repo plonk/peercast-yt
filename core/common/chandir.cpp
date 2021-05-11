@@ -106,7 +106,7 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
         return false;
     }
 
-    unique_ptr<ClientSocket> rsock(sys->createSocket());
+    auto rsock = sys->createSocket();
 
     try {
         LOG_TRACE("Connecting to %s ...", feed.host().c_str());

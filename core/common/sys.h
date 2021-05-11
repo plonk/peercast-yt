@@ -22,6 +22,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "common.h"
 
@@ -68,7 +69,7 @@ public:
     Sys();
     virtual ~Sys();
 
-    virtual class ClientSocket  *createSocket() = 0;
+    virtual std::shared_ptr<class ClientSocket>  createSocket() = 0;
     virtual bool            startThread(class ThreadInfo *);
     virtual bool            startWaitableThread(class ThreadInfo *);
     virtual void            waitThread(ThreadInfo *);

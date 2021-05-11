@@ -2,7 +2,6 @@
 #include "stream.h"
 #include "uptest.h"
 #include "threading.h"
-#include "defer.h"
 #include "socket.h"
 #include "version2.h"
 #include "xml.h"
@@ -208,8 +207,7 @@ std::string UptestEndpoint::download(const std::string& url)
     if (!host.ip)
         throw std::runtime_error("could not resolve host name");
 
-    ClientSocket* rsock = sys->createSocket();
-    Defer cb([=] { delete rsock; });
+    auto rsock = sys->createSocket();
     rsock->open(host);
     rsock->connect();
 
@@ -286,8 +284,7 @@ HTTPResponse UptestEndpoint::postRandomData(URI uri, size_t size)
     if (!host.ip)
         throw std::runtime_error("Could not resolve host name");
 
-    ClientSocket* rsock = sys->createSocket();
-    Defer cb([=] { delete rsock; });
+    auto rsock = sys->createSocket();
     rsock->open(host);
     rsock->connect();
 

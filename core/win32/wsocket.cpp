@@ -360,7 +360,7 @@ void WSAClientSocket::bind(const Host &h)
 }
 
 // --------------------------------------------------
-ClientSocket *WSAClientSocket::accept()
+std::shared_ptr<ClientSocket> WSAClientSocket::accept()
 {
     int fromSize = sizeof(sockaddr_in6);
     sockaddr_in6 from;
@@ -370,7 +370,7 @@ ClientSocket *WSAClientSocket::accept()
     if (conSock ==  INVALID_SOCKET)
         return NULL;
 
-    WSAClientSocket *cs = new WSAClientSocket();
+    auto cs = std::make_shared<WSAClientSocket>();
     cs->sockNum = conSock;
 
     cs->host.port = ntohs(from.sin6_port);

@@ -76,9 +76,9 @@ double USys::getDTime()
 }
 
 // ---------------------------------
-ClientSocket *USys::createSocket()
+std::shared_ptr<ClientSocket> USys::createSocket()
 {
-    return new UClientSocket();
+    return std::make_shared<UClientSocket>();
 }
 
 // ---------------------------------

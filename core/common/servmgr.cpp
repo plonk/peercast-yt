@@ -698,7 +698,7 @@ void ServMgr::checkFirewall()
         Host host;
         host.fromStrName(servMgr->rootHost.cstr(), DEFAULT_PORT);
 
-        ClientSocket *sock = sys->createSocket();
+        auto sock = sys->createSocket();
         if (!sock)
             throw StreamException("Unable to create socket");
         sock->setReadTimeout(30000);
@@ -716,7 +716,6 @@ void ServMgr::checkFirewall()
         atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT);
 
         sock->close();
-        delete sock;
     }
 }
 
@@ -1615,7 +1614,7 @@ int ServMgr::clientProc(ThreadInfo *thread)
 }
 
 // -----------------------------------
-bool    ServMgr::acceptGIV(ClientSocket *sock)
+bool    ServMgr::acceptGIV(std::shared_ptr<ClientSocket> sock)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
 

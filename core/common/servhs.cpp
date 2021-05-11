@@ -2298,7 +2298,7 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
 
     LOG_DEBUG("Writing HTML file: %s", fileName.cstr());
 
-    WriteBufferedStream bufferedSock(sock);
+    WriteBufferedStream bufferedSock(sock.get());
     HTML html("", bufferedSock);
 
     const char* mimeType = fileNameToMimeType(fileName);

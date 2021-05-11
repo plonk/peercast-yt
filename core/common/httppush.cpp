@@ -21,7 +21,7 @@ void HTTPPushSource::stream(std::shared_ptr<Channel> ch)
 
         if (m_isChunked)
         {
-            Dechunker dechunker(*(Stream*)ch->sock);
+            Dechunker dechunker(*ch->sock);
             ch->readStream(dechunker, source.get());
         }
         else
@@ -39,7 +39,6 @@ void HTTPPushSource::stream(std::shared_ptr<Channel> ch)
     {
         m_sock = NULL;
         ch->sock->close();
-        delete ch->sock;
         ch->sock = NULL;
     }
 }

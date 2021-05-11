@@ -31,7 +31,7 @@ class USys : public Sys
 public:
     USys();
 
-    ClientSocket    *createSocket() override;
+    std::shared_ptr<ClientSocket> createSocket() override;
     double          getDTime() override;
     unsigned int    rnd() override { return rndGen.next(); }
     void            getURL(const char *) override;

@@ -187,14 +187,12 @@ void    Servent::kill()
     if (sock)
     {
         sock->close();
-        delete sock;
         sock = NULL;
     }
 
     if (pushSock)
     {
         pushSock->close();
-        delete pushSock;
         pushSock = NULL;
     }
 
@@ -274,7 +272,7 @@ bool Servent::sendPacket(ChanPacket &pack, const GnuID &cid, const GnuID &sid, c
 }
 
 // -----------------------------------
-bool Servent::acceptGIV(ClientSocket *givSock)
+bool Servent::acceptGIV(std::shared_ptr<ClientSocket> givSock)
 {
     if (!pushSock)
     {
@@ -338,7 +336,7 @@ void Servent::checkFree()
 
 // -----------------------------------
 // クライアントとの対話を開始する。
-void Servent::initIncoming(ClientSocket *s, unsigned int a)
+void Servent::initIncoming(std::shared_ptr<ClientSocket> s, unsigned int a)
 {
     try{
         checkFree();
@@ -476,7 +474,7 @@ bool    Servent::pingHost(Host &rhost, const GnuID &rsid)
     char ipstr[64];
     strcpy(ipstr, rhost.str().c_str());
     LOG_DEBUG("Ping host %s: trying..", ipstr);
-    ClientSocket *s=NULL;
+    std::shared_ptr<ClientSocket> s;
     bool hostOK=false;
     try
     {
@@ -531,7 +529,6 @@ bool    Servent::pingHost(Host &rhost, const GnuID &rsid)
     if (s)
     {
         s->close();
-        delete s;
     }
 
     if (!hostOK)
@@ -1551,7 +1548,6 @@ int Servent::outgoingProc(ThreadInfo *thread)
                 if (sv->sock)
                 {
                     sv->sock->close();
-                    delete sv->sock;
                     sv->sock = NULL;
                 }
             }catch (StreamException &) {}
@@ -1680,7 +1676,7 @@ bool Servent::waitForChannelHeader(ChanInfo &info)
 // -----------------------------------
 void Servent::sendRawChannel(bool sendHead, bool sendData)
 {
-    WriteBufferedStream bsock(sock);
+    WriteBufferedStream bsock(sock.get());
 
     try
     {
@@ -1901,7 +1897,7 @@ void Servent::sendPCPChannel()
     if (!ch)
         throw StreamException("Channel not found");
 
-    WriteBufferedStream bsock(sock);
+    WriteBufferedStream bsock(sock.get());
     AtomStream atom(bsock);
 
     pcpStream = new PCPStream(remoteID);
@@ -2058,7 +2054,7 @@ int Servent::serverProc(ThreadInfo *thread)
                 continue;
             }
 
-            ClientSocket *cs = sv->sock->accept();
+            auto cs = sv->sock->accept();
             if (!cs)
             {
                 LOG_ERROR("accept failed");
@@ -2071,7 +2067,6 @@ int Servent::serverProc(ThreadInfo *thread)
             {
                 LOG_ERROR("Out of servents");
                 cs->close();
-                delete cs;
                 continue;
             }
 

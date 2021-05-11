@@ -98,7 +98,6 @@ void Channel::endThread()
     if (pushSock)
     {
         pushSock->close();
-        delete pushSock;
         pushSock = NULL;
     }
 
@@ -393,7 +392,7 @@ THREAD_PROC Channel::stream(ThreadInfo *thread)
 }
 
 // -----------------------------------
-bool Channel::acceptGIV(ClientSocket *givSock)
+bool Channel::acceptGIV(std::shared_ptr<ClientSocket> givSock)
 {
     if (!pushSock)
     {
@@ -740,7 +739,6 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
             if (ch->sock)
             {
                 ch->sock->close();
-                delete ch->sock;
                 ch->sock = NULL;
             }
 
@@ -763,7 +761,7 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
 }
 
 // -----------------------------------
-void    Channel::startHTTPPush(ClientSocket *cs, bool isChunked)
+void    Channel::startHTTPPush(std::shared_ptr<ClientSocket> cs, bool isChunked)
 {
     srcType = SRC_HTTPPUSH;
     type    = T_BROADCAST;
@@ -776,7 +774,7 @@ void    Channel::startHTTPPush(ClientSocket *cs, bool isChunked)
 }
 
 // -----------------------------------
-void    Channel::startWMHTTPPush(ClientSocket *cs)
+void    Channel::startWMHTTPPush(std::shared_ptr<ClientSocket> cs)
 {
     srcType = SRC_HTTPPUSH;
     type    = T_BROADCAST;
@@ -789,7 +787,7 @@ void    Channel::startWMHTTPPush(ClientSocket *cs)
 }
 
 // -----------------------------------
-void    Channel::startICY(ClientSocket *cs, SRC_TYPE st)
+void    Channel::startICY(std::shared_ptr<ClientSocket> cs, SRC_TYPE st)
 {
     srcType = st;
     type = T_BROADCAST;

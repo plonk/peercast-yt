@@ -134,7 +134,7 @@ public:
 
     void    reset();
     bool    initServer(Host &);
-    void    initIncoming(ClientSocket *, unsigned int);
+    void    initIncoming(std::shared_ptr<ClientSocket>, unsigned int);
     void    initOutgoing(TYPE);
     void    initGIV(const Host &, const GnuID &);
     void    initPCP(const Host &);
@@ -241,7 +241,7 @@ public:
 
     Host    getHost();
 
-    bool    acceptGIV(ClientSocket *);
+    bool    acceptGIV(std::shared_ptr<ClientSocket>);
     bool    sendPacket(ChanPacket &, const GnuID &, const GnuID &, const GnuID &, Servent::TYPE);
 
     ChanInfo createChannelInfo(GnuID broadcastID, const String& broadcastMsg, cgi::Query& query, const std::string& contentType);
@@ -279,7 +279,7 @@ public:
 
     std::atomic<unsigned int> allow;
 
-    ClientSocket        *sock, *pushSock;
+    std::shared_ptr<ClientSocket> sock, pushSock;
 
     std::recursive_mutex lock;
 

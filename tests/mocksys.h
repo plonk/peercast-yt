@@ -10,7 +10,7 @@ public:
     {
     }
 
-    class ClientSocket* createSocket() override
+    std::shared_ptr<ClientSocket> createSocket() override
     {
         return NULL;
     }
@@ -95,6 +95,26 @@ public:
         } else {
             out = ""; return false;
         }
+    }
+
+    std::string getExecutablePath() override
+    {
+        return "";
+    }
+
+    std::string dirname(const std::string&) override
+    {
+        return "";
+    }
+
+    std::string joinPath(const std::vector<std::string>&) override
+    {
+        return "";
+    }
+
+    std::string realPath(const std::string& path) override
+    {
+        return "";
     }
 };
 

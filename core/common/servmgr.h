@@ -189,7 +189,7 @@ public:
     bool            getChannel(char *, ChanInfo &, bool);
     void            setFilterDefaults();
 
-    bool            acceptGIV(ClientSocket *);
+    bool            acceptGIV(std::shared_ptr<ClientSocket>);
     void            addVersion(unsigned int);
 
     void            broadcastRootSettings(bool);

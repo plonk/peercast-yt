@@ -50,9 +50,9 @@ double WSys::getDTime()
 }
 
 // ---------------------------------
-ClientSocket *WSys::createSocket()
+std::shared_ptr<ClientSocket> WSys::createSocket()
 {
-    return new WSAClientSocket();
+    return std::make_shared<WSAClientSocket>();
 }
 
 // --------------------------------------------------
