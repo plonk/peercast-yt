@@ -692,7 +692,7 @@ bool ServMgr::checkForceIP()
 // -----------------------------------
 void ServMgr::checkFirewall()
 {
-    if ((getFirewall(4) == FW_UNKNOWN) && !servMgr->rootHost.isEmpty())
+    if (!servMgr->rootHost.isEmpty())
     {
         LOG_DEBUG("Checking firewall..");
         Host host;
