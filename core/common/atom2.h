@@ -29,6 +29,7 @@ public:
     Atom(const ID4& name, std::initializer_list<Atom> lst);
     Atom(const ID4& name, int);
     Atom(const ID4& name, short);
+    Atom(const ID4& name, char);
     Atom(const ID4& name, void*, size_t);
     Atom(const ID4& name, const char*);
     Atom(const ID4& name, const GnuID&);

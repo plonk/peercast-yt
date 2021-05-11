@@ -39,6 +39,14 @@ Atom::Atom(const ID4& name, short n)
     m_data = s.str();
 }
 
+Atom::Atom(const ID4& name, char c)
+    : m_name(name)
+{
+    StringStream s;
+    s.writeChar(c);
+    m_data = s.str();
+}
+
 Atom::Atom(const ID4& name, void* data, size_t len)
     : m_name(name)
 {
