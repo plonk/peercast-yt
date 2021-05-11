@@ -805,13 +805,20 @@ void ServMgr::checkFirewallIPv6()
 #endif
 
     IPv6PortChecker checker;
-    LOG_DEBUG("Checking firewall.. (IPv6)");
-    auto result = checker.run({serverHost.port});
-    LOG_DEBUG("%s %s", result.ip.str().c_str(), std::to_string(result.ports.size()).c_str());
-    if (result.ports.size()) {
-        setFirewall(6, FW_OFF);
-    } else {
-        setFirewall(6, FW_ON);
+
+    try {
+        LOG_DEBUG("Checking firewall.. (IPv6)");
+        auto result = checker.run({serverHost.port});
+        LOG_DEBUG("%s %s", result.ip.str().c_str(), std::to_string(result.ports.size()).c_str());
+        if (result.ports.size()) {
+            setFirewall(6, FW_OFF);
+        } else {
+            setFirewall(6, FW_ON);
+        }
+    } catch (SockException& e) {
+        // network unreachable etc
+        LOG_ERROR("checkFirewallIPv6: %s", e.what());
+        setFirewall(6, FW_UNKNOWN);
     }
 }
 
