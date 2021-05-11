@@ -124,6 +124,8 @@ public:
         throw NotImplementedException(__func__);
     }
 
+    virtual std::string realPath(const std::string& path) = 0;
+
     unsigned int idleSleepTime;
 
     class LogBuffer *logBuf;

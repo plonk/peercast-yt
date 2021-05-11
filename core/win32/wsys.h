@@ -49,6 +49,8 @@ public:
 
     std::string getExecutablePath() override;
 
+    std::string realPath(const std::string& path) override;
+
     HWND    mainWindow;
     peercast::Random rndGen;
 };

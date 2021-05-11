@@ -192,3 +192,20 @@ std::string WSys::getExecutablePath()
     }
     return path;
 }
+
+// ---------------------------------
+#include "Shlwapi.h"
+std::string WSys::realPath(const std::string& path)
+{
+    char resolvedPath[4096];
+    char* ret = _fullpath(resolvedPath, path.c_str(), 4096);
+    if (ret == NULL)
+    {
+        throw GeneralException(str::format("_fullpath: Failed to resolve `%s`", path.c_str()).c_str());
+    }
+
+    if (PathFileExistsA(resolvedPath))
+        return resolvedPath;
+    else
+        throw GeneralException(str::format("realPath: File not found: %s", resolvedPath).c_str());
+}

@@ -405,3 +405,15 @@ void USys::exit()
 }
 
 #endif
+
+// ---------------------------------
+std::string USys::realPath(const std::string& path)
+{
+    char resolvedPath[PATH_MAX];
+    char *p = realpath(path.c_str(), resolvedPath);
+
+    if (!p)
+        throw GeneralException((std::string("realPath: ") + strerror(errno)).c_str());
+    else
+        return resolvedPath;
+}

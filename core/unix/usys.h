@@ -50,6 +50,8 @@ public:
     std::string dirname(const std::string&) override;
     std::string joinPath(const std::vector<std::string>&) override;
 
+    std::string realPath(const std::string& path) override;
+
     peercast::Random rndGen;
 private:
 

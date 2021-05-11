@@ -2251,11 +2251,33 @@ const char* Servent::fileNameToMimeType(const String& fileName)
 }
 
 // -----------------------------------
+static void validFileOrThrow(const char* filePath, const std::string& documentRoot)
+{
+    ASSERT(documentRoot.size() > 0);
+    ASSERT(documentRoot.back() == '/');
+
+    std::string abspath;
+    try {
+        abspath = sys->realPath(filePath);
+    } catch (GeneralException &e) {
+        LOG_ERROR("Cannot determine absolute path: %s", e.what());
+        throw HTTPException(HTTP_SC_NOTFOUND, 404);
+    }
+    if (!str::has_prefix(abspath, documentRoot)) {
+        LOG_ERROR("Requested file is outside of the document root: %s",
+                  abspath.c_str());
+        // ファイルが存在することを知らせたくないので 404 を返す。
+        throw HTTPException(HTTP_SC_NOTFOUND, 404);
+    }
+}
+
+// -----------------------------------
 void Servent::handshakeLocalFile(const char *fn, HTTP& http)
 {
-    String fileName;
+    std::string documentRoot;
+    documentRoot = sys->realPath(peercastApp->getPath()) + "/";
 
-    fileName = peercastApp->getPath();
+    String fileName = documentRoot.c_str();
     fileName.append(fn);
 
     LOG_DEBUG("Writing HTML file: %s", fileName.cstr());
@@ -2293,11 +2315,16 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
             *args = '\0';
 
         auto req = http.getRequest();
+
+        validFileOrThrow(fileName.c_str(), documentRoot);
+
         html.writeOK(MIME_HTML);
         HTTPRequestScope scope(req);
         html.writeTemplate(fileName.cstr(), req.queryString.c_str(), scope);
     }else
     {
+        validFileOrThrow(fileName.c_str(), documentRoot);
+
         html.writeRawFile(fileName.cstr(), mimeType);
     }
 }
