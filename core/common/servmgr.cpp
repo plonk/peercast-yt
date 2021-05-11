@@ -804,9 +804,6 @@ void ServMgr::checkFirewallIPv6()
     }
 #endif
 
-    if (getFirewall(6) != FW_UNKNOWN) // is this reasonable?
-        return;
-
     IPv6PortChecker checker;
     LOG_DEBUG("Checking firewall.. (IPv6)");
     auto result = checker.run({serverHost.port});
