@@ -239,6 +239,75 @@ TEST_F(ChanHitFixture, writeAtom100)
     ASSERT_EQ(169 + 24, mem.pos);
 }
 
+#include "atom2.h"
+#include "pcp.h"
+
+TEST_F(ChanHitFixture, writeAtomIPv4)
+{
+    StringStream ss;
+    AtomStream writer(ss);
+    GnuID chid;
+    chid.fromStr("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+
+    hit->uphost.ip = IP::parse("127.0.0.1");
+    hit->writeAtoms(writer, chid);
+
+    Atom expectation (PCP_HOST, {
+            { PCP_HOST_CHANID, chid },
+            { PCP_HOST_ID, GnuID() },
+            { PCP_HOST_IP, IP::parse("0.0.0.0") },
+            { PCP_HOST_PORT, (short) 0 },
+            { PCP_HOST_IP, IP::parse("0.0.0.0") },
+            { PCP_HOST_PORT, (short) 0 },
+            { PCP_HOST_NUML, 0 },
+            { PCP_HOST_NUMR, 0 },
+            { PCP_HOST_UPTIME, 0 },
+            { PCP_HOST_VERSION, 0 },
+            { PCP_HOST_VERSION_VP, 0 },
+            { PCP_HOST_FLAGS1, (char) 0x32 },
+            { PCP_HOST_OLDPOS, 0 },
+            { PCP_HOST_NEWPOS, 0 },
+            { PCP_HOST_UPHOST_IP, IP::parse("127.0.0.1") },
+            { PCP_HOST_UPHOST_PORT, (int) 0 },
+            { PCP_HOST_UPHOST_HOPS, 0 },
+    });
+
+    ASSERT_EQ(expectation.serialize(), ss.str());
+}
+
+TEST_F(ChanHitFixture, writeAtomIPv6)
+{
+    StringStream ss;
+    AtomStream writer(ss);
+    GnuID chid;
+    chid.fromStr("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+
+    hit->uphost.ip = IP::parse("::1");
+    hit->writeAtoms(writer, chid);
+
+    Atom expectation (PCP_HOST, {
+            { PCP_HOST_CHANID, chid },
+            { PCP_HOST_ID, GnuID() },
+            { PCP_HOST_IP, IP::parse("0.0.0.0") },
+            { PCP_HOST_PORT, (short) 0 },
+            { PCP_HOST_IP, IP::parse("0.0.0.0") },
+            { PCP_HOST_PORT, (short) 0 },
+            { PCP_HOST_NUML, 0 },
+            { PCP_HOST_NUMR, 0 },
+            { PCP_HOST_UPTIME, 0 },
+            { PCP_HOST_VERSION, 0 },
+            { PCP_HOST_VERSION_VP, 0 },
+            { PCP_HOST_FLAGS1, (char) 0x32 },
+            { PCP_HOST_OLDPOS, 0 },
+            { PCP_HOST_NEWPOS, 0 },
+            { PCP_HOST_UPHOST_IP, IP::parse("::1") },
+            { PCP_HOST_UPHOST_PORT, (int) 0 },
+            { PCP_HOST_UPHOST_HOPS, 0 },
+    });
+
+    ASSERT_EQ(expectation.serialize(), ss.str());
+}
+
 TEST_F(ChanHitFixture, initLocal)
 {
     Channel channel;
