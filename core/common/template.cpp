@@ -676,6 +676,18 @@ json::array_t Template::evaluateCollectionVariable(String& varName)
     {
         auto channels = JrpcApi().getYPChannelsInternal({});
         return channels;
+    }else if (varName == "flags")
+    {
+        json::array_t arr;
+        arr.push_back(json::object_t({
+                                      { "name", "randomizeBroadcastingChannelID" },
+                                      { "enabled", servMgr->randomizeBroadcastingChannelID.load() },
+                }));
+        arr.push_back(json::object_t({
+                                      { "name", "sendPortAtomWhenFirewallUnknown" },
+                                      { "enabled", servMgr->sendPortAtomWhenFirewallUnknown.load() },
+                }));
+        return arr;
     }else
     {
         return {};
