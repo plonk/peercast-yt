@@ -1649,7 +1649,7 @@ int ServMgr::broadcastPushRequest(ChanHit &hit, Host &to, const GnuID &chanID, S
         atom.writeBytes(PCP_BCST_VERSION_EX_PREFIX, PCP_CLIENT_VERSION_EX_PREFIX, 2);
         atom.writeShort(PCP_BCST_VERSION_EX_NUMBER, PCP_CLIENT_VERSION_EX_NUMBER);
         atom.writeParent(PCP_PUSH, 3);
-            atom.writeInt(PCP_PUSH_IP, to.ip);
+            atom.writeAddress(PCP_PUSH_IP, to.ip);
             atom.writeShort(PCP_PUSH_PORT, to.port);
             atom.writeBytes(PCP_PUSH_CHANID, chanID.id, 16);
 
