@@ -131,7 +131,8 @@ void UClientSocket::setBlocking(bool block)
     else
         fl |= O_NONBLOCK;
 
-    fcntl(sockNum, F_SETFL, fl);
+    if (fcntl(sockNum, F_SETFL, fl) == -1)
+        throw SockException("Unable to set NONBLOCK");
 }
 
 // --------------------------------------------------
