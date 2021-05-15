@@ -179,7 +179,7 @@ void PCPStream::readPushAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
         ID4 id = atom.read(c, d);
 
         if (id == PCP_PUSH_IP)
-            host.ip = atom.readInt();
+            host.ip = atom.readAddress();
         else if (id == PCP_PUSH_PORT)
             host.port = atom.readShort();
         else if (id == PCP_PUSH_CHANID)
