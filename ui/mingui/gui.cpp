@@ -20,7 +20,6 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-#include <windows.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
@@ -33,6 +32,8 @@
 #include "servmgr.h"
 #include "peercast.h"
 #include "simple.h"
+
+#include <windows.h>
 
 ThreadInfo guiThread;
 bool shownChannels = false;
