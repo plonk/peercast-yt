@@ -348,7 +348,7 @@ void WSAClientSocket::bind(const Host &h)
     memset(&localAddr,0,sizeof(localAddr));
     localAddr.sin6_family = AF_INET6;
     localAddr.sin6_port = htons(h.port);
-    localAddr.sin6_addr = IN6ADDR_ANY_INIT;
+    localAddr.sin6_addr = in6addr_any;
 
     if(::bind(sockNum, (sockaddr *)&localAddr, sizeof(localAddr)) == -1)
         throw SockException("Can`t bind socket");
