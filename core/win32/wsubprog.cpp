@@ -57,9 +57,6 @@ std::string createCommandLine(std::string prog, std::vector<std::string> args)
 }
 
 // プログラムの実行を開始。
-extern "C" {
-    extern DWORD WINAPI GetProcessId(HANDLE Process);
-}
 bool Subprogram::start(std::initializer_list<std::string> arguments, Environment& env)
 {
     SECURITY_ATTRIBUTES sa;
