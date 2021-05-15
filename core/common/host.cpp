@@ -19,6 +19,7 @@
 #include "host.h"
 #include "socket.h"
 #include "str.h"
+#include "regexp.h"
 
 // ------------------------------------------
 bool Host::isLocalhost()
@@ -64,6 +65,14 @@ Host Host::fromString(const std::string& str)
 // ------------------------------------------
 void Host::fromStrName(const char *str, int p)
 {
+    static const Regexp IPV4_PATTERN("^\\d+\\.\\d+\\.\\d+\\.\\d+$");
+    static const Regexp IPV4_PATTERN_PORT("^\\d+\\.\\d+\\.\\d+\\.\\d+:\\d+$");
+#define IPV6 "(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|[fF][eE]80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::([fF][fF][fF][fF](:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))"
+    static const Regexp IPV6_PATTERN("^" IPV6 "$");
+    static const Regexp IPV6_PATTERN_BRACKETED("^\\[" IPV6 "\\]$");
+    static const Regexp IPV6_PATTERN_BRACKETED_PORT("^\\[" IPV6 "\\]:\\d+$");
+#undef IPV6
+
     if (!strlen(str))
     {
         port = 0;
@@ -71,20 +80,49 @@ void Host::fromStrName(const char *str, int p)
         return;
     }
 
-    auto v = str::split(str, ":");
-    if (v.size() == 2)
-        port = atoi(v[1].c_str());
-    else
+    if (IPV4_PATTERN.exec(str).size()) {
+        ip = IP::parse(str);
         port = p;
-
-    ip = ClientSocket::getIP(v[0].c_str());
+    } else if (IPV4_PATTERN_PORT.exec(str).size()) {
+        auto v = str::split(str, ":");
+        ip = IP::parse(v[0]);
+        port = atoi(v[1].c_str());
+    } else if (IPV6_PATTERN.exec(str).size()) {
+        ip = IP::parse(str);
+        port = p;
+    } else if (IPV6_PATTERN_BRACKETED.exec(str).size()) {
+        ip = IP::parse(std::string(str + 1, strlen(str) - 2));
+        port = p;
+    } else if (IPV6_PATTERN_BRACKETED_PORT.exec(str).size()) {
+        const char *q = strchr(str, ']');
+        ip = IP::parse(std::string(str + 1, q));
+        port = atoi(q + 2);
+    } else {
+        auto v = str::split(str, ":");
+        if (v.size() <= 2) {
+            if (!IP::tryParse(v[0], ip)) {
+                ip = IP();
+                for (std::string& s : sys->getIPAddresses(v[0])) {
+                    ip = IP::parse(s);
+                    break;
+                }
+            }
+            if (v.size() == 2)
+                port = atoi(v[1].c_str());
+            else
+                port = p;
+        } else {
+            LOG_ERROR("fromStrName: Parse error: %s", str);
+            ip = 0;
+            port = 0;
+        }
+    }
 }
 
 // ------------------------------------------
 ::String Host::IPtoStr() const
 {
-    ::String result = ip.str().c_str();
-    return result;
+    return ip.str().c_str();
 }
 
 // ------------------------------------------

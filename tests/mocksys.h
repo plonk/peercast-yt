@@ -79,7 +79,13 @@ public:
 
     std::vector<std::string> getIPAddresses(const std::string& name) override
     {
-        return {};
+        if (name == "localhost") {
+            return { "127.0.0.1" };
+        } else if (name == "ip6-localhost") {
+            return { "::1" };
+        } else {
+            return {};
+        }
     }
 
     bool getHostnameByAddress(const IP& ip, std::string& out) override
