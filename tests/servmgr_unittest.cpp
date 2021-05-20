@@ -392,97 +392,84 @@ TEST_F(ServMgrFixture, isFiltered)
     ASSERT_TRUE(m.isFiltered(ServFilter::F_DIRECT, h));
 }
 
-TEST_F(ServMgrFixture, doSaveSettings)
+#include <stdio.h>
+TEST_F(ServMgrFixture, getSettings)
 {
-    StringStream mem;
-    IniFileBase ini(mem);
-    m.doSaveSettings(ini);
-    ASSERT_EQ("\r\n"
-              "[Server]\r\n"
-              "serverName = \r\n"
-              "serverPort = 7144\r\n"
-              "autoServe = Yes\r\n"
-              "forceIP = \r\n"
-              "isRoot = No\r\n"
-              "maxBitrateOut = 0\r\n"
-              "maxRelays = 2\r\n"
-              "maxDirect = 0\r\n"
-              "maxRelaysPerChannel = 0\r\n"
-              "firewallTimeout = 30\r\n"
-              "forceNormal = No\r\n"
-              "rootMsg = \r\n"
-              "authType = cookie\r\n"
-              "cookiesExpire = session\r\n"
-              "htmlPath = html/en\r\n"
-              "maxServIn = 50\r\n"
-              "chanLog = \r\n"
-              "networkID = 00000000000000000000000000000000\r\n"
-              "randomizeBroadcastingChannelID = Yes\r\n"
-              "\r\n"
-              "[Broadcast]\r\n"
-              "broadcastMsgInterval = 10\r\n"
-              "broadcastMsg = \r\n"
-              "icyMetaInterval = 8192\r\n"
-              "broadcastID = 00151515151515151515151515151515\r\n"
-              "hostUpdateInterval = 120\r\n"
-              "maxControlConnections = 3\r\n"
-              "rootHost = yp.pcgw.pgw.jp:7146\r\n"
-              "\r\n"
-              "[Client]\r\n"
-              "refreshHTML = 5\r\n"
-              "chat = Yes\r\n"
-              "relayBroadcast = 30\r\n"
-              "minBroadcastTTL = 1\r\n"
-              "maxBroadcastTTL = 7\r\n"
-              "pushTries = 5\r\n"
-              "pushTimeout = 60\r\n"
-              "maxPushHops = 8\r\n"
-              "transcodingEnabled = No\r\n"
-              "preset = veryfast\r\n"
-              "audioCodec = mp3\r\n"
-              "wmvProtocol = http\r\n"
-              "\r\n"
-              "[Privacy]\r\n"
-              "password = \r\n"
-              "maxUptime = 0\r\n"
-              "\r\n"
-              "[Filter]\r\n"
-              "ip = 255.255.255.255\r\n"
-              "private = No\r\n"
-              "ban = No\r\n"
-              "network = Yes\r\n"
-              "direct = Yes\r\n"
-              "[End]\r\n"
-              "\r\n"
-              "[Feed]\r\n"
-              "url = http://yp.pcgw.pgw.jp/index.txt\r\n"
-              "[End]\r\n"
-              "\r\n"
-              "[Uptest]\r\n"
-              "url = http://bayonet.ddo.jp/sp/yp4g.xml\r\n"
-              "[End]\r\n"
-              "\r\n"
-              "[Uptest]\r\n"
-              "url = http://temp.orz.hm/yp/yp4g.xml\r\n"
-              "[End]\r\n"
-              "\r\n"
-              "[Notify]\r\n"
-              "PeerCast = Yes\r\n"
-              "Broadcasters = Yes\r\n"
-              "TrackInfo = Yes\r\n"
-              "[End]\r\n"
-              "\r\n"
-              "[Server1]\r\n"
-              "allowHTML = Yes\r\n"
-              "allowBroadcast = Yes\r\n"
-              "allowNetwork = Yes\r\n"
-              "allowDirect = Yes\r\n"
-              "[End]\r\n"
-              "\r\n"
-              "[Debug]\r\n"
-              "logLevel = 3\r\n"
-              "pauseLog = No\r\n"
-              "idleSleepTime = 10\r\n", mem.str());
+    auto doc = m.getSettings();
+
+    /* セクション名とキーの名前だけテストし、セクションの数とキーの値はテストしない。 */
+    for (auto& r : std::vector<std::pair<std::string, std::vector<std::pair<std::string,ini::Value>>>>({
+        {{"Server",
+          {{"serverName", ""},
+           {"serverPort", "7144"},
+           {"autoServe", "Yes"},
+           {"forceIP", ""},
+           {"isRoot", "No"},
+           {"maxBitrateOut", "0"},
+           {"maxRelays", "2"},
+           {"maxDirect", "0"},
+           {"maxRelaysPerChannel", "0"},
+           {"firewallTimeout", "30"},
+           {"forceNormal", "No"},
+           {"rootMsg", ""},
+           {"authType", "cookie"},
+           {"cookiesExpire", "session"},
+           {"htmlPath", "html/en"},
+           {"maxServIn", "50"},
+           {"chanLog", ""},
+           {"networkID", "00000000000000000000000000000000"},
+           {"randomizeBroadcastingChannelID", "Yes"}}},
+         {"Broadcast",
+          {{"broadcastMsgInterval", "10"},
+           {"broadcastMsg", ""},
+           {"icyMetaInterval", "8192"},
+           {"broadcastID", "00151515151515151515151515151515"},
+           {"hostUpdateInterval", "120"},
+           {"maxControlConnections", "3"},
+           {"rootHost", "yp.pcgw.pgw.jp:7146"}}},
+         {"Client",
+          {{"refreshHTML", "5"},
+           {"chat", "Yes"},
+           {"relayBroadcast", "30"},
+           {"minBroadcastTTL", "1"},
+           {"maxBroadcastTTL", "7"},
+           {"pushTries", "5"},
+           {"pushTimeout", "60"},
+           {"maxPushHops", "8"},
+           {"transcodingEnabled", "No"},
+           {"preset", "veryfast"},
+           {"audioCodec", "mp3"},
+           {"wmvProtocol", "http"}}},
+         {"Privacy", {{"password", ""}, {"maxUptime", "0"}}},
+         {"Filter",
+          {{"ip", "255.255.255.255"},
+           {"private", "No"},
+           {"ban", "No"},
+           {"network", "Yes"},
+           {"direct", "Yes"}}},
+         {"Feed", {{"url", "http://yp.pcgw.pgw.jp/index.txt"}}},
+         {"Uptest", {{"url", "http://bayonet.ddo.jp/sp/yp4g.xml"}}},
+         {"Notify",
+          {{"PeerCast", "Yes"}, {"Broadcasters", "Yes"}, {"TrackInfo", "Yes"}}},
+         {"Server1",
+          {{"allowHTML", "Yes"},
+           {"allowBroadcast", "Yes"},
+           {"allowNetwork", "Yes"},
+           {"allowDirect", "Yes"}}},
+         {"Debug", {{"logLevel", "3"}, {"pauseLog", "No"}, {"idleSleepTime", "10"}}}}
+         }))
+    {
+        auto it = std::find_if(doc.begin(), doc.end(), [&](ini::Section& s){ return s.name == r.first; });
+        ASSERT_EQ(r.first, it != doc.end() ? r.first : std::string("SECTION NOT FOUND"));
+        //ASSERT_TRUE(it != doc.end());
+        for (auto& p : r.second) {
+            auto it2 = std::find_if(it->keys.begin(),
+                                    it->keys.end(),
+                                    [&](std::pair<std::string, ini::Value>& q) { return p.first == q.first; });
+            ASSERT_EQ(p.first, it2 != it->keys.end() ? p.first : std::string("KEY NOT FOUND"));
+            //ASSERT_TRUE(it2 != it->keys.end());
+        }
+    }
 }
 
 TEST_F(ServMgrFixture, hasUnsafeFilterSettings)
