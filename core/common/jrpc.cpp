@@ -216,6 +216,11 @@ json JrpcApi::fetch(json::array_t params)
         std::string contact = params[4];
         int bitrate         = params[5];
         std::string typeStr = params[6];
+        std::string network;
+        if (params[7].is_null())
+            network = "ipv4";
+        else
+            network = params[7];
 
         ChanInfo info;
         info.name    = name.c_str();
@@ -241,6 +246,10 @@ json JrpcApi::fetch(json::array_t params)
         if (!c)
         {
             throw application_error(kUnknownError, "failed to create channel");
+        }
+        if (network == "ipv6") {
+            c->ipVersion = Channel::IP_V6;
+            servMgr->checkFirewallIPv6();
         }
         c->startURL(url.c_str());
 
@@ -296,6 +305,19 @@ json JrpcApi::to_json(TrackInfo& track)
     };
 }
 
+json JrpcApi::to_json(Channel::IP_VERSION ipVersion)
+{
+    switch (ipVersion)
+    {
+    case Channel::IP_V4:
+        return "ipv4";
+    case Channel::IP_V6:
+        return "ipv6";
+    default:
+        return "unknown";
+    }
+}
+
 // PeerCastStation では Receiving, Searching, Error, Idle のどれか
 // が返る。peercast では NONE, WAIT, CONNECT, REQUEST, CLOSE,
 // RECEIVE, BROADCAST, ABORT, SEARCH, NOHOSTS, IDLE, ERROR,
@@ -333,6 +355,7 @@ json JrpcApi::channelStatus(std::shared_ptr<Channel> c)
         {"isRelayFull", c->isFull()},
         {"isDirectFull", nullptr},
         {"isReceiving", c->isReceiving()},
+        {"network", to_json(c->ipVersion)},
     };
 }
 
@@ -774,7 +797,7 @@ json JrpcApi::getChannelRelayTree(json::array_t args)
     if (!hitList)
         throw application_error(kUnknownError, "Hit list not found");
 
-    HostGraph graph(channel, hitList);
+    HostGraph graph(channel, hitList, channel->ipVersion);
 
     return graph.getRelayTree();
 }

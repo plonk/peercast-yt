@@ -87,7 +87,6 @@ TEST_F(ChanInfoFixture, static_getTypeStr)
 
 TEST_F(ChanInfoFixture, static_getProtocolStr)
 {
-    ASSERT_STREQ("PEERCAST", ChanInfo::getProtocolStr(ChanInfo::SP_PEERCAST));
     ASSERT_STREQ("HTTP", ChanInfo::getProtocolStr(ChanInfo::SP_HTTP));
     ASSERT_STREQ("FILE", ChanInfo::getProtocolStr(ChanInfo::SP_FILE));
     ASSERT_STREQ("MMS", ChanInfo::getProtocolStr(ChanInfo::SP_MMS));
@@ -143,14 +142,12 @@ TEST_F(ChanInfoFixture, static_getTypeFromStr)
 
 TEST_F(ChanInfoFixture, static_getProtocolFromStr)
 {
-    ASSERT_EQ(ChanInfo::SP_PEERCAST, ChanInfo::getProtocolFromStr("PEERCAST"));
     ASSERT_EQ(ChanInfo::SP_HTTP, ChanInfo::getProtocolFromStr("HTTP"));
     ASSERT_EQ(ChanInfo::SP_FILE, ChanInfo::getProtocolFromStr("FILE"));
     ASSERT_EQ(ChanInfo::SP_MMS, ChanInfo::getProtocolFromStr("MMS"));
     ASSERT_EQ(ChanInfo::SP_PCP, ChanInfo::getProtocolFromStr("PCP"));
     ASSERT_EQ(ChanInfo::SP_WMHTTP, ChanInfo::getProtocolFromStr("WMHTTP"));
 
-    ASSERT_EQ(ChanInfo::SP_PEERCAST, ChanInfo::getProtocolFromStr("Peercast")); // type str. is case-insesitive
     ASSERT_EQ(ChanInfo::SP_RTMP, ChanInfo::getProtocolFromStr("RTMP"));
     ASSERT_EQ(ChanInfo::SP_UNKNOWN, ChanInfo::getProtocolFromStr("Hoge2.0"));
 }

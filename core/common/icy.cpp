@@ -25,7 +25,6 @@ void ICYSource::stream(std::shared_ptr<Channel> ch)
     if (ch->sock)
     {
         ch->sock->close();
-        delete ch->sock;
         ch->sock = NULL;
     }
 

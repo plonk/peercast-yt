@@ -142,6 +142,7 @@ std::shared_ptr<Channel> ChanMgr::findChannelByMount(const char *str)
     auto ch = channel;
     while (ch)
     {
+        std::lock_guard<std::recursive_mutex> lock(ch->lock);
         if (ch->isActive())
             if (strcmp(ch->mount, str) == 0)
                 return ch;
@@ -157,6 +158,7 @@ std::shared_ptr<Channel> ChanMgr::findChannelByID(const GnuID &id)
     auto ch = channel;
     while (ch)
     {
+        std::lock_guard<std::recursive_mutex> lock(ch->lock);
         if (ch->isActive())
             if (ch->info.id.isSame(id))
                 return ch;
@@ -475,6 +477,7 @@ ChanHitList *ChanMgr::findHitList(ChanInfo &info)
     ChanHitList *chl = hitlist;
     while (chl)
     {
+        std::lock_guard<std::recursive_mutex> lock(chl->lock);
         if (chl->isUsed())
             if (chl->info.matchNameID(info))
                 return chl;
@@ -490,6 +493,7 @@ ChanHitList *ChanMgr::findHitListByID(const GnuID &id)
     ChanHitList *chl = hitlist;
     while (chl)
     {
+        std::lock_guard<std::recursive_mutex> lock(chl->lock);
         if (chl->isUsed())
             if (chl->info.id.isSame(id))
                 return chl;

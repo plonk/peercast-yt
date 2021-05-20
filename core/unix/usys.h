@@ -31,7 +31,7 @@ class USys : public Sys
 public:
     USys();
 
-    ClientSocket    *createSocket() override;
+    std::shared_ptr<ClientSocket> createSocket() override;
     double          getDTime() override;
     unsigned int    rnd() override { return rndGen.next(); }
     void            getURL(const char *) override;
@@ -46,6 +46,12 @@ public:
     std::vector<std::string> getAllIPAddresses() override;
     bool getHostnameByAddress(const IP& ip, std::string& out) override;
     
+    std::string getExecutablePath() override;
+    std::string dirname(const std::string&) override;
+    std::string joinPath(const std::vector<std::string>&) override;
+
+    std::string realPath(const std::string& path) override;
+
     peercast::Random rndGen;
 private:
 

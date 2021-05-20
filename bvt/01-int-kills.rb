@@ -1,6 +1,11 @@
 #!/usr/bin/env ruby
 require 'fileutils'
 
+if RUBY_PLATFORM =~ /msys/
+  puts "skipped"
+  exit 0
+end
+
 # 新品の設定ファイルを使う。
 FileUtils.cp "peercast.ini.master", "peercast.ini"
 

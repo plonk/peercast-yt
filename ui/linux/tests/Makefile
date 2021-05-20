@@ -37,6 +37,8 @@ TESTS = test-all
 # definition.
 GTEST_HEADERS = $(wildcard /usr/include/gtest/*.h) $(wildcard /usr/include/gtest/internal/*.h)
 
+-include Makefile.local
+
 # House-keeping build targets.
 
 all : $(TESTS)

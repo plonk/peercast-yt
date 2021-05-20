@@ -10,7 +10,7 @@ public:
 
 TEST_F(HostGraphFixture, constructorNullChannel)
 {
-    ASSERT_THROW(JrpcApi::HostGraph(nullptr, nullptr), std::invalid_argument);
+    ASSERT_THROW(JrpcApi::HostGraph(nullptr, nullptr, 4), std::invalid_argument);
 }
 
 TEST_F(HostGraphFixture, simplestCase)
@@ -19,7 +19,7 @@ TEST_F(HostGraphFixture, simplestCase)
     auto hitList = new ChanHitList();
     Defer reclaim([=]() { delete hitList; });
 
-    JrpcApi::HostGraph graph(ch, hitList);
+    JrpcApi::HostGraph graph(ch, hitList, 4);
 
     ASSERT_STREQ("[{\"address\":\"127.0.0.1\",\"children\":[],\"isControlFull\":false,\"isDirectFull\":true,\"isFirewalled\":true,\"isReceiving\":false,\"isRelayFull\":false,\"isTracker\":false,\"localDirects\":0,\"localRelays\":0,\"port\":0,\"sessionId\":\"00151515151515151515151515151515\",\"version\":1218}]", ((json) graph.getRelayTree()).dump().c_str());
 }
@@ -37,7 +37,7 @@ TEST_F(HostGraphFixture, withHitList)
 
     hitList->addHit(hit);
 
-    JrpcApi::HostGraph graph(ch, hitList);
+    JrpcApi::HostGraph graph(ch, hitList, 4);
 
     ASSERT_STREQ("[{\"address\":\"127.0.0.1\",\"children\":[],\"isControlFull\":false,\"isDirectFull\":true,\"isFirewalled\":true,\"isReceiving\":false,\"isRelayFull\":false,\"isTracker\":false,\"localDirects\":0,\"localRelays\":0,\"port\":0,\"sessionId\":\"00151515151515151515151515151515\",\"version\":1218},{\"address\":\"8.8.8.8\",\"children\":[],\"isControlFull\":false,\"isDirectFull\":true,\"isFirewalled\":false,\"isReceiving\":true,\"isRelayFull\":false,\"isTracker\":false,\"localDirects\":0,\"localRelays\":0,\"port\":7144,\"sessionId\":\"00000000000000000000000000000000\",\"version\":0}]", ((json) graph.getRelayTree()).dump().c_str());
 }

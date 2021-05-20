@@ -190,7 +190,7 @@ public:
     bool            getChannel(char *, ChanInfo &, bool);
     void            setFilterDefaults();
 
-    bool            acceptGIV(ClientSocket *);
+    bool            acceptGIV(std::shared_ptr<ClientSocket>);
     void            addVersion(unsigned int);
 
     void            broadcastRootSettings(bool);
@@ -201,7 +201,7 @@ public:
 
     unsigned int    getUptime()
     {
-        return sys->getTime()-startTime;
+        return sys->getTime() - startTime;
     }
 
     bool    needHosts()
@@ -215,7 +215,7 @@ public:
 
     bool    controlInFull()
     {
-        return numConnected(Servent::T_CIN)>=maxControl;
+        return numConnected(Servent::T_CIN) >= maxControl;
     }
 
     bool    relaysFull()
@@ -229,7 +229,7 @@ public:
 
     bool    bitrateFull(unsigned int br)
     {
-        return maxBitrateOut ? (BYTES_TO_KBPS(totalOutput(false))+br) > maxBitrateOut  : false;
+        return maxBitrateOut ? (BYTES_TO_KBPS(totalOutput(false)) + br) > maxBitrateOut  : false;
     }
 
     void logLevel(int newLevel);
@@ -328,6 +328,13 @@ public:
     bool                chat;
 
     std::atomic_bool    randomizeBroadcastingChannelID;
+    std::atomic_bool    sendPortAtomWhenFirewallUnknown;
+    /* sendPortAtomWhenFirewallUnknown: 外向きのPCP接続でハンドシェイ
+       クする時、自身のファイアーウォール状態が不明な場合、
+       PCP_HELO_PORT アトムを送るかどうかを制御する。もともと
+       PCP_HELO_PING の有無でポートチェック（ping）の有無が制御されて
+       いたが、PeerCast Station が PCP_HELO_PORT を受け取ると ping し
+       ないのでこのフラグを false に設定すれば ping してもらえる。 */
 };
 
 // ----------------------------------

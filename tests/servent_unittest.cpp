@@ -18,17 +18,16 @@ public:
 
     void SetUp()
     {
-        mock = new MockClientSocket();
+        mock = std::make_shared<MockClientSocket>();
         s.sock = mock;
     }
 
     void TearDown()
     {
-        delete mock;
     }
 
     Servent s;
-    MockClientSocket* mock;
+    std::shared_ptr<MockClientSocket> mock;
 };
 
 TEST_F(ServentFixture, initialState)
@@ -79,8 +78,6 @@ TEST_F(ServentFixture, initialState)
 
     // GnuPacketBuffer     outPacketsNorm, outPacketsPri;
 
-    ASSERT_EQ(false, s.flowControl);
-
     ASSERT_EQ(nullptr, s.next);
 
     ASSERT_EQ(nullptr, s.pcpStream);
@@ -88,6 +85,17 @@ TEST_F(ServentFixture, initialState)
     ASSERT_STREQ("", s.cookie.id);
     ASSERT_EQ(0, s.cookie.ip);
 
+}
+
+TEST_F(ServentFixture, resetResetsCookie)
+{
+    strcpy(s.cookie.id, "hoge");
+    s.cookie.ip = IP(127 << 3 | 1);
+
+    s.reset();
+
+    ASSERT_STREQ("", s.cookie.id);
+    ASSERT_EQ(0, s.cookie.ip);
 }
 
 TEST_F(ServentFixture, handshakeHTTP)
@@ -128,15 +136,7 @@ TEST_F(ServentFixture, handshakeIncomingNonexistentFile)
 
     mock->incoming.str("GET /html/en/nonexistent.html HTTP/1.0\r\n\r\n");
 
-    s.handshakeIncoming();
-
-    std::string output = mock->outgoing.str();
-
-    // ファイルが無いのに OK はおかしくないか…
-    ASSERT_TRUE(str::contains(output, "200 OK"));
-    ASSERT_TRUE(str::contains(output, "Server: "));
-    ASSERT_TRUE(str::contains(output, "Date: "));
-    ASSERT_TRUE(str::contains(output, "Unable to open file"));
+    ASSERT_THROW(s.handshakeIncoming(), HTTPException);
 }
 
 TEST_F(ServentFixture, handshakeIncomingJRPCGetUnauthorized)
@@ -837,4 +837,97 @@ TEST_F(ServentFixture, fileNameToMimeType)
     ASSERT_STREQ(MIME_JS, Servent::fileNameToMimeType("a.js"));
     ASSERT_STREQ(MIME_ICO, Servent::fileNameToMimeType("a.ico"));
     ASSERT_STREQ(nullptr, Servent::fileNameToMimeType("a.txt"));
+}
+
+TEST_F(ServentFixture, writeHeloAtom_all)
+{
+    StringStream s;
+    AtomStream atom(s);
+
+    //void Servent::writeHeloAtom(AtomStream &atom, bool sendPort, bool sendPing, bool sendBCID, const GnuID& sessionID, uint16_t port, const GnuID& broadcastID)
+    Servent::writeHeloAtom(atom, true, true, true, GnuID("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"), 7144, GnuID("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"));
+
+    s.rewind();
+
+    int nchildren, size;
+    ID4 id;
+    char buf[17] = "";
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("helo", id.getString().str());
+    ASSERT_EQ(6, nchildren);
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("agnt", id.getString().str());
+    ASSERT_TRUE( size > 0 );
+    atom.skip(0, size);
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("ver", id.getString().str());
+    ASSERT_EQ(4, size);
+    atom.skip(0, 4);
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("sid", id.getString().str());
+    ASSERT_EQ(16, size);
+    atom.readBytes(buf, 16);
+    ASSERT_STREQ("\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa",
+                 buf);
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("port", id.getString().str());
+    ASSERT_EQ(2, size);
+    ASSERT_EQ(7144, atom.readShort());
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("ping", id.getString().str());
+    ASSERT_EQ(2, size);
+    ASSERT_EQ(7144, atom.readShort());
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("bcid", id.getString().str());
+    ASSERT_EQ(16, size);
+    atom.readBytes(buf, 16);
+    ASSERT_STREQ("\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff",
+                 buf);
+
+    ASSERT_EQ(s.str().size(), s.getPosition());
+}
+
+TEST_F(ServentFixture, writeHeloAtom_none)
+{
+    StringStream s;
+    AtomStream atom(s);
+
+    //void Servent::writeHeloAtom(AtomStream &atom, bool sendPort, bool sendPing, bool sendBCID, const GnuID& sessionID, uint16_t port, const GnuID& broadcastID)
+    Servent::writeHeloAtom(atom, false, false, false, GnuID("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"), 7144, GnuID("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"));
+
+    s.rewind();
+
+    int nchildren, size;
+    ID4 id;
+    char buf[17] = "";
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("helo", id.getString().str());
+    ASSERT_EQ(3, nchildren);
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("agnt", id.getString().str());
+    ASSERT_TRUE( size > 0 );
+    atom.skip(0, size);
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("ver", id.getString().str());
+    ASSERT_EQ(4, size);
+    atom.skip(0, 4);
+
+    id = atom.read(nchildren, size);
+    ASSERT_STREQ("sid", id.getString().str());
+    ASSERT_EQ(16, size);
+    atom.readBytes(buf, 16);
+    ASSERT_STREQ("\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa",
+                 buf);
+
+    ASSERT_EQ(s.str().size(), s.getPosition());
 }

@@ -136,8 +136,7 @@ void ChanHit::initLocal(
     oldestPos = oldp;
     newestPos = newp;
 
-    uphost.ip   = sourceHost.ip;
-    uphost.port = sourceHost.port;
+    uphost      = sourceHost;
     uphostHops  = 1;
 }
 
@@ -186,7 +185,7 @@ void ChanHit::writeAtoms(AtomStream &atom, const GnuID &chanID)
         atom.writeInt(PCP_HOST_NEWPOS, newestPos);
         if (uphost.ip)
         {
-            atom.writeInt(PCP_HOST_UPHOST_IP, uphost.ip);
+            atom.writeAddress(PCP_HOST_UPHOST_IP, uphost.ip);
             atom.writeInt(PCP_HOST_UPHOST_PORT, uphost.port);
             atom.writeInt(PCP_HOST_UPHOST_HOPS, uphostHops);
         }

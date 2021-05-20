@@ -37,7 +37,7 @@
     "Uptime"                  : "稼働時間",
     "Channel cache"           : "チャンネルキャッシュ",
     "Clear"                   : "消去",
-    "Firewalled"              : "ファイアウォール有り",
+    "Firewalled"              : "ファイアウォール",
     "Yes"                     : "はい",
     "No"                      : "いいえ",
     "Unknown"                 : "不明",
@@ -66,6 +66,10 @@
     "Dump"                    : "ダンプ",
 
     "Refresh"                 : "更新",
+
+    "Build date and time"     : "ビルド日時",
+
+    "Check"                   : "チェック",
 
     // speedtest.html
     "Remove"                  : "削除",
@@ -234,7 +238,7 @@
     "URL of yp4g.xml"         : "yp4g.xmlのURL",
 
     "Chat"                    : "チャット",
-    "Randomize broadcasting channel ID" : "配信するチャンネルのIDをランダム化",
+    "Randomize broadcasting channel ID" : "配信チャンネルIDをランダム化",
 
     // rtmp.html
     "Start"                   : "開始",

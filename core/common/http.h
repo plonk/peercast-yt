@@ -92,7 +92,6 @@ public:
 #define MIME_M3U             "audio/m3u"
 #define MIME_MPEGURL         "audio/mpegurl"
 #define MIME_XM3U            "audio/x-mpegurl"
-#define MIME_XPEERCAST       "application/x-peercast"
 #define MIME_XPCP            "application/x-peercast-pcp"
 #define MIME_RAW             "application/binary"
 #define MIME_JPEG            "image/jpeg"

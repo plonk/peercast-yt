@@ -22,7 +22,7 @@ public:
         return false;
     }
 
-    ClientSocket    *accept() override
+    std::shared_ptr<ClientSocket> accept() override
     {
         return NULL;
     }

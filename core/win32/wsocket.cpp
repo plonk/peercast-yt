@@ -36,7 +36,7 @@ void WSAClientSocket::init()
     WSADATA wsaData;
     int err;
 
-    wVersionRequested = MAKEWORD( 2, 0 );
+    wVersionRequested = MAKEWORD( 2, 2 );
     err = WSAStartup( wVersionRequested, &wsaData );
     if (err != 0)
         throw SockException("Unable to init sockets");
@@ -226,13 +226,15 @@ void WSAClientSocket::checkTimeout(bool r, bool w)
 // --------------------------------------------------
 Host WSAClientSocket::getLocalHost()
 {
-    struct sockaddr_in localAddr;
+    struct sockaddr_in6 localAddr;
 
-    int len = sizeof(localAddr);
-    if (getsockname(sockNum, (sockaddr *)&localAddr, &len) == 0)
-        return Host(SWAP4(localAddr.sin_addr.s_addr),0);
-    else
-        return Host(0,0);
+    socklen_t len = sizeof(localAddr);
+    if (getsockname(sockNum, (sockaddr *)&localAddr, &len) == 0) {
+        return Host(IP(localAddr.sin6_addr), 0);
+    } else {
+        int err = WSAGetLastError();
+        throw SockException("getsockname failed", err);
+    }
 }
 
 // --------------------------------------------------
@@ -335,13 +337,18 @@ void WSAClientSocket::bind(const Host &h)
     if ((sockNum = socket(PF_INET6, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET)
         throw SockException("Can`t open socket");
 
+    int disable = 0;
+    if (setsockopt(sockNum, IPPROTO_IPV6,  IPV6_V6ONLY, (char*) &disable, sizeof(disable)) == SOCKET_ERROR) {
+        throw SockException("Can't reset V6ONLY");
+    }
+
     setBlocking(false);
     setReuse(true);
 
     memset(&localAddr,0,sizeof(localAddr));
     localAddr.sin6_family = AF_INET6;
     localAddr.sin6_port = htons(h.port);
-    localAddr.sin6_addr = IN6ADDR_ANY_INIT;
+    localAddr.sin6_addr = in6addr_any;
 
     if(::bind(sockNum, (sockaddr *)&localAddr, sizeof(localAddr)) == -1)
         throw SockException("Can`t bind socket");
@@ -353,7 +360,7 @@ void WSAClientSocket::bind(const Host &h)
 }
 
 // --------------------------------------------------
-ClientSocket *WSAClientSocket::accept()
+std::shared_ptr<ClientSocket> WSAClientSocket::accept()
 {
     int fromSize = sizeof(sockaddr_in6);
     sockaddr_in6 from;
@@ -363,7 +370,7 @@ ClientSocket *WSAClientSocket::accept()
     if (conSock ==  INVALID_SOCKET)
         return NULL;
 
-    WSAClientSocket *cs = new WSAClientSocket();
+    auto cs = std::make_shared<WSAClientSocket>();
     cs->sockNum = conSock;
 
     cs->host.port = ntohs(from.sin6_port);

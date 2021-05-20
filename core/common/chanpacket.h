@@ -61,8 +61,6 @@ public:
     void    init(TYPE type, const void *data, unsigned int length, unsigned int position);
 
     void    writeRaw(Stream &);
-    void    writePeercast(Stream &);
-    void    readPeercast(Stream &);
 
     ChanPacket& operator=(const ChanPacket& other);
 

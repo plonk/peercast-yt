@@ -150,6 +150,43 @@ void sigProc(int sig)
     }
 }
 
+#include <pwd.h>
+#include <sys/stat.h>
+
+static bool mkdir_p(const char* dir)
+{
+    if (strcmp(dir, "/") == 0) {
+        return true; // the root dir is assumed to exist.
+    } else {
+        struct stat sb;
+
+        if (stat(dir, &sb) == -1) {
+            if (errno == ENOENT) {
+                char *dircopy = strdup(dir);
+                if (mkdir_p(dirname(dircopy))) {
+                    free(dircopy);
+                    if (mkdir(dir, 0777) == -1) {
+                        perror("mkdir");
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
+            } else {
+                perror("stat");
+                return false;
+            }
+        }
+
+        if ((sb.st_mode & S_IFMT) == S_IFDIR) {
+            return true;
+        } else {
+            fprintf(stderr, "mkdir_p: Not a directory `%s`", dir);
+            return false;
+        }
+    }
+}
+
 // ----------------------------------
 static void init()
 {
@@ -159,15 +196,33 @@ static void init()
         perror("/proc/self/exe");
         exit(1);
     }
-    auto dir = dirname(path);
+    auto bindir = dirname(path);
+    htmlPath.set(bindir);
+    htmlPath.append("/../share/peercast/");
 
-    iniFileName.set(dir);
+    ::String confdir;
+    char* dir;
+    dir = getenv("XDG_CONFIG_DIR");
+    if (dir) {
+        confdir.set(dir);
+    } else {
+        dir = getenv("HOME");
+        if (!dir)
+            dir = getpwuid(getuid())->pw_dir;
+        confdir.set(dir);
+        confdir.append("/.config");
+    }
+    confdir.append("/peercast");
+
+    if (confdir.c_str()[0] == '/') {
+        mkdir_p(confdir.c_str());
+    }
+
+    iniFileName.set(confdir);
     iniFileName.append("/peercast.ini");
-    htmlPath.set(dir);
-    htmlPath.append("/");
-    pidFileName.set(dir);
+    pidFileName.set(confdir);
     pidFileName.append("/peercast.pid");
-    logFileName.set(dir);
+    logFileName.set(confdir);
     logFileName.append("/peercast.log");
 }
 
@@ -238,6 +293,12 @@ int main(int argc, char* argv[])
     peercastApp = new MyPeercastApp();
 
     peercastInst->init();
+
+    LOG_INFO("Config file: %s", iniFileName.c_str());
+    if (logToFile)
+        LOG_INFO("Log file: %s", logFileName.c_str());
+    if (setPidFile)
+        LOG_INFO("PID file: %s", pidFileName.c_str());
 
     signal(SIGINT, sigProc);
     signal(SIGTERM, sigProc);

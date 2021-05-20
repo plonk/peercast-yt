@@ -23,6 +23,8 @@
 #include <string>
 #include <assert.h>
 
+#include <vector>
+
 #ifndef __GNUC__
 #define __attribute__(x)
 #endif
@@ -31,19 +33,30 @@
 class GeneralException : public std::exception
 {
 public:
-    GeneralException(const char *m, int e = 0)
-    {
-        std::snprintf(msg, sizeof(msg), "%s", m);
-        err = e;
-    }
+    GeneralException(const char *m, int e = 0);
 
-    const char* what() const throw() override
-    {
-        return msg;
-    }
-
-    char msg[128];
+    const char* what() const throw() override;
+    
+    const char* msg;
+    std::string msgbuf;
+    std::vector<std::string> backtrace;
     int  err;
+};
+
+// -------------------------------------
+class NotImplementedException : public GeneralException
+{
+public:
+    NotImplementedException(const char *m) : GeneralException(m) {}
+    NotImplementedException(const char *m, int e) : GeneralException(m, e) {}
+};
+
+// -------------------------------------
+class LogicError : public GeneralException
+{
+public:
+    LogicError(const char *m) : GeneralException(m) {}
+    LogicError(const char *m, int e) : GeneralException(m, e) {}
 };
 
 // -------------------------------------
@@ -121,6 +134,9 @@ extern void LOG_INFO(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)
 extern void LOG_WARN(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
 extern void LOG_ERROR(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
 extern void LOG_FATAL(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
+
+// ----------------------------------
+#define ASSERT(expr) do{if(!(expr))LOG_WARN("Assertion failed: " #expr " at " __FILE__ ":%d", __LINE__);}while(0)
 
 #endif
 

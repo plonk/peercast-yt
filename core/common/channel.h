@@ -83,15 +83,6 @@ public:
 };
 
 // ------------------------------------------
-class PeercastStream : public ChannelStream
-{
-public:
-    void readHeader(Stream &, std::shared_ptr<Channel>) override;
-    int  readPacket(Stream &, std::shared_ptr<Channel>) override;
-    void readEnd(Stream &, std::shared_ptr<Channel>) override;
-};
-
-// ------------------------------------------
 class ChannelSource
 {
 public:
@@ -169,10 +160,10 @@ public:
 
     void    startMP3File(char *);
     void    startGet();
-    void    startICY(ClientSocket *, SRC_TYPE);
+    void    startICY(std::shared_ptr<ClientSocket>, SRC_TYPE);
     void    startURL(const char *);
-    void    startHTTPPush(ClientSocket *, bool isChunked);
-    void    startWMHTTPPush(ClientSocket *cs);
+    void    startHTTPPush(std::shared_ptr<ClientSocket>, bool isChunked);
+    void    startWMHTTPPush(std::shared_ptr<ClientSocket> cs);
 
     ChannelStream   *createSource();
 
@@ -233,7 +224,7 @@ public:
     bool         sendPacketUp(ChanPacket &, const GnuID &, const GnuID &, const GnuID &);
 
     bool         writeVariable(Stream &, const String &) override;
-    bool         acceptGIV(ClientSocket *);
+    bool         acceptGIV(std::shared_ptr<ClientSocket>);
     void         updateInfo(const ChanInfo &);
     int          readStream(Stream &, ChannelStream *);
     void         checkReadDelay(unsigned int);
@@ -288,8 +279,8 @@ public:
     STATUS              status;
     static const char   *statusMsgs[], *srcTypes[];
 
-    ClientSocket        *sock;
-    ClientSocket        *pushSock;
+    std::shared_ptr<ClientSocket> sock;
+    std::shared_ptr<ClientSocket> pushSock;
 
     unsigned int        lastTrackerUpdate;
     unsigned int        lastMetaUpdate;

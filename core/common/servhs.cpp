@@ -620,7 +620,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
         // Icecast 放送
 
         handshakeSOURCE(http.cmdLine, isHTTP);
-    }else if (http.isRequest(servMgr->password)) // FIXME: check for empty password!
+    }else if (servMgr->password[0] != '\0' && http.isRequest(servMgr->password))
     {
         // ShoutCast broadcast
 
@@ -810,9 +810,6 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
         }
     }
 
-    Cookie gotCookie;
-    cookie.clear();
-
     while (http.nextHeader())
     {
         char *arg = http.getArgStr();
@@ -829,15 +826,22 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
                 if (http.isHeader("Cookie"))
                 {
                     LOG_DEBUG("Got cookie: %s", arg);
-                    char *idp = arg;
-                    while ((idp = strstr(idp, "id=")))
-                    {
-                        idp += 3;
-                        gotCookie.set(idp, sock->host.ip);
-                        if (servMgr->cookieList.contains(gotCookie))
-                        {
-                            LOG_DEBUG("Cookie found");
-                            cookie = gotCookie;
+                    const std::string idKey = str::STR(servMgr->serverHost.port, "_id");
+                    auto assignments = str::split(arg, "; ");
+
+                    for (auto assignment : assignments) {
+                        auto sides = str::split(assignment, "=", 2);
+                        if (sides.size() != 2) {
+                            LOG_ERROR("Invalid Cookie header: expected '='");
+                            break;
+                        } else if (sides[0] == idKey) {
+                            Cookie gotCookie;
+                            gotCookie.set(sides[1].c_str(), sock->host.ip);
+
+                            if (servMgr->cookieList.contains(gotCookie)) {
+                                LOG_DEBUG("Cookie found");
+                                cookie = gotCookie;
+                            }
                             break;
                         }
                     }
@@ -880,6 +884,32 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
     }
 
     return false;
+}
+
+// -----------------------------------
+void Servent::CMD_portcheck4(const char* cmd, HTTP& http, String& jumpStr)
+{
+    servMgr->checkFirewall();
+    if (!http.headers.get("Referer").empty())
+    {
+        jumpStr.sprintf("%s", http.headers.get("Referer").c_str());
+    }else
+    {
+        jumpStr.sprintf("/%s/index.html", servMgr->htmlPath);
+    }
+}
+
+// -----------------------------------
+void Servent::CMD_portcheck6(const char* cmd, HTTP& http, String& jumpStr)
+{
+    servMgr->checkFirewallIPv6();
+    if (!http.headers.get("Referer").empty())
+    {
+        jumpStr.sprintf("%s", http.headers.get("Referer").c_str());
+    }else
+    {
+        jumpStr.sprintf("/%s/index.html", servMgr->htmlPath);
+    }
 }
 
 // -----------------------------------
@@ -1348,9 +1378,9 @@ void Servent::CMD_login(const char* cmd, HTTP& http, String& jumpStr)
 
     http.writeLine(HTTP_SC_FOUND);
     if (servMgr->cookieList.neverExpire)
-        http.writeLineF("%s id=%s; path=/; expires=\"Mon, 01-Jan-3000 00:00:00 GMT\";", HTTP_HS_SETCOOKIE, idstr);
+        http.writeLineF("%s %d_id=%s; path=/; expires=\"Mon, 01-Jan-3000 00:00:00 GMT\"", HTTP_HS_SETCOOKIE, (int) servMgr->serverHost.port, idstr);
     else
-        http.writeLineF("%s id=%s; path=/;", HTTP_HS_SETCOOKIE, idstr);
+        http.writeLineF("%s %d_id=%s; path=/", HTTP_HS_SETCOOKIE, (int) servMgr->serverHost.port, idstr);
 
     if (query.get("requested_path") != "")
         http.writeLineF("Location: %s", query.get("requested_path").c_str());
@@ -1773,6 +1803,12 @@ void Servent::handshakeCMD(HTTP& http, char *q)
         }else if (cmd == "logout")
         {
             CMD_logout(query.c_str(), http, jumpStr);
+        }else if (cmd == "portcheck4")
+        {
+            CMD_portcheck4(query.c_str(), http, jumpStr);
+        }else if (cmd == "portcheck6")
+        {
+            CMD_portcheck6(query.c_str(), http, jumpStr);
         }else if (cmd == "redirect")
         {
             CMD_redirect(query.c_str(), http, jumpStr);
@@ -1971,8 +2007,6 @@ void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd, size_t plen)
             info.srcProtocol = ChanInfo::SP_MMS;
         else if (stristr(arg, MIME_XPCP))
             info.srcProtocol = ChanInfo::SP_PCP;
-        else if (stristr(arg, MIME_XPEERCAST))
-            info.srcProtocol = ChanInfo::SP_PEERCAST;
 
         else if (stristr(arg, MIME_XSCPLS))
             info.contentType = ChanInfo::T_PLS;
@@ -1991,12 +2025,11 @@ void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd, size_t plen)
 
 // -----------------------------------
 // Windows Media HTTP Push Distribution Protocol
-#define ASSERT(x)
 void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
 {
     // At this point, http has read all the headers.
 
-    ASSERT(http.headers["CONTENT-TYPE"] == "application/x-wms-pushsetup");
+    ASSERT(http.headers.get("CONTENT-TYPE") == "application/x-wms-pushsetup");
     LOG_DEBUG("%s", nlohmann::json(http.headers.m_headers).dump().c_str());
 
     int size = std::atoi(http.headers.get("Content-Length").c_str());
@@ -2035,7 +2068,7 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
     http.readHeaders();
     LOG_DEBUG("Setup: %s", nlohmann::json(http.headers.m_headers).dump().c_str());
 
-    ASSERT(http.headers["CONTENT-TYPE"] == "application/x-wms-pushstart");
+    ASSERT(http.headers.get("CONTENT-TYPE") == "application/x-wms-pushstart");
 
     // -----------------------------------------
 
@@ -2234,16 +2267,38 @@ const char* Servent::fileNameToMimeType(const String& fileName)
 }
 
 // -----------------------------------
+static void validFileOrThrow(const char* filePath, const std::string& documentRoot)
+{
+    ASSERT(documentRoot.size() > 0);
+    ASSERT(documentRoot.back() == sys->getDirectorySeparator()[0]);
+
+    std::string abspath;
+    try {
+        abspath = sys->realPath(filePath);
+    } catch (GeneralException &e) {
+        LOG_ERROR("Cannot determine absolute path: %s", e.what());
+        throw HTTPException(HTTP_SC_NOTFOUND, 404);
+    }
+    if (!str::has_prefix(abspath, documentRoot)) {
+        LOG_ERROR("Requested file is outside of the document root: %s",
+                  abspath.c_str());
+        // ファイルが存在することを知らせたくないので 404 を返す。
+        throw HTTPException(HTTP_SC_NOTFOUND, 404);
+    }
+}
+
+// -----------------------------------
 void Servent::handshakeLocalFile(const char *fn, HTTP& http)
 {
-    String fileName;
+    std::string documentRoot;
+    documentRoot = sys->realPath(peercastApp->getPath()) + sys->getDirectorySeparator();
 
-    fileName = peercastApp->getPath();
+    String fileName = documentRoot.c_str();
     fileName.append(fn);
 
     LOG_DEBUG("Writing HTML file: %s", fileName.cstr());
 
-    WriteBufferedStream bufferedSock(sock);
+    WriteBufferedStream bufferedSock(sock.get());
     HTML html("", bufferedSock);
 
     const char* mimeType = fileNameToMimeType(fileName);
@@ -2276,11 +2331,16 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
             *args = '\0';
 
         auto req = http.getRequest();
+
+        validFileOrThrow(fileName.c_str(), documentRoot);
+
         html.writeOK(MIME_HTML);
         HTTPRequestScope scope(req);
         html.writeTemplate(fileName.cstr(), req.queryString.c_str(), scope);
     }else
     {
+        validFileOrThrow(fileName.c_str(), documentRoot);
+
         html.writeRawFile(fileName.cstr(), mimeType);
     }
 }
