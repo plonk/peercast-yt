@@ -652,10 +652,6 @@ json::array_t Template::evaluateCollectionVariable(String& varName)
         JrpcApi api;
         LOG_DEBUG("%s", api.getChannelsFound({}).dump().c_str());
         json::array_t cs = api.getChannelsFound({});
-        // ジャンル接頭辞で始まらないチャンネルは掲載しない。
-        cs.erase(std::remove_if(cs.begin(), cs.end(),
-                                [] (json c) { return !str::is_prefix_of(servMgr->genrePrefix, c["genre"]); }),
-                 cs.end());
         return cs;
     }else if (varName == "broadcastingChannels")
     {

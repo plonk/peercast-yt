@@ -2116,9 +2116,6 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var == "publicDirectoryEnabled")
     {
         buf = to_string(publicDirectoryEnabled);
-    }else if (var == "genrePrefix")
-    {
-        buf = genrePrefix;
     }else if (var == "transcodingEnabled")
     {
         buf = to_string(servMgr->transcodingEnabled);

@@ -1117,8 +1117,6 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
             servMgr->randomizeBroadcastingChannelID = getCGIargBOOL(arg);
         else if (strcmp(curr, "public_directory") == 0)
             servMgr->publicDirectoryEnabled = true;
-        else if (strcmp(curr, "genreprefix") == 0)
-            servMgr->genrePrefix = arg;
         else if (strcmp(curr, "auth") == 0)
         {
             if (strcmp(arg, "cookie") == 0)
