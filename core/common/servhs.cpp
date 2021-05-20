@@ -30,6 +30,7 @@
 #include "str.h"
 #include "cgi.h"
 #include "template.h"
+#include "public.h"
 #include "assets.h"
 #include "uptest.h"
 #include "gnutella.h"
@@ -412,6 +413,27 @@ void Servent::handshakeGET(HTTP &http)
             http.writeLineF("%s %zu", HTTP_HS_LENGTH, response.size());
             http.writeLine("");
             http.writeString(response.c_str());
+        }
+    }else if (strcmp(fn, "/public")== 0 ||
+              strncmp(fn, "/public/", strlen("/public/"))==0)
+    {
+        // 公開ディレクトリ
+
+        http.readHeaders();
+
+        if (!servMgr->publicDirectoryEnabled)
+        {
+            throw HTTPException(HTTP_SC_FORBIDDEN, 403);
+        }
+
+        try
+        {
+            PublicController controller(peercastApp->getPath() + std::string("public"));
+            http.send(controller(http.getRequest(), *sock, sock->host));
+        } catch (GeneralException& e)
+        {
+            LOG_ERROR("Error: %s", e.msg);
+            throw HTTPException(HTTP_SC_SERVERERROR, 500);
         }
     }else if (str::is_prefix_of("/assets/", fn))
     {
@@ -966,6 +988,7 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
     servMgr->numFilters = 0;
     ServFilter *currFilter = servMgr->filters;
     servMgr->channelDirectory->clearFeeds();
+    servMgr->publicDirectoryEnabled = false;
     servMgr->transcodingEnabled = false;
     servMgr->chat = false;
     servMgr->randomizeBroadcastingChannelID = false;
@@ -1069,6 +1092,11 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
                 servMgr->channelDirectory->addFeed(str.cstr());
             }
         }
+        else if (strncmp(curr, "channel_feed_public", strlen("channel_feed_public")) == 0)
+        {
+            int index = atoi(curr + strlen("channel_feed_public"));
+            servMgr->channelDirectory->setFeedPublic(index, true);
+        }
 
         // client
         else if (strcmp(curr, "clientactive") == 0)
@@ -1087,6 +1115,8 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
             servMgr->chat = getCGIargBOOL(arg);
         else if (strcmp(curr, "randomizechid") == 0)
             servMgr->randomizeBroadcastingChannelID = getCGIargBOOL(arg);
+        else if (strcmp(curr, "public_directory") == 0)
+            servMgr->publicDirectoryEnabled = true;
         else if (strcmp(curr, "genreprefix") == 0)
             servMgr->genrePrefix = arg;
         else if (strcmp(curr, "auth") == 0)

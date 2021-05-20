@@ -1,5 +1,6 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env ruby -W0
 require 'fileutils'
+require_relative 'common'
 
 if RUBY_PLATFORM =~ /msys/
   puts "skipped"
@@ -10,8 +11,7 @@ end
 FileUtils.cp "peercast.ini.master", "peercast.ini"
 
 # 起動。
-pid = spawn "peercast-yt/peercast -i peercast.ini"
-sleep 0.1
+pid = spawn_peercast
 
 # プロセスを終了する。
 Process.kill(:INT, pid)
@@ -23,8 +23,14 @@ loop do
     fail
   end
   pid, status = Process.wait2(-1, Process::WNOHANG)
-  if pid && status.exited?
-    break
+  if pid
+    if status.exited?
+      break
+    else
+      # SIGINT シグナルハンドラーのインストールが間に合わないとここに来る。
+      puts "process died abnormally: #{status.inspect}"
+      exit 1
+    end
   end
   sleep 0.1
 end

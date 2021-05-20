@@ -1,0 +1,70 @@
+.titlelinks {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 16px;
+	font-weight: bold;
+}
+a {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	color: #0000FF;
+	text-decoration: none;
+
+}
+a:hover {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	text-decoration: underline;
+
+}
+.normal {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+
+}
+.normal-small {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+}
+.titlelinksBig {
+
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 24px;
+	font-weight: bold;
+}
+
+input {
+	font-family: Arial;
+}
+
+input[type=radio] {
+	vertical-align: -3px;
+}
+
+.navbar {
+	margin-top: 10px; margin-bottom: 15px;
+}
+
+td {
+	padding-left: 4px; padding-right: 4px;
+	padding-top: 3px; padding-bottom: 3px;
+}
+th {
+	padding-left: 4px; padding-right: 4px;
+	padding-top: 3px; padding-bottom: 3px;
+}
+
+td.numeric {
+	text-align: right;
+}
+
+td.container {
+	padding: 3px 15px;
+}
+a.button {
+    -webkit-appearance: button;
+    -moz-appearance: button;
+    appearance: button;
+
+    text-decoration: none;
+    color: initial;
+
+    padding: 2px 10px;
+}

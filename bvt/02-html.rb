@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby -W0
 require_relative 'common'
 
 spawn_peercast
@@ -31,7 +32,7 @@ spawn_peercast
   assert_eq(302, response.code)
   assert_eq("/", response.headers['Location'])
 
-  files = %w[bcid.html chat.html notifications.html settings.html
+  files = %w[bcid.html notifications.html settings.html
 broadcast.html connections.html login.html viewlog.html
 channels.html head.html logout.html relayinfo.html]
 

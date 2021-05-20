@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <title>{$page.channel.name} - {#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$request.host}{@end}</title>
+    <link rel="stylesheet" href="peercast.css">
+    <meta charset="utf-8">
+    <style>
+      .paper { background-color: #eee; max-width: 750px; margin: 1em auto 1em auto; padding: 0.5em }
+     object { color: white; font-size: 14px; }
+     .message { color: white; font-size: 14px; }
+    </style>
+  </head>
+  <body class="normal" style="background-color: #222">
+
+    {^include player.html}
+
+    <div class="paper">
+      {$page.channel.name} {$page.channel.desc} {$page.channel.comment} {$page.channel.bitrate} kbps
+      <a target="_blank"
+         href="/pls/{$page.channel.id}{$page.channel.plsExt}?auth={$page.channel.authToken}">
+        {#Playlist}
+      </a>
+      {@if page.channel.contactURL}
+      <a target="_blank"
+         href="{$page.channel.contactURL}">
+        {#Contact}
+      </a>
+      {@else}
+      {#Contact}
+      {@end}
+    </div>
+  </body>
+</html>

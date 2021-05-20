@@ -1,12 +1,12 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env ruby -W0
 require 'fileutils'
+require_relative 'common'
 
 # 新品の設定ファイルを使う。
 FileUtils.cp "peercast.ini.master", "peercast.ini"
 
 # 起動。
-pid = spawn "peercast-yt/peercast -i peercast.ini"
-sleep 0.1
+pid = spawn_peercast
 
 # プロセスは死んだか。
 fail 'process is dead' unless Process.wait(-1, Process::WNOHANG) == nil

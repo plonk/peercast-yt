@@ -36,6 +36,7 @@
 // -----------------------------------
 ServMgr::ServMgr()
     : relayBroadcast(30) // オリジナルでは未初期化。
+    , publicDirectoryEnabled(false)
     , channelDirectory(new ChannelDirectory())
     , uptestServiceRegistry(new UptestServiceRegistry())
 #ifdef WIN32
@@ -940,6 +941,7 @@ ini::Document ServMgr::getSettings()
             {"htmlPath", this->htmlPath},
             {"maxServIn", this->maxServIn},
             {"chanLog", this->chanLog},
+            {"publicDirectory", this->publicDirectoryEnabled},
             {"networkID", networkID.str()},
             {"randomizeBroadcastingChannelID", randomizeBroadcastingChannelID},
         }
@@ -1205,6 +1207,8 @@ void ServMgr::loadSettings(const char *fn)
                 servMgr->maxServIn = iniFile.getIntValue();
             else if (iniFile.isName("chanLog"))
                 servMgr->chanLog.set(iniFile.getStrValue(), String::T_ASCII);
+            else if (iniFile.isName("publicDirectory"))
+                servMgr->publicDirectoryEnabled = iniFile.getBoolValue();
 
             else if (iniFile.isName("rootMsg"))
                 rootMsg.set(iniFile.getStrValue());
@@ -1294,6 +1298,10 @@ void ServMgr::loadSettings(const char *fn)
                         break;
                     else if (iniFile.isName("url"))
                         servMgr->channelDirectory->addFeed(iniFile.getStrValue());
+                    else if (iniFile.isName("isPublic"))
+                    {
+                        servMgr->channelDirectory->setFeedPublic(feedIndex, iniFile.getBoolValue());
+                    }
                 }
                 feedIndex++;
             }
@@ -2096,6 +2104,12 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var.startsWith("uptestServiceRegistry."))
     {
         return uptestServiceRegistry->writeVariable(out, var + strlen("uptestServiceRegistry."));
+    }else if (var == "publicDirectoryEnabled")
+    {
+        buf = to_string(publicDirectoryEnabled);
+    }else if (var == "genrePrefix")
+    {
+        buf = genrePrefix;
     }else if (var == "transcodingEnabled")
     {
         buf = to_string(servMgr->transcodingEnabled);

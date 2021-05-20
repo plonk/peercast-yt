@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby -W0
 Dir.glob("[0-9]*-*.rb").sort.each do |rb|
   name = rb.sub(/\.rb$/, '')
   print "#{name}: "

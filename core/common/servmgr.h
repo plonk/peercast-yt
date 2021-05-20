@@ -304,6 +304,7 @@ public:
 
     const std::unique_ptr<class ChannelDirectory>
                         channelDirectory;
+    bool                publicDirectoryEnabled;
 
     const std::unique_ptr<class UptestServiceRegistry>
                         uptestServiceRegistry;
