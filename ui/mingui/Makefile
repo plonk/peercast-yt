@@ -15,7 +15,7 @@ RTMPSERVER = rtmp-server.exe
 CORE = ../../core
 RTMP = ../../rtmp-server
 SRCHTMLTAR = ../html.tar
-HTML = html
+SRCPUBLICTAR = ../public.tar
 ASSETS = ../assets/
 CGIBIN = ../cgi-bin/
 
@@ -28,7 +28,6 @@ COREOBJ = $(notdir $(CORESOURCE:.cpp=.o))
 SYSOBJ = $(notdir $(SYSSOURCE:.cpp=.o))
 
 WINSOURCE = Simple.cpp gui.cpp
-
 WINOBJ = $(notdir $(WINSOURCE:.cpp=.o)) resource.o
 
 RTMPSOURCE = $(wildcard $(RTMP)/*.cpp)
@@ -36,7 +35,9 @@ RTMPOBJ = $(notdir $(RTMPSOURCE:.cpp=.o))
 
 DEPENDFILE = .deps
 
-.PHONY: all clean build-html deps $(SRCHTMLTAR) $(SRCASSETSTAR)
+-include Makefile.local
+
+.PHONY: all clean build-html deps $(SRCHTMLTAR) $(SRCPUBLICSTAR) $(SRCASSETSTAR)
 
 # Here follow the generic build rules.
 all: $(TARGET) $(LIBOBJSTATIC) $(DISTARCHIVE) $(RTMPSERVER)
@@ -49,18 +50,18 @@ resource.o: Simple.rc
 $(SRCHTMLTAR):
 	$(MAKE) -C .. html.tar
 
-$(HTML): $(SRCHTMLTAR)
-	rm -rf $(HTML)
-	tar xf $(SRCHTMLTAR)
-	touch $(HTML)
-
 $(SRCASSETSTAR):
 	$(MAKE) -C .. assets.tar
 
-$(DISTARCHIVE): $(TARGET) $(HTML) $(ASSETS) $(RTMPSERVER)
+$(SRCPUBLICTAR):
+	$(MAKE) -C .. public.tar
+
+$(DISTARCHIVE): $(TARGET) $(ASSETS) $(RTMPSERVER) $(SRCPUBLICTAR) $(SRCHTMLTAR)
 	rm -rf peercast-yt
 	mkdir peercast-yt
-	cp -R $(HTML) $(TARGET) $(ASSETS) $(CGIBIN) $(RTMPSERVER) ../../licenses ../../core/LICENSE peercast-yt/
+	cp -R $(TARGET) $(ASSETS) $(CGIBIN) $(RTMPSERVER) ../../licenses ../../core/LICENSE peercast-yt/
+	tar xf $(SRCHTMLTAR) -C peercast-yt/
+	tar xf $(SRCPUBLICTAR) -C peercast-yt/
 	strip peercast-yt/$(TARGET)
 	strip peercast-yt/$(RTMPSERVER)
 	tar czf $(DISTARCHIVE) peercast-yt
@@ -68,7 +69,6 @@ $(DISTARCHIVE): $(TARGET) $(HTML) $(ASSETS) $(RTMPSERVER)
 clean:
 	$(MAKE) -C .. clean
 	rm -f $(WINOBJ) $(COREOBJ) $(SYSOBJ) $(TARGET) ${LIBOBJSTATIC} $(COREOBJSTATIC) $(DEPENDFILE) $(RTMPSERVER)
-	rm -rf $(HTML)
 	rm -rf peercast-yt/
 	rm -f $(DISTARCHIVE)
 
@@ -81,7 +81,7 @@ $(SYSOBJ): %.o : $(CORE)/win32/%.cpp
 $(RTMPOBJ): %.o : $(RTMP)/%.cpp
 	$(CXX) $(CPPFLAGS) -c $< -o $@
 
-$(DEPENDFILE): $(CORESOURCE) $(WINSOURCE) $(RTMPSOURCE)
+$(DEPENDFILE): $(CORESOURCE) $(SYSSOURCE) $(WINSOURCE) $(RTMPSOURCE)
 	$(CXX) $(CPPFLAGS) -MM $(CORESOURCE) $(SYSSOURCE) $(WINSOURCE) $(RTMPSOURCE) > $(DEPENDFILE)
 
 $(LIBOBJSTATIC): $(COREOBJ) $(SYSOBJ)
