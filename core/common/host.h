@@ -121,6 +121,11 @@ public:
         return const_cast<Host*>(this)->isSame(const_cast<Host&>(other));
     }
 
+    bool operator != (const Host& other) const
+    {
+        return !(*this == other);
+    }
+
     void    fromStrIP(const char *, int);
     void    fromStrName(const char *, int);
 

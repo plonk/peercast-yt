@@ -1,12 +1,12 @@
 # Uncomment following line to enabled RTMP fetch support
 WITH_RTMP = yes
 
-CPPFLAGS = -g -Wreturn-type -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT $(INCLUDES)
+CPPFLAGS = -g -Wreturn-type -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT -DADD_BACKTRACE $(INCLUDES)
 ifeq ($(WITH_RTMP),yes)
   CPPFLAGS += -DWITH_RTMP
 endif
 
-LDFLAGS = -fuse-ld=gold -pthread
+LDFLAGS = -fuse-ld=gold -pthread -rdynamic
 LIBS = 
 ifeq ($(WITH_RTMP),yes)
   LIBS += -lrtmp
@@ -27,7 +27,7 @@ RTMP = ../../rtmp-server
 SRCHTMLTAR = ../html.tar
 HTML = html
 SRCPUBLICTAR = ../public.tar
-PUBLIC = ../public
+PUBLIC = public
 ASSETS = ../assets/
 CGIBIN = ../cgi-bin
 
@@ -47,6 +47,8 @@ RTMPSOURCE = $(wildcard $(RTMP)/*.cpp)
 RTMPOBJ = $(notdir $(RTMPSOURCE:.cpp=.o))
 
 DEPENDFILE = .deps
+
+-include Makefile.local
 
 .PHONY: all clean build-html deps $(SRCHTMLTAR) $(SRCPUBLICTAR)
 

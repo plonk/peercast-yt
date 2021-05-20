@@ -36,7 +36,7 @@ void WSAClientSocket::init()
     WSADATA wsaData;
     int err;
 
-    wVersionRequested = MAKEWORD( 2, 0 );
+    wVersionRequested = MAKEWORD( 2, 2 );
     err = WSAStartup( wVersionRequested, &wsaData );
     if (err != 0)
         throw SockException("Unable to init sockets");
@@ -348,7 +348,7 @@ void WSAClientSocket::bind(const Host &h)
     memset(&localAddr,0,sizeof(localAddr));
     localAddr.sin6_family = AF_INET6;
     localAddr.sin6_port = htons(h.port);
-    localAddr.sin6_addr = IN6ADDR_ANY_INIT;
+    localAddr.sin6_addr = in6addr_any;
 
     if(::bind(sockNum, (sockaddr *)&localAddr, sizeof(localAddr)) == -1)
         throw SockException("Can`t bind socket");
@@ -360,7 +360,7 @@ void WSAClientSocket::bind(const Host &h)
 }
 
 // --------------------------------------------------
-ClientSocket *WSAClientSocket::accept()
+std::shared_ptr<ClientSocket> WSAClientSocket::accept()
 {
     int fromSize = sizeof(sockaddr_in6);
     sockaddr_in6 from;
@@ -370,7 +370,7 @@ ClientSocket *WSAClientSocket::accept()
     if (conSock ==  INVALID_SOCKET)
         return NULL;
 
-    WSAClientSocket *cs = new WSAClientSocket();
+    auto cs = std::make_shared<WSAClientSocket>();
     cs->sockNum = conSock;
 
     cs->host.port = ntohs(from.sin6_port);

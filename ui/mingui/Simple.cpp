@@ -18,7 +18,6 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-#include <windows.h>
 #include "stdafx.h"
 #include "resource.h"
 #include "gui.h"
@@ -30,6 +29,9 @@
 #include "simple.h"
 #include "version2.h"
 #include "gnutella.h"
+
+#include <windows.h>
+#include <shellapi.h>
 
 #define MAX_LOADSTRING 100
 

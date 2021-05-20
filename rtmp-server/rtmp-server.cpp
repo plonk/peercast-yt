@@ -25,13 +25,13 @@ namespace rtmpserver
         exit(1);
     }
 
-    Stream* openUri(const std::string& spec)
+    std::shared_ptr<Stream> openUri(const std::string& spec)
     {
         URI uri(spec);
 
         if (uri.scheme() == "http")
         {
-            ClientSocket* sock = sys->createSocket();
+            auto sock = sys->createSocket();
             Host host;
             host.fromStrName(uri.host().c_str(), uri.port());
             sock->open(host);
@@ -41,12 +41,12 @@ namespace rtmpserver
             return sock;
         }else if (uri.scheme() == "file")
         {
-            FileStream *file = new FileStream();
+            auto file = std::make_shared<FileStream>();
             file->openWriteReplace(uri.path().c_str());
             return file;
         }else if (!uri.isValid())
         {
-            FileStream *file = new FileStream();
+            auto file = std::make_shared<FileStream>();
             file->openWriteReplace(spec.c_str());
             return file;
         }else
@@ -145,17 +145,16 @@ int main(int argc, char* argv[])
         die("no URL supplied");
 
     Host serverHost(0 /* IGNORED */, rtmp_port);
-    ClientSocket* server = sys->createSocket();
+    auto server = sys->createSocket();
     server->bind(serverHost);
     server->setBlocking(true); // accept() がブロックするように。
 
     while (true)
     {
         // ループブロックの最後でストリームを解放する。
-        std::vector<Stream*> streams;
-        Defer cb([&]() { for (auto s : streams) delete s; });
+        std::vector<std::shared_ptr<Stream>> streams;
 
-        ClientSocket* client = server->accept();
+        auto client = server->accept();
 
         for (int i = 1; i < argc; ++i)
             streams.push_back(openUri(argv[i]));

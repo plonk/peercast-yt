@@ -17,7 +17,7 @@ public:
     int getSourceRate() override;
     int getSourceRateAvg() override;
 
-    ClientSocket* m_sock;
+    std::shared_ptr<ClientSocket> m_sock;
     bool m_isChunked;
 };
 

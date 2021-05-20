@@ -23,6 +23,8 @@
 #include <string>
 #include <assert.h>
 
+#include <vector>
+
 #ifndef __GNUC__
 #define __attribute__(x)
 #endif
@@ -31,19 +33,22 @@
 class GeneralException : public std::exception
 {
 public:
-    GeneralException(const char *m, int e = 0)
-    {
-        std::snprintf(msg, sizeof(msg), "%s", m);
-        err = e;
-    }
+    GeneralException(const char *m, int e = 0);
 
-    const char* what() const throw() override
-    {
-        return msg;
-    }
-
-    char msg[128];
+    const char* what() const throw() override;
+    
+    const char* msg;
+    std::string msgbuf;
+    std::vector<std::string> backtrace;
     int  err;
+};
+
+// -------------------------------------
+class NotImplementedException : public GeneralException
+{
+public:
+    NotImplementedException(const char *m) : GeneralException(m) {}
+    NotImplementedException(const char *m, int e) : GeneralException(m, e) {}
 };
 
 // -------------------------------------

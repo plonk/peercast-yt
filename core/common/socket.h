@@ -26,6 +26,8 @@
 #include "config.h"
 #include "ip.h"
 
+#include <memory>
+
 // --------------------------------------------------
 class ClientSocket : public Stream
 {
@@ -44,7 +46,7 @@ public:
     virtual void            bind(const Host &)       = 0;
     virtual void            connect()          = 0;
     virtual bool            active()           = 0;
-    virtual ClientSocket    *accept()          = 0;
+    virtual std::shared_ptr<ClientSocket> accept()          = 0;
     virtual Host            getLocalHost()     = 0;
 
     void    setReadTimeout(unsigned int t) override

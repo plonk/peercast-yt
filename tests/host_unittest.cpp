@@ -93,23 +93,101 @@ TEST(HostTest, fromStrName_128bytes)
     ASSERT_EQ(0, host.port);
 }
 
-TEST(HostTest, fromStrName_localhost)
+TEST(HostTest, fromStrName_emptyString)
+{
+    Host host;
+
+    host.fromStrName("", 7144);
+    ASSERT_EQ(0, host.ip);
+    ASSERT_EQ(0, host.port);
+}
+
+TEST(HostTest, fromStrName_nonexistentHostname)
+{
+    Host host;
+
+    host.fromStrName("hogehoge", 0);
+    ASSERT_EQ(0, host.ip);
+    ASSERT_EQ(0, host.port);
+}
+
+TEST(HostTest, fromStrName_ipv4hostname)
 {
     Host host;
 
     host.fromStrName("localhost", 0);
 
-    ASSERT_EQ(127<<24 | 1, host.ip.ipv4());
+    ASSERT_EQ(IP::parse("127.0.0.1"), host.ip);
     ASSERT_EQ(0, host.port);
 
     host.fromStrName("localhost", 7144);
 
-    ASSERT_EQ(127<<24 | 1, host.ip.ipv4());
+    ASSERT_EQ(IP::parse("127.0.0.1"), host.ip);
     ASSERT_EQ(7144, host.port);
 
     host.fromStrName("localhost:8144", 7144);
 
-    ASSERT_EQ(127<<24 | 1, host.ip.ipv4());
+    ASSERT_EQ(IP::parse("127.0.0.1"), host.ip);
+    ASSERT_EQ(8144, host.port);
+}
+
+TEST(HostTest, fromStrName_ipv6hostname)
+{
+    Host host;
+
+    host.fromStrName("ip6-localhost", 0);
+
+    ASSERT_EQ(IP::parse("::1"), host.ip);
+    ASSERT_EQ(0, host.port);
+
+    host.fromStrName("ip6-localhost", 7144);
+
+    ASSERT_EQ(IP::parse("::1"), host.ip);
+    ASSERT_EQ(7144, host.port);
+
+    host.fromStrName("ip6-localhost:8144", 7144);
+
+    ASSERT_EQ(IP::parse("::1"), host.ip);
+    ASSERT_EQ(8144, host.port);
+}
+
+TEST(HostTest, fromStrName_ipv4addr)
+{
+    Host host;
+
+    host.fromStrName("127.0.0.1", 0);
+
+    ASSERT_EQ(IP::parse("127.0.0.1"), host.ip);
+    ASSERT_EQ(0, host.port);
+
+    host.fromStrName("127.0.0.1", 7144);
+
+    ASSERT_EQ(IP::parse("127.0.0.1"), host.ip);
+    ASSERT_EQ(7144, host.port);
+
+    host.fromStrName("127.0.0.1:8144", 7144);
+
+    ASSERT_EQ(IP::parse("127.0.0.1"), host.ip);
+    ASSERT_EQ(8144, host.port);
+}
+
+TEST(HostTest, fromStrName_ipv6addr)
+{
+    Host host;
+
+    host.fromStrName("::1", 0);
+
+    ASSERT_EQ(IP::parse("::1"), host.ip);
+    ASSERT_EQ(0, host.port);
+
+    host.fromStrName("::1", 7144);
+
+    ASSERT_EQ(IP::parse("::1"), host.ip);
+    ASSERT_EQ(7144, host.port);
+
+    host.fromStrName("[::1]:8144", 7144);
+
+    ASSERT_EQ(IP::parse("::1"), host.ip);
     ASSERT_EQ(8144, host.port);
 }
 

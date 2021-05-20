@@ -187,14 +187,12 @@ void    Servent::kill()
     if (sock)
     {
         sock->close();
-        delete sock;
         sock = NULL;
     }
 
     if (pushSock)
     {
         pushSock->close();
-        delete pushSock;
         pushSock = NULL;
     }
 
@@ -274,7 +272,7 @@ bool Servent::sendPacket(ChanPacket &pack, const GnuID &cid, const GnuID &sid, c
 }
 
 // -----------------------------------
-bool Servent::acceptGIV(ClientSocket *givSock)
+bool Servent::acceptGIV(std::shared_ptr<ClientSocket> givSock)
 {
     if (!pushSock)
     {
@@ -338,7 +336,7 @@ void Servent::checkFree()
 
 // -----------------------------------
 // クライアントとの対話を開始する。
-void Servent::initIncoming(ClientSocket *s, unsigned int a)
+void Servent::initIncoming(std::shared_ptr<ClientSocket> s, unsigned int a)
 {
     try{
         checkFree();
@@ -476,7 +474,7 @@ bool    Servent::pingHost(Host &rhost, const GnuID &rsid)
     char ipstr[64];
     strcpy(ipstr, rhost.str().c_str());
     LOG_DEBUG("Ping host %s: trying..", ipstr);
-    ClientSocket *s=NULL;
+    std::shared_ptr<ClientSocket> s;
     bool hostOK=false;
     try
     {
@@ -531,7 +529,6 @@ bool    Servent::pingHost(Host &rhost, const GnuID &rsid)
     if (s)
     {
         s->close();
-        delete s;
     }
 
     if (!hostOK)
@@ -581,10 +578,6 @@ void Servent::handshakeStream_readHeaders(bool& gotPCP, unsigned int& reqPos, in
 // 状況に応じて this->outputProtocol を設定する。
 void Servent::handshakeStream_changeOutputProtocol(bool gotPCP, const ChanInfo& chanInfo)
 {
-    // 旧プロトコルへの切り替え？
-    if ((!gotPCP) && (outputProtocol == ChanInfo::SP_PCP))
-        outputProtocol = ChanInfo::SP_PEERCAST;
-
     // WMV ならば MMS(MMSH)
     if (outputProtocol == ChanInfo::SP_HTTP)
     {
@@ -670,9 +663,6 @@ void Servent::handshakeStream_returnStreamHeaders(AtomStream& atom,
         {
             sock->writeLineF("%s %d", PCX_HS_POS, streamPos);
             sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XPCP);
-        }else if (outputProtocol == ChanInfo::SP_PEERCAST)
-        {
-            sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XPEERCAST);
         }
     }
     sock->writeLine("");
@@ -1558,7 +1548,6 @@ int Servent::outgoingProc(ThreadInfo *thread)
                 if (sv->sock)
                 {
                     sv->sock->close();
-                    delete sv->sock;
                     sv->sock = NULL;
                 }
             }catch (StreamException &) {}
@@ -1659,9 +1648,6 @@ void Servent::processStream(bool doneHandshake, ChanInfo &chanInfo)
         }else if (outputProtocol  == ChanInfo::SP_PCP)
         {
             sendPCPChannel();
-        }else if (outputProtocol  == ChanInfo::SP_PEERCAST)
-        {
-            sendPeercastChannel();
         }
     }
 
@@ -1690,7 +1676,7 @@ bool Servent::waitForChannelHeader(ChanInfo &info)
 // -----------------------------------
 void Servent::sendRawChannel(bool sendHead, bool sendData)
 {
-    WriteBufferedStream bsock(sock);
+    WriteBufferedStream bsock(sock.get());
 
     try
     {
@@ -1905,68 +1891,13 @@ void Servent::sendRawMetaChannel(int interval)
 }
 
 // -----------------------------------
-void Servent::sendPeercastChannel()
-{
-    try
-    {
-        setStatus(S_CONNECTED);
-
-        auto ch = chanMgr->findChannelByID(chanID);
-        if (!ch)
-            throw StreamException("Channel not found");
-
-        LOG_DEBUG("Starting PeerCast stream: %s", ch->info.name.cstr());
-
-        sock->writeTag("PCST");
-
-        ChanPacket pack;
-
-        ch->headPack.writePeercast(*sock);
-
-        pack.init(ChanPacket::T_META, ch->insertMeta.data, ch->insertMeta.len, ch->streamPos);
-        pack.writePeercast(*sock);
-
-        streamPos = 0;
-        unsigned int syncPos=0;
-        while ((thread.active()) && sock->active())
-        {
-            ch = chanMgr->findChannelByID(chanID);
-            if (!ch)
-            {
-                throw StreamException("Channel not found");
-            }
-
-            ChanPacket rawPack;
-            if (ch->rawData.findPacket(streamPos, rawPack))
-            {
-                if ((rawPack.type == ChanPacket::T_DATA) || (rawPack.type == ChanPacket::T_HEAD))
-                {
-                    sock->writeTag("SYNC");
-                    sock->writeShort(4);
-                    sock->writeShort(0);
-                    sock->write(&syncPos, 4);
-                    syncPos++;
-
-                    rawPack.writePeercast(*sock);
-                }
-                streamPos = rawPack.pos + rawPack.len;
-            }
-            sys->sleepIdle();
-        }
-    }catch (StreamException &e)
-    {
-        LOG_ERROR("Stream channel: %s", e.msg);
-    }
-}
-
-// -----------------------------------
 void Servent::sendPCPChannel()
 {
     auto ch = chanMgr->findChannelByID(chanID);
     if (!ch)
         throw StreamException("Channel not found");
 
-    WriteBufferedStream bsock(sock);
+    WriteBufferedStream bsock(sock.get());
     AtomStream atom(bsock);
 
     pcpStream = new PCPStream(remoteID);
@@ -2123,7 +2054,7 @@ int Servent::serverProc(ThreadInfo *thread)
                 continue;
             }
 
-            ClientSocket *cs = sv->sock->accept();
+            auto cs = sv->sock->accept();
             if (!cs)
             {
                 LOG_ERROR("accept failed");
@@ -2136,7 +2067,6 @@ int Servent::serverProc(ThreadInfo *thread)
             {
                 LOG_ERROR("Out of servents");
                 cs->close();
-                delete cs;
                 continue;
             }
 

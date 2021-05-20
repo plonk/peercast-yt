@@ -31,6 +31,7 @@
 #include "cgi.h"
 #include "template.h"
 #include "public.h"
+#include "assets.h"
 #include "uptest.h"
 #include "gnutella.h"
 
@@ -905,6 +906,32 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
     }
 
     return false;
+}
+
+// -----------------------------------
+void Servent::CMD_portcheck4(const char* cmd, HTTP& http, String& jumpStr)
+{
+    servMgr->checkFirewall();
+    if (!http.headers.get("Referer").empty())
+    {
+        jumpStr.sprintf("%s", http.headers.get("Referer").c_str());
+    }else
+    {
+        jumpStr.sprintf("/%s/index.html", servMgr->htmlPath);
+    }
+}
+
+// -----------------------------------
+void Servent::CMD_portcheck6(const char* cmd, HTTP& http, String& jumpStr)
+{
+    servMgr->checkFirewallIPv6();
+    if (!http.headers.get("Referer").empty())
+    {
+        jumpStr.sprintf("%s", http.headers.get("Referer").c_str());
+    }else
+    {
+        jumpStr.sprintf("/%s/index.html", servMgr->htmlPath);
+    }
 }
 
 // -----------------------------------
@@ -1806,6 +1833,12 @@ void Servent::handshakeCMD(HTTP& http, char *q)
         }else if (cmd == "logout")
         {
             CMD_logout(query.c_str(), http, jumpStr);
+        }else if (cmd == "portcheck4")
+        {
+            CMD_portcheck4(query.c_str(), http, jumpStr);
+        }else if (cmd == "portcheck6")
+        {
+            CMD_portcheck6(query.c_str(), http, jumpStr);
         }else if (cmd == "redirect")
         {
             CMD_redirect(query.c_str(), http, jumpStr);
@@ -2004,8 +2037,6 @@ void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd, size_t plen)
             info.srcProtocol = ChanInfo::SP_MMS;
         else if (stristr(arg, MIME_XPCP))
             info.srcProtocol = ChanInfo::SP_PCP;
-        else if (stristr(arg, MIME_XPEERCAST))
-            info.srcProtocol = ChanInfo::SP_PEERCAST;
 
         else if (stristr(arg, MIME_XSCPLS))
             info.contentType = ChanInfo::T_PLS;
@@ -2266,16 +2297,38 @@ const char* Servent::fileNameToMimeType(const String& fileName)
 }
 
 // -----------------------------------
+static void validFileOrThrow(const char* filePath, const std::string& documentRoot)
+{
+    ASSERT(documentRoot.size() > 0);
+    ASSERT(documentRoot.back() == sys->getDirectorySeparator()[0]);
+
+    std::string abspath;
+    try {
+        abspath = sys->realPath(filePath);
+    } catch (GeneralException &e) {
+        LOG_ERROR("Cannot determine absolute path: %s", e.what());
+        throw HTTPException(HTTP_SC_NOTFOUND, 404);
+    }
+    if (!str::has_prefix(abspath, documentRoot)) {
+        LOG_ERROR("Requested file is outside of the document root: %s",
+                  abspath.c_str());
+        // ファイルが存在することを知らせたくないので 404 を返す。
+        throw HTTPException(HTTP_SC_NOTFOUND, 404);
+    }
+}
+
+// -----------------------------------
 void Servent::handshakeLocalFile(const char *fn, HTTP& http)
 {
-    String fileName;
+    std::string documentRoot;
+    documentRoot = sys->realPath(peercastApp->getPath()) + sys->getDirectorySeparator();
 
-    fileName = peercastApp->getPath();
+    String fileName = documentRoot.c_str();
     fileName.append(fn);
 
     LOG_DEBUG("Writing HTML file: %s", fileName.cstr());
 
-    WriteBufferedStream bufferedSock(sock);
+    WriteBufferedStream bufferedSock(sock.get());
     HTML html("", bufferedSock);
 
     const char* mimeType = fileNameToMimeType(fileName);
@@ -2308,11 +2361,16 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
             *args = '\0';
 
         auto req = http.getRequest();
+
+        validFileOrThrow(fileName.c_str(), documentRoot);
+
         html.writeOK(MIME_HTML);
         HTTPRequestScope scope(req);
         html.writeTemplate(fileName.cstr(), req.queryString.c_str(), scope);
     }else
     {
+        validFileOrThrow(fileName.c_str(), documentRoot);
+
         html.writeRawFile(fileName.cstr(), mimeType);
     }
 }

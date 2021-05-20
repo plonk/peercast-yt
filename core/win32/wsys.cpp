@@ -50,9 +50,9 @@ double WSys::getDTime()
 }
 
 // ---------------------------------
-ClientSocket *WSys::createSocket()
+std::shared_ptr<ClientSocket> WSys::createSocket()
 {
-    return new WSAClientSocket();
+    return std::make_shared<WSAClientSocket>();
 }
 
 // --------------------------------------------------
@@ -181,4 +181,44 @@ bool WSys::getHostnameByAddress(const IP& ip, std::string& out)
             return true;
         }
     }
+}
+
+// ---------------------------------
+std::string WSys::getExecutablePath()
+{
+    char path[1024];
+    if (GetModuleFileNameA(NULL, path, sizeof(path)) == 0) {
+        throw GeneralException(str::format("%s: %d", __func__, GetLastError()).c_str());
+    }
+    return path;
+}
+
+// ---------------------------------
+#include "Shlwapi.h"
+std::string WSys::realPath(const std::string& path)
+{
+    char resolvedPath[4096];
+    char* ret = _fullpath(resolvedPath, path.c_str(), 4096);
+    if (ret == NULL)
+    {
+        throw GeneralException(str::format("_fullpath: Failed to resolve `%s`", path.c_str()).c_str());
+    }
+
+    if (!PathFileExistsA(resolvedPath)) {
+        throw GeneralException(str::format("realPath: File not found: %s", resolvedPath).c_str());
+    }
+
+    /* 多分フォワードスラッシュは入ってこないから、バックスラッシュだ
+       け見る。 \\ が空文字列になるのはまずいかもしれないので 2 文字未
+       満には切り詰めない。 */
+    for (int len = strlen(resolvedPath); len >= 2 && resolvedPath[len - 1] == '\\'; --len) {
+        resolvedPath[len - 1] = '\0';
+    }
+    return resolvedPath;
+}
+
+// ---------------------------------
+std::string WSys::getDirectorySeparator()
+{
+    return "\\";
 }

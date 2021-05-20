@@ -16,13 +16,4 @@ public:
     FileSystemMapper mapper;
 };
 
-class AssetsController
-{
-public:
-    AssetsController(const std::string& documentRoot);
-    HTTPResponse operator()(const HTTPRequest&, Stream&, Host&);
-
-    FileSystemMapper mapper;
-};
-
 #endif

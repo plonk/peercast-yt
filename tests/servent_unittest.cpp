@@ -18,17 +18,16 @@ public:
 
     void SetUp()
     {
-        mock = new MockClientSocket();
+        mock = std::make_shared<MockClientSocket>();
         s.sock = mock;
     }
 
     void TearDown()
     {
-        delete mock;
     }
 
     Servent s;
-    MockClientSocket* mock;
+    std::shared_ptr<MockClientSocket> mock;
 };
 
 TEST_F(ServentFixture, initialState)
@@ -137,15 +136,7 @@ TEST_F(ServentFixture, handshakeIncomingNonexistentFile)
 
     mock->incoming.str("GET /html/en/nonexistent.html HTTP/1.0\r\n\r\n");
 
-    s.handshakeIncoming();
-
-    std::string output = mock->outgoing.str();
-
-    // ファイルが無いのに OK はおかしくないか…
-    ASSERT_TRUE(str::contains(output, "200 OK"));
-    ASSERT_TRUE(str::contains(output, "Server: "));
-    ASSERT_TRUE(str::contains(output, "Date: "));
-    ASSERT_TRUE(str::contains(output, "Unable to open file"));
+    ASSERT_THROW(s.handshakeIncoming(), HTTPException);
 }
 
 TEST_F(ServentFixture, handshakeIncomingJRPCGetUnauthorized)

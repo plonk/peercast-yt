@@ -56,7 +56,7 @@ public:
     void    bind(const Host &) override;
     void    connect() override;
     void    close() override;
-    ClientSocket *accept() override;
+    std::shared_ptr<ClientSocket> accept() override;
     bool    active() override { return sockNum != 0; }
     bool    readReady(int milliSeconds = 0) override;
     int     numPending() override;

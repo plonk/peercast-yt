@@ -10,7 +10,7 @@ public:
     {
     }
 
-    class ClientSocket* createSocket() override
+    std::shared_ptr<ClientSocket> createSocket() override
     {
         return NULL;
     }
@@ -79,7 +79,15 @@ public:
 
     std::vector<std::string> getIPAddresses(const std::string& name) override
     {
-        return {};
+        if (name == "localhost") {
+            return { "127.0.0.1" };
+        } else if (name == "ip6-localhost") {
+            return { "::1" };
+        } else if (name == "dns.google") {
+            return { "8.8.4.4", "8.8.8.8" };
+        } else {
+            return {};
+        }
     }
 
     bool getHostnameByAddress(const IP& ip, std::string& out) override
@@ -95,6 +103,26 @@ public:
         } else {
             out = ""; return false;
         }
+    }
+
+    std::string getExecutablePath() override
+    {
+        return "";
+    }
+
+    std::string dirname(const std::string&) override
+    {
+        return "";
+    }
+
+    std::string joinPath(const std::vector<std::string>&) override
+    {
+        return "";
+    }
+
+    std::string realPath(const std::string& path) override
+    {
+        return "";
     }
 };
 

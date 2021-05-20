@@ -69,9 +69,11 @@ public:
 
     virtual void    setReadTimeout(unsigned int )
     {
+        LOG_WARN("Stream::setReadTimeout null implementation called");
     }
     virtual void    setWriteTimeout(unsigned int )
     {
+        LOG_WARN("Stream::setWriteTimeout null implementation called");
     }
     virtual void    setPollRead(bool)
     {

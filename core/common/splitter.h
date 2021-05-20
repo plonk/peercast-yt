@@ -7,7 +7,7 @@
 // コンストラクト時に出力先のストリームも close される。
 struct StreamSplitter : public Stream
 {
-    StreamSplitter(const std::vector<Stream*>& streams = {})
+    StreamSplitter(const std::vector<std::shared_ptr<Stream>>& streams = {})
         : Stream()
         , m_streams(streams) {}
 
@@ -16,12 +16,12 @@ struct StreamSplitter : public Stream
         close();
     }
 
-    void addStream(Stream* stream)
+    void addStream(std::shared_ptr<Stream> stream)
     {
         m_streams.push_back(stream);
     }
 
-    const std::vector<Stream*>&
+    const std::vector<std::shared_ptr<Stream>>&
     streams()
     {
         return m_streams;
@@ -44,7 +44,7 @@ struct StreamSplitter : public Stream
             stream->close();
     }
 
-    std::vector<Stream*> m_streams;
+    std::vector<std::shared_ptr<Stream>> m_streams;
 };
 
 #endif

@@ -98,7 +98,6 @@ void Channel::endThread()
     if (pushSock)
     {
         pushSock->close();
-        delete pushSock;
         pushSock = NULL;
     }
 
@@ -393,7 +392,7 @@ THREAD_PROC Channel::stream(ThreadInfo *thread)
 }
 
 // -----------------------------------
-bool Channel::acceptGIV(ClientSocket *givSock)
+bool Channel::acceptGIV(std::shared_ptr<ClientSocket> givSock)
 {
     if (!pushSock)
     {
@@ -740,7 +739,6 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
             if (ch->sock)
             {
                 ch->sock->close();
-                delete ch->sock;
                 ch->sock = NULL;
             }
 
@@ -763,7 +761,7 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
 }
 
 // -----------------------------------
-void    Channel::startHTTPPush(ClientSocket *cs, bool isChunked)
+void    Channel::startHTTPPush(std::shared_ptr<ClientSocket> cs, bool isChunked)
 {
     srcType = SRC_HTTPPUSH;
     type    = T_BROADCAST;
@@ -776,7 +774,7 @@ void    Channel::startHTTPPush(ClientSocket *cs, bool isChunked)
 }
 
 // -----------------------------------
-void    Channel::startWMHTTPPush(ClientSocket *cs)
+void    Channel::startWMHTTPPush(std::shared_ptr<ClientSocket> cs)
 {
     srcType = SRC_HTTPPUSH;
     type    = T_BROADCAST;
@@ -789,7 +787,7 @@ void    Channel::startWMHTTPPush(ClientSocket *cs)
 }
 
 // -----------------------------------
-void    Channel::startICY(ClientSocket *cs, SRC_TYPE st)
+void    Channel::startICY(std::shared_ptr<ClientSocket> cs, SRC_TYPE st)
 {
     srcType = st;
     type = T_BROADCAST;
@@ -1063,8 +1061,10 @@ void Channel::updateInfo(const ChanInfo &newInfo)
     }
 
     ChanHitList *chl = chanMgr->findHitList(info);
-    if (chl)
+    if (chl) {
+        std::lock_guard<std::recursive_mutex> lock(chl->lock);
         chl->info = info;
+    }
 
     peercastApp->channelUpdate(&info);
 }
@@ -1077,16 +1077,10 @@ ChannelStream *Channel::createSource()
 
     ChannelStream *source=NULL;
 
-    if (info.srcProtocol == ChanInfo::SP_PEERCAST)
-    {
-        LOG_INFO("Channel is Peercast");
-        source = new PeercastStream();
-    }
-    else if (info.srcProtocol == ChanInfo::SP_PCP)
+    if (info.srcProtocol == ChanInfo::SP_PCP)
     {
         LOG_INFO("Channel is PCP");
-        PCPStream *pcp = new PCPStream(remoteID);
-        source = pcp;
+        source = new PCPStream(remoteID);
     }
     else if (info.srcProtocol == ChanInfo::SP_MMS)
     {
@@ -1250,85 +1244,6 @@ int Channel::readStream(Stream &in, ChannelStream *source)
     source->readEnd(in, shared_from_this());
 
     return error;
-}
-
-// -----------------------------------
-void PeercastStream::readHeader(Stream &in, std::shared_ptr<Channel> ch)
-{
-    if (in.readTag() != 'PCST')
-        throw StreamException("Not PeerCast stream");
-}
-
-// -----------------------------------
-void PeercastStream::readEnd(Stream &, std::shared_ptr<Channel>)
-{
-}
-
-// -----------------------------------
-int PeercastStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
-{
-    ChanPacket pack;
-
-    pack.readPeercast(in);
-
-    MemoryStream mem(pack.data, pack.len);
-
-    switch(pack.type)
-    {
-        case ChanPacket::T_HEAD:
-            // update sync pos
-            ch->headPack = pack;
-            pack.pos = ch->streamPos;
-            ch->newPacket(pack);
-            ch->streamPos += pack.len;
-            break;
-        case ChanPacket::T_DATA:
-            pack.pos = ch->streamPos;
-            ch->newPacket(pack);
-            ch->streamPos += pack.len;
-            break;
-        case ChanPacket::T_META:
-            ch->insertMeta.fromMem(pack.data, pack.len);
-            if (pack.len)
-            {
-                XML xml;
-                xml.read(mem);
-                XML::Node *n = xml.findNode("channel");
-                if (n)
-                {
-                    ChanInfo newInfo = ch->info;
-                    newInfo.updateFromXML(n);
-                    ChanHitList *chl = chanMgr->findHitList(ch->info);
-                    if (chl)
-                        newInfo.updateFromXML(n);
-                    ch->updateInfo(newInfo);
-                }
-            }
-            break;
-#if 0
-        case ChanPacket::T_SYNC:
-            {
-                unsigned int s = mem.readLong();
-                if ((s-ch->syncPos) != 1)
-                {
-                    LOG_INFO("Ch.%d SKIP: %d to %d (%d)", ch->index, ch->syncPos, s, ch->info.numSkips);
-                    if (ch->syncPos)
-                    {
-                        ch->info.numSkips++;
-                        if (ch->info.numSkips>50)
-                            throw StreamException("Bumped - Too many skips");
-                    }
-                }
-
-                ch->syncPos = s;
-            }
-            break;
-#endif
-        default:
-            throw StreamException("unknown packet type");
-    }
-
-    return 0;
 }
 
 // ------------------------------------------

@@ -67,7 +67,9 @@
 
     "Refresh"                 : "更新",
 
-    "Build date and time"    : "ビルド日時",
+    "Build date and time"     : "ビルド日時",
+
+    "Check"                   : "チェック",
 
     // speedtest.html
     "Remove"                  : "削除",

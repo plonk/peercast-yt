@@ -229,31 +229,3 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
         }
     }
 }
-
-// ------------------------------------------------------------
-AssetsController::AssetsController(const std::string& documentRoot)
-    : mapper("/assets", documentRoot)
-{
-}
-
-// ------------------------------------------------------------
-HTTPResponse AssetsController::operator()(const HTTPRequest& req, Stream& stream, Host& remoteHost)
-{
-    auto path = mapper.toLocalFilePath(req.path);
-
-    if (path.empty())
-        return HTTPResponse::notFound();
-
-    StringStream mem;
-    FileStream   file;
-
-    file.openReadOnly(path.c_str());
-    file.writeTo(mem, file.length());
-
-    string body = mem.str();
-    map<string,string> headers = {
-        {"Content-Type",MIMEType(path)},
-        {"Content-Length",to_string(body.size())}
-    };
-    return HTTPResponse::ok(headers, body);
-}

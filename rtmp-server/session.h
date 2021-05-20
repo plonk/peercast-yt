@@ -14,7 +14,7 @@ namespace rtmpserver
     class Session
     {
     public:
-        ClientSocket* client;
+        std::shared_ptr<ClientSocket> client;
         FLVWriter& flv_writer;
 
         int max_incoming_chunk_size;
@@ -22,7 +22,7 @@ namespace rtmpserver
 
         bool quitting;
 
-        Session(ClientSocket* aClient, FLVWriter& aFlvWriter)
+        Session(std::shared_ptr<ClientSocket> aClient, FLVWriter& aFlvWriter)
             : client(aClient)
             , flv_writer(aFlvWriter)
             , max_incoming_chunk_size(128)
@@ -41,7 +41,7 @@ namespace rtmpserver
             return res;
         }
 
-        std::tuple<int,int,int,int> read_type0_header(Stream* io)
+        std::tuple<int,int,int,int> read_type0_header(std::shared_ptr<Stream> io)
         {
             // int でいいの？ wrap-round 大丈夫？
             int  timestamp         = to_integer_big_endian({ io->readChar(), io->readChar(), io->readChar() });
@@ -53,7 +53,7 @@ namespace rtmpserver
             return std::make_tuple(timestamp, message_length, message_type_id, message_stream_id);
         }
 
-        std::tuple<int,int,int> read_type1_header(Stream* io)
+        std::tuple<int,int,int> read_type1_header(std::shared_ptr<Stream> io)
         {
             int tdelta = to_integer_big_endian({ io->readChar(), io->readChar(), io->readChar() });
             int length = to_integer_big_endian({ io->readChar(), io->readChar(), io->readChar() });
@@ -338,7 +338,7 @@ namespace rtmpserver
             }
         }
 
-        void handshake(ClientSocket* client)
+        void handshake(std::shared_ptr<ClientSocket> client)
         {
             // receive C0
             char c0 = client->readChar();

@@ -40,27 +40,6 @@ void ChanPacket::writeRaw(Stream &out)
 }
 
 // -----------------------------------
-void ChanPacket::writePeercast(Stream &out)
-{
-    unsigned int tp = 0;
-    switch (type)
-    {
-        case T_HEAD: tp = 'HEAD'; break;
-        case T_META: tp = 'META'; break;
-        case T_DATA: tp = 'DATA'; break;
-        default: throw StreamException("unsupported packet type for writing");
-    }
-
-    if (type != T_UNKNOWN)
-    {
-        out.writeTag(tp);
-        out.writeShort(len);
-        out.writeShort(0);
-        out.write(data, len);
-    }
-}
-
-// -----------------------------------
 ChanPacket& ChanPacket::operator=(const ChanPacket& other)
 {
     this->type = other.type;
@@ -71,25 +50,6 @@ ChanPacket& ChanPacket::operator=(const ChanPacket& other)
     memcpy(this->data, other.data, this->len);
 
     return *this;
-}
-
-// -----------------------------------
-void ChanPacket::readPeercast(Stream &in)
-{
-    unsigned int tp = in.readTag();
-
-    switch (tp)
-    {
-        case 'HEAD':    type = T_HEAD; break;
-        case 'DATA':    type = T_DATA; break;
-        case 'META':    type = T_META; break;
-        default:        type = T_UNKNOWN;
-    }
-    len = in.readShort();
-    in.readShort();
-    if (len > MAX_DATALEN)
-        throw StreamException("Bad ChanPacket");
-    in.read(data, len);
 }
 
 // -----------------------------------

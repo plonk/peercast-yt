@@ -26,6 +26,7 @@
 #include "inifile.h"
 #include "servfilter.h"
 #include "chanmgr.h"
+#include "ini.h"
 
 // ----------------------------------
 
@@ -182,14 +183,14 @@ public:
     void            setMaxRelays(int);
     bool            checkForceIP();
     void            saveSettings(const char *);
-    void            doSaveSettings(IniFileBase& iniFile);
+    ini::Document   getSettings();
     void            loadSettings(const char *);
     void            setPassiveSearch(unsigned int);
     int             findChannel(ChanInfo &);
     bool            getChannel(char *, ChanInfo &, bool);
     void            setFilterDefaults();
 
-    bool            acceptGIV(ClientSocket *);
+    bool            acceptGIV(std::shared_ptr<ClientSocket>);
     void            addVersion(unsigned int);
 
     void            broadcastRootSettings(bool);

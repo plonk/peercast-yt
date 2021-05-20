@@ -131,7 +131,8 @@ void UClientSocket::setBlocking(bool block)
     else
         fl |= O_NONBLOCK;
 
-    fcntl(sockNum, F_SETFL, fl);
+    if (fcntl(sockNum, F_SETFL, fl) == -1)
+        throw SockException("Unable to set NONBLOCK");
 }
 
 // --------------------------------------------------
@@ -352,7 +353,7 @@ void UClientSocket::bind(const Host &h)
 }
 
 // --------------------------------------------------
-ClientSocket *UClientSocket::accept()
+std::shared_ptr<ClientSocket> UClientSocket::accept()
 {
     socklen_t fromSize = sizeof(sockaddr_in6);
     sockaddr_in6 from;
@@ -362,7 +363,7 @@ ClientSocket *UClientSocket::accept()
     if (conSock ==  INVALID_SOCKET)
         return NULL;
 
-    UClientSocket *cs = new UClientSocket();
+    auto cs = std::make_shared<UClientSocket>();
     cs->sockNum = conSock;
 
     cs->host.port = ntohs(from.sin6_port);

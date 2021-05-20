@@ -201,3 +201,43 @@ TEST_F(SysFixture, createSocket)
     }
 }
 #endif
+
+TEST_F(SysFixture, getExecutablePath)
+{
+    std::string str;
+    ASSERT_NO_THROW(str = m_sys->getExecutablePath());
+    ASSERT_TRUE(str.size() > 1);
+#if _UNIX
+    ASSERT_EQ('/', str[0]);
+#endif
+}
+
+TEST_F(SysFixture, dirname)
+{
+#if _UNIX
+    ASSERT_EQ("/usr", m_sys->dirname("/usr/lib"));
+    ASSERT_EQ("/", m_sys->dirname("/usr/"));
+    ASSERT_EQ(".", m_sys->dirname("usr"));
+    ASSERT_EQ("/", m_sys->dirname("/"));
+#else
+    /* 今のところWindows版で実装されていなくても構わない。 */
+    ASSERT_THROW(m_sys->dirname(""),
+                 NotImplementedException);
+#endif
+}
+
+TEST_F(SysFixture, joinPath)
+{
+#if _UNIX
+    ASSERT_EQ("/etc/passwd", m_sys->joinPath( {"/etc", "passwd"} ));
+    ASSERT_EQ("/etc/passwd", m_sys->joinPath( {"/etc", "", "passwd"} ));
+    ASSERT_EQ("/etc/passwd", m_sys->joinPath( {"/etc/", "passwd"} ));
+    ASSERT_EQ("/etc/passwd", m_sys->joinPath( {"/etc/", "/passwd"} ));
+    ASSERT_EQ("/etc/passwd", m_sys->joinPath( {"/etc/", "/", "/passwd"} ));
+    ASSERT_EQ("./passwd", m_sys->joinPath( {".", "passwd"} ));
+#else
+    /* 今のところWindows版で実装されていなくても構わない。 */
+    ASSERT_THROW(m_sys->joinPath({}),
+                 NotImplementedException);
+#endif
+}

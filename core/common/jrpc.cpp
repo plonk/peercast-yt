@@ -797,7 +797,7 @@ json JrpcApi::getChannelRelayTree(json::array_t args)
     if (!hitList)
         throw application_error(kUnknownError, "Hit list not found");
 
-    HostGraph graph(channel, hitList);
+    HostGraph graph(channel, hitList, channel->ipVersion);
 
     return graph.getRelayTree();
 }
