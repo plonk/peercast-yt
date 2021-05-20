@@ -45,9 +45,9 @@ TEST_F(IniFixture, createDocument)
                     { "network", true },
                     { "direct", true },
                 },
-                "End"
+          "End"
         }
     };
-    EXPECT_EQ(1, doc.size());
-    ASSERT_EQ("hoge", ini::dump(doc));
+    EXPECT_EQ(2, doc.size());
+    ASSERT_EQ("\n[Server]\nserverPort = 7144\n\n[Filter]\nip = 255.255.255.255\nprivate = No\nban = No\nnetwork = Yes\ndirect = Yes\n[End]\n", ini::dump(doc));
 }
