@@ -136,8 +136,7 @@ void ChanHit::initLocal(
     oldestPos = oldp;
     newestPos = newp;
 
-    uphost.ip   = sourceHost.ip;
-    uphost.port = sourceHost.port;
+    uphost      = sourceHost;
     uphostHops  = 1;
 }
 
