@@ -46,6 +46,8 @@ RTMPOBJ = $(notdir $(RTMPSOURCE:.cpp=.o))
 
 DEPENDFILE = .deps
 
+-include Makefile.local
+
 .PHONY: all clean build-html deps $(SRCHTMLTAR)
 
 # Here follow the generic build rules.
