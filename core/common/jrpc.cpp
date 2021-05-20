@@ -862,10 +862,6 @@ json JrpcApi::getYPChannelsInternal(json::array_t args)
 {
     auto channels = servMgr->channelDirectory->channels();
     json::array_t res;
-    std::map<std::string,bool> publicFeed;
-
-    for (auto& feed : servMgr->channelDirectory->feeds())
-        publicFeed[feed.url] = feed.isPublic;
 
     for (auto& c : channels)
     {
@@ -892,7 +888,6 @@ json JrpcApi::getYPChannelsInternal(json::array_t args)
                 { "feedUrl",        c.feedUrl },
                 { "chatUrl",        c.chatUrl() },
                 { "statsUrl",       c.statsUrl() },
-                { "isPublic",       publicFeed[c.feedUrl] },
             });
     }
     return res;

@@ -63,7 +63,7 @@
 
       </table>
 
-      <!-- <h2>{#Yellow Pages}</h2>
+      <h2>{#Yellow Pages}</h2>
 
       <table width="100%" class="channel-list">
       <tr>
@@ -77,118 +77,33 @@
 
       {@foreach channelsFound}
       <tr>
-      <td class="rank">{$loop.indexBaseOne}</td>
-      <td>
-      <a href="/public/play.html?id={$this.id}">
-      <img class="play-button" src="/assets/images/play.png">
-      </a>
-      </td>
-      <td style="width: 600px" class="channel-description">
-      <span style="font-weight: bold">
-      {@if this.url}
-      <a class="link channel-name" href="{$this.url}">{$this.name}</a>
-      {@else}
-      {$this.name}
-      {@end}
-      </span><br>
-      <div class="detail">
-      {@if this.genre}{!this.genre} - {@end}{!this.desc}
-      </div>
-      </td>
-      <td align=center nowrap>
-      {$this.hit_stat.listeners} / {$this.hit_stat.relays}
-      </td>
-      <td class="bitrate" align=center nowrap>{$this.bitrate} kb/s</td>
-      <td align=center>{$this.type}</td>
+        <td class="rank">{$loop.indexBaseOne}</td>
+        <td>
+          <a href="/public/play.html?id={$this.id}">
+            <img class="play-button" src="/assets/images/play.png">
+          </a>
+        </td>
+        <td style="width: 600px" class="channel-description">
+          <span style="font-weight: bold">
+            {@if this.url}
+            <a class="link channel-name" href="{$this.url}">{$this.name}</a>
+            {@else}
+            {$this.name}
+            {@end}
+          </span><br>
+          <div class="detail">
+            {@if this.genre}{!this.genre} - {@end}{!this.desc}
+          </div>
+        </td>
+        <td align=center nowrap>
+          {$this.hit_stat.listeners} / {$this.hit_stat.relays}
+        </td>
+        <td class="bitrate" align=center nowrap>{$this.bitrate} kb/s</td>
+        <td align=center>{$this.type}</td>
       </tr>
       {@end}
 
-      </table> -->
-
-      <h2>{#Channels from Friendly Stations}</h2>
-
-      <table width="100%" class="channel-list">
-        <tr>
-          <th>{#Rank}</th>
-          <th>
-            <img src="/assets/images/small-icon.png" alt="{#Small icon of a megaphone}">
-          </th>
-          <th>{#Channel}</th>
-          <th>{#Status}</th>
-          <th>{#Bitrate}</th>
-          <th>{#Type}</th>
-        </tr>
-
-        {@foreach publicExternalChannels}
-        <tr>
-          <td class="rank">
-            {$loop.indexBaseOne}
-          </td>
-          <td>
-            {@if this.id != "00000000000000000000000000000000"}
-            <a href="/public/play.html?id={$this.id}">
-              <img class="play-button" src="/assets/images/play.png">
-            </a>
-            {@else}
-            <img class="play-button" src="/assets/images/play_grey.png">
-            {@end}
-          </td>
-          <td style="width: 600px" class="channel-description">
-            <span style="font-weight: bold">
-              {@if this.url}
-              <a class="link channel-name" href="{$this.url}">{!this.name}</a>
-              {@else}
-              {!this.name}
-              {@end}
-            </span><br>
-            <div class="detail">
-              {@if this.genre}{!this.genre} - {@end}{!this.desc}
-            </div>
-          </td>
-          <td align=center nowrap>
-            <span class="listeners">
-              {$this.numDirects}/{$this.numRelays}
-            </span>
-            {@if this.encodedName}
-            <div class="icons">
-              <a href="{$this.chatUrl}"><img alt="Chat" src="/assets/images/chat.png"></a>
-              <a href="{$this.statsUrl}"><img alt="Stats" src="/assets/images/graph.png"></a>
-            </div>
-            {@end}
-          </td>
-          <td class="bitrate" align=center nowrap>
-            {$this.bitrate} kb/s
-          </td>
-          <td align=center>
-            {$this.contentTypeStr}
-          </td>
-        </tr>
-        {@end}
       </table>
-
-      <h2>{#Link Status}</h2>
-
-      <ul>
-      {@loop servMgr.numChannelFeeds}
-        {@if loop.channelFeed.isPublic}
-        <li style="list-style: none">
-          {@if loop.channelFeed.status == "OK"}
-            ✔
-          {@else}{@if loop.channelFeed.status == "ERROR"}
-            ❌
-          {@else}{@if loop.channelFeed.status == "UNKNOWN"}
-            ？
-          {@else}
-            {$loop.channelFeed.status}
-          {@end}{@end}{@end}
-          <a href="{$loop.channelFeed.directoryUrl}">
-            {$loop.channelFeed.directoryUrl}
-          </a>
-        </li>
-        {@end}
-      {@end}
-      </ul>
-
     </div>
   </body>
 </html>
