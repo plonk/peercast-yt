@@ -83,6 +83,8 @@ public:
             return { "127.0.0.1" };
         } else if (name == "ip6-localhost") {
             return { "::1" };
+        } else if (name == "dns.google") {
+            return { "8.8.4.4", "8.8.8.8" };
         } else {
             return {};
         }
