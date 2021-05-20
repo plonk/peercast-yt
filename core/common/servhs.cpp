@@ -2270,7 +2270,7 @@ const char* Servent::fileNameToMimeType(const String& fileName)
 static void validFileOrThrow(const char* filePath, const std::string& documentRoot)
 {
     ASSERT(documentRoot.size() > 0);
-    ASSERT(documentRoot.back() == '/');
+    ASSERT(documentRoot.back() == sys->getDirectorySeparator()[0]);
 
     std::string abspath;
     try {
@@ -2291,7 +2291,7 @@ static void validFileOrThrow(const char* filePath, const std::string& documentRo
 void Servent::handshakeLocalFile(const char *fn, HTTP& http)
 {
     std::string documentRoot;
-    documentRoot = sys->realPath(peercastApp->getPath()) + "/";
+    documentRoot = sys->realPath(peercastApp->getPath()) + sys->getDirectorySeparator();
 
     String fileName = documentRoot.c_str();
     fileName.append(fn);

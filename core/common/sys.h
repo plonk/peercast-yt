@@ -127,6 +127,11 @@ public:
 
     virtual std::string realPath(const std::string& path) = 0;
 
+    virtual std::string getDirectorySeparator()
+    {
+        return "/";
+    }
+
     unsigned int idleSleepTime;
 
     class LogBuffer *logBuf;
