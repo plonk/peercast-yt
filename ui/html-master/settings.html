@@ -49,6 +49,39 @@
         </tr>
         <tr class="normal">
           <th class="left-heading" width="35%">{#Server Name}</th>
+          <td>
+            <input class="fill-parent" value="{$servMgr.serverName}" name=servername placeholder="{#Nickname for this server}">
+          </td>
+        </tr>
+        <tr class="normal">
+          <th class="left-heading">{#DJ Message}</th>
+          <td><input class="fill-parent" value="{$chanMgr.djMessage}" name=djmsg>
+          </td>
+        </tr>
+        <tr class="normal">
+          <th class="left-heading">{#ICY MetaInterval}</th>
+          <td><input size=5 value="{$chanMgr.icyMetaInterval}" name=icymeta>
+          </td>
+        </tr>
+        <tr class="normal">
+          <th class="left-heading">{#Mode}</th>
+          <td>
+            <label><input type=radio {@if !servMgr.isRoot}checked{@end} value=0 name=root>
+              <i>{#Normal}</i></label><br>
+            <label><input name=root type=radio value=1 {@if servMgr.isRoot}checked{@end}>
+              <i>{#Root}</i></label></td>
+        </tr>
+        <tr class="normal">
+          <th class="left-heading">{#Randomize broadcasting channel ID}</th>
+          <td>
+            <input type="checkbox" name=randomizechid value=1 {@if servMgr.randomizeBroadcastingChannelID}checked{@end}>
+          </td>
+        </tr>
+        <tr class="normal">
+          <th class="left-heading">{#Public Directory}</th>
+          <td>
+            <input type="checkbox" name="public_directory" value=1 {@if servMgr.publicDirectoryEnabled}checked{@end}>
+          </td>
         </tr>
       </table>
 
