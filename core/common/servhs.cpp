@@ -659,9 +659,9 @@ void Servent::handshakeIncoming()
     bool isHTTP = (stristr(buf, HTTP_PROTO1) != NULL);
 
     if (isHTTP)
-        LOG_DEBUG("HTTP from %s '%s'", sock->host.str().c_str(), buf);
+        LOG_TRACE("HTTP from %s '%s'", sock->host.str().c_str(), buf);
     else
-        LOG_DEBUG("Connect from %s '%s'", sock->host.str().c_str(), buf);
+        LOG_TRACE("Connect from %s '%s'", sock->host.str().c_str(), buf);
 
     HTTP http(*sock);
     http.initRequest(buf);
@@ -825,7 +825,7 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
             case ServMgr::AUTH_COOKIE:
                 if (http.isHeader("Cookie"))
                 {
-                    LOG_DEBUG("Got cookie: %s", arg);
+                    LOG_TRACE("Got cookie: %s", arg);
                     const std::string idKey = str::STR(servMgr->serverHost.port, "_id");
                     auto assignments = str::split(arg, "; ");
 
@@ -839,7 +839,7 @@ bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
                             gotCookie.set(sides[1].c_str(), sock->host.ip);
 
                             if (servMgr->cookieList.contains(gotCookie)) {
-                                LOG_DEBUG("Cookie found");
+                                LOG_TRACE("Cookie found");
                                 cookie = gotCookie;
                             }
                             break;
@@ -2296,7 +2296,7 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
     String fileName = documentRoot.c_str();
     fileName.append(fn);
 
-    LOG_DEBUG("Writing HTML file: %s", fileName.cstr());
+    LOG_TRACE("Writing HTML file: %s", fileName.cstr());
 
     WriteBufferedStream bufferedSock(sock.get());
     HTML html("", bufferedSock);
