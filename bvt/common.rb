@@ -5,14 +5,16 @@ def spawn_peercast
   FileUtils.cp "peercast.ini.master", "peercast.ini"
 
   # 起動。
-  pid = spawn "peercast-yt/peercast -i peercast.ini"
-  sleep 0.1
+  pid = spawn "peercast-yt/peercast -i peercast.ini -P peercast-yt"
+  sleep 1.0
 
   at_exit {
-    Process.kill(9, pid)
+    Process.kill(9, pid) rescue nil
   }
 
   fail "peercast died immediately after spawn" if Process.wait(-1, Process::WNOHANG) != nil
+
+  return pid
 end
 
 def assert_eq(expectation, actual, opts = {})

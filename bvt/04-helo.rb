@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby -W0
 require_relative 'common'
 require 'socket'
 
