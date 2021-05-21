@@ -63,3 +63,29 @@ TEST_F(HostGraphFixture, withUphost)
     ASSERT_EQ(relayTree[0]["children"].size(), 1);
     ASSERT_EQ(relayTree[0]["children"][0]["address"], "8.8.8.8");
 }
+
+TEST_F(HostGraphFixture, withUphostPush)
+{
+    auto ch = std::make_shared<Channel>();
+    auto hitList = std::make_shared<ChanHitList>();
+
+    {
+        ChanHit hit;
+
+        hit.rhost[0].fromStrIP("8.8.8.8", 0);
+        hit.rhost[1].fromStrIP("192.168.0.1", 7144);
+        hit.firewalled = true;
+        hit.uphost = Host("127.0.0.1", 49152 /* ephemeral port */);
+
+        hitList->addHit(hit);
+    }
+
+    JrpcApi::HostGraph graph(ch, hitList.get(), 4);
+
+    auto relayTree = graph.getRelayTree();
+
+    ASSERT_EQ(relayTree.size(), 1);
+    ASSERT_EQ(relayTree[0]["address"], "127.0.0.1");
+    ASSERT_EQ(relayTree[0]["children"].size(), 1);
+    ASSERT_EQ(relayTree[0]["children"][0]["address"], "8.8.8.8");
+}
