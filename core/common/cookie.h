@@ -46,6 +46,8 @@ public:
         MAX_COOKIES = 32
     };
 
+    CookieList() { init(); }
+
     void    init();
     bool    add(Cookie &);
     void    remove(Cookie &);

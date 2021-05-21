@@ -48,7 +48,6 @@ ServMgr::ServMgr()
     , sendPortAtomWhenFirewallUnknown(true)
 {
     authType = AUTH_COOKIE;
-    cookieList.init();
 
     serventNum = 0;
 
