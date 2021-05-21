@@ -942,7 +942,6 @@ ini::Document ServMgr::getSettings()
             {"chanLog", this->chanLog},
             {"publicDirectory", this->publicDirectoryEnabled},
             {"networkID", networkID.str()},
-            {"randomizeBroadcastingChannelID", randomizeBroadcastingChannelID},
         }
     });
 
