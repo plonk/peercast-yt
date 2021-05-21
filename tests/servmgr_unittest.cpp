@@ -323,10 +323,6 @@ TEST_F(ServMgrFixture, writeVariable)
     ASSERT_STREQ("0", mem.str().c_str());
 
     mem.str("");
-    ASSERT_TRUE(m.writeVariable(mem, "genrePrefix"));
-    ASSERT_STREQ("", mem.str().c_str());
-
-    mem.str("");
     ASSERT_TRUE(m.writeVariable(mem, "test"));
     ASSERT_STREQ("かきくけこABCDabcd", mem.str().c_str());
 }
