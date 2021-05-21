@@ -707,7 +707,7 @@ void Servent::triggerChannel(char *str, ChanInfo::PROTOCOL proto, bool relay)
 
     outputProtocol = proto;
 
-    processStream(false, info);
+    processStream(info);
 }
 
 // -----------------------------------

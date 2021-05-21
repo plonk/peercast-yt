@@ -1601,17 +1601,12 @@ int Servent::incomingProc(ThreadInfo *thread)
 }
 
 // -----------------------------------
-void Servent::processStream(bool doneHandshake, ChanInfo &chanInfo)
+void Servent::processStream(ChanInfo &chanInfo)
 {
-    ASSERT(doneHandshake == false);
+    setStatus(S_HANDSHAKE);
 
-    if (!doneHandshake)
-    {
-        setStatus(S_HANDSHAKE);
-
-        if (!handshakeStream(chanInfo))
-            return;
-    }
+    if (!handshakeStream(chanInfo))
+        return;
 
     ASSERT(chanID.isSet());
 

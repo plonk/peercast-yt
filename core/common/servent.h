@@ -216,7 +216,7 @@ public:
     bool    writeVariable(Stream &, const String &) override;
 
     // the "mainloop" of servents
-    void    processStream(bool, ChanInfo &);
+    void    processStream(ChanInfo &);
 
     void    triggerChannel(char *, ChanInfo::PROTOCOL, bool);
     void    sendRawChannel(bool, bool);
