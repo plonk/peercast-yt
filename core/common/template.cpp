@@ -677,11 +677,11 @@ json::array_t Template::evaluateCollectionVariable(String& varName)
         json::array_t arr;
         arr.push_back(json::object_t({
                                       { "name", "randomizeBroadcastingChannelID" },
-                                      { "enabled", servMgr->randomizeBroadcastingChannelID.load() },
+                                      { "enabled", servMgr->randomizeBroadcastingChannelID.load() ? "1" : "0" },
                 }));
         arr.push_back(json::object_t({
                                       { "name", "sendPortAtomWhenFirewallUnknown" },
-                                      { "enabled", servMgr->sendPortAtomWhenFirewallUnknown.load() },
+                                      { "enabled", servMgr->sendPortAtomWhenFirewallUnknown.load() ? "1" : "0" },
                 }));
         return arr;
     }else
