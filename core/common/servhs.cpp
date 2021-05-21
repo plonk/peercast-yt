@@ -313,7 +313,7 @@ void Servent::handshakeGET(HTTP &http)
         if (!isAllowed(ALLOW_HTML))
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-        if (handshakeAuth(http, fn, true))
+        if (handshakeAuth(http, fn))
             handshakeLocalFile(dirName, http);
     }else if (strncmp(fn, "/admin.cgi", 10) == 0)
     {
@@ -465,7 +465,7 @@ void Servent::handshakeGET(HTTP &http)
                 http.readHeaders();
                 invokeCGIScript(http, fn);
             }
-        }else if (handshakeAuth(http, fn, true))
+        }else if (handshakeAuth(http, fn))
         {
             invokeCGIScript(http, fn);
         }
@@ -497,7 +497,7 @@ void Servent::handshakePOST(HTTP &http)
 
     std::string path = vec2[0];
 
-    if (strcmp(path.c_str(), "/api/1") == 0)
+    if (path == "/api/1")
     {
         // JSON API
 
@@ -506,7 +506,7 @@ void Servent::handshakePOST(HTTP &http)
 
         if (handshakeHTTPBasicAuth(http))
             handshakeJRPC(http);
-    }else if (strcmp(path.c_str(), "/") == 0)
+    }else if (path == "/")
     {
         // HTTP Push
 
@@ -517,6 +517,15 @@ void Servent::handshakePOST(HTTP &http)
             throw HTTPException(HTTP_SC_FORBIDDEN, 403);
 
         handshakeHTTPPush(args);
+    }else if (path == "/admin")
+    {
+        if (!isAllowed(ALLOW_HTML))
+            throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
+
+        http.readHeaders();
+        auto req = http.getRequest();
+        LOG_DEBUG("Admin (POST)");
+        handshakeCMD(http, req.body);
     }else
     {
         http.readHeaders();
@@ -813,80 +822,61 @@ bool Servent::handshakeHTTPBasicAuth(HTTP &http)
 }
 
 // -----------------------------------
-bool Servent::handshakeAuth(HTTP &http, const char *args, bool local)
+bool Servent::handshakeAuth(HTTP &http, const char *args)
 {
-    char user[64], pass[64];
-    user[0] = pass[0] = 0;
+    std::string user, pass;
 
-    const char *pwd  = getCGIarg(args, "pass=");
-
-    if ((pwd) && strlen(servMgr->password))
-    {
-        String tmp = pwd;
-        char *as = strstr(tmp.cstr(), "&");
-        if (as) *as = 0;
-        if (strcmp(tmp, servMgr->password) == 0)
-        {
-            http.readHeaders();
-            return true;
-        }
-    }
-
-    while (http.nextHeader())
-    {
-        char *arg = http.getArgStr();
-        if (!arg)
-            continue;
-
-        switch (servMgr->authType)
-        {
-            case ServMgr::AUTH_HTTPBASIC:
-                if (http.isHeader("Authorization"))
-                    http.getAuthUserPass(user, pass, sizeof(user), sizeof(pass));
-                break;
-            case ServMgr::AUTH_COOKIE:
-                if (http.isHeader("Cookie"))
-                {
-                    LOG_TRACE("Got cookie: %s", arg);
-                    const std::string idKey = str::STR(servMgr->serverHost.port, "_id");
-                    auto assignments = str::split(arg, "; ");
-
-                    for (auto assignment : assignments) {
-                        auto sides = str::split(assignment, "=", 2);
-                        if (sides.size() != 2) {
-                            LOG_ERROR("Invalid Cookie header: expected '='");
-                            break;
-                        } else if (sides[0] == idKey) {
-                            Cookie gotCookie;
-                            gotCookie.set(sides[1].c_str(), sock->host.ip);
-
-                            if (servMgr->cookieList.contains(gotCookie)) {
-                                LOG_TRACE("Cookie found");
-                                cookie = gotCookie;
-                            }
-                            break;
-                        }
-                    }
-                }
-                break;
-        }
-    }
+    http.readHeaders();
 
     if (sock->host.isLocalhost())
         return true;
 
-    switch (servMgr->authType)
+    cgi::Query query(args);
+    if (strlen(servMgr->password) && query.get("pass") == servMgr->password)
     {
-        case ServMgr::AUTH_HTTPBASIC:
-            if ((strcmp(pass, servMgr->password) == 0) && strlen(servMgr->password))
-                return true;
-            break;
-        case ServMgr::AUTH_COOKIE:
-            if (servMgr->cookieList.contains(cookie))
-                return true;
-            break;
+        return true;
     }
 
+    switch (servMgr->authType)
+    {
+    case ServMgr::AUTH_HTTPBASIC:
+        if (http.headers.get("Authorization") != "") {
+            HTTP::parseAuthorizationHeader(http.headers.get("Authorization"), user, pass);
+            if (strlen(servMgr->password) && pass == servMgr->password) {
+                return true;
+            }
+        }
+        break;
+    case ServMgr::AUTH_COOKIE:
+        if (http.headers.get("Cookie") != "")
+        {
+            auto arg = http.headers.get("Cookie");
+            LOG_TRACE("Got cookie: %s", arg.c_str());
+            const std::string idKey = str::STR(servMgr->serverHost.port, "_id");
+            auto assignments = str::split(arg, "; ");
+
+            for (auto assignment : assignments) {
+                auto sides = str::split(assignment, "=", 2);
+                if (sides.size() != 2) {
+                    LOG_ERROR("Invalid Cookie header: expected '='");
+                    break;
+                } else if (sides[0] == idKey) {
+                    Cookie gotCookie;
+                    gotCookie.set(sides[1].c_str(), sock->host.ip);
+                    cookie = gotCookie;
+                    break;
+                }
+            }
+
+            if (servMgr->cookieList.contains(cookie)){
+                LOG_TRACE("Cookie ID found");
+                return true;
+            }
+        }
+        break;
+    }
+
+    // Auth failure
     if (servMgr->authType == ServMgr::AUTH_HTTPBASIC)
     {
         http.writeLine(HTTP_SC_UNAUTHORIZED);
@@ -1772,15 +1762,11 @@ void Servent::CMD_speedtest_cached_xml(const char* cmd, HTTP& http, String& jump
     }
 }
 
-void Servent::handshakeCMD(HTTP& http, char *q)
+void Servent::handshakeCMD(HTTP& http, const std::string& query)
 {
     String jumpStr;
 
-    // q が http.cmdLine の一部を指しているので、http の操作に伴って変
-    // 更されるため、コピーしておく。
-    std::string query = q;
-
-    if (!handshakeAuth(http, query.c_str(), true))
+    if (!handshakeAuth(http, query.c_str()))
         return;
 
     std::string cmd = cgi::Query(query).get("cmd");

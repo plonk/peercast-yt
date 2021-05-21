@@ -28,7 +28,7 @@
   <BODY class="normal">
     <div><a href="/public/index.html">{#Public Directory}</a></div>
     <DIV align=center>
-      <FORM action="/admin?" method=get>
+      <FORM action="/admin?" method=POST>
         <INPUT type=hidden value=login name=cmd>
         {@if page.requested_path == "page.requested_path"}
           <input type="hidden"  name="requested_path" value="{$request.path}{$request.search}">

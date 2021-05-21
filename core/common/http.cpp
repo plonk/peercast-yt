@@ -89,6 +89,9 @@ bool    HTTP::nextHeader()
 {
     using namespace std;
 
+    if (m_headersRead)
+        return false;
+
     if (readLine(cmdLine, sizeof(cmdLine)))
     {
         char *ap = strstr(cmdLine, ":");
@@ -115,6 +118,7 @@ bool    HTTP::nextHeader()
     }else
     {
         arg = NULL;
+        m_headersRead = true;
         return false;
     }
 }
@@ -149,6 +153,12 @@ int HTTP::getArgInt()
 //-----------------------------------------
 void HTTP::getAuthUserPass(char *user, char *pass, size_t ulen, size_t plen)
 {
+    parseAuthorizationHeader(arg, user, pass, ulen, plen);
+}
+
+//-----------------------------------------
+void HTTP::parseAuthorizationHeader(const char* arg, char* user, char* pass, size_t ulen, size_t plen)
+{
     if (arg)
     {
         char *s = stristr(arg, "Basic");
@@ -177,6 +187,17 @@ void HTTP::getAuthUserPass(char *user, char *pass, size_t ulen, size_t plen)
     }
 }
 
+// -----------------------------------
+void HTTP::parseAuthorizationHeader(const std::string& arg, std::string& sUser, std::string& sPass)
+{
+    char user[64] = "", pass[64] = "";
+    parseAuthorizationHeader(arg.c_str(), user, pass, sizeof(user), sizeof(pass));
+
+    sUser = user;
+    sPass = pass;
+}
+
+// -----------------------------------
 static const char* statusMessage(int statusCode)
 {
     switch (statusCode)
@@ -193,6 +214,38 @@ static const char* statusMessage(int statusCode)
     case 502: return "Bad Gateway";
     case 503: return "Service Unavailable";
     default: return "Unknown";
+    }
+}
+
+// -----------------------------------
+HTTPRequest HTTP::getRequest()
+{
+    if (method.size() > 0 &&
+        requestUrl.size() > 0 &&
+        protocolVersion.size() > 0 &&
+        strlen(cmdLine) == 0)
+    {
+        if (method == "POST") {
+            if (headers.get("Content-Length") == "") {
+                throw GeneralException("POST without Content-Length");
+            } else {
+                HTTPRequest req(method, requestUrl, protocolVersion, headers);
+                int size = atoi(headers.get("Content-Length").c_str());
+
+                if (m_body == nullptr) {
+                    m_body = std::make_shared<std::string>();
+                    *m_body = stream->read(size);
+                }
+                req.body = *m_body;
+
+                return req;
+            }
+        } else {
+            return HTTPRequest(method, requestUrl, protocolVersion, headers);
+        }
+    }else
+    {
+        throw GeneralException("Request not ready");
     }
 }
 

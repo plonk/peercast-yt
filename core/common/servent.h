@@ -173,8 +173,8 @@ public:
 
     void    handshakeHTML(char *);
     void    handshakeXML();
-    void    handshakeCMD(HTTP&, char *);
-    bool    handshakeAuth(HTTP &, const char *, bool);
+    void    handshakeCMD(HTTP&, const std::string&);
+    bool    handshakeAuth(HTTP &, const char *);
 
     bool    handshakeHTTPBasicAuth(HTTP &http);
 
