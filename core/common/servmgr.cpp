@@ -45,7 +45,7 @@ ServMgr::ServMgr()
     , rtmpServerMonitor(sys->joinPath({ sys->dirname(sys->getExecutablePath()), "rtmp-server" }))
 #endif
     , randomizeBroadcastingChannelID(true)
-    , sendPortAtomWhenFirewallUnknown(true)
+    , sendPortAtomWhenFirewallUnknown(false)
     , sendOtherHostsWithTrackerUpdate(false)
 {
     authType = AUTH_COOKIE;
