@@ -334,6 +334,7 @@ public:
        PCP_HELO_PING の有無でポートチェック（ping）の有無が制御されて
        いたが、PeerCast Station が PCP_HELO_PORT を受け取ると ping し
        ないのでこのフラグを false に設定すれば ping してもらえる。 */
+    std::atomic_bool    sendOtherHostsWithTrackerUpdate;
 };
 
 // ----------------------------------

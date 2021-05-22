@@ -220,6 +220,7 @@ public:
     std::string  getSourceString();
     std::string  getBufferString();
 
+    void         writeTrackerUpdateAtom(AtomStream& atom);
     void         broadcastTrackerUpdate(const GnuID &, bool = false);
     bool         sendPacketUp(ChanPacket &, const GnuID &, const GnuID &, const GnuID &);
 

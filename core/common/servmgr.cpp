@@ -46,6 +46,7 @@ ServMgr::ServMgr()
 #endif
     , randomizeBroadcastingChannelID(true)
     , sendPortAtomWhenFirewallUnknown(true)
+    , sendOtherHostsWithTrackerUpdate(false)
 {
     authType = AUTH_COOKIE;
 
@@ -1082,6 +1083,7 @@ ini::Document ServMgr::getSettings()
         {
             {"randomizeBroadcastingChannelID", randomizeBroadcastingChannelID},
             {"sendPortAtomWhenFirewallUnknown", sendPortAtomWhenFirewallUnknown},
+            {"sendOtherHostsWithTrackerUpdate", sendOtherHostsWithTrackerUpdate},
         }
     });
 

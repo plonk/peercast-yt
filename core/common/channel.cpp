@@ -939,6 +939,65 @@ void ChanMeta::addMem(void *p, int l)
 }
 
 // -----------------------------------
+#include <random>
+void Channel::writeTrackerUpdateAtom(AtomStream& atom)
+{
+    ChanHitList *chl = chanMgr->findHitListByID(info.id);
+    if (!chl)
+        throw StreamException("Broadcast channel has no hitlist");
+
+    int numListeners = totalListeners();
+    int numRelays = totalRelays();
+
+    unsigned int oldp = rawData.getOldestPos();
+    unsigned int newp = rawData.getLatestPos();
+
+    ChanHit hit;
+    hit.initLocal(numListeners, numRelays, info.numSkips, info.getUptime(), isPlaying(),
+                  oldp, newp, canAddRelay(), this->sourceHost.host, (ipVersion == IP_V6));
+    hit.tracker = true;
+
+    std::vector<ChanHit> hosts;
+    if (servMgr->sendOtherHostsWithTrackerUpdate) {
+        for (auto h = chl->hit; h != nullptr; h = h->next) {
+          if (!h->firewalled &&
+              !h->tracker &&
+              !h->yp &
+              h->recv &&
+              h->relay) {
+            hosts.push_back(*h);
+          }
+        }
+        std::random_device seed_gen;
+        std::mt19937 engine(seed_gen());
+        std::shuffle(hosts.begin(), hosts.end(), engine);
+        /* 50個ならパケットに入るだろうという考え。 */
+        if (hosts.size() > 50) {
+            hosts.resize(50);
+        }
+    }
+
+    atom.writeParent(PCP_BCST, 10 + hosts.size());
+        atom.writeChar(PCP_BCST_GROUP, PCP_BCST_GROUP_ROOT);
+        atom.writeChar(PCP_BCST_HOPS, 0);
+        atom.writeChar(PCP_BCST_TTL, 7);
+        atom.writeBytes(PCP_BCST_FROM, servMgr->sessionID.id, 16);
+        atom.writeInt(PCP_BCST_VERSION, PCP_CLIENT_VERSION);
+        atom.writeInt(PCP_BCST_VERSION_VP, PCP_CLIENT_VERSION_VP);
+        atom.writeBytes(PCP_BCST_VERSION_EX_PREFIX, PCP_CLIENT_VERSION_EX_PREFIX, 2);
+        atom.writeShort(PCP_BCST_VERSION_EX_NUMBER, PCP_CLIENT_VERSION_EX_NUMBER);
+        atom.writeParent(PCP_CHAN, 4);
+            atom.writeBytes(PCP_CHAN_ID, info.id.id, 16);
+            atom.writeBytes(PCP_CHAN_BCID, chanMgr->broadcastID.id, 16);
+            info.writeInfoAtoms(atom);
+            info.writeTrackAtoms(atom);
+        hit.writeAtoms(atom, info.id);
+        for (auto &h : hosts)
+            h.writeAtoms(atom, info.id);
+}
+
+// -----------------------------------
+// トラッカーである自分からYPへの通知。
 void Channel::broadcastTrackerUpdate(const GnuID &svID, bool force /* = false */)
 {
     unsigned int ctime = sys->getTime();
@@ -948,39 +1007,9 @@ void Channel::broadcastTrackerUpdate(const GnuID &svID, bool force /* = false */
         ChanPacket pack;
 
         MemoryStream mem(pack.data, sizeof(pack.data));
-
         AtomStream atom(mem);
 
-        ChanHit hit;
-
-        ChanHitList *chl = chanMgr->findHitListByID(info.id);
-        if (!chl)
-            throw StreamException("Broadcast channel has no hitlist");
-
-        int numListeners = totalListeners();
-        int numRelays = totalRelays();
-
-        unsigned int oldp = rawData.getOldestPos();
-        unsigned int newp = rawData.getLatestPos();
-
-        hit.initLocal(numListeners, numRelays, info.numSkips, info.getUptime(), isPlaying(), oldp, newp, canAddRelay(), this->sourceHost.host, (ipVersion == IP_V6));
-        hit.tracker = true;
-
-        atom.writeParent(PCP_BCST, 10);
-            atom.writeChar(PCP_BCST_GROUP, PCP_BCST_GROUP_ROOT);
-            atom.writeChar(PCP_BCST_HOPS, 0);
-            atom.writeChar(PCP_BCST_TTL, 7);
-            atom.writeBytes(PCP_BCST_FROM, servMgr->sessionID.id, 16);
-            atom.writeInt(PCP_BCST_VERSION, PCP_CLIENT_VERSION);
-            atom.writeInt(PCP_BCST_VERSION_VP, PCP_CLIENT_VERSION_VP);
-            atom.writeBytes(PCP_BCST_VERSION_EX_PREFIX, PCP_CLIENT_VERSION_EX_PREFIX, 2);
-            atom.writeShort(PCP_BCST_VERSION_EX_NUMBER, PCP_CLIENT_VERSION_EX_NUMBER);
-            atom.writeParent(PCP_CHAN, 4);
-                atom.writeBytes(PCP_CHAN_ID, info.id.id, 16);
-                atom.writeBytes(PCP_CHAN_BCID, chanMgr->broadcastID.id, 16);
-                info.writeInfoAtoms(atom);
-                info.writeTrackAtoms(atom);
-            hit.writeAtoms(atom, info.id);
+        writeTrackerUpdateAtom(atom);
 
         pack.len = mem.pos;
         pack.type = ChanPacket::T_PCP;

@@ -683,6 +683,10 @@ json::array_t Template::evaluateCollectionVariable(String& varName)
                                       { "name", "sendPortAtomWhenFirewallUnknown" },
                                       { "enabled", servMgr->sendPortAtomWhenFirewallUnknown.load() ? "1" : "0" },
                 }));
+        arr.push_back(json::object_t({
+                                      { "name", "sendOtherHostsWithTrackerUpdate" },
+                                      { "enabled", servMgr->sendOtherHostsWithTrackerUpdate.load() ? "1" : "0" },
+                }));
         return arr;
     }else
     {
