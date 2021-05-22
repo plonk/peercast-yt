@@ -4,6 +4,9 @@ ui/linux/peercast-yt/
 ui/html/
 ui/public/
 peercast
+peercast.exe
+rtmp-server
+rtmp-server.exe
 peercast.ini
 .deps
 **/*.tar
@@ -19,3 +22,8 @@ GSYMS
 GTAGS
 **/*~
 bvt/peercast-yt/
+ui/*/tests/test-all
+ui/*/tests/test-all.exe
+ui/**/Makefile.local
+*.zip
+*.exe
