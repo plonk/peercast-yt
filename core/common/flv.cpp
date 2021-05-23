@@ -51,23 +51,28 @@ std::pair<bool,int> FLVStream::readMetaData(void* data, int size)
     // 算して (true, bitrate) を返す。onMetaData でなかった場合や、ど
     // ちらのプロパティも存在しなかった場合は、(false, _) を返す。
 
-    MemoryStream flvmem(data, size);
-    amf0::Deserializer deserializer;
-    double bitrate = 0;
-    auto cmd = deserializer.readValue(flvmem);
-    if (cmd.string() == "onMetaData")
-    {
-        auto object = deserializer.readValue(flvmem).object();
+    try {
+        MemoryStream flvmem(data, size);
+        amf0::Deserializer deserializer;
+        double bitrate = 0;
+        auto cmd = deserializer.readValue(flvmem);
+        if (cmd.string() == "onMetaData")
+        {
+            auto object = deserializer.readValue(flvmem).object();
 
-        if (object.count("videodatarate"))
-            bitrate += object["videodatarate"].number();
-        if (object.count("audiodatarate"))
-            bitrate += object["audiodatarate"].number();
+            if (object.count("videodatarate"))
+                bitrate += object["videodatarate"].number();
+            if (object.count("audiodatarate"))
+                bitrate += object["audiodatarate"].number();
 
-        if (bitrate > 0)
-            return std::make_pair(true, ceil(bitrate));
+            if (bitrate > 0)
+                return std::make_pair(true, ceil(bitrate));
+        }
+        return std::make_pair(false, 0);
+    } catch (std::runtime_error& e) {
+        LOG_ERROR("readMetaData: %s", e.what());
+        return std::make_pair(false, 0);
     }
-    return std::make_pair(false, 0);
 }
 
 // ------------------------------------------
