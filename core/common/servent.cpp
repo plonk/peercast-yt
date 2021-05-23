@@ -1028,7 +1028,7 @@ void Servent::writeHeloAtom(AtomStream &atom, bool sendPort, bool sendPing, bool
 void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, String &agent, bool isTrusted)
 {
     int ipv = rhost.ip.isIPv4Mapped() ? 4 : 6;
-    if (servMgr->sendPortAtomWhenFirewallUnknown)
+    if (servMgr->flags.get("sendPortAtomWhenFirewallUnknown").currentValue)
     {
         bool sendPort = (servMgr->getFirewall(ipv) != ServMgr::FW_ON);
         bool testFW   = (servMgr->getFirewall(ipv) == ServMgr::FW_UNKNOWN);

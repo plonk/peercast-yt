@@ -44,9 +44,12 @@ ServMgr::ServMgr()
 #else
     , rtmpServerMonitor(sys->joinPath({ sys->dirname(sys->getExecutablePath()), "rtmp-server" }))
 #endif
-    , randomizeBroadcastingChannelID(true)
-    , sendPortAtomWhenFirewallUnknown(false)
-    , sendOtherHostsWithTrackerUpdate(false)
+    , flags(
+        {
+            {"randomizeBroadcastingChannelID", "配信するチャンネルのIDをランダムにする。", true },
+            {"sendPortAtomWhenFirewallUnknown", "古いPeerCastStation相手に正常にポートチェックするにはオフにする。", false },
+            {"sendOtherHostsWithTrackerUpdate", "ルートサーバーにリレーツリーの内容を送信する。", false}
+        })
 {
     authType = AUTH_COOKIE;
 
@@ -1077,14 +1080,16 @@ ini::Document ServMgr::getSettings()
             doc.push_back(writeServHost(*sh));
     }
 
+    std::vector<ini::Key> keys;
+    this->flags.forEachFlag([&](Flag& flag)
+                            {
+                                keys.emplace_back(flag.name, flag.currentValue);
+                            });
     doc.push_back(
     {
         "Flags",
-        {
-            {"randomizeBroadcastingChannelID", randomizeBroadcastingChannelID},
-            {"sendPortAtomWhenFirewallUnknown", sendPortAtomWhenFirewallUnknown},
-            {"sendOtherHostsWithTrackerUpdate", sendOtherHostsWithTrackerUpdate},
-        }
+        keys,
+        "End"
     });
 
     return doc;
@@ -1419,10 +1424,21 @@ void ServMgr::loadSettings(const char *fn)
             }
 
             // Experimental feature flags
-            else if (iniFile.isName("randomizeBroadcastingChannelID"))
-                servMgr->randomizeBroadcastingChannelID = iniFile.getBoolValue();
-            else if (iniFile.isName("sendPortAtomWhenFirewallUnknown"))
-                servMgr->sendPortAtomWhenFirewallUnknown = iniFile.getBoolValue();
+            else if (iniFile.isName("[Flags]"))
+            {
+                while (iniFile.readNext())
+                {
+                    if (iniFile.isName("[End]")) {
+                        break;
+                    } else {
+                        try {
+                            this->flags.get(iniFile.getName()).currentValue = iniFile.getBoolValue();
+                        } catch (std::out_of_range) {
+                            LOG_ERROR("Flag %s not found", iniFile.getName());
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -2141,7 +2157,7 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
         buf = to_string(servMgr->chat);
     }else if (var == "randomizeBroadcastingChannelID")
     {
-        buf = to_string(servMgr->randomizeBroadcastingChannelID);
+        buf = to_string(servMgr->flags.get("randomizeBroadcastingChannelID").currentValue);
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);

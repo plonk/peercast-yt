@@ -4,20 +4,35 @@
 <div class="flex-container">
   <div class="column">
     <form action=/admin method=POST>
-      <input type=hidden value=setflags name=cmd>
+      <input type=hidden value=applyflags name=cmd>
       <table class="table-panel" width="100%" border="0">
-        <tr >
-          <td colspan="2" class="normal"><div align="center"><strong>{#Flags}</strong></div></td>
+        <tr>
+          <td colspan="4" class="normal"><div align="center"><strong>{#Flags}</strong></div></td>
+        </tr>
+        <tr>
+          <th class="normal">名前</th>
+          <th class="normal">説明</th>
+          <th class="normal">デフォルト値</th>
+          <th class="normal">現在の値</th>
         </tr>
         {@foreach flags}
         <tr class="normal">
-          <th class="left-heading" style="text-align: left">{$this.name}</th>
+          <td {@if this.defaultValue != this.currentValue}style="font-weight: bold"{@end}>
+             {$this.name}
+          </td>
           <td>
-            <input type="checkbox" name="{$this.name}" value=1 {@if this.enabled}checked{@end}>
+            {$this.desc}
+          </td>
+          <td>
+            <input type="checkbox" {@if this.defaultValue}checked{@end} disabled>
+          </td>
+          <td>
+            <input type="checkbox" name="{$this.name}" value=1 {@if this.currentValue}checked{@end}>
           </td>
         </tr>
         {@end}
       </table>
+      <center><input type=submit value="{#Apply}"></center>
     </form>
   </div>
 </div><!-- .flex-container -->

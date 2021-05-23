@@ -958,7 +958,7 @@ void Channel::writeTrackerUpdateAtom(AtomStream& atom)
     hit.tracker = true;
 
     std::vector<ChanHit> hosts;
-    if (servMgr->sendOtherHostsWithTrackerUpdate) {
+    if (servMgr->flags.get("sendOtherHostsWithTrackerUpdate").currentValue) {
         for (auto h = chl->hit; h != nullptr; h = h->next) {
           if (!h->firewalled &&
               !h->tracker &&

@@ -981,7 +981,7 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
     servMgr->publicDirectoryEnabled = false;
     servMgr->transcodingEnabled = false;
     servMgr->chat = false;
-    servMgr->randomizeBroadcastingChannelID = false;
+    servMgr->flags.get("randomizeBroadcastingChannelID").currentValue = false;
 
     bool brRoot = false;
     bool getUpd = false;
@@ -1099,7 +1099,7 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
         else if (strcmp(curr, "chat") == 0)
             servMgr->chat = getCGIargBOOL(arg);
         else if (strcmp(curr, "randomizechid") == 0)
-            servMgr->randomizeBroadcastingChannelID = getCGIargBOOL(arg);
+            servMgr->flags.get("randomizeBroadcastingChannelID").currentValue = getCGIargBOOL(arg);
         else if (strcmp(curr, "public_directory") == 0)
             servMgr->publicDirectoryEnabled = true;
         else if (strcmp(curr, "auth") == 0)
@@ -1170,6 +1170,28 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
         servMgr->broadcastRootSettings(getUpd);
 }
 
+void Servent::CMD_applyflags(const char* cmd, HTTP& http, String& jumpStr)
+{
+    std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
+
+    cgi::Query query(cmd);
+
+    servMgr->flags.forEachFlag([&](Flag& flag)
+    {
+        if (query.get(flag.name) == "") {
+            flag.currentValue = false;
+        } else {
+            flag.currentValue = true;
+        }
+    });
+
+    peercastInst->saveSettings();
+    peercast::notifyMessage(ServMgr::NT_PEERCAST, "設定を保存しました。");
+    peercastApp->updateSettings();
+
+    jumpStr.sprintf("/%s/flags.html", servMgr->htmlPath);
+}
+
 void Servent::CMD_fetch(const char* cmd, HTTP& http, String& jumpStr)
 {
     cgi::Query query(cmd);
@@ -1189,7 +1211,7 @@ void Servent::CMD_fetch(const char* cmd, HTTP& http, String& jumpStr)
 
     // id がセットされていないチャンネルがあるといろいろまずいので、事
     // 前に設定してから登録する。
-    if (servMgr->randomizeBroadcastingChannelID) {
+    if (servMgr->flags.get("randomizeBroadcastingChannelID").currentValue) {
         info.id = GnuID::random();
     } else {
         info.id = chanMgr->broadcastID;
@@ -1779,6 +1801,9 @@ void Servent::handshakeCMD(HTTP& http, const std::string& query)
         }else if (cmd == "apply")
         {
             CMD_apply(query.c_str(), http, jumpStr);
+        }else if (cmd == "applyflags")
+        {
+            CMD_applyflags(query.c_str(), http, jumpStr);
         }else if (cmd == "bump")
         {
             CMD_bump(query.c_str(), http, jumpStr);
@@ -2096,7 +2121,7 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
     if (vec.size() > 2) info.desc  = vec[2];
     if (vec.size() > 3) info.url   = vec[3];
 
-    if (servMgr->randomizeBroadcastingChannelID) {
+    if (servMgr->flags.get("randomizeBroadcastingChannelID").currentValue) {
         info.id = GnuID::random();
     } else {
         info.id = chanMgr->broadcastID;
@@ -2139,7 +2164,7 @@ ChanInfo Servent::createChannelInfo(GnuID broadcastID, const String& broadcastMs
     info.bitrate = atoi(query.get("bitrate").c_str());
     info.comment = query.get("comment").empty() ? broadcastMsg : query.get("comment");
 
-    if (servMgr->randomizeBroadcastingChannelID) {
+    if (servMgr->flags.get("randomizeBroadcastingChannelID").currentValue) {
         info.id = GnuID::random();
     } else {
         info.id = broadcastID;
@@ -2224,7 +2249,7 @@ void Servent::handshakeICY(Channel::SRC_TYPE type, bool isHTTP)
     // attach channel ID to name, channel ID is also encoded with IP address
     // to help prevent channel hijacking.
 
-    if (servMgr->randomizeBroadcastingChannelID) {
+    if (servMgr->flags.get("randomizeBroadcastingChannelID").currentValue) {
         info.id = GnuID::random();
     } else {
         info.id = chanMgr->broadcastID;
