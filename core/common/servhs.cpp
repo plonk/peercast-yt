@@ -2325,7 +2325,12 @@ static void validFileOrThrow(const char* filePath, const std::string& documentRo
 void Servent::handshakeLocalFile(const char *fn, HTTP& http)
 {
     std::string documentRoot;
-    documentRoot = sys->realPath(peercastApp->getPath()) + sys->getDirectorySeparator();
+    try {
+        documentRoot = sys->realPath(peercastApp->getPath()) + sys->getDirectorySeparator();
+    } catch (GeneralException &e) {
+        LOG_ERROR("documentRoot: %s (%s)", e.what(), peercastApp->getPath());
+        throw HTTPException(HTTP_SC_SERVERERROR, 500);
+    }
 
     String fileName = documentRoot.c_str();
     fileName.append(fn);
