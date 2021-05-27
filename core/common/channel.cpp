@@ -960,13 +960,15 @@ void Channel::writeTrackerUpdateAtom(AtomStream& atom)
     std::vector<ChanHit> hosts;
     if (servMgr->flags.get("sendOtherHostsWithTrackerUpdate").currentValue) {
         for (auto h = chl->hit; h != nullptr; h = h->next) {
-          if (!h->firewalled &&
-              !h->tracker &&
-              !h->yp &
-              h->recv &&
-              h->relay) {
-            hosts.push_back(*h);
-          }
+            if (!h->firewalled &&
+                !h->tracker &&
+                !h->yp &
+                h->recv &&
+                h->relay) {
+                hosts.push_back(*h);
+                hosts.back().numListeners = 0;
+                hosts.back().numRelays = 0;
+            }
         }
         std::random_device seed_gen;
         std::mt19937 engine(seed_gen());
