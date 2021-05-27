@@ -68,6 +68,8 @@
 
     "Refresh"                 : "更新",
 
+    "Installation directory"  : "インストールディレクトリ",
+    "Configuration file"      : "設定ファイル",
     "Build date and time"     : "ビルド日時",
 
     "Check"                   : "チェック",

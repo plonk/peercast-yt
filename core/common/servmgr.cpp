@@ -2165,6 +2165,12 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
         } catch (std::out_of_range) {
             return false;
         }
+    } else if (var == "installationDirectory")
+    {
+        buf = peercastApp->getPath();
+    } else if (var == "configurationFile")
+    {
+        buf = peercastApp->getIniFilename();
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);
