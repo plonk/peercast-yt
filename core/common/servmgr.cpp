@@ -2158,6 +2158,13 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     }else if (var == "randomizeBroadcastingChannelID")
     {
         buf = to_string(this->flags.get("randomizeBroadcastingChannelID").currentValue);
+    }else if (var.startsWith("flags."))
+    {
+        try {
+            buf = to_string(this->flags.get(var + strlen("flags.")));
+        } catch (std::out_of_range) {
+            return false;
+        }
     }else if (var == "test")
     {
         out.writeUTF8(0x304b);

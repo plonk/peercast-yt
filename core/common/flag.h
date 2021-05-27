@@ -31,6 +31,8 @@ public:
     bool load() const;
     void store(bool value);
 
+    operator bool () const { return currentValue.load(); }
+
     const std::string name, desc;
     const bool defaultValue;
     std::atomic_bool currentValue;
