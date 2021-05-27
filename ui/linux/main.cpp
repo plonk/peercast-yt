@@ -243,9 +243,14 @@ int main(int argc, char* argv[])
             }
         } else if (!strcmp(argv[i], "--path") || !strcmp(argv[i], "-P")) {
             if (++i < argc) {
-                htmlPath.setFromString(argv[i]);
-                // Add a "/" in order to make this parameter more natural:
-                htmlPath.append("/");
+                char path[PATH_MAX];
+                if (realpath(argv[i], path)) {
+                    htmlPath.setFromString(path);
+                    // Add a "/" in order to make this parameter more natural:
+                    htmlPath.append("/");
+                } else {
+                    perror(argv[i]);
+                }
             }
         } else if (!strcmp(argv[i], "--help") || !strcmp(argv[i], "-h")) {
             printf("peercast - P2P Streaming Server, version %s\n", PCX_VERSTRING);
