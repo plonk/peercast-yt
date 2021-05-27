@@ -41,6 +41,8 @@
     "Firewalled"              : "ファイアウォール",
     "Yes"                     : "はい",
     "No"                      : "いいえ",
+    "(forced)"                : "(強制)",
+    "The forceFirewalled flag is on." : "forceFirewalled フラグがオンです。",
     "Unknown"                 : "不明",
     "XML stats"               : "統計XML",
     "View"                    : "表示",

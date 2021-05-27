@@ -48,7 +48,8 @@ ServMgr::ServMgr()
         {
             {"randomizeBroadcastingChannelID", "配信するチャンネルのIDをランダムにする。", true },
             {"sendPortAtomWhenFirewallUnknown", "古いPeerCastStation相手に正常にポートチェックするにはオフにする。", false },
-            {"sendOtherHostsWithTrackerUpdate", "ルートサーバーにリレーツリーの内容を送信する。", false}
+            {"sendOtherHostsWithTrackerUpdate", "ルートサーバーにリレーツリーの内容を送信する。", false},
+            {"forceFirewalled", "ファイアーウォール オンであるかの様に振る舞う。", false},
         })
 {
     authType = AUTH_COOKIE;
@@ -728,6 +729,9 @@ ServMgr::FW_STATE ServMgr::getFirewall(int ipv)
 {
     if (ipv != 4 && ipv != 6)
         throw ArgumentException("getFirewall: Invalid IP version");
+
+    if (this->flags.get("forceFirewalled"))
+        return FW_ON;
         
     std::lock_guard<std::recursive_mutex> cs(lock);
     if (ipv == 4)
