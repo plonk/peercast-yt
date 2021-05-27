@@ -101,18 +101,29 @@ public:
                 m_children[p->uphost].push_back(h);
             }
 
-            // 上流の項目が見付からないノードはルートにする。
-            for (auto it = m_children.begin(); it != m_children.end(); ++it)
-            {
-                try
-                {
-                    if (it->first != Host())
-                        m_hit.at(it->first);
-                }
-                catch (std::out_of_range&)
-                {
-                    for (auto i : it->second)
-                        m_children[Host()].push_back(i);
+            // 上流の項目が見付からないノードはIPの同じポート違いのノー
+            // ドか、ルートにする。
+            for (auto& pair : m_hit) {
+                auto& host = pair.first;
+                auto& hit = pair.second;
+
+                if (hit.uphost == Host())
+                    continue;
+
+                if (m_hit.count(hit.uphost) == 0) {
+                    auto it = std::find_if(m_hit.begin(), m_hit.end(),
+                                           [&](std::pair<Host,ChanHit> p) {
+                                               return (p.first.ip == hit.uphost.ip);
+                                           });
+                    if (it != m_hit.end()) {
+                        LOG_TRACE("HostGraph: %s adopts %s (uphost %s)",
+                                  it->first.str().c_str(),
+                                  endpoint(&hit).str().c_str(),
+                                  hit.uphost.str().c_str());
+                        m_children[it->first].push_back(endpoint(&hit));
+                    } else {
+                        m_children[Host()].push_back(endpoint(&hit));
+                    }
                 }
             }
         }
