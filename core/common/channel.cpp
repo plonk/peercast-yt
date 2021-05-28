@@ -968,6 +968,7 @@ void Channel::writeTrackerUpdateAtom(AtomStream& atom)
                 hosts.push_back(*h);
                 hosts.back().numListeners = 0;
                 hosts.back().numRelays = 0;
+                hosts.back().tracker = 1;
             }
         }
         std::random_device seed_gen;
