@@ -32,16 +32,6 @@ Flag::Flag(const Flag& other)
 {
 }
 
-bool Flag::load() const
-{
-    return currentValue.load();
-}
-
-void Flag::store(bool value)
-{
-    currentValue.store(value);
-}
-
 FlagRegistory::FlagRegistory(std::vector<Flag>&& flags)
     : m_flags(flags)
 {
