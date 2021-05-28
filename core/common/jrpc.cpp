@@ -3,6 +3,7 @@
 
 #include "jrpc.h"
 #include "str.h"
+#include "hostgraph.h"
 
 using namespace std;
 using json = nlohmann::json;
