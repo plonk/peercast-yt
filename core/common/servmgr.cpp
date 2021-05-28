@@ -1436,7 +1436,7 @@ void ServMgr::loadSettings(const char *fn)
                         break;
                     } else {
                         try {
-                            this->flags.get(iniFile.getName()).currentValue = iniFile.getBoolValue();
+                            this->flags.get(iniFile.getName()) = iniFile.getBoolValue();
                         } catch (std::out_of_range) {
                             LOG_ERROR("Flag %s not found", iniFile.getName());
                         }
@@ -2161,7 +2161,7 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
         buf = to_string(this->chat);
     }else if (var == "randomizeBroadcastingChannelID")
     {
-        buf = to_string(this->flags.get("randomizeBroadcastingChannelID").currentValue);
+        buf = to_string(this->flags.get("randomizeBroadcastingChannelID"));
     }else if (var.startsWith("flags."))
     {
         try {

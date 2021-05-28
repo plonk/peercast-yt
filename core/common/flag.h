@@ -32,6 +32,7 @@ public:
     void store(bool value);
 
     operator bool () const { return currentValue.load(); }
+    Flag& operator = (bool v) { currentValue.store(v); return *this; }
 
     const std::string name, desc;
     const bool defaultValue;
