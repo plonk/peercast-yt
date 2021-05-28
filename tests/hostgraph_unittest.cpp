@@ -143,9 +143,9 @@ TEST_F(HostGraphFixture, localRelay)
 
     ASSERT_EQ(relayTree.size(), 1);
     ASSERT_EQ(relayTree[0]["address"].get<std::string>(), "127.0.0.1");
-    ASSERT_EQ(relayTree[0]["isFirewalled"], true);
+    ASSERT_EQ(relayTree[0]["isFirewalled"].get<bool>(), true);
     ASSERT_EQ(relayTree[0]["children"].size(), 1);
     ASSERT_EQ(relayTree[0]["children"][0]["address"].get<std::string>(), "127.0.0.1");
-    ASSERT_EQ(relayTree[0]["children"][0]["port"], 8144);
-    ASSERT_EQ(relayTree[0]["children"][0]["isFirewalled"], false);
+    ASSERT_EQ(relayTree[0]["children"][0]["port"].get<int>(), 8144);
+    ASSERT_EQ(relayTree[0]["children"][0]["isFirewalled"].get<bool>(), false);
 }
