@@ -25,20 +25,26 @@ class ChanHitList;
 #include <channel.h>
 #include <chanhit.h>
 
+#include "host.h"
+
 class HostGraph
 {
     using json = nlohmann::json;
+
+    typedef std::pair<Host, Host> ID;
 
 public:
     HostGraph(std::shared_ptr<Channel> ch, ChanHitList *hitList, int ipVersion);
 
     json::array_t getRelayTree();
 
-    Host endpoint(ChanHit *hit);
-    json toRelayTree(Host& endpoint, const std::vector<Host> path);
+    ID id(ChanHit& hit);
+    json toRelayTree(ID& endpoint, const std::vector<ID> path);
 
-    std::map<Host, ChanHit> m_hit;
-    std::map<Host, std::vector<Host> > m_children;
+    std::map<ID, ChanHit> m_hit;
+    std::map<ID, std::vector<ID> > m_children;
+
+    static const ID kNullID;
 };
 
 #endif

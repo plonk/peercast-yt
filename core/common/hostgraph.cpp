@@ -19,6 +19,8 @@
 
 using json = nlohmann::json;
 
+const HostGraph::ID HostGraph::kNullID = { Host(), Host() };
+
 HostGraph::HostGraph(std::shared_ptr<Channel> ch, ChanHitList *hitList, int ipVersion)
 {
     if (ch == nullptr)
@@ -48,85 +50,101 @@ HostGraph::HostGraph(std::shared_ptr<Channel> ch, ChanHitList *hitList, int ipVe
                        (ipVersion == 6));
         self.tracker = isTracker;
 
-        m_hit[endpoint(&self)] = self;
-        m_children[self.uphost].push_back(endpoint(&self));
+        m_hit[id(self)] = self;
     }
 
     for (ChanHit *p = hitList->hit;
          p;
          p = p->next)
     {
-        Host h = endpoint(p);
+        LOG_DEBUG("HostGraph: %s", p->rhost[0].str().c_str());
 
-        LOG_DEBUG("HostGraph: endpoint = %s", h.IPtoStr().cstr());
-
-        if (!h.ip)
-            continue;
-
-        m_hit[h] = *p;
-        m_hit[h].next = nullptr;
-
-        m_children[p->uphost].push_back(h);
+        m_hit[id(*p)] = *p;
+        m_hit[id(*p)].next = nullptr;
     }
 
-    // 上流の項目が見付からないノードはIPの同じポート違いのノー
-    // ドか、ルートにする。
     for (auto& pair : m_hit) {
-        auto& host = pair.first;
+        auto& id0 = pair.first;
         auto& hit = pair.second;
+        bool found = false;
 
-        if (hit.uphost == Host())
-            continue;
+        // tracker
+        if (hit.uphost == Host()) {
+            m_children[kNullID].push_back(id0);
+            found = true;
+        }
 
-        if (m_hit.count(hit.uphost) == 0) {
-            auto it = std::find_if(m_hit.begin(), m_hit.end(),
-                                   [&](std::pair<Host,ChanHit> p) {
-                                       return (p.first.ip == hit.uphost.ip);
-                                   });
-            if (it != m_hit.end()) {
-                LOG_TRACE("HostGraph: %s adopts %s (uphost %s)",
-                          it->first.str().c_str(),
-                          endpoint(&hit).str().c_str(),
-                          hit.uphost.str().c_str());
-                m_children[it->first].push_back(endpoint(&hit));
-            } else {
-                m_children[Host()].push_back(endpoint(&hit));
+        // wan relay (fetch)
+        if (!found) {
+            for (const auto& entry : m_hit) {
+                auto& id1 = entry.first;
+                if (id1.first == hit.uphost) {
+                    found = true;
+                    m_children[id1].push_back(id0);
+                    break;
+                }
             }
+        }
+
+        // wan relay (push)
+        if (!found) {
+            for (const auto& entry : m_hit) {
+                auto& id1 = entry.first;
+                if (id1.first.ip == hit.uphost.ip) {
+                    found = true;
+                    m_children[id1].push_back(id0);
+                    break;
+                }
+            }
+        }
+
+        // lan relay (fetch)
+        if (!found) {
+            for (const auto& entry : m_hit) {
+                auto& id1 = entry.first;
+                if (id1.first.ip == hit.rhost[0].ip &&
+                    id1.second == hit.uphost) {
+                    found = true;
+                    m_children[id1].push_back(id0);
+                    break;
+                }
+            }
+        }
+
+        if (!found) {
+            m_children[kNullID].push_back(id0);
         }
     }
 }
 
-Host HostGraph::endpoint(ChanHit *hit)
+std::pair<Host, Host> HostGraph::id(ChanHit& hit)
 {
-    if (hit->rhost[0].ip)
-        return hit->rhost[0];
-    else
-        return hit->rhost[1];
+    return { hit.rhost[0], hit.rhost[1] };
 }
 
-json HostGraph::toRelayTree(Host& endpoint, const std::vector<Host> path)
+json HostGraph::toRelayTree(ID& endpoint, const std::vector<ID> path)
 {
     ChanHit& hit = m_hit[endpoint];
     json::array_t children;
 
-    for (Host& child : m_children[endpoint])
+    for (ID& child : m_children[endpoint])
     {
         if (find(path.begin(), path.end(), child) == path.end())
         {
-            std::vector<Host> p = path;
+            std::vector<ID> p = path;
             p.push_back(endpoint);
             children.push_back(toRelayTree(child, p));
         }
         else
         {
-            LOG_DEBUG("toRelayTree: circularity detected. skipping %s", ((std::string) child).c_str());
+            LOG_WARN("toRelayTree: circularity detected.");
         }
     }
 
     return {
         { "sessionId", (std::string) hit.sessionID },
-        { "address", endpoint.IPtoStr().cstr() },
-        { "port", endpoint.port },
+        { "address", hit.rhost[0].ip.str() },
+        { "port", hit.rhost[0].port }, // ペカステに合わせて 0 を入れないようにすべき？
         { "isFirewalled", hit.firewalled },
         { "localRelays", hit.numRelays },
         { "localDirects", hit.numListeners },
@@ -145,9 +163,9 @@ json::array_t HostGraph::getRelayTree()
 {
     json::array_t result;
 
-    for (Host& root : m_children[Host()])
+    for (ID& root : m_children[kNullID])
     {
-        result.push_back(toRelayTree(root, std::vector<Host>()));
+        result.push_back(toRelayTree(root, {}));
     }
     return result;
 }
