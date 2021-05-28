@@ -337,6 +337,12 @@ TEST_F(ChanHitFixture, initLocal)
     ASSERT_EQ(6, hit->oldestPos);
     ASSERT_EQ(7, hit->newestPos);
     ASSERT_EQ(true, hit->relay);
+
+    ASSERT_TRUE(hit->firewalled);
+
+    ASSERT_EQ("127.0.0.1:7144", hit->host.str());
+    ASSERT_EQ("127.0.0.1:0", hit->rhost[0].str());
+    ASSERT_EQ("192.168.0.2:7144", hit->rhost[1].str());
 }
 
 TEST_F(ChanHitFixture, str)

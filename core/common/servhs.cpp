@@ -1149,7 +1149,7 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
             ipstr =  vec[0]+":"+std::to_string(newPort);
         }else
         {
-            ipstr = Host(ClientSocket::getIP(NULL), newPort).str();
+            ipstr = Host(sys->getInterfaceIPv4Address(), newPort).str();
         }
         jumpStr.sprintf("http://%s/%s/settings.html", ipstr.c_str(), servMgr->htmlPath);
 

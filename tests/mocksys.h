@@ -124,6 +124,11 @@ public:
     {
         return "";
     }
+
+    IP getInterfaceIPv4Address() const override
+    {
+        return IP::parse("192.168.0.2");
+    }
 };
 
 #endif

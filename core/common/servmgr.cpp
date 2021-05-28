@@ -2077,7 +2077,7 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
         buf = to_string(serverHost.port);
     else if (var == "serverLocalIP")
     {
-        Host lh(ClientSocket::getIP(NULL), 0);
+        Host lh(sys->getInterfaceIPv4Address(), 0);
         buf = lh.str(false);
     }else if (var == "upgradeURL")
         buf = this->downloadURL;

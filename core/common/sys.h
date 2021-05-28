@@ -92,6 +92,8 @@ public:
         out = "";
         return false;
     }
+
+    virtual IP getInterfaceIPv4Address() const;
     
 #ifdef __BIG_ENDIAN__
     unsigned short  convertEndian(unsigned short v) { return SWAP2(v); }

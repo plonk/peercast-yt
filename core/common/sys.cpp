@@ -24,6 +24,7 @@
 #include "sys.h"
 #include "logbuf.h"
 #include "stream.h"
+#include "socket.h"
 #include <chrono>
 
 // ------------------------------------------
@@ -288,4 +289,10 @@ void Sys::waitThread(ThreadInfo* info)
     {
         LOG_ERROR("waitThread called on non-joinable thread");
     }
+}
+
+// ---------------------------------
+IP Sys::getInterfaceIPv4Address() const
+{
+    return ClientSocket::getIP(nullptr);
 }

@@ -24,7 +24,7 @@
 // ------------------------------------------
 bool Host::isLocalhost()
 {
-    return loopbackIP() || (ip == IP(ClientSocket::getIP(NULL)));
+    return loopbackIP() || (ip == sys->getInterfaceIPv4Address());
 }
 
 // ------------------------------------------
