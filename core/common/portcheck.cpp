@@ -30,6 +30,7 @@ PortCheckResult IPv6PortChecker::run(const std::vector<int>& ports)
         throw GeneralException(("No IPv6 address associated with " + m_uri.host()).c_str());
     }        
 
+    LOG_DEBUG("Contacting %s (%s) ...", m_uri.host().c_str(), ip.str().c_str());
     sock->open(Host(ip, m_uri.port()));
     sock->connect();
 
@@ -43,14 +44,14 @@ PortCheckResult IPv6PortChecker::run(const std::vector<int>& ports)
                      {"Content-Length", std::to_string(reqbody.size())}});
 
     req.body = reqbody;
-    LOG_DEBUG("req: %s", req.body.c_str());
+    LOG_DEBUG("Request: %s", req.body.c_str());
     auto res = http.send(req);
     if (res.statusCode != 200) {
         throw GeneralException(str::STR("HTTP request failed: ", res.statusCode).c_str(), res.statusCode);
     }
 
     auto data = json::parse(res.body);
-    LOG_DEBUG("res: %s", res.body.c_str());
+    LOG_DEBUG("Response: %s", res.body.c_str());
     PortCheckResult result;
     result.ip = IP::parse(data["ip"]);
     for (json& j : data["ports"]) {

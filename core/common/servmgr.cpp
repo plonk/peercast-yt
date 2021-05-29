@@ -697,7 +697,10 @@ bool ServMgr::checkForceIP()
 // -----------------------------------
 void ServMgr::checkFirewall()
 {
-    if (!this->rootHost.isEmpty())
+    if (this->rootHost.isEmpty())
+    {
+        LOG_ERROR("Root server is not set.");
+    }else
     {
         LOG_DEBUG("Checking firewall..");
         Host host;
@@ -741,6 +744,21 @@ ServMgr::FW_STATE ServMgr::getFirewall(int ipv)
 }
 
 // -----------------------------------
+const char* ServMgr::getFirewallStateString(FW_STATE state)
+{
+    switch (state)
+    {
+    case FW_ON:
+        return "ON";
+    case FW_OFF:
+        return "OFF";
+    case FW_UNKNOWN:
+    default:
+        return "UNKNOWN";
+    }
+}
+
+// -----------------------------------
 void ServMgr::setFirewall(int ipv, FW_STATE state)
 {
     if (ipv != 4 && ipv != 6)
@@ -748,20 +766,7 @@ void ServMgr::setFirewall(int ipv, FW_STATE state)
 
     std::lock_guard<std::recursive_mutex> cs(lock);
 
-    const char *str;
-    switch (state)
-    {
-    case FW_ON:
-        str = "ON";
-        break;
-    case FW_OFF:
-        str = "OFF";
-        break;
-    case FW_UNKNOWN:
-    default:
-        str = "UNKNOWN";
-        break;
-    }
+    auto str = getFirewallStateString(state);
 
     if (ipv == 4) {
         if (firewalled != state)

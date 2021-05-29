@@ -243,6 +243,8 @@ public:
 
     bool updateIPAddress(const IP& newIP);
 
+    static const char* getFirewallStateString(FW_STATE);
+
     ThreadInfo          serverThread;
     ThreadInfo          idleThread;
 

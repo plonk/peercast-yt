@@ -899,29 +899,56 @@ bool Servent::handshakeAuth(HTTP &http, const char *args)
 }
 
 // -----------------------------------
+#include "sstream.h"
+#include "defer.h"
+extern thread_local std::vector<std::function<void(LogBuffer::TYPE type, const char*)>> AUX_LOG_FUNC_VECTOR;
+static std::string runProcess(std::function<void(Stream&)> action)
+{
+    StringStream ss;
+    try {
+        AUX_LOG_FUNC_VECTOR.push_back([&](LogBuffer::TYPE type, const char* msg) -> void
+                                      {
+                                          if (type == LogBuffer::T_ERROR)
+                                              ss.writeString("Error: ");
+                                          else if (type == LogBuffer::T_WARN)
+                                              ss.writeString("Warning: ");
+                                          ss.writeLine(msg);
+                                      });
+        Defer defer([]() { AUX_LOG_FUNC_VECTOR.pop_back(); });
+
+        action(ss);
+    } catch(GeneralException& e) {
+        ss.writeLineF("Error: %s\n", e.what());
+    }
+    return ss.str();
+}
+
+// -----------------------------------
 void Servent::CMD_portcheck4(const char* cmd, HTTP& http, String& jumpStr)
 {
-    servMgr->checkFirewall();
-    if (!http.headers.get("Referer").empty())
-    {
-        jumpStr.sprintf("%s", http.headers.get("Referer").c_str());
-    }else
-    {
-        jumpStr.sprintf("/%s/index.html", servMgr->htmlPath);
-    }
+    auto output = runProcess([](Stream& s)
+                             {
+                                 servMgr->checkFirewall();
+                                 s.writeLineF("IPv4 firewall is %s",
+                                              ServMgr::getFirewallStateString(servMgr->getFirewall(4)));
+                             });
+
+    auto res = HTTPResponse::ok({ {"Content-Type", "text/plain; charset=UTF-8"} }, output);
+    http.send(res);
 }
 
 // -----------------------------------
 void Servent::CMD_portcheck6(const char* cmd, HTTP& http, String& jumpStr)
 {
-    servMgr->checkFirewallIPv6();
-    if (!http.headers.get("Referer").empty())
-    {
-        jumpStr.sprintf("%s", http.headers.get("Referer").c_str());
-    }else
-    {
-        jumpStr.sprintf("/%s/index.html", servMgr->htmlPath);
-    }
+    auto output = runProcess([](Stream& s)
+                             {
+                                 servMgr->checkFirewallIPv6();
+                                 s.writeLineF("IPv6 firewall is %s",
+                                              ServMgr::getFirewallStateString(servMgr->getFirewall(6)));
+                             });
+
+    auto res = HTTPResponse::ok({ {"Content-Type", "text/plain; charset=UTF-8"} }, output);
+    http.send(res);
 }
 
 // -----------------------------------

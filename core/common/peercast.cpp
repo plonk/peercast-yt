@@ -167,6 +167,7 @@ void    APICALL PeercastInstance::callLocalURL(const char *url)
 }
 
 // --------------------------------------------------
+thread_local std::vector<std::function<void(LogBuffer::TYPE type, const char*)>> AUX_LOG_FUNC_VECTOR;
 void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)
 {
     if (!servMgr) return;
@@ -184,6 +185,10 @@ void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)
         sys->logBuf->write(str, type);
 
     peercastApp->printLog(type, str);
+
+    for (auto func : AUX_LOG_FUNC_VECTOR) {
+        func(type, str);
+    }
 }
 
 // --------------------------------------------------
