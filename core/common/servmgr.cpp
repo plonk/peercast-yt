@@ -706,6 +706,12 @@ void ServMgr::checkFirewall()
         Host host;
         host.fromStrName(this->rootHost.cstr(), DEFAULT_PORT);
 
+        if (!host.ip.isIPv4Mapped()) {
+            throw GeneralException("Not an IPv4 addresss");
+        } else {
+            LOG_DEBUG("Contacting %s (%s) ...", this->rootHost.c_str(), host.ip.str().c_str());
+        }
+
         auto sock = sys->createSocket();
         if (!sock)
             throw StreamException("Unable to create socket");
