@@ -928,6 +928,7 @@ void Servent::CMD_portcheck4(const char* cmd, HTTP& http, String& jumpStr)
 {
     auto output = runProcess([](Stream& s)
                              {
+                                 servMgr->setFirewall(4, ServMgr::FW_UNKNOWN);
                                  servMgr->checkFirewall();
                                  s.writeLineF("IPv4 firewall is %s",
                                               ServMgr::getFirewallStateString(servMgr->getFirewall(4)));
@@ -942,6 +943,7 @@ void Servent::CMD_portcheck6(const char* cmd, HTTP& http, String& jumpStr)
 {
     auto output = runProcess([](Stream& s)
                              {
+                                 servMgr->setFirewall(6, ServMgr::FW_UNKNOWN);
                                  servMgr->checkFirewallIPv6();
                                  s.writeLineF("IPv6 firewall is %s",
                                               ServMgr::getFirewallStateString(servMgr->getFirewall(6)));
