@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Peercast YT
+Exec=peercast
+Icon=peercast
+Type=Application
+Terminal=true
+Categories=Network;
