@@ -2,10 +2,17 @@ require 'fileutils'
 
 def spawn_peercast
   # 新品の設定ファイルを使う。
-  FileUtils.cp "peercast.ini.master", "peercast.ini"
+  FileUtils.cp "peercast.ini.master", "peercast-yt/peercast.ini"
 
   # 起動。
-  pid = spawn "peercast-yt/peercast -i peercast.ini -P peercast-yt"
+  if RUBY_PLATFORM =~ /msys/
+    cmdline = "./peercast.exe"
+  else
+    cmdline = "peercast -i peercast.ini -P ."
+  end
+  Dir.chdir("peercast-yt")
+  pid = spawn cmdline
+  Dir.chdir("..")
   sleep 1.0
 
   at_exit {
