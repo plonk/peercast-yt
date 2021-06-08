@@ -8,7 +8,7 @@ def spawn_peercast
   if RUBY_PLATFORM =~ /msys/
     cmdline = "./peercast.exe"
   else
-    cmdline = "peercast -i peercast.ini -P ."
+    cmdline = "./peercast -i peercast.ini -P ."
   end
   Dir.chdir("peercast-yt")
   pid = spawn cmdline
