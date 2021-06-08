@@ -16,6 +16,9 @@ OS = $(shell uname -s | tr A-Z a-z)
 ARCH = $(shell uname -m | tr A-Z a-z)
 
 DISTARCHIVE = peercast-yt-$(OS)-$(ARCH).tar.gz
+APPIMAGE = Peercast_YT-$(ARCH).AppImage
+APPIMAGETOOL = appimagetool-$(ARCH).AppImage
+LINUXDEPLOY = linuxdeploy-$(ARCH).AppImage
 AR = ar
 
 INCLUDES = -I../../core -I../../core/common
@@ -47,6 +50,11 @@ RTMPSOURCE = $(wildcard $(RTMP)/*.cpp)
 RTMPOBJ = $(notdir $(RTMPSOURCE:.cpp=.o))
 
 DEPENDFILE = .deps
+
+PREFIX ?= /usr/local
+bindir=$(PREFIX)/bin
+docdir=$(PREFIX)/share/doc/peercast
+sharedir=$(PREFIX)/share/peercast
 
 -include Makefile.local
 
@@ -80,6 +88,26 @@ $(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS) $(RTMPSERVER)
 	strip peercast-yt/$(TARGET)
 	strip peercast-yt/$(RTMPSERVER)
 	tar czf $(DISTARCHIVE) peercast-yt
+
+install: all
+	mkdir -p $(bindir)
+	cp -R $(TARGET) $(RTMPSERVER) $(bindir)
+	mkdir -p $(docdir)
+	cp -R ../../licenses ../../core/LICENSE $(docdir)
+	mkdir -p $(sharedir)
+	cp -R $(HTML) $(PUBLIC) $(ASSETS) $(CGIBIN) $(sharedir)
+
+$(APPIMAGE): $(APPIMAGETOOL) $(LINUXDEPLOY)
+	rm -r AppDir/
+	PREFIX=AppDir/usr make install
+	./$(LINUXDEPLOY) --appdir=AppDir -e AppDir/usr/bin/peercast  --deploy-deps-only="AppDir/usr/bin/rtmp-server" -d peercast.desktop -i peercast.png
+	./$(APPIMAGETOOL) AppDir
+
+$(APPIMAGETOOL):
+	if [ ! -f $(APPIMAGETOOL) ]; then wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-$(ARCH).AppImage; chmod +x $(APPIMAGETOOL); fi
+
+$(LINUXDEPLOY):
+	if [ ! -f $(LINUXDEPLOY) ]; then wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-$(ARCH).AppImage; chmod +x $(LINUXDEPLOY); fi
 
 clean:
 	$(MAKE) -C .. clean
