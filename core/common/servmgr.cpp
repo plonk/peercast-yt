@@ -2181,7 +2181,12 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
         }
     } else if (var == "installationDirectory")
     {
-        buf = peercastApp->getPath();
+        try {
+            buf = sys->realPath(peercastApp->getPath());
+        } catch (GeneralException& e) {
+            LOG_ERROR("installationDirectory: %s", e.what());
+            buf = "[Error]";
+        }
     } else if (var == "configurationFile")
     {
         buf = peercastApp->getIniFilename();
