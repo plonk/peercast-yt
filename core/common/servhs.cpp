@@ -902,9 +902,36 @@ bool Servent::handshakeAuth(HTTP &http, const char *args)
 #include "sstream.h"
 #include "defer.h"
 extern thread_local std::vector<std::function<void(LogBuffer::TYPE type, const char*)>> AUX_LOG_FUNC_VECTOR;
-static std::string runProcess(std::function<void(Stream&)> action)
+class ChunkedStream : public IndirectStream
 {
-    StringStream ss;
+public:
+    ChunkedStream(Stream* aStream)
+        {
+            init(aStream);
+        }
+
+    void write(const void *p, int l) override
+    {
+        stream->writeStringF("%x\r\n", l);
+        stream->write(p, l);
+        stream->writeString("\r\n");
+    }
+
+    void close() override
+    {
+        stream->writeString("0\r\n\r\n");
+    }
+
+    ~ChunkedStream() override
+    {
+        try {
+            this->close();
+        } catch(SockException) {
+        }
+    }
+};
+static void runProcess(Stream& ss, std::function<void()> action)
+{
     try {
         AUX_LOG_FUNC_VECTOR.push_back([&](LogBuffer::TYPE type, const char* msg) -> void
                                       {
@@ -916,41 +943,56 @@ static std::string runProcess(std::function<void(Stream&)> action)
                                       });
         Defer defer([]() { AUX_LOG_FUNC_VECTOR.pop_back(); });
 
-        action(ss);
+        action();
     } catch(GeneralException& e) {
         ss.writeLineF("Error: %s\n", e.what());
     }
-    return ss.str();
 }
 
 // -----------------------------------
 void Servent::CMD_portcheck4(const char* cmd, HTTP& http, String& jumpStr)
 {
-    auto output = runProcess([](Stream& s)
-                             {
-                                 servMgr->setFirewall(4, ServMgr::FW_UNKNOWN);
-                                 servMgr->checkFirewall();
-                                 s.writeLineF("IPv4 firewall is %s",
-                                              ServMgr::getFirewallStateString(servMgr->getFirewall(4)));
-                             });
-
-    auto res = HTTPResponse::ok({ {"Content-Type", "text/plain; charset=UTF-8"} }, output);
-    http.send(res);
+    http.writeLine(HTTP_SC_OK);
+    http.writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
+    http.writeLine("Transfer-Encoding: chunked");
+    http.writeLine("Content-Type: text/plain; charset=UTF-8");
+    http.writeLine("");
+    ChunkedStream cs(&http);
+    try {
+        runProcess(cs,
+                   [&]()
+                   {
+                       servMgr->setFirewall(4, ServMgr::FW_UNKNOWN);
+                       servMgr->checkFirewall();
+                       cs.writeLineF("IPv4 firewall is %s",
+                                     ServMgr::getFirewallStateString(servMgr->getFirewall(4)));
+                   });
+    } catch(SockException& e) {
+        LOG_ERROR("CMD_portcheck4: %s", e.what());
+    }
 }
 
 // -----------------------------------
 void Servent::CMD_portcheck6(const char* cmd, HTTP& http, String& jumpStr)
 {
-    auto output = runProcess([](Stream& s)
-                             {
-                                 servMgr->setFirewall(6, ServMgr::FW_UNKNOWN);
-                                 servMgr->checkFirewallIPv6();
-                                 s.writeLineF("IPv6 firewall is %s",
-                                              ServMgr::getFirewallStateString(servMgr->getFirewall(6)));
-                             });
-
-    auto res = HTTPResponse::ok({ {"Content-Type", "text/plain; charset=UTF-8"} }, output);
-    http.send(res);
+    http.writeLine(HTTP_SC_OK);
+    http.writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
+    http.writeLine("Transfer-Encoding: chunked");
+    http.writeLine("Content-Type: text/plain; charset=UTF-8");
+    http.writeLine("");
+    ChunkedStream cs(&http);
+    try {
+        runProcess(cs,
+                   [&]()
+                   {
+                       servMgr->setFirewall(6, ServMgr::FW_UNKNOWN);
+                       servMgr->checkFirewallIPv6();
+                       cs.writeLineF("IPv6 firewall is %s",
+                                     ServMgr::getFirewallStateString(servMgr->getFirewall(6)));
+                   });
+    } catch(SockException& e) {
+        LOG_ERROR("CMD_portcheck6: %s", e.what());
+    }
 }
 
 // -----------------------------------

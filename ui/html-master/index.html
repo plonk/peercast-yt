@@ -8,6 +8,11 @@
 </div>
 {@end}
 
+<div>
+<a id="portcheck4" href="/admin?cmd=portcheck4">{#Check} (IPv4)</a> -
+<a id="portcheck6" href="/admin?cmd=portcheck6">{#Check} (IPv6)</a>
+</div>
+
 <DIV align=center class="reloader flex-container" data-url="index.html?fragment=content" data-interval="{$servMgr.refreshHTML}">
   {@fragment content}
   <div class="column">
@@ -36,14 +41,14 @@
       <TD>{@if servMgr.firewallKnown} {@if servMgr.isFirewalled}
         {#Yes} {@else} {#No} {@end} {@else} {#Unknown} {@end}
         {@if servMgr.flags.forceFirewalled} <b title="{#The forceFirewalled flag is on.}">{#(forced)}</b> {@end}
-        - <a id="portcheck4" href="/admin?cmd=portcheck4">{#Check}</a></TD>
+      </TD>
     </TR>
     <TR align=left>
       <th class="left-heading">{#Firewalled} (v6)</th>
       <TD>{@if servMgr.firewallKnownIPv6} {@if servMgr.isFirewalledIPv6}
         {#Yes} {@else} {#No} {@end} {@else} {#Unknown} {@end}
         {@if servMgr.flags.forceFirewalled} <b title="{#The forceFirewalled flag is on.}">{#(forced)}</b> {@end}
-        - <a id="portcheck6" href="/admin?cmd=portcheck6">{#Check}</a></TD>
+        </TD>
     </TR>
     <TR align=left>
       <th class="left-heading">{#XML stats}</th>
@@ -137,28 +142,73 @@
     </tr>
   </table>
   </div>
+  {@end}
+</DIV>
+
 
   <script>
   $(function(){
-      $("#portcheck4").click(function(ev){
+      $("#portcheck4").click(function (ev){
           ev.preventDefault();
-          $.ajax("/admin?cmd=portcheck4", {
-              cache: false,
-              success: function (data) {
-                  alert(data);
-              },
+          $("#console").text("");
+          $("#modal").show();
+          fetch("/admin?cmd=portcheck4").then(res => {
+            var reader = res.body.getReader();
+            var f = ({done, value}) => {
+              if (!done) {
+                var addition = new TextDecoder().decode(value);
+                $("#console").text($("#console").text() + addition);
+                reader.read().then(f);
+              } else {
+                $("#console").text($("#console").text() + "コマンドは正常に終了しました。");
+              }
+            };
+            reader.read().then(f);
           });
       });
-      $("#portcheck6").click(function(ev){
+      $("#portcheck6").click(function (ev){
           ev.preventDefault();
-          $.ajax("/admin?cmd=portcheck6", {
-              cache: false,
-              success: function (data) {
-                  alert(data);
-              },
+          $("#console").text("");
+          $("#modal").show();
+          fetch("/admin?cmd=portcheck6").then(res => {
+            var reader = res.body.getReader();
+            var f = ({done, value}) => {
+              if (!done) {
+                var addition = new TextDecoder().decode(value);
+                $("#console").text($("#console").text() + addition);
+                reader.read().then(f);
+              } else {
+                $("#console").text($("#console").text() + "コマンドは正常に終了しました。");
+              }
+            };
+            reader.read().then(f);
           });
       });
+      $("#close_button").click(ev => { $("#modal").hide() });
   });
   </script>
-  {@end}
-</DIV>
+
+<style>
+.blink_me {
+  color: white;
+  animation: blinker 1.0s linear infinite;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
+</style>
+
+<div id="modal" style="display: none; position: fixed; top: 0; bottom: 0; left: 0; right: 0; text-align: left">
+  <div 
+     style="box-shadow: 2px 2px 6px 6px rgba(0,0,0,0.1); width: 600px; position: relative; margin: 30px auto; background-color: gray; border: solid 1px blue">
+    <div id="title-bar" style="color: white; background-color: blue; font-size: 10pt; font-family: Meiryo, 'MS UI Gothic'; padding: 2px">
+    <img src="favicon.ico" type="image/vnd.microsoft.icon" style="vertical-align: middle">
+    コンソール
+    <button id="close_button" style="float: right; font-weight: bold; padding: 0px 2px 0px 2px">×</button>
+    </div>
+    <div style="word-break: break-all; white-space: pre-wrap; margin: 0; min-height: 24em; font-family: 'MS Gothic', 'Lucida Console', monospace; background-color: black; color: #aaa"><span id="console"></span><span class="blink_me">█</span></div>
+  </div>
+</div>
