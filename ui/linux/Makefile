@@ -98,7 +98,7 @@ install: all
 	cp -R $(HTML) $(PUBLIC) $(ASSETS) $(CGIBIN) $(sharedir)
 
 $(APPIMAGE): $(APPIMAGETOOL) $(LINUXDEPLOY)
-	rm -r AppDir/
+	rm -rf AppDir/
 	PREFIX=AppDir/usr make install
 	./$(LINUXDEPLOY) --appdir=AppDir -e AppDir/usr/bin/peercast  --deploy-deps-only="AppDir/usr/bin/rtmp-server" -d peercast.desktop -i peercast.png
 	./$(APPIMAGETOOL) AppDir
