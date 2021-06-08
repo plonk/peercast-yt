@@ -7,6 +7,18 @@ addons:
     packages:
     - libgtest-dev
     - librtmp-dev
-script: make -C ui/linux && make -C ui/linux/tests && cd ui/linux/tests && ./test-all && cd ../../../bvt && cp -R ../ui/linux/peercast-yt . && ruby test-all.rb
+script: make -C ui/linux && make -C ui/linux Peercast_YT-x86_64.AppImage && make -C ui/linux/tests && cd ui/linux/tests && ./test-all && cd ../../../bvt && cp -R ../ui/linux/peercast-yt . && ruby test-all.rb
+before_deploy:
+  - cd $TRAVIS_BUILD_DIR
+deploy:
+  provider: releases
+  api_key:
+    secure: pCMGXBhP6St/UlKA6LyuNAoPy7Hs4zSQLH16zI5wmiMAqBowCtoEnWcd1Rt3+ya3T9zy8DtD6rNIsAkH18tQQK1lGahIvwiicGMUFNLPROdaTbczekBU/qI7xccorqGVGRaM1sfJCb5M7tkb4MuTx+p7gCwd29/9b9yXICNIHIuyyD7BP4kr+JfBLXLEt70P7qWV0xEzGwlEL3jmFLodWWIMR1z+YYu5cjIqY5NUuT3w4WdLwMgySlbQ1pizNHPlauhJfh0XOAReZvpF2QQrQXfrOr4TNNMEC6cYJKYqtBZD4ZSGYqK343uHm/6jKfRfpKgXHGHy2gT9I2WsYkmRDXGPcvab4Mhfbj8+KaRZuJbidhqkks3L6QrDYodojHjFLnSQH2ttAESFi0ZZMi+pzutBAXv0UkFv8dnDpAABEztOb1V0EuRuXvM+ZhJDKq3JgRQco6P+plK9IcFeWxK8pHiVtWlJBWgVSw2V9+x8VzfNVdXNMWGvRBtdpPyOjpPUi/NxBaZLcNQIRHPZIehp6cqUJGXno3gVNjj8MVZpNu1Ogvgzs4M0NDOLZFyDjPUhlT5lphYUoPnlITbSQzke34GjWm3HrcY2zPkaXEodYkkep1PShJon6HayFZUdRd4+LZhqyAaWN2AEhXcKv1BNpQ1iNFO6/d5fkfmDFj8QkuU=
+  file: ui/linux/Peercast_YT-x86_64.AppImage
+  skip_cleanup: true
+  all_branches: true
+  on:
+    repo: plonk/peercast-yt
+    tags: true
 notifications:
   webhooks: https://discordapp.com/api/webhooks/397294790728876052/s087VB-hN8g2r-YvX8_HAUPuZCdZ-OA_g6voqTUNg2SIUDn9FhMQRDmxQRIjWWG8-tse/slack
