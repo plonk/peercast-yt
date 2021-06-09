@@ -1700,7 +1700,7 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
             unsigned int streamIndex = ch->streamIndex;
             unsigned int connectTime = sys->getTime();
             unsigned int lastWriteTime = connectTime;
-            bool         skipContinuation = true;
+            bool         skipContinuation = servMgr->flags.get("startPlayingFromKeyFrame");
 
             while ((thread.active()) && sock->active())
             {
@@ -1729,11 +1729,13 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
                         if (!skipContinuation || !rawPack.cont)
                         {
                             skipContinuation = false;
-                            rawPack.writeRaw(bsock);
+                            rawPack.writeRaw(*sock);
                             lastWriteTime = sys->getTime();
                         }else
                         {
-                            LOG_DEBUG("raw: skip continuation %s packet pos=%d", rawPack.type==ChanPacket::T_DATA?"DATA":"HEAD", rawPack.pos);
+                            LOG_DEBUG("raw: skip continuation %s packet pos=%d",
+                                      (rawPack.type == ChanPacket::T_DATA) ? "DATA" : "HEAD",
+                                      rawPack.pos);
                         }
                     }
 
