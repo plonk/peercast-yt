@@ -52,6 +52,8 @@ public:
 
     std::string realPath(const std::string& path) override;
 
+    void rename(const std::string& oldpath, const std::string& newpath) override;
+
     peercast::Random rndGen;
 private:
 

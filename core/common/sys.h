@@ -134,6 +134,8 @@ public:
         return "/";
     }
 
+    virtual void rename(const std::string& oldpath, const std::string& newpath) = 0;
+
     unsigned int idleSleepTime;
 
     class LogBuffer *logBuf;

@@ -417,3 +417,11 @@ std::string USys::realPath(const std::string& path)
     else
         return resolvedPath;
 }
+
+// ---------------------------------
+void USys::rename(const std::string& oldpath, const std::string& newpath)
+{
+    if (::rename(oldpath.c_str(), newpath.c_str()) < 0) {
+        throw GeneralException( str::format("rename: %s", strerror(errno)).c_str() );
+    }
+}

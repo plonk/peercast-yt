@@ -53,6 +53,8 @@ public:
 
     std::string getDirectorySeparator() override;
 
+    void rename(const std::string& oldpath, const std::string& newpath) override;
+
     HWND    mainWindow;
     peercast::Random rndGen;
 };

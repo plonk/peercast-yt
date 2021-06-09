@@ -914,9 +914,10 @@ void ServMgr::saveSettings(const char *fn)
 {
     FileStream iniFile;
     ini::Document settings = getSettings();
+    std::string tmpname = str::STR(fn, ".tmp");
 
     try {
-        iniFile.openWriteReplace(fn);
+        iniFile.openWriteReplace(tmpname.c_str());
     } catch (StreamException&) {
         LOG_ERROR("Unable to open ini file");
     }
@@ -928,6 +929,8 @@ void ServMgr::saveSettings(const char *fn)
     LOG_DEBUG("Saving settings to: %s", fn);
     iniFile.writeString(ini::dump(settings));
     iniFile.close();
+
+    sys->rename(tmpname, fn);
 }
 
 // --------------------------------------------------
