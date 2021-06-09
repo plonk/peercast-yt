@@ -68,11 +68,12 @@ static string getDirectPermission()
 }
 
 // ------------------------------------------------------------
-// このサーバーから配信しているチャンネルの index.txt を作る
+// このサーバーから配信しているチャンネルとCINから教わったチャンネルの index.txt を作る
 string PublicController::createChannelIndex()
 {
     string res;
-    json::array_t channels = JrpcApi().getChannels({});
+    JrpcApi api;
+    json::array_t channels = api.getChannels({});
     auto notBroadcasting = [] (json channel) { return !channel["status"]["isBroadcasting"]; };
     channels.erase(remove_if(channels.begin(), channels.end(), notBroadcasting),
                    channels.end());
@@ -101,6 +102,35 @@ string PublicController::createChannelIndex()
             /* 16 */ "click",
             /* 17 */ c["info"]["comment"],
             /* 18 */ getDirectPermission(),
+        };
+        res += str::join("<>", vec) + "\n";
+    }
+
+    // TODO: エラー処理。
+    json::array_t foundChannels = api.getChannelsFound({});
+    LOG_DEBUG("%s", json(foundChannels).dump().c_str());
+    for (auto& c : foundChannels) {
+        const std::string tip = c["hits"][0]["push"] ? "" : c["hits"][0]["ip"];
+        vector<string> vec = {
+            /*  0 */ c["name"],
+            /*  1 */ c["id"],
+            /*  2 */ tip,
+            /*  3 */ c["url"],
+            /*  4 */ c["genre"],
+            /*  5 */ c["desc"],
+            /*  6 */ to_string((int) c["hit_stat"]["listeners"]),
+            /*  7 */ to_string((int) c["hit_stat"]["relays"]),
+            /*  8 */ to_string((int) c["bitrate"]),
+            /*  9 */ c["type"],
+            /* 10 */ c["track"]["creator"],
+            /* 11 */ c["track"]["album"],
+            /* 12 */ c["track"]["name"],
+            /* 13 */ c["track"]["url"],
+            /* 14 */ cgi::escape(c["name"]),
+            /* 15 */ formatUptime(c["uptime"]),
+            /* 16 */ "click",
+            /* 17 */ c["comment"],
+            /* 18 */ to_string((int) c["hits"][0]["direct"]),
         };
         res += str::join("<>", vec) + "\n";
     }
