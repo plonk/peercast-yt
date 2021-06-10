@@ -1729,7 +1729,7 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
                         if (!skipContinuation || !rawPack.cont)
                         {
                             skipContinuation = false;
-                            rawPack.writeRaw(*sock);
+                            rawPack.writeRaw(bsock);
                             lastWriteTime = sys->getTime();
                         }else
                         {
