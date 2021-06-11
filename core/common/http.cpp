@@ -265,6 +265,13 @@ void HTTP::send(const HTTPResponse& response)
         {"Date", cgi::rfc1123Time(sys->getTime())}
     };
 
+    const bool bodyIsStream = (response.stream != nullptr);
+
+    // Content-Length が設定されておらず、値が決定できる場合は設定する。
+    if (response.headers.get("Content-Length").empty() && !bodyIsStream) {
+        headers["Content-Length"] = std::to_string(response.body.size());
+    }
+
     for (const auto& pair : response.headers)
         headers[pair.first] = pair.second;
 
@@ -273,7 +280,7 @@ void HTTP::send(const HTTPResponse& response)
 
     writeLine("");
 
-    if (response.stream != nullptr)
+    if (bodyIsStream)
     {
         try
         {
