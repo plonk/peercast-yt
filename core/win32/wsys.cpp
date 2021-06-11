@@ -227,6 +227,6 @@ std::string WSys::getDirectorySeparator()
 void WSys::rename(const std::string& oldpath, const std::string& newpath)
 {
     if (MoveFile(oldpath.c_str(), newpath.c_str()) == 0) {
-        throw GenralExcpetion(str::format("rename: MoveFile failed: error = %d", GetLastError()).c_str());
+        throw GeneralException(str::format("rename: MoveFile failed: error = %d", GetLastError()).c_str());
     }
 }
