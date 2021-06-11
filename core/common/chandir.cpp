@@ -109,9 +109,10 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
     auto rsock = sys->createSocket();
 
     try {
-        LOG_TRACE("Connecting to %s ...", feed.host().c_str());
+        LOG_TRACE("Connecting to %s:%d ...", feed.host().c_str(), feed.port());
         rsock->open(host);
         rsock->connect();
+        LOG_TRACE("connected.");
 
         HTTP rhttp(*rsock);
 
@@ -143,6 +144,31 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
     }
 }
 
+#include "sstream.h"
+#include "defer.h"
+#include "logbuf.h"
+extern thread_local std::vector<std::function<void(LogBuffer::TYPE type, const char*)>> AUX_LOG_FUNC_VECTOR;
+static std::string runProcess(std::function<void(Stream&)> action)
+{
+    StringStream ss;
+    try {
+        AUX_LOG_FUNC_VECTOR.push_back([&](LogBuffer::TYPE type, const char* msg) -> void
+                                      {
+                                          if (type == LogBuffer::T_ERROR)
+                                              ss.writeString("Error: ");
+                                          else if (type == LogBuffer::T_WARN)
+                                              ss.writeString("Warning: ");
+                                          ss.writeLine(msg);
+                                      });
+        Defer defer([]() { AUX_LOG_FUNC_VECTOR.pop_back(); });
+
+        action(ss);
+    } catch(GeneralException& e) {
+        ss.writeLineF("Error: %s\n", e.what());
+    }
+    return ss.str();
+}
+
 bool ChannelDirectory::update(UpdateMode mode)
 {
     typedef std::vector<ChannelEntry> ChannelList;
@@ -161,23 +187,32 @@ bool ChannelDirectory::update(UpdateMode mode)
         std::function<void(void)> getChannels =
             [&feed, &mutex, this]
             {
-                ChannelList channels;
-                bool success;
-                double t1 = sys->getDTime();
-                success = getFeed(feed.url, channels);
-                LOG_TRACE("Channel feed: %f sec %s", sys->getDTime() - t1, feed.url.c_str());
+                feed.log =
+                runProcess([&feed, &mutex, this](Stream& s)
+                           {
+                               // print start time
+                               String time;
+                               time.setFromTime(sys->getTime());
+                               s.writeStringF("Start time: %s\n", time.c_str()); // two newlines at the end
 
-                if (success) {
-                    feed.status = ChannelFeed::Status::kOk;
-                    LOG_TRACE("Got %zu channels from %s", channels.size(), feed.url.c_str());
-                    {
-                        std::lock_guard<std::mutex> lock(mutex);
-                        for (auto& c : channels) m_channels.push_back(c);
-                    }
-                } else {
-                    feed.status = ChannelFeed::Status::kError;
-                    LOG_ERROR("Failed to get channels from %s", feed.url.c_str());
-                }
+                               ChannelList channels;
+                               bool success;
+                               double t1 = sys->getDTime();
+                               success = getFeed(feed.url, channels);
+                               double t2 = sys->getDTime();
+
+                               if (success) {
+                                   feed.status = ChannelFeed::Status::kOk;
+                                   LOG_TRACE("Got %zu channels from %s (%.6f seconds)", channels.size(), feed.url.c_str(), t2 - t1);
+                                   {
+                                       std::lock_guard<std::mutex> lock(mutex);
+                                       for (auto& c : channels) m_channels.push_back(c);
+                                   }
+                               } else {
+                                   feed.status = ChannelFeed::Status::kError;
+                                   LOG_ERROR("Failed to get channels from %s (%.6f seconds)", feed.url.c_str(), t2 - t1);
+                               }
+                           });
             };
         workers.push_back(std::thread(getChannels));
     }

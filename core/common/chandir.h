@@ -95,6 +95,8 @@ public:
 
     std::string url;
     Status status;
+
+    std::string log;
 };
 
 // 外部からチャンネルリストを取得して保持する。

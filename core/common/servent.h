@@ -299,6 +299,7 @@ private:
     void CMD_apply(const char* cmd, HTTP& http, String& jumpStr);
     void CMD_applyflags(const char* cmd, HTTP& http, String& jumpStr);
     void CMD_bump(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_chanfeedlog(const char* cmd, HTTP& http, String& jumpStr);
     void CMD_clear(const char* cmd, HTTP& http, String& jumpStr);
     void CMD_clearlog(const char* cmd, HTTP& http, String& jumpStr);
     void CMD_control_rtmp(const char* cmd, HTTP& http, String& jumpStr);

@@ -1298,6 +1298,22 @@ void Servent::CMD_stop_servent(const char* cmd, HTTP& http, String& jumpStr)
     }
 }
 
+void Servent::CMD_chanfeedlog(const char* cmd, HTTP& http, String& jumpStr)
+{
+    cgi::Query query(cmd);
+    int index = atoi(query.get("index").c_str());
+
+    try {
+        HTTPResponse res(200, { {"Content-Type","text/plain; charset=UTF-8"} });
+        res.body = servMgr->channelDirectory->feeds().at(index).log;
+        http.send(res);
+    } catch (std::out_of_range& e) {
+        HTTPResponse res(404, { {"Content-Type","text/plain; charset=UTF-8"} });
+        res.body = e.what();
+        http.send(res);
+    }
+}
+
 void Servent::CMD_clear(const char* cmd, HTTP& http, String& jumpStr)
 {
     char arg[MAX_CGI_LEN];
@@ -1836,6 +1852,9 @@ void Servent::handshakeCMD(HTTP& http, const std::string& query)
         }else if (cmd == "bump")
         {
             CMD_bump(query.c_str(), http, jumpStr);
+        }else if (cmd == "chanfeedlog")
+        {
+            CMD_chanfeedlog(query.c_str(), http, jumpStr);
         }else if (cmd == "clear")
         {
             CMD_clear(query.c_str(), http, jumpStr);

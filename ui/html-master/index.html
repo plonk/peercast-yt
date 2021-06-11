@@ -77,13 +77,14 @@
 
   <table class="table-panel" class="normal">
     <tr>
-      <th colspan="2">{#Channel Feeds}</th>
+      <th colspan="3">{#Channel Feeds}</th>
     </tr>
 
     {@loop servMgr.numChannelFeeds}
     <tr>
       <td>{$loop.channelFeed.url}</td>
       <td align="center">{$loop.channelFeed.status}</td>
+      <td align="center"><a href="/admin?cmd=chanfeedlog&index={$loop.index}" class="alert-link">&#x2139;&#xFE0F;<!-- information source emoji --></a></td>
     </tr>
     {@end}
   </table>
@@ -152,6 +153,15 @@
       $("#portcheck6").click(function(ev){
           ev.preventDefault();
           $.ajax("/admin?cmd=portcheck6", {
+              cache: false,
+              success: function (data) {
+                  alert(data);
+              },
+          });
+      });
+      $(".alert-link").click(function(ev){
+          ev.preventDefault();
+          $.ajax($(this).attr("href"), {
               cache: false,
               success: function (data) {
                   alert(data);
