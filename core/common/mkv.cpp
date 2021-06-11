@@ -236,20 +236,32 @@ void MKVStream::readInfo(const std::string& data)
     StringStream in;
     in.str(data);
 
-    while (true)
-    {
-        VInt id   = VInt::read(in);
-        VInt size = VInt::read(in);
+    LOG_TRACE("Info length = %d", (int) in.getLength());
 
-        if (id.toName() == "TimecodeScale")
+    try {
+        while (in.getPosition() < in.getLength())
         {
+            int pos = in.getPosition();
+            VInt id   = VInt::read(in);
+            VInt size = VInt::read(in);
+
+            LOG_TRACE("readInfo: Got %s 0x%lX with size=%d at pos %d",
+                      id.toName().c_str(),
+                      (unsigned long int) id.uint(),
+                      (int) size.uint(),
+                      pos);
+
             auto data = in.Stream::read((int) size.uint());
 
-            auto scale = unpackUnsignedInt(data);
-            LOG_DEBUG("TimecodeScale = %d nanoseconds", (int) scale);
-            m_timecodeScale = scale;
-            return;
+            if (id.toName() == "TimecodeScale")
+            {
+                auto scale = unpackUnsignedInt(data);
+                LOG_DEBUG("TimecodeScale = %d nanoseconds", (int) scale);
+                m_timecodeScale = scale;
+            }
         }
+    } catch (std::exception& e) {
+        LOG_ERROR("Failed to parse Info: %s", e.what());
     }
 }
 
