@@ -106,10 +106,13 @@ string PublicController::createChannelIndex()
         res += str::join("<>", vec) + "\n";
     }
 
-    // TODO: エラー処理。
     json::array_t foundChannels = api.getChannelsFound({});
     LOG_DEBUG("%s", json(foundChannels).dump().c_str());
     for (auto& c : foundChannels) {
+        if (c["hits"].size() == 0) {
+            LOG_DEBUG("createChannelIndex: skipping `%s` because no hits", c["name"].get<std::string>().c_str());
+            continue;
+        }
         const std::string tip = c["hits"][0]["push"] ? "" : c["hits"][0]["ip"];
         vector<string> vec = {
             /*  0 */ c["name"],
@@ -137,6 +140,7 @@ string PublicController::createChannelIndex()
 
     return res;
 }
+
 // ------------------------------------------------------------
 vector<string>
 PublicController::acceptableLanguages(const string& acceptLanguage)
