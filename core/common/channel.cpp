@@ -957,29 +957,6 @@ void Channel::writeTrackerUpdateAtom(AtomStream& atom)
                   oldp, newp, canAddRelay(), this->sourceHost.host, (ipVersion == IP_V6));
     hit.tracker = true;
 
-    std::vector<ChanHit> hosts;
-    if (servMgr->flags.get("sendOtherHostsWithTrackerUpdate")) {
-        for (auto h = chl->hit; h != nullptr; h = h->next) {
-            if (!h->firewalled &&
-                !h->tracker &&
-                !h->yp &
-                h->recv &&
-                h->relay) {
-                hosts.push_back(*h);
-                hosts.back().numListeners = 0;
-                hosts.back().numRelays = 0;
-                hosts.back().tracker = 1;
-            }
-        }
-        std::random_device seed_gen;
-        std::mt19937 engine(seed_gen());
-        std::shuffle(hosts.begin(), hosts.end(), engine);
-        /* 50個ならパケットに入るだろうという考え。 */
-        if (hosts.size() > 50) {
-            hosts.resize(50);
-        }
-    }
-
     atom.writeParent(PCP_BCST, 10 + hosts.size());
         atom.writeChar(PCP_BCST_GROUP, PCP_BCST_GROUP_ROOT);
         atom.writeChar(PCP_BCST_HOPS, 0);
@@ -995,8 +972,6 @@ void Channel::writeTrackerUpdateAtom(AtomStream& atom)
             info.writeInfoAtoms(atom);
             info.writeTrackAtoms(atom);
         hit.writeAtoms(atom, info.id);
-        for (auto &h : hosts)
-            h.writeAtoms(atom, info.id);
 }
 
 // -----------------------------------

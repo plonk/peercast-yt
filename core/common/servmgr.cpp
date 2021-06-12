@@ -48,7 +48,6 @@ ServMgr::ServMgr()
         {
             {"randomizeBroadcastingChannelID", "配信するチャンネルのIDをランダムにする。", true },
             {"sendPortAtomWhenFirewallUnknown", "古いPeerCastStation相手に正常にポートチェックするにはオフにする。", false },
-            {"sendOtherHostsWithTrackerUpdate", "ルートサーバーにリレーツリーの内容を送信する。", false},
             {"forceFirewalled", "ファイアーウォール オンであるかの様に振る舞う。", false},
             {"startPlayingFromKeyFrame", "DIRECT接続でキーフレームまで継続パケットをスキップする。", true},
         })
