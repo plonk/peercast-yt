@@ -957,7 +957,7 @@ void Channel::writeTrackerUpdateAtom(AtomStream& atom)
                   oldp, newp, canAddRelay(), this->sourceHost.host, (ipVersion == IP_V6));
     hit.tracker = true;
 
-    atom.writeParent(PCP_BCST, 10 + hosts.size());
+    atom.writeParent(PCP_BCST, 10);
         atom.writeChar(PCP_BCST_GROUP, PCP_BCST_GROUP_ROOT);
         atom.writeChar(PCP_BCST_HOPS, 0);
         atom.writeChar(PCP_BCST_TTL, 7);
