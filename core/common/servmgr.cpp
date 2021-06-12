@@ -929,7 +929,11 @@ void ServMgr::saveSettings(const char *fn)
     iniFile.writeString(ini::dump(settings));
     iniFile.close();
 
-    sys->rename(tmpname, fn);
+    try {
+        sys->rename(tmpname, fn);
+    } catch (GeneralException& e) {
+        LOG_ERROR("rename failed: %s", e.what());
+    }
 }
 
 // --------------------------------------------------
