@@ -166,11 +166,11 @@ public:
 
     static bool pingHost(Host &, const GnuID &);
 
-    bool    getLocalURL(char *);
+    std::string getLocalURL(const std::string& hostHeader);
 
     // various types of handshaking are needed
-    void    handshakePLS(ChanInfo &);
-
+    void handshakePLS(ChanInfo &info, HTTP& http);
+ 
     void    handshakeHTML(char *);
     void    handshakeXML();
     void    handshakeCMD(HTTP&, const std::string&);
