@@ -128,13 +128,15 @@ void PlayList::writeASX(Stream &out)
 // -----------------------------------
 void PlayList::addChannel(const char *path, ChanInfo &info)
 {
-    String url;
-
+    std::string url;
     std::string nid = info.id.isSet() ? info.id.str() : info.name;
 
-    sprintf(url.cstr(), "%s/stream/%s%s?auth=%s",
-            path, nid.c_str(), info.getTypeExt(), chanMgr->authToken(info.id).c_str());
-    addURL(url.cstr(), info.name);
+    url = str::format("%s/stream/%s%s?auth=%s",
+                      path,
+                      nid.c_str(),
+                      info.getTypeExt(),
+                      chanMgr->authToken(info.id).c_str());
+    addURL(url.c_str(), info.name);
 }
 
 // -----------------------------------
