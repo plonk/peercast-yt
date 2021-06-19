@@ -931,3 +931,10 @@ TEST_F(ServentFixture, writeHeloAtom_none)
 
     ASSERT_EQ(s.str().size(), s.getPosition());
 }
+
+TEST_F(ServentFixture, getLocalURL)
+{
+    ASSERT_EQ("http://hostname:9144", s.getLocalURL("hostname:9144"));
+    ASSERT_EQ("http://127.0.0.1:7144", s.getLocalURL(""));
+    // TODO: IPv6 [::1] もテストしたい。
+}
