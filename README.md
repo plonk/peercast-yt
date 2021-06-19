@@ -1,6 +1,6 @@
 # PeerCast YT
 
-[![Build Status](https://travis-ci.org/plonk/peercast-yt.svg?branch=master)](https://travis-ci.org/plonk/peercast-yt)
+[![Build Status](https://travis-ci.com/plonk/peercast-yt.svg?branch=master)](https://travis-ci.com/plonk/peercast-yt)
 
 PeerCast のフォークです。
 
