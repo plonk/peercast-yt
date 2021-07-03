@@ -19,6 +19,7 @@
 #include <map>
 #include <functional>
 #include <atomic>
+#include <string>
 
 class Flag
 {
