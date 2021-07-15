@@ -414,7 +414,7 @@ void channelPopup(const char *title, const char *msg)
 
     trayIcon.uFlags = NIF_ICON|NIF_TIP;
     _tcsncpy(trayIcon.szTip, tBoth, sizeof(trayIcon.szTip)-1);
-    trayIcon.szTip[sizeof(trayIcon.szTip)-1]=0;
+    trayIcon.szTip[sizeof(trayIcon.szTip)/sizeof(trayIcon.szTip[0])-1]=0;
 
     trayIcon.uFlags |= 16;
     trayIcon.uTimeout = 10000;
