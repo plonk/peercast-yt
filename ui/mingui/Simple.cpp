@@ -136,7 +136,7 @@ void LOG2(const char *fmt, ...)
 }
 
 // ---------------------------------------
-static isValidURL(const std::string& url)
+static bool isValidURL(const std::string& url)
 {
     auto url1 = str::downcase(url);
     return (str::has_prefix(url1, "http://") ||
