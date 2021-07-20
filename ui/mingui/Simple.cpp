@@ -680,7 +680,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_COPYDATA:
         {
             COPYDATASTRUCT *pc = (COPYDATASTRUCT *)lParam;
-            LOG_DEBUG("URL request: %s", pc->lpData);
+            LOG_DEBUG("URL request: %s", (char*) pc->lpData);
             if (pc->dwData == WM_PLAYCHANNEL) {
                 ChanInfo info;
                 servMgr->procConnectArgs((char *)pc->lpData, info);
@@ -731,7 +731,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     break;
                 }
                 if (!TrackPopupMenu(menu, TPM_RIGHTALIGN, point.x, point.y, 0, hWnd, NULL)) {
-                    LOG_ERROR("Can`t track popup menu: %d", GetLastError());
+                    LOG_ERROR("Can`t track popup menu: %lu", GetLastError());
                 }
                 PostMessage(hWnd, WM_NULL, 0, 0); 
 
