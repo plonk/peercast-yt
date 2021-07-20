@@ -903,20 +903,27 @@ bool Servent::handshakeAuth(HTTP &http, const char *args)
 // -----------------------------------
 #include "sstream.h"
 #include "defer.h"
-extern thread_local std::vector<std::function<void(LogBuffer::TYPE type, const char*)>> AUX_LOG_FUNC_VECTOR;
+extern std::map<std::thread::id, std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>> AUX_OUTPUT_FUNCS;
+extern std::recursive_mutex AUX_OUTPUT_FUNCS_lock;
 static std::string runProcess(std::function<void(Stream&)> action)
 {
     StringStream ss;
     try {
-        AUX_LOG_FUNC_VECTOR.push_back([&](LogBuffer::TYPE type, const char* msg) -> void
-                                      {
-                                          if (type == LogBuffer::T_ERROR)
-                                              ss.writeString("Error: ");
-                                          else if (type == LogBuffer::T_WARN)
-                                              ss.writeString("Warning: ");
-                                          ss.writeLine(msg);
-                                      });
-        Defer defer([]() { AUX_LOG_FUNC_VECTOR.pop_back(); });
+        {
+            std::lock_guard<std::recursive_mutex> cs(AUX_OUTPUT_FUNCS_lock);
+            AUX_OUTPUT_FUNCS[std::this_thread::get_id()].push_back([&](LogBuffer::TYPE type, const char* msg) -> void
+            {
+                if (type == LogBuffer::T_ERROR)
+                    ss.writeString("Error: ");
+                else if (type == LogBuffer::T_WARN)
+                    ss.writeString("Warning: ");
+                ss.writeLine(msg);
+            });
+        }
+        Defer defer([]() {
+            std::lock_guard<std::recursive_mutex> cs(AUX_OUTPUT_FUNCS_lock);
+            AUX_OUTPUT_FUNCS[std::this_thread::get_id()].pop_back();
+        });
 
         action(ss);
     } catch(GeneralException& e) {
