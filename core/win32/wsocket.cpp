@@ -28,6 +28,7 @@
 #include "stats.h"
 
 #include "config.h"
+#include "str.h"
 
 // --------------------------------------------------
 void WSAClientSocket::init()
@@ -418,5 +419,10 @@ bool    WSAClientSocket::readReady(int timeoutMilliseconds)
     FD_ZERO(&read_fds);
     FD_SET(sockNum, &read_fds);
 
-    return select(sockNum+1, &read_fds, NULL, NULL, &timeout) == 1;
+    int num = select(sockNum+1, &read_fds, NULL, NULL, &timeout);
+    if (num == SOCKET_ERROR) {
+        throw SockException(str::format("select failed (error code = %d)", WSAGetLastError()).c_str());
+    }
+
+    return num == 1;
 }

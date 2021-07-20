@@ -375,7 +375,7 @@ void Servent::handshakeGET(HTTP &http)
         {
             http.readHeaders(); // this smashes fn
             LOG_DEBUG("User-Agent: %s", http.headers.get("User-Agent").c_str());
-            handshakePLS(info);
+            handshakePLS(info, http);
         }else
         {
             http.readHeaders();
@@ -750,40 +750,42 @@ void writePLSHeader(Stream &s, PlayList::TYPE type)
 }
 
 // -----------------------------------
-void Servent::handshakePLS(ChanInfo &info)
+void Servent::handshakePLS(ChanInfo &info, HTTP& http)
 {
-    char url[256];
+    std::string url;
 
-    if (getLocalURL(url))
-    {
-        PlayList::TYPE type = PlayList::getPlayListType(info.contentType);
+    url = getLocalURL(http.headers.get("Host"));
 
-        writePLSHeader(*sock, type);
+    PlayList::TYPE type = PlayList::getPlayListType(info.contentType);
 
-        PlayList pls(type, 1);
-        pls.wmvProtocol = servMgr->wmvProtocol;
-        pls.addChannel(url, info);
-        pls.write(*sock);
-    }
+    writePLSHeader(*sock, type);
+
+    PlayList pls(type, 1);
+    pls.wmvProtocol = servMgr->wmvProtocol;
+    pls.addChannel(url.c_str(), info);
+    pls.write(*sock);
 }
 
 // -----------------------------------
-bool Servent::getLocalURL(char *str)
+std::string Servent::getLocalURL(const std::string& hostHeader)
 {
     if (!sock)
         throw StreamException("Not connected");
 
-    Host h;
+    if (hostHeader.empty()) {
+        Host h;
 
-    if (sock->host.localIP())
-        h = sock->getLocalHost();
-    else
-        h = servMgr->serverHost;
+        if (sock->host.localIP())
+            h = sock->getLocalHost();
+        else
+            h = servMgr->serverHost;
 
-    h.port = servMgr->serverHost.port;
+        h.port = servMgr->serverHost.port;
 
-    sprintf(str, "http://%s", h.str().c_str());
-    return true;
+        return str::STR("http://", h.str());
+    } else {
+        return str::STR("http://", hostHeader);
+    }
 }
 
 // -----------------------------------
@@ -901,20 +903,27 @@ bool Servent::handshakeAuth(HTTP &http, const char *args)
 // -----------------------------------
 #include "sstream.h"
 #include "defer.h"
-extern thread_local std::vector<std::function<void(LogBuffer::TYPE type, const char*)>> AUX_LOG_FUNC_VECTOR;
+extern std::map<std::thread::id, std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>> AUX_OUTPUT_FUNCS;
+extern std::recursive_mutex AUX_OUTPUT_FUNCS_lock;
 static std::string runProcess(std::function<void(Stream&)> action)
 {
     StringStream ss;
     try {
-        AUX_LOG_FUNC_VECTOR.push_back([&](LogBuffer::TYPE type, const char* msg) -> void
-                                      {
-                                          if (type == LogBuffer::T_ERROR)
-                                              ss.writeString("Error: ");
-                                          else if (type == LogBuffer::T_WARN)
-                                              ss.writeString("Warning: ");
-                                          ss.writeLine(msg);
-                                      });
-        Defer defer([]() { AUX_LOG_FUNC_VECTOR.pop_back(); });
+        {
+            std::lock_guard<std::recursive_mutex> cs(AUX_OUTPUT_FUNCS_lock);
+            AUX_OUTPUT_FUNCS[std::this_thread::get_id()].push_back([&](LogBuffer::TYPE type, const char* msg) -> void
+            {
+                if (type == LogBuffer::T_ERROR)
+                    ss.writeString("Error: ");
+                else if (type == LogBuffer::T_WARN)
+                    ss.writeString("Warning: ");
+                ss.writeLine(msg);
+            });
+        }
+        Defer defer([]() {
+            std::lock_guard<std::recursive_mutex> cs(AUX_OUTPUT_FUNCS_lock);
+            AUX_OUTPUT_FUNCS[std::this_thread::get_id()].pop_back();
+        });
 
         action(ss);
     } catch(GeneralException& e) {

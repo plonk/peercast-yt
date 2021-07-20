@@ -155,7 +155,7 @@ bool WSys::getHostnameByAddress(const IP& ip, std::string& out)
                         NULL,
                         0,
                         NI_NAMEREQD)) {
-            LOG_ERROR("%s", gai_strerror(errcode));
+            LOG_ERROR("getnameinfo: error code = %d", errcode);
             out = "";
             return false;
         } else {
@@ -173,7 +173,7 @@ bool WSys::getHostnameByAddress(const IP& ip, std::string& out)
                         NULL,
                         0,
                         NI_NAMEREQD)) {
-            LOG_ERROR("%s", gai_strerror(errcode));
+            LOG_ERROR("getnameinfo: error code = %d", errcode);
             out = "";
             return false;
         } else {
@@ -188,7 +188,7 @@ std::string WSys::getExecutablePath()
 {
     char path[1024];
     if (GetModuleFileNameA(NULL, path, sizeof(path)) == 0) {
-        throw GeneralException(str::format("%s: %d", __func__, GetLastError()).c_str());
+        throw GeneralException(str::format("%s: %lu", __func__, GetLastError()).c_str());
     }
     return path;
 }
@@ -227,6 +227,6 @@ std::string WSys::getDirectorySeparator()
 void WSys::rename(const std::string& oldpath, const std::string& newpath)
 {
     if (MoveFileExA(oldpath.c_str(), newpath.c_str(), MOVEFILE_REPLACE_EXISTING) == 0) {
-        throw GeneralException(str::format("rename: MoveFileExA failed: error = %d", GetLastError()).c_str());
+        throw GeneralException(str::format("rename: MoveFileExA failed: error = %lu", GetLastError()).c_str());
     }
 }

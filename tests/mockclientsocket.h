@@ -5,6 +5,10 @@
 class MockClientSocket : public ClientSocket
 {
 public:
+    MockClientSocket()
+        : localHostString("127.0.0.1")
+    {}
+
     void            open(const Host &) override
     {
     }
@@ -27,10 +31,11 @@ public:
         return NULL;
     }
 
+    std::string localHostString;
     Host            getLocalHost() override
     {
         Host host;
-        host.fromStrIP("127.0.0.1", 7144);
+        host.fromStrName(localHostString.c_str(), 0);
         return host;
     }
 

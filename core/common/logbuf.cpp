@@ -35,21 +35,56 @@ const char *LogBuffer::logTypes[]=
 };
 
 // -----------------------------------
+size_t LogBuffer::copy_utf8(char* dest, const char* src, size_t buflen)
+{
+    auto origlen = buflen;
+
+    while (buflen && *src != '\0') {
+        int charlen;
+
+        if ((*src & 0x80) == 0) // 0xxx xxxx
+            charlen = 1;
+        else if ((*src & 0xE0) == 0xC0) // 110x xxxx
+            charlen = 2;
+        else if ((*src & 0xF0) == 0xE0) // 1110 xxxx
+            charlen = 3;
+        else if ((*src & 0xF8) == 0xF0) // 1111 0xxx
+            charlen = 4;
+        else
+            charlen = 1; // malformed
+
+        if (buflen < charlen)
+            break;
+
+        // copy char
+        for (int i = 0; i < charlen; i++)
+            *dest++ = *src++;
+        buflen -= charlen;
+    }
+
+    for (int i = 0; i < buflen; i++)
+        *dest++ = '\0';
+    return origlen - buflen;
+}
+
+// -----------------------------------
 void LogBuffer::write(const char *str, TYPE t)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
 
-    unsigned int len = strlen(str);
+    size_t len = strlen(str);
     int cnt=0;
     while (len)
     {
-        unsigned int rlen = len;
+        size_t rlen = len;
         if (rlen > (lineLen-1))
             rlen = lineLen-1;
 
         int i = currLine % maxLines;
         int bp = i*lineLen;
-        strncpy(&buf[bp], str, rlen);
+
+        //strncpy(&buf[bp], str, rlen);
+        rlen = copy_utf8(&buf[bp], str, rlen);
         buf[bp+rlen] = 0;
         if (cnt==0)
         {

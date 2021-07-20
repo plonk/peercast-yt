@@ -136,7 +136,7 @@ void LOG2(const char *fmt, ...)
 }
 
 // ---------------------------------------
-static isValidURL(const std::string& url)
+static bool isValidURL(const std::string& url)
 {
     auto url1 = str::downcase(url);
     return (str::has_prefix(url1, "http://") ||
@@ -414,7 +414,7 @@ void channelPopup(const char *title, const char *msg)
 
     trayIcon.uFlags = NIF_ICON|NIF_TIP;
     _tcsncpy(trayIcon.szTip, tBoth, sizeof(trayIcon.szTip)-1);
-    trayIcon.szTip[sizeof(trayIcon.szTip)-1]=0;
+    trayIcon.szTip[sizeof(trayIcon.szTip)/sizeof(trayIcon.szTip[0])-1]=0;
 
     trayIcon.uFlags |= 16;
     trayIcon.uTimeout = 10000;
@@ -680,7 +680,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_COPYDATA:
         {
             COPYDATASTRUCT *pc = (COPYDATASTRUCT *)lParam;
-            LOG_DEBUG("URL request: %s", pc->lpData);
+            LOG_DEBUG("URL request: %s", (char*) pc->lpData);
             if (pc->dwData == WM_PLAYCHANNEL) {
                 ChanInfo info;
                 servMgr->procConnectArgs((char *)pc->lpData, info);
@@ -731,7 +731,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     break;
                 }
                 if (!TrackPopupMenu(menu, TPM_RIGHTALIGN, point.x, point.y, 0, hWnd, NULL)) {
-                    LOG_ERROR("Can`t track popup menu: %d", GetLastError());
+                    LOG_ERROR("Can`t track popup menu: %lu", GetLastError());
                 }
                 PostMessage(hWnd, WM_NULL, 0, 0); 
 
