@@ -86,20 +86,12 @@ public:
         gettimeofday(&tv, NULL);
         localtime_r(&tv.tv_sec, &tm);
         strftime(buf, sizeof(buf), "%Y/%m/%d %T", &tm);
-        printf("%s.%03d ", buf, (int) tv.tv_usec/1000);
-        if (logfile != NULL) {
-            fprintf(logfile, "%s.%03d ", buf, (int) tv.tv_usec/1000);
-        }
-        if (t != LogBuffer::T_NONE) {
-            printf("[%s] ", LogBuffer::getTypeStr(t));
-            if (logfile != NULL) {
-                fprintf(logfile, "[%s] ", LogBuffer::getTypeStr(t));
-            }
-        }
-        printf("%s\n", str);
-        if (logfile != NULL) {
-            fprintf(logfile, "%s\n", str);
-        }
+
+        FILE *out = logfile ? logfile : stdout;
+        fprintf(out, "%s.%03d ", buf, (int) tv.tv_usec/1000);
+        if (t != LogBuffer::T_NONE)
+            fprintf(out, "[%s] ", LogBuffer::getTypeStr(t));
+        fprintf(out, "%s\n", str);
     }
 };
 
