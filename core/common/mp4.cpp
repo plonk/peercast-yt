@@ -119,6 +119,14 @@ int MP4Stream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
         int rlen = moof->size() + mdat->size();
         bool firstTime = true;
 
+        double sleepSeconds;
+        if (rlen / MAX_OUTGOING_PACKET_SIZE > 0) 
+            sleepSeconds = 1.0 / (rlen / MAX_OUTGOING_PACKET_SIZE);
+        else
+            sleepSeconds = 0.0;
+
+        LOG_TRACE("sleepSeconds = %g", sleepSeconds);
+
         while (rlen)
         {
              int rl = (rlen > MAX_OUTGOING_PACKET_SIZE) ?
@@ -137,6 +145,8 @@ int MP4Stream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
 
              rlen -= rl;
              firstTime = false;
+
+             sys->sleep(sleepSeconds * 1000);
         }
     } else {
          throw StreamException("moof expected");
