@@ -32,6 +32,7 @@ public:
     void readEnd(Stream &, std::shared_ptr<Channel>) override;
 
  private:
+    size_t m_bufferSize = 2*1024*1024;
     uint8_t *m_buffer;
     const int MAX_OUTGOING_PACKET_SIZE = 15 * 1024;
 };

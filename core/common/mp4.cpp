@@ -105,6 +105,12 @@ int MP4Stream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
             throw StreamException("mdat expected");
         }
 
+        while (moof->size() + mdat->size() > m_bufferSize) {
+            m_bufferSize *= 2;
+            delete [] m_buffer;
+            m_buffer = new uint8_t[m_bufferSize];
+            LOG_TRACE("doubling buffer size (now %d bytes)", (int) m_bufferSize);
+        }
         memcpy(m_buffer, moof->data(), moof->size());
         memcpy(m_buffer + moof->size(), mdat->data(), mdat->size());
 
