@@ -428,6 +428,7 @@ ChanHit *ChanHitList::addHit(ChanHit &h)
 }
 
 // -----------------------------------
+// 古いヒットを削除し、リストに残ったヒットの数を返す。
 int ChanHitList::clearDeadHits(unsigned int timeout, bool clearTrackers)
 {
     int cnt = 0;
