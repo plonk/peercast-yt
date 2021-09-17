@@ -77,7 +77,7 @@ public:
     ChanHitList *addHitList(ChanInfo &);
 
     void        clearHitLists();
-    void        clearDeadHits(bool);
+    bool        clearDeadHits(bool);
     int         numHitLists();
 
     void        setBroadcastMsg(::String &);

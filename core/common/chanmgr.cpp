@@ -533,24 +533,35 @@ ChanHitList *ChanMgr::addHitList(ChanInfo &info)
 }
 
 // -----------------------------------
-void ChanMgr::clearDeadHits(bool clearTrackers)
+// 古いヒットを削除し、ヒットリストが空になったらヒットリスト自体を削除する。
+// ヒットリストを削除した場合は true を返し、そうでなければ false を返す。
+bool ChanMgr::clearDeadHits(bool clearTrackers)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
-    constexpr unsigned int interval = 180;
+    constexpr unsigned int INTERVAL = 180;
+    bool hitListDeleted = false;
 
     ChanHitList *chl = hitlist, *prev = NULL;
     while (chl)
     {
         if (chl->isUsed())
         {
-            if (chl->clearDeadHits(interval, clearTrackers) == 0)
+            /* ヒットリストが空になったならば… */
+            if (chl->clearDeadHits(INTERVAL, clearTrackers) == 0)
             {
+                /* 自分が配信しているチャンネルでなければ… */
                 if (!isBroadcasting(chl->info.id))
                 {
-                    if (!chanMgr->findChannelByID(chl->info.id))
+                    /* チャンネルが存在しなければ… */
+                    if (!findChannelByID(chl->info.id))
                     {
+                        /* UI に削除を通知。 */
                         peercastApp->delChannel(&chl->info);
 
+                        LOG_DEBUG("Hit list for %s deleted", chl->info.name.c_str());
+
+                        /* このヒットリストを切り離して削除する。 */
+                        hitListDeleted = true;
                         ChanHitList *next = chl->next;
                         if (prev)
                             prev->next = next;
@@ -567,6 +578,8 @@ void ChanMgr::clearDeadHits(bool clearTrackers)
         prev = chl;
         chl = chl->next;
     }
+
+    return hitListDeleted;
 }
 
 // -----------------------------------

@@ -524,6 +524,8 @@ void PCPStream::readChanAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
                 LOG_ERROR("Unable to update channel log: %s", e.msg);
             }
         }
+
+        servMgr->onHitListsChanged();
     }
 
     if (ch && !ch->isBroadcasting())

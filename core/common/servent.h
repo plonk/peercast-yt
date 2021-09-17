@@ -173,6 +173,7 @@ public:
 
     void    handshakeHTML(char *);
     void    handshakeXML();
+    static void writeXML(std::shared_ptr<Stream> sock);
     void    handshakeCMD(HTTP&, const std::string&);
     bool    handshakeAuth(HTTP &, const char *);
 

@@ -28,6 +28,7 @@
 #include "chanmgr.h"
 #include "ini.h"
 #include "flag.h"
+#include "uri.h"
 
 // ----------------------------------
 
@@ -245,6 +246,9 @@ public:
 
     static const char* getFirewallStateString(FW_STATE);
 
+    void onHitListsChanged();
+    static void postWebhookNotification(URI& uri);
+
     ThreadInfo          serverThread;
     ThreadInfo          idleThread;
 
@@ -304,6 +308,7 @@ public:
     std::atomic_int     serventNum;
 
     String              chanLog;
+    std::string         webhookURL;
 
     const std::unique_ptr<class ChannelDirectory>
                         channelDirectory;

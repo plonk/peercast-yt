@@ -1967,6 +1967,19 @@ static XML::Node *createChannelXML(ChanHitList *chl)
 // -----------------------------------
 void Servent::handshakeXML()
 {
+    sock->writeLine(HTTP_SC_OK);
+    sock->writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
+    sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XML);
+    sock->writeLine("Connection: close");
+
+    sock->writeLine("");
+
+    writeXML(sock);
+}
+
+// -----------------------------------
+void Servent::writeXML(std::shared_ptr<Stream> sock)
+{
     XML xml;
 
     XML::Node *rn = new XML::Node("peercast");
@@ -2016,13 +2029,6 @@ void Servent::handshakeXML()
         }
     }
     rn->add(hc);
-
-    sock->writeLine(HTTP_SC_OK);
-    sock->writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
-    sock->writeLineF("%s %s", HTTP_HS_CONTENT, MIME_XML);
-    sock->writeLine("Connection: close");
-
-    sock->writeLine("");
 
     xml.write(*sock);
 }

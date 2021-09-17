@@ -121,7 +121,7 @@ ServMgr::ServMgr()
 
     servents = NULL;
 
-    chanLog="";
+    chanLog = "";
 
     serverName = "";
 
@@ -965,6 +965,7 @@ ini::Document ServMgr::getSettings()
             {"htmlPath", this->htmlPath},
             {"maxServIn", this->maxServIn},
             {"chanLog", this->chanLog},
+            {"webhookURL", this->webhookURL},
             {"publicDirectory", this->publicDirectoryEnabled},
             {"networkID", networkID.str()},
         }
@@ -1233,6 +1234,8 @@ void ServMgr::loadSettings(const char *fn)
                 this->maxServIn = iniFile.getIntValue();
             else if (iniFile.isName("chanLog"))
                 this->chanLog.set(iniFile.getStrValue(), String::T_ASCII);
+            else if (iniFile.isName("webhookURL"))
+                this->webhookURL = iniFile.getStrValue();
             else if (iniFile.isName("publicDirectory"))
                 this->publicDirectoryEnabled = iniFile.getBoolValue();
 
@@ -1867,7 +1870,9 @@ int ServMgr::idleProc(ThreadInfo *thread)
             }
         }
 
-        chanMgr->clearDeadHits(true);
+        bool hitListDeleted = chanMgr->clearDeadHits(true);
+        if (hitListDeleted)
+            servMgr->onHitListsChanged();
 
         if (servMgr->shutdownTimer)
         {
@@ -2241,4 +2246,54 @@ bool ServMgr::hasUnsafeFilterSettings()
             return true;
     }
     return false;
+}
+
+// ------------------------------------------
+void ServMgr::onHitListsChanged()
+{
+    /* ルートモードの時だけ通知を送信する。 */
+    if (!servMgr->isRoot)
+        return;
+
+    if (!webhookURL.empty())
+    {
+        LOG_DEBUG("Sending webhook notification to URL %s", webhookURL.c_str());
+        URI uri(webhookURL);
+        postWebhookNotification(uri);
+    }
+}
+
+// ------------------------------------------
+#include "sstream.h"
+#include "http.h"
+void ServMgr::postWebhookNotification(URI& uri)
+{
+    Host host;
+    host.fromStrName(uri.host().c_str(), uri.port());
+
+    if (!host.ip) {
+        LOG_ERROR("postWebhookNotification: Could not resolve host name");
+        return;
+    }
+
+    auto rsock = sys->createSocket();
+    rsock->open(host);
+    rsock->connect();
+
+    auto mem = std::make_shared<StringStream>();
+    Servent::writeXML(mem);
+
+    HTTP http(*rsock);
+    HTTPRequest req("POST", uri.path(), "HTTP/1.0",
+                    {
+                        { "Host", uri.host() },
+                        { "Connection", "close" },
+                        { "User-Agent", PCX_AGENT },
+                        { "Content-Length", std::to_string(mem->str().size()) },
+                        { "Content-Type", "application/xml" }
+                    });
+    req.body = mem->str();
+    auto res = http.send(req);
+
+    LOG_INFO("Got HTTP response %d", res.statusCode);
 }
