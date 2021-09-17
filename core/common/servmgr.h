@@ -247,7 +247,7 @@ public:
     static const char* getFirewallStateString(FW_STATE);
 
     void onHitListsChanged();
-    static void postWebhookNotification(URI& uri);
+    static int postWebhookNotification(URI& uri);
 
     ThreadInfo          serverThread;
     ThreadInfo          idleThread;

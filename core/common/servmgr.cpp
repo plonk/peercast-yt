@@ -1836,66 +1836,72 @@ int ServMgr::idleProc(ThreadInfo *thread)
 
     while (thread->active())
     {
-        stats.update();
-
-        unsigned int ctime = sys->getTime();
-
-        if (!servMgr->forceIP.isEmpty())
+        try
         {
-            if ((ctime - lastForceIPCheck) > 60)
+            LOG_TRACE("idleProc loop start");
+            stats.update();
+
+            unsigned int ctime = sys->getTime();
+
+            if (!servMgr->forceIP.isEmpty())
             {
-                if (servMgr->checkForceIP())
+                if ((ctime - lastForceIPCheck) > 60)
                 {
-                    chanMgr->broadcastTrackerUpdate(GnuID(), true);
+                    if (servMgr->checkForceIP())
+                    {
+                        chanMgr->broadcastTrackerUpdate(GnuID(), true);
+                    }
+                    lastForceIPCheck = ctime;
                 }
-                lastForceIPCheck = ctime;
             }
-        }
 
-        if (chanMgr->isBroadcasting())
-        {
-            if ((ctime - lastBroadcastConnect) > 30)
+            if (chanMgr->isBroadcasting())
             {
-                servMgr->connectBroadcaster();
-                lastBroadcastConnect = ctime;
+                if ((ctime - lastBroadcastConnect) > 30)
+                {
+                    servMgr->connectBroadcaster();
+                    lastBroadcastConnect = ctime;
+                }
             }
-        }
 
-        if (servMgr->isRoot)
-        {
-            if ((ctime - lastRootBroadcast) > chanMgr->hostUpdateInterval)
+            if (servMgr->isRoot)
             {
-                servMgr->broadcastRootSettings(true);
-                lastRootBroadcast = ctime;
+                if ((ctime - lastRootBroadcast) > chanMgr->hostUpdateInterval)
+                {
+                    servMgr->broadcastRootSettings(true);
+                    lastRootBroadcast = ctime;
+                }
             }
-        }
 
-        bool hitListDeleted = chanMgr->clearDeadHits(true);
-        if (hitListDeleted)
-            servMgr->onHitListsChanged();
+            bool hitListDeleted = chanMgr->clearDeadHits(true);
+            if (hitListDeleted)
+                servMgr->onHitListsChanged();
 
-        if (servMgr->shutdownTimer)
-        {
-            if (--servMgr->shutdownTimer <= 0)
+            if (servMgr->shutdownTimer)
             {
-                peercastInst->saveSettings();
-                peercastInst->quit();
-                sys->exit();
+                if (--servMgr->shutdownTimer <= 0)
+                {
+                    peercastInst->saveSettings();
+                    peercastInst->quit();
+                    sys->exit();
+                }
             }
+
+            // shutdown idle channels
+            if (chanMgr->numIdleChannels() > ChanMgr::MAX_IDLE_CHANNELS)
+                chanMgr->closeOldestIdle();
+
+            // チャンネル一覧を取得する。
+            servMgr->channelDirectory->update();
+
+            servMgr->rtmpServerMonitor.update();
+
+            servMgr->uptestServiceRegistry->update();
+
+            sys->sleep(500);
+        } catch(GeneralException& e) {
+            LOG_DEBUG("Unexpected exception occured in idleProc: %s", e.what());
         }
-
-        // shutdown idle channels
-        if (chanMgr->numIdleChannels() > ChanMgr::MAX_IDLE_CHANNELS)
-            chanMgr->closeOldestIdle();
-
-        // チャンネル一覧を取得する。
-        servMgr->channelDirectory->update();
-
-        servMgr->rtmpServerMonitor.update();
-
-        servMgr->uptestServiceRegistry->update();
-
-        sys->sleep(500);
     }
 
     return 0;
@@ -2258,22 +2264,32 @@ void ServMgr::onHitListsChanged()
     if (!webhookURL.empty())
     {
         LOG_DEBUG("Sending webhook notification to URL %s", webhookURL.c_str());
-        URI uri(webhookURL);
-        postWebhookNotification(uri);
+        try
+        {
+            URI uri(webhookURL);
+            int statusCode = postWebhookNotification(uri);
+            if (statusCode == 200) {
+                LOG_INFO("Webhook notification successfully sent.");
+            } else {
+                LOG_ERROR("Unexpected HTTP response %d from %s", statusCode, uri.host().c_str());
+            }
+        } catch (GeneralException& e)
+        {
+            LOG_ERROR("Error occured while sending webhook notification to URL %s: %s", webhookURL.c_str(), e.what());
+        }
     }
 }
 
 // ------------------------------------------
 #include "sstream.h"
 #include "http.h"
-void ServMgr::postWebhookNotification(URI& uri)
+int ServMgr::postWebhookNotification(URI& uri)
 {
     Host host;
     host.fromStrName(uri.host().c_str(), uri.port());
 
     if (!host.ip) {
-        LOG_ERROR("postWebhookNotification: Could not resolve host name");
-        return;
+        throw GeneralException("postWebhookNotification: Could not resolve host name");
     }
 
     auto rsock = sys->createSocket();
@@ -2295,5 +2311,5 @@ void ServMgr::postWebhookNotification(URI& uri)
     req.body = mem->str();
     auto res = http.send(req);
 
-    LOG_INFO("Got HTTP response %d", res.statusCode);
+    return res.statusCode;
 }
