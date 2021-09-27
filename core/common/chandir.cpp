@@ -147,27 +147,20 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
 #include "sstream.h"
 #include "defer.h"
 #include "logbuf.h"
-extern std::map<std::thread::id, std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>> AUX_OUTPUT_FUNCS;
-extern std::recursive_mutex AUX_OUTPUT_FUNCS_lock;
+extern thread_local std::vector<std::function<void(LogBuffer::TYPE type, const char*)>> AUX_LOG_FUNC_VECTOR;
 static std::string runProcess(std::function<void(Stream&)> action)
 {
     StringStream ss;
     try {
-        {
-            std::lock_guard<std::recursive_mutex> cs(AUX_OUTPUT_FUNCS_lock);
-            AUX_OUTPUT_FUNCS[std::this_thread::get_id()].push_back([&](LogBuffer::TYPE type, const char* msg) -> void
-            {
-                if (type == LogBuffer::T_ERROR)
-                    ss.writeString("Error: ");
-                else if (type == LogBuffer::T_WARN)
-                    ss.writeString("Warning: ");
-                ss.writeLine(msg);
-            });
-        }
-        Defer defer([]() {
-            std::lock_guard<std::recursive_mutex> cs(AUX_OUTPUT_FUNCS_lock);
-            AUX_OUTPUT_FUNCS[std::this_thread::get_id()].pop_back();
-        });
+        AUX_LOG_FUNC_VECTOR.push_back([&](LogBuffer::TYPE type, const char* msg) -> void
+                                      {
+                                          if (type == LogBuffer::T_ERROR)
+                                              ss.writeString("Error: ");
+                                          else if (type == LogBuffer::T_WARN)
+                                              ss.writeString("Warning: ");
+                                          ss.writeLine(msg);
+                                      });
+        Defer defer([]() { AUX_LOG_FUNC_VECTOR.pop_back(); });
 
         action(ss);
     } catch(GeneralException& e) {
