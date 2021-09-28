@@ -167,7 +167,7 @@ void    APICALL PeercastInstance::callLocalURL(const char *url)
 }
 
 // --------------------------------------------------
-thread_local std::vector<std::function<void(LogBuffer::TYPE type, const char*)>> AUX_LOG_FUNC_VECTOR;
+thread_local std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>* AUX_LOG_FUNC_VECTOR = nullptr;
 void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)
 {
     if (!servMgr) return;
@@ -180,8 +180,10 @@ void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)
     str[MAX_LINELEN-1]=0;
 
     // ログレベルに関わらず出力する。
-    for (auto func : AUX_LOG_FUNC_VECTOR) {
-        func(type, str);
+    if (AUX_LOG_FUNC_VECTOR) {
+        for (auto func : *AUX_LOG_FUNC_VECTOR) {
+            func(type, str);
+        }
     }
 
     if (servMgr->logLevel() > type) return;

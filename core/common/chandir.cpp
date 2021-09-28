@@ -117,7 +117,7 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
                             { "Connection", "close" },
                             { "User-Agent", PCX_AGENT }
                         });
-        
+
         HTTPResponse res = rhttp.send(req);
         if (res.statusCode != 200) {
             LOG_ERROR("%s: status code %d", feed.host().c_str(), res.statusCode);
@@ -141,12 +141,13 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
 #include "sstream.h"
 #include "defer.h"
 #include "logbuf.h"
-extern thread_local std::vector<std::function<void(LogBuffer::TYPE type, const char*)>> AUX_LOG_FUNC_VECTOR;
+
 static std::string runProcess(std::function<void(Stream&)> action)
 {
     StringStream ss;
     try {
-        AUX_LOG_FUNC_VECTOR.push_back([&](LogBuffer::TYPE type, const char* msg) -> void
+        assert(AUX_LOG_FUNC_VECTOR != nullptr);
+        AUX_LOG_FUNC_VECTOR->push_back([&](LogBuffer::TYPE type, const char* msg) -> void
                                       {
                                           if (type == LogBuffer::T_ERROR)
                                               ss.writeString("Error: ");
@@ -154,7 +155,7 @@ static std::string runProcess(std::function<void(Stream&)> action)
                                               ss.writeString("Warning: ");
                                           ss.writeLine(msg);
                                       });
-        Defer defer([]() { AUX_LOG_FUNC_VECTOR.pop_back(); });
+        Defer defer([]() { AUX_LOG_FUNC_VECTOR->pop_back(); });
 
         action(ss);
     } catch(GeneralException& e) {
@@ -180,32 +181,40 @@ bool ChannelDirectory::update(UpdateMode mode)
         std::function<void(void)> getChannels =
             [&feed, &mutex, this]
             {
-                feed.log =
-                runProcess([&feed, &mutex, this](Stream& s)
-                           {
-                               // print start time
-                               String time;
-                               time.setFromTime(sys->getTime());
-                               s.writeStringF("Start time: %s\n", time.c_str()); // two newlines at the end
+                assert(AUX_LOG_FUNC_VECTOR == nullptr);
+                AUX_LOG_FUNC_VECTOR = new std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>();
+                assert(AUX_LOG_FUNC_VECTOR != nullptr);
+                Defer defer([]()
+                            {
+                                assert(AUX_LOG_FUNC_VECTOR != nullptr);
+                                delete AUX_LOG_FUNC_VECTOR;
+                            });
 
-                               std::vector<ChannelEntry> channels;
-                               bool success;
-                               double t1 = sys->getDTime();
-                               success = getFeed(feed.url, channels);
-                               double t2 = sys->getDTime();
+                feed.log = runProcess([&feed, &mutex, this](Stream& s)
+                                      {
+                                          // print start time
+                                          String time;
+                                          time.setFromTime(sys->getTime());
+                                          s.writeStringF("Start time: %s\n", time.c_str()); // two newlines at the end
 
-                               LOG_TRACE("Got %zu channels from %s (%.6f seconds)", channels.size(), feed.url.c_str(), t2 - t1);
-                               if (success) {
-                                   feed.status = ChannelFeed::Status::kOk;
-                               } else {
-                                   feed.status = ChannelFeed::Status::kError;
-                               }
+                                          std::vector<ChannelEntry> channels;
+                                          bool success;
+                                          double t1 = sys->getDTime();
+                                          success = getFeed(feed.url, channels);
+                                          double t2 = sys->getDTime();
 
-                               {
-                                   std::lock_guard<std::mutex> lock(mutex);
-                                   for (auto& c : channels) m_channels.push_back(c);
-                               }
-                           });
+                                          LOG_TRACE("Got %zu channels from %s (%.6f seconds)", channels.size(), feed.url.c_str(), t2 - t1);
+                                          if (success) {
+                                              feed.status = ChannelFeed::Status::kOk;
+                                          } else {
+                                              feed.status = ChannelFeed::Status::kError;
+                                          }
+
+                                          {
+                                              std::lock_guard<std::mutex> lock(mutex);
+                                              for (auto& c : channels) m_channels.push_back(c);
+                                          }
+                                      });
             };
         workers.push_back(std::thread(getChannels));
     }
