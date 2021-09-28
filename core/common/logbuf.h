@@ -81,4 +81,8 @@ public:
     static const char   *logTypes[];
 };
 
+
+// ----------------------------------
+extern thread_local std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>* AUX_LOG_FUNC_VECTOR;
+
 #endif

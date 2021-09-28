@@ -901,12 +901,14 @@ bool Servent::handshakeAuth(HTTP &http, const char *args)
 // -----------------------------------
 #include "sstream.h"
 #include "defer.h"
-extern thread_local std::vector<std::function<void(LogBuffer::TYPE type, const char*)>> AUX_LOG_FUNC_VECTOR;
+#include <assert.h>
+
 static std::string runProcess(std::function<void(Stream&)> action)
 {
     StringStream ss;
     try {
-        AUX_LOG_FUNC_VECTOR.push_back([&](LogBuffer::TYPE type, const char* msg) -> void
+        assert(AUX_LOG_FUNC_VECTOR != nullptr);
+        AUX_LOG_FUNC_VECTOR->push_back([&](LogBuffer::TYPE type, const char* msg) -> void
                                       {
                                           if (type == LogBuffer::T_ERROR)
                                               ss.writeString("Error: ");
@@ -914,7 +916,7 @@ static std::string runProcess(std::function<void(Stream&)> action)
                                               ss.writeString("Warning: ");
                                           ss.writeLine(msg);
                                       });
-        Defer defer([]() { AUX_LOG_FUNC_VECTOR.pop_back(); });
+        Defer defer([]() { AUX_LOG_FUNC_VECTOR->pop_back(); });
 
         action(ss);
     } catch(GeneralException& e) {
