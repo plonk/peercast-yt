@@ -374,6 +374,29 @@ std::string rstrip(const std::string& str)
     return res;
 }
 
+std::string strip(const std::string& str)
+{
+    auto it = str.begin();
+    while (it != str.end()) {
+        auto c = *it;
+        if (c == ' ' || (c >= 0x09 && c <= 0x0d) || c == '\0')
+            it++;
+        else
+            break;
+    }
+    std::string res(it, str.end());
+
+    while (!res.empty()) {
+        auto c = res.back();
+        if (c == ' ' || (c >= 0x09 && c <= 0x0d) || c == '\0')
+            res.pop_back();
+        else
+            break;
+    }
+
+    return res;
+}
+
 std::string escapeshellarg_unix(const std::string& str)
 {
     std::string buf = "\'";

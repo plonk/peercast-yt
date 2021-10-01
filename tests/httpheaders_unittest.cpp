@@ -52,3 +52,21 @@ TEST_F(HTTPHeadersFixture, assignment)
     copy = headers;
     ASSERT_EQ("b", copy.get("A"));
 }
+
+TEST_F(HTTPHeadersFixture, hasKeyWithValue_basic)
+{
+    headers.set("connection", "keep-alive");
+    ASSERT_TRUE(headers.hasKeyWithValue("connection", "keep-alive"));
+}
+
+TEST_F(HTTPHeadersFixture, hasKeyWithValue_caseSensitivity)
+{
+    headers.set("Connection", "Keep-Alive");
+    ASSERT_TRUE(headers.hasKeyWithValue("CONNECTION", "KEEP-ALIVE"));
+}
+
+TEST_F(HTTPHeadersFixture, hasKeyWithValue_commaValues)
+{
+    headers.set("connection", "keep-alive, Upgrade");
+    ASSERT_TRUE(headers.hasKeyWithValue("connection", "Upgrade"));
+}

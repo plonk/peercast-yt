@@ -167,8 +167,7 @@ void    APICALL PeercastInstance::callLocalURL(const char *url)
 }
 
 // --------------------------------------------------
-std::map<std::thread::id, std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>> AUX_OUTPUT_FUNCS;
-std::recursive_mutex AUX_OUTPUT_FUNCS_lock;
+thread_local std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>* AUX_LOG_FUNC_VECTOR = nullptr;
 void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)
 {
     if (!servMgr) return;
@@ -180,15 +179,10 @@ void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)
     vsnprintf(str, MAX_LINELEN-1, fmt, ap);
     str[MAX_LINELEN-1]=0;
 
-    {
-        std::lock_guard<std::recursive_mutex> cs(AUX_OUTPUT_FUNCS_lock);
-        if (AUX_OUTPUT_FUNCS.count(std::this_thread::get_id()) > 0) {
-            const auto& aux_log_funcs = AUX_OUTPUT_FUNCS[std::this_thread::get_id()];
-
-            // ログレベルに関わらず出力する。
-            for (auto func : aux_log_funcs) {
-                func(type, str);
-            }
+    // ログレベルに関わらず出力する。
+    if (AUX_LOG_FUNC_VECTOR) {
+        for (auto func : *AUX_LOG_FUNC_VECTOR) {
+            func(type, str);
         }
     }
 

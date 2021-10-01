@@ -25,6 +25,7 @@
 #include "logbuf.h"
 #include "stream.h"
 #include "socket.h"
+#include "defer.h"
 #include <chrono>
 
 // ------------------------------------------
@@ -207,6 +208,7 @@ char* Sys::strcpy_truncate(char* dest, size_t destsize, const char* src)
 }
 
 // ---------------------------------
+#include <assert.h>
 bool    Sys::startThread(ThreadInfo *info)
 {
     info->m_active.store(true);
@@ -214,6 +216,14 @@ bool    Sys::startThread(ThreadInfo *info)
     try {
         info->handle = std::thread([info]()
                                    {
+                                       assert(AUX_LOG_FUNC_VECTOR == nullptr);
+                                       AUX_LOG_FUNC_VECTOR = new std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>();
+                                       assert(AUX_LOG_FUNC_VECTOR != nullptr);
+                                       Defer defer([]()
+                                                   {
+                                                       assert(AUX_LOG_FUNC_VECTOR != nullptr);
+                                                       delete AUX_LOG_FUNC_VECTOR;
+                                                   });
                                        try
                                        {
                                            sys->setThreadName("new thread");
@@ -248,6 +258,8 @@ bool    Sys::startWaitableThread(ThreadInfo *info)
     try {
         info->handle = std::thread([info]()
                                    {
+                                       AUX_LOG_FUNC_VECTOR = new std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>();
+                                       Defer defer([](){ delete AUX_LOG_FUNC_VECTOR; });
                                        try
                                        {
                                            sys->setThreadName("new thread");

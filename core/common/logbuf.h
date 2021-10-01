@@ -23,6 +23,7 @@
 #include "threading.h"
 #include <vector>
 #include <functional>
+#include <map>
 
 class Stream;
 
@@ -46,6 +47,7 @@ public:
     LogBuffer(int aMaxLines, int aLineLen)
         : lineLen(aLineLen)
         , maxLines(aMaxLines)
+        , seq(0)
     {
         currLine = 0;
         buf = new char[lineLen*maxLines];
@@ -71,6 +73,12 @@ public:
     static std::string  lineRendererHTML(unsigned int time, TYPE type, const char* line);
     static size_t copy_utf8(char* dest, const char* src, size_t buflen);
 
+    unsigned int addListener(std::function<void(const char*,TYPE)>);
+    bool removeListener(unsigned int);
+
+    std::map<unsigned int, std::function<void(const char*,TYPE)>> m_listeners;
+    unsigned int seq;
+
     char                *buf;
     unsigned int        *times;
     unsigned int        currLine;
@@ -80,5 +88,9 @@ public:
     std::recursive_mutex lock;
     static const char   *logTypes[];
 };
+
+
+// ----------------------------------
+extern thread_local std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>* AUX_LOG_FUNC_VECTOR;
 
 #endif

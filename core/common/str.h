@@ -33,6 +33,7 @@ namespace str
     int         count(const std::string& haystack, const std::string& needle);
 
     std::string rstrip(const std::string& str);
+    std::string strip(const std::string&);
     std::string escapeshellarg_unix(const std::string& str);
 
     std::vector<std::string> to_lines(const std::string& text);

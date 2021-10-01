@@ -13,7 +13,7 @@
 using namespace std;
 
 std::vector<ChannelEntry>
-ChannelEntry::textToChannelEntries(const std::string& text, const std::string& aFeedUrl)
+ChannelEntry::textToChannelEntries(const std::string& text, const std::string& aFeedUrl, std::vector<std::string>& errors)
 {
     istringstream in(text);
     string line;
@@ -22,22 +22,12 @@ ChannelEntry::textToChannelEntries(const std::string& text, const std::string& a
 
     while (getline(in, line)) {
         lineno++;
-
-        vector<string> fields;
-        const char *p = line.c_str();
-        const char *q;
-
-        while ((q = strstr(p, "<>")) != nullptr) {
-            fields.push_back(string(p, q));
-            p = q + 2; // <>をスキップ
-        }
-        fields.push_back(p);
-
+        vector<string> fields = str::split(line, "<>");
         if (fields.size() != 19) {
-            throw std::runtime_error(String::format("Parse error at line %d.", lineno).cstr());
+            errors.push_back(str::format("Parse error at line %d.", lineno));
+        } else {
+            res.push_back(ChannelEntry(fields, aFeedUrl));
         }
-
-        res.push_back(ChannelEntry(fields, aFeedUrl));
     }
 
     return res;
@@ -85,10 +75,13 @@ int ChannelDirectory::numFeeds() const
 }
 
 // index.txt を指す URL である url からチャンネルリストを読み込み、out
-// に格納する。成功した場合は true が返る。失敗した場合は false が返り、
-// out は変更されない。
+// に格納する。成功した場合は true が返る。エラーが発生した場合は
+// false が返る。false を返した場合でも out に読み込めたチャンネル情報
+// が入っている場合がある。
 static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
 {
+    out.clear();
+
     URI feed(url);
     if (!feed.isValid()) {
         LOG_ERROR("invalid URL (%s)", url.c_str());
@@ -124,20 +117,21 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
                             { "Connection", "close" },
                             { "User-Agent", PCX_AGENT }
                         });
-        
+
         HTTPResponse res = rhttp.send(req);
         if (res.statusCode != 200) {
             LOG_ERROR("%s: status code %d", feed.host().c_str(), res.statusCode);
             return false;
         }
 
-        try {
-            out = ChannelEntry::textToChannelEntries(res.body, url);
-        } catch (std::runtime_error& e) {
-            LOG_ERROR("%s", e.what());
-            return false;
+        std::vector<std::string> errors;
+        out = ChannelEntry::textToChannelEntries(res.body, url, errors);
+
+        for (auto& message : errors) {
+            LOG_ERROR("%s", message.c_str());
         }
-        return true;
+
+        return errors.empty();
     } catch (StreamException& e) {
         LOG_ERROR("%s", e.msg);
         return false;
@@ -147,27 +141,21 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
 #include "sstream.h"
 #include "defer.h"
 #include "logbuf.h"
-extern std::map<std::thread::id, std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>> AUX_OUTPUT_FUNCS;
-extern std::recursive_mutex AUX_OUTPUT_FUNCS_lock;
+
 static std::string runProcess(std::function<void(Stream&)> action)
 {
     StringStream ss;
     try {
-        {
-            std::lock_guard<std::recursive_mutex> cs(AUX_OUTPUT_FUNCS_lock);
-            AUX_OUTPUT_FUNCS[std::this_thread::get_id()].push_back([&](LogBuffer::TYPE type, const char* msg) -> void
-            {
-                if (type == LogBuffer::T_ERROR)
-                    ss.writeString("Error: ");
-                else if (type == LogBuffer::T_WARN)
-                    ss.writeString("Warning: ");
-                ss.writeLine(msg);
-            });
-        }
-        Defer defer([]() {
-            std::lock_guard<std::recursive_mutex> cs(AUX_OUTPUT_FUNCS_lock);
-            AUX_OUTPUT_FUNCS[std::this_thread::get_id()].pop_back();
-        });
+        assert(AUX_LOG_FUNC_VECTOR != nullptr);
+        AUX_LOG_FUNC_VECTOR->push_back([&](LogBuffer::TYPE type, const char* msg) -> void
+                                      {
+                                          if (type == LogBuffer::T_ERROR)
+                                              ss.writeString("Error: ");
+                                          else if (type == LogBuffer::T_WARN)
+                                              ss.writeString("Warning: ");
+                                          ss.writeLine(msg);
+                                      });
+        Defer defer([]() { AUX_LOG_FUNC_VECTOR->pop_back(); });
 
         action(ss);
     } catch(GeneralException& e) {
@@ -178,7 +166,6 @@ static std::string runProcess(std::function<void(Stream&)> action)
 
 bool ChannelDirectory::update(UpdateMode mode)
 {
-    typedef std::vector<ChannelEntry> ChannelList;
     std::lock_guard<std::recursive_mutex> cs(m_lock);
 
     const int coolDownTime = (mode==kUpdateManual) ? 30 : 5 * 60;
@@ -194,32 +181,40 @@ bool ChannelDirectory::update(UpdateMode mode)
         std::function<void(void)> getChannels =
             [&feed, &mutex, this]
             {
-                feed.log =
-                runProcess([&feed, &mutex, this](Stream& s)
-                           {
-                               // print start time
-                               String time;
-                               time.setFromTime(sys->getTime());
-                               s.writeStringF("Start time: %s\n", time.c_str()); // two newlines at the end
+                assert(AUX_LOG_FUNC_VECTOR == nullptr);
+                AUX_LOG_FUNC_VECTOR = new std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>();
+                assert(AUX_LOG_FUNC_VECTOR != nullptr);
+                Defer defer([]()
+                            {
+                                assert(AUX_LOG_FUNC_VECTOR != nullptr);
+                                delete AUX_LOG_FUNC_VECTOR;
+                            });
 
-                               ChannelList channels;
-                               bool success;
-                               double t1 = sys->getDTime();
-                               success = getFeed(feed.url, channels);
-                               double t2 = sys->getDTime();
+                feed.log = runProcess([&feed, &mutex, this](Stream& s)
+                                      {
+                                          // print start time
+                                          String time;
+                                          time.setFromTime(sys->getTime());
+                                          s.writeStringF("Start time: %s\n", time.c_str()); // two newlines at the end
 
-                               if (success) {
-                                   feed.status = ChannelFeed::Status::kOk;
-                                   LOG_TRACE("Got %zu channels from %s (%.6f seconds)", channels.size(), feed.url.c_str(), t2 - t1);
-                                   {
-                                       std::lock_guard<std::mutex> lock(mutex);
-                                       for (auto& c : channels) m_channels.push_back(c);
-                                   }
-                               } else {
-                                   feed.status = ChannelFeed::Status::kError;
-                                   LOG_ERROR("Failed to get channels from %s (%.6f seconds)", feed.url.c_str(), t2 - t1);
-                               }
-                           });
+                                          std::vector<ChannelEntry> channels;
+                                          bool success;
+                                          double t1 = sys->getDTime();
+                                          success = getFeed(feed.url, channels);
+                                          double t2 = sys->getDTime();
+
+                                          LOG_TRACE("Got %zu channels from %s (%.6f seconds)", channels.size(), feed.url.c_str(), t2 - t1);
+                                          if (success) {
+                                              feed.status = ChannelFeed::Status::kOk;
+                                          } else {
+                                              feed.status = ChannelFeed::Status::kError;
+                                          }
+
+                                          {
+                                              std::lock_guard<std::mutex> lock(mutex);
+                                              for (auto& c : channels) m_channels.push_back(c);
+                                          }
+                                      });
             };
         workers.push_back(std::thread(getChannels));
     }

@@ -25,7 +25,7 @@ CPPFLAGS += -D_UNIX -I$(GTEST_DIR)/include -I../../../core/common -I../../../cor
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT
 
-LDFLAGS = -fuse-ld=gold -pthread
+LDFLAGS = -fuse-ld=gold -pthread `pkg-config openssl --libs`
 LIBS = -Wl,-Bstatic -Wl,-Bdynamic
 LIBS += -lrtmp
 
