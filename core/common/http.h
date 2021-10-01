@@ -134,6 +134,24 @@ public:
             return it->second;
     }
 
+    bool hasKeyWithValue(const std::string& key, const std::string& value)
+    {
+        using namespace str;
+        auto it = m_headers.find(upcase(key));
+        if (it == m_headers.end()) {
+            return false;
+        } else {
+            auto target = upcase(strip(value));
+            auto words = split(it->second, ",");
+            for (auto& word : words) {
+                if (upcase(strip(word)) == target) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
     size_t size()
     {
         return m_headers.size();

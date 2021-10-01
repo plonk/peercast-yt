@@ -45,6 +45,10 @@ TEST_F(strFixture, split)
     ASSERT_STREQ("b", vec[1].c_str());
     ASSERT_STREQ("c", vec[2].c_str());
     ASSERT_STREQ("", vec[3].c_str());
+
+    vec = split("a", ",");
+    ASSERT_EQ(1, vec.size());
+    ASSERT_STREQ("a", vec[0].c_str());
 }
 
 TEST_F(strFixture, split_with_limit)
@@ -322,4 +326,18 @@ TEST_F(strFixture, validate_utf8)
     ASSERT_FALSE(validate_utf8("\x8A\xBF")); // 漢
     ASSERT_FALSE(validate_utf8("\x83" "A")); // ア; KATAKANA LETTER A
     ASSERT_FALSE(validate_utf8("\xB1"));     // ｱ; HALFWIDTH KATAKANA LETTER A
+}
+
+TEST_F(strFixture, strip)
+{
+    ASSERT_EQ("", str::strip(""));
+    ASSERT_EQ("", str::strip(" "));
+    ASSERT_EQ("", str::strip("\t\r\n"));
+    ASSERT_EQ("a", str::strip("a"));
+    ASSERT_EQ("a", str::strip("a "));
+    ASSERT_EQ("a", str::strip("a\t\r\n"));
+    ASSERT_EQ("a", str::strip(" a"));
+    ASSERT_EQ("a", str::strip("\t\r\na"));
+    ASSERT_EQ("a", str::strip(" a "));
+    ASSERT_EQ("a", str::strip({ '\0', '\n', 'a', '\0', '\n' }));
 }
