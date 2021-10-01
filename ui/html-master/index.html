@@ -154,3 +154,10 @@
   </script>
   {@end}
 </DIV>
+
+<script>
+  var socket = new WebSocket("ws://localhost:7144/api/console");
+  socket.onmessage = function(ev){
+    console.log(ev.data);
+  };
+</script>

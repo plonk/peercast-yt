@@ -268,6 +268,130 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
 }
 
 // -----------------------------------
+static std::string base64_encode(const std::string input)
+{
+    char const alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    std::string output;
+    int pre = 0;
+    int pre_len = 0;
+    
+    for (size_t i = 0; i < input.size(); i++) {
+        int n = pre;
+        n <<= (6 - pre_len);
+        unsigned char c = input[i];
+
+        c >>= (8 - (6 - pre_len));
+        n |= c;
+        output += alphabet[n];
+
+        pre = input[i] & (0xff >> (6 - pre_len));
+        pre_len = (8 - (6 - pre_len));
+
+        if (pre_len == 6) {
+            output += alphabet[pre];
+            pre = 0;
+            pre_len = 0;
+        }
+    }
+
+    if (pre_len > 0) {
+        int n = pre;
+        n <<= (6 - pre_len);
+        output += alphabet[n];
+    }
+
+    switch (input.size() % 3)
+    {
+    case 2:
+        output += '=';
+        break;
+    case 1:
+        output += "==";
+        break;
+    default:
+        break;
+    }
+
+    return output;
+}
+
+#include <openssl/sha.h>
+#include "waitablequeue.h"
+#include "defer.h"
+#include "websocket.h"
+
+static bool isValidWebSocketClientRequest(HTTPRequest& req, std::string& error)
+{
+    /* if (req.protocolVersion != "1.1") {
+        error = "HTTP protocol version";
+        return false;
+    } else */if (req.method != "GET") {
+        error = "method";
+        return false;
+    } else if (!req.headers.hasKeyWithValue("Upgrade", "websocket")) {
+        error = "upgrade header";
+        return false;
+    } else if (!req.headers.hasKeyWithValue("Connection", "Upgrade")) {
+        error = "connection header";
+        return false;
+    } else if (!req.headers.hasKeyWithValue("Sec-WebSocket-Version", "13")) {
+        error = "websocket version";
+        return false;
+    } else if (req.headers.get("Sec-WebSocket-Key").empty()) {
+        error = "websocket key";
+        return false;
+    }
+    error = "";
+    return true;
+}
+
+void Servent::handshakeWebSocket(HTTP &http)
+{
+    auto req = http.getRequest();
+
+    std::string error;
+    if (!isValidWebSocketClientRequest(req, error)) {
+        LOG_ERROR("Invalid WebSocket client request: %s", error.c_str());
+        http.send(HTTPResponse::badRequest(error));
+        return;
+    }
+
+    std::string concatenated = req.headers.get("Sec-WebSocket-Key") + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+    unsigned char digest[SHA_DIGEST_LENGTH];
+    SHA1(reinterpret_cast<const unsigned char*>(concatenated.c_str()),
+         concatenated.size(),
+         digest);
+
+    auto hash = base64_encode(std::string(digest, digest + SHA_DIGEST_LENGTH));
+
+    http.writeLine("HTTP/1.1 101 Switching Protocols");
+    http.writeLine("Upgrade: websocket");
+    http.writeLine("Connection: Upgrade");
+    http.writeLineF("Sec-WebSocket-Accept: %s", hash.c_str());
+    http.writeLine("");
+
+    // この辺、いろんなもののライフタイムが正しいのか自信ない。
+    WaitableQueue<std::string> queue;
+    unsigned int id;
+    Defer defer([&id]()
+                {
+                    bool b = sys->logBuf->removeListener(id);
+                    LOG_DEBUG("removeListener(%u) == %d", id, b);
+                });
+    id = sys->logBuf->addListener([&queue](const char* msg, LogBuffer::TYPE type)
+                                  {
+                                      queue.enqueue(str::format("[%s] %s", LogBuffer::getTypeStr(type), msg));
+                                  });
+    while (thread.active() && sock->active())
+    {
+        std::string logLine = queue.dequeue();
+        auto frame = ws::createTextFrame(logLine.c_str(), logLine.size());
+        http.write(frame->data(), frame->getSize());
+    }
+}
+
+// -----------------------------------
 void Servent::handshakeGET(HTTP &http)
 {
     char *fn = http.cmdLine + 4;
@@ -413,6 +537,17 @@ void Servent::handshakeGET(HTTP &http)
             http.writeLineF("%s %zu", HTTP_HS_LENGTH, response.size());
             http.writeLine("");
             http.writeString(response.c_str());
+        }
+    }else if (strcmp(fn, "/api/console") == 0)
+    {
+        // JSON RPC バージョン情報取得用
+
+        if (!isAllowed(ALLOW_HTML))
+            throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
+
+        if (handshakeAuth(http, ""))
+        {
+            handshakeWebSocket(http);
         }
     }else if (strcmp(fn, "/public")== 0 ||
               strncmp(fn, "/public/", strlen("/public/"))==0)
