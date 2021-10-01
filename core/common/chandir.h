@@ -14,7 +14,7 @@
 class ChannelEntry
 {
 public:
-    static std::vector<ChannelEntry> textToChannelEntries(const std::string& text, const std::string& aFeedUrl);
+    static std::vector<ChannelEntry> textToChannelEntries(const std::string& text, const std::string& aFeedUrl, std::vector<std::string>& errors);
 
     ChannelEntry(const std::vector<std::string>& fields, const std::string& aFeedUrl)
         : feedUrl(aFeedUrl)
