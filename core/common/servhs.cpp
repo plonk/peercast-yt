@@ -323,10 +323,10 @@ static std::string base64_encode(const std::string input)
 
 static bool isValidWebSocketClientRequest(HTTPRequest& req, std::string& error)
 {
-    /* if (req.protocolVersion != "1.1") {
+    if (req.protocolVersion != "HTTP/1.1") {
         error = "HTTP protocol version";
         return false;
-    } else */if (req.method != "GET") {
+    } else if (req.method != "GET") {
         error = "method";
         return false;
     } else if (!req.headers.hasKeyWithValue("Upgrade", "websocket")) {
