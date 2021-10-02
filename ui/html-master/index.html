@@ -156,7 +156,7 @@
 </DIV>
 
 <script>
-  var socket = new WebSocket("ws://localhost:7144/api/console");
+  var socket = new WebSocket("ws://{$request.host}/api/console");
   socket.onmessage = function(ev){
     console.log(ev.data);
   };
