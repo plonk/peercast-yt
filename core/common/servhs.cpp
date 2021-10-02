@@ -371,6 +371,8 @@ void Servent::handshakeWebSocket(HTTP &http)
     http.writeLineF("Sec-WebSocket-Accept: %s", hash.c_str());
     http.writeLine("");
 
+    this->type = T_WEBSOCKET;
+
     // この辺、いろんなもののライフタイムが正しいのか自信ない。
     WaitableQueue<std::string> queue;
     unsigned int id;

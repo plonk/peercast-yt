@@ -55,6 +55,7 @@ public:
         T_DIRECT,           // Outgoing direct connection
         T_COUT,             // PCP out connection
         T_CIN,              // PCP in connection
+        T_WEBSOCKET,
     };
 
     enum STATUS
