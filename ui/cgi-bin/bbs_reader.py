@@ -25,7 +25,12 @@ class Board:
     return ("http://{0}/bbs/rawmode.cgi/{1}/{2}/" if self.shitaraba else "http://{0}/{1}/dat/{2}.dat").format(self.fqdn, self.urlpath, thread_num)
 
   def settings(self):
-    str = self.download(self.__settings_url)
+    try:
+      str = self.download(self.__settings_url)
+    except urllib.error.HTTPError:
+      config = configparser.ConfigParser()
+      config.read_string("[DEFAULT]\n" + "ERROR = [Settings download error]\n")
+      return config.defaults()
     try:
       str = str.decode(self.external_encoding)
     except:
