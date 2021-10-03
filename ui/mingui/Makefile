@@ -1,6 +1,15 @@
+# Uncomment following line to enabled RTMP fetch support
+WITH_RTMP = yes
+
 CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -U__STRICT_ANSI__ -DWIN32 -D_REENTRANT -D_UNICODE -DUNICODE $(INCLUDES)
-LDFLAGS = -static-libgcc -static-libstdc++
-LIBS = -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic -lws2_32 -lShlwapi
+ifeq ($(WITH_RTMP),yes)
+  CPPFLAGS += -DWITH_RTMP $(shell pkg-config librtmp --cflags)
+endif
+LDFLAGS = 
+LIBS = -lwinpthread -lws2_32 -lShlwapi
+ifeq ($(WITH_RTMP),yes)
+  LIBS += $(shell pkg-config librtmp --libs)
+endif
 
 OS = $(shell uname -s | tr A-Z a-z)
 ARCH = $(shell uname -m | tr A-Z a-z)
