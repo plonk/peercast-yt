@@ -73,6 +73,7 @@ $(DISTARCHIVE): $(TARGET) $(ASSETS) $(RTMPSERVER) $(SRCPUBLICTAR) $(SRCHTMLTAR)
 	tar xf $(SRCPUBLICTAR) -C peercast-yt/
 	strip peercast-yt/$(TARGET)
 	strip peercast-yt/$(RTMPSERVER)
+	cp `ldd peercast-yt/$(TARGET) | ruby -ne 'if $$_ =~ / => (\S+)/ then puts $$1 end' | grep -vi /WINDOWS/` peercast-yt/
 	tar czf $(DISTARCHIVE) peercast-yt
 
 clean:
