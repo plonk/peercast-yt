@@ -243,6 +243,13 @@
     "Chat"                    : "チャット",
     "Randomize broadcasting channel ID" : "配信チャンネルIDをランダム化",
 
+    "None"                    : "なし",
+    "Custom..."               : "カスタム...",
+
+    "Turf"                    : "芝",
+    "Heisei"                  : "平成",
+    "Event YP"                : "イベントYP",
+
     // rtmp.html
     "Start"                   : "開始",
     "Process ID"              : "プロセスID",
