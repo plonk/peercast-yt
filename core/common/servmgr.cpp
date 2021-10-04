@@ -832,6 +832,7 @@ void ServMgr::checkFirewallIPv6()
         } else {
             setFirewall(6, FW_ON);
         }
+        updateIPAddress(result.ip);
     } catch (SockException& e) {
         // network unreachable etc
         LOG_ERROR("checkFirewallIPv6: %s", e.what());
