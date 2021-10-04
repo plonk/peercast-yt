@@ -1,5 +1,17 @@
 {^define LAYOUT layout.html}
 {^define TITLE}{#_Settings_navbar} - {#PeerCast on} {^SERVER_NAME}{^end}
+{^define HEAD}
+<style>
+  input[readonly="readonly"] {
+      /* 編集不可能だが、値は送信する場合、グレイアウトする。 */
+      background-color: rgb(227,227,227);
+      color: rgb(109,109,109);
+  }
+  select.fill-parent { width: 100% }
+  select#yp_select { min-height: 26px; margin-bottom: 3px }
+  select.channel-feed-select { min-height: 26px }
+</style>
+{^end}
 
 <form action=/admin method=POST>
   <input type=hidden value=apply name=cmd>
@@ -201,7 +213,18 @@
         </tr>
         <tr class="normal">
           <th class="left-heading">{#YP Address}</th>
-          <td><input class="fill-parent" value="{$servMgr.ypAddress}" name=yp></td>
+          <td>
+            <select id="yp_select">
+              <option value="None">{#None}</option>
+              <option value="Custom">{#Custom...}</option>
+              <option data-addr="bayonet.ddo.jp:7146" value="SP">SP</option>
+              <option data-addr="term.orz.hm" value="TP">TP</option>
+              <option data-addr="takami98.luna.ddns.vc" value="Turf">{#Turf}</option>
+              <option data-addr="yp.pcgw.pgw.jp:7146" value="Heisei">{#Heisei}</option>
+              <option data-addr="root.p-at.net" value="P@">P@</option>
+            </select>
+            <input id="yp" class="fill-parent" value="{$servMgr.ypAddress}" name=yp>
+          </td>
         </tr>
         <tr class="normal">
           <th class="left-heading">{#Max. Output (Kbits/s)}</th>
@@ -269,15 +292,26 @@
 
       <table class="table-panel" width="100%" align=center border=0>
         <tr align=middle class="normal">
-          <td><b>{#Channel Feeds}</b></td>
-        </tr>
-        <tr align=middle class="normal">
-          <th>{#URL}</th>
+          <td colspan=2><b>{#Channel Feeds}</b></td>
         </tr>
         {@loop servMgr.numChannelFeedsPlusOne}
         <tr class="normal">
+          <td width=110>
+            <select class="channel-feed-select fill-parent" data-index="{$loop.index}">
+              <option value="None">{#None}</option>
+              <option value="Custom">{#Custom...}</option>
+              <option data-url="http://bayonet.ddo.jp/sp/index.txt" value="SP">SP</option>
+              <option data-url="http://temp.orz.hm/yp/index.txt" value="TP">TP</option>
+              <option data-url="http://peercast.takami98.net/turf-page/index.txt" value="Turf">{#Turf}</option>
+              <option data-url="http://yp.pcgw.pgw.jp/index.txt" value="Heisei">{#Heisei}</option>
+              <option data-url="http://insecure.p-at.net/index.txt" value="P@">P@</option>
+              <option data-url="http://ypv6.pecastation.org/index.txt" value="YPv6">YPv6</option>
+              <option data-url="http://eventyp.xrea.jp/index.txt" value="Event YP">{#Event YP}</option>
+            </select>
+          </td>
           <td>
-            <input size=15 value="{$loop.channelFeed.url}" name="channel_feed_url" style="width: 100%" placeholder="{#URL of index.txt}">
+            <input class="channel-feed-url" data-index="{$loop.index}"
+                size=15 value="{$loop.channelFeed.url}" name="channel_feed_url" style="width: 100%" placeholder="{#URL of index.txt}">
           </td>
         </tr>
         {@end}
@@ -319,3 +353,90 @@
     </div>
   </div><!-- .flex-container -->
 </form>
+
+<script>
+  /* 既に設定されている文字列値からメニュー項目を選択済みにしてテキス
+     ト入力フィールドの編集可否状態とフォーカス状態を変更する。 */
+  const ypaddr = $('input#yp').prop('value')
+  if (ypaddr == "") {
+      $('select#yp_select').prop('value', 'None')
+      $('input#yp').attr('readonly', true)
+  } else {
+      let selected = false
+      $('select#yp_select > option').each(function(){
+          if ($(this).data('addr') == ypaddr) {
+              $('select#yp_select').prop('value', $(this).prop('value'))
+              $('input#yp').attr('readonly', true)
+              selected = true
+          }
+      })
+      if (!selected) {
+          $('select#yp_select').prop('value', 'Custom')
+          $('input#yp').attr('readonly', false)
+      }
+  }
+
+  /* 選択されているメニュー項目が変更された場合、テキスト入力フィール
+     ドの値と状態を変更する。 */
+  $('select#yp_select').on('change', function(){
+      const textfield = $('input#yp')
+      if (this.value == 'None') {
+          textfield.prop('value', "")
+          textfield.attr('readonly', true)
+      }else if (this.value == 'Custom') {
+          textfield.prop('value', "")
+          textfield.attr('readonly', false)
+          textfield.focus()
+      } else {
+          const option = $(`select#yp_select > option[value="${this.value}"]`)
+          textfield.prop('value', option.data('addr'))
+          textfield.attr('readonly', true)
+      }
+  })
+
+  // ----------------------------------------------------------------
+
+  $('.channel-feed-select').each(function(){
+      const select = $(this)
+      const index = $(this).data('index')
+      const textfield = $(`.channel-feed-url[data-index="${index}"]`)
+      const url = textfield.prop('value')
+      if (url == "") {
+          select.prop('value', 'Custom')
+          textfield.attr('readonly', false)
+      } else {
+          let selected = false
+          select.children().each(function(){
+              const option = $(this)
+              if (option.data('url') == url) {
+                  select.prop('value', option.prop('value'))
+                  textfield.attr('readonly', true)
+                  selected = true
+              }
+          })
+          if (!selected) {
+              select.prop('value', 'Custom')
+              textfield.attr('readonly', false)
+          }
+      }
+  })
+
+  $('.channel-feed-select').on('change', function(){
+      const select = $(this)
+      const index = $(this).data('index')
+      const textfield = $(`.channel-feed-url[data-index="${index}"]`)
+      if (select.prop('value') == 'None') {
+          textfield.prop('value', "")
+          textfield.attr('readonly', true)
+      }else if (select.prop('value') == 'Custom') {
+          textfield.prop('value', "")
+          textfield.attr('readonly', false)
+          textfield.focus()
+      } else {
+          const option = $(`.channel-feed-select > option[value="${this.value}"]`)
+          textfield.prop('value', option.data('url'))
+          textfield.attr('readonly', true)
+      }
+  })
+
+</script>
