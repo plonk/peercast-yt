@@ -30,6 +30,11 @@ CGIBIN = ../cgi-bin/
 
 LIBOBJSTATIC = libpeercast.a
 
+DLLS=$(MSYSTEM_PREFIX)/bin/lib{winpthread-*,gcc_s_*-*,stdc++-*,rtmp-*,gmp-*,hogweed-*,gnutls-*,nettle-*,p11-kit-*,idn2-*,tasn1-*,unistring-*,ffi-*,iconv-*,intl-*}.dll
+ifeq ($(MSYSTEM),MINGW64)
+  DLLS += $(MSYSTEM_PREFIX)/bin/zlib1.dll
+endif
+
 SYSSOURCE = $(wildcard $(CORE)/win32/*.cpp)
 CORESOURCE = $(wildcard $(CORE)/common/*.cpp)
 
@@ -73,7 +78,7 @@ $(DISTARCHIVE): $(TARGET) $(ASSETS) $(RTMPSERVER) $(SRCPUBLICTAR) $(SRCHTMLTAR)
 	tar xf $(SRCPUBLICTAR) -C peercast-yt/
 	strip peercast-yt/$(TARGET)
 	strip peercast-yt/$(RTMPSERVER)
-	cp `ldd peercast-yt/$(TARGET) | ruby -ne 'if $$_ =~ / => (\S+)/ then puts $$1 end' | grep -vi /WINDOWS/` peercast-yt/
+	cp $(DLLS) peercast-yt/
 	tar czf $(DISTARCHIVE) peercast-yt
 
 clean:
