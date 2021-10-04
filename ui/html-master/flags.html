@@ -11,22 +11,18 @@
         </tr>
         <tr>
           <th class="normal">名前</th>
-          <th class="normal">説明</th>
-          <th class="normal">デフォルト値</th>
-          <th class="normal">現在の値</th>
+          <th class="normal">デフォルト / 現在</th>
         </tr>
         {@foreach flags}
         <tr class="normal">
-          <td {@if this.defaultValue != this.currentValue}style="font-weight: bold"{@end}>
-             {$this.name}
-          </td>
           <td>
-            {$this.desc}
+            <span style="font-weight: {@if this.defaultValue != this.currentValue}bold{@else}medium{@end}; word-break: break-word">
+              {$this.name}
+            </span>
+            <div style="margin-left: 1em">{$this.desc}</div>
           </td>
-          <td>
-            <input type="checkbox" {@if this.defaultValue}checked{@end} disabled>
-          </td>
-          <td>
+          <td style="text-align:center">
+            <input type="checkbox" {@if this.defaultValue}checked{@end} disabled> / 
             <input type="checkbox" name="{$this.name}" value=1 {@if this.currentValue}checked{@end}>
           </td>
         </tr>
