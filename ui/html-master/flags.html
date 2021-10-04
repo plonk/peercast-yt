@@ -10,7 +10,7 @@
           <td colspan="4" class="normal"><div align="center"><strong>{#Flags}</strong></div></td>
         </tr>
         <tr>
-          <th class="normal">名前</th>
+          <th class="normal">名前と説明</th>
           <th class="normal">デフォルト / 現在</th>
         </tr>
         {@foreach flags}
@@ -19,7 +19,7 @@
             <span style="font-weight: {@if this.defaultValue != this.currentValue}bold{@else}medium{@end}; word-break: break-word">
               {$this.name}
             </span>
-            <div style="margin-left: 1em">{$this.desc}</div>
+            <div style="margin-left:2em">{$this.desc}</div>
           </td>
           <td style="text-align:center">
             <input type="checkbox" {@if this.defaultValue}checked{@end} disabled> / 
