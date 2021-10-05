@@ -20,14 +20,13 @@ GTEST_DIR = $(MINGW_PREFIX)/src/gtest
 USER_DIR = ../../../tests
 
 # Flags passed to the preprocessor.
-CPPFLAGS += -I$(GTEST_DIR)/include -I../../../core/common -I../../../core/win32 $(shell pkg-config openssl --cflags)
+CPPFLAGS += -I$(GTEST_DIR)/include -I../../../core/common -I../../../core/win32 -DWIN32 -D_REENTRANT -DWITH_RTMP $(shell pkg-config librtmp --cflags) $(shell pkg-config openssl --cflags)
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -g -Wno-multichar -Wno-unused-variable -std=c++11 -DWIN32 -D_REENTRANT
+CXXFLAGS += -g -Wno-multichar -Wno-unused-variable -std=c++11
 
 LDFLAGS = 
-LIBS = -Wl,-Bstatic -lwinpthread $(shell pkg-config openssl --libs) -Wl,-Bdynamic -lws2_32 -lShlwapi
-#LIBS += -lrtmp
+LIBS = -lwinpthread -lws2_32 -lShlwapi $(shell pkg-config librtmp --libs) $(shell pkg-config openssl --libs)
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
