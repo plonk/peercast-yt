@@ -63,7 +63,8 @@ sharedir=$(PREFIX)/share/peercast
 # Here follow the generic build rules.
 all: $(TARGET) $(LIBOBJSTATIC) $(DISTARCHIVE) $(RTMPSERVER)
 
-deps: $(DEPENDFILE)
+deps:
+	$(CXX) $(CPPFLAGS) -MM $(CORESOURCE) $(SYSSOURCE) $(LINUXSOURCE) $(RTMPSOURCE) > $(DEPENDFILE)
 
 $(SRCHTMLTAR):
 	$(MAKE) -C .. html.tar
@@ -124,9 +125,6 @@ $(SYSOBJ): %.o : $(CORE)/unix/%.cpp
 
 $(RTMPOBJ): %.o : $(RTMP)/%.cpp
 	$(CXX) $(CPPFLAGS) -c $< -o $@
-
-$(DEPENDFILE): $(CORESOURCE) $(SYSSOURCE) $(LINUXSOURCE) $(RTMPSOURCE)
-	$(CXX) $(CPPFLAGS) -MM $(CORESOURCE) $(SYSSOURCE) $(LINUXSOURCE) $(RTMPSOURCE) > $(DEPENDFILE)
 
 $(LIBOBJSTATIC): $(COREOBJ) $(SYSOBJ)
 	$(AR) rcs $(LIBOBJSTATIC) $(COREOBJ) $(SYSOBJ)
