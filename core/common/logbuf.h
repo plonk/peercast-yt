@@ -69,7 +69,7 @@ public:
     void                dumpHTML(Stream &);
 
     static std::string  lineRendererHTML(unsigned int time, TYPE type, const char* line);
-    static void         escapeHTML(char* dest, char* src);
+    static size_t copy_utf8(char* dest, const char* src, size_t buflen);
 
     char                *buf;
     unsigned int        *times;
@@ -80,5 +80,9 @@ public:
     std::recursive_mutex lock;
     static const char   *logTypes[];
 };
+
+
+// ----------------------------------
+extern thread_local std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>* AUX_LOG_FUNC_VECTOR;
 
 #endif

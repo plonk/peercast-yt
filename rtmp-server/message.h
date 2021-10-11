@@ -39,7 +39,7 @@ namespace rtmpserver
         int
         remaining()
         {
-            assert(length - data.size() >= 0);
+            assert(length - (int) data.size() >= 0);
             return length - data.size();
         }
 

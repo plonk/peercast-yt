@@ -102,3 +102,30 @@ TEST_F(LogBufferFixture, dumpHTML_1001)
 
     ASSERT_EQ(1000, str::count((lb.dumpHTML(mem),mem.str()), "<br>"));
 }
+
+TEST_F(LogBufferFixture, copy_utf8)
+{
+    char dest[1024];
+
+    strcpy(dest, "AAAA");
+    ASSERT_EQ(LogBuffer::copy_utf8(dest, "プログラミング", 0), 0);
+    ASSERT_STREQ(dest, "AAAA");
+
+    strcpy(dest, "AAAA");
+    ASSERT_EQ(LogBuffer::copy_utf8(dest, "プログラミング", 1), 0);
+    ASSERT_STREQ(dest, "");
+
+    strcpy(dest, "AAAA");
+    ASSERT_EQ(LogBuffer::copy_utf8(dest, "プログラミング", 2), 0);
+    ASSERT_STREQ(dest, "");
+    ASSERT_EQ(*(dest + 1), '\0'); // NUL で埋められる。
+
+    strcpy(dest, "AAAA");
+    ASSERT_EQ(LogBuffer::copy_utf8(dest, "プログラミング", 3), 3);
+    ASSERT_STREQ(dest, "プA");
+    // コピーされた文字列がバッファー長に等しい場合はNUL終端されない。
+
+    strcpy(dest, "AAAA");
+    ASSERT_EQ(LogBuffer::copy_utf8(dest, "プログラミング", 4), 3);
+    ASSERT_STREQ(dest, "プ");
+}

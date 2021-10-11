@@ -23,7 +23,7 @@
 #include "stream.h"
 
 // -----------------------------------
-#define isSJIS(a, b) ((a >= 0x81 && a <= 0x9f || a >= 0xe0 && a <= 0xfc) && (b >= 0x40 && b <= 0x7e || b >= 0x80 && b <= 0xfc))
+#define isSJIS(a, b) (((a >= 0x81 && a <= 0x9f) || (a >= 0xe0 && a <= 0xfc)) && ((b >= 0x40 && b <= 0x7e) || (b >= 0x80 && b <= 0xfc)))
 #define isEUC(a) (a >= 0xa1 && a <= 0xfe)
 #define isASCII(a) (a <= 0x7f)
 #define isPLAINASCII(a) (((a >= '0') && (a <= '9')) || ((a >= 'a') && (a <= 'z')) || ((a >= 'A') && (a <= 'Z')))

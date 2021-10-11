@@ -1,6 +1,6 @@
 # PeerCast YT
 
-[![Build Status](https://travis-ci.org/plonk/peercast-yt.svg?branch=master)](https://travis-ci.org/plonk/peercast-yt)
+[![Build Status](https://travis-ci.com/plonk/peercast-yt.svg?branch=master)](https://travis-ci.com/plonk/peercast-yt)
 
 PeerCast のフォークです。
 
@@ -63,21 +63,17 @@ https://github.com/plonk/peercast-yt/releases/ に各プラットフォーム用
 
 ## 手順
 
-`ui/linux` ディレクトリに入って `make` してください。すると
-`peercast-yt-linux-x86_64.tar.gz` (CPUアーキテクチャによって名前が変わ
-ります) ができます。
+`ui/linux` ディレクトリに入って `make` したあと、`sudo make install` で
+/usr/local/ 以下にインストールできます。
 
-※ make した後、`ui/linux/peercast-yt` ディレクトリの `peercast` を実行
-することもできます。
+また、`ui/linux/tests` ディレクトリで `make` すると一連の単体テストを実行する
+`test-all` コマンドが作成されます。
 
 # 実行
 
-`peercast-yt-linux-x86_64.tar.gz` を適当な場所に展開して、ディレクトリ
-内の `peercast` を実行してください。
-
-ウェブブラウザで `http://localhost:7144/` を開くと操作できます。なお、
-設定ファイル `peercast.ini` は `peercast` と同じディレクトリに作られま
-す。
+peercast コマンドを起動したあと、ウェブブラウザで `http://localhost:7144/`
+を開くと操作できます。なお、設定ファイル `peercast.ini` は `~/.config/peercast/`
+ディレクトリに作られます。
 
 # MSYS2でのビルド
 
@@ -119,3 +115,10 @@ RTMP をサポートするストリーミングサーバーからストリーム
 サポートをオンにするには `Makefile` の先頭で `WITH_RTMP` 変数の値を
 `yes` にしてビルドします。`librtmp` をリンクする必要があるので、インス
 トールしておいてください。
+
+MinGW の場合は rtmpdump-git パッケージを以下のように（64ビットの場合)インストール
+してください。
+
+```
+pacman -S mingw-w64-x86_64-rtmpdump-git
+```

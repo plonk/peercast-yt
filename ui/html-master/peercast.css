@@ -7,9 +7,11 @@
 }
 a {
 	font-family: Verdana, Arial, Helvetica, sans-serif;
-	color: #0000FF;
 	text-decoration: none;
 
+}
+a[href] {
+	color: #0000FF;
 }
 a:hover {
 	font-family: Verdana, Arial, Helvetica, sans-serif;
@@ -189,4 +191,4 @@ td.checkbox-cell {
     width: 100%;
 }
 
-.hscroll { overflow-x: auto; width: 100%; overflow-y: hidden }
+.hscroll { overflow-wrap: break-word; overflow-x: auto; width: 100%; overflow-y: hidden }
