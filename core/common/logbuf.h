@@ -45,9 +45,9 @@ public:
     };
 
     LogBuffer(int aMaxLines, int aLineLen)
-        : lineLen(aLineLen)
+        : seq(0)
+        , lineLen(aLineLen)
         , maxLines(aMaxLines)
-        , seq(0)
     {
         currLine = 0;
         buf = new char[lineLen*maxLines];
@@ -82,8 +82,8 @@ public:
     char                *buf;
     unsigned int        *times;
     unsigned int        currLine;
-    const unsigned int  maxLines;
     const unsigned int  lineLen;
+    const unsigned int  maxLines;
     TYPE                *types;
     std::recursive_mutex lock;
     static const char   *logTypes[];

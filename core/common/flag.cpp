@@ -25,8 +25,8 @@ Flag::Flag(const std::string& aName,
 }
 
 Flag::Flag(const Flag& other)
-    : desc(other.desc)
-    , name(other.name)
+    : name(other.name)
+    , desc(other.desc)
     , defaultValue(other.defaultValue)
     , currentValue(other.currentValue.load())
 {

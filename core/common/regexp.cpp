@@ -3,8 +3,8 @@
 #include <stdexcept>
 
 Regexp::Regexp(const std::string& exp)
-    : m_exp(exp)
-    , m_reg(exp.c_str())
+    : m_reg(exp.c_str())
+    , m_exp(exp)
 {
 }
 

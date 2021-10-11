@@ -36,8 +36,8 @@
 // -----------------------------------
 ServMgr::ServMgr()
     : relayBroadcast(30) // オリジナルでは未初期化。
-    , publicDirectoryEnabled(false)
     , channelDirectory(new ChannelDirectory())
+    , publicDirectoryEnabled(false)
     , uptestServiceRegistry(new UptestServiceRegistry())
 #ifdef WIN32
     , rtmpServerMonitor(std::string(peercastApp->getPath()) + "rtmp-server")
