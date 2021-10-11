@@ -90,7 +90,7 @@ $(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS) $(RTMPSERVER)
 	strip peercast-yt/$(RTMPSERVER)
 	tar czf $(DISTARCHIVE) peercast-yt
 
-install: all
+install:
 	mkdir -p $(bindir)
 	cp -R $(TARGET) $(RTMPSERVER) $(bindir)
 	mkdir -p $(docdir)
