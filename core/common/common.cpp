@@ -66,6 +66,8 @@ GeneralException::GeneralException(const char *m, int e)
             backtrace.push_back(strings[i]);
         }
     }
+
+    free(strings);
 #endif
 
     msg = msgbuf.c_str();
