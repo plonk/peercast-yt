@@ -74,6 +74,7 @@ int ChannelDirectory::numFeeds() const
     return m_feeds.size();
 }
 
+#include "sslclientsocket.h"
 // index.txt を指す URL である url からチャンネルリストを読み込み、out
 // に格納する。成功した場合は true が返る。エラーが発生した場合は
 // false が返る。false を返した場合でも out に読み込めたチャンネル情報
@@ -87,7 +88,7 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
         LOG_ERROR("invalid URL (%s)", url.c_str());
         return false;
     }
-    if (feed.scheme() != "http") {
+    if (feed.scheme() != "http" && feed.scheme() != "https") {
         LOG_ERROR("unsupported protocol (%s)", url.c_str());
         return false;
     }
@@ -99,7 +100,12 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
         return false;
     }
 
-    auto rsock = sys->createSocket();
+    std::shared_ptr<ClientSocket> rsock;
+    if (feed.scheme() == "https") {
+        rsock = std::make_shared<SslClientSocket>();
+    } else {
+        rsock = sys->createSocket();
+    }
 
     try {
         LOG_TRACE("Connecting to %s:%d ...", feed.host().c_str(), feed.port());
@@ -382,7 +388,7 @@ bool ChannelDirectory::addFeed(const std::string& url)
     }
 
     URI u(url);
-    if (!u.isValid() || u.scheme() != "http") {
+    if (!u.isValid() || (u.scheme() != "http" && u.scheme() != "https")) {
         LOG_ERROR("Invalid feed URL %s", url.c_str());
         return false;
     }
