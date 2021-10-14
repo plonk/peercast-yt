@@ -12,47 +12,31 @@
 {^end}
 
 {@if page.channel.type == "FLV"}
-  {@if page.player != "flash" }
-    <div class="message" style="text-align: center">
-      <script src="/assets/js/flv.min.js"></script>
-      <div style="position: relative">
-        <video id="videoElement" controls autoplay>
-          {#Your browser doesn't seem to support playback of FLV videos.} {#Try the playlist link below.}
-        </video>
-      	{^UNMUTE_BUTTON}
-      </div>
-      <script>
-       if (flvjs.isSupported()) {
-         var flvPlayer = flvjs.createPlayer({
-           type: 'flv',
-           isLive: true,
-           url: '/stream/{$page.channel.id}.flv'
-         });
-         flvPlayer.attachMediaElement(videoElement);
-         flvPlayer.load();
-         flvPlayer.play().catch(error => {
-           videoElement.muted = true;
-           unmuteButton.style.visibility = "visible";
-           flvPlayer.play();
-         });
-       }
-      </script>
+  <div class="message" style="text-align: center">
+    <script src="/assets/js/flv.min.js"></script>
+    <div style="position: relative">
+      <video id="videoElement" controls autoplay>
+        {#Your browser doesn't seem to support playback of FLV videos.} {#Try the playlist link below.}
+      </video>
+    	{^UNMUTE_BUTTON}
     </div>
-  {@else}
-    <div class="message" style="text-align: center">
-    <!-- 何かサイズの初期値を入れておかないと表示されないので -->
-    <object width="800" height="450"
-            id="undefined" name="undefined"
-            data="http://releases.flowplayer.org/swf/flowplayer-3.2.18.swf"
-            type="application/x-shockwave-flash">
-      <param name="movie" value="http://releases.flowplayer.org/swf/flowplayer-3.2.18.swf" />
-      <param name="allowfullscreen" value="true" />
-      <param name="allowscriptaccess" value="always" />
-      <param name="flashvars" value='config={"canvas":{"backgroundColor":"#000","backgroundGradient":"none"},"clip":{"url":"/stream/{$page.channel.id}.flv?auth={$page.channel.authToken}"},"playlist":[{"url":"/stream/{$page.channel.id}.flv?auth={$page.channel.authToken}","scaling":"fit"}]}' />
-
-    </object>
-    </div>
-  {@end}
+    <script>
+     if (flvjs.isSupported()) {
+       var flvPlayer = flvjs.createPlayer({
+         type: 'flv',
+         isLive: true,
+         url: '/stream/{$page.channel.id}.flv'
+       });
+       flvPlayer.attachMediaElement(videoElement);
+       flvPlayer.load();
+       flvPlayer.play().catch(error => {
+         videoElement.muted = true;
+         unmuteButton.style.visibility = "visible";
+         flvPlayer.play();
+       });
+     }
+    </script>
+  </div>
 {@elsif page.channel.type == "WMV"}
   {@if servMgr.transcodingEnabled}
     <div class="message" style="text-align: center">

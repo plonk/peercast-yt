@@ -14,18 +14,12 @@
 	  flex-direction: row;
 	  flex-wrap: wrap;
       }
-      object { color: white; font-size: 14px; }
       .message { color: white; font-size: 14px; }
 
       video {
 	  width: 100%;
 	  max-height: calc(100vh - 37px);
 	  max-width: calc(100vw);
-      }
-
-      /* FlowPlayer */
-      object {
-	  max-width: calc(100% - 320px);
       }
 
       #bbs-view {
@@ -112,14 +106,6 @@
 	  {@end}
 	  -
 	  <a href="/admin?cmd=bump&amp;id={$page.channel.id}">{#Bump}</a>
-	  {@if page.channel.type == "FLV"}
-	  -
-	  {@if page.player != "flash"}
-	  <a href="?id={$page.channel.id}&amp;player=flash" title="{#Request Flash-based player}">Flash</a>
-	  {@else}
-	  <a href="?id={$page.channel.id}" title="{#Request HTML5 player}">HTML5</a>
-	  {@end}
-	  {@end}
 	</div>
 
         {@if servMgr.chat}
