@@ -30,7 +30,7 @@ posts = [{
   "date":  post.date
 } for post in thread.posts(range(first, board.resmax))]
 
-print("Content-Type: text/json; charset=UTF-8\n")
+print("Content-Type: application/json; charset=UTF-8\n")
 print(json.dumps({
   "status": "ok",
   "id":     thread.id,
