@@ -9,7 +9,7 @@ import bbs_reader
 form = cgi.FieldStorage()
 
 if "fqdn" not in form or "category" not in form or "id" not in form:
-  common.print_bad_request("bad parameter")
+  bbs_reader.print_bad_request("bad parameter")
   sys.exit()
 
 if "first" not in form:
