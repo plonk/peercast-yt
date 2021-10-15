@@ -36,5 +36,5 @@ data = {
   "board_num": board.board_num
 }
 
-print("Content-Type: text/json; charset=UTF-8\n")
+print("Content-Type: application/json; charset=UTF-8\n")
 print(json.dumps(data))
