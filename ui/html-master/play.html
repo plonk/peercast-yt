@@ -13,9 +13,15 @@
 	  display: flex;
 	  flex-direction: row;
 	  flex-wrap: wrap;
+
+          border-bottom: solid 1px gray;
       }
-      object { color: white; font-size: 14px; }
-      .message { color: white; font-size: 14px; }
+
+      .message {
+          flex-grow: 1;
+          color: white;
+          font-size: 14px;
+      }
 
       video {
 	  width: 100%;
@@ -23,24 +29,38 @@
 	  max-width: calc(100vw);
       }
 
-      /* FlowPlayer */
-      object {
-	  max-width: calc(100% - 320px);
-      }
-
-      #bbs-view {
+      #bbs-view-container {
 	  background-color: #eee;
 	  box-sizing: border-box;
 	  margin: 0;
-	  padding: 5px 5px 5px 5px;
-	  overflow-y: scroll;
-	  word-break: break-all;
-	  flex-grow: 1;
+          flex: 1 0 340px;
+          display: flex;
+          flex-direction: column;
+
+          border-left: solid 1px gray;
       }
 
-      dl.thread dd {
-	  margin-left: 1.5em;
-	  margin-bottom: 1em;
+      #bbs-view {
+	  padding: 5px 5px 5px 5px;
+	  box-sizing: border-box;
+	  overflow-y: scroll;
+	  word-break: break-all;
+          flex: 1 1 1px;
+      }
+
+      .message {
+          flex-grow: 1 0;
+          display: flex;
+          align-items: center;
+      }
+
+      .message > div {
+          flex-grow: 1;
+      }
+
+      .post-form {
+	  padding: 5px 5px 5px 5px;
+          border-top: solid 1px gray;
       }
 
       table.layout {
@@ -59,17 +79,24 @@
 
       #main-area {
 	  flex-grow: 1;
-	  overflow-y: hidden;
+	  /* overflow-y: hidden; */
 
 	  /* this is itself a flex container */
 	  display: flex;
 	  flex-direction: row;
       }
 
+      #message-input {
+          width: 100%
+      }
+
       @media (orientation: portrait) {
 	  #main-area {
 	      flex-direction: column;
 	  }
+          #bbs-view-container {
+              flex: 1 1 120px;
+          }
       }
 
       @media (orientation: portrait) {
@@ -133,7 +160,13 @@
       <div id="main-area">
 	{^include player.html}
         {@if servMgr.chat}
-        <div id="bbs-view"></div>
+        <div id="bbs-view-container">
+          <div id="bbs-view"></div>
+          <div class="post-form" style="text-align: right">
+            <input type="text" id="message-input" placeholder="{#Send a message}" style="padding: 5px; border-radius: 5px;">
+            <button id="post-button" style="margin-top: 5px; color: white; font-weight: bold; background-color: #348; border-radius: 5px">{#Chat}</button>
+          </div>
+        </div>
         {@end}
       </div>
     </div>

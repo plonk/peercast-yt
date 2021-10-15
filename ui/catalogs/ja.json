@@ -292,6 +292,7 @@
     "Show Chat"               : "チャット表示",
     "Request Flash-based player" : "Flashベースのプレーヤーにチェンジ",
     "Request HTML5 player"    : "HTML5プレーヤーにチェンジ",
+    "Send a message"          : "メッセージを送る",
 
     // public/index.html
     "Local Channels"          : "ローカルチャンネル",
