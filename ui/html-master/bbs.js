@@ -174,15 +174,19 @@ async function mainAsync(url) {
         console.log(board);
 
         var board_url = boardUrl(info);
-        $('#bbs-title').html("<a target='_blank' href='"+board_url+"'><b>"+h(board.title)+"</b></a>");
+        $('#bbs-title').html(`<a target='_blank' href='${board_url}'><b>${h(board.title)}</b></a>`);
 
-        var buf = "";
-        for (var i = 0; i < board.threads.length; i++) {
-            var t = board.threads[i];
-            var thread_url = info.protocol+"://"+info.fqdn+"/"+(info.shitaraba ? "bbs" : "test")+"/read.cgi/"+info.category+(info.shitaraba ? "/"+info.board_num+"/" : "/")+t.id+"/l50";
-            buf += "<a href='"+thread_url+"' class='thread-link' data-thread-id="+t.id+">"+h(t.title)+" ("+t.last+")</a><br>";
+        if (board.threads.length > 0) {
+            var buf = "";
+            for (var i = 0; i < board.threads.length; i++) {
+                var t = board.threads[i];
+                var thread_url = info.protocol+"://"+info.fqdn+"/"+(info.shitaraba ? "bbs" : "test")+"/read.cgi/"+info.category+(info.shitaraba ? "/"+info.board_num+"/" : "/")+t.id+"/l50";
+                buf += "<a href='"+thread_url+"' class='thread-link' data-thread-id="+t.id+">"+h(t.title)+" ("+t.last+")</a><br>";
+            }
+            $('#bbs-view').html(buf);
+        } else {
+            $('#bbs-view').html(`掲示板「<a target='_blank' href='${board_url}'>${h(board.title)}</a>」にスレッドはありません。`);
         }
-        $('#bbs-view').html(buf);
 
         $('.thread-link').on('click', function (e) {
             if (e.button === 0) {
