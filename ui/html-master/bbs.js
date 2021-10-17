@@ -195,6 +195,8 @@ async function mainAsync(url) {
             }
         })
 
+        $('.post-form').hide();
+
         // 移動要求を待つだけのループ。
         while (true) {
             // 移動要求が来たら中断して全部やりなおす。
@@ -209,6 +211,8 @@ async function mainAsync(url) {
             await delay(100);
         }
     } else if (info = getThreadInfo(url)) {
+        $('.post-form').show();
+
         const board = await $.getJSON(`/cgi-bin/board.cgi?fqdn=${info.fqdn}&category=${info.category}&board_num=${info.board_num}`);
         let thread = await $.getJSON(threadCgi(info, info.thread_id));
         console.log(thread);
