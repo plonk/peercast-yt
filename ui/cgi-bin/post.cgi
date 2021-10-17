@@ -30,6 +30,28 @@ def post_message_nichan(fqdn, category, thread_id, name, mail, body):
   else:
     return {'status':'error','code':response.getcode()}
 
+def post_message_shitaraba(fqdn, category, board_num, thread_id, name, mail, body):
+  url = f'https://{fqdn}/bbs/write.cgi/{category}/{board_num}/{thread_id}/'
+  referer = f'https://{fqdn}/bbs/read.cgi/{category}/{board_num}/{thread_id}/'
+
+  form_data = {
+    "BBS": board_num,
+    "KEY": thread_id,
+    "DIR": category,
+    "NAME": name.encode('euc-jp'),
+    "MAIL": mail.encode('euc-jp'),
+    'MESSAGE': body.encode('euc-jp')
+  }
+  data = urllib.parse.urlencode(form_data).encode('ascii')
+  headers = {'Referer':referer}
+  request = urllib.request.Request(url, data, headers)
+  response = urllib.request.urlopen(request)
+
+  if response.getcode() == 200:
+    return {'status':'ok'}
+  else:
+    return {'status':'error','code':response.getcode()}
+
 form = cgi.FieldStorage()
 
 # 2ch掲示板の場合は category は板名。name, mail は空文字列でよい。
@@ -43,12 +65,21 @@ mail = form['mail'].value if 'mail' in form else ""
 
 board_num = form["board_num"].value if "board_num" in form else ""
 
-result = post_message_nichan(form['fqdn'].value,
-                             form['category'].value,
-                             form['id'].value,
-                             name,
-                             mail,
-                             form['body'].value)
+if 'shitaraba' in form['fqdn'].value:
+  result = post_message_shitaraba(form['fqdn'].value,
+                                  form['category'].value,
+                                  board_num,
+                                  form['id'].value,
+                                  name,
+                                  mail,
+                                  form['body'].value)
+else:
+  result = post_message_nichan(form['fqdn'].value,
+                               form['category'].value,
+                               form['id'].value,
+                               name,
+                               mail,
+                               form['body'].value)
 
 print("Content-Type: application/json; charset=UTF-8\n")
 print(json.dumps(result))

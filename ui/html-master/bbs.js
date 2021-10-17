@@ -144,7 +144,7 @@ function encodeForm(obj) {
 
 async function doPostMessageAsync(info, body) {
     const name = '', mail = 'sage';
-    const query = encodeForm({'fqdn':info.fqdn, 'category':info.category, 'id':info.thread_id}) + '&' + encodeForm({name, mail, body})
+    const query = encodeForm({'fqdn':info.fqdn, 'category':info.category, 'id':info.thread_id, 'board_num':info.board_num}) + '&' + encodeForm({name, mail, body})
 
     try {
         const result = await $.getJSON(`/cgi-bin/post.cgi?${query}`);
