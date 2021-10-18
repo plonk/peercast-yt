@@ -154,16 +154,26 @@ void Host::fromStrIP(const char *str, int p)
 // -----------------------------------
 bool Host::isMemberOf(const Host &h) const
 {
-    if (!h.ip)
+    auto pattern = h.ip;
+
+    // 集合はIPv4で表される。
+    if (!pattern.isIPv4Mapped())
+        throw ArgumentException("Invalid pattern");
+
+    // IPv6アドレスはIPv4アドレスの集合の要素ではない。
+    if (!ip.isIPv4Mapped())
         return false;
 
-    if ( h.ip.ip0() != 255 && ip.ip0() != h.ip.ip0() )
+    if (!pattern)
         return false;
-    if ( h.ip.ip1() != 255 && ip.ip1() != h.ip.ip1() )
+
+    if ( pattern.ip0() != 255 && ip.ip0() != pattern.ip0() )
         return false;
-    if ( h.ip.ip2() != 255 && ip.ip2() != h.ip.ip2() )
+    if ( pattern.ip1() != 255 && ip.ip1() != pattern.ip1() )
         return false;
-    if ( h.ip.ip3() != 255 && ip.ip3() != h.ip.ip3() )
+    if ( pattern.ip2() != 255 && ip.ip2() != pattern.ip2() )
+        return false;
+    if ( pattern.ip3() != 255 && ip.ip3() != pattern.ip3() )
         return false;
 
     return true;
