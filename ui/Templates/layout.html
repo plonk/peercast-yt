@@ -65,7 +65,7 @@
               <div align="center">
                 <table width="100%" border="0">
                   <tr>
-                    <td nowrap>
+                    <td>
                       <table width="100%" border="0" cellspacing="0" cellpadding="0">
                         <tr>
                           <td valign="middle" nowrap>
@@ -86,7 +86,7 @@
                             </table>
                             <div align="center"><span class="titlelinksBig"> </span>
                           </div></td>
-                          <td style="padding: 0" align="right">
+                          <td style="padding: 0" align="right" style="white-space:normal">
                             {@if servMgr.upgradeURL}
                             <div align="center" class="normal">
                               <a href="{$servMgr.upgradeURL}" target="_blank">
@@ -103,8 +103,10 @@
                               {#Warning: The whole of the Internet is marked as Private.}
                             </span>
                             {@end}
-			    <a class="normal-small" href="/public/index.html">{#Public Directory}</a>
-			    <a class="normal-small" href="logout.html">{#_Logout_navbar}</a>
+                            <div style="float:right">
+			      <a class="normal-small" href="/public/index.html">{#Public Directory}</a>
+			      <a class="normal-small" href="logout.html">{#_Logout_navbar}</a>
+                            </div>
                           </td>
                         </tr>
                       </table>
