@@ -25,6 +25,8 @@
 
 static const Regexp IPV4_PATTERN("^\\d+\\.\\d+\\.\\d+\\.\\d+$");
 static const Regexp IPV6_PATTERN("^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|[fF][eE]80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::([fF][fF][fF][fF](:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$");
+static const Regexp IPV4_WITH_NETMASK_PATTERN("^\\d+\\.\\d+\\.\\d+\\.\\d+/\\d+$");
+static const Regexp IPV6_WITH_NETMASK_PATTERN("^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|[fF][eE]80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::([fF][fF][fF][fF](:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))/\\d+$");
 
 bool    ServFilter::writeVariable(Stream &out, const String &var)
 {
@@ -70,6 +72,38 @@ bool ServFilter::matches(int fl, const Host& h) const
                 return false;
             }
         }
+    case T_IPV4_WITH_NETMASK:
+        {
+            if (!h.ip.isIPv4Mapped())
+                return false;
+
+            uint32_t mask = (uint32_t) -1 << (32 - netmask);
+
+            return (host.ip.ipv4() & mask) == (h.ip.ipv4() & mask);
+        }
+    case T_IPV6_WITH_NETMASK:
+        {
+            const unsigned char* addr1 = host.ip.addr;
+            const unsigned char* addr2 = h.ip.addr;
+
+            int n = netmask;
+            for (int i = 0; i < 16; i++)
+            {
+                if (n >= 8) {
+                    if (addr1[i] != addr2[i])
+                        return false;
+                    n -= 8;
+                } else {
+                    unsigned char mask = (unsigned char) -1 << (8 - n);
+                    if ((addr1[i] & mask) != (addr2[i] & mask))
+                        return false;
+                    n = 0;
+                }
+                if (n <= 0)
+                    break;
+            }
+            return true;
+        }
     default:
         throw LogicError("matches: Unknown ServFilter type");
     }
@@ -94,6 +128,18 @@ void ServFilter::setPattern(const char* str)
     {
         type = T_IPV6;
         host = Host(IP::parse(str), 0);
+    }else if (IPV4_WITH_NETMASK_PATTERN.matches(str))
+    {
+        type = T_IPV4_WITH_NETMASK;
+        auto vec = str::split(str, "/", 2);
+        host.fromStrIP(vec[0].c_str(), 0);
+        netmask = std::min(32, atoi(vec[1].c_str()));
+    }else if (IPV6_WITH_NETMASK_PATTERN.matches(str))
+    {
+        type = T_IPV6_WITH_NETMASK;
+        auto vec = str::split(str, "/", 2);
+        host = Host(IP::parse(vec[0]), 0);
+        netmask = std::min(128, atoi(vec[1].c_str()));
     }else
     {
         type = T_HOSTNAME;
@@ -114,6 +160,9 @@ std::string ServFilter::getPattern() const
         return pattern;
     case T_SUFFIX:
         return pattern;
+    case T_IPV4_WITH_NETMASK:
+    case T_IPV6_WITH_NETMASK:
+        return host.ip.str() + "/" + std::to_string(netmask);
     default:
         throw LogicError("getPattern: Unknown ServFilter type");
     }

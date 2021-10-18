@@ -166,3 +166,42 @@ TEST_F(ServFilterFixture, matchIPv4MappedIPv6UpperCase)
     ASSERT_TRUE(filter.matches(ServFilter::F_DIRECT, Host(IP::parse("192.168.0.1"), 0)));
     ASSERT_FALSE(filter.matches(ServFilter::F_DIRECT, Host(IP::parse("192.168.0.2"), 0)));
 }
+
+TEST_F(ServFilterFixture, setIPv4WithNetmask)
+{
+    filter.setPattern("192.168.0.0/24");
+    ASSERT_EQ(ServFilter::T_IPV4_WITH_NETMASK, filter.type);
+    ASSERT_EQ("192.168.0.0/24", filter.getPattern());
+}
+
+TEST_F(ServFilterFixture, matchIPv4WithNetMask)
+{
+    filter.flags = ServFilter::F_DIRECT;
+    filter.setPattern("192.168.0.0/24");
+    ASSERT_TRUE(filter.matches(ServFilter::F_DIRECT, Host(IP::parse("192.168.0.1"), 0)));
+    ASSERT_FALSE(filter.matches(ServFilter::F_DIRECT, Host(IP::parse("192.168.1.1"), 0)));
+}
+
+TEST_F(ServFilterFixture, setIPv6WithNetmask)
+{
+    filter.setPattern("fc00::/7");
+    ASSERT_EQ(ServFilter::T_IPV6_WITH_NETMASK, filter.type);
+    ASSERT_EQ("fc00::/7", filter.getPattern());
+
+    filter.setPattern("::/0");
+    ASSERT_EQ(ServFilter::T_IPV6_WITH_NETMASK, filter.type);
+    ASSERT_EQ("::/0", filter.getPattern());
+ }
+
+TEST_F(ServFilterFixture, matchIPv6WithNetMask)
+{
+    filter.flags = ServFilter::F_DIRECT;
+    filter.setPattern("fc00::/7");
+    ASSERT_TRUE(filter.matches(ServFilter::F_DIRECT, Host(IP::parse("fd44:7144:7144::1"), 0)));
+    ASSERT_FALSE(filter.matches(ServFilter::F_DIRECT, Host(IP::parse("::1"), 0)));
+
+    // 何でもマッチする。
+    filter.setPattern("::/0");
+    ASSERT_TRUE(filter.matches(ServFilter::F_DIRECT, Host(IP::parse("fd44:7144:7144::1"), 0)));
+    ASSERT_TRUE(filter.matches(ServFilter::F_DIRECT, Host(IP::parse("::1"), 0)));
+}
