@@ -189,7 +189,7 @@ public:
     void            setPassiveSearch(unsigned int);
     int             findChannel(ChanInfo &);
     bool            getChannel(char *, ChanInfo &, bool);
-    void            setFilterDefaults();
+    void            ensureCatchallFilters();
 
     bool            acceptGIV(std::shared_ptr<ClientSocket>);
     void            addVersion(unsigned int);
