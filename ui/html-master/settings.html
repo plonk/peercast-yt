@@ -102,23 +102,22 @@
           <td colspan=5><b>{#Filters}</b></td>
         </tr>
         <tr class="normal">
-          <th width="32%" style="font-weight: normal; padding: 3px 0; font-size: 85%;">{#IP Mask}</th>
-          <th width="17%" style="font-weight: normal; padding: 3px 0; font-size: 85%;">{#Network}</th>
-          <th width="17%" style="font-weight: normal; padding: 3px 0; font-size: 85%;">{#Direct}</th>
-          <th width="17%" style="font-weight: normal; padding: 3px 0; font-size: 85%;">{#Private}</th>
-          <th width="17%" style="font-weight: normal; padding: 3px 0; font-size: 85%;">{#Ban}</th>
+          <th style="font-weight: normal; padding: 3px 0">{#IP Mask}</th>
+          <th style="max-width: 100px; font-weight: normal; padding: 3px 0; white-space: normal">
+            {#Flags}<br>
+            <small>({#Network} / {#Direct} / {#Private} / {#Ban})</small>
+          </th>
         </tr>
         {@loop servMgr.numFilters}
         <tr align=middle class="normal">
-          <td><input class="fill-parent" size=15 value="{$loop.filter.ip}" name=filt_ip>
+          <td>
+            <input class="fill-parent" size=30 value="{$loop.filter.ip}" name=filt_ip>
           </td>
-          <td><input type=checkbox {@if loop.filter.network}checked{@end} value=1 name="filt_nw{$loop.index}">
-          </td>
-          <td><input type=checkbox {@if loop.filter.direct}checked{@end} value=1 name="filt_di{$loop.index}">
-          </td>
-          <td><input type=checkbox {@if loop.filter.private}checked{@end} value=1 name="filt_pr{$loop.index}">
-          </td>
-          <td><input type=checkbox {@if loop.filter.banned}checked{@end} value=1 name="filt_bn{$loop.index}">
+          <td nowrap>
+            <input title="{#Network}" type=checkbox {@if loop.filter.network}checked{@end} value=1 name="filt_nw{$loop.index}">
+            <input title="{#Direct}" type=checkbox {@if loop.filter.direct}checked{@end} value=1 name="filt_di{$loop.index}">
+            <input title="{#Private}" type=checkbox {@if loop.filter.private}checked{@end} value=1 name="filt_pr{$loop.index}">
+            <input title="{#Ban}" type=checkbox {@if loop.filter.banned}checked{@end} value=1 name="filt_bn{$loop.index}">
           </td>
         </tr>
         {@end}
