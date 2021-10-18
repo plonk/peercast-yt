@@ -205,3 +205,31 @@ TEST_F(ServFilterFixture, matchIPv6WithNetMask)
     ASSERT_TRUE(filter.matches(ServFilter::F_DIRECT, Host(IP::parse("fd44:7144:7144::1"), 0)));
     ASSERT_TRUE(filter.matches(ServFilter::F_DIRECT, Host(IP::parse("::1"), 0)));
 }
+
+TEST_F(ServFilterFixture, isGlobal1)
+{
+    ASSERT_FALSE(filter.isGlobal());
+    filter.setPattern("255.255.255.255");
+    ASSERT_TRUE(filter.isGlobal());
+}
+
+TEST_F(ServFilterFixture, isGlobal2)
+{
+    ASSERT_FALSE(filter.isGlobal());
+    filter.setPattern("192.168.0.255");
+    ASSERT_FALSE(filter.isGlobal());
+}
+
+TEST_F(ServFilterFixture, isGlobal3)
+{
+    ASSERT_FALSE(filter.isGlobal());
+    filter.setPattern("0.0.0.0/0");
+    ASSERT_TRUE(filter.isGlobal());
+}
+
+TEST_F(ServFilterFixture, isGlobal4)
+{
+    ASSERT_FALSE(filter.isGlobal());
+    filter.setPattern("::/0");
+    ASSERT_TRUE(filter.isGlobal());
+}

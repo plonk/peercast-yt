@@ -478,12 +478,22 @@ TEST_F(ServMgrFixture, getSettings)
     }
 }
 
-TEST_F(ServMgrFixture, hasUnsafeFilterSettings)
+TEST_F(ServMgrFixture, hasUnsafeFilterSettingsV4)
 {
     ASSERT_EQ(2, m.numFilters);
     ASSERT_EQ("255.255.255.255", m.filters[0].getPattern());
     ASSERT_FALSE(m.hasUnsafeFilterSettings());
 
     m.filters[0].flags |= ServFilter::F_PRIVATE;
+    ASSERT_TRUE(m.hasUnsafeFilterSettings());
+}
+
+TEST_F(ServMgrFixture, hasUnsafeFilterSettingsV6)
+{
+    ASSERT_EQ(2, m.numFilters);
+    ASSERT_EQ("::/0", m.filters[1].getPattern());
+    ASSERT_FALSE(m.hasUnsafeFilterSettings());
+
+    m.filters[1].flags |= ServFilter::F_PRIVATE;
     ASSERT_TRUE(m.hasUnsafeFilterSettings());
 }

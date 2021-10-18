@@ -171,7 +171,9 @@ std::string ServFilter::getPattern() const
 // --------------------------------------------------
 bool ServFilter::isGlobal()
 {
-    return type == T_IP && host.str(false) == "255.255.255.255";
+    return (getPattern() == "255.255.255.255") ||
+        (getPattern() == "0.0.0.0/0") ||
+        (getPattern() == "::/0");
 }
 
 // --------------------------------------------------
