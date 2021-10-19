@@ -117,7 +117,8 @@ ServMgr::ServMgr()
 
     restartServer=false;
 
-    setFilterDefaults();
+    numFilters = 0;
+    ensureCatchallFilters();
 
     servents = NULL;
 
@@ -216,13 +217,33 @@ void    ServMgr::connectBroadcaster()
 }
 
 // -----------------------------------
-void ServMgr::setFilterDefaults()
+void ServMgr::ensureCatchallFilters()
 {
-    numFilters = 0;
+    bool hasV4Catchall = false;
+    bool hasV6Catchall = false;
 
-    filters[numFilters].setPattern("255.255.255.255");
-    filters[numFilters].flags = ServFilter::F_NETWORK|ServFilter::F_DIRECT;
-    numFilters++;
+    for (int i = 0; i < numFilters; i++)
+    {
+        if (filters[i].getPattern() == "255.255.255.255")
+            hasV4Catchall = true;
+        else if (filters[i].getPattern() == "::/0")
+            hasV6Catchall = true;
+    }
+
+    if (!hasV4Catchall)
+    {
+        filters[numFilters].setPattern("255.255.255.255");
+        filters[numFilters].flags = ServFilter::F_NETWORK|ServFilter::F_DIRECT;
+        numFilters++;
+    }
+    
+
+    if (!hasV6Catchall)
+    {
+        filters[numFilters].setPattern("::/0");
+        filters[numFilters].flags = ServFilter::F_NETWORK|ServFilter::F_DIRECT;
+        numFilters++;
+    }
 }
 
 // -----------------------------------
@@ -1464,8 +1485,7 @@ void ServMgr::loadSettings(const char *fn)
         }
     }
 
-    if (!numFilters)
-        setFilterDefaults();
+    ensureCatchallFilters();
 }
 
 // --------------------------------------------------

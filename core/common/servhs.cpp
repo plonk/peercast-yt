@@ -1226,9 +1226,12 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
 
             if (strncmp(fs, "ip", 2) == 0)        // ip must be first
             {
+                String str(arg, String::T_ESC);
+                str.convertTo(String::T_ASCII);
+
                 currFilter = &servMgr->filters[servMgr->numFilters];
                 currFilter->init();
-                currFilter->setPattern(arg);
+                currFilter->setPattern(str.c_str());
                 if (currFilter->isSet() && (servMgr->numFilters < (ServMgr::MAX_FILTERS-1)))
                 {
                     servMgr->numFilters++;
