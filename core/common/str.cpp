@@ -431,7 +431,7 @@ std::string indent_tab(const std::string& text, int n)
     auto lines = to_lines(text);
     auto space = repeat("\t", n);
 
-    for (int i = 0; i < lines.size(); ++i)
+    for (size_t i = 0; i < lines.size(); ++i)
         lines[i] = space + lines[i];
 
     return join("", lines);

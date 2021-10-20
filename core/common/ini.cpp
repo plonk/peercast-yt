@@ -116,7 +116,7 @@ Document parse(const std::string& str)
 
     auto lines = str::to_lines(str);
     Section section;
-    int i = 0;
+    size_t i = 0;
     while (i < lines.size()) {
         std::vector<std::string> v;
         auto line_i = trim(lines[i]);
@@ -126,7 +126,7 @@ Document parse(const std::string& str)
         } else if ((v = kRegexpSection.exec(line_i)).size()) {
             if (v[1] == "End") {
                 if (section.name == "") {
-                    auto msg = str::format("Syntax error in line %d: Stray 'End'", i + 1);
+                    auto msg = str::format("Syntax error in line %lu: Stray 'End'", i + 1);
                     throw FormatException(msg.c_str());
                 } else {
                     section.endTag = "End";
@@ -142,7 +142,7 @@ Document parse(const std::string& str)
                 std::string sectionName = v[1];
                 std::vector<Key> keys;
 
-                for (int j = i + 1; j < lines.size(); j++) {
+                for (size_t j = i + 1; j < lines.size(); j++) {
                     auto line_j = trim(lines[j]);
 
                     if ((v = kRegexpAssignment.exec(line_j)).size()) {
@@ -155,7 +155,7 @@ Document parse(const std::string& str)
                 section = Section(sectionName, keys);
             }
         } else {
-            auto msg = str::format("Syntax error in line %d", i + 1);
+            auto msg = str::format("Syntax error in line %lu", i + 1);
             throw GeneralException(msg.c_str());
         }
     }
