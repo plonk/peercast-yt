@@ -140,6 +140,7 @@ std::vector<std::string> USys::getIPAddresses(const std::string& name)
             break;
         }
     }
+    freeaddrinfo(result);
     return addrs;
 }
 
