@@ -221,12 +221,12 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
         string path, lang;
         tie(path, lang) = mapper.toLocalFilePath(req.path, langs);
 
-        LOG_DEBUG("Writing `%s` lang=%s", path.c_str(), lang.c_str());
-
         if (path.empty())
             return HTTPResponse::notFound();
         else
         {
+            LOG_DEBUG("Writing `%s` lang=%s", path.c_str(), lang.c_str());
+
             auto type = MIMEType(path);
 
             StringStream mem;
