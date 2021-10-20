@@ -192,6 +192,10 @@ std::string codepoint_to_utf8(uint32_t codepoint)
 #include <stdarg.h>
 std::string format(const char* fmt, ...)
 {
+    // 必要なバイト数の計算のために vsnprintf を呼び出し、実際に文字列
+    // を作るためにもう一度 vsnprintf を呼び出す。
+    // １度目の vsnprintf の呼び出しのあと ap の値は未定義になるので、
+    // ２度目の呼び出しのために aq にコピーしておく。
     va_list ap, aq;
     std::string res;
 
