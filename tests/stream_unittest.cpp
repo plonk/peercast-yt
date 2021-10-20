@@ -420,6 +420,12 @@ TEST_F(StreamFixture, writeLineF)
     ASSERT_STREQ("hello world\n", mem.str().c_str());
 }
 
+TEST_F(StreamFixture, writeLineF_largeInput)
+{
+    std::string longString(40960, 'A');
+    ASSERT_THROW(mem.writeLineF("hello %s", longString.c_str()), StreamException);
+}
+
 TEST_F(StreamFixture, writeString)
 {
     mem.writeString("hello world");
@@ -438,6 +444,12 @@ TEST_F(StreamFixture, writeStringF)
 {
     mem.writeStringF("hello %s", "world");
     ASSERT_STREQ("hello world", mem.str().c_str());
+}
+
+TEST_F(StreamFixture, writeStringF_largeInput)
+{
+    std::string longString(40960, 'A');
+    ASSERT_THROW(mem.writeStringF("hello %s", longString.c_str()), StreamException);
 }
 
 TEST_F(StreamFixture, readBits_nibbles)
