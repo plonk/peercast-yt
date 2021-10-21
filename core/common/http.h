@@ -283,6 +283,7 @@ public:
         requestUrl = "";
         protocolVersion = "";
         headers.clear();
+        m_headersRead = false;
     }
 
     HTTPRequest getRequest();
