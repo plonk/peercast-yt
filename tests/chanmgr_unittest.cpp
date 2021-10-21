@@ -35,6 +35,10 @@ TEST_F(ChanMgrFixture, initialState)
     ASSERT_EQ(NULL, x->hitlist);
     //ASSERT_EQ(PCP_BROADCAST_FLAGS, x->broadcastID.getFlags());
 
+    ASSERT_TRUE(id.isSame(x->searchInfo.id));
+    ASSERT_TRUE(id.isSame(x->searchInfo.bcID));
+    // ...
+
     // ASSERT_EQ(0, x->numFinds); // 初期化されない。
     ASSERT_EQ(String(), x->broadcastMsg);
     EXPECT_EQ(10, x->broadcastMsgInterval);
