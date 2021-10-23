@@ -94,7 +94,7 @@ TEST_F(ServMgrFixture, initialState)
     ASSERT_EQ("255.255.255.255", m.filters[0].getPattern());
     ASSERT_EQ(ServFilter::F_NETWORK|ServFilter::F_DIRECT, m.filters[0].flags);
     // int                 numFilters;
-    ASSERT_EQ(1, m.numFilters);
+    ASSERT_EQ(2, m.numFilters);
     // CookieList          cookieList;
     // AUTH_TYPE           authType;
     ASSERT_EQ(ServMgr::AUTH_COOKIE, m.authType);
@@ -234,7 +234,7 @@ TEST_F(ServMgrFixture, writeVariable)
 
     mem.str("");
     ASSERT_TRUE(m.writeVariable(mem, "numFilters"));
-    ASSERT_STREQ("2", mem.str().c_str());
+    ASSERT_STREQ("3", mem.str().c_str()); // HTML UI の都合で+1される。
 
     mem.str("");
     ASSERT_TRUE(m.writeVariable(mem, "numActive1"));
@@ -478,12 +478,22 @@ TEST_F(ServMgrFixture, getSettings)
     }
 }
 
-TEST_F(ServMgrFixture, hasUnsafeFilterSettings)
+TEST_F(ServMgrFixture, hasUnsafeFilterSettingsV4)
 {
-    ASSERT_EQ(1, m.numFilters);
+    ASSERT_EQ(2, m.numFilters);
     ASSERT_EQ("255.255.255.255", m.filters[0].getPattern());
     ASSERT_FALSE(m.hasUnsafeFilterSettings());
 
     m.filters[0].flags |= ServFilter::F_PRIVATE;
+    ASSERT_TRUE(m.hasUnsafeFilterSettings());
+}
+
+TEST_F(ServMgrFixture, hasUnsafeFilterSettingsV6)
+{
+    ASSERT_EQ(2, m.numFilters);
+    ASSERT_EQ("::/0", m.filters[1].getPattern());
+    ASSERT_FALSE(m.hasUnsafeFilterSettings());
+
+    m.filters[1].flags |= ServFilter::F_PRIVATE;
     ASSERT_TRUE(m.hasUnsafeFilterSettings());
 }

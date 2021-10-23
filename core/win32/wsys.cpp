@@ -129,6 +129,7 @@ std::vector<std::string> WSys::getIPAddresses(const std::string& name)
             break;
         }
     }
+    freeaddrinfo(result);
     return addrs;
 }
 
