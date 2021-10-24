@@ -1475,7 +1475,7 @@ void ServMgr::loadSettings(const char *fn)
                     } else {
                         try {
                             this->flags.get(iniFile.getName()) = iniFile.getBoolValue();
-                        } catch (std::out_of_range) {
+                        } catch (std::out_of_range&) {
                             LOG_ERROR("Flag %s not found", iniFile.getName());
                         }
                     }
@@ -2203,7 +2203,7 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     {
         try {
             buf = to_string(this->flags.get(var + strlen("flags.")));
-        } catch (std::out_of_range) {
+        } catch (std::out_of_range&) {
             return false;
         }
     } else if (var == "installationDirectory")
