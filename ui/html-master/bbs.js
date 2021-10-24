@@ -181,7 +181,7 @@ async function mainAsync(url) {
             for (var i = 0; i < board.threads.length; i++) {
                 var t = board.threads[i];
                 var thread_url = info.protocol+"://"+info.fqdn+"/"+(info.shitaraba ? "bbs" : "test")+"/read.cgi/"+info.category+(info.shitaraba ? "/"+info.board_num+"/" : "/")+t.id+"/l50";
-                buf += "<a href='"+thread_url+"' class='thread-link' data-thread-id="+t.id+">"+h(t.title)+" ("+t.last+")</a><br>";
+                buf += `<div style="padding:2px;font-size:13px"><a href='${thread_url}' class='thread-link' data-thread-id=${t.id}>${h(t.title)} (${t.last})</a></div>`;
             }
             $('#bbs-view').html(buf);
         } else {
