@@ -43,13 +43,13 @@ json JrpcApi::call_internal(const string& input)
 
     try {
         id = j.at("id");
-    } catch (json::out_of_range) {
+    } catch (json::out_of_range&) {
         return error_object(kInvalidRequest, "Invalid Request");
     }
 
     try {
         method = j.at("method");
-    } catch (json::out_of_range) {
+    } catch (json::out_of_range&) {
         return error_object(kInvalidRequest, "Invalid Request", id);
     }
 
