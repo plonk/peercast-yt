@@ -268,6 +268,8 @@ std::shared_ptr<Channel> ChanMgr::findAndRelay(ChanInfo &info)
 
 // -----------------------------------
 ChanMgr::ChanMgr()
+    : lastHit(0)
+    , searchActive(false)
 {
     channel = NULL;
 

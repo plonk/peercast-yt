@@ -692,7 +692,7 @@ void Servent::handshakeGIV(const char *requestLine)
 {
     HTTP(*sock).readHeaders();
 
-    if (!isAllowed(ALLOW_NETWORK))
+    if (!isAllowed(ALLOW_NETWORK) || !isFiltered(ServFilter::F_NETWORK))
         throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
     GnuID id;
@@ -2261,10 +2261,8 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
     int size = std::atoi(http.headers.get("Content-Length").c_str());
 
     // エンコーダーの設定要求を読む。0 バイトの空の設定要求も合法。
-    unique_ptr<char> buffer(new char[size + 1]);
-    http.read(buffer.get(), size);
-    buffer.get()[size] = '\0';
-    LOG_DEBUG("setup: %s", str::inspect(buffer.get()).c_str());
+    std::string setup = http.Stream::read(size);
+    LOG_DEBUG("setup: %s", str::inspect(setup).c_str());
 
     // わかったふりをする
     http.writeLine("HTTP/1.1 204 No Content"); // これってちゃんと CRLF 出る？

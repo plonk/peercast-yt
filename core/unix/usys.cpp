@@ -51,7 +51,7 @@ USys::USys()
         {
             int seed;
             char *p = (char*) &seed;
-            for (int i = 0; i < sizeof(int); i++)
+            for (size_t i = 0; i < sizeof(int); i++)
             {
                 p[i] = fgetc(fp);
             }
@@ -140,6 +140,7 @@ std::vector<std::string> USys::getIPAddresses(const std::string& name)
             break;
         }
     }
+    freeaddrinfo(result);
     return addrs;
 }
 
@@ -236,7 +237,7 @@ std::string USys::dirname(const std::string& path)
     std::string normal;
 
     // 連続するスラッシュを１つにする。
-    for (int i = 0; i < path.size(); i++) {
+    for (size_t i = 0; i < path.size(); i++) {
         if (path[i] == '/') {
             if (path[i+1] != '/')
                 normal.push_back(path[i]);
@@ -268,7 +269,7 @@ std::string USys::joinPath(const std::vector<std::string>& vec)
 {
     std::string result;
 
-    for (int i = 0; i < vec.size(); i++) {
+    for (size_t i = 0; i < vec.size(); i++) {
         std::string frag = vec[i];
         if (frag.empty()) {
             // 空文字列の要素はスキップする。
