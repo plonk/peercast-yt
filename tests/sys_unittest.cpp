@@ -241,3 +241,15 @@ TEST_F(SysFixture, joinPath)
                  NotImplementedException);
 #endif
 }
+
+// 実際に引いてみる。dns.google は現在 IPv4 アドレスが２つ、IPv6 アド
+// レスが 2 つ設定されている。このテストは、テストを走らせるマシンに
+// IPv4 か IPv6 のアドレスが設定されていることを仮定している。
+TEST_F(SysFixture, getIPAddresses)
+{
+    auto vec = m_sys->getIPAddresses("dns.google");
+
+    // 少なくとも２つのアドレスが返る。
+    ASSERT_GE(vec.size(), 2);
+}
+

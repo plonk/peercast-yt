@@ -366,8 +366,10 @@ std::string Stream::read(int remaining)
 void Stream::write(const char *fmt, va_list ap)
 {
     char tmp[4096];
-    vsprintf(tmp, fmt, ap);
-    write(tmp, strlen(tmp));
+    int len = vsnprintf(tmp, sizeof(tmp), fmt, ap);
+    if (len == -1 || len >= (int) sizeof(tmp))
+        throw StreamException("Cannot format string");
+    write(tmp, len);
 }
 
 // -------------------------------------

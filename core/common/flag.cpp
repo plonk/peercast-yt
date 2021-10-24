@@ -35,7 +35,7 @@ Flag::Flag(const Flag& other)
 FlagRegistory::FlagRegistory(std::vector<Flag>&& flags)
     : m_flags(flags)
 {
-    for (int i = 0; i < m_flags.size(); ++i) {
+    for (size_t i = 0; i < m_flags.size(); ++i) {
         m_indices[m_flags[i].name] = i;
     }
 }

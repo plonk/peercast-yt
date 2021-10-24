@@ -50,6 +50,8 @@ public:
         T_HOSTNAME,
         T_SUFFIX,
         T_IPV6,
+        T_IPV4_WITH_NETMASK,
+        T_IPV6_WITH_NETMASK,
     };
 
     ServFilter() { init(); }
@@ -58,6 +60,8 @@ public:
         type = T_IP;
         flags = 0;
         host.init();
+        pattern = "";
+        netmask = -1;
     }
     bool    writeVariable(Stream &, const String &) override;
     bool    matches(int fl, const Host& h) const;
@@ -72,4 +76,5 @@ public:
 private:
     Host host;
     std::string pattern;
+    int netmask;
 };

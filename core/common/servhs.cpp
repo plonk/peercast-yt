@@ -1226,9 +1226,12 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
 
             if (strncmp(fs, "ip", 2) == 0)        // ip must be first
             {
+                String str(arg, String::T_ESC);
+                str.convertTo(String::T_ASCII);
+
                 currFilter = &servMgr->filters[servMgr->numFilters];
                 currFilter->init();
-                currFilter->setPattern(arg);
+                currFilter->setPattern(str.c_str());
                 if (currFilter->isSet() && (servMgr->numFilters < (ServMgr::MAX_FILTERS-1)))
                 {
                     servMgr->numFilters++;
@@ -2258,10 +2261,8 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
     int size = std::atoi(http.headers.get("Content-Length").c_str());
 
     // エンコーダーの設定要求を読む。0 バイトの空の設定要求も合法。
-    unique_ptr<char> buffer(new char[size + 1]);
-    http.read(buffer.get(), size);
-    buffer.get()[size] = '\0';
-    LOG_DEBUG("setup: %s", str::inspect(buffer.get()).c_str());
+    std::string setup = http.Stream::read(size);
+    LOG_DEBUG("setup: %s", str::inspect(setup).c_str());
 
     // わかったふりをする
     http.writeLine("HTTP/1.1 204 No Content"); // これってちゃんと CRLF 出る？
