@@ -245,6 +245,8 @@ public:
 
     static const char* getFirewallStateString(FW_STATE);
 
+    bool isBlacklisted(const Host& h);
+
     ThreadInfo          serverThread;
     ThreadInfo          idleThread;
 

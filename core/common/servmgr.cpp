@@ -50,6 +50,7 @@ ServMgr::ServMgr()
             {"sendPortAtomWhenFirewallUnknown", "古いPeerCastStation相手に正常にポートチェックするにはオフにする。", false },
             {"forceFirewalled", "ファイアーウォール オンであるかの様に振る舞う。", false},
             {"startPlayingFromKeyFrame", "DIRECT接続でキーフレームまで継続パケットをスキップする。", true},
+            {"banTrackersWhileBroadcasting", "配信中他の配信者による視聴をBANする。", false},
         })
 {
     authType = AUTH_COOKIE;
@@ -861,8 +862,29 @@ void ServMgr::checkFirewallIPv6()
 }
 
 // -----------------------------------
+bool ServMgr::isBlacklisted(const Host& h)
+{
+    if (flags.get("banTrackersWhileBroadcasting") && chanMgr->isBroadcasting())
+    {
+        for (auto& entry : channelDirectory->channels())
+        {
+            auto tracker = Host::fromString(entry.tip);
+            if (tracker.ip && (tracker.ip == h.ip))
+            {
+                LOG_INFO("%s(%s) is being blocked", h.ip.str().c_str(), entry.name.c_str());
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// -----------------------------------
 bool ServMgr::isFiltered(int fl, Host &h)
 {
+    if ((fl & ServFilter::F_BAN) && isBlacklisted(h))
+        return true;
+
     for (int i=0; i<numFilters; i++)
         if (filters[i].matches(fl, h))
             return true;
