@@ -38,22 +38,29 @@ class Board:
     return self.__parse_settings(str)
 
   def thread_list(self):
-    str = self.download(self.__thread_list_url)
+    try:
+      str = self.download(self.__thread_list_url)
+    except urllib.error.HTTPError:
+      # したらばでスレッドがまだないときはsubject.txtが404になる。
+      str = b""
     return str.decode(self.external_encoding)
 
   def thread(self, thread_num):
     return next((t for t in self.threads() if t.id == thread_num), None)
 
   def threads(self):
+    threads = []
     lines = self.thread_list().splitlines()
     p = re.compile("^(\d+)\.cgi,(.+?)\((\d+)\)$" if self.shitaraba else "^(\d+)\.dat<>(.+?)\s\((\d+)\)$")
     for i, line in enumerate(lines):
+      if line == "": # したらばでスレッドがない場合、空行だけになる。
+        continue
       m = p.match(line)
       self.resmax = max(self.resmax, int(m.group(3)))
-      lines[i] = Thread(self, m.group(1), html.unescape(m.group(2)), m.group(3))
-    if self.shitaraba and len(lines) > 1:
-      lines.pop(len(lines) - 1)
-    return lines
+      threads.append(Thread(self, m.group(1), html.unescape(m.group(2)), m.group(3)))
+    if self.shitaraba and len(threads) > 1:
+      threads.pop(len(threads) - 1)
+    return threads
 
   def download(self, url):
     response = urllib.request.urlopen(url)
