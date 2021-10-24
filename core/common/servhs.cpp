@@ -692,7 +692,7 @@ void Servent::handshakeGIV(const char *requestLine)
 {
     HTTP(*sock).readHeaders();
 
-    if (!isAllowed(ALLOW_NETWORK))
+    if (!isAllowed(ALLOW_NETWORK) || !isFiltered(ServFilter::F_NETWORK))
         throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
     GnuID id;
