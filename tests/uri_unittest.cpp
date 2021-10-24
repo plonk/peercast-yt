@@ -7,6 +7,7 @@ class URIFixture : public ::testing::Test {
 public:
 };
 
+#include "LUrlParser.h"
 TEST_F(URIFixture, httpScheme)
 {
     URI u("http://www.example.com");
@@ -24,30 +25,6 @@ TEST_F(URIFixture, httpSchemeWithPortQueryAndFragment)
 
     ASSERT_TRUE(u.isValid());
     ASSERT_STREQ("http", u.scheme().c_str());
-    ASSERT_STREQ("localhost", u.host().c_str());
-    ASSERT_EQ(7144, u.port());
-    ASSERT_STREQ("/html/en/index.html", u.path().c_str());
-    ASSERT_STREQ("name=%E4%BA%88%E5%AE%9A%E5%9C%B0", u.query().c_str()); // 自動的に unescape はされない。
-    ASSERT_STREQ("top", u.fragment().c_str());
-}
-
-TEST_F(URIFixture, httpsScheme)
-{
-    URI u("https://www.example.com");
-
-    ASSERT_TRUE(u.isValid());
-    ASSERT_STREQ("https", u.scheme().c_str());
-    ASSERT_STREQ("www.example.com", u.host().c_str());
-    ASSERT_EQ(443, u.port()); // ポート指定がない場合はスキームのデフォルトポート。
-    ASSERT_STREQ("/", u.path().c_str()); // パスが省略されている場合は "/" になる。
-}
-
-TEST_F(URIFixture, httpsSchemeWithPortQueryAndFragment)
-{
-    URI u("https://localhost:7144/html/en/index.html?name=%E4%BA%88%E5%AE%9A%E5%9C%B0#top");
-
-    ASSERT_TRUE(u.isValid());
-    ASSERT_STREQ("https", u.scheme().c_str());
     ASSERT_STREQ("localhost", u.host().c_str());
     ASSERT_EQ(7144, u.port());
     ASSERT_STREQ("/html/en/index.html", u.path().c_str());
