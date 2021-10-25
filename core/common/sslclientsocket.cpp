@@ -13,7 +13,11 @@
 #include "sslclientsocket.h"
 #include <openssl/ssl.h>
 #include <sys/types.h>
+#ifdef WIN32
+#else
 #include <sys/socket.h>
+#include "strerror.h"
+#endif
 #include <unistd.h>
 #include "str.h"
 
@@ -55,21 +59,37 @@ SslClientSocket::~SslClientSocket()
     }
 
     if (m_socket != -1)
+    {
+#ifdef WIN32
+        closesocket(m_socket);
+#else
         ::close(m_socket);
+#endif
+    }
 }
 
 void SslClientSocket::open(const Host &rh)
 {
     m_socket = socket(AF_INET6, SOCK_STREAM, 0);
+    if (m_socket == -1)
+	throw SockException("socket open error");
+
+#ifdef WIN32
+    // ソケットをデュアルスタックモードに入れる。
+    int disable = 0;
+    if (setsockopt(m_socket, IPPROTO_IPV6,  IPV6_V6ONLY, (const char*) &disable, sizeof(disable)) == SOCKET_ERROR) {
+        throw SockException("Can't reset V6ONLY");
+    }
+#endif
 
 #ifdef WIN32
     DWORD timeout;
     timeout = this->readTimeout;
-    if (setsockopt(socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof timeout) != 0)
+    if (setsockopt(m_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*) &timeout, sizeof timeout) != 0)
         throw SockException("Failed to set read timeout on socket");
 
     timeout = this->writeTimeout;
-    if (setsockopt(socket, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof timeout) != 0)
+    if (setsockopt(m_socket, SOL_SOCKET, SO_SNDTIMEO, (const char*) &timeout, sizeof timeout) != 0)
         throw SockException("Failed to set write timeout on socket");
 #else
     struct timeval tv = {};
@@ -106,7 +126,11 @@ void SslClientSocket::connect()
 {
     if (::connect(m_socket, (struct sockaddr *) &m_remoteAddr, sizeof(m_remoteAddr)) == -1)
     {
-        throw SockException( format("Can't connect: %s", strerror(errno)).c_str() );
+#ifdef WIN32
+        throw SockException( format("Can't connect: error = %d", WSAGetLastError()).c_str() );
+#else
+        throw SockException( format("Can't connect: %s", str::strerror(errno).c_str()).c_str() );
+#endif
     }
 
     if (SSL_set_fd(m_ssl, m_socket) == 0) // error
