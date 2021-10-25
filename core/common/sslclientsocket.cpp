@@ -62,6 +62,28 @@ void SslClientSocket::open(const Host &rh)
 {
     m_socket = socket(AF_INET6, SOCK_STREAM, 0);
 
+#ifdef WIN32
+    DWORD timeout;
+    timeout = this->readTimeout;
+    if (setsockopt(socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof timeout) != 0)
+        throw SockException("Failed to set read timeout on socket");
+
+    timeout = this->writeTimeout;
+    if (setsockopt(socket, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof timeout) != 0)
+        throw SockException("Failed to set write timeout on socket");
+#else
+    struct timeval tv = {};
+    tv.tv_sec = this->readTimeout / 1000;
+    tv.tv_usec = (this->readTimeout % 1000) * 1000;
+    if (setsockopt(m_socket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof tv) != 0)
+        throw SockException("Failed to set read timeout on socket");
+
+    tv.tv_sec = this->writeTimeout / 1000;
+    tv.tv_usec = (this->writeTimeout % 1000) * 1000;
+    if (setsockopt(m_socket, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof tv) != 0)
+        throw SockException("Failed to set write timeout on socket");
+#endif
+
     m_ctx = SSL_CTX_new(SSLv23_client_method());
     assert( m_ctx != nullptr ); // ライブラリが初期化されているから null は返らない。
     m_ssl = SSL_new(m_ctx);

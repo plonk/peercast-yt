@@ -23,6 +23,9 @@ public:
     SslClientSocket();
     ~SslClientSocket();
 
+    // setReadTimeout setWriteTimeout は open の前に呼び出す必要があり、
+    // 一度 open したらタイムアウト値を変更しても効果はない。
+
     // ClientSocket interface
     void open(const Host &) override;
     void bind(const Host &) override;
