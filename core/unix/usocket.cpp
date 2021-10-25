@@ -27,6 +27,7 @@
 #include <errno.h>
 #include "usocket.h"
 #include "stats.h"
+#include "strerror.h"
 
 #ifdef __APPLE__
 #include <netinet/in_systm.h> // for n_long definition
@@ -228,7 +229,7 @@ void UClientSocket::checkTimeout(bool r, bool w)
             throw SockException("select failed.");
     }else{
         char str[64];
-        snprintf(str, 64, "Closed: %s", strerror(err));
+        snprintf(str, 64, "Closed: %s", str::strerror(err).c_str());
         throw SockException(str);
     }
 }

@@ -7,6 +7,8 @@
 #include <sys/wait.h>
 #include <signal.h> // kill(2)
 
+#include "strerror.h"
+
 Subprogram::Subprogram(const std::string& name, bool receiveData, bool feedData)
     : m_receiveData(receiveData)
     , m_feedData(feedData)
@@ -29,17 +31,13 @@ bool Subprogram::start(std::initializer_list<std::string> arguments, Environment
 
     if (pipe(stdoutPipe) == -1)
     {
-        char buf[1024];
-        strerror_r(errno, buf, sizeof(buf));
-        LOG_ERROR("pipe: %s", buf);
+        LOG_ERROR("pipe: %s", str::strerror(errno).c_str());
         return false;
     }
 
     if (pipe(stdinPipe) == -1)
     {
-        char buf[1024];
-        strerror_r(errno, buf, sizeof(buf));
-        LOG_ERROR("pipe: %s", buf);
+        LOG_ERROR("pipe: %s", str::strerror(errno).c_str());
 
         close(stdoutPipe[0]);
         close(stdoutPipe[1]);
@@ -87,8 +85,7 @@ bool Subprogram::start(std::initializer_list<std::string> arguments, Environment
 #endif
         if (r == -1)
         {
-            char *buf = strerror(errno);
-            LOG_ERROR("execle: %s: %s", m_name.c_str(), buf);
+            LOG_ERROR("execle: %s: %s", m_name.c_str(), str::strerror(errno).c_str());
             _exit(1);
         }
         /* NOT REACHED */
@@ -146,7 +143,7 @@ bool Subprogram::isAlive()
         return true;
     else if (r == -1)
     {
-        LOG_ERROR("Failed in checking the status of %d: %s", (int) m_pid, strerror(errno));
+        LOG_ERROR("Failed in checking the status of %d: %s", (int) m_pid, str::strerror(errno).c_str());
         return false;
     }
     else
