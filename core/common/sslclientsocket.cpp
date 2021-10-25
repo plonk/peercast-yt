@@ -16,7 +16,7 @@
 #ifdef WIN32
 #else
 #include <sys/socket.h>
-#include "strerror.h"
+#include "unix/strerror.h"
 #endif
 #include <unistd.h>
 #include "str.h"
