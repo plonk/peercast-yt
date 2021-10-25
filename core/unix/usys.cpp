@@ -38,6 +38,7 @@
 #include "usocket.h"
 #include "usys.h"
 #include "subprog.h"
+#include "strerror.h"
 
 // ---------------------------------
 USys::USys()
@@ -103,7 +104,7 @@ std::string USys::getHostname()
     char buf[256];
  
     if (gethostname(buf, 256) == -1) {
-        throw GeneralException(strerror(errno));
+        throw GeneralException(str::strerror(errno).c_str());
     } else {
         return buf;
     }
@@ -226,7 +227,7 @@ std::string USys::getExecutablePath()
     // readlink does not append a null byte to the buffer, so we zero it out beforehand.
     char path[PATH_MAX + 1] = "";
     if (readlink("/proc/self/exe", path, PATH_MAX) == -1) {
-        throw GeneralException(str::format("%s: %s", __func__, strerror(errno)).c_str());
+        throw GeneralException(str::format("%s: %s", __func__, str::strerror(errno).c_str()).c_str());
     }
     return path;
 }
@@ -414,7 +415,7 @@ std::string USys::realPath(const std::string& path)
     char *p = realpath(path.c_str(), resolvedPath);
 
     if (!p)
-        throw GeneralException((std::string("realPath: ") + strerror(errno)).c_str());
+        throw GeneralException((std::string("realPath: ") + str::strerror(errno).c_str()).c_str());
     else
         return resolvedPath;
 }
@@ -423,6 +424,6 @@ std::string USys::realPath(const std::string& path)
 void USys::rename(const std::string& oldpath, const std::string& newpath)
 {
     if (::rename(oldpath.c_str(), newpath.c_str()) < 0) {
-        throw GeneralException( str::format("rename: %s", strerror(errno)).c_str() );
+        throw GeneralException( str::format("rename: %s", str::strerror(errno).c_str()).c_str() );
     }
 }
