@@ -63,6 +63,8 @@ int URI::defaultPort(const std::string& scheme)
 {
     if (scheme == "http")
         return 80;
+    else if (scheme == "https")
+        return 443;
     else
         return 0;
 }
