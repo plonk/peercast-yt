@@ -238,7 +238,19 @@ void UClientSocket::checkTimeout(bool r, bool w)
 void UClientSocket::connect()
 {
     if (::connect(sockNum, (struct sockaddr *)&remoteAddr, sizeof(remoteAddr)) == SOCKET_ERROR)
+    {
         checkTimeout(false, true);
+        int err;
+        socklen_t size = sizeof(int);
+        if (getsockopt(sockNum, SOL_SOCKET, SO_ERROR, &err, &size) != 0)
+        {
+            throw SockException("getsockopt failed");
+        }
+        if (err != 0)
+        {
+            throw SockException(str::strerror(err).c_str());
+        }
+    }
 }
 
 // --------------------------------------------------
