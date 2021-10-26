@@ -59,7 +59,7 @@ std::shared_ptr<ClientSocket> WSys::createSocket()
 void WSys::callLocalURL(const char *str,int port)
 {
     char cmd[512];
-    sprintf(cmd,"http://localhost:%d/%s",port,str);
+    snprintf(cmd, sizeof(cmd), "http://localhost:%d/%s", port, str);
     ShellExecuteA(mainWindow, NULL, cmd, NULL, NULL, SW_SHOWNORMAL);
 }
 
