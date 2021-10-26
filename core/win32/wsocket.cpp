@@ -217,9 +217,7 @@ void WSAClientSocket::checkTimeout(bool r, bool w)
         else if (r == SOCKET_ERROR)
             throw SockException("select failed.");
     }else{
-        char str[32];
-        sprintf(str,"%d",err);
-        throw SockException(str);
+        throw SockException(std::to_string(err).c_str());
     }
 }
 

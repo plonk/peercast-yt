@@ -229,7 +229,7 @@ XML::Node::Node(const char *fmt, ...)
     va_start(ap, fmt);
 
     char tmp[8192];
-    vsprintf(tmp, fmt, ap);
+    vsnprintf(tmp, sizeof(tmp), fmt, ap);
     setAttributes(tmp);
 
     va_end(ap);

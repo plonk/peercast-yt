@@ -734,15 +734,15 @@ void ChanMgr::playChannel(ChanInfo &info)
         type = PlayList::T_ASX;
         // WMP seems to have a bug where it doesn`t re-read asx files if they have the same name
         // so we prepend the channel id to make it unique - NOTE: should be deleted afterwards.
-        sprintf(fname, "%s/%s.asx", peercastApp->getPath(), info.id.str().c_str());
+        snprintf(fname, sizeof(fname), "%s/%s.asx", peercastApp->getPath(), info.id.str().c_str());
     }else if (info.contentType == ChanInfo::T_OGM)
     {
         type = PlayList::T_RAM;
-        sprintf(fname, "%s/play.ram", peercastApp->getPath());
+        snprintf(fname, sizeof(fname), "%s/play.ram", peercastApp->getPath());
     }else
     {
         type = PlayList::T_SCPLS;
-        sprintf(fname, "%s/play.pls", peercastApp->getPath());
+        snprintf(fname, sizeof(fname), "%s/play.pls", peercastApp->getPath());
     }
 
     PlayList *pls = new PlayList(type, 1);
