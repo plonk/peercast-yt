@@ -146,36 +146,6 @@ std::vector<std::string> USys::getIPAddresses(const std::string& name)
 }
 
 // --------------------------------------------------
-std::vector<std::string> USys::getAllIPAddresses()
-{
-    Subprogram hostname("hostname", true, false);
-    Environment env;
-    if (!hostname.start({"-I"}, env)) {
-        return {};
-    }
-    Stream& pipe = hostname.inputStream();
-    std::string buf;
-    try {
-        while (!pipe.eof())
-            buf += pipe.readChar();
-    } catch (StreamException& e) {
-    }
-    while (isspace(buf[buf.size()-1]))
-        buf.resize(buf.size()-1);
-
-    int statusCode;
-    if (hostname.wait(&statusCode)) {
-        if (statusCode != 0)
-            LOG_ERROR("hostname exited with status code %d", statusCode);
-    } else {
-        LOG_ERROR("hostname didn't exit normally");
-    }
-
-    std::vector<std::string> ips = str::split(buf, " ");
-    return ips;
-}
-
-// --------------------------------------------------
 #include <arpa/inet.h>
 bool USys::getHostnameByAddress(const IP& ip, std::string& out)
 {

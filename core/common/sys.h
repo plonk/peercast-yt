@@ -86,7 +86,6 @@ public:
 
     virtual std::string     getHostname() { return "localhost"; }
     virtual std::vector<std::string> getIPAddresses(const std::string& name) { return {}; }
-    virtual std::vector<std::string> getAllIPAddresses() { return {}; }
     virtual bool getHostnameByAddress(const IP& ip, std::string& out)
     {
         out = "";

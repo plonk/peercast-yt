@@ -134,12 +134,6 @@ std::vector<std::string> WSys::getIPAddresses(const std::string& name)
 }
 
 // --------------------------------------------------
-std::vector<std::string> WSys::getAllIPAddresses()
-{
-    return getIPAddresses(getHostname());
-}
-
-// --------------------------------------------------
 bool WSys::getHostnameByAddress(const IP& ip, std::string& out)
 {
     char hbuf[NI_MAXHOST];
