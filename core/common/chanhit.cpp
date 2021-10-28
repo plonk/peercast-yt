@@ -84,7 +84,7 @@ void ChanHit::init()
     uphostHops = 0;
 
     versionVP = 0;
-    strncpy(versionExPrefix, "  ", 2);
+    memcpy(versionExPrefix, "  ", 2);
     versionExNumber = 0;
 }
 
@@ -124,7 +124,7 @@ void ChanHit::initLocal(
 
     version = PCP_CLIENT_VERSION;
     versionVP = PCP_CLIENT_VERSION_VP;
-    strncpy(versionExPrefix, PCP_CLIENT_VERSION_EX_PREFIX, 2);
+    memcpy(versionExPrefix, PCP_CLIENT_VERSION_EX_PREFIX, 2);
     versionExNumber = PCP_CLIENT_VERSION_EX_NUMBER;
 
     rhost[0] = Host(host.ip, host.port);
