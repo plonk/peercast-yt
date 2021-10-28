@@ -72,10 +72,6 @@ void LogBuffer::write(const char *str, TYPE t)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
 
-    for (auto& pair : m_listeners) {
-        pair.second(str, t);
-    }
-
     size_t len = strlen(str);
     int cnt=0;
     while (len)
@@ -181,19 +177,4 @@ void    LogBuffer::clear()
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
     currLine = 0;
-}
-
-#include <assert.h>
-unsigned int LogBuffer::addListener(std::function<void(const char*,TYPE)> f)
-{
-    std::lock_guard<std::recursive_mutex> cs(lock);
-    assert( m_listeners.count(seq) == 0 );
-    m_listeners[seq] = f;
-    return seq++;
-}
-
-bool LogBuffer::removeListener(unsigned int i)
-{
-    std::lock_guard<std::recursive_mutex> cs(lock);
-    return !!m_listeners.erase(i);
 }

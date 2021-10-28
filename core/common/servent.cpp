@@ -66,7 +66,6 @@ const char *Servent::typeMsgs[] =
     "DIRECT",
     "COUT",
     "CIN",
-    "WEBSOCKET",
 };
 
 // -----------------------------------

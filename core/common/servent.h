@@ -55,7 +55,6 @@ public:
         T_DIRECT,           // Outgoing direct connection
         T_COUT,             // PCP out connection
         T_CIN,              // PCP in connection
-        T_WEBSOCKET,
     };
 
     enum STATUS
@@ -255,8 +254,6 @@ public:
     static bool isTerminationCandidate(ChanHit* hit);
 
     static void writeHeloAtom(AtomStream &atom, bool sendPort, bool sendPing, bool sendBCID, const GnuID& sessionID, uint16_t port, const GnuID& broadcastID);
-
-    void handshakeWebSocket(HTTP &http);
 
     TYPE                type;
     std::atomic<STATUS> status;
