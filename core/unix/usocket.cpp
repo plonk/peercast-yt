@@ -189,6 +189,9 @@ void UClientSocket::open(const Host &rh)
 // --------------------------------------------------
 void UClientSocket::checkTimeout(bool r, bool w)
 {
+    if ((r && w) || !(r || w))
+        throw ArgumentException("Either r or w but no both must be true");
+
     int err = errno;
     if ((err == EAGAIN) || (err == EINPROGRESS))
     {
@@ -197,40 +200,54 @@ void UClientSocket::checkTimeout(bool r, bool w)
         timeval timeout;
         fd_set read_fds;
         fd_set write_fds;
+        fd_set except_fds;
 
         timeout.tv_sec = 0;
         timeout.tv_usec = 0;
 
-        FD_ZERO (&write_fds);
+        FD_ZERO(&write_fds);
+        FD_ZERO(&read_fds);
+        FD_ZERO(&except_fds);
+
         if (w)
         {
-            timeout.tv_sec = (int)this->writeTimeout/1000;
-            FD_SET (sockNum, &write_fds);
+            timeout.tv_sec = this->writeTimeout/1000;
+            timeout.tv_usec = this->writeTimeout%1000*1000;
+            FD_SET(sockNum, &write_fds);
         }
 
-        FD_ZERO (&read_fds);
         if (r)
         {
-            timeout.tv_sec = (int)this->readTimeout/1000;
-            FD_SET (sockNum, &read_fds);
+            timeout.tv_sec = this->readTimeout/1000;
+            timeout.tv_usec = this->readTimeout%1000*1000;
+            FD_SET(sockNum, &read_fds);
         }
 
+        FD_SET(sockNum, &except_fds);
+
         timeval *tp;
-        if (timeout.tv_sec)
+        if (timeout.tv_sec != 0  || timeout.tv_usec != 0)
             tp = &timeout;
         else
             tp = NULL;
 
-        int r=select (sockNum+1, &read_fds, &write_fds, NULL, tp);
+        int r = select(sockNum+1, &read_fds, &write_fds, &except_fds, tp);
 
         if (r == 0)
             throw TimeoutException();
         else if (r == SOCKET_ERROR)
             throw SockException("select failed.");
+        else{
+            int err;
+            socklen_t size = sizeof(int);
+            if (getsockopt(sockNum, SOL_SOCKET, SO_ERROR, (char*) &err, &size) != 0)
+                throw SockException("getsockopt failed");
+
+            if (err != 0)
+                throw SockException(str::strerror(err).c_str());
+        }
     }else{
-        char str[64];
-        snprintf(str, 64, "Closed: %s", str::strerror(err).c_str());
-        throw SockException(str);
+        throw SockException(str::strerror(err).c_str());
     }
 }
 
@@ -238,19 +255,7 @@ void UClientSocket::checkTimeout(bool r, bool w)
 void UClientSocket::connect()
 {
     if (::connect(sockNum, (struct sockaddr *)&remoteAddr, sizeof(remoteAddr)) == SOCKET_ERROR)
-    {
         checkTimeout(false, true);
-        int err;
-        socklen_t size = sizeof(int);
-        if (getsockopt(sockNum, SOL_SOCKET, SO_ERROR, &err, &size) != 0)
-        {
-            throw SockException("getsockopt failed");
-        }
-        if (err != 0)
-        {
-            throw SockException(str::strerror(err).c_str());
-        }
-    }
 }
 
 // --------------------------------------------------
