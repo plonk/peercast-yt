@@ -31,6 +31,21 @@
 #include "str.h"
 
 // --------------------------------------------------
+static std::string wsStrError(int err)
+{
+    CHAR buf[128];
+    DWORD ret;
+    constexpr DWORD langId = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
+
+    ret = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err, langId, buf, sizeof(buf), NULL);
+    if (ret == 0) {
+        throw GeneralException("FormatMessageA failed");
+    }
+    return buf;
+}
+
+
+// --------------------------------------------------
 void WSAClientSocket::init()
 {
     WORD wVersionRequested;
@@ -217,7 +232,7 @@ void WSAClientSocket::checkTimeout(bool r, bool w)
         else if (r == SOCKET_ERROR)
             throw SockException("select failed.");
     }else{
-        throw SockException(std::to_string(err).c_str());
+        throw SockException(wsStrError(err).c_str());
     }
 }
 
@@ -232,7 +247,7 @@ Host WSAClientSocket::getLocalHost()
         return Host(IP(localAddr.sin6_addr), 0);
     } else {
         int err = WSAGetLastError();
-        throw SockException("getsockname failed", err);
+        throw SockException( ("getsockname failed" + wsStrError(err)).c_str() );
     }
 }
 
@@ -419,7 +434,7 @@ bool    WSAClientSocket::readReady(int timeoutMilliseconds)
 
     int num = select(sockNum+1, &read_fds, NULL, NULL, &timeout);
     if (num == SOCKET_ERROR) {
-        throw SockException(str::format("select failed (error code = %d)", WSAGetLastError()).c_str());
+        throw SockException(str::format("select failed: %s", wsStrError(WSAGetLastError()).c_str()).c_str());
     }
 
     return num == 1;
