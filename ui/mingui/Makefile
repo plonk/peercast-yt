@@ -56,7 +56,8 @@ DEPENDFILE = .deps
 # Here follow the generic build rules.
 all: $(TARGET) $(LIBOBJSTATIC) $(DISTARCHIVE) $(RTMPSERVER)
 
-deps: $(DEPENDFILE)
+deps:
+	$(CXX) $(CPPFLAGS) -MM $(CORESOURCE) $(SYSSOURCE) $(WINSOURCE) $(RTMPSOURCE) > $(DEPENDFILE)
 
 resource.o: Simple.rc
 	windres Simple.rc resource.o
@@ -95,9 +96,6 @@ $(SYSOBJ): %.o : $(CORE)/win32/%.cpp
 
 $(RTMPOBJ): %.o : $(RTMP)/%.cpp
 	$(CXX) $(CPPFLAGS) -c $< -o $@
-
-$(DEPENDFILE): $(CORESOURCE) $(SYSSOURCE) $(WINSOURCE) $(RTMPSOURCE)
-	$(CXX) $(CPPFLAGS) -MM $(CORESOURCE) $(SYSSOURCE) $(WINSOURCE) $(RTMPSOURCE) > $(DEPENDFILE)
 
 $(LIBOBJSTATIC): $(COREOBJ) $(SYSOBJ)
 	$(AR) rcs $(LIBOBJSTATIC) $(COREOBJ) $(SYSOBJ)
