@@ -40,7 +40,7 @@ size_t LogBuffer::copy_utf8(char* dest, const char* src, size_t buflen)
     auto origlen = buflen;
 
     while (buflen && *src != '\0') {
-        int charlen;
+        size_t charlen;
 
         if ((*src & 0x80) == 0) // 0xxx xxxx
             charlen = 1;
@@ -57,12 +57,12 @@ size_t LogBuffer::copy_utf8(char* dest, const char* src, size_t buflen)
             break;
 
         // copy char
-        for (int i = 0; i < charlen; i++)
+        for (size_t i = 0; i < charlen; i++)
             *dest++ = *src++;
         buflen -= charlen;
     }
 
-    for (int i = 0; i < buflen; i++)
+    for (size_t i = 0; i < buflen; i++)
         *dest++ = '\0';
     return origlen - buflen;
 }

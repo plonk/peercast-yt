@@ -1780,7 +1780,7 @@ void Servent::sendRawMetaChannel(int interval)
         char buf[16384];
         int bufPos=0;
 
-        if ((interval > sizeof(buf)) || (interval < 1))
+        if ((interval > (int) sizeof(buf)) || (interval < 1))
             throw StreamException("Bad ICY Meta Interval value");
 
         unsigned int connectTime = sys->getTime();

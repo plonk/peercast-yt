@@ -174,7 +174,7 @@ bool ChannelDirectory::update(UpdateMode mode)
 {
     std::lock_guard<std::recursive_mutex> cs(m_lock);
 
-    const int coolDownTime = (mode==kUpdateManual) ? 30 : 5 * 60;
+    const unsigned int coolDownTime = (mode==kUpdateManual) ? 30 : 5 * 60;
     if (sys->getTime() - m_lastUpdate < coolDownTime)
         return false;
 
