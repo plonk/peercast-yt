@@ -32,6 +32,7 @@
 #include <sys/wait.h> // WIFEXITED, WEXITSTATUS
 #include <thread>
 #include <stdio.h>
+#include <limits.h>
 
 #include "stats.h"
 #include "str.h"
