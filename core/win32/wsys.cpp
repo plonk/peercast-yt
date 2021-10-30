@@ -156,10 +156,11 @@ bool WSys::getHostnameByAddress(const IP& ip, std::string& out)
                         NULL,
                         0,
                         NI_NAMEREQD)) {
-            LOG_ERROR("getnameinfo: error code = %d", errcode);
+            LOG_TRACE("getnameinfo: error code = %d (%s)", errcode, ip.str().c_str());
             out = "";
             return false;
         } else {
+            LOG_TRACE("getnameinfo: %s (%s)", hbuf, ip.str().c_str());
             out = hbuf;
             return true;
         }
@@ -174,10 +175,11 @@ bool WSys::getHostnameByAddress(const IP& ip, std::string& out)
                         NULL,
                         0,
                         NI_NAMEREQD)) {
-            LOG_ERROR("getnameinfo: error code = %d", errcode);
+            LOG_TRACE("getnameinfo: error code = %d (%s)", errcode, ip.str().c_str());
             out = "";
             return false;
         } else {
+            LOG_TRACE("getnameinfo: %s (%s)", hbuf, ip.str().c_str());
             out = hbuf;
             return true;
         }

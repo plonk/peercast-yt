@@ -108,10 +108,10 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
     }
 
     try {
-        LOG_TRACE("Connecting to %s:%d ...", feed.host().c_str(), feed.port());
+        LOG_TRACE("Connecting to %s (%s) port %d ...", feed.host().c_str(), host.ip.str().c_str(), feed.port());
         rsock->open(host);
         rsock->connect();
-        LOG_TRACE("connected.");
+        LOG_TRACE("Connected to %s", host.str().c_str());
 
         HTTP rhttp(*rsock);
 
