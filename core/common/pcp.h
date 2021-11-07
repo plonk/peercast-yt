@@ -220,8 +220,6 @@ public:
 
     void    kill() override
     {
-        inData.lock.lock();
-        outData.lock.lock();
     }
 
     bool    sendPacket(ChanPacket &, GnuID &) override;
