@@ -165,7 +165,7 @@ public:
     void    startHTTPPush(std::shared_ptr<ClientSocket>, bool isChunked);
     void    startWMHTTPPush(std::shared_ptr<ClientSocket> cs);
 
-    ChannelStream   *createSource();
+    std::shared_ptr<ChannelStream> createSource();
 
     void    resetPlayTime();
 
@@ -227,7 +227,7 @@ public:
     bool         writeVariable(Stream &, const String &) override;
     bool         acceptGIV(std::shared_ptr<ClientSocket>);
     void         updateInfo(const ChanInfo &);
-    int          readStream(Stream &, ChannelStream *);
+    int          readStream(Stream &, std::shared_ptr<ChannelStream>);
     void         checkReadDelay(unsigned int);
     void         processMp3Metadata(char *);
     void         readHeader();
@@ -252,7 +252,7 @@ public:
 
     ChanPacketBuffer    rawData;
 
-    ChannelStream       *sourceStream;
+    std::shared_ptr<ChannelStream> sourceStream;
     unsigned int        streamIndex;
 
     ChanInfo            info;
@@ -269,7 +269,7 @@ public:
     bool                readDelay;
 
     TYPE                type;
-    ChannelSource       *sourceData;
+    std::shared_ptr<ChannelSource> sourceData;
 
     SRC_TYPE            srcType;
 

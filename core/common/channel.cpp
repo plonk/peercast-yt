@@ -109,7 +109,6 @@ void Channel::endThread()
 
     if (sourceData)
     {
-        delete sourceData;
         sourceData = NULL;
     }
 
@@ -286,7 +285,7 @@ void    Channel::startGet()
     type = T_RELAY;
     info.srcProtocol = ChanInfo::SP_PCP;
 
-    sourceData = new PeercastSource();
+    sourceData = std::make_shared<PeercastSource>();
 
     startStream();
 }
@@ -302,7 +301,7 @@ void    Channel::startURL(const char *u)
 
     resetPlayTime();
 
-    sourceData = new URLSource(u);
+    sourceData = std::make_shared<URLSource>(u);
 
     startStream();
 }
@@ -730,10 +729,9 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
                     }
                 }catch (StreamException &)
                 {}
-                ChannelStream *cs = ch->sourceStream;
+                auto cs = ch->sourceStream;
                 ch->sourceStream = NULL;
                 cs->kill();
-                delete cs;
             }
 
             if (ch->sock)
@@ -769,7 +767,7 @@ void    Channel::startHTTPPush(std::shared_ptr<ClientSocket> cs, bool isChunked)
     sock = cs;
     info.srcProtocol = ChanInfo::SP_HTTP;
 
-    sourceData = new HTTPPushSource(isChunked);
+    sourceData = std::make_shared<HTTPPushSource>(isChunked);
     startStream();
 }
 
@@ -782,7 +780,7 @@ void    Channel::startWMHTTPPush(std::shared_ptr<ClientSocket> cs)
     sock = cs;
     info.srcProtocol = ChanInfo::SP_WMHTTP;
 
-    sourceData = new HTTPPushSource(false);
+    sourceData = std::make_shared<HTTPPushSource>(false);
     startStream();
 }
 
@@ -797,7 +795,7 @@ void    Channel::startICY(std::shared_ptr<ClientSocket> cs, SRC_TYPE st)
 
     streamIndex = ++chanMgr->icyIndex;
 
-    sourceData = new ICYSource();
+    sourceData = std::make_shared<ICYSource>();
     startStream();
 }
 
@@ -1076,29 +1074,24 @@ void Channel::updateInfo(const ChanInfo &newInfo)
 }
 
 // -----------------------------------
-ChannelStream *Channel::createSource()
+std::shared_ptr<ChannelStream> Channel::createSource()
 {
-//  if (servMgr->relayBroadcast)
-//      chanMgr->broadcastRelays(NULL, chanMgr->minBroadcastTTL, chanMgr->maxBroadcastTTL);
-
-    ChannelStream *source=NULL;
-
     if (info.srcProtocol == ChanInfo::SP_PCP)
     {
         LOG_INFO("Channel is PCP");
-        source = new PCPStream(remoteID);
+        return std::make_shared<PCPStream>(remoteID);
     }
     else if (info.srcProtocol == ChanInfo::SP_MMS)
     {
         LOG_INFO("Channel is MMS");
-        source = new MMSStream();
+        return std::make_shared<MMSStream>();
     }else if (info.srcProtocol == ChanInfo::SP_WMHTTP)
     {
         if (info.contentType == ChanInfo::T_WMA ||
             info.contentType == ChanInfo::T_WMV)
         {
             LOG_INFO("Channel is WMHTTP");
-            source = new WMHTTPStream();
+            return std::make_shared<WMHTTPStream>();
         }else
         {
             throw StreamException("Channel is WMHTTP - but not WMA/WMV");
@@ -1107,45 +1100,43 @@ ChannelStream *Channel::createSource()
         if (info.contentType == ChanInfo::T_MP3)
         {
             LOG_INFO("Channel is MP3 - meta: %d", icyMetaInterval);
-            source = new MP3Stream();
+            return std::make_shared<MP3Stream>();
         }else if (info.contentType == ChanInfo::T_NSV)
         {
             LOG_INFO("Channel is NSV");
-            source = new NSVStream();
+            return std::make_shared<NSVStream>();
         }else if (info.contentType == ChanInfo::T_WMA ||
                   info.contentType == ChanInfo::T_WMV)
         {
             LOG_INFO("Channel is MMS");
-            source = new MMSStream();
+            return std::make_shared<MMSStream>();
         }else if (info.contentType == ChanInfo::T_FLV)
         {
             LOG_INFO("Channel is FLV");
-            source = new FLVStream();
+            return std::make_shared<FLVStream>();
         }else if (info.contentType == ChanInfo::T_OGG ||
                   info.contentType == ChanInfo::T_OGM)
         {
             LOG_INFO("Channel is OGG");
-            source = new OGGStream();
+            return std::make_shared<OGGStream>();
         }else if (info.contentType == ChanInfo::T_MKV)
         {
             LOG_INFO("Channel is MKV");
-            source = new MKVStream();
+            return std::make_shared<MKVStream>();
         }else if (info.contentType == ChanInfo::T_WEBM)
         {
             LOG_INFO("Channel is WebM");
-            source = new MKVStream();
+            return std::make_shared<MKVStream>();
         }else if (info.contentType == ChanInfo::T_MP4)
         {
             LOG_INFO("Channel is MP4");
-            source = new MP4Stream();
+            return std::make_shared<MP4Stream>();
         }else
         {
             LOG_INFO("Channel is Raw");
-            source = new RawStream();
+            return std::make_shared<RawStream>();
         }
     }
-
-    return source;
 }
 
 // -----------------------------------
@@ -1167,7 +1158,7 @@ bool    Channel::checkBump()
 }
 
 // -----------------------------------
-int Channel::readStream(Stream &in, ChannelStream *source)
+int Channel::readStream(Stream &in, std::shared_ptr<ChannelStream> source)
 {
     int error = 0;
 
