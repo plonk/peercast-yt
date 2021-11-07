@@ -109,7 +109,7 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
     char *fileName = urlTmp.cstr();
 
     std::shared_ptr<PlayList> pls;
-    ChannelStream *source = NULL;
+    std::shared_ptr<ChannelStream> source;
 
     bool chunkedStream = false;
 
@@ -354,9 +354,6 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
     {
         inputStream = nullptr;
     }
-
-    if (source)
-        delete source;
 
     return nextURL;
 }

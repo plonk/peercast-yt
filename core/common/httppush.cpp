@@ -17,16 +17,16 @@ void HTTPPushSource::stream(std::shared_ptr<Channel> ch)
 
         ch->setStatus(Channel::S_BROADCASTING);
 
-        std::unique_ptr<ChannelStream> source(ch->createSource());
+        std::shared_ptr<ChannelStream> source = ch->createSource();
 
         if (m_isChunked)
         {
             Dechunker dechunker(*ch->sock);
-            ch->readStream(dechunker, source.get());
+            ch->readStream(dechunker, source);
         }
         else
         {
-            ch->readStream(*ch->sock, source.get());
+            ch->readStream(*ch->sock, source);
         }
     }catch (StreamException &e)
     {

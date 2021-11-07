@@ -4,7 +4,7 @@
 // ------------------------------------------------
 void ICYSource::stream(std::shared_ptr<Channel> ch)
 {
-    ChannelStream *source=NULL;
+    std::shared_ptr<ChannelStream> source;
     try
     {
         if (!ch->sock)
@@ -27,7 +27,4 @@ void ICYSource::stream(std::shared_ptr<Channel> ch)
         ch->sock->close();
         ch->sock = NULL;
     }
-
-    if (source)
-        delete source;
 }
