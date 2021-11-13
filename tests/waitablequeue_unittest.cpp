@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "waitablequeue.h"
 #include <thread>
+#include <functional>
 
 class WaitableQueueFixture : public ::testing::Test {
 public:
