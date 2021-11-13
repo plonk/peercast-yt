@@ -109,7 +109,6 @@ public:
     unsigned int    findOldestPos(unsigned int);
     bool            findPacket(unsigned int, ChanPacket &);
     unsigned int    getStreamPos(unsigned int);
-    unsigned int    getStreamPosEnd(unsigned int);
     unsigned int    getLastSync();
     unsigned int    getLatestNonContinuationPos();
     unsigned int    getOldestNonContinuationPos();
