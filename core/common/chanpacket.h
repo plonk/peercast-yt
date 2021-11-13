@@ -95,8 +95,6 @@ public:
         lastWriteTime = 0;
     }
 
-    int     copyFrom(ChanPacketBuffer &, unsigned in);
-
     bool    writePacket(ChanPacket &, bool = false);
     void    readPacket(ChanPacket &);
 
@@ -109,7 +107,6 @@ public:
     unsigned int    findOldestPos(unsigned int);
     bool            findPacket(unsigned int, ChanPacket &);
     unsigned int    getStreamPos(unsigned int);
-    unsigned int    getLastSync();
     unsigned int    getLatestNonContinuationPos();
     unsigned int    getOldestNonContinuationPos();
 
