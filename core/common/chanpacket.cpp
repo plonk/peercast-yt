@@ -173,7 +173,7 @@ bool ChanPacketBuffer::writePacket(ChanPacket &pack, bool updateReadPos)
     if (willSkip()) // too far behind [読み出しが遅すぎる]
         return false;
 
-    lock.lock();
+    std::lock_guard<std::recursive_mutex> cs(lock);
 
     pack.sync = writePos;
     packets[writePos%MAX_PACKETS] = pack;
@@ -195,14 +195,14 @@ bool ChanPacketBuffer::writePacket(ChanPacket &pack, bool updateReadPos)
 
     lastWriteTime = sys->getTime();
 
-    lock.unlock();
-
     return true;
 }
 
 // -----------------------------------
 void    ChanPacketBuffer::readPacket(ChanPacket &pack)
 {
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
     unsigned int tim = sys->getTime();
 
     if (readPos < firstPos)
@@ -210,14 +210,14 @@ void    ChanPacketBuffer::readPacket(ChanPacket &pack)
 
     while (readPos >= writePos)
     {
+        lock.unlock();
         sys->sleepIdle();
+        lock.lock();
         if ((sys->getTime() - tim) > 30)
             throw TimeoutException();
     }
-    lock.lock();
     pack = packets[readPos%MAX_PACKETS];
     readPos++;
-    lock.unlock();
 
     sys->sleepIdle();
 }
