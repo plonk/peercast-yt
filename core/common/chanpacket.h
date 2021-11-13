@@ -100,7 +100,11 @@ public:
 
     bool    willSkip();
 
-    int     numPending() { return writePos - readPos; }
+    int     numPending()
+    {
+        std::lock_guard<std::recursive_mutex> cs(lock);
+        return writePos - readPos;
+    }
 
     unsigned int    getLatestPos();
     unsigned int    getOldestPos();
