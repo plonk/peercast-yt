@@ -7,6 +7,8 @@ class MockSys : public Sys
 {
 public:
     MockSys()
+        : time(0)
+        , dtime(0.0)
     {
     }
 
@@ -31,12 +33,12 @@ public:
 
     unsigned int getTime() override
     {
-        return 0;
+        return time;
     }
 
     double getDTime() override
     {
-        return 0;
+        return dtime;
     }
 
     unsigned int rnd() override
@@ -133,6 +135,9 @@ public:
     void rename(const std::string&, const std::string&) override
     {
     }
+
+    unsigned int time;
+    double dtime;
 };
 
 #endif
