@@ -170,7 +170,7 @@ bool ChanPacketBuffer::writePacket(ChanPacket &pack, bool updateReadPos)
     if (pack.len == 0)
         return false;
 
-    if (willSkip()) // too far behind
+    if (willSkip()) // too far behind [読み出しが遅すぎる]
         return false;
 
     lock.lock();
@@ -181,7 +181,7 @@ bool ChanPacketBuffer::writePacket(ChanPacket &pack, bool updateReadPos)
     writePos++;
 
     if (writePos >= MAX_PACKETS)
-        firstPos = writePos-MAX_PACKETS;
+        firstPos = writePos - MAX_PACKETS;
     else
         firstPos = 0;
 
