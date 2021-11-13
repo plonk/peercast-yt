@@ -52,36 +52,6 @@ ChanPacket& ChanPacket::operator=(const ChanPacket& other)
     return *this;
 }
 
-// -----------------------------------
-// (使われていないようだ。)
-int ChanPacketBuffer::copyFrom(ChanPacketBuffer &buf, unsigned int reqPos)
-{
-    lock.lock();
-    buf.lock.lock();
-
-    firstPos = 0;
-    lastPos = 0;
-    safePos = 0;
-    readPos = 0;
-
-    for (unsigned int i = buf.firstPos; i <= buf.lastPos; i++)
-    {
-        ChanPacket *src = &buf.packets[i%MAX_PACKETS];
-        if (src->type & accept)
-        {
-            if (src->pos >= reqPos)
-            {
-                lastPos = writePos;
-                packets[writePos++] = *src;
-            }
-        }
-    }
-
-    buf.lock.unlock();
-    lock.unlock();
-    return lastPos - firstPos;
-}
-
 // ------------------------------------------------------------------
 // ストリームポジションが spos か、それよりも新しいパケットが見付かれ
 // ば pack に代入する。見付かった場合は true, そうでなければ false を
@@ -194,49 +164,40 @@ unsigned int    ChanPacketBuffer::getStreamPos(unsigned int index)
     return packets[index%MAX_PACKETS].pos;
 }
 
-// -------------------------------------------------------------------
-// パケットインデックス index のパケットの次のパケットのストリームポジ
-// ションを計算する。
-unsigned int    ChanPacketBuffer::getStreamPosEnd(unsigned int index)
-{
-    return packets[index%MAX_PACKETS].pos + packets[index%MAX_PACKETS].len;
-}
-
 // -----------------------------------
 bool ChanPacketBuffer::writePacket(ChanPacket &pack, bool updateReadPos)
 {
-    if (pack.len)
-    {
-        if (willSkip()) // too far behind
-            return false;
+    if (pack.len == 0)
+        return false;
 
-        lock.lock();
+    if (willSkip()) // too far behind
+        return false;
 
-        pack.sync = writePos;
-        packets[writePos%MAX_PACKETS] = pack;
-        lastPos = writePos;
-        writePos++;
+    lock.lock();
 
-        if (writePos >= MAX_PACKETS)
-            firstPos = writePos-MAX_PACKETS;
-        else
-            firstPos = 0;
+    pack.sync = writePos;
+    packets[writePos%MAX_PACKETS] = pack;
+    lastPos = writePos;
+    writePos++;
 
-        if (writePos >= NUM_SAFEPACKETS)
-            safePos = writePos - NUM_SAFEPACKETS;
-        else
-            safePos = 0;
+    if (writePos >= MAX_PACKETS)
+        firstPos = writePos-MAX_PACKETS;
+    else
+        firstPos = 0;
 
-        if (updateReadPos)
-            readPos = writePos;
+    if (writePos >= NUM_SAFEPACKETS)
+        safePos = writePos - NUM_SAFEPACKETS;
+    else
+        safePos = 0;
 
-        lastWriteTime = sys->getTime();
+    if (updateReadPos)
+        readPos = writePos;
 
-        lock.unlock();
-        return true;
-    }
+    lastWriteTime = sys->getTime();
 
-    return false;
+    lock.unlock();
+
+    return true;
 }
 
 // -----------------------------------
