@@ -21,6 +21,8 @@
 
 #include <vector>
 #include <mutex>
+#include <map>
+#include <memory>
 
 // ----------------------------------
 class Stream;
@@ -56,13 +58,14 @@ public:
         pos  = 0;
         sync = 0;
         cont = false;
+        time = 0;
     }
 
     void    init(TYPE type, const void *data, unsigned int length, unsigned int position);
 
     void    writeRaw(Stream &);
 
-    ChanPacket& operator=(const ChanPacket& other);
+    // ChanPacket& operator=(const ChanPacket& other);
 
     TYPE            type;
     unsigned int    len;
@@ -70,17 +73,14 @@ public:
     unsigned int    sync;
     bool            cont; // true if this is a continuation packet
     char            data[MAX_DATALEN];
+
+    unsigned int    time;
 };
 
 // ----------------------------------
 class ChanPacketBuffer
 {
 public:
-    enum {
-        MAX_PACKETS = 64,
-        NUM_SAFEPACKETS = 56
-    };
-
     ChanPacketBuffer()
     {
         init();
@@ -132,8 +132,8 @@ public:
         int cs = 0, ncs = 0;
         for (unsigned int i = firstPos; i <= lastPos; i++)
         {
-            lens.push_back(packets[i % MAX_PACKETS].len);
-            if (packets[i % MAX_PACKETS].cont)
+            lens.push_back(packets.at(i)->len);
+            if (packets.at(i)->cont)
                 cs++;
             else
                 ncs++;
@@ -141,12 +141,18 @@ public:
         return { lens, cs, ncs };
     }
 
-    ChanPacket              packets[MAX_PACKETS];
+    std::map<unsigned int,std::shared_ptr<ChanPacket>> packets;
     volatile unsigned int   lastPos, firstPos, safePos;
     volatile unsigned int   readPos, writePos;
     unsigned int            accept;
     unsigned int            lastWriteTime;
     std::recursive_mutex    lock;
+
+private:
+    enum {
+        MAX_PACKETS = 64,
+        NUM_SAFEPACKETS = 56
+    };
 };
 
 #endif
