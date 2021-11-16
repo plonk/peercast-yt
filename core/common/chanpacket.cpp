@@ -40,17 +40,17 @@ void ChanPacket::writeRaw(Stream &out)
 }
 
 // -----------------------------------
-ChanPacket& ChanPacket::operator=(const ChanPacket& other)
-{
-    this->type = other.type;
-    this->len  = other.len;
-    this->pos  = other.pos;
-    this->sync = other.sync;
-    this->cont = other.cont;
-    memcpy(this->data, other.data, this->len);
+// ChanPacket& ChanPacket::operator=(const ChanPacket& other)
+// {
+//     this->type = other.type;
+//     this->len  = other.len;
+//     this->pos  = other.pos;
+//     this->sync = other.sync;
+//     this->cont = other.cont;
+//     memcpy(this->data, other.data, this->len);
 
-    return *this;
-}
+//     return *this;
+// }
 
 // ------------------------------------------------------------------
 // ストリームポジションが spos か、それよりも新しいパケットが見付かれ
@@ -67,16 +67,12 @@ bool ChanPacketBuffer::findPacket(unsigned int spos, ChanPacket &pack)
     if (spos < fpos)
         spos = fpos;
 
-    // このループ、lastPos == UINT_MAX の時終了しないのでは？ …4G パ
-    // ケットも送らないか。
-    for (unsigned int i = firstPos; i <= lastPos; i++)
+    auto result = std::find_if(packets.begin(), packets.end(),
+                               [=](const std::pair<unsigned int,std::shared_ptr<ChanPacket>>& pair) { return pair.second->pos >= spos; });
+    if (result != packets.end())
     {
-        ChanPacket &p = packets[i%MAX_PACKETS];
-        if (p.pos >= spos)
-        {
-            pack = p;
-            return true;
-        }
+        pack = *result->second;
+        return true;
     }
 
     return false;
@@ -104,9 +100,9 @@ unsigned int    ChanPacketBuffer::getLatestNonContinuationPos()
 
     for (int64_t i = lastPos; i >= firstPos; i--)
     {
-        ChanPacket &p = packets[i%MAX_PACKETS];
-        if (!p.cont)
-            return p.pos;
+        auto p = packets.at((unsigned int) i);
+        if (!p->cont)
+            return p->pos;
     }
 
     return 0;
@@ -122,9 +118,9 @@ unsigned int    ChanPacketBuffer::getOldestNonContinuationPos()
 
     for (int64_t i = firstPos; i <= lastPos; i++)
     {
-        ChanPacket &p = packets[i%MAX_PACKETS];
-        if (!p.cont)
-            return p.pos;
+        auto p = packets.at((unsigned int) i);
+        if (!p->cont)
+            return p->pos;
     }
 
     return 0;
@@ -161,7 +157,7 @@ unsigned int    ChanPacketBuffer::findOldestPos(unsigned int spos)
 // パケットインデックス index のパケットのストリームポジションを返す。
 unsigned int    ChanPacketBuffer::getStreamPos(unsigned int index)
 {
-    return packets[index%MAX_PACKETS].pos;
+    return packets.at((unsigned int) index)->pos;
 }
 
 // -----------------------------------
@@ -174,15 +170,25 @@ bool ChanPacketBuffer::writePacket(ChanPacket &pack, bool updateReadPos)
         return false;
 
     std::lock_guard<std::recursive_mutex> cs(lock);
+    unsigned int now = sys->getTime();
 
     pack.sync = writePos;
-    packets[writePos%MAX_PACKETS] = pack;
+    pack.time = now;
+    packets[(unsigned int) writePos] = std::make_shared<ChanPacket>(pack);
     lastPos = writePos;
     writePos++;
 
     if (writePos >= MAX_PACKETS)
-        firstPos = writePos - MAX_PACKETS;
-    else
+    {
+        auto begin = packets.find((unsigned int ) firstPos);
+        auto end = packets.find((unsigned int) lastPos);
+        auto result = std::find_if(begin, end, [=](const std::pair<unsigned int,std::shared_ptr<ChanPacket>>& pair) { return pair.second->time >= now - 10; });
+        if (result != end)
+        {
+            firstPos = result->first;
+            packets.erase(begin, result);
+        }
+    }else
         firstPos = 0;
 
     if (writePos >= NUM_SAFEPACKETS)
@@ -193,7 +199,7 @@ bool ChanPacketBuffer::writePacket(ChanPacket &pack, bool updateReadPos)
     if (updateReadPos)
         readPos = writePos;
 
-    lastWriteTime = sys->getTime();
+    lastWriteTime = now;
 
     return true;
 }
@@ -216,7 +222,7 @@ void    ChanPacketBuffer::readPacket(ChanPacket &pack)
         if ((sys->getTime() - tim) > 30)
             throw TimeoutException();
     }
-    pack = packets[readPos%MAX_PACKETS];
+    pack = *packets.at((unsigned int) readPos);
     readPos++;
 
     sys->sleepIdle();
