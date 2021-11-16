@@ -538,13 +538,11 @@ public:
             stream->write(p, l);
         } else if (buf.size() + l > kBufSize)
         {
-            for (int i = 0; i < l; i++)
-                buf.push_back(static_cast<const char*>(p)[i]);
+            buf.append(static_cast<const char*>(p), l);
             flush();
         } else
         {
-            for (int i = 0; i < l; i++)
-                buf.push_back(static_cast<const char*>(p)[i]);
+            buf.append(static_cast<const char*>(p), l);
         }
     }
 

@@ -4,8 +4,6 @@
 #include "dechunker.h"
 #include "defer.h"
 
-using namespace std;
-
 int Dechunker::hexValue(char c)
 {
     if (c >= '0' && c <= '9')
@@ -33,23 +31,16 @@ int  Dechunker::read(void *buf, int aSize)
     if (aSize < 0)
         throw GeneralException("Bad argument");
 
-    size_t size = aSize;
-
-    char *p = (char*) buf;
+    const size_t size = aSize;
 
     while (true)
     {
         if (m_buffer.size() >= size)
         {
-            while (size > 0)
-            {
-                *p++ = m_buffer.front();
-                m_buffer.pop_front();
-                size--;
-            }
-            int r = p - (char*)buf;
-            updateTotals(r, 0);
-            return r;
+            copy_n(m_buffer.begin(), size, (char*) buf);
+            m_buffer.erase(m_buffer.begin(), m_buffer.begin() + size);
+            updateTotals(size, 0);
+            return size;
         } else {
             getNextChunk();
             continue;
