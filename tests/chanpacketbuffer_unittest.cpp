@@ -255,6 +255,7 @@ TEST_F(ChanPacketBufferFixture, readPacket_mutithreaded)
     consumer.join();
     ASSERT_EQ(memcmp(out.data, "HELLO", 4), 0);
 
+    delete sys;
     sys = sys_;
 }
 
