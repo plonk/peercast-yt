@@ -65,8 +65,6 @@ public:
 
     void    writeRaw(Stream &);
 
-    // ChanPacket& operator=(const ChanPacket& other);
-
     TYPE            type;
     unsigned int    len;
     unsigned int    pos;
@@ -89,11 +87,18 @@ public:
     void    init()
     {
         std::lock_guard<std::recursive_mutex> cs(lock);
+        packets.clear();
+        packets.resize(64);
+        m_maxPackets = 64;
+        m_safePackets = 56;
+
         lastPos = firstPos = safePos = 0;
         readPos = writePos = 0;
         accept = 0;
         lastWriteTime = 0;
     }
+
+    void resize(unsigned int newSize);
 
     bool    writePacket(ChanPacket &, bool = false);
     void    readPacket(ChanPacket &);
@@ -121,38 +126,17 @@ public:
         int nonContinuations;
     };
 
-    Stat getStatistics()
-    {
-        std::lock_guard<std::recursive_mutex> cs_(lock);
+    Stat getStatistics();
 
-        if (writePos == 0)
-            return { {}, 0, 0 };
-
-        std::vector<unsigned int> lens;
-        int cs = 0, ncs = 0;
-        for (unsigned int i = firstPos; i <= lastPos; i++)
-        {
-            lens.push_back(packets.at(i)->len);
-            if (packets.at(i)->cont)
-                cs++;
-            else
-                ncs++;
-        }
-        return { lens, cs, ncs };
-    }
-
-    std::map<unsigned int,std::shared_ptr<ChanPacket>> packets;
+    std::vector<std::shared_ptr<ChanPacket>> packets;
     volatile unsigned int   lastPos, firstPos, safePos;
     volatile unsigned int   readPos, writePos;
     unsigned int            accept;
     unsigned int            lastWriteTime;
     std::recursive_mutex    lock;
 
-private:
-    enum {
-        MAX_PACKETS = 64,
-        NUM_SAFEPACKETS = 56
-    };
+    unsigned int m_maxPackets;
+    unsigned int m_safePackets;
 };
 
 #endif

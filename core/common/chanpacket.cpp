@@ -21,6 +21,7 @@
 #include "chanpacket.h"
 #include "sys.h"
 #include "stream.h"
+#include "str.h"
 
 // -----------------------------------
 void ChanPacket::init(TYPE t, const void *p, unsigned int l, unsigned int _pos)
@@ -39,19 +40,6 @@ void ChanPacket::writeRaw(Stream &out)
     out.write(data, len);
 }
 
-// -----------------------------------
-// ChanPacket& ChanPacket::operator=(const ChanPacket& other)
-// {
-//     this->type = other.type;
-//     this->len  = other.len;
-//     this->pos  = other.pos;
-//     this->sync = other.sync;
-//     this->cont = other.cont;
-//     memcpy(this->data, other.data, this->len);
-
-//     return *this;
-// }
-
 // ------------------------------------------------------------------
 // ストリームポジションが spos か、それよりも新しいパケットが見付かれ
 // ば pack に代入する。見付かった場合は true, そうでなければ false を
@@ -67,12 +55,13 @@ bool ChanPacketBuffer::findPacket(unsigned int spos, ChanPacket &pack)
     if (spos < fpos)
         spos = fpos;
 
-    auto result = std::find_if(packets.begin(), packets.end(),
-                               [=](const std::pair<unsigned int,std::shared_ptr<ChanPacket>>& pair) { return pair.second->pos >= spos; });
-    if (result != packets.end())
+    for (size_t i = firstPos; i <= lastPos; i++)
     {
-        pack = *result->second;
-        return true;
+        if (packets.at(i % m_maxPackets)->pos >= spos)
+        {
+            pack = *packets.at(i % m_maxPackets);
+            return true;
+        }
     }
 
     return false;
@@ -100,7 +89,7 @@ unsigned int    ChanPacketBuffer::getLatestNonContinuationPos()
 
     for (int64_t i = lastPos; i >= firstPos; i--)
     {
-        auto p = packets.at((unsigned int) i);
+        auto p = packets.at(i % m_maxPackets);
         if (!p->cont)
             return p->pos;
     }
@@ -118,7 +107,7 @@ unsigned int    ChanPacketBuffer::getOldestNonContinuationPos()
 
     for (int64_t i = firstPos; i <= lastPos; i++)
     {
-        auto p = packets.at((unsigned int) i);
+        auto p = packets.at(i % m_maxPackets);
         if (!p->cont)
             return p->pos;
     }
@@ -157,7 +146,7 @@ unsigned int    ChanPacketBuffer::findOldestPos(unsigned int spos)
 // パケットインデックス index のパケットのストリームポジションを返す。
 unsigned int    ChanPacketBuffer::getStreamPos(unsigned int index)
 {
-    return packets.at((unsigned int) index)->pos;
+    return packets.at(index % m_maxPackets)->pos;
 }
 
 // -----------------------------------
@@ -172,29 +161,26 @@ bool ChanPacketBuffer::writePacket(ChanPacket &pack, bool updateReadPos)
     std::lock_guard<std::recursive_mutex> cs(lock);
     unsigned int now = sys->getTime();
 
+    if (writePos - firstPos >= m_maxPackets)
+    {
+        if (packets.at(firstPos % m_maxPackets)->time >= now - 10)
+        {
+            // buffer is full but first packet is not old enough
+            resize(m_maxPackets + m_maxPackets/2);
+        }
+    }
+
     pack.sync = writePos;
     pack.time = now;
-    packets[(unsigned int) writePos] = std::make_shared<ChanPacket>(pack);
+    packets.at(writePos % m_maxPackets) = std::make_shared<ChanPacket>(pack);
     lastPos = writePos;
     writePos++;
 
-    if (writePos >= MAX_PACKETS)
-    {
-        auto begin = packets.find((unsigned int ) firstPos);
-        auto end = packets.find((unsigned int) lastPos);
-        auto result = std::find_if(begin, end, [=](const std::pair<unsigned int,std::shared_ptr<ChanPacket>>& pair) { return pair.second->time >= now - 10; });
-        if (result != end)
-        {
-            firstPos = result->first;
-            packets.erase(begin, result);
-        }
-    }else
-        firstPos = 0;
+    if (writePos - firstPos >= m_maxPackets)
+        firstPos = writePos - m_maxPackets;
 
-    if (writePos >= NUM_SAFEPACKETS)
-        safePos = writePos - NUM_SAFEPACKETS;
-    else
-        safePos = 0;
+    if (writePos - firstPos >= m_safePackets)
+        safePos = writePos - m_safePackets;
 
     if (updateReadPos)
         readPos = writePos;
@@ -222,7 +208,7 @@ void    ChanPacketBuffer::readPacket(ChanPacket &pack)
         if ((sys->getTime() - tim) > 30)
             throw TimeoutException();
     }
-    pack = *packets.at((unsigned int) readPos);
+    pack = *packets.at(readPos % m_maxPackets);
     readPos++;
 
     sys->sleepIdle();
@@ -233,5 +219,47 @@ void    ChanPacketBuffer::readPacket(ChanPacket &pack)
 bool    ChanPacketBuffer::willSkip()
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
-    return ((writePos - readPos) >= MAX_PACKETS);
+    return ((writePos - readPos) >= m_maxPackets);
+}
+
+// ------------------------------------------------------------
+void ChanPacketBuffer::resize(unsigned int newSize)
+{
+    if (newSize < 64)
+        throw GeneralException("New size too small");
+
+    if (newSize < writePos - firstPos)
+        throw GeneralException(str::STR("New size (", newSize, ") too small to hold ", writePos - firstPos, " elements.").c_str());
+
+    std::vector<std::shared_ptr<ChanPacket>> newPackets;
+    newPackets.resize(newSize);
+    for (unsigned int i = firstPos; i < writePos; i++)
+    {
+        newPackets[i % newSize] = packets[i % m_maxPackets];
+    }
+    packets = newPackets;
+
+    m_maxPackets = newSize;
+    m_safePackets = newSize - 6;
+}
+
+// ------------------------------------------------------------
+ChanPacketBuffer::Stat ChanPacketBuffer::getStatistics()
+{
+    std::lock_guard<std::recursive_mutex> cs_(lock);
+
+    if (writePos == 0)
+        return { {}, 0, 0 };
+
+    std::vector<unsigned int> lens;
+    int cs = 0, ncs = 0;
+    for (unsigned int i = firstPos; i <= lastPos; i++)
+    {
+        lens.push_back(packets.at(i % m_maxPackets)->len);
+        if (packets.at(i % m_maxPackets)->cont)
+            cs++;
+        else
+            ncs++;
+    }
+    return { lens, cs, ncs };
 }

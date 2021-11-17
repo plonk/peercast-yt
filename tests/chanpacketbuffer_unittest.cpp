@@ -129,7 +129,7 @@ TEST_F(ChanPacketBufferFixture, writePos)
     packet.pos = 0;
 
     int i;
-    for (i = 0; i < ChanPacketBuffer::MAX_PACKETS; i++) {
+    for (i = 0; i < data.m_maxPackets; i++) {
         ASSERT_EQ(data.writePos, i);
         data.writePacket(packet);
     }
@@ -146,7 +146,7 @@ TEST_F(ChanPacketBufferFixture, lastPos)
     packet.pos = 0;
 
     int i;
-    for (i = 0; i < ChanPacketBuffer::MAX_PACKETS; i++) {
+    for (i = 0; i < data.m_maxPackets; i++) {
         // lastPos goes 0, 0, 1, 2, 3, ...
         if (i == 0)
             ASSERT_EQ(data.lastPos, i);
@@ -166,7 +166,7 @@ TEST_F(ChanPacketBufferFixture, writePacket_fails_after_taking_in_MAX_PACKETS)
     packet.len = 8192;
     packet.pos = 0;
 
-    for (int i = 0; i < ChanPacketBuffer::MAX_PACKETS; i++) {
+    for (int i = 0; i < data.m_maxPackets; i++) {
         ASSERT_TRUE( data.writePacket(packet) );
     }
 
@@ -184,7 +184,7 @@ TEST_F(ChanPacketBufferFixture, firstPos)
     packet.pos = 0;
 
     // (MAX_PACKETS 0's), 1, 2, ...
-    for (int i = 0; i < ChanPacketBuffer::MAX_PACKETS; i++) {
+    for (int i = 0; i < data.m_maxPackets; i++) {
         ASSERT_EQ(data.writePos, i);
         ASSERT_EQ(data.firstPos, 0);
 
@@ -194,6 +194,8 @@ TEST_F(ChanPacketBufferFixture, firstPos)
     ASSERT_EQ(data.writePos, 64);
     ASSERT_EQ(data.firstPos, 0);
 
+#if 0 // 今ではバッファーは拡張されるので firstPos は 0 のままになる。
+
     ASSERT_TRUE( data.writePacket(packet) ); // 65th packet
     ASSERT_EQ(data.writePos, 65);
     ASSERT_EQ(data.firstPos, 1);
@@ -201,6 +203,7 @@ TEST_F(ChanPacketBufferFixture, firstPos)
     ASSERT_TRUE( data.writePacket(packet) ); // 66th packet
     ASSERT_EQ(data.writePos, 66);
     ASSERT_EQ(data.firstPos, 2);
+#endif
 }
 
 #include <thread>
