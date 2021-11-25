@@ -16,9 +16,7 @@ void MKVStream::sendPacket(ChanPacket::TYPE type, const byte_string& data, bool 
 
     if (type == ChanPacket::T_HEAD)
     {
-        ch->streamIndex++;
-        ch->rawData.init();
-        ch->streamPos = 0;
+        ch->resetStream();
     }
 
     ChanPacket pack;

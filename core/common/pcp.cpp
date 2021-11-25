@@ -342,8 +342,7 @@ void PCPStream::readPktAtoms(std::shared_ptr<Channel> ch, AtomStream &atom, int 
             if (pack.pos == 0)
             {
                 LOG_INFO("PCP resetting stream");
-                ch->streamIndex++;
-                ch->rawData.init();
+                ch->resetStream();
             }
 
             ch->headPack = pack;

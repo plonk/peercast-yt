@@ -167,8 +167,7 @@ int FLVStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
 
         m_buffer.flush(ch);
 
-        ch->rawData.init();
-        ch->streamIndex++;
+        ch->resetStream();
 
         ch->headPack.type = ChanPacket::T_HEAD;
         ch->headPack.len = mem.pos;

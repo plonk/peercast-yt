@@ -80,8 +80,7 @@ void MP4Stream::readHeader(Stream &in, std::shared_ptr<Channel> ch)
     mem.write(ftyp->data(), ftyp->size());
     mem.write(moov->data(), moov->size());
 
-    ch->rawData.init();
-    ch->streamIndex++;
+    ch->resetStream();
 
     ch->headPack.type = ChanPacket::T_HEAD;
     ch->headPack.len = mem.pos;
