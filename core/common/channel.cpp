@@ -1309,6 +1309,14 @@ std::string Channel::getBufferString()
 {
     std::string buf;
     String time;
+
+    // getSourceRateAvg は Channel をロックする。Channel をロックして
+    // からその rawData をロックするスレッドがあるので、rawData をロッ
+    // クしてから getSourceRateAvg を呼び出してはいけない。
+    double byterate = (sourceData) ? sourceData->getSourceRateAvg() : 0.0;
+
+    // 統計情報と齟齬しない lastWriteTime を呼び出すために rawData を
+    // ロックする。
     std::lock_guard<std::recursive_mutex> cs(rawData.lock);
     auto lastWritten = (double)sys->getTime() - rawData.lastWriteTime;
 
@@ -1317,9 +1325,9 @@ std::string Channel::getBufferString()
     else
         time.setFromStopwatch(lastWritten);
 
+    // 統計情報を読み出す。
     auto stat = rawData.getStatistics();
     auto& lens = stat.packetLengths;
-    double byterate = (sourceData) ? sourceData->getSourceRateAvg() : 0.0;
     auto sum = std::accumulate(lens.begin(), lens.end(), 0);
 
     buf = str::format("Length: %s bytes (%.2f sec)\n",
