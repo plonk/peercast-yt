@@ -269,7 +269,7 @@ public:
     GnuID               chanID;
     GnuID               givID; // GIV するチャンネルのID
 
-    ThreadInfo          thread;
+    std::shared_ptr<ThreadInfo> thread;
 
     String              loginPassword, loginMount;
 

@@ -398,7 +398,7 @@ Servent *ServMgr::findOldestServent(Servent::TYPE type, bool priv)
     while (s)
     {
         if (s->type == type)
-            if (s->thread.active())
+            if (s->thread->active())
                 if (s->isOlderThan(oldest))
                     if (s->isPrivate() == priv)
                         oldest = s;
@@ -541,7 +541,7 @@ void    ServMgr::closeConnections(Servent::TYPE type)
     {
         if (sv->isConnected())
             if (sv->type == type)
-                sv->thread.shutdown();
+                sv->thread->shutdown();
         sv = sv->next;
     }
 }
@@ -557,7 +557,7 @@ unsigned int ServMgr::numConnected(int type, bool priv, unsigned int uptime)
     Servent *s = servents;
     while (s)
     {
-        if (s->thread.active())
+        if (s->thread->active())
             if (s->isConnected())
                 if (s->type == type)
                     if (s->isPrivate()==priv)
@@ -579,7 +579,7 @@ unsigned int ServMgr::numConnected()
     Servent *s = servents;
     while (s)
     {
-        if (s->thread.active())
+        if (s->thread->active())
             if (s->isConnected())
                 cnt++;
 
@@ -633,7 +633,7 @@ unsigned int ServMgr::numActiveOnPort(int port)
     while (s)
     {
         std::lock_guard<std::recursive_mutex> cs(s->lock);
-        if (s->thread.active() && s->sock && (s->servPort == port))
+        if (s->thread->active() && s->sock && (s->servPort == port))
             cnt++;
         s = s->next;
     }
@@ -652,7 +652,7 @@ unsigned int ServMgr::numActive(Servent::TYPE tp)
     {
         std::lock_guard<std::recursive_mutex> cs(s->lock);
 
-        if (s->thread.active() && s->sock && (s->type == tp))
+        if (s->thread->active() && s->sock && (s->type == tp))
             cnt++;
         s = s->next;
     }
@@ -692,8 +692,8 @@ void ServMgr::quit()
     Servent *s = servents;
     while (s)
     {
-        if (s->thread.active())
-            s->thread.shutdown();
+        if (s->thread->active())
+            s->thread->shutdown();
 
         s = s->next;
     }
@@ -1727,7 +1727,7 @@ int ServMgr::clientProc(ThreadInfo *thread)
             while (s)
             {
                 if (s->type == Servent::T_OUTGOING)
-                    s->thread.shutdown();
+                    s->thread->shutdown();
                 s=s->next;
             }
 #endif
@@ -1973,7 +1973,7 @@ int ServMgr::serverProc(ThreadInfo *thread)
             while (s)
             {
                 if (s->type == Servent::T_INCOMING)
-                    s->thread.shutdown();
+                    s->thread->shutdown();
                 s = s->next;
             }
 

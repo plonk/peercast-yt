@@ -171,7 +171,7 @@ void    Servent::kill()
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
 
-    thread.shutdown();
+    thread->shutdown();
 
     setStatus(S_CLOSING);
 
@@ -206,7 +206,7 @@ void    Servent::kill()
 void    Servent::abort()
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
-    thread.shutdown();
+    thread->shutdown();
     if (sock)
     {
         sock->close();
@@ -251,6 +251,8 @@ void Servent::reset()
     streamPos = 0;
 
     cookie.clear();
+
+    thread = std::make_shared<ThreadInfo>();
 }
 
 // -----------------------------------
@@ -307,12 +309,12 @@ bool Servent::initServer(Host &h)
 
         sock->bind(h);
 
-        thread.data = this;
-        thread.func = serverProc;
+        thread->data = this;
+        thread->func = serverProc;
 
         type = T_SERVER;
 
-        if (!sys->startThread(&thread))
+        if (!sys->startThread(thread.get()))
             throw StreamException("Can`t start thread");
     }catch (StreamException &e)
     {
@@ -329,7 +331,7 @@ void Servent::checkFree()
 {
     if (sock)
         throw StreamException("Socket already set");
-    if (thread.active())
+    if (thread->active())
         throw StreamException("Thread already active");
 }
 
@@ -343,14 +345,14 @@ void Servent::initIncoming(std::shared_ptr<ClientSocket> s, unsigned int a)
         type = T_INCOMING;
         sock = s;
         allow = a;
-        thread.data = this;
-        thread.func = incomingProc;
+        thread->data = this;
+        thread->func = incomingProc;
 
         setStatus(S_PROTOCOL);
 
         LOG_DEBUG("Incoming from %s", sock->host.str().c_str());
 
-        if (!sys->startThread(&thread))
+        if (!sys->startThread(thread.get()))
             throw StreamException("Can`t start thread");
     }catch (StreamException &e)
     {
@@ -370,10 +372,10 @@ void Servent::initOutgoing(TYPE ty)
 
         type = ty;
 
-        thread.data = this;
-        thread.func = outgoingProc;
+        thread->data = this;
+        thread->func = outgoingProc;
 
-        if (!sys->startThread(&thread))
+        if (!sys->startThread(thread.get()))
             throw StreamException("Can`t start thread");
     }catch (StreamException &e)
     {
@@ -398,12 +400,12 @@ void Servent::initPCP(const Host &rh)
         if (!isAllowed(ALLOW_NETWORK))
             throw StreamException("Servent not allowed");
 
-        thread.data = this;
-        thread.func = outgoingProc;
+        thread->data = this;
+        thread->func = outgoingProc;
 
         LOG_DEBUG("Outgoing to %s", rh.str().c_str());
 
-        if (!sys->startThread(&thread))
+        if (!sys->startThread(thread.get()))
             throw StreamException("Can`t start thread");
     }catch (StreamException &e)
     {
@@ -430,12 +432,12 @@ void Servent::initGIV(const Host &h, const GnuID &id)
 
         sock->connect();
 
-        thread.data = this;
-        thread.func = givProc;
+        thread->data = this;
+        thread->func = givProc;
 
         type = T_RELAY;
 
-        if (!sys->startThread(&thread))
+        if (!sys->startThread(thread.get()))
             throw StreamException("Can`t start thread");
     }catch (StreamException &e)
     {
@@ -962,7 +964,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
             }else {
                 break;
             }
-        }while (thread.active() && sock->active());
+        }while (thread->active() && sock->active());
     }
 
     ChanHitList *chl = chanMgr->findHitList(chanInfo);
@@ -1378,7 +1380,7 @@ void Servent::processIncomingPCP(bool suggestOthers)
 
     int error = 0;
     BroadcastState bcs;
-    while (!error && thread.active() && !sock->eof())
+    while (!error && thread->active() && !sock->eof())
     {
         error = pcpStream->readPacket(*sock, bcs);
         sys->sleepIdle();
@@ -1409,7 +1411,7 @@ int Servent::outgoingProc(ThreadInfo *thread)
 
     sv->pcpStream = new PCPStream(GnuID());
 
-    while (sv->thread.active())
+    while (sv->thread->active())
     {
         sv->setStatus(S_WAIT);
 
@@ -1467,7 +1469,7 @@ int Servent::outgoingProc(ThreadInfo *thread)
                     chanMgr->lastYPConnect = ctime;
                 }
                 sys->sleepIdle();
-            }while (!bestHit.host.ip && (sv->thread.active()));
+            }while (!bestHit.host.ip && (sv->thread->active()));
 
             if (!bestHit.host.ip)       // give up
             {
@@ -1509,7 +1511,7 @@ int Servent::outgoingProc(ThreadInfo *thread)
 
                 BroadcastState bcs;
                 error = 0;
-                while (!error && sv->thread.active() && !sv->sock->eof() && servMgr->autoServe)
+                while (!error && sv->thread->active() && !sv->sock->eof() && servMgr->autoServe)
                 {
                     error = sv->pcpStream->readPacket(*sv->sock, bcs);
 
@@ -1660,7 +1662,7 @@ bool Servent::waitForChannelHeader(ChanInfo &info)
         if (ch->isPlaying() && (ch->rawData.writePos>0))
             return true;
 
-        if (!thread.active() || !sock->active())
+        if (!thread->active() || !sock->active())
             break;
         sys->sleep(100);
     }
@@ -1701,7 +1703,7 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
             unsigned int lastWriteTime = connectTime;
             bool         skipContinuation = servMgr->flags.get("startPlayingFromKeyFrame");
 
-            while ((thread.active()) && sock->active())
+            while ((thread->active()) && sock->active())
             {
                 ch = chanMgr->findChannelByID(chanID);
                 if (!ch)
@@ -1788,7 +1790,7 @@ void Servent::sendRawMetaChannel(int interval)
 
         streamPos = 0;      // raw meta channel has no header (its MP3)
 
-        while ((thread.active()) && sock->active())
+        while ((thread->active()) && sock->active())
         {
             ch = chanMgr->findChannelByID(chanID);
             if (!ch)
@@ -1913,7 +1915,7 @@ void Servent::sendPCPChannel()
 
         unsigned int streamIndex = ch->streamIndex;
 
-        while (thread.active())
+        while (thread->active())
         {
             auto ch = chanMgr->findChannelByID(chanID);
 
