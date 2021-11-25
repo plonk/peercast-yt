@@ -347,11 +347,11 @@ void PCPStream::readPktAtoms(std::shared_ptr<Channel> ch, AtomStream &atom, int 
 
             ch->headPack = pack;
 
-            ch->rawData.writePacket(pack, true);
+            ch->newPacket(pack);
             ch->streamPos = pack.pos+pack.len;
         }else if (pack.type == ChanPacket::T_DATA)
         {
-            ch->rawData.writePacket(pack, true);
+            ch->newPacket(pack);
             ch->streamPos = pack.pos+pack.len;
         }
     }
