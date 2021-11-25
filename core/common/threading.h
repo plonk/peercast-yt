@@ -23,6 +23,23 @@
 #include <atomic>
 #include <mutex>
 #include <thread>
+#include <memory>
+#include "waitablequeue.h"
+#include "chanpacket.h"
+
+// ------------------------------------
+class Message
+{
+public:
+    std::string type;
+    virtual ~Message() = default;
+};
+
+class PacketMessage : public Message
+{
+public:
+    std::shared_ptr<ChanPacket> packet;
+};
 
 // ------------------------------------
 class ThreadInfo;
@@ -49,6 +66,8 @@ public:
     THREAD_FUNC     func;
     void            *data;
     std::shared_ptr<class Channel> channel;
+
+    WaitableQueue<std::shared_ptr<Message>> mbox;
 
     THREAD_HANDLE   handle;
 };

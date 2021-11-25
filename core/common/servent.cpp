@@ -1682,6 +1682,8 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
         if (!ch)
             throw StreamException("Channel not found");
 
+        ch->subscribe(this->thread);
+
         setStatus(S_CONNECTED);
 
         LOG_DEBUG("Starting Raw stream of %s at %d", ch->info.name.cstr(), streamPos);
@@ -1709,6 +1711,9 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
                 if (!ch)
                 {
                     throw StreamException("Channel not found");
+                }else
+                {
+                    ch->subscribe(this->thread);
                 }
 
                 if (streamIndex != ch->streamIndex)
@@ -1719,8 +1724,12 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
                 }
 
                 ChanPacket rawPack;
-                while (ch->rawData.findPacket(streamPos, rawPack))
+                //while (true)
                 {
+                    // ch->rawData.findPacket(streamPos, rawPack))
+                    std::shared_ptr<PacketMessage> msg = std::dynamic_pointer_cast<PacketMessage>(this->thread->mbox.dequeue());
+                    rawPack = *msg->packet;
+                    
                     if (syncPos != rawPack.sync)
                         LOG_ERROR("Send skip: %d", rawPack.sync-syncPos);
                     syncPos = rawPack.sync + 1;
@@ -1749,7 +1758,7 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
                     throw TimeoutException();
 
                 bsock.flush();
-                sys->sleep(200);
+                // sys->sleep(200);
                 //sys->sleepIdle();
             }
         }

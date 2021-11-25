@@ -26,6 +26,7 @@
 #include "cstream.h"
 #include "chanpacket.h"
 #include "varwriter.h"
+#include <list>
 
 // --------------------------------------------------
 struct MP3Header
@@ -236,6 +237,9 @@ public:
     XML::Node    *createRelayXML(bool);
 
     void         newPacket(ChanPacket &);
+    void         broadcastPacket(ChanPacket &pack);
+
+    void         subscribe(std::shared_ptr<ThreadInfo> subscriber);
 
     int          localListeners();
     int          localRelays();
@@ -295,6 +299,8 @@ public:
     mutable std::recursive_mutex lock;
 
     std::shared_ptr<Channel> next;
+
+    std::list<std::shared_ptr<ThreadInfo>> m_subscribers;
 };
 
 #endif

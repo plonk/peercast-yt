@@ -54,6 +54,8 @@
 
 #include "version2.h"
 
+#include "threading.h"
+
 // -----------------------------------
 const char *Channel::srcTypes[] =
 {
@@ -213,6 +215,48 @@ void    Channel::newPacket(ChanPacket &pack)
         return;
 
     rawData.writePacket(pack, true);
+    broadcastPacket(pack);
+}
+
+// -----------------------------------
+void    Channel::broadcastPacket(ChanPacket &pack)
+{
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
+    auto msg = std::make_shared<PacketMessage>();
+    msg->packet = std::make_shared<ChanPacket>(pack);
+
+    int i = 0;
+    for (auto it = m_subscribers.begin(); it != m_subscribers.end(); )
+    {
+        if ((*it)->active())
+        {
+            (*it)->mbox.enqueue(msg);
+            ++it;
+            i++;
+        }else
+        {
+            auto tmp = it;
+            ++it;
+            m_subscribers.erase(tmp);
+        }
+    }
+    LOG_DEBUG("Packet broadcast to %d servents", i);
+}
+
+// -----------------------------------
+void Channel::subscribe(std::shared_ptr<ThreadInfo> subscriber)
+{
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
+    if (std::find(m_subscribers.begin(), m_subscribers.end(), subscriber) != m_subscribers.end())
+    {
+        LOG_DEBUG("already subscribed");
+    }else
+    {
+        m_subscribers.push_back(subscriber);
+        LOG_DEBUG("subscription +1");
+    }
 }
 
 // -----------------------------------
