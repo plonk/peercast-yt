@@ -52,7 +52,7 @@ TEST_F(ServentFixture, initialState)
     ASSERT_STREQ("00000000000000000000000000000000", s.chanID.str().c_str());
     ASSERT_STREQ("00000000000000000000000000000000", s.givID.str().c_str());
 
-    ASSERT_EQ(false, s.thread.active());
+    ASSERT_EQ(false, s.thread->active());
 
     ASSERT_STREQ("", s.loginPassword.cstr());
     ASSERT_STREQ("", s.loginMount.cstr());
