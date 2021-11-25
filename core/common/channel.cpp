@@ -216,6 +216,15 @@ void    Channel::newPacket(ChanPacket &pack)
 }
 
 // -----------------------------------
+void    Channel::resetStream()
+{
+    std::lock_guard<std::recursive_mutex> cs(lock);
+    this->streamIndex++;
+    this->rawData.init();
+    this->streamPos = 0;
+}
+
+// -----------------------------------
 bool    Channel::checkIdle()
 {
     return
