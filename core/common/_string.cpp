@@ -54,10 +54,8 @@ static int base64chartoval(char input)
 String& String::setFromTime(unsigned int t)
 {
     time_t t2 = t;
-    char *p = std::ctime(&t2);
-    if (p)
-        strcpy(data, p);
-    else
+    char *p = ctime_r(&t2, data);
+    if (!p)
         strcpy(data, "-");
     type = T_ASCII;
 
