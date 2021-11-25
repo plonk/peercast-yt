@@ -219,10 +219,11 @@ bool    Sys::startThread(ThreadInfo *info)
                                        assert(AUX_LOG_FUNC_VECTOR == nullptr);
                                        AUX_LOG_FUNC_VECTOR = new std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>();
                                        assert(AUX_LOG_FUNC_VECTOR != nullptr);
-                                       Defer defer([]()
+                                       Defer defer([info]()
                                                    {
                                                        assert(AUX_LOG_FUNC_VECTOR != nullptr);
                                                        delete AUX_LOG_FUNC_VECTOR;
+                                                       info->m_active.store(false);
                                                    });
                                        try
                                        {
@@ -259,7 +260,11 @@ bool    Sys::startWaitableThread(ThreadInfo *info)
         info->handle = std::thread([info]()
                                    {
                                        AUX_LOG_FUNC_VECTOR = new std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>();
-                                       Defer defer([](){ delete AUX_LOG_FUNC_VECTOR; });
+                                       Defer defer([info]()
+                                                   {
+                                                       delete AUX_LOG_FUNC_VECTOR;
+                                                       info->m_active.store(false);
+                                                   });
                                        try
                                        {
                                            sys->setThreadName("new thread");
