@@ -30,9 +30,6 @@ void PCPStream::init(const GnuID &rid)
     lastPacketTime = 0;
     nextRootPacket = 0;  // 0 seconds (never)
 
-    inData.init();
-    inData.accept = ChanPacket::T_PCP;
-
     outData.init();
     outData.accept = ChanPacket::T_PCP;
 }
@@ -120,7 +117,7 @@ int PCPStream::readPacket(Stream &in, BroadcastState &bcs)
 
         error = PCP_ERROR_READ;
         // poll for new downward packet
-        if (in.readReady())
+        while (in.readReady())
         {
             int numc, numd;
             ID4 id;
@@ -131,19 +128,12 @@ int PCPStream::readPacket(Stream &in, BroadcastState &bcs)
             pack.len = patom.writeAtoms(id, in, numc, numd);
             pack.type = ChanPacket::T_PCP;
 
-            inData.writePacket(pack);
-        }
-        error = PCP_ERROR_GENERAL;
+            error = PCP_ERROR_GENERAL;
 
-        // process downward packets
-        if (inData.numPending())
-        {
-            inData.readPacket(pack);
-
+            // process downward packets
             mem.rewind();
 
-            int numc, numd;
-            ID4 id = patom.read(numc, numd);
+            id = patom.read(numc, numd);
 
             error = PCPStream::procAtom(patom, id, numc, numd, bcs);
 

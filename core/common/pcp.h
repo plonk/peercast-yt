@@ -244,7 +244,7 @@ public:
 
     int             readBroadcastAtoms(AtomStream &, int, BroadcastState &);
 
-    ChanPacketBuffer inData, outData;
+    ChanPacketBuffer outData;
     unsigned int    lastPacketTime;
     unsigned int    nextRootPacket;
 
