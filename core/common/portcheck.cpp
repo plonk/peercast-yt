@@ -27,7 +27,7 @@ PortCheckResult IPv6PortChecker::run(const std::vector<int>& ports)
             break;
     }
     if (!ip || ip.isIPv4Mapped()) {
-        throw GeneralException(("No IPv6 address associated with " + m_uri.host()).c_str());
+        throw GeneralException("No IPv6 address associated with " + m_uri.host());
     }        
 
     LOG_DEBUG("Contacting %s (%s) ...", m_uri.host().c_str(), ip.str().c_str());
@@ -47,7 +47,7 @@ PortCheckResult IPv6PortChecker::run(const std::vector<int>& ports)
     LOG_DEBUG("Request: %s", req.body.c_str());
     auto res = http.send(req);
     if (res.statusCode != 200) {
-        throw GeneralException(str::STR("HTTP request failed: ", res.statusCode).c_str(), res.statusCode);
+        throw GeneralException(str::STR("HTTP request failed: ", res.statusCode), res.statusCode);
     }
 
     auto data = json::parse(res.body);

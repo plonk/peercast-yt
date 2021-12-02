@@ -127,9 +127,9 @@ void SslClientSocket::connect()
     if (::connect(m_socket, (struct sockaddr *) &m_remoteAddr, sizeof(m_remoteAddr)) == -1)
     {
 #ifdef WIN32
-        throw SockException( format("Can't connect: error = %d", WSAGetLastError()).c_str() );
+        throw SockException( format("Can't connect: error = %d", WSAGetLastError()) );
 #else
-        throw SockException( format("Can't connect: %s", str::strerror(errno).c_str()).c_str() );
+        throw SockException( format("Can't connect: %s", str::strerror(errno).c_str()) );
 #endif
     }
 
@@ -184,7 +184,7 @@ int SslClientSocket::read(void *p, int l)
             if (err == SSL_ERROR_ZERO_RETURN) {
                 throw EOFException("Closed on read");
             } else {
-                throw SockException( format("SSL_read failed, error = %d", err).c_str() );
+                throw SockException( format("SSL_read failed, error = %d", err) );
             }
         } else {
             l -= r;
@@ -203,7 +203,7 @@ int SslClientSocket::readUpto(void *p, int l)
         if (err == SSL_ERROR_ZERO_RETURN) {
             return 0;
         } else {
-            throw SockException( format("SSL_read failed, error = %d", err).c_str() );
+            throw SockException( format("SSL_read failed, error = %d", err) );
         }
     } else {
         return r;
@@ -224,7 +224,7 @@ void SslClientSocket::write(const void *p, int l)
         char buf[120]; // This is large enough. See ERR_error_string(3).
         ERR_error_string(err, buf);
 
-        throw SockException( format("SSL_write failed: %s", buf).c_str() );
+        throw SockException( format("SSL_write failed: %s", buf) );
     }
     assert( r == l );
 }

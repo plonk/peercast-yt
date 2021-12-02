@@ -191,7 +191,7 @@ std::string WSys::getExecutablePath()
 {
     char path[1024];
     if (GetModuleFileNameA(NULL, path, sizeof(path)) == 0) {
-        throw GeneralException(str::format("%s: %lu", __func__, GetLastError()).c_str());
+        throw GeneralException(str::format("%s: %lu", __func__, GetLastError()));
     }
     return path;
 }
@@ -204,11 +204,11 @@ std::string WSys::realPath(const std::string& path)
     char* ret = _fullpath(resolvedPath, path.c_str(), 4096);
     if (ret == NULL)
     {
-        throw GeneralException(str::format("_fullpath: Failed to resolve `%s`", path.c_str()).c_str());
+        throw GeneralException(str::format("_fullpath: Failed to resolve `%s`", path.c_str()));
     }
 
     if (!PathFileExistsA(resolvedPath)) {
-        throw GeneralException(str::format("realPath: File not found: %s", resolvedPath).c_str());
+        throw GeneralException(str::format("realPath: File not found: %s", resolvedPath));
     }
 
     /* 多分フォワードスラッシュは入ってこないから、バックスラッシュだ
@@ -230,6 +230,6 @@ std::string WSys::getDirectorySeparator()
 void WSys::rename(const std::string& oldpath, const std::string& newpath)
 {
     if (MoveFileExA(oldpath.c_str(), newpath.c_str(), MOVEFILE_REPLACE_EXISTING) == 0) {
-        throw GeneralException(str::format("rename: MoveFileExA failed: error = %lu", GetLastError()).c_str());
+        throw GeneralException(str::format("rename: MoveFileExA failed: error = %lu", GetLastError()));
     }
 }

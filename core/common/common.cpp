@@ -21,11 +21,11 @@
 #include "common.h"
 #include "str.h"
 
-GeneralException::GeneralException(const char *m, int e)
+GeneralException::GeneralException(const std::string& m, int e)
+    : msgbuf(m)
+    , msg(msgbuf.c_str())
+    , err(e)
 {
-    msgbuf = m;
-    err = e;
-
 #ifdef ADD_BACKTRACE
     constexpr size_t kMaxBacktrace = 16;
     void* backtraceBuffer[kMaxBacktrace];
@@ -69,8 +69,6 @@ GeneralException::GeneralException(const char *m, int e)
 
     free(strings);
 #endif
-
-    msg = msgbuf.c_str();
 }
 
 const char* GeneralException::what() const throw()

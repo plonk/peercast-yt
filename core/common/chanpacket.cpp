@@ -229,7 +229,7 @@ void ChanPacketBuffer::resize(unsigned int newSize)
         throw GeneralException("New size too small");
 
     if (newSize < writePos - firstPos)
-        throw GeneralException(str::STR("New size (", newSize, ") too small to hold ", writePos - firstPos, " elements.").c_str());
+        throw GeneralException(str::STR("New size (", newSize, ") too small to hold ", writePos - firstPos, " elements."));
 
     std::vector<std::shared_ptr<ChanPacket>> newPackets;
     newPackets.resize(newSize);
