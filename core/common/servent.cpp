@@ -1662,8 +1662,6 @@ bool Servent::waitForChannelHeader(ChanInfo &info)
 // -----------------------------------
 void Servent::sendRawChannel(bool sendHead, bool sendData)
 {
-    WriteBufferedStream bsock(sock.get());
-
     try
     {
         sock->setWriteTimeout(DIRECT_WRITE_TIMEOUT*1000);
@@ -1680,11 +1678,11 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
 
         if (sendHead)
         {
-            ch->headPack.writeRaw(bsock);
+            ch->headPack.writeRaw(*sock);
             streamPos = ch->headPack.pos + ch->headPack.len;
-            auto ncpos = ch->rawData.getLatestNonContinuationPos();
-            if (ncpos && streamPos < ncpos)
-                streamPos = ncpos;
+            // auto ncpos = ch->rawData.getLatestNonContinuationPos();
+            // if (ncpos && streamPos < ncpos)
+            //     streamPos = ncpos;
             LOG_DEBUG("Sent %d bytes header ", ch->headPack.len);
         }
 
@@ -1697,15 +1695,6 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
 
             while ((thread->active()) && sock->active())
             {
-                ch = chanMgr->findChannelByID(chanID);
-                if (!ch)
-                {
-                    throw StreamException("Channel not found");
-                }else
-                {
-                    ch->subscribe(this->thread);
-                }
-
                 if (streamIndex != ch->streamIndex)
                 {
                     streamIndex = ch->streamIndex;
@@ -1714,43 +1703,49 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
                 }
 
                 ChanPacket rawPack;
-                //while (true)
-                {
-                    // ch->rawData.findPacket(streamPos, rawPack))
-                    std::shared_ptr<PacketMessage> msg = std::dynamic_pointer_cast<PacketMessage>(this->thread->mbox.dequeue());
+
+                try {
+                    std::shared_ptr<PacketMessage> msg = std::dynamic_pointer_cast<PacketMessage>(this->thread->mbox.dequeueWithTimeout(1000));
                     rawPack = *msg->packet;
-                    
-                    if (syncPos != rawPack.sync)
-                        LOG_ERROR("Send skip: %d", rawPack.sync-syncPos);
-                    syncPos = rawPack.sync + 1;
-
-                    if ((rawPack.type == ChanPacket::T_DATA) || (rawPack.type == ChanPacket::T_HEAD))
+                } catch (TimeoutException&)
+                {
+                    ch = chanMgr->findChannelByID(chanID);
+                    if (!ch)
                     {
-                        if (!skipContinuation || !rawPack.cont)
-                        {
-                            skipContinuation = false;
-                            rawPack.writeRaw(bsock);
-                            lastWriteTime = sys->getTime();
-                        }else
-                        {
-                            LOG_DEBUG("raw: skip continuation %s packet pos=%d",
-                                      (rawPack.type == ChanPacket::T_DATA) ? "DATA" : "HEAD",
-                                      rawPack.pos);
-                        }
+                        throw StreamException("Channel not found");
+                    }else
+                    {
+                        ch->subscribe(this->thread);
                     }
+                    continue;
+                }
+                    
+                if (syncPos != rawPack.sync)
+                    LOG_ERROR("Send skip: %d", rawPack.sync-syncPos);
+                syncPos = rawPack.sync + 1;
 
-                    if (rawPack.pos < streamPos)
-                        LOG_DEBUG("raw: skip back %d", rawPack.pos - streamPos);
-                    streamPos = rawPack.pos + rawPack.len;
+                if ((rawPack.type == ChanPacket::T_DATA) || (rawPack.type == ChanPacket::T_HEAD))
+                {
+                    if (!skipContinuation || !rawPack.cont)
+                    {
+                        skipContinuation = false;
+                        rawPack.writeRaw(*sock);
+                        lastWriteTime = sys->getTime();
+                    }else
+                    {
+                        LOG_DEBUG("raw: skip continuation %s packet pos=%d",
+                                  (rawPack.type == ChanPacket::T_DATA) ? "DATA" : "HEAD",
+                                  rawPack.pos);
+                    }
                 }
 
-                if ((sys->getTime() - lastWriteTime) > DIRECT_WRITE_TIMEOUT)
-                    throw TimeoutException();
-
-                bsock.flush();
-                // sys->sleep(200);
-                //sys->sleepIdle();
+                if (rawPack.pos < streamPos)
+                    LOG_DEBUG("raw: skip back %d", rawPack.pos - streamPos);
+                streamPos = rawPack.pos + rawPack.len;
             }
+
+            if ((sys->getTime() - lastWriteTime) > DIRECT_WRITE_TIMEOUT)
+                throw TimeoutException();
         }
     }catch (StreamException &e)
     {

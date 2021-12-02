@@ -14,6 +14,7 @@
 
 #include <queue>
 #include <condition_variable>
+#include <chrono>
 
 template <typename T>
 class WaitableQueue
@@ -35,6 +36,24 @@ public:
         auto t = m_queue.front();
         m_queue.pop();
         return t;
+    }
+
+    T dequeueWithTimeout(int duration)
+    {
+        if (duration < 0)
+            throw ArgumentException("negative duration");
+
+        std::unique_lock<std::mutex> lock(m_mutex);
+
+        if (m_cv.wait_for(lock, std::chrono::milliseconds(duration), [this]() { return !m_queue.empty(); }))
+        {
+            auto t = m_queue.front();
+            m_queue.pop();
+            return t;
+        }else
+        {
+            throw TimeoutException();
+        }
     }
 
 private:
