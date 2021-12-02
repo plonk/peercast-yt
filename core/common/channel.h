@@ -301,6 +301,8 @@ public:
     std::shared_ptr<Channel> next;
 
     std::list<std::shared_ptr<ThreadInfo>> m_subscribers;
+
+    unsigned int m_writePos;
 };
 
 #endif

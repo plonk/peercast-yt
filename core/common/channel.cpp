@@ -89,6 +89,7 @@ const char *Channel::statusMsgs[] =
 // Initialise the channel to its default settings of unallocated and reset.
 // -----------------------------------------------------------------------------
 Channel::Channel()
+    : m_writePos(0)
 {
     next = NULL;
     reset();
@@ -215,6 +216,8 @@ void    Channel::newPacket(ChanPacket &pack)
         return;
 
     rawData.writePacket(pack, true);
+    ASSERT(pack.sync == m_writePos);
+    pack.sync = m_writePos++;
     broadcastPacket(pack);
 }
 
@@ -265,6 +268,7 @@ void    Channel::resetStream()
     std::lock_guard<std::recursive_mutex> cs(lock);
     this->streamIndex++;
     this->rawData.init();
+    m_writePos = 0;
     this->streamPos = 0;
 }
 
