@@ -1680,9 +1680,6 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
         {
             ch->headPack.writeRaw(*sock);
             streamPos = ch->headPack.pos + ch->headPack.len;
-            // auto ncpos = ch->rawData.getLatestNonContinuationPos();
-            // if (ncpos && streamPos < ncpos)
-            //     streamPos = ncpos;
             LOG_DEBUG("Sent %d bytes header ", ch->headPack.len);
         }
 
@@ -1721,7 +1718,7 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
                 }
                     
                 if (syncPos != rawPack.sync)
-                    LOG_ERROR("Send skip: %d", rawPack.sync-syncPos);
+                    LOG_ERROR("Send skip: %d", rawPack.sync - syncPos); // %d packets
                 syncPos = rawPack.sync + 1;
 
                 if ((rawPack.type == ChanPacket::T_DATA) || (rawPack.type == ChanPacket::T_HEAD))

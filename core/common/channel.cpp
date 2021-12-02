@@ -270,6 +270,8 @@ void    Channel::resetStream()
     this->rawData.init();
     m_writePos = 0;
     this->streamPos = 0;
+
+    LOG_DEBUG("Channel stream reset: streamIndex=%u", this->streamIndex);
 }
 
 // -----------------------------------
