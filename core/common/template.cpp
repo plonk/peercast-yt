@@ -489,7 +489,7 @@ vector<string> Template::tokenize(const string& input)
         }else
         {
             auto c = string() + s[0];
-            throw StreamException(("Unrecognized token. Error at " + str::inspect(c)).c_str());
+            throw StreamException("Unrecognized token. Error at " + str::inspect(c));
         }
     }
     return tokens;
@@ -540,7 +540,7 @@ bool    Template::evalCondition(const string& cond, int loop)
             res = ((lhs==rhs) == pred);
         }
         else
-            throw StreamException(("Unrecognized condition operator " + op).c_str());
+            throw StreamException("Unrecognized condition operator " + op);
     }else if (tokens.size() == 1)
     {
         string varName;

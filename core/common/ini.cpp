@@ -127,7 +127,7 @@ Document parse(const std::string& str)
             if (v[1] == "End") {
                 if (section.name == "") {
                     auto msg = str::format("Syntax error in line %lu: Stray 'End'", i + 1);
-                    throw FormatException(msg.c_str());
+                    throw FormatException(msg);
                 } else {
                     section.endTag = "End";
                     doc.push_back(section);
@@ -156,7 +156,7 @@ Document parse(const std::string& str)
             }
         } else {
             auto msg = str::format("Syntax error in line %lu", i + 1);
-            throw GeneralException(msg.c_str());
+            throw GeneralException(msg);
         }
     }
 

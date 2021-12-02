@@ -244,10 +244,10 @@ void UClientSocket::checkTimeout(bool r, bool w)
                 throw SockException("getsockopt failed");
 
             if (err != 0)
-                throw SockException(str::strerror(err).c_str());
+                throw SockException(str::strerror(err));
         }
     }else{
-        throw SockException(str::strerror(err).c_str());
+        throw SockException(str::strerror(err));
     }
 }
 

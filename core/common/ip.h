@@ -223,7 +223,7 @@ class IP
         if (tryParse(str, ip))
             return ip;
         else
-            throw FormatException(("Invalid IP address: " + str).c_str());
+            throw FormatException("Invalid IP address: " + str);
     }
 
     unsigned char addr[16];

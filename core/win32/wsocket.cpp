@@ -249,12 +249,12 @@ void WSAClientSocket::checkTimeout(bool r, bool w)
                 throw SockException("getsockopt failed");
 
             if (err != 0)
-                throw SockException(wsStrError(err).c_str());
+                throw SockException(wsStrError(err));
             else
                 throw LogicError("Exceptional condition was notified but no error was found");
         }
     }else{
-        throw SockException(wsStrError(err).c_str());
+        throw SockException(wsStrError(err));
     }
 }
 
@@ -269,7 +269,7 @@ Host WSAClientSocket::getLocalHost()
         return Host(IP(localAddr.sin6_addr), 0);
     } else {
         int err = WSAGetLastError();
-        throw SockException( ("getsockname failed" + wsStrError(err)).c_str() );
+        throw SockException( "getsockname failed" + wsStrError(err) );
     }
 }
 
@@ -456,7 +456,7 @@ bool    WSAClientSocket::readReady(int timeoutMilliseconds)
 
     int num = select(sockNum+1, &read_fds, NULL, NULL, &timeout);
     if (num == SOCKET_ERROR) {
-        throw SockException(str::format("select failed: %s", wsStrError(WSAGetLastError()).c_str()).c_str());
+        throw SockException("select failed: " + wsStrError(WSAGetLastError()));
     }
 
     return num == 1;
