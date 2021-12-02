@@ -884,13 +884,6 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
     if (ch)
     {
         sendHeader = true;
-        if (reqPos)
-        {
-            streamPos = ch->rawData.findOldestPos(reqPos);
-        }else
-        {
-            streamPos = ch->rawData.getLatestPos();
-        }
 
         // 自動リレー管理。
         bool autoManageTried = false;
