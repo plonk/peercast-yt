@@ -216,8 +216,6 @@ void    Channel::newPacket(ChanPacket &pack)
         return;
 
     rawData.writePacket(pack, true);
-    ASSERT(pack.sync == m_writePos);
-    pack.sync = m_writePos++;
     broadcastPacket(pack);
 }
 
@@ -268,7 +266,6 @@ void    Channel::resetStream()
     std::lock_guard<std::recursive_mutex> cs(lock);
     this->streamIndex++;
     this->rawData.init();
-    m_writePos = 0;
     this->streamPos = 0;
 
     LOG_DEBUG("Channel stream reset: streamIndex=%u", this->streamIndex);

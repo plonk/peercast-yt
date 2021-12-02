@@ -263,3 +263,34 @@ ChanPacketBuffer::Stat ChanPacketBuffer::getStatistics()
     }
     return { lens, cs, ncs };
 }
+
+DummyChanPacketBuffer::DummyChanPacketBuffer()
+    : lastWriteTime(0)
+    , writePos(0)
+{
+}
+
+unsigned int    DummyChanPacketBuffer::getLatestPos()
+{
+    return writePos ? writePos - 1 : 0;
+}
+
+unsigned int    DummyChanPacketBuffer::getOldestPos()
+{
+    return writePos ? writePos - 1: 0;
+}
+
+ChanPacketBuffer::Stat DummyChanPacketBuffer::getStatistics()
+{
+    if (writePos == 0)
+        return { {}, 0, 0 };
+    else
+        return { {}, 0, 0 };
+}
+
+bool DummyChanPacketBuffer::writePacket(ChanPacket & pack, bool)
+{
+    pack.sync = writePos++;
+    lastWriteTime = sys->getTime();
+    return true;
+}

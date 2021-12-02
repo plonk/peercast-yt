@@ -139,4 +139,24 @@ public:
     unsigned int m_safePackets;
 };
 
+class DummyChanPacketBuffer
+{
+public:
+    DummyChanPacketBuffer();
+
+    unsigned int accept;
+    volatile unsigned int lastWriteTime;
+    volatile unsigned int writePos;
+    
+    void init() { writePos = 0; lastWriteTime = 0; accept = 0; }
+
+    bool writePacket(ChanPacket &, bool = false);
+
+    unsigned int    getLatestPos();
+    unsigned int    getOldestPos();
+
+    ChanPacketBuffer::Stat getStatistics();
+    std::recursive_mutex    lock;
+};
+
 #endif

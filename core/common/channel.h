@@ -256,7 +256,7 @@ public:
     ChanMeta            insertMeta;
     ChanPacket          headPack;
 
-    ChanPacketBuffer    rawData;
+    DummyChanPacketBuffer    rawData;
 
     std::shared_ptr<ChannelStream> sourceStream;
     unsigned int        streamIndex;
