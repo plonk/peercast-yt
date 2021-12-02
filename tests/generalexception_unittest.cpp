@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "common.h"
+#include "_string.h"
 
 class GeneralExceptionFixture : public ::testing::Test {
 public:
@@ -41,4 +42,11 @@ TEST_F(GeneralExceptionFixture, what)
     GeneralException e("foobar");
 
     ASSERT_STREQ(e.what(), "foobar");
+}
+
+TEST_F(GeneralExceptionFixture, String)
+{
+    GeneralException e(String("foobar"));
+
+    ASSERT_STREQ(e.msg, "foobar");
 }
