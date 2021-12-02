@@ -220,7 +220,6 @@ public:
 
     void    triggerChannel(char *, ChanInfo::PROTOCOL, bool);
     void    sendRawChannel(bool, bool);
-    void    sendRawMetaChannel(int);
     void    sendPCPChannel();
 
     static void readICYHeader(HTTP &, ChanInfo &, char *, size_t);
