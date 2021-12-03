@@ -273,7 +273,7 @@ public:
     GnuID               networkID;
     unsigned int        firewallTimeout;
     std::atomic<int>    m_logLevel;
-    int                 shutdownTimer;
+    std::atomic<int>    shutdownTimer;
     bool                pauseLog;
     bool                forceNormal;
     bool                useFlowControl;
