@@ -2075,6 +2075,8 @@ bool    Servent::writeVariable(Stream &s, const String &var)
     else if (var == "status")
         buf = getStatusStr();
     else if (var == "address")
+        buf = getHost().ip.str();
+    else if (var == "endpoint")
         buf = getHost().str();
     else if (var == "agent")
         buf = agent.c_str();
