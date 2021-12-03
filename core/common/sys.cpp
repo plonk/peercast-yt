@@ -157,6 +157,21 @@ void    ThreadInfo::shutdown() noexcept
 }
 
 // ---------------------------
+#include "str.h"
+ThreadInfo::~ThreadInfo()
+{
+    using str::STR;
+    if (this->handle.joinable())
+    {
+        this->handle.join();
+        LOG_DEBUG("%s", STR("thread ", this->handle.get_id(), " joined").c_str());
+    }else
+    {
+        LOG_DEBUG("%s", STR("dtor called for non-joinable thread (", this->handle.get_id(), ")").c_str());
+    }
+}
+
+// ---------------------------
 char* Sys::strdup(const char *src)
 {
     size_t len = strlen(src);
@@ -211,43 +226,11 @@ char* Sys::strcpy_truncate(char* dest, size_t destsize, const char* src)
 #include <assert.h>
 bool    Sys::startThread(ThreadInfo *info)
 {
-    info->m_active.store(true);
-
-    try {
-        info->handle = std::thread([info]()
-                                   {
-                                       assert(AUX_LOG_FUNC_VECTOR == nullptr);
-                                       AUX_LOG_FUNC_VECTOR = new std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>();
-                                       assert(AUX_LOG_FUNC_VECTOR != nullptr);
-                                       Defer defer([]()
-                                                   {
-                                                       assert(AUX_LOG_FUNC_VECTOR != nullptr);
-                                                       delete AUX_LOG_FUNC_VECTOR;
-                                                   });
-                                       try
-                                       {
-                                           sys->setThreadName("new thread");
-                                           info->func(info);
-                                       }catch (GeneralException &e)
-                                       {
-                                           // just log it and continue..
-                                           LOG_ERROR("Unexpected exception: %s", e.what());
-                                           for (const std::string line : e.backtrace) {
-                                               LOG_ERROR("    %s", line.c_str());
-                                           }
-                                       }catch (std::exception &e)
-                                       {
-                                           // just log it and continue..
-                                           LOG_ERROR("Unexpected exception: %s", e.what());
-                                       }
-                                   });
+    bool result = Sys::startWaitableThread(info);
+    if (result)
         info->handle.detach();
-        return true;
-    } catch (std::system_error& e)
-    {
-        LOG_ERROR("Error creating thread");
-        return false;
-    }
+
+    return result;
 }
 
 // ---------------------------------
@@ -256,27 +239,28 @@ bool    Sys::startWaitableThread(ThreadInfo *info)
     info->m_active.store(true);
 
     try {
-        info->handle = std::thread([info]()
-                                   {
-                                       AUX_LOG_FUNC_VECTOR = new std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>();
-                                       Defer defer([](){ delete AUX_LOG_FUNC_VECTOR; });
-                                       try
-                                       {
-                                           sys->setThreadName("new thread");
-                                           info->func(info);
-                                       }catch (GeneralException &e)
-                                       {
-                                           // just log it and continue..
-                                           LOG_ERROR("Unexpected exception: %s", e.what());
-                                           for (const std::string line : e.backtrace) {
-                                               LOG_ERROR("    %s", line.c_str());
-                                           }
-                                       }catch (std::exception &e)
-                                       {
-                                           // just log it and continue..
-                                           LOG_ERROR("Unexpected exception: %s", e.what());
-                                       }
-                                   });
+        std::thread t([info]()
+                      {
+                          AUX_LOG_FUNC_VECTOR = new std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>();
+                          Defer defer([](){ delete AUX_LOG_FUNC_VECTOR; });
+                          try
+                          {
+                              sys->setThreadName("new thread");
+                              info->func(info);
+                          }catch (GeneralException &e)
+                          {
+                              // just log it and continue..
+                              LOG_ERROR("Unexpected exception: %s", e.what());
+                              for (const std::string line : e.backtrace) {
+                                  LOG_ERROR("    %s", line.c_str());
+                              }
+                          }catch (std::exception &e)
+                          {
+                              // just log it and continue..
+                              LOG_ERROR("Unexpected exception: %s", e.what());
+                          }
+                      });
+        info->handle = std::move(t);
         return true;
     } catch (std::system_error& e)
     {
