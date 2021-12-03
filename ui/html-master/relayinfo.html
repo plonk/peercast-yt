@@ -26,7 +26,7 @@
       </TR>
       <TR class="normal">
         <th class="left-heading">{#URL}</th>
-        <TD style="word-break: break-all; word-wrap: break-word; overflow-wrap: break-word">
+        <TD class="break-word">
           <A href="/admin?cmd=redirect&amp;url={$page.channel.contactURL}"
              target=_blank>{$page.channel.contactURL}</A>
         </TD>
@@ -76,7 +76,7 @@
       </TR>
       <TR class="normal">
         <th class="left-heading">{#Buffer}</th>
-        <TD><pre style="font-family: sans-serif; margin-bottom: 0; min-width: 25em">{$page.channel.buffer}</pre></TD>
+        <TD><pre style="font-family: sans-serif; margin-bottom: 0">{$page.channel.buffer}</pre></TD>
       </TR>
       <TR class="heading-row normal">
         <TD colSpan=2 align=middle><B>{#Current Track}</B></TD>
@@ -104,12 +104,39 @@
     </TBODY>
   </TABLE>
   </div>
-  
-  <BR>
 
-  <div class="hscroll">
+  <TABLE class="table-panel">
+    <TBODY>
+      <TR align=middle class="normal">
+        <TD colSpan=5><B>{#Connections}</B></TD>
+      </TR>
+      <TR align=middle class="normal" style="white-space: nowrap">
+        <TD><B>{#_Type_connection}</B></TD>
+        <TD><B>{#Time}</B></TD>
+        <TD style="width: 11.5em"><B>{#IP}</B></TD>
+        <TD><B>{#Kbits/s}</B></TD>
+        <td><b>{#Stop}</b></td>
+      </TR>
+      {@loop servMgr.numServents}
+        {@if page.channel.id == loop.servent.chanID}          
+          <tr class="normal">
+            <TD>{$loop.servent.type}</TD>
+            <TD>{$loop.servent.uptime}</TD>
+            <TD class="break-word"><a href="ip.html?">{$loop.servent.address}</a></TD>
+            <TD align=right>{$loop.servent.bitrate}</TD>
+            <td style="text-align: center"><a class="text-danger" href="/admin?cmd=stop_servent&amp;servent_id={$loop.servent.id}">&#x23f9;<!-- BLACK SQUARE FOR STOP --></a></td>
+          </TR>
+        {@end}
+      {@end}
+    </TBODY>
+  </TABLE>
+
+  <div class="hscroll" style="width:100%">
     <TABLE class="table-panel" border=0>
       <TBODY>
+      <TR align=middle class="normal">
+        <TD colSpan=9><B>{#Known Hosts}</B></TD>
+      </TR>
 	<TR align=middle class="normal">
           <th colspan="2">{#IP:Port}</th>
           <th>{#Hops}</th>
@@ -140,6 +167,7 @@
       </TBODY>
     </TABLE>
   </div>
+
   {@else}
   <p class="normal" style="text-align: center">
     {#Channel not found.}

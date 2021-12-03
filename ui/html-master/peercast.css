@@ -124,6 +124,8 @@ a.button {
 	color: #d00;
 }
 
+.hscroll > .table-panel { margin-bottom: 0 }
+
 table.table-panel {
     font-family: Verdana, Arial, Helvetica, sans-serif;
     font-size: 9pt;
@@ -192,3 +194,21 @@ td.checkbox-cell {
 }
 
 .hscroll { overflow-wrap: break-word; overflow-x: auto; width: 100%; overflow-y: hidden }
+
+.break-word {
+    word-break: break-all;
+    word-wrap: break-word;
+    overflow-wrap: break-word
+}
+
+.table-caption {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 9pt;
+    font-weight: bold;
+    margin-bottom: 0;
+    background-color: #ccc;
+    margin-left: 2px;
+    margin-right: 2px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+}

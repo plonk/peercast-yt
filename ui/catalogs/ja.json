@@ -59,7 +59,7 @@
     "Internet (Kbit/s)"       : "インターネット (Kbps)",
     //"GNet (Kbit/s)"         : "",
     "GNet packets/sec"        : "GNet パケット/sec",
-    "Connections"             : "接続数",
+    "Connections"             : "接続",
     "Direct"                  : "ダイレクト",
     "Relay"                   : "リレー",
     //"CIN / COUT"            : "",
@@ -90,7 +90,7 @@
     "Bitrate (kb/s)"          : "転送速度 (Kbps)",
     "Stream"                  : "タイプ",
     "Total Relays"            : "総リレー",
-    "Local Relays"            : "ローカル<br>リレー",
+    "Local Relays"            : "ローカルリレー",
     "Status"                  : "状態",
     "Keep"                    : "キープ",
     "Info"                    : "情報",
@@ -129,6 +129,8 @@
     "Channel not found."      : "チャンネルが見付かりません。",
 
     "IP Version"              : "IPバージョン",
+
+    "Known Hosts"             : "既知のホスト",
 
     // editinfo.html
     "Apply"                   : "適用",
