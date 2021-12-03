@@ -171,6 +171,7 @@ public:
 
     bool    notFound()
     {
+        std::lock_guard<std::recursive_mutex> cs(lock);
         return (status == S_NOTFOUND);
     }
 
@@ -182,6 +183,7 @@ public:
 
     bool    isReceiving()
     {
+        std::lock_guard<std::recursive_mutex> cs(lock);
         return (status == S_RECEIVING);
     }
 
@@ -201,6 +203,7 @@ public:
 
     bool    isActive()
     {
+        std::lock_guard<std::recursive_mutex> cs(lock);
         return type != T_NONE;
     }
 
@@ -212,11 +215,31 @@ public:
     static THREAD_PROC stream(ThreadInfo *);
 
     void         setStatus(STATUS s);
-    const char   *getSrcTypeStr() { return srcTypes[srcType]; }
-    const char   *getStatusStr() { return statusMsgs[status]; }
-    const char   *getName() { return info.name.cstr(); }
-    GnuID        getID() { return info.id; }
-    int          getBitrate() { return info.bitrate; }
+    const char   *getSrcTypeStr()
+    {
+        std::lock_guard<std::recursive_mutex> cs(lock);
+        return srcTypes[srcType];
+    }
+    const char   *getStatusStr()
+    {
+        std::lock_guard<std::recursive_mutex> cs(lock);
+        return statusMsgs[status];
+    }
+    const char   *getName()
+    {
+        std::lock_guard<std::recursive_mutex> cs(lock);
+        return info.name.cstr();
+    }
+    GnuID        getID()
+    {
+        std::lock_guard<std::recursive_mutex> cs(lock);
+        return info.id;
+    }
+    int          getBitrate()
+    {
+        std::lock_guard<std::recursive_mutex> cs(lock);
+        return info.bitrate;
+    }
     std::string  getSourceString();
     std::string  getBufferString();
 
