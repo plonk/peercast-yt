@@ -89,8 +89,14 @@
   {@end}
 </div>
 <div align="center" class="normal" style="margin-top: 1.5em; margin-bottom: 1.5em">
-  <a href="/admin?cmd=clear&amp;channels=1" class="button">{#Clear}</a>
-  <a href="broadcast.html" class="button">{#_Broadcast_navbar}…</a>
+  <form action="/admin" style="display: inline">
+    <input type="hidden" name="cmd" value="clear">
+    <input type="hidden" name="channels" value="1">
+    <input type="submit" value="{#Clear}" style="min-width: 64px">
+  </form>
+  <form action="broadcast.html" style="display: inline">
+    <input type="submit" value="{#_Broadcast_navbar}…" style="min-width: 64px">
+  </form>
 </div>
 
 <!-- index.txt の取得が5分ごとなので、あまり頻繁に更新しても仕方ない -->
