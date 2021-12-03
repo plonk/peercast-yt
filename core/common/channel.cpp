@@ -312,7 +312,7 @@ void Channel::startStream()
 {
     thread.channel = shared_from_this();
     thread.func = stream;
-    if (!sys->startThread(&thread))
+    if (!sys->startWaitableThread(&thread))
         reset();
 }
 

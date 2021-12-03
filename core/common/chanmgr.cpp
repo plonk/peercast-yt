@@ -45,10 +45,24 @@ int ChanMgr::numIdleChannels()
 // -----------------------------------
 void ChanMgr::closeIdles()
 {
-    for (auto ch = channel; ch; ch = ch->next)
+    // 直接 this->channel をたどって、個々のチャンネルのスレッドを
+    // shutdownするとそのチャンネルスレッドが自身をリストから削除する
+    // ためにChanMgrをロックしようとしてデッドロックになるため、ここで
+    // チャンネルリストをコピーする。
+    std::vector<std::shared_ptr<Channel>> channels;
+    {
+        std::lock_guard<std::recursive_mutex> cs(lock);
+        for (auto ch = channel; ch; ch = ch->next)
+            channels.push_back(ch);
+    }
+
+    for (auto ch : channels)
     {
         if (ch->isIdle())
+        {
             ch->thread.shutdown();
+            sys->waitThread(&ch->thread);
+        }
     }
 }
 
