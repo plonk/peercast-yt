@@ -87,6 +87,22 @@ TEST_F(cgiFixture, rfc1123Time_years)
     ASSERT_EQ("Sat, 01 Jan 2000 00:00:00 GMT", cgi::rfc1123Time(946684800));
 }
 
+TEST_F(cgiFixture, parseHttpDate)
+{
+    ASSERT_EQ(784111777, cgi::parseHttpDate("Sun, 06 Nov 1994 08:49:37 GMT"));
+    ASSERT_EQ(784111777, cgi::parseHttpDate("Sunday, 06-Nov-94 08:49:37 GMT"));
+    ASSERT_EQ(784111777, cgi::parseHttpDate("Sun Nov  6 08:49:37 1994"));
+
+    ASSERT_EQ("Sun, 06 Nov 1994 08:49:37 GMT",
+              cgi::rfc1123Time(cgi::parseHttpDate("Sun, 06 Nov 1994 08:49:37 GMT")));
+}
+
+TEST_F(cgiFixture, parseHttpDate_epoch)
+{
+    ASSERT_EQ(0, cgi::parseHttpDate("Thu, 01 Jan 1970 00:00:00 GMT"));
+    ASSERT_EQ(0, cgi::parseHttpDate("Thu, 01 Jan 1970 00:00:00 UTC"));
+}
+
 TEST_F(cgiFixture, escape_html)
 {
     ASSERT_STREQ("", escape_html("").c_str());
