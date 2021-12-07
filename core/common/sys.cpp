@@ -251,7 +251,7 @@ bool    Sys::startWaitableThread(ThreadInfo *info)
                           {
                               // just log it and continue..
                               LOG_ERROR("Unexpected exception: %s", e.what());
-                              for (const std::string line : e.backtrace) {
+                              for (auto& line : e.backtrace) {
                                   LOG_ERROR("    %s", line.c_str());
                               }
                           }catch (std::exception &e)
