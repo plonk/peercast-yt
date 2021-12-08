@@ -425,7 +425,7 @@ void String::ASCII2META(const char *in, bool safe)
 }
 
 // -----------------------------------
-void String::convertTo(TYPE t)
+String& String::convertTo(TYPE t)
 {
     if (t != type)
     {
@@ -488,6 +488,7 @@ void String::convertTo(TYPE t)
 
         type = t;
     }
+    return *this;
 }
 
 // -----------------------------------
