@@ -123,7 +123,6 @@ public:
 
     bool writeChannelVariable(Stream& out, const String& varName, int index);
     bool writeFeedVariable(Stream& out, const String& varName, int index);
-    //bool writeVariable(Stream& out, const String& varName) override;
 
     std::vector<ChannelEntry> channels() const;
 

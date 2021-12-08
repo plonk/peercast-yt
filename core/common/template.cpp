@@ -78,48 +78,6 @@ bool Template::writeObjectProperty(amf0::Value& out, const String& varName, amf0
         return true;
     }
 }
-// bool Template::writeObjectProperty(Stream& s, const String& varName, json::object_t object)
-// {
-//     // LOG_DEBUG("writeObjectProperty %s", varName.str().c_str());
-//     auto names = str::split(varName.str(), ".");
-
-//     if (names.size() == 1)
-//     {
-//         try
-//         {
-//             json value = object.at(varName.str());
-//             if (value.is_string())
-//             {
-//                 string str = value;
-//                 s.writeString(str.c_str());
-//             }else
-//                 s.writeString(value.dump().c_str());
-//         }catch (out_of_range&)
-//         {
-//             return false;
-//         }
-//         return true;
-//     }else{
-//         try
-//         {
-//             json value = object.at(names[0]);
-//             if (value.is_null() || value.is_string() || value.is_number())
-//             {
-//                 return false;
-//             }else if (value.is_array())
-//             {
-//                 return writeObjectProperty(s, varName + strlen(names[0].c_str()) + 1, array_to_object(value));
-//             }else if (value.is_object())
-//             {
-//                 return writeObjectProperty(s, varName + strlen(names[0].c_str()) + 1, value);
-//             }
-//         } catch (out_of_range&)
-//         {
-//             return false;
-//         }
-//         return true;
-//     }
-// }
 
 // --------------------------------------
 bool Template::writeVariable(amf0::Value& out, const String &varName)
@@ -138,79 +96,6 @@ bool Template::writeVariable(amf0::Value& out, const String &varName)
 
     return true;
 }
-
-// --------------------------------------
-// bool Template::writeLoopVariable(Stream &s, const String &varName, int loop)
-// {
-//     if (varName.startsWith("loop.channel."))
-//     {
-//         auto ch = chanMgr->findChannelByIndex(loop);
-//         if (ch)
-//             return ch->writeVariable(s, varName+13);
-//     }else if (varName.startsWith("loop.servent."))
-//     {
-//         Servent *sv = servMgr->findServentByIndex(loop);
-//         if (sv)
-//             return sv->writeVariable(s, varName+13);
-//     }else if (varName.startsWith("loop.filter."))
-//     {
-//         ServFilter *sf = &servMgr->filters[loop];
-//         return sf->writeVariable(s, varName+12);
-//     }else if (varName == "loop.indexEven")
-//     {
-//         s.writeStringF("%d", (loop&1)==0);
-//         return true;
-//     }else if (varName == "loop.index")
-//     {
-//         s.writeStringF("%d", loop);
-//         return true;
-//     }else if (varName == "loop.indexBaseOne")
-//     {
-//         s.writeStringF("%d", loop + 1);
-//         return true;
-//     }else if (varName.startsWith("loop.hit."))
-//     {
-//         const char *idstr = getCGIarg(tmplArgs.c_str(), "id=");
-//         if (idstr)
-//         {
-//             GnuID id;
-//             id.fromStr(idstr);
-//             ChanHitList *chl = chanMgr->findHitListByID(id);
-//             if (chl)
-//             {
-//                 int cnt=0;
-//                 ChanHit *ch = chl->hit;
-//                 while (ch)
-//                 {
-//                     if (ch->host.ip && !ch->dead)
-//                     {
-//                         if (cnt == loop)
-//                         {
-//                             return ch->writeVariable(s, varName+9);
-//                             break;
-//                         }
-//                         cnt++;
-//                     }
-//                     ch=ch->next;
-//                 }
-//             }
-//         }
-//     }else if (varName.startsWith("loop.externalChannel."))
-//     {
-//         return servMgr->channelDirectory->writeVariable(s, varName + strlen("loop."), loop);
-//     }else if (varName.startsWith("loop.channelFeed."))
-//     {
-//         return servMgr->channelDirectory->writeVariable(s, varName + strlen("loop."), loop);
-//     }else if (varName.startsWith("loop.notification."))
-//     {
-//         return g_notificationBuffer.writeVariable(s, varName + strlen("loop."), loop);
-//     }else if (varName.startsWith("loop.uptestServiceRegistry."))
-//     {
-//         return servMgr->uptestServiceRegistry->writeVariable(s, varName + strlen("loop.uptestServiceRegistry."), loop);
-//     }
-
-//     return false;
-// }
 
 // --------------------------------------
 bool Template::writePageVariable(amf0::Value& out, const String &varName)
@@ -623,40 +508,6 @@ void    Template::readLoop(Stream &in, Stream *outp)
         }
     }
 }
-
-// --------------------------------------
-// json::array_t Template::evaluateCollectionVariable(String& varName)
-// {
-//     if (varName == "channelsFound")
-//     {
-//         JrpcApi api;
-//         LOG_DEBUG("%s", api.getChannelsFound({}).dump().c_str());
-//         json::array_t cs = api.getChannelsFound({});
-//         return cs;
-//     }else if (varName == "broadcastingChannels")
-//     {
-//         // このサーバーから配信中のチャンネルをリスナー数降順でソート。
-//         JrpcApi api;
-//         json::array_t channels = api.getChannels({});
-//         auto newend = std::remove_if(channels.begin(), channels.end(),
-//                                   [] (json channel)
-//                                   { return !channel["status"]["isBroadcasting"]; });
-//         std::sort(channels.begin(), newend,
-//                   [] (json a, json b)
-//                   {
-//                       return a["status"]["totalDirects"] < b["status"]["totalDirects"];
-//                   });
-
-//         return json::array_t(channels.begin(), newend);
-//     }else if (varName == "externalChannels")
-//     {
-//         auto channels = JrpcApi().getYPChannelsInternal({});
-//         return channels;
-//     }else
-//     {
-//         return {};
-//     }
-// }
 
 // --------------------------------------
 void    Template::readForeach(Stream &in, Stream *outp)

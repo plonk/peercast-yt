@@ -132,7 +132,6 @@ public:
     Servent             *findServentByIndex(int);
     Servent             *findServentByID(int id);
 
-//    bool                writeVariable(Stream &, const String &) override;
     Servent             *allocServent();
 
     unsigned int        numUsed(int);

@@ -16,7 +16,6 @@ public:
     void enable();
     void disable();
 
-//    bool writeVariable(Stream &out, const String &var) override;
     amf0::Value getState() override;
 
     void start();

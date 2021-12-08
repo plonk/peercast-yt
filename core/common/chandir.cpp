@@ -316,19 +316,6 @@ bool ChannelDirectory::writeFeedVariable(Stream& out, const String& varName, int
     return true;
 }
 
-/*
-bool ChannelDirectory::writeVariable(Stream& out, const String& varName, int index)
-{
-    if (varName.startsWith("externalChannel.")) {
-        return writeChannelVariable(out, varName + strlen("externalChannel."), index);
-    } else if (varName.startsWith("channelFeed.")) {
-        return writeFeedVariable(out, varName + strlen("channelFeed."), index);
-    } else {
-        return false;
-    }
-}
-*/
-
 static std::string formatTime(unsigned int diff)
 {
     auto min = diff / 60;
@@ -339,22 +326,6 @@ static std::string formatTime(unsigned int diff)
         return str::format("%dm %ds", min, sec);
     }
 }
-
-/*
-bool ChannelDirectory::writeVariable(Stream& out, const String& varName)
-{
-    if (varName == "totalListeners") {
-        out.writeString(to_string(totalListeners()));
-    } else if (varName == "totalRelays") {
-        out.writeString(to_string(totalRelays()));
-    } else if (varName == "lastUpdate") {
-        out.writeString(formatTime(sys->getTime() - m_lastUpdate));
-    } else {
-        return false;
-    }
-    return true;
-}
-*/
 
 amf0::Value ChannelDirectory::getState()
 {

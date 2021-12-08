@@ -348,34 +348,6 @@ amf0::Value ChanMgr::getState()
 }
 
 // -----------------------------------
-/*
-bool ChanMgr::writeVariable(Stream &out, const String &var)
-{
-    char buf[1024];
-    if (var == "numHitLists")
-        sprintf(buf, "%d", numHitLists());
-
-    else if (var == "numChannels")
-        sprintf(buf, "%d", numChannels());
-    else if (var == "djMessage")
-        strcpy(buf, broadcastMsg.cstr());
-    else if (var == "icyMetaInterval")
-        sprintf(buf, "%d", icyMetaInterval);
-    else if (var == "maxRelaysPerChannel")
-        sprintf(buf, "%d", maxRelaysPerChannel);
-    else if (var == "hostUpdateInterval")
-        sprintf(buf, "%d", hostUpdateInterval);
-    else if (var == "broadcastID")
-        broadcastID.toStr(buf);
-    else
-        return false;
-
-    out.writeString(buf);
-    return true;
-}
-*/
-
-// -----------------------------------
 void ChanMgr::broadcastTrackerUpdate(const GnuID &svID, bool force)
 {
     auto c = channel;

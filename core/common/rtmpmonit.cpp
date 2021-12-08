@@ -62,25 +62,6 @@ amf0::Value RTMPServerMonitor::getState()
         });
 }
 
-/*
-bool RTMPServerMonitor::writeVariable(Stream &out, const String &var)
-{
-    std::string buf;
-
-    if (var == "status")
-        buf = status();
-    else if (var == "processID")
-        buf = std::to_string( m_rtmpServer.pid() );
-    else if (var == "ipVersion")
-        buf = std::to_string(ipVersion);
-    else
-        return false;
-
-    out.writeString(buf);
-    return true;
-}
-*/
-
 void RTMPServerMonitor::start()
 {
     // Environment env を現在の環境から初期化する。

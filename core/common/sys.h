@@ -105,7 +105,6 @@ public:
 
     void    sleepIdle();
 
-//    bool writeVariable(Stream&, const String&) override;
     amf0::Value getState() override;
 
     static char* strdup(const char *s);

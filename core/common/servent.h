@@ -213,7 +213,6 @@ public:
     bool    waitForChannelHeader(ChanInfo &);
     ChanInfo findChannel(char *str, ChanInfo &);
 
-    //bool    writeVariable(Stream &, const String &) override;
     amf0::Value    getState() override;
 
     // the "mainloop" of servents

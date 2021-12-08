@@ -120,7 +120,6 @@ public:
     void    readInfoAtoms(AtomStream &, int);
     void    readTrackAtoms(AtomStream &, int);
 
-//    bool    writeVariable(Stream &out, const String &var) override;
     amf0::Value getState() override;
 
     unsigned int        getUptime();
