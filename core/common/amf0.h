@@ -22,9 +22,10 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "stream.h"
 #include <stdexcept>
 #include "str.h"
+
+class Stream;
 
 namespace amf0
 {
@@ -79,14 +80,18 @@ namespace amf0
         Value(std::nullptr_t p) : Value() {}
         Value(double d) : m_type(kNumber), m_number(d), m_bool(false) {}
         Value(const char* s) : m_type(kString), m_number(0.0), m_bool(false), m_string(s) {}
+        Value(const std::string& s) : m_type(kString), m_number(0.0), m_bool(false), m_string(s) {}
         Value(bool b) : m_type(kBool), m_number(0.0), m_bool(b) {}
         Value(int n) : m_type(kNumber), m_number(n), m_bool(false) {}
+        Value(unsigned int n) : m_type(kNumber), m_number(n), m_bool(false) {}
+        Value(long unsigned int n) : m_type(kNumber), m_number(n), m_bool(false) {}
         Value(std::initializer_list<KeyValuePair> l) : m_type(kObject), m_number(0.0), m_bool(false)
         {
             for (auto pair: l)
                 m_object[pair.first] = pair.second;
         }
         Value(const Date& d) : m_type(kDate), m_number(0.0), m_bool(false), m_date(d) {}
+        Value(std::vector<Value> arr) : m_type(kStrictArray), m_number(0.0), m_bool(false), m_strict_array(arr) {}
 
         static Value number(double d)
         { Value v; v.m_type = kNumber; v.m_number = d; return v; }
@@ -338,103 +343,13 @@ namespace amf0
     class Deserializer
     {
     public:
-        bool readBool(Stream &in)
-        {
-            return in.readChar() != 0;
-        }
-
-        int32_t readInt32(Stream &in)
-        {
-            return (in.readChar() << 24) | (in.readChar() << 16) | (in.readChar() << 8) | (in.readChar());
-        }
-
-        int16_t readInt16(Stream& in)
-        {
-            return (in.readChar() << 8) | (in.readChar());
-        }
-
-        std::string readString(Stream &in)
-        {
-            int len = (in.readChar() << 8) | (in.readChar());
-            return in.read(len);
-        }
-
-        double readDouble(Stream &in)
-        {
-            double number;
-            char* data = reinterpret_cast<char*>(&number);
-            for (int i = 8; i > 0; i--) {
-                char c = in.readChar();
-                *(data + i - 1) = c;
-            }
-            return number;
-        }
-
-        std::vector<KeyValuePair> readObject(Stream &in)
-        {
-            std::vector<KeyValuePair> list;
-            while (true)
-            {
-                std::string key = readString(in);
-                if (key == "")
-                    break;
-
-                list.push_back({key, readValue(in)});
-            }
-            in.readChar(); // OBJECT_END
-            return list;
-        }
-
-        Value readValue(Stream &in)
-        {
-            char type = in.readChar();
-
-            switch (type)
-            {
-            case AMF_NUMBER:
-            {
-                return Value::number(readDouble(in));
-            }
-            case AMF_STRING:
-            {
-                return Value::string(readString(in));
-            }
-            case AMF_OBJECT:
-            {
-                return Value::object(readObject(in));
-            }
-            case AMF_BOOL:
-            {
-                return Value::boolean(readBool(in));
-            }
-            case AMF_ARRAY:
-            {
-                readInt32(in); // length
-                return Value::array(readObject(in));
-            }
-            case AMF_STRICTARRAY:
-            {
-                int len = readInt32(in);
-                std::vector<Value> list;
-                for (int i = 0; i < len; i++) {
-                    list.push_back(readValue(in));
-                }
-                return Value::strictArray(list);
-            }
-            case AMF_NULL:
-            {
-                return Value(nullptr);
-            }
-            case AMF_DATE:
-            {
-                double unixTime = readDouble(in);
-                uint16_t timeZone = readInt16(in);
-                return Value::date(unixTime, timeZone);
-            }
-            default:
-                throw std::runtime_error("unknown AMF value type " + std::to_string(type));
-            }
-        }
+        bool readBool(Stream &in);
+        int32_t readInt32(Stream &in);
+        int16_t readInt16(Stream& in);
+        std::string readString(Stream &in);
+        double readDouble(Stream &in);
+        std::vector<KeyValuePair> readObject(Stream &in);
+        Value readValue(Stream &in);
     };
 } // namespace amf
 #endif
