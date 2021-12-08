@@ -205,6 +205,7 @@ static const char* statusMessage(int statusCode)
     case 101: return "Switch protocols";
     case 200: return "OK";
     case 302: return "Found";
+    case 304: return "Not Modified";
     case 400: return "Bad Request";
     case 401: return "Unauthorized";
     case 403: return "Forbidden";

@@ -202,7 +202,12 @@ void HTML::writeRawFile(const char *fileName, const char *mimeType)
         time_t t = mtime(fileName);
 
         if (t != -1)
+        {
             additionalHeaders["Last-Modified"] = cgi::rfc1123Time(t);
+        }else
+        {
+            LOG_ERROR("Failed to get mtime of %s", fileName);
+        }
 
         writeOK(mimeType, additionalHeaders);
         file.writeTo(*out, file.length());
