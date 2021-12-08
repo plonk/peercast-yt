@@ -12,55 +12,6 @@
   </head>
   <body>
 
-    <div class="reloader" data-url="?fragment=notifications" data-interval="{$servMgr.refreshHTML}">
-      {@fragment notifications}
-      <script>
-        var notifications = [];
-        var t = {!sys.time};
-        var r = {!servMgr.refreshHTML};
-        {@loop notificationBuffer.numNotifications}
-          {@if !loop.notification.isRead}
-            if (t - {$loop.notification.unixTime} <= (2*r))
-              notifications.push({ time: "{\loop.notification.time}", type: "{\loop.notification.type}", message: "{\loop.notification.message}" });
-          {@end}
-        {@end}
-
-        // {$notificationBuffer.markAsRead}
-
-        function notifyMe() {
-          if (!("Notification" in window)) {
-            console.log("This browser does not support system notifications");
-          }
-          else if (Notification.permission === "granted") {
-            for (var i = 0; i < notifications.length; i++) {
-              spawnNotification(notifications[i].message, "/assets/images/small-logo.png", notifications[i].type);
-            }
-          }
-          else if (Notification.permission !== 'denied') {
-            Notification.requestPermission(function (permission) {
-              if (permission === "granted") {
-                for (var i = 0; i < notifications.length; i++) {
-                  spawnNotification(notifications[i].message, "/assets/images/small-logo.png", notifications[i].type);
-                }
-              }
-            });
-          }
-        }
-
-        function spawnNotification(theBody,theIcon,theTitle) {
-          var options = {
-              body: theBody,
-              icon: theIcon
-          }
-          var n = new Notification(theTitle,options);
-          setTimeout(n.close.bind(n), 5000);
-        }
-
-        notifyMe();
-      </script>
-    {@end}
-    </div>
-
             <div align="center">
               <div align="center">
                 <table width="100%" border="0">
