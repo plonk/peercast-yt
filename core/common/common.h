@@ -121,7 +121,7 @@ public:
 #define SWAP4(v) (((v&0xff)<<24) | ((v&0xff00)<<8) | ((v&0xff0000)>>8) | ((v&0xff000000)>>24))
 #define TOUPPER(c) ((((c) >= 'a') && ((c) <= 'z')) ? (c)+'A'-'a' : (c))
 #define TONIBBLE(c) ((((c) >= 'A')&&((c) <= 'F')) ? (((c)-'A')+10) : ((c)-'0'))
-#define BYTES_TO_KBPS(n) (float)(((((float)n)*8.0f)/1024.0f))
+#define BYTES_TO_KBPS(n) (float)(((((float)(n))*8.0f)/1024.0f))
 
 // -----------------------------------
 const char  *getCGIarg(const char *str, const char *arg);
