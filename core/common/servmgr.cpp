@@ -2034,6 +2034,111 @@ ServHost::TYPE ServHost::getTypeFromStr(const char *s)
 }
 
 // --------------------------------------------------
+amf0::Value ServMgr::getState()
+{
+    using std::to_string;
+
+    LOG_DEBUG("getState()");
+
+    std::vector<amf0::Value> filterArray;
+    for (int i = 0; i < this->numFilters; i++)
+        filterArray.push_back(this->filters[i].getState());
+
+    std::vector<amf0::Value> serventArray;
+    for (auto sv = servents; sv != nullptr; sv = sv->next)
+        serventArray.push_back(sv->getState());
+
+    return amf0::Value::object(
+        {
+            {"version", PCX_VERSTRING},
+            {"buildDateTime", __DATE__ " " __TIME__},
+            {"uptime", String().setFromStopwatch(getUptime()).c_str()},
+            {"numRelays", to_string(numStreams(Servent::T_RELAY, true))},
+            {"numDirect", to_string(numStreams(Servent::T_DIRECT, true))},
+            {"totalConnected", to_string(totalConnected())},
+            {"numServHosts", to_string(numHosts(ServHost::T_SERVENT))},
+            {"numServents", to_string(numServents())},
+            {"servents", serventArray},
+            {"serverName", serverName.c_str()},
+            {"serverPort", to_string(serverHost.port)},
+            {"serverIP", serverHost.str(false)},
+            {"serverIPv6", serverHostIPv6.str(false)},
+            {"ypAddress", rootHost.c_str()},
+            {"password", password},
+            {"isFirewalled", getFirewall(4)==FW_ON ? "1" : "0"},
+            {"firewallKnown", getFirewall(4)==FW_UNKNOWN ? "0" : "1"},
+            {"isFirewalledIPv6", getFirewall(6)==FW_ON ? "1" : "0"},
+            {"firewallKnownIPv6", getFirewall(6)==FW_UNKNOWN ? "0" : "1"},
+            {"rootMsg", rootMsg.c_str()},
+            {"isRoot", to_string(isRoot ? 1 : 0)},
+            {"isPrivate", "0"},
+            {"forceYP", "0"},
+            {"refreshHTML", to_string(refreshHTML ? refreshHTML : 0x0fffffff)},
+            {"maxRelays", to_string(maxRelays)},
+            {"maxDirect", to_string(maxDirect)},
+            {"maxBitrateOut", to_string(maxBitrateOut)},
+            {"maxControlsIn", to_string(maxControl)},
+            {"maxServIn", to_string(maxServIn)},
+            {"numFilters", to_string(numFilters+1)},
+            {"filters", filterArray },
+            {"numActive1", to_string(numActiveOnPort(serverHost.port))},
+            {"numCIN", to_string(numConnected(Servent::T_CIN))},
+            {"numCOUT", to_string(numConnected(Servent::T_COUT))},
+            {"numIncoming", to_string(numActive(Servent::T_INCOMING))},
+            {"disabled", to_string(isDisabled)},
+            {"serverPort1", to_string(serverHost.port)},
+            {"serverLocalIP",Host(sys->getInterfaceIPv4Address(), 0).str(false) },
+            {"upgradeURL", this->downloadURL},
+            {"allow", amf0::Value::object(
+                    {
+                        {"HTML1", (allowServer1 & Servent::ALLOW_HTML) ? "1" : "0"},
+                        {"broadcasting1", (allowServer1 & Servent::ALLOW_BROADCAST) ? "1" : "0"},
+                        {"network1", (allowServer1 & Servent::ALLOW_NETWORK) ? "1" : "0"},
+                        {"direct1", (allowServer1 & Servent::ALLOW_DIRECT) ? "1" : "0"},
+                    })},
+            {"auth", amf0::Value::object(
+                    {
+                        {"useCookies", (authType==AUTH_COOKIE) ? "1" : "0"},
+                        {"useHTTP", (authType==AUTH_HTTPBASIC) ? "1" : "0"},
+                        {"useSessionCookies", (cookieList.neverExpire==false) ? "1" : "0"},
+                    })},
+            {"log", amf0::Value::object(
+                    {
+                        {"level", std::to_string(logLevel())}
+                    })},
+            {"lang", this->htmlPath + strlen("html/") },
+            {"numExternalChannels", to_string(channelDirectory->numChannels())},
+            {"numChannelFeedsPlusOne", channelDirectory->numFeeds() + 1},
+            {"numChannelFeeds", channelDirectory->numFeeds()},
+            {"channelDirectory", channelDirectory->getState()},
+            {"uptestServiceRegistry", uptestServiceRegistry->getState()},
+            {"publicDirectoryEnabled", to_string(publicDirectoryEnabled)},
+            {"transcodingEnabled", to_string(this->transcodingEnabled)},
+            {"preset", this->preset},
+            {"audioCodec", this->audioCodec},
+            {"wmvProtocol", this->wmvProtocol},
+            {"defaultChannelInfo", this->defaultChannelInfo.getState()},
+            {"rtmpServerMonitor", this->rtmpServerMonitor.getState()},
+            {"rtmpPort", std::to_string(this->rtmpPort)},
+            {"hasUnsafeFilterSettings", std::to_string(this->hasUnsafeFilterSettings())},
+            {"chat", to_string(this->chat)},
+            {"randomizeBroadcastingChannelID", to_string(this->flags.get("randomizeBroadcastingChannelID"))},
+            {"flags", this->flags.getState()},
+            {"installationDirectory", []()
+                                      {
+                                          try {
+                                              return sys->realPath(peercastApp->getPath());
+                                          } catch (GeneralException& e) {
+                                              LOG_ERROR("installationDirectory: %s", e.what());
+                                              return std::string("[Error]");
+                                          }
+                                      }()},
+            {"configurationFile", peercastApp->getIniFilename()},
+        });
+}
+
+// --------------------------------------------------
+/*
 bool ServMgr::writeVariable(Stream &out, const String &var)
 {
     using namespace std;
@@ -2242,6 +2347,7 @@ bool ServMgr::writeVariable(Stream &out, const String &var)
     out.writeString(buf);
     return true;
 }
+*/
 
 // --------------------------------------------------
 void ServMgr::logLevel(int newLevel)

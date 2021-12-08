@@ -328,6 +328,27 @@ ChanMgr::~ChanMgr()
 }
 
 // -----------------------------------
+amf0::Value ChanMgr::getState()
+{
+    std::vector<amf0::Value> channelArray;
+    for (auto ch = channel; ch != nullptr; ch = ch->next)
+        channelArray.push_back(ch->getState());
+
+    return amf0::Value::object(
+        {
+            { "channels", channelArray },
+            { "numHitLists",numHitLists()},
+            { "numChannels",numChannels()},
+            { "djMessage", broadcastMsg.c_str()},
+            { "icyMetaInterval",icyMetaInterval},
+            { "maxRelaysPerChannel",maxRelaysPerChannel},
+            { "hostUpdateInterval",hostUpdateInterval},
+            { "broadcastID",         broadcastID.str() },
+        });
+}
+
+// -----------------------------------
+/*
 bool ChanMgr::writeVariable(Stream &out, const String &var)
 {
     char buf[1024];
@@ -352,6 +373,7 @@ bool ChanMgr::writeVariable(Stream &out, const String &var)
     out.writeString(buf);
     return true;
 }
+*/
 
 // -----------------------------------
 void ChanMgr::broadcastTrackerUpdate(const GnuID &svID, bool force)

@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>{$page.channel.name} - {#PeerCast on} {^SERVER_NAME}</title>
+    <title>{$channel.name} - {#PeerCast on} {^SERVER_NAME}</title>
     <link rel="stylesheet" href="peercast.css">
     <meta charset="utf-8">
     <style>
@@ -108,7 +108,7 @@
     </style>
     <script src="/assets/js/jquery-3.2.1.min.js"></script>
     <script>
-     var CONTACT_URL = "{\page.channel.contactURL}";
+     var CONTACT_URL = "{\channel.contactURL}";
     </script>
     {@if servMgr.chat}
     <script src="bbs.js"></script>
@@ -124,22 +124,22 @@
       <div class="toolbar">
 	<div>
 	  <a href="channels.html">&#x2b05; {#Back}</a> <span style="color: #aaa">|</span>
-	  <b>{$page.channel.name}</b>
+	  <b>{$channel.name}</b>
 	  <a target="_blank"
-	     href="/pls/{$page.channel.id}{$page.channel.plsExt}?auth={$page.channel.authToken}">
+	     href="/pls/{$channel.id}{$channel.plsExt}?auth={$channel.authToken}">
 	    {#Playlist}
 	  </a>
 	  -
-	  {@if page.channel.contactURL}
+	  {@if channel.contactURL}
 	  <a target="_blank"
-	     href="{$page.channel.contactURL}">
+	     href="{$channel.contactURL}">
 	    {#Contact}
 	  </a>
 	  {@else}
 	  {#Contact}
 	  {@end}
 	  -
-	  <a href="/admin?cmd=bump&amp;id={$page.channel.id}">{#Bump}</a>
+	  <a href="/admin?cmd=bump&amp;id={$channel.id}">{#Bump}</a>
 	</div>
 
         {@if servMgr.chat}

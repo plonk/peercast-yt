@@ -58,6 +58,27 @@ void    Stats::update()
 }
 
 // ------------------------------------
+amf0::Value Stats::getState()
+{
+    return amf0::Value::object(
+        {
+            { "totalInPerSec", str::format("%.1f", BYTES_TO_KBPS(getPerSecond(Stats::BYTESIN))) },
+            { "totalOutPerSec", str::format("%.1f", BYTES_TO_KBPS(getPerSecond(Stats::BYTESOUT))) },
+            { "totalPerSec", str::format("%.1f", BYTES_TO_KBPS(getPerSecond(Stats::BYTESIN)+getPerSecond(Stats::BYTESOUT))) },
+            { "wanInPerSec", str::format("%.1f", BYTES_TO_KBPS(getPerSecond(Stats::BYTESIN)-getPerSecond(Stats::LOCALBYTESIN))) },
+            { "wanOutPerSec", str::format("%.1f", BYTES_TO_KBPS(getPerSecond(Stats::BYTESOUT)-getPerSecond(Stats::LOCALBYTESOUT))) },
+            { "wanTotalPerSec", str::format("%.1f", BYTES_TO_KBPS((getPerSecond(Stats::BYTESIN)-getPerSecond(Stats::LOCALBYTESIN))+(getPerSecond(Stats::BYTESOUT)-getPerSecond(Stats::LOCALBYTESOUT)))) },
+            { "netInPerSec", str::format("%.1f", BYTES_TO_KBPS(getPerSecond(Stats::PACKETDATAIN))) },
+            { "netOutPerSec", str::format("%.1f", BYTES_TO_KBPS(getPerSecond(Stats::PACKETDATAOUT))) },
+            { "netTotalPerSec", str::format("%.1f", BYTES_TO_KBPS(getPerSecond(Stats::PACKETDATAOUT)+getPerSecond(Stats::PACKETDATAIN))) },
+            { "packInPerSec", str::format("%u", getPerSecond(Stats::NUMPACKETSIN)) },
+            { "packOutPerSec", str::format("%u", getPerSecond(Stats::NUMPACKETSOUT)) },
+            { "packTotalPerSec", str::format("%u", getPerSecond(Stats::NUMPACKETSOUT)+getPerSecond(Stats::NUMPACKETSIN)) },
+        });
+}
+
+// ------------------------------------
+/*
 bool Stats::writeVariable(Stream &out, const String &var)
 {
     char buf[1024];
@@ -94,3 +115,4 @@ bool Stats::writeVariable(Stream &out, const String &var)
 
     return true;
 }
+*/

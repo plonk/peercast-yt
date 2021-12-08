@@ -9,6 +9,8 @@
 
 using namespace std;
 
+using json = nlohmann::json;
+
 // ------------------------------------------------------------
 PublicController::PublicController(const string& documentRoot)
     : mapper("/public", documentRoot)
@@ -208,7 +210,7 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
         file.openReadOnly(path.c_str());
         Template engine(req.queryString);
         engine.prependScope(scope);
-        engine.readTemplate(file, &mem, 0);
+        engine.readTemplate(file, &mem);
 
         map<string,string> headers;
         headers["Content-Type"]     = "text/html";
@@ -240,7 +242,7 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
                     file.openReadOnly(path.c_str());
                     Template engine(req.queryString);
                     engine.prependScope(scope);
-                    engine.readTemplate(file, &mem, 0);
+                    engine.readTemplate(file, &mem);
                 }else
                 {
                     file.openReadOnly(path.c_str());

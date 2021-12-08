@@ -2401,6 +2401,11 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
 
     if (strcmp(mimeType, MIME_HTML) == 0)
     {
+        auto req = http.getRequest();
+        GenericScope locals;
+        HTTPRequestScope reqScope(req);
+        std::vector<Template::Scope*> scopes = { &reqScope, &locals };
+
         if (str::contains(fn, "play.html"))
         {
             // 視聴ページだった場合はあらかじめチャンネルのリレーを開
@@ -2418,19 +2423,23 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
             ChanInfo info;
             if (!servMgr->getChannel(id.cstr(), info, true))
                 throw HTTPException(HTTP_SC_NOTFOUND, 404);
+
+            auto ch = chanMgr->findChannelByID(GnuID(id.c_str()));
+            if (!ch)
+                throw HTTPException(HTTP_SC_NOTFOUND, 404);
+
+            locals.vars["channel"] = ch->getState();
         }
 
         char *args = strstr(fileName.cstr(), "?");
         if (args)
             *args = '\0';
 
-        auto req = http.getRequest();
 
         validFileOrThrow(fileName.c_str(), documentRoot);
 
         html.writeOK(MIME_HTML);
-        HTTPRequestScope scope(req);
-        html.writeTemplate(fileName.cstr(), req.queryString.c_str(), scope);
+        html.writeTemplate(fileName.cstr(), req.queryString.c_str(), scopes);
     }else
     {
         validFileOrThrow(fileName.c_str(), documentRoot);

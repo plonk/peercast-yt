@@ -123,12 +123,13 @@ public:
 
     bool writeChannelVariable(Stream& out, const String& varName, int index);
     bool writeFeedVariable(Stream& out, const String& varName, int index);
-    bool writeVariable(Stream& out, const String& varName) override;
-    bool writeVariable(Stream &, const String &, int) override;
+    //bool writeVariable(Stream& out, const String& varName) override;
 
     std::vector<ChannelEntry> channels() const;
 
     std::string findTracker(const GnuID& id) const;
+
+    amf0::Value getState() override;
 
     std::vector<ChannelEntry> m_channels;
     std::vector<ChannelFeed> m_feeds;

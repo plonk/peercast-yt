@@ -38,52 +38,50 @@
   {@fragment relays}
   <TABLE class="relay-list table-panel" align=center border=0>
     <TBODY>
-      {@if chanMgr.numChannels}
       <TR align=middle bgColor=#cccccc class="normal">
         <th colspan=2>{#Relays}</th>
       </TR>
-      {@end}
-      {@loop chanMgr.numChannels}
+      {@foreach chanMgr.channels}
       <tr class="normal">
         <TD width="1" align="left">
-          <a href="play.html?id={$loop.channel.id}">
+          <a href="play.html?id={$this.id}">
             <img src="/assets/images/play.png" border="0">
           </a>
         </TD>
         <TD align="left">
           <div class="channel-name">
-            {$loop.channel.name}
+            {$this.name}
             <form style="float:right" action="/admin">
               <input type="hidden" name="cmd" value="stop">
-              <input type="hidden" name="id" value="{$loop.channel.id}">
+              <input type="hidden" name="id" value="{$this.id}">
               <button type="submit" style="font-size:16px">&times;</button>
             </form>
           </div>
-          {$loop.channel.srcrate} / {$loop.channel.bitrate}Kbps
-          <a href="/stream/{$loop.channel.id}{$loop.channel.ext}">{$loop.channel.type}</a>
-          ({$loop.channel.totalListeners}/{$loop.channel.totalRelays})
-          <a href="connections.html?id={$loop.channel.id}">
-            [{$loop.channel.localListeners}/{$loop.channel.localRelays}]
+          {$this.srcrate} / {$this.bitrate}Kbps
+          <a href="/stream/{$this.id}{$this.ext}">{$this.type}</a>
+          ({$this.totalListeners}/{$this.totalRelays})
+          <a href="connections.html?id={$this.id}">
+            [{$this.localListeners}/{$this.localRelays}]
           </a>
-          {$loop.channel.status}
+          {$this.status}
           <br>
           <span>{#Keep}</span>
-          <a href="/admin?cmd=keep&amp;id={$loop.channel.id}"><b>{$loop.channel.keep}</b></a>
+          <a href="/admin?cmd=keep&amp;id={$this.id}"><b>{$this.keep}</b></a>
 
           <div class="normal" style="white-space: nowrap">
-            <b><a href="relayinfo.html?id={$loop.channel.id}">{#Info}</a></b>
-            {@if loop.channel.status == "BROADCAST"}
-              - <b><a href="editinfo.html?id={$loop.channel.id}">{#Edit}</a></b>
+            <b><a href="relayinfo.html?id={$this.id}">{#Info}</a></b>
+            {@if this.status == "BROADCAST"}
+              - <b><a href="editinfo.html?id={$this.id}">{#Edit}</a></b>
             {@else}
               - <b class="text-muted">{#Edit}</b>
             {@end}
-            {@if loop.channel.contactURL}
-              - <b><a href="{$loop.channel.contactURL}">{#WWW}</a></b>
+            {@if this.contactURL}
+              - <b><a href="{$this.contactURL}">{#WWW}</a></b>
             {@else}
               - <b class="text-muted">{#WWW}</b>
             {@end}
-            - <b><a href="/pls/{$loop.channel.id}{$loop.channel.plsExt}?auth={$loop.channel.authToken}">{#Playlist}</a></b>
-            - <b><a href="/admin?cmd=bump&amp;id={$loop.channel.id}">{#Bump}</a></b>
+            - <b><a href="/pls/{$this.id}{$this.plsExt}?auth={$this.authToken}">{#Playlist}</a></b>
+            - <b><a href="/admin?cmd=bump&amp;id={$this.id}">{#Bump}</a></b>
           </div>
         </TD>
       </TR>
@@ -120,7 +118,7 @@
       <th>Channel</th><th>Status</th><th>Bitrate</th><th>Type</th>
     </tr>
 
-    {@foreach externalChannels}
+    {@foreach servMgr.channelDirectory.channels}
     <tr>
       <td class="channel-description">
 	<a {@if this.id != "00000000000000000000000000000000"}href="play.html?id={$this.id}"{@end} style="display: block; text-decoration: none; max-width: 45vw">

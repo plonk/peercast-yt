@@ -1360,7 +1360,56 @@ std::string Channel::getBufferString()
 }
 
 // -----------------------------------
-bool Channel::writeVariable(Stream &out, const String &var)
+amf0::Value Channel::getState()
+{
+    using std::to_string;
+
+    return amf0::Value::object(
+        {
+            {"name", String(info.name).convertTo(String::T_UNICODESAFE).c_str()},
+            {"bitrate", to_string(info.bitrate)},
+            {"srcrate", (sourceData) ? str::format("%.0f", BYTES_TO_KBPS(sourceData->getSourceRate())) : "0"},
+            {"genre", String(info.genre).convertTo(String::T_UNICODE).c_str()},
+            {"desc", String(info.desc).convertTo(String::T_UNICODE).c_str()},
+            {"comment", String(info.comment).convertTo(String::T_UNICODE).c_str()},
+            {"uptime", (info.lastPlayStart) ? String().setFromStopwatch(sys->getTime()-info.lastPlayStart).c_str() : "-"},
+            {"type", info.getTypeStr()},
+            {"typeLong", info.getTypeStringLong()},
+            {"ext", info.getTypeExt()},
+            {"localRelays", to_string(localRelays())},
+            {"localListeners", to_string(localListeners())},
+            {"totalRelays", to_string(totalRelays())},
+            {"totalListeners", to_string(totalListeners())},
+            {"status", getStatusStr()},
+            {"keep", stayConnected?"Yes":"No"},
+            {"id", info.id.str()},
+
+            {"track",
+             {
+                 {"title", String(info.track.title).convertTo(String::T_UNICODE).c_str()},
+                 {"artist", String(info.track.artist).convertTo(String::T_UNICODE).c_str()},
+                 {"album", String(info.track.album).convertTo(String::T_UNICODE).c_str()},
+                 {"genre", String(info.track.genre).convertTo(String::T_UNICODE).c_str()},
+                 {"contactURL", String(info.track.contact).convertTo(String::T_UNICODE).c_str()},
+             }},
+            {"contactURL", info.url.cstr()},
+            {"streamPos", str::group_digits(std::to_string(streamPos), ",")},
+            {"sourceType", getSrcTypeStr()},
+            {"sourceProtocol", ChanInfo::getProtocolStr(info.srcProtocol)},
+            {"sourceURL", getSourceString()},
+            {"headPos", str::group_digits(std::to_string(headPack.pos), ",")},
+            {"headLen", str::group_digits(std::to_string(headPack.len), ",")},
+            {"buffer", getBufferString()},
+            {"headDump", renderHexDump(std::string(headPack.data, headPack.data + headPack.len))},
+            {"numHits", [this](){ auto chl = chanMgr->findHitListByID(info.id); return to_string((chl) ? chl->numHits() : 0); }()},
+            {"authToken", chanMgr->authToken(info.id).c_str()},
+            {"plsExt", info.getPlayListExt()},
+            {"ipVersion", std::to_string((int)ipVersion)},
+        });
+}
+
+// -----------------------------------
+/*bool Channel::writeVariable(Stream &out, const String &var)
 {
     using namespace std;
 
@@ -1477,4 +1526,4 @@ bool Channel::writeVariable(Stream &out, const String &var)
 
     out.writeString(buf);
     return true;
-}
+}*/

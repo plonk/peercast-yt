@@ -53,7 +53,7 @@ public:
     int     broadcastPacketUp(ChanPacket &, const GnuID &, const GnuID &, const GnuID &);
     void    broadcastTrackerUpdate(const GnuID &, bool = false);
 
-    bool    writeVariable(Stream &, const String &) override;
+//    bool    writeVariable(Stream &, const String &) override;
 
     int     findChannels(ChanInfo &, std::shared_ptr<Channel> *, int);
     int     findChannelsByStatus(std::shared_ptr<Channel> *, int, Channel::STATUS);
@@ -96,6 +96,8 @@ public:
 
     std::string authSecret(const GnuID& id);
     std::string authToken(const GnuID& id);
+
+    amf0::Value getState() override;
 
     std::shared_ptr<Channel> channel;
     ChanHitList     *hitlist;

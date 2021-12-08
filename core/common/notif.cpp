@@ -1,4 +1,5 @@
 #include "notif.h"
+#include "str.h"
 
 // global
 NotificationBuffer g_notificationBuffer;
@@ -77,6 +78,28 @@ void NotificationBuffer::addNotification(const Notification& notif)
     notifications.push_front(Entry(notif, false));
 }
 
+amf0::Value NotificationBuffer::getState()
+{
+    std::vector<amf0::Value> notificationsArray;
+
+    for (auto& e : notifications)
+        notificationsArray.push_back(amf0::Value(
+                                         {
+                                             {"message", e.notif.message},
+                                             {"isRead", std::to_string((int) e.isRead)},
+                                             {"type", e.notif.getTypeStr()},
+                                             {"unixTime", std::to_string(e.notif.time)},
+                                             {"time", str::rstrip(String().setFromTime(e.notif.time))},
+                                         }));
+    return amf0::Value(
+        {
+            {"numNotifications" , std::to_string(numNotifications())},
+            {"numUnread" , std::to_string(numUnread())},
+            {"notifications", notificationsArray },
+        });
+}
+
+/*
 bool NotificationBuffer::writeVariable(Stream& out, const String& varName)
 {
     if (varName == "numNotifications") {
@@ -93,7 +116,9 @@ bool NotificationBuffer::writeVariable(Stream& out, const String& varName)
         return false;
     }
 }
+*/
 
+/*
 bool NotificationBuffer::writeVariable(Stream& out, const String& varName, int index)
 {
     if (varName.startsWith("notification.")) {
@@ -122,3 +147,4 @@ bool NotificationBuffer::writeVariable(Stream& out, const String& varName, int i
     }
     return false;
 }
+*/

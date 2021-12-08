@@ -22,20 +22,17 @@
 
 #include <list>
 #include "stream.h"
-#include "json.hpp"
 #include "varwriter.h"
-
-using json = nlohmann::json;
 
 // HTML テンプレートシステム
 class Template
 {
 public:
 
-    class Scope : public VariableWriter
+    class Scope
     {
     public:
-        virtual bool writeVariable(Stream &, const String &, int) = 0;
+        virtual bool writeVariable(amf0::Value& out, const String &) = 0;
     };
 
     enum
@@ -50,7 +47,6 @@ public:
         TMPL_FOREACH
     };
 
-    Template(const char* args = NULL);
     Template(const std::string& args);
     ~Template();
 
@@ -71,40 +67,43 @@ public:
     }
 
     // 変数
-    void    writeVariable(Stream &, const String &, int);
-    void    writeGlobalVariable(Stream &, const String &, int);
-    bool    writeLoopVariable(Stream &s, const String &varName, int loop);
-    bool    writePageVariable(Stream &s, const String &varName, int loop);
-    int     getIntVariable(const String &, int);
-    bool    getBoolVariable(const String &, int);
+    bool    writeVariable(amf0::Value&, const String &);
+    bool    writeGlobalVariable(amf0::Value&, const String &);
+    bool    writePageVariable(amf0::Value&, const String &varName);
+    int     getIntVariable(const String &);
+    bool    getBoolVariable(const String &);
 
     // ディレクティブの実行
-    int     readCmd(Stream &, Stream *, int);
-    void    readIf(Stream &, Stream *, int);
-    void    readLoop(Stream &, Stream *, int);
-    void    readForeach(Stream &, Stream *, int);
-    void    readFragment(Stream &, Stream *, int);
+    int     readCmd(Stream &, Stream *);
+    void    readIf(Stream &, Stream *);
+    void    readLoop(Stream &, Stream *);
+    void    readForeach(Stream &, Stream *);
+    void    readFragment(Stream &, Stream *);
 
-    void    readVariable(Stream &, Stream *, int);
-    void    readVariableJavaScript(Stream &in, Stream *outp, int loop);
-    void    readVariableRaw(Stream &in, Stream *outp, int loop);
-    int     readTemplate(Stream &, Stream *, int);
-    bool    writeObjectProperty(Stream& s, const String& varName, json::object_t object);
-    json::array_t evaluateCollectionVariable(String& varName);
+    void    readVariable(Stream &, Stream *);
+    void    readVariableJavaScript(Stream &in, Stream *outp);
+    void    readVariableRaw(Stream &in, Stream *outp);
+    int     readTemplate(Stream &, Stream *);
+    bool    writeObjectProperty(amf0::Value& out, const String& varName, amf0::Value& obj);
 
-    bool    evalCondition(const std::string& cond, int loop);
+    bool    evalCondition(const std::string& cond);
     std::vector<std::string> tokenize(const std::string& input);
     std::pair<std::string,std::string> readStringLiteral(const std::string& input);
     std::string evalStringLiteral(const std::string& input);
-    std::string getStringVariable(const std::string& varName, int loop);
+    std::string getStringVariable(const std::string& varName);
 
-    char * tmplArgs;
+    std::string tmplArgs;
     std::string selectedFragment;
     std::string currentFragment;
-    json currentElement;
 
     std::list<Scope*> m_scopes;
-    std::map<std::string,VariableWriter*> m_variableWriters;
+};
+
+class GenericScope : public Template::Scope
+{
+public:
+    bool writeVariable(amf0::Value& out, const String& varName) override;
+    std::map<std::string,amf0::Value> vars;
 };
 
 #include "http.h"
@@ -118,7 +117,7 @@ public:
     {
     }
 
-    bool writeVariable(Stream &, const String &, int) override;
+    bool writeVariable(amf0::Value& out, const String &) override;
 
     const HTTPRequest& m_request;
 };

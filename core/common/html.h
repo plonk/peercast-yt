@@ -24,6 +24,7 @@
 #include <map>
 #include "xml.h"
 #include "sys.h"
+#include "template.h"
 
 class FileStream;
 
@@ -58,7 +59,8 @@ public:
                     const std::map<std::string,std::string>& = {});
     void    locateTo(const char *);
     void    writeRawFile(const char *, const char *);
-    void    writeTemplate(const char *fileName, const char *args, class HTTPRequestScope& reqScope);
+    void    writeTemplate(const char *fileName, const char *args, const std::vector<Template::Scope*>& scopes);
+
 
     String  title, refreshURL;
     char    currTag[MAX_TAGLEVEL][MAX_TAGLEN];

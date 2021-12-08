@@ -3,15 +3,79 @@
 #include "template.h"
 #include "sstream.h"
 
+#include "str.h"
+#include "servmgr.h"
+
+class MockScope : public Template::Scope
+{
+public:
+    bool writeObjectProperty(Stream& s, const String& varName, amf0::Value& obj)
+    {
+        auto names = str::split(varName.str(), ".");
+
+        if (names.size() == 1)
+        {
+            try
+            {
+                auto value = obj.object().at(varName.str());
+                if (value.isString())
+                {
+                    s.writeString(value.string().c_str());
+                }else
+                    s.writeString(value.inspect().c_str());
+            }catch (std::out_of_range&)
+            {
+                return false;
+            }
+            return true;
+        }else{
+            try
+            {
+                auto value = obj.object().at(names[0]);
+                if (value.isArray())
+                {
+                    return false;
+//writeObjectProperty(s, varName + strlen(names[0].c_str()) + 1, array_to_object(value));
+                }else if (value.isObject())
+                {
+                    return writeObjectProperty(s, varName + strlen(names[0].c_str()) + 1, value);
+                }else
+                    return false;
+            } catch (std::out_of_range&)
+            {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    bool writeVariable(Stream& s, const String& varName, int loop) override
+    {
+        if (str::has_prefix(varName, "servMgr.")) {
+            amf0::Value obj = servMgr->getState();
+            return writeObjectProperty(s, varName + strlen("servMgr."), obj);
+        }else
+            return false;
+    }
+};
+
 class TemplateFixture : public ::testing::Test {
 public:
     TemplateFixture()
         : temp("")
     {
+        temp.prependScope(mockscope);
     }
 
+    MockScope mockscope;
     Template temp;
 };
+
+TEST_F(TemplateFixture, hoge)
+{
+    amf0::Value obj = servMgr->getState();
+    ASSERT_EQ("fuga", obj.inspect());
+}
 
 TEST_F(TemplateFixture, readVariable)
 {
@@ -20,7 +84,7 @@ TEST_F(TemplateFixture, readVariable)
     in.writeString("servMgr.version}");
     in.rewind();
     temp.readVariable(in, &out, 0);
-    ASSERT_STREQ("v0.1218", out.str().substr(0,7).c_str());
+    ASSERT_TRUE(str::has_prefix(out.str(), "v0.1218"));
 }
 
 TEST_F(TemplateFixture, writeVariable)
@@ -28,7 +92,7 @@ TEST_F(TemplateFixture, writeVariable)
     StringStream out;
 
     temp.writeVariable(out, "servMgr.version", 0);
-    ASSERT_STREQ("v0.1218", out.str().substr(0,7).c_str());
+    ASSERT_TRUE(str::has_prefix(out.str(), "v0.1218"));
 }
 
 TEST_F(TemplateFixture, writeVariableUndefined)

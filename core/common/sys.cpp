@@ -54,6 +54,23 @@ void Sys::sleepIdle()
 }
 
 // -----------------------------------
+#include "sstream.h"
+amf0::Value Sys::getState()
+{
+    StringStream s;
+    logBuf->dumpHTML(s);
+    return amf0::Value::object(
+        {
+            { "log", amf0::Value::object(
+                    {
+                        {"dumpHTML", s.str()}
+                    })},
+            { "time", sys->getTime() },
+        });
+}
+
+// -----------------------------------
+/*
 bool Sys::writeVariable(Stream& s, const String& varName)
 {
     if (varName == "log.dumpHTML")
@@ -68,6 +85,7 @@ bool Sys::writeVariable(Stream& s, const String& varName)
 
     return false;
 }
+*/
 
 // -----------------------------------
 char *trimstr(char *s1)

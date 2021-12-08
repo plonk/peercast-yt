@@ -80,10 +80,10 @@
       <th colspan="3">{#Channel Feeds}</th>
     </tr>
 
-    {@loop servMgr.numChannelFeeds}
+    {@foreach servMgr.channelDirectory.feeds}
     <tr>
-      <td>{$loop.channelFeed.url}</td>
-      <td align="center">{$loop.channelFeed.status}</td>
+      <td>{$this.url}</td>
+      <td align="center">{$this.status}</td>
       <td align="center"><a href="/admin?cmd=chanfeedlog&amp;index={$loop.index}" class="alert-link">&#x2139;&#xFE0F;<!-- information source emoji --></a></td>
     </tr>
     {@end}

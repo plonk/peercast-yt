@@ -28,6 +28,21 @@ static const Regexp IPV6_PATTERN("^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0
 static const Regexp IPV4_WITH_NETMASK_PATTERN("^\\d+\\.\\d+\\.\\d+\\.\\d+/\\d+$");
 static const Regexp IPV6_WITH_NETMASK_PATTERN("^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|[fF][eE]80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::([fF][fF][fF][fF](:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))/\\d+$");
 
+// --------------------------------------------------
+amf0::Value    ServFilter::getState()
+{
+    return amf0::Value::object(
+        {
+            { "network", (flags & F_NETWORK) ? "1" : "0"},
+            { "private", (flags & F_PRIVATE) ? "1" : "0" },
+            { "direct", (flags & F_DIRECT) ? "1" : "0" },
+            { "banned", (flags & F_BAN) ? "1" : "0" },
+            { "ip", getPattern() },
+        });
+}
+
+// --------------------------------------------------
+/*
 bool    ServFilter::writeVariable(Stream &out, const String &var)
 {
     std::string buf;
@@ -48,6 +63,7 @@ bool    ServFilter::writeVariable(Stream &out, const String &var)
     out.writeString(buf);
     return true;
 }
+*/
 
 // --------------------------------------------------
 bool ServFilter::matches(int fl, const Host& h) const

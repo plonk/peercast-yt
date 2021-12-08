@@ -67,6 +67,43 @@ void UptestServiceRegistry::clear()
     m_providers.clear();
 }
 
+static std::string textStatus(int status)
+{
+    switch (status)
+    {
+    case UptestEndpoint::kUntried:
+        return "Untried";
+    case UptestEndpoint::kSuccess:
+        return "Success";
+    case UptestEndpoint::kError:
+        return "Error";
+    default:
+        abort();
+    }
+}
+
+amf0::Value UptestServiceRegistry::getState()
+{
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
+    std::vector<amf0::Value> providers;
+
+    for (size_t i = 0; i < m_providers.size(); i++)
+        providers.push_back(
+            {
+                {"url", m_providers[i].url},
+                {"status", textStatus(m_providers[i].status)},
+                {"speed", m_providers[i].m_info.speed},
+                {"over", m_providers[i].m_info.over},
+                {"checkable", m_providers[i].m_info.checkable},
+            });
+
+    return amf0::Value::object(
+        {
+            {"providers", providers}
+        });
+}
+
+/*
 bool UptestServiceRegistry::writeVariable(Stream& s, const String& v)
 {
     std::lock_guard<std::recursive_mutex> cs(m_lock);
@@ -79,7 +116,9 @@ bool UptestServiceRegistry::writeVariable(Stream& s, const String& v)
 
     return false;
 }
+*/
 
+/*
 bool UptestServiceRegistry::writeVariable(Stream& s, const String& v, int i)
 {
     std::lock_guard<std::recursive_mutex> cs(m_lock);
@@ -129,6 +168,7 @@ bool UptestServiceRegistry::writeVariable(Stream& s, const String& v, int i)
 
     return false;
 }
+*/
 
 void UptestServiceRegistry::update()
 {

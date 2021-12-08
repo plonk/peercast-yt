@@ -2060,6 +2060,28 @@ int Servent::serverProc(ThreadInfo *thread)
 }
 
 // -----------------------------------
+amf0::Value    Servent::getState()
+{
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
+    return amf0::Value::object(
+        {
+            {"id", std::to_string(serventIndex)},
+            {"type", getTypeStr()},
+            {"status", getStatusStr()},
+            {"address", getHost().ip.str()},
+            {"endpoint", getHost().str()},
+            {"agent", agent.c_str()},
+            {"bitrate", str::format("%.1f", BYTES_TO_KBPS(sock ? sock->bytesInPerSec() + sock->bytesOutPerSec() : 0))},
+            {"bitrateAvg", str::format("%.1f", BYTES_TO_KBPS(sock ? sock->stat.bytesInPerSecAvg() + sock->stat.bytesOutPerSecAvg() : 0))},
+            {"uptime", (lastConnect) ? String().setFromStopwatch(sys->getTime() - lastConnect).c_str() : "-"},
+            {"chanID", chanID.str()},
+            {"isPrivate", std::to_string(isPrivate())},
+        });
+}
+
+// -----------------------------------
+/*
 bool    Servent::writeVariable(Stream &s, const String &var)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
@@ -2113,3 +2135,4 @@ bool    Servent::writeVariable(Stream &s, const String &var)
 
     return true;
 }
+*/

@@ -24,6 +24,7 @@
 #include "xml.h"
 #include "atom.h"
 #include "http.h"
+#include "varwriter.h"
 
 // ----------------------------------
 class TrackInfo
@@ -53,7 +54,7 @@ public:
 };
 
 // ----------------------------------
-class ChanInfo
+class ChanInfo : public VariableWriter
 {
 public:
     typedef ::String TYPE;
@@ -119,7 +120,8 @@ public:
     void    readInfoAtoms(AtomStream &, int);
     void    readTrackAtoms(AtomStream &, int);
 
-    bool    writeVariable(Stream &out, const String &var);
+//    bool    writeVariable(Stream &out, const String &var) override;
+    amf0::Value getState() override;
 
     unsigned int        getUptime();
     unsigned int        getAge();

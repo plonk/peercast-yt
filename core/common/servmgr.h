@@ -132,7 +132,7 @@ public:
     Servent             *findServentByIndex(int);
     Servent             *findServentByID(int id);
 
-    bool                writeVariable(Stream &, const String &) override;
+//    bool                writeVariable(Stream &, const String &) override;
     Servent             *allocServent();
 
     unsigned int        numUsed(int);
@@ -244,6 +244,8 @@ public:
     bool updateIPAddress(const IP& newIP);
 
     static const char* getFirewallStateString(FW_STATE);
+
+    amf0::Value getState() override;
 
     ThreadInfo          serverThread;
     ThreadInfo          idleThread;

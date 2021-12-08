@@ -51,3 +51,19 @@ void FlagRegistory::forEachFlag(std::function<void(Flag&)> func)
         func(flag);
     }
 }
+
+amf0::Value FlagRegistory::getState()
+{
+    auto value = amf0::Value::strictArray({});
+
+    for (auto& flag : m_flags) {
+        value.strictArray().push_back(
+            amf0::Value::object({
+                { "name", flag.name },
+                { "desc", flag.desc },
+                { "defaultValue", flag.defaultValue },
+                { "currentValue", flag.currentValue.load() },
+            }));
+    }
+    return value;
+}

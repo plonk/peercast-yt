@@ -61,7 +61,84 @@ void HTML::writeOK(const char *content, const std::map<std::string,std::string>&
 }
 
 // --------------------------------------
-void HTML::writeTemplate(const char *fileName, const char *args, HTTPRequestScope& reqScope)
+#include <map>
+#include "servmgr.h"
+#include "stats.h"
+#include "notif.h"
+class RootObjectScope : public Template::Scope
+{
+public:
+    RootObjectScope()
+        : m_objects({{"servMgr" , servMgr->getState()},
+                     {"chanMgr" , chanMgr->getState()},
+                     {"stats"   , stats.getState()},
+                     {"notificationBuffer" , g_notificationBuffer.getState()},
+                     {"sys"     , sys->getState()}})
+    {
+    }
+
+    bool writeObjectProperty(amf0::Value& out, const String& varName, amf0::Value& obj)
+    {
+        auto names = str::split(varName.str(), ".");
+
+        if (names.size() == 1)
+        {
+            try
+            {
+                auto value = obj.object().at(varName.str());
+                out = value;
+                return true;
+            }catch (std::out_of_range&)
+            {
+                return false;
+            }
+        }else{
+            try
+            {
+                auto value = obj.object().at(names[0]);
+                if (value.isArray())
+                {
+                    return false;
+//writeObjectProperty(s, varName + strlen(names[0].c_str()) + 1, array_to_object(value));
+                }else if (value.isObject())
+                {
+                    return writeObjectProperty(out, varName + strlen(names[0].c_str()) + 1, value);
+                }else
+                    return false;
+            } catch (std::out_of_range&)
+            {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    // loop は無視。
+    bool writeVariable(amf0::Value& out, const String& varName) override
+    {
+        const std::string v = varName;
+        if (m_objects.count(v))
+        {
+            out =  m_objects[v];
+            return true;
+        }else{
+            auto idx = v.find('.');
+            if (idx != std::string::npos)
+            {
+                auto qual = v.substr(0, idx);
+                if (m_objects.count(qual))
+                {
+                    auto obj = m_objects[qual];
+                    return writeObjectProperty(out, varName + qual.size() + 1, obj);
+                }
+            }
+            return false;
+        }
+    }
+    std::map<std::string,amf0::Value> m_objects;
+};
+
+void HTML::writeTemplate(const char *fileName, const char *args, const std::vector<Template::Scope*>& scopes)
 {
     FileStream file;
     try
@@ -71,16 +148,26 @@ void HTML::writeTemplate(const char *fileName, const char *args, HTTPRequestScop
         file.writeTo(mem, file.length());
         mem.rewind();
 
-        WriteBufferedStream bufferedOut(out);
+        StringStream bufferedOut;
         Template temp(args);
-        temp.prependScope(reqScope);
+        RootObjectScope globals;
+        temp.prependScope(globals);
+        for (auto scope : scopes)
+            temp.prependScope(*scope);
+
         if (args)
         {
             cgi::Query query(args);
             temp.selectedFragment = query.get("fragment");
         }
-        temp.readTemplate(mem, &bufferedOut, 0);
+        temp.readTemplate(mem, &bufferedOut);
+        out->writeString(bufferedOut.str());
     }catch (StreamException &e)
+    {
+        out->writeString(e.msg);
+        out->writeString(" : ");
+        out->writeString(fileName);
+    }catch (GeneralException &e)
     {
         out->writeString(e.msg);
         out->writeString(" : ");

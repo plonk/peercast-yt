@@ -63,7 +63,8 @@ public:
         pattern = "";
         netmask = -1;
     }
-    bool    writeVariable(Stream &, const String &) override;
+//    bool    writeVariable(Stream &, const String &) override;
+    amf0::Value getState() override;
     bool    matches(int fl, const Host& h) const;
 
     void setPattern(const char* str);

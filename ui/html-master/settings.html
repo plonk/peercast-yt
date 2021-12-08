@@ -41,10 +41,10 @@
       <th class="left-heading">{#Language}</th>
       <td>
         <select name="htmlPath" size="1" id="htmlPath">
-          <option value="en" {@if servMgr.lang.en} selected {@end}>{#English}</option>
-          <option value="fr" {@if servMgr.lang.fr} selected {@end}>{#French}</option>
-          <option value="de" {@if servMgr.lang.de} selected {@end}>{#Deutsch}</option>
-          <option value="ja" {@if servMgr.lang.ja} selected {@end}>{#Japanese}</option>
+          <option value="en" {@if servMgr.lang == "en"} selected {@end}>{#English}</option>
+          <option value="fr" {@if servMgr.lang == "fr"} selected {@end}>{#French}</option>
+          <option value="de" {@if servMgr.lang == "de"} selected {@end}>{#Deutsch}</option>
+          <option value="ja" {@if servMgr.lang == "ja"} selected {@end}>{#Japanese}</option>
         </select>
       </td>
     </tr>
@@ -108,16 +108,16 @@
             <small>({#Network} / {#Direct} / {#Private} / {#Ban})</small>
           </th>
         </tr>
-        {@loop servMgr.numFilters}
+        {@foreach servMgr.filters}
         <tr align=middle class="normal">
           <td>
-            <input class="fill-parent" size=30 value="{$loop.filter.ip}" name=filt_ip>
+            <input class="fill-parent" size=30 value="{$this.ip}" name=filt_ip>
           </td>
           <td nowrap>
-            <input title="{#Network}" type=checkbox {@if loop.filter.network}checked{@end} value=1 name="filt_nw{$loop.index}">
-            <input title="{#Direct}" type=checkbox {@if loop.filter.direct}checked{@end} value=1 name="filt_di{$loop.index}">
-            <input title="{#Private}" type=checkbox {@if loop.filter.private}checked{@end} value=1 name="filt_pr{$loop.index}">
-            <input title="{#Ban}" type=checkbox {@if loop.filter.banned}checked{@end} value=1 name="filt_bn{$loop.index}">
+            <input title="{#Network}" type=checkbox {@if this.network}checked{@end} value=1 name="filt_nw{$loop.index}">
+            <input title="{#Direct}" type=checkbox {@if this.direct}checked{@end} value=1 name="filt_di{$loop.index}">
+            <input title="{#Private}" type=checkbox {@if this.private}checked{@end} value=1 name="filt_pr{$loop.index}">
+            <input title="{#Ban}" type=checkbox {@if this.banned}checked{@end} value=1 name="filt_bn{$loop.index}">
           </td>
         </tr>
         {@end}
@@ -294,7 +294,7 @@
         <tr align=middle class="normal">
           <td colspan=2><b>{#Channel Feeds}</b></td>
         </tr>
-        {@loop servMgr.numChannelFeedsPlusOne}
+        {@foreach servMgr.channelDirectory.feeds}
         <tr class="normal">
           <td width=110>
             <select class="channel-feed-select fill-parent" data-index="{$loop.index}">
@@ -311,10 +311,30 @@
           </td>
           <td>
             <input class="channel-feed-url" data-index="{$loop.index}"
-                size=15 value="{$loop.channelFeed.url}" name="channel_feed_url" style="width: 100%" placeholder="{#URL of index.txt}">
+                size=15 value="{$this.url}" name="channel_feed_url" style="width: 100%" placeholder="{#URL of index.txt}">
           </td>
         </tr>
         {@end}
+        <!-- 新しい項目入力用 -->
+        <tr class="normal">
+          <td width=110>
+            <select class="channel-feed-select fill-parent" data-index="-1">
+              <option value="None">{#None}</option>
+              <option value="Custom">{#Custom...}</option>
+              <option data-url="http://bayonet.ddo.jp/sp/index.txt" value="SP">SP</option>
+              <option data-url="http://temp.orz.hm/yp/index.txt" value="TP">TP</option>
+              <option data-url="http://peercast.takami98.net/turf-page/index.txt" value="Turf">{#Turf}</option>
+              <option data-url="http://yp.pcgw.pgw.jp/index.txt" value="Heisei">{#Heisei}</option>
+              <option data-url="https://p-at.net/index.txt" value="P@">P@</option>
+              <option data-url="http://ypv6.pecastation.org/index.txt" value="YPv6">YPv6</option>
+              <option data-url="http://eventyp.xrea.jp/index.txt" value="Event YP">{#Event YP}</option>
+            </select>
+          </td>
+          <td>
+            <input class="channel-feed-url" data-index="-1"
+                size=15 value="" name="channel_feed_url" style="width: 100%" placeholder="{#URL of index.txt}">
+          </td>
+        </tr>
       </table>
       <table class="table-panel" width="100%" align=center border=0>
         <tr align=middle class="normal">
