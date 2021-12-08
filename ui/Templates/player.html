@@ -27,6 +27,15 @@
          isLive: true,
          url: '/stream/{$page.channel.id}.flv'
        });
+       flvPlayer.on('error', (errorType, errorCode, details) => {
+           let msg = `エラーが起きたので動画が再生できませんでした。\n` +
+                     `ページをリロードしますか？\n` +
+                     `\n` + 
+                     `${errorType}\n${errorCode}\n${JSON.stringify(details)}`;
+           if (window.confirm(msg)) {
+               window.location.reload();
+           }
+       });
        flvPlayer.attachMediaElement(videoElement);
        flvPlayer.load();
        flvPlayer.play().catch(error => {
