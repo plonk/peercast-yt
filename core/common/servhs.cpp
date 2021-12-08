@@ -2429,6 +2429,19 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
                 throw HTTPException(HTTP_SC_NOTFOUND, 404);
 
             locals.vars["channel"] = ch->getState();
+        }else if (str::contains(fn, "/relayinfo.html"))
+        {
+            auto vec = str::split(fn, "?");
+            if (vec.size() != 2)
+                throw HTTPException(HTTP_SC_BADREQUEST, 400);
+
+            String id = cgi::Query(vec[1]).get("id").c_str();
+
+            if (id.isEmpty())
+                throw HTTPException(HTTP_SC_BADREQUEST, 400);
+
+            auto ch = chanMgr->findChannelByID(GnuID(id.c_str()));
+            locals.vars["channel"] = ch ? ch->getState() : nullptr;
         }
 
         char *args = strstr(fileName.cstr(), "?");

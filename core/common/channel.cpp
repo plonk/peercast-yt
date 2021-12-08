@@ -1364,6 +1364,12 @@ amf0::Value Channel::getState()
 {
     using std::to_string;
 
+    auto chl = chanMgr->findHitListByID(info.id);
+
+    std::vector<amf0::Value> hits;
+    for (auto p = chl->hit; p; p = p->next)
+        hits.push_back(p->getState());
+
     return amf0::Value::object(
         {
             {"name", String(info.name).convertTo(String::T_UNICODESAFE).c_str()},
@@ -1401,129 +1407,11 @@ amf0::Value Channel::getState()
             {"headLen", str::group_digits(std::to_string(headPack.len), ",")},
             {"buffer", getBufferString()},
             {"headDump", renderHexDump(std::string(headPack.data, headPack.data + headPack.len))},
-            {"numHits", [this](){ auto chl = chanMgr->findHitListByID(info.id); return to_string((chl) ? chl->numHits() : 0); }()},
+            {"numHits", to_string((chl) ? chl->numHits() : 0)},
+            {"hits", hits},
             {"authToken", chanMgr->authToken(info.id).c_str()},
             {"plsExt", info.getPlayListExt()},
             {"ipVersion", std::to_string((int)ipVersion)},
         });
 }
 
-// -----------------------------------
-/*bool Channel::writeVariable(Stream &out, const String &var)
-{
-    using namespace std;
-
-    string buf;
-    String utf8;
-
-    if (var == "name")
-    {
-        utf8 = info.name;
-        utf8.convertTo(String::T_UNICODESAFE);
-        buf = utf8.c_str();
-    }else if (var == "bitrate")
-    {
-        buf = to_string(info.bitrate);
-    }else if (var == "srcrate")
-    {
-        if (sourceData)
-        {
-            unsigned int tot = sourceData->getSourceRate();
-            buf = str::format("%.0f", BYTES_TO_KBPS(tot));
-        }else
-            buf = "0";
-    }else if (var == "genre")
-    {
-        utf8 = info.genre;
-        utf8.convertTo(String::T_UNICODE);
-        buf = utf8.c_str();
-    }else if (var == "desc")
-    {
-        utf8 = info.desc;
-        utf8.convertTo(String::T_UNICODE);
-        buf = utf8.c_str();
-    }else if (var == "comment")
-    {
-        utf8 = info.comment;
-        utf8.convertTo(String::T_UNICODE);
-        buf = utf8.c_str();
-    }else if (var == "uptime")
-    {
-        String uptime;
-        if (info.lastPlayStart)
-            uptime.setFromStopwatch(sys->getTime()-info.lastPlayStart);
-        else
-            uptime.set("-");
-        buf = uptime.c_str();
-    }
-    else if (var == "type")
-        buf = info.getTypeStr();
-    else if (var == "typeLong")
-        buf = info.getTypeStringLong();
-    else if (var == "ext")
-        buf = info.getTypeExt();
-    else if (var == "localRelays")
-        buf = to_string(localRelays());
-    else if (var == "localListeners")
-        buf = to_string(localListeners());
-    else if (var == "totalRelays")
-        buf = to_string(totalRelays());
-    else if (var == "totalListeners")
-        buf = to_string(totalListeners());
-    else if (var == "status")
-        buf = getStatusStr();
-    else if (var == "keep")
-        buf = stayConnected?"Yes":"No";
-    else if (var == "id")
-        buf = info.id.str();
-    else if (var.startsWith("track."))
-    {
-        if (var == "track.title")
-            utf8 = info.track.title;
-        else if (var == "track.artist")
-            utf8 = info.track.artist;
-        else if (var == "track.album")
-            utf8 = info.track.album;
-        else if (var == "track.genre")
-            utf8 = info.track.genre;
-        else if (var == "track.contactURL")
-            utf8 = info.track.contact;
-
-        utf8.convertTo(String::T_UNICODE);
-        buf = utf8.c_str();
-    }else if (var == "contactURL")
-        buf = info.url.cstr();
-    else if (var == "streamPos")
-        buf = str::group_digits(std::to_string(streamPos), ",");
-    else if (var == "sourceType")
-        buf = getSrcTypeStr();
-    else if (var == "sourceProtocol")
-        buf = ChanInfo::getProtocolStr(info.srcProtocol);
-    else if (var == "sourceURL")
-        buf = getSourceString();
-    else if (var == "headPos")
-        buf = str::group_digits(std::to_string(headPack.pos), ",");
-    else if (var == "headLen")
-        buf = str::group_digits(std::to_string(headPack.len), ",");
-    else if (var == "buffer")
-        buf = getBufferString();
-    else if (var == "headDump")
-    {
-        out.writeString(renderHexDump(std::string(headPack.data, headPack.data + headPack.len)));
-        return true;
-    }else if (var == "numHits")
-    {
-        ChanHitList *chl = chanMgr->findHitListByID(info.id);
-        buf = to_string((chl) ? chl->numHits() : 0);
-    }else if (var == "authToken")
-        buf = chanMgr->authToken(info.id).c_str();
-    else if (var == "plsExt")
-        buf = info.getPlayListExt();
-    else if (var == "ipVersion")
-        buf = std::to_string((int)ipVersion);
-    else
-        return false;
-
-    out.writeString(buf);
-    return true;
-}*/

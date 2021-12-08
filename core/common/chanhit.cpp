@@ -192,50 +192,22 @@ void ChanHit::writeAtoms(AtomStream &atom, const GnuID &chanID)
 }
 
 // -----------------------------------
-bool    ChanHit::writeVariable(Stream &out, const String &var)
+amf0::Value    ChanHit::getState()
 {
-    std::string buf;
+    std::string ver = versionString();
 
-    if (var == "rhost0")
-        buf = rhost[0].str();
-    else if (var == "rhost1")
-        buf = rhost[1].str();
-    else if (var == "numHops")
-        buf = std::to_string(numHops);
-    else if (var == "numListeners")
-        buf = std::to_string(numListeners);
-    else if (var == "numRelays")
-        buf = std::to_string(numRelays);
-    else if (var == "uptime")
-    {
-        String timeStr;
-        timeStr.setFromStopwatch(upTime);
-        buf = timeStr.c_str();
-    }else if (var == "update")
-    {
-        String timeStr;
-        if (timeStr)
-            timeStr.setFromStopwatch(sys->getTime()-time);
-        else
-            timeStr.set("-");
-        buf = timeStr.c_str();
-    }else if (var == "isFirewalled")
-        buf = firewalled ? "1" : "0";
-    else if (var == "version")
-    {
-        std::string ver = versionString();
-        if (ver.empty())
-            buf = "-";
-        else
-            buf = ver;
-    }
-    else if (var == "tracker")
-        buf = std::to_string(tracker);
-    else
-        return false;
-
-    out.writeString(buf);
-    return true;
+    return {
+        {"rhost0", rhost[0].str()},
+        {"rhost1", rhost[1].str()},
+        {"numHops", std::to_string(numHops)},
+        {"numListeners", std::to_string(numListeners)},
+        {"numRelays", std::to_string(numRelays)},
+        {"uptime", String().setFromStopwatch(upTime).c_str()},
+        {"update", (time) ? String().setFromStopwatch(sys->getTime()-time).c_str() : "-"},
+        {"isFirewalled", firewalled ? "1" : "0"},
+        {"version", ver.empty() ? std::string("-") : ver},
+        {"tracker", std::to_string(tracker)},
+    };
 }
 
 // -----------------------------------
