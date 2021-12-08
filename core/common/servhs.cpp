@@ -2406,7 +2406,7 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
         HTTPRequestScope reqScope(req);
         std::vector<Template::Scope*> scopes = { &reqScope, &locals };
 
-        if (str::contains(fn, "play.html"))
+        if (str::contains(fn, "/play.html"))
         {
             // 視聴ページだった場合はあらかじめチャンネルのリレーを開
             // 始しておく。
