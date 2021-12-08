@@ -309,7 +309,7 @@ namespace amf0
 
         std::map<std::string,Value>& object()
         {
-            if (!isObject() && !isArray()) throw std::runtime_error("not an object or an array (%d)");
+            if (!isObject() && !isArray()) throw std::runtime_error("not an object or an array");
             return m_object;
         }
 
