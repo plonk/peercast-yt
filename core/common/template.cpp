@@ -168,7 +168,8 @@ int Template::getIntVariable(const String &varName)
                 return std::stoi(value.string());
             } catch(std::invalid_argument& e)
             {
-                throw GeneralException(e.what());
+                //throw GeneralException(e.what());
+                return 0;
             } catch(std::out_of_range& e)
             {
                 throw GeneralException(e.what());
