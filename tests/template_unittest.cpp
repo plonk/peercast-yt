@@ -6,76 +6,18 @@
 #include "str.h"
 #include "servmgr.h"
 
-class MockScope : public Template::Scope
-{
-public:
-    bool writeObjectProperty(Stream& s, const String& varName, amf0::Value& obj)
-    {
-        auto names = str::split(varName.str(), ".");
-
-        if (names.size() == 1)
-        {
-            try
-            {
-                auto value = obj.object().at(varName.str());
-                if (value.isString())
-                {
-                    s.writeString(value.string().c_str());
-                }else
-                    s.writeString(value.inspect().c_str());
-            }catch (std::out_of_range&)
-            {
-                return false;
-            }
-            return true;
-        }else{
-            try
-            {
-                auto value = obj.object().at(names[0]);
-                if (value.isArray())
-                {
-                    return false;
-//writeObjectProperty(s, varName + strlen(names[0].c_str()) + 1, array_to_object(value));
-                }else if (value.isObject())
-                {
-                    return writeObjectProperty(s, varName + strlen(names[0].c_str()) + 1, value);
-                }else
-                    return false;
-            } catch (std::out_of_range&)
-            {
-                return false;
-            }
-            return true;
-        }
-    }
-
-    bool writeVariable(Stream& s, const String& varName, int loop) override
-    {
-        if (str::has_prefix(varName, "servMgr.")) {
-            amf0::Value obj = servMgr->getState();
-            return writeObjectProperty(s, varName + strlen("servMgr."), obj);
-        }else
-            return false;
-    }
-};
-
 class TemplateFixture : public ::testing::Test {
 public:
     TemplateFixture()
         : temp("")
     {
-        temp.prependScope(mockscope);
+        locals.vars["servMgr"] = { { "version", "v0.1218" } };
+        temp.prependScope(locals);
     }
 
-    MockScope mockscope;
+    GenericScope locals;
     Template temp;
 };
-
-TEST_F(TemplateFixture, hoge)
-{
-    amf0::Value obj = servMgr->getState();
-    ASSERT_EQ("fuga", obj.inspect());
-}
 
 TEST_F(TemplateFixture, readVariable)
 {
@@ -83,34 +25,32 @@ TEST_F(TemplateFixture, readVariable)
 
     in.writeString("servMgr.version}");
     in.rewind();
-    temp.readVariable(in, &out, 0);
+    temp.readVariable(in, &out);
     ASSERT_TRUE(str::has_prefix(out.str(), "v0.1218"));
 }
 
 TEST_F(TemplateFixture, writeVariable)
 {
-    StringStream out;
-
-    temp.writeVariable(out, "servMgr.version", 0);
-    ASSERT_TRUE(str::has_prefix(out.str(), "v0.1218"));
+    amf0::Value out;
+    temp.writeVariable(out, "servMgr.version");
+    ASSERT_TRUE(str::has_prefix(out.string(), "v0.1218"));
 }
 
 TEST_F(TemplateFixture, writeVariableUndefined)
 {
-    StringStream out;
-
-    temp.writeVariable(out, "hoge.fuga.piyo", 0);
-    ASSERT_STREQ("hoge.fuga.piyo", out.str().c_str());
+    amf0::Value out;
+    temp.writeVariable(out, "hoge.fuga.piyo");
+    ASSERT_EQ(amf0::Value(nullptr), out);
 }
 
 TEST_F(TemplateFixture, getIntVariable)
 {
-    ASSERT_EQ(0, temp.getIntVariable("servMgr.version", 0));
+    ASSERT_EQ(0, temp.getIntVariable("servMgr.version"));
 }
 
 TEST_F(TemplateFixture, getBoolVariable)
 {
-    ASSERT_EQ(false, temp.getIntVariable("servMgr.version", 0));
+    ASSERT_EQ(false, temp.getIntVariable("servMgr.version"));
 }
 
 
@@ -121,15 +61,15 @@ TEST_F(TemplateFixture, readTemplate)
 
     in.writeString("hoge");
     in.rewind();
-    res = temp.readTemplate(in, &out, 0);
+    res = temp.readTemplate(in, &out);
     ASSERT_EQ(Template::TMPL_END, res);
     ASSERT_STREQ("hoge", out.str().c_str());
 }
 
 TEST_F(TemplateFixture, getStringVariable)
 {
-    ASSERT_STREQ("1", temp.getStringVariable("TRUE", 0).c_str());
-    ASSERT_STREQ("0", temp.getStringVariable("FALSE", 0).c_str());
+    ASSERT_STREQ("1", temp.getStringVariable("TRUE").c_str());
+    ASSERT_STREQ("0", temp.getStringVariable("FALSE").c_str());
 }
 
 TEST_F(TemplateFixture, evalStringLiteral)
@@ -171,38 +111,38 @@ TEST_F(TemplateFixture, tokenizeVariableExpression)
 
 TEST_F(TemplateFixture, evalCondition)
 {
-    ASSERT_TRUE(temp.evalCondition("TRUE", 0));
-    ASSERT_FALSE(temp.evalCondition("FALSE", 0));
+    ASSERT_TRUE(temp.evalCondition("TRUE"));
+    ASSERT_FALSE(temp.evalCondition("FALSE"));
 }
 
 TEST_F(TemplateFixture, evalCondition2)
 {
-    ASSERT_TRUE(temp.evalCondition("TRUE==TRUE", 0));
-    ASSERT_FALSE(temp.evalCondition("TRUE==FALSE", 0));
+    ASSERT_TRUE(temp.evalCondition("TRUE==TRUE"));
+    ASSERT_FALSE(temp.evalCondition("TRUE==FALSE"));
 }
 
 TEST_F(TemplateFixture, evalCondition3)
 {
-    ASSERT_FALSE(temp.evalCondition("TRUE!=TRUE", 0));
-    ASSERT_TRUE(temp.evalCondition("TRUE!=FALSE", 0));
+    ASSERT_FALSE(temp.evalCondition("TRUE!=TRUE"));
+    ASSERT_TRUE(temp.evalCondition("TRUE!=FALSE"));
 }
 
 TEST_F(TemplateFixture, stringBinaryCondition)
 {
-    ASSERT_TRUE(temp.evalCondition("\"A\"==\"A\"", 0));
-    ASSERT_FALSE(temp.evalCondition("\"A\"==\"B\"", 0));
+    ASSERT_TRUE(temp.evalCondition("\"A\"==\"A\""));
+    ASSERT_FALSE(temp.evalCondition("\"A\"==\"B\""));
 }
 
 TEST_F(TemplateFixture, regexpBinaryCondition)
 {
-    ASSERT_TRUE(temp.evalCondition("\"A\"=~\"A\"", 0));
-    ASSERT_FALSE(temp.evalCondition("\"A\"=~\"B\"", 0));
+    ASSERT_TRUE(temp.evalCondition("\"A\"=~\"A\""));
+    ASSERT_FALSE(temp.evalCondition("\"A\"=~\"B\""));
 
-    ASSERT_FALSE(temp.evalCondition("\"A\"!~\"A\"", 0));
-    ASSERT_TRUE(temp.evalCondition("\"A\"!~\"B\"", 0));
+    ASSERT_FALSE(temp.evalCondition("\"A\"!~\"A\""));
+    ASSERT_TRUE(temp.evalCondition("\"A\"!~\"B\""));
 
-    ASSERT_TRUE(temp.evalCondition("\"ABC\"=~\"^A\"", 0));
-    ASSERT_TRUE(temp.evalCondition("\"ABC\"=~\"C$\"", 0));
+    ASSERT_TRUE(temp.evalCondition("\"ABC\"=~\"^A\""));
+    ASSERT_TRUE(temp.evalCondition("\"ABC\"=~\"C$\""));
 }
 
 TEST_F(TemplateFixture, readIfTrue)
@@ -211,7 +151,7 @@ TEST_F(TemplateFixture, readIfTrue)
 
     in.writeString("TRUE}T{@else}F{@end}");
     in.rewind();
-    temp.readIf(in, &out, 0);
+    temp.readIf(in, &out);
     ASSERT_STREQ("T", out.str().c_str());
 }
 
@@ -221,7 +161,7 @@ TEST_F(TemplateFixture, readIfFalse)
 
     in.writeString("FALSE}T{@else}F{@end}");
     in.rewind();
-    temp.readIf(in, &out, 0);
+    temp.readIf(in, &out);
     ASSERT_STREQ("F", out.str().c_str());
 }
 
@@ -231,7 +171,7 @@ TEST_F(TemplateFixture, readIfTrueWithoutElse)
 
     in.writeString("TRUE}T{@end}");
     in.rewind();
-    temp.readIf(in, &out, 0);
+    temp.readIf(in, &out);
     ASSERT_STREQ("T", out.str().c_str());
 }
 
@@ -241,7 +181,7 @@ TEST_F(TemplateFixture, readIfFalseWithoutElse)
 
     in.writeString("FALSE}T{@end}");
     in.rewind();
-    temp.readIf(in, &out, 0);
+    temp.readIf(in, &out);
     ASSERT_STREQ("", out.str().c_str());
 }
 
@@ -252,7 +192,7 @@ TEST_F(TemplateFixture, fragment)
 
     in.writeString("hoge{@fragment a}fuga{@end}piyo");
     in.rewind();
-    res = temp.readTemplate(in, &out, 0);
+    res = temp.readTemplate(in, &out);
     ASSERT_EQ(Template::TMPL_END, res);
     ASSERT_STREQ("hogefugapiyo", out.str().c_str());
 }
@@ -265,7 +205,7 @@ TEST_F(TemplateFixture, fragment2)
     in.writeString("hoge{@fragment a}fuga{@end}piyo");
     in.rewind();
     temp.selectedFragment = "a";
-    res = temp.readTemplate(in, &out, 0);
+    res = temp.readTemplate(in, &out);
     ASSERT_EQ(Template::TMPL_END, res);
     ASSERT_STREQ("fuga", out.str().c_str());
 }
@@ -278,7 +218,7 @@ TEST_F(TemplateFixture, fragment3)
     in.writeString("hoge{@fragment a}fuga{@end}piyo");
     in.rewind();
     temp.selectedFragment = "b";
-    res = temp.readTemplate(in, &out, 0);
+    res = temp.readTemplate(in, &out);
     ASSERT_EQ(Template::TMPL_END, res);
     ASSERT_STREQ("", out.str().c_str());
 }
@@ -290,7 +230,7 @@ TEST_F(TemplateFixture, variableInFragment)
 
     in.writeString("{@fragment a}{$TRUE}{@end}{@fragment b}{$FALSE}{@end}");
     in.rewind();
-    res = temp.readTemplate(in, &out, 0);
+    res = temp.readTemplate(in, &out);
     ASSERT_EQ(Template::TMPL_END, res);
     ASSERT_STREQ("10", out.str().c_str());
 }
@@ -303,7 +243,7 @@ TEST_F(TemplateFixture, variableInFragment2)
     in.writeString("{@fragment a}{$TRUE}{@end}{@fragment b}{$FALSE}{@end}");
     in.rewind();
     temp.selectedFragment = "a";
-    res = temp.readTemplate(in, &out, 0);
+    res = temp.readTemplate(in, &out);
     ASSERT_EQ(Template::TMPL_END, res);
     ASSERT_STREQ("1", out.str().c_str());
 }
@@ -316,7 +256,7 @@ TEST_F(TemplateFixture, variableInFragment3)
     in.writeString("{@fragment a}{$TRUE}{@end}{$FALSE}");
     in.rewind();
     temp.selectedFragment = "a";
-    res = temp.readTemplate(in, &out, 0);
+    res = temp.readTemplate(in, &out);
     ASSERT_EQ(Template::TMPL_END, res);
     ASSERT_STREQ("1", out.str().c_str());
 }
@@ -328,25 +268,25 @@ TEST_F(TemplateFixture, elsif)
 
     in.str("{@if TRUE}A{@elsif TRUE}B{@else}C{@end}");
     out.str("");
-    res = temp.readTemplate(in, &out, 0);
+    res = temp.readTemplate(in, &out);
     ASSERT_EQ(Template::TMPL_END, res);
     ASSERT_EQ("A", out.str());
 
     in.str("{@if TRUE}A{@elsif FALSE}B{@else}C{@end}");
     out.str("");
-    res = temp.readTemplate(in, &out, 0);
+    res = temp.readTemplate(in, &out);
     ASSERT_EQ(Template::TMPL_END, res);
     ASSERT_EQ("A", out.str());
 
     in.str("{@if FALSE}A{@elsif TRUE}B{@else}C{@end}");
     out.str("");
-    res = temp.readTemplate(in, &out, 0);
+    res = temp.readTemplate(in, &out);
     ASSERT_EQ(Template::TMPL_END, res);
     ASSERT_EQ("B", out.str());
 
     in.str("{@if FALSE}A{@elsif FALSE}B{@else}C{@end}");
     out.str("");
-    res = temp.readTemplate(in, &out, 0);
+    res = temp.readTemplate(in, &out);
     ASSERT_EQ(Template::TMPL_END, res);
     ASSERT_EQ("C", out.str());
 }

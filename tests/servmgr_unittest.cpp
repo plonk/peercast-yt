@@ -301,8 +301,8 @@ TEST_F(ServMgrFixture, writeVariable)
     ASSERT_STREQ("3", mem.str().c_str());
 
     mem.str("");
-    ASSERT_TRUE(m.writeVariable(mem, "lang.en"));
-    ASSERT_STREQ("1", mem.str().c_str());
+    ASSERT_TRUE(m.writeVariable(mem, "lang"));
+    ASSERT_STREQ("en", mem.str().c_str());
 
     mem.str("");
     ASSERT_TRUE(m.writeVariable(mem, "numExternalChannels"));
@@ -321,10 +321,6 @@ TEST_F(ServMgrFixture, writeVariable)
     mem.str("");
     ASSERT_TRUE(m.writeVariable(mem, "publicDirectoryEnabled"));
     ASSERT_STREQ("0", mem.str().c_str());
-
-    mem.str("");
-    ASSERT_TRUE(m.writeVariable(mem, "test"));
-    ASSERT_STREQ("かきくけこABCDabcd", mem.str().c_str());
 }
 
 // serventNum がインクリメントされ、サーバントの serventIndex にセットされる。
