@@ -176,6 +176,8 @@ namespace amf0
                 return this->m_strict_array == rhs.m_strict_array;
             case kDate:
                 return this->m_date == rhs.m_date;
+            case kNull:
+                return true;
             default:
                 throw std::runtime_error("unknown AMF value type " + std::to_string(m_type));
             }
