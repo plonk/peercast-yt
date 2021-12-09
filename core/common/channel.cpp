@@ -1364,11 +1364,14 @@ amf0::Value Channel::getState()
 {
     using std::to_string;
 
-    auto chl = chanMgr->findHitListByID(info.id);
-
     std::vector<amf0::Value> hits;
-    for (auto p = chl->hit; p; p = p->next)
-        hits.push_back(p->getState());
+
+    auto chl = chanMgr->findHitListByID(info.id);
+    if (chl)
+    {
+        for (auto p = chl->hit; p; p = p->next)
+            hits.push_back(p->getState());
+    }
 
     return amf0::Value::object(
         {
