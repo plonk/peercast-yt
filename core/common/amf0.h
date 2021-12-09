@@ -333,6 +333,39 @@ namespace amf0
             return m_date;
         }
 
+        const Value& at(const std::string& key) const
+        {
+            if (!isObject())
+                throw std::runtime_error("not an object");
+
+            return m_object.at(key);
+        }
+
+        const Value& at(size_t index) const
+        {
+            if (!isStrictArray())
+                throw std::runtime_error("not a strict array");
+
+            return m_strict_array.at(index);
+        }
+
+        size_t count(const std::string& key) const
+        {
+            if (!isObject())
+                throw std::runtime_error("not an object");
+
+            return m_object.count(key);
+        }
+
+        size_t size() const
+        {
+            if (!isStrictArray())
+                throw std::runtime_error("not a strict array");
+
+            return m_strict_array.size();
+        }
+
+
         int                         m_type;
         double                      m_number;
         bool                        m_bool;
