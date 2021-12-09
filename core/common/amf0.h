@@ -149,14 +149,14 @@ namespace amf0
         static Value date(double unixTime, uint16_t timezone = 0)
         { Value v; v.m_type = kDate; v.m_date = Date(unixTime, timezone); return v; }
 
-        bool isNumber() { return m_type == kNumber; }
-        bool isObject() { return m_type == kObject; }
-        bool isString() { return m_type == kString; }
-        bool isBool() { return m_type == kBool; }
-        bool isArray() { return m_type == kArray; }
-        bool isStrictArray() { return m_type == kStrictArray; }
-        bool isNull() { return m_type == kNull; }
-        bool isDate() { return m_type == kDate; }
+        bool isNumber() const { return m_type == kNumber; }
+        bool isObject() const { return m_type == kObject; }
+        bool isString() const { return m_type == kString; }
+        bool isBool() const { return m_type == kBool; }
+        bool isArray() const { return m_type == kArray; }
+        bool isStrictArray() const { return m_type == kStrictArray; }
+        bool isNull() const { return m_type == kNull; }
+        bool isDate() const { return m_type == kDate; }
 
         bool operator == (const Value& rhs) const
         {
@@ -243,7 +243,7 @@ namespace amf0
             }
         }
 
-        std::string inspect()
+        std::string inspect() const
         {
             switch (m_type)
             {
@@ -291,43 +291,43 @@ namespace amf0
             }
         }
 
-        double number()
+        double number() const
         {
             if (!isNumber()) throw std::runtime_error("not a number");
             return m_number;
         }
 
-        std::string string()
+        std::string string() const
         {
             if (!isString()) throw std::runtime_error("not a string");
             return m_string;
         }
 
-        bool boolean()
+        bool boolean() const
         {
             if (!isBool()) throw std::runtime_error("not a boolean");
             return m_bool;
         }
 
-        std::map<std::string,Value>& object()
+        const std::map<std::string,Value>& object() const
         {
             if (!isObject() && !isArray()) throw std::runtime_error("not an object or an array");
             return m_object;
         }
 
-        std::vector<Value>& strictArray()
+        const std::vector<Value>& strictArray() const
         {
             if (!isStrictArray()) throw std::runtime_error("not a strict array");
             return m_strict_array;
         }
 
-        std::nullptr_t null()
+        std::nullptr_t null() const
         {
             if (!isNull()) throw std::runtime_error("not null");
             return nullptr;
         }
 
-        Date date()
+        Date date() const
         {
             if (!isDate()) throw std::runtime_error("not a date");
             return m_date;
