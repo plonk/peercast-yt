@@ -93,6 +93,9 @@ namespace amf0
         Value(const Date& d) : m_type(kDate), m_number(0.0), m_bool(false), m_date(d) {}
         Value(std::vector<Value> arr) : m_type(kStrictArray), m_number(0.0), m_bool(false), m_strict_array(arr) {}
 
+        static Value null(nullptr_t)
+        { return Value(); }
+
         static Value number(double d)
         { Value v; v.m_type = kNumber; v.m_number = d; return v; }
 
