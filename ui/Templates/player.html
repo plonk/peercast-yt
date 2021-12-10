@@ -11,6 +11,29 @@
   </script>
 {^end}
 
+{^define SETUP_flvPlayer}
+  flvPlayer.on('error', (errorType, errorCode, details) => {
+      if (errorType == 'NetworkError' && errorCode == 'HttpStatusCodeInvalid') {
+          let msg = `ストリームURLが取得できませんでした。\n` +
+                    `ページをリロードしますか？\n` +
+                    `\n` + 
+                    `${details.code} ${details.msg}`;
+          if (window.confirm(msg)) {
+              window.location.reload();
+          }
+      } else {
+          console.error(errorType, errorCode, details);
+      }
+  });
+  flvPlayer.attachMediaElement(videoElement);
+  flvPlayer.load();
+  flvPlayer.play().catch(error => {
+    videoElement.muted = true;
+    unmuteButton.style.visibility = "visible";
+    flvPlayer.play();
+  });
+{^end}
+
 {@if channel.type == "FLV"}
   <div class="message" style="text-align: center">
     <script src="/assets/js/flv.min.js"></script>
@@ -27,22 +50,7 @@
          isLive: true,
          url: '/stream/{$channel.id}.flv'
        });
-       flvPlayer.on('error', (errorType, errorCode, details) => {
-           let msg = `エラーが起きたので動画が再生できませんでした。\n` +
-                     `ページをリロードしますか？\n` +
-                     `\n` + 
-                     `${errorType}\n${errorCode}\n${JSON.stringify(details)}`;
-           if (window.confirm(msg)) {
-               window.location.reload();
-           }
-       });
-       flvPlayer.attachMediaElement(videoElement);
-       flvPlayer.load();
-       flvPlayer.play().catch(error => {
-         videoElement.muted = true;
-         unmuteButton.style.visibility = "visible";
-         flvPlayer.play();
-       });
+       {^SETUP_flvPlayer}
      }
     </script>
   </div>
@@ -64,13 +72,7 @@
                 isLive: true,
                 url: '/cgi-bin/flv.cgi?id={$channel.id}&type={$channel.type}&bitrate={$channel.bitrate}&preset={$servMgr.preset}&audio_codec={$servMgr.audioCodec}'
             });
-            flvPlayer.attachMediaElement(videoElement);
-            flvPlayer.load();
-            flvPlayer.play().catch(error => {
-                videoElement.muted = true;
-                unmuteButton.style.visibility = "visible";
-                flvPlayer.play();
-            });
+            {^SETUP_flvPlayer}
         }
       </script>
     </div>
@@ -120,13 +122,7 @@
                 isLive: true,
                 url: '/cgi-bin/flv.cgi?id={$channel.id}&type={$channel.type}&bitrate={$channel.bitrate}&preset={$servMgr.preset}&audio_codec={$servMgr.audioCodec}'
             });
-            flvPlayer.attachMediaElement(videoElement);
-            flvPlayer.load();
-            flvPlayer.play().catch(error => {
-                videoElement.muted = true;
-                unmuteButton.style.visibility = "visible";
-                flvPlayer.play();
-            });
+            {^SETUP_flvPlayer}
         }
       </script>
     </div>
