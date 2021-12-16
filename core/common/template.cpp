@@ -618,7 +618,18 @@ int Template::readCmd(Stream &in, Stream *outp)
 }
 
 // --------------------------------------
-void    Template::readVariable(Stream &in, Stream *outp)
+static void to_s(const amf0::Value& value, std::string& out)
+{
+    if (value.isString())
+        out = value.string();
+    else if (value.isNull())
+        out = "";
+    else
+        out = value.inspect();
+}
+
+// --------------------------------------
+void Template::readVariable_(Stream &in, Stream *outp, std::function<std::string(const std::string&)> filter)
 {
     String var;
     while (!in.eof())
@@ -626,79 +637,38 @@ void    Template::readVariable(Stream &in, Stream *outp)
         char c = in.readChar();
         if (c == '}')
         {
-            if (inSelectedFragment() && outp)
-            {
-                amf0::Value out;
-                std::string str;
-                writeVariable(out, var);
-                if (out.isString())
-                    str = out.string();
-                else
-                    str = out.inspect();
-                outp->writeString(cgi::escape_html(str));
-            }
+            if (!inSelectedFragment() || !outp)
+                return;
+
+            amf0::Value out;
+            std::string str;
+            writeVariable(out, var);
+            to_s(out, str);
+            outp->writeString(filter(str));
+
             return;
         }else
         {
             var.append(c);
         }
     }
+}
+// --------------------------------------
+void    Template::readVariable(Stream &in, Stream *outp)
+{
+    readVariable_(in, outp, cgi::escape_html);
 }
 
 // --------------------------------------
 void    Template::readVariableJavaScript(Stream &in, Stream *outp)
 {
-    String var;
-    while (!in.eof())
-    {
-        char c = in.readChar();
-        if (c == '}')
-        {
-            if (inSelectedFragment() && outp)
-            {
-                amf0::Value out;
-                std::string str;
-                writeVariable(out, var);
-                if (out.isString())
-                    str = out.string();
-                else
-                    str = out.inspect();
-                outp->writeString(cgi::escape_javascript(str).c_str());
-            }
-            return;
-        }else
-        {
-            var.append(c);
-        }
-    }
+    readVariable_(in, outp, cgi::escape_javascript);
 }
 
 // --------------------------------------
 void    Template::readVariableRaw(Stream &in, Stream *outp)
 {
-    String var;
-    while (!in.eof())
-    {
-        char c = in.readChar();
-        if (c == '}')
-        {
-            if (inSelectedFragment() && outp)
-            {
-                amf0::Value out;
-                std::string str;
-                writeVariable(out, var);
-                if (out.isString())
-                    str = out.string();
-                else
-                    str = out.inspect();
-                outp->writeString(str);
-            }
-            return;
-        }else
-        {
-            var.append(c);
-        }
-    }
+    readVariable_(in, outp, [](const std::string& s) { return s; });
 }
 
 // --------------------------------------

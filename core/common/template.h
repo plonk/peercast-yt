@@ -23,6 +23,7 @@
 #include <list>
 #include "stream.h"
 #include "varwriter.h"
+#include <functional>
 
 // HTML テンプレートシステム
 class Template
@@ -80,6 +81,7 @@ public:
     void    readForeach(Stream &, Stream *);
     void    readFragment(Stream &, Stream *);
 
+    void    readVariable_(Stream &in, Stream *outp, std::function<std::string(const std::string&)> filter);
     void    readVariable(Stream &, Stream *);
     void    readVariableJavaScript(Stream &in, Stream *outp);
     void    readVariableRaw(Stream &in, Stream *outp);
