@@ -168,10 +168,11 @@ int Template::getIntVariable(const String &varName)
                 return std::stoi(value.string());
             } catch(std::invalid_argument& e)
             {
-                //throw GeneralException(e.what());
+                // 数字で始まっていない。
                 return 0;
             } catch(std::out_of_range& e)
             {
+                // 値が大きすぎる、あるいは小さすぎる。
                 throw GeneralException(e.what());
             }
         }
