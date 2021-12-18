@@ -181,6 +181,8 @@ namespace amf0
                 return this->m_date == rhs.m_date;
             case kNull:
                 return true;
+            case kBool:
+                return this->m_bool == rhs.m_bool;
             default:
                 throw std::runtime_error("unknown AMF value type " + std::to_string(m_type));
             }

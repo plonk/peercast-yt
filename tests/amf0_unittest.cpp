@@ -185,6 +185,13 @@ TEST_F(amf0Fixture, compare_String)
     ASSERT_NE(Value::string("fuga"), Value::string("hoge"));
 }
 
+TEST_F(amf0Fixture, compare_Boolean)
+{
+    ASSERT_EQ(Value::boolean(true), Value::boolean(true));
+    ASSERT_EQ(Value::boolean(false), Value::boolean(false));
+    ASSERT_NE(Value::boolean(true), Value::boolean(false));
+}
+
 TEST_F(amf0Fixture, serialize_String)
 {
     auto s = Value::string("hoge");
