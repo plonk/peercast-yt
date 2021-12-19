@@ -38,11 +38,11 @@
   {@fragment relays}
   <TABLE class="relay-list table-panel" align=center border=0>
     <TBODY>
-      <TR align=middle bgColor=#cccccc class="normal">
+      <TR align=middle bgColor=#cccccc>
         <th colspan=2>{#Relays}</th>
       </TR>
       {@foreach chanMgr.channels}
-      <tr class="normal">
+      <tr>
         <TD width="1" align="left">
           <a href="play.html?id={$this.id}">
             <img src="/assets/images/play.png" border="0">
@@ -68,7 +68,7 @@
           <span>{#Keep}</span>
           <a href="/admin?cmd=keep&amp;id={$this.id}"><b>{$this.keep}</b></a>
 
-          <div class="normal" style="white-space: nowrap">
+          <div style="white-space: nowrap">
             <b><a href="relayinfo.html?id={$this.id}">{#Info}</a></b>
             {@if this.status == "BROADCAST"}
               - <b><a href="editinfo.html?id={$this.id}">{#Edit}</a></b>
@@ -90,7 +90,7 @@
   </TABLE>
   {@end}
 </div>
-<div align="center" class="normal" style="margin-top: 1.5em; margin-bottom: 1.5em">
+<div align="center" style="margin-top: 1.5em; margin-bottom: 1.5em">
   <form action="/admin" style="display: inline">
     <input type="hidden" name="cmd" value="clear">
     <input type="hidden" name="channels" value="1">

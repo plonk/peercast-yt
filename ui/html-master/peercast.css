@@ -5,28 +5,33 @@
 	font-size: 16px;
 	font-weight: bold;
 }
+
 a {
 	font-family: Verdana, Arial, Helvetica, sans-serif;
 	text-decoration: none;
 
 }
+
 a[href] {
 	color: #0000FF;
 }
+
 a:hover {
 	font-family: Verdana, Arial, Helvetica, sans-serif;
 	text-decoration: underline;
 }
 
-.normal {
+body {
 	font-family: Verdana, Arial, Helvetica, sans-serif;
 	font-size: 9pt;
 
 }
+
 .normal-small {
 	font-family: Verdana, Arial, Helvetica, sans-serif;
 	font-size: 10px;
 }
+
 .titlelinksBig {
 
 	font-family: Verdana, Arial, Helvetica, sans-serif;

@@ -7,14 +7,14 @@
       <input type=hidden value=applyflags name=cmd>
       <table class="table-panel" width="100%" border="0">
         <tr>
-          <td colspan="4" class="normal"><div align="center"><strong>{#Flags}</strong></div></td>
+          <td colspan="4"><div align="center"><strong>{#Flags}</strong></div></td>
         </tr>
         <tr>
-          <th class="normal">名前と説明</th>
-          <th class="normal">デフォルト / 現在</th>
+          <th>名前と説明</th>
+          <th>デフォルト / 現在</th>
         </tr>
         {@foreach servMgr.flags}
-        <tr class="normal">
+        <tr>
           <td>
             <span style="font-weight: {@if this.defaultValue != this.currentValue}bold{@else}medium{@end}; word-break: break-word">
               {$this.name}

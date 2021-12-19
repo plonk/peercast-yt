@@ -27,32 +27,32 @@
     <input type="hidden" name="id" value="{$page.channel.id}">
 
     <table align=center border=0>
-      <tr align=middle bgcolor=#ccc class="normal">
+      <tr align=middle bgcolor=#ccc>
         <td colSpan=2><B>{#Channel Information}</B></td>
       </tr>
-      <tr align=left bgcolor=#eee class="normal">
+      <tr align=left bgcolor=#eee>
         <td style="min-width: 90px">{#Name}</td>
         <td style="min-width: 300px">
           <input type="text" name="name" value="{$page.channel.name}">
         </td>
       </tr>
-      <tr align=left bgcolor=#ddd class="normal">
+      <tr align=left bgcolor=#ddd>
         <td>{#Genre}</td>
         <td><input type="text" name="genre" value="{$page.channel.genre}"></td>
       </tr>
-      <tr align=left bgcolor=#eee class="normal">
+      <tr align=left bgcolor=#eee>
         <td>{#Desc.}</td>
         <td><input type="text" name="desc" value="{$page.channel.desc}"></td>
       </tr>
-      <tr align=left bgcolor=#ddd class="normal">
+      <tr align=left bgcolor=#ddd>
         <td>{#URL}</td>
         <td><input type="text" name="contactURL" value="{$page.channel.contactURL}"></td>
       </tr>
-      <tr align=left bgcolor=#eee class="normal">
+      <tr align=left bgcolor=#eee>
         <td>{#Comment}</td>
         <td><input type="text" name="comment" value="{$page.channel.comment}"></td>
       </tr>
-      <tr align=left bgcolor=#ccc class="normal">
+      <tr align=left bgcolor=#ccc>
         <td colSpan=2 align=middle>
           <B>{#Current Track}</B>
           <div id="widget" style="color: blue; cursor: pointer; float: right" onclick="toggleTrack()"></div>
@@ -60,25 +60,25 @@
       </tr>
     </table>
     <table id="track">
-      <tr align=left bgcolor=#ddd class="normal">
+      <tr align=left bgcolor=#ddd>
         <td style="min-width: 90px">{#Artist}</td>
         <td style="min-width: 300px">
           <input type="text" name="track.artist" value="{$page.channel.track.artist}">
         </td>
       </tr>
-      <tr align=left bgcolor=#eee class="normal">
+      <tr align=left bgcolor=#eee>
         <td>{#Title}</td>
         <td><input type="text" name="track.title" value="{$page.channel.track.title}"></td>
       </tr>
-      <tr align=left bgcolor=#ddd class="normal">
+      <tr align=left bgcolor=#ddd>
         <td>{#Album}</td>
         <td><input type="text" name="track.album" value="{$page.channel.track.album}"></td>
       </tr>
-      <tr align=left bgcolor=#eee class="normal">
+      <tr align=left bgcolor=#eee>
         <td>{#Genre}</td>
         <td><input type="text" name="track.genre" value="{$page.channel.track.genre}"></td>
       </tr>
-      <tr align=left bgcolor=#ddd class="normal">
+      <tr align=left bgcolor=#ddd>
         <td>{#Contact}</td>
         <td><input type="text" name="track.contactURL" value="{$page.channel.track.contactURL}"></td>
       </tr>
@@ -88,7 +88,7 @@
     </div>
   </form>
 {@else}
-  <p class="normal" style="text-align: center">
+  <p style="text-align: center">
     {#Channel not found.}
   </p>
 {@end} <!-- if page.channel.exit -->

@@ -17,27 +17,27 @@
   <input type=hidden value=apply name=cmd>
   <table class="table-panel" width="50%" border="0">
     <tr >
-      <td colspan="2" class="normal"><div align="center"><strong>{#Basic Settings}</strong></div></td>
+      <td colspan="2"><div align="center"><strong>{#Basic Settings}</strong></div></td>
     </tr>
-    <tr class="normal">
+    <tr>
       <th class="left-heading">{#Password}</th>
       <td>
         <input name=passnew type=password size="10" maxlength="32" value="{$servMgr.password}" style="width: 100%">
       </td>
     </tr>
-    <tr class="normal">
+    <tr>
       <th class="left-heading" style="width: 8.5em">{#Port}</th>
       <td><input size=10 value="{$servMgr.serverPort1}" name=port></td>
     </tr>
-    <tr class="normal">
+    <tr>
       <th class="left-heading">{#Max. Relays}</th>
       <td><input size=5 value="{$servMgr.maxRelays}" name=maxrelays></td>
     </tr>
-    <tr class="normal">
+    <tr>
       <th class="left-heading">{#Max. Direct streams}</th>
       <td><input size=5 value="{$servMgr.maxDirect}" name=maxdirect></td>
     </tr>
-    <tr class="normal">
+    <tr>
       <th class="left-heading">{#Language}</th>
       <td>
         <select name="htmlPath" size="1" id="htmlPath">
@@ -56,26 +56,26 @@
   <div class="flex-container">
     <div class="column">
       <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle class="normal">
+        <tr align=middle>
           <td colspan=2><b>{#Server}</b></td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading" width="35%">{#Server Name}</th>
           <td>
             <input class="fill-parent" value="{$servMgr.serverName}" name=servername placeholder="{#Nickname for this server}">
           </td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading">{#DJ Message}</th>
           <td><input class="fill-parent" value="{$chanMgr.djMessage}" name=djmsg>
           </td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading">{#ICY MetaInterval}</th>
           <td><input size=5 value="{$chanMgr.icyMetaInterval}" name=icymeta>
           </td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading">{#Mode}</th>
           <td>
             <label><input type=radio {@if !servMgr.isRoot}checked{@end} value=0 name=root>
@@ -83,13 +83,13 @@
             <label><input name=root type=radio value=1 {@if servMgr.isRoot}checked{@end}>
               <i>{#Root}</i></label></td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading">{#Randomize broadcasting channel ID}</th>
           <td>
             <input type="checkbox" name=randomizechid value=1 {@if servMgr.randomizeBroadcastingChannelID}checked{@end}>
           </td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading">{#Public Directory}</th>
           <td>
             <input type="checkbox" name="public_directory" value=1 {@if servMgr.publicDirectoryEnabled}checked{@end}>
@@ -98,10 +98,10 @@
       </table>
 
       <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle class="normal">
+        <tr align=middle>
           <td colspan=5><b>{#Filters}</b></td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th style="font-weight: normal; padding: 3px 0">{#IP Mask}</th>
           <th style="max-width: 100px; font-weight: normal; padding: 3px 0; white-space: normal">
             {#Flags}<br>
@@ -109,7 +109,7 @@
           </th>
         </tr>
         {@foreach servMgr.filters}
-        <tr align=middle class="normal">
+        <tr align=middle>
           <td>
             <input class="fill-parent" size=30 value="{$this.ip}" name=filt_ip>
           </td>
@@ -121,7 +121,7 @@
           </td>
         </tr>
         {@end}
-        <tr align=middle class="normal">
+        <tr align=middle>
           <td>
             <input class="fill-parent" size=30 value="0.0.0.0" name=filt_ip>
           </td>
@@ -135,24 +135,24 @@
       </table>
 
       <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle class="normal">
+        <tr align=middle>
           <td colspan=5><b>{#UI}</b></td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading">{#Refresh HTML (sec)}</th>
           <td><input size=10 value="{$servMgr.refreshHTML}" name=refresh></td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading">{#Chat}</th>
           <td><input type="checkbox" name="chat" value="1" {@if servMgr.chat}checked{@end}></td>
         </tr>
       </table>
 
       <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle class="normal">
+        <tr align=middle>
           <td colspan=2><b>{#Authentication}</b></td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading" width="35%">{#HTML Authentication}</th>
           <td>
             <label><input type=radio {@if servMgr.auth.useCookies}checked{@end} value=cookie name=auth>
@@ -160,7 +160,7 @@
             <label><input type=radio {@if servMgr.auth.useHTTP}checked{@end} value=http name=auth>
               <i>{#Basic HTTP}</i></label></td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading">{#Cookies Expire}</th>
           <td>
             <label><input type=radio {@if servMgr.auth.useSessionCookies}checked{@end} value=session name=expire>
@@ -171,10 +171,10 @@
       </table>
 
       <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle class="normal">
+        <tr align=middle>
           <td colspan=2><b>{#Playlist}</b></td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading" width="35%">{#WMV Protocol}</th>
           <td>
             <select name="wmvProtocol">
@@ -189,26 +189,26 @@
       </table>
       {@if servMgr.isRoot}
       <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle class="normal">
+        <tr align=middle>
           <td colspan=2><b>{#Root Mode}</b></td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading">{#Host Update (sec)}</th>
           <td><input size=5 {@if chanMgr.hostUpdateInterval}value="{$chanMgr.hostUpdateInterval}"{@end} name=huint></td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading">{#Message}</th>
           <td><input type=text value="{$servMgr.rootMsg}" name=pcmsg></td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading" width="50%">{#Get Update}</th>
           <td><input type=checkbox value=1 name=getupd></td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading" width="50%">{#Send}</th>
           <td><input type=checkbox value=1 name=brroot></td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading">{#Broadcast IDs}</th>
           <td><a href="bcid.html">{#View}</a></td>
         </tr>
@@ -218,10 +218,10 @@
 
     <div class="column">
       <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle class="normal">
+        <tr align=middle>
           <td colspan=2><b>{#Network}</b></td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading">{#YP Address}</th>
           <td>
             <select id="yp_select">
@@ -237,44 +237,44 @@
             <input id="yp" class="fill-parent" value="{$servMgr.ypAddress}" name=yp>
           </td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading">{#Max. Output (Kbits/s)}</th>
           <td><input size=5 value="{$servMgr.maxBitrateOut}" name=maxup></td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading" width="50%">{#Max. Relays Per Channel}</th>
           <td><input size=5 value="{$chanMgr.maxRelaysPerChannel}" name=maxrelaypc></td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading" width="50%">{#Max. Controls In}</th>
           <td><input size=5 value="{$servMgr.maxControlsIn}" name=maxcin></td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading">{#Max. Connections In} </th>
           <td><input name=maxsin id="maxsin" value="{$servMgr.maxServIn}" size=5></td>
         </tr>
       </table>
 
       <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle class="normal">
+        <tr align=middle>
           <td colspan=2><b>{#Security}</b></td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th width="40%" class="left-heading">HTML</th>
           <td class="checkbox-cell"><input type=checkbox {@if servMgr.allow.HTML1}checked{@end} value=1 name=allowHTML1>
           </td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading">{#Broadcasting}</th>
           <td class="checkbox-cell"><input type=checkbox {@if servMgr.allow.broadcasting1}checked{@end} value=1 name=allowBroadcast1>
           </td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading">{#Network}</th>
           <td class="checkbox-cell"><input type=checkbox {@if servMgr.allow.network1}checked{@end} value=1 name=allowNetwork1>
           </td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading">{#Direct}</th>
           <td class="checkbox-cell"><input type=checkbox {@if servMgr.allow.direct1}checked{@end} value=1 name=allowDirect1>
           </td>
@@ -282,10 +282,10 @@
       </table>
       
       <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle class="normal">
+        <tr align=middle>
           <td colspan=2><b>{#Log}</b></td>
         </tr>
-        <tr class="normal">
+        <tr>
           <th class="left-heading" width="30%">{#Level}</th>
           <td>
             <select name="logLevel">
@@ -302,11 +302,11 @@
       </table>
 
       <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle class="normal">
+        <tr align=middle>
           <td colspan=2><b>{#Channel Feeds}</b></td>
         </tr>
         {@foreach servMgr.channelDirectory.feeds}
-        <tr class="normal">
+        <tr>
           <td width=110>
             <select class="channel-feed-select fill-parent" data-index="{$loop.index}">
               <option value="None">{#None}</option>
@@ -327,7 +327,7 @@
         </tr>
         {@end}
         <!-- 新しい項目入力用 -->
-        <tr class="normal">
+        <tr>
           <td width=110>
             <select class="channel-feed-select fill-parent" data-index="-1">
               <option value="None">{#None}</option>
@@ -348,18 +348,18 @@
         </tr>
       </table>
       <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle class="normal">
+        <tr align=middle>
           <td colspan=2><b>{#Transcoding}</b></td>
         </tr>
 
-        <tr class="normal">
+        <tr>
           <th class="left-heading">{#Enable}</th>
           <td>
             <input type="checkbox" name="transcoding_enabled" value="1" {@if servMgr.transcodingEnabled}checked{@end}>
           </td>
         </tr>
 
-        <tr class="normal">
+        <tr>
           <th class="left-heading">{#x264 Preset}</th>
           <td>
             <select name="preset">
@@ -370,7 +370,7 @@
           </td>
         </tr>
 
-        <tr class="normal">
+        <tr>
           <th class="left-heading">{#Audio Codec}</th>
           <td>
             <select name="audio_codec">
