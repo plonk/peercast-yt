@@ -150,6 +150,10 @@ static Regexp asctime("^([A-z]{3}) ([A-z]{3}) +(\\d+) (\\d+):(\\d+):(\\d+) (\\d+
 
 struct tm parseHttpDate_lasttm = {};
 
+#ifdef WIN32
+#define timegm _mkgmtime
+#endif
+
 time_t parseHttpDate(const std::string& str)
 {
     int sec = -1, min = -1, hour = -1, mday = -1, mon = -1, year = -1, wday = -1;
