@@ -33,7 +33,7 @@
       <td align="center">{$this.status}</td>
       <td style="text-align: right">
         {@if this.status == "Success"}
-        {@if this.over == "1"}
+        {@if this.over}
         ≥
         {@end}
         {$this.speed} Kbps
@@ -43,7 +43,7 @@
       </td>
       <td align="center">
         {@if this.status == "Success"}
-        {@if this.checkable == "1"}
+        {@if this.checkable}
         <a href="/admin?cmd=take_speedtest&amp;index={$loop.index}" title="{#Start speedtest}">{#Start}</a>
         {@else}
         {#Not allowed}
