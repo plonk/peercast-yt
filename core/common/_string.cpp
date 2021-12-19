@@ -16,7 +16,8 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-#include <ctime> // for ctime
+#define _POSIX_C_SOURCE 200809L // expose localtime_r on Windows
+#include <time.h>
 
 #include "_string.h"
 #include "jis.h"
@@ -51,13 +52,26 @@ static int base64chartoval(char input)
 }
 
 // -----------------------------------
+static const char* daysOfWeek[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", nullptr };
+static const char* monthNames[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", nullptr };
 String& String::setFromTime(unsigned int t)
 {
     time_t t2 = t;
-    if (!strftime(this->data, 26, "%a %b %e %H:%M:%S %Y\n", localtime(&t2)))
+    struct tm tm;
+    if (localtime_r(&t2, &tm))
     {
-        data[0] = '-';
-        data[1] = '\0';
+        snprintf(data, sizeof(data),
+                 "%s %s %2d %.2d:%.2d:%.2d %d\n",
+                 daysOfWeek[tm.tm_wday],
+                 monthNames[tm.tm_mon],
+                 tm.tm_mday,
+                 tm.tm_hour,
+                 tm.tm_min,
+                 tm.tm_sec,
+                 tm.tm_year + 1900);
+    }else
+    {
+        sprintf(data, sizeof(data), "-");
     }
 
     type = T_ASCII;
