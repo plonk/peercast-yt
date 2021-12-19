@@ -23,6 +23,7 @@
 #include <vector>
 #include <map>
 #include <stdexcept>
+#include <cstddef> // for nullptr_t
 #include "str.h"
 
 class Stream;
