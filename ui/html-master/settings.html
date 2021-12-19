@@ -121,6 +121,17 @@
           </td>
         </tr>
         {@end}
+        <tr align=middle class="normal">
+          <td>
+            <input class="fill-parent" size=30 value="0.0.0.0" name=filt_ip>
+          </td>
+          <td nowrap>
+            <input title="{#Network}" type=checkbox value=1 name="filt_nw{$length(servMgr.filters)}">
+            <input title="{#Direct}" type=checkbox value=1 name="filt_di{$length(servMgr.filters)}">
+            <input title="{#Private}" type=checkbox value=1 name="filt_pr{$length(servMgr.filters)}">
+            <input title="{#Ban}" type=checkbox value=1 name="filt_bn{$length(servMgr.filters)}">
+          </td>
+        </tr>
       </table>
 
       <table class="table-panel" width="100%" align=center border=0>
