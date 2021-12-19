@@ -15,6 +15,15 @@ TEST(StringTest, setFromStopwatchWorks) {
     ASSERT_STREQ("-", str);
 }
 
+#include <time.h>
+
+TEST(StringTest, setFromTime) {
+    time_t t = 0;
+    ctime(&t);
+
+    ASSERT_STREQ(String().setFromTime(t), ctime(&t));
+}
+
 TEST(StringTest, eqWorks) {
     String s1("abc");
     String s2("abc");

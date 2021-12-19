@@ -54,9 +54,12 @@ static int base64chartoval(char input)
 String& String::setFromTime(unsigned int t)
 {
     time_t t2 = t;
-    char *p = ctime_r(&t2, data);
-    if (!p)
-        strcpy(data, "-");
+    if (!strftime(this->data, 26, "%a %b %e %H:%M:%S %Y\n", localtime(&t2)))
+    {
+        data[0] = '-';
+        data[1] = '\0';
+    }
+
     type = T_ASCII;
 
     return *this;
