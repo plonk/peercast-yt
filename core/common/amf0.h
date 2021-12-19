@@ -86,6 +86,7 @@ namespace amf0
         Value(int n) : m_type(kNumber), m_number(n), m_bool(false) {}
         Value(unsigned int n) : m_type(kNumber), m_number(n), m_bool(false) {}
         Value(long unsigned int n) : m_type(kNumber), m_number(n), m_bool(false) {}
+        Value(long long unsigned int n) : m_type(kNumber), m_number(n), m_bool(false) {} // can lose precision
         Value(std::initializer_list<KeyValuePair> l) : m_type(kObject), m_number(0.0), m_bool(false)
         {
             for (auto pair: l)
