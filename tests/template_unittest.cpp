@@ -105,8 +105,20 @@ TEST_F(TemplateFixture, tokenizeVariableExpression)
     ASSERT_STREQ("a", tok[0].c_str());
 
     tok = temp.tokenize("!a");
-    ASSERT_EQ(1, tok.size());
-    ASSERT_STREQ("!a", tok[0].c_str());
+    ASSERT_EQ(2, tok.size());
+    ASSERT_STREQ("!", tok[0].c_str());
+    ASSERT_STREQ("a", tok[1].c_str());
+}
+
+TEST_F(TemplateFixture, tokenizeCallExpression)
+{
+    auto tok = temp.tokenize("inspect(x)");
+
+    ASSERT_EQ(4, tok.size());
+    ASSERT_EQ(tok[0], "inspect");
+    ASSERT_EQ(tok[1], "(");
+    ASSERT_EQ(tok[2], "x");
+    ASSERT_EQ(tok[3], ")");
 }
 
 TEST_F(TemplateFixture, evalCondition)
@@ -289,4 +301,35 @@ TEST_F(TemplateFixture, elsif)
     res = temp.readTemplate(in, &out);
     ASSERT_EQ(Template::TMPL_END, res);
     ASSERT_EQ("C", out.str());
+}
+
+TEST_F(TemplateFixture, parse)
+{
+    auto tok = temp.tokenize("inspect(x)");
+    auto val = Template::parse(tok);
+    ASSERT_EQ(val.inspect(), amf0::Value::strictArray({"inspect", "x"}).inspect());
+
+    tok = temp.tokenize("!x.y");
+    val = Template::parse(tok);
+    ASSERT_EQ(val.inspect(), amf0::Value::strictArray({"!", "x.y"}).inspect());
+
+    tok = temp.tokenize("x.y");
+    val = Template::parse(tok);
+    ASSERT_EQ(val.inspect(), amf0::Value("x.y").inspect());
+
+    tok = temp.tokenize("a == b");
+    val = Template::parse(tok);
+    ASSERT_EQ(val.inspect(), amf0::Value::strictArray({"==", "a", "b"}).inspect());
+
+    tok = temp.tokenize("f(a) != g(b)");
+    val = Template::parse(tok);
+    ASSERT_EQ(val.inspect(), amf0::Value::strictArray({"!=", amf0::Value::strictArray({ "f", "a" }), amf0::Value::strictArray({ "g", "b" }) }).inspect());
+
+    tok = temp.tokenize("\"a\"");
+    val = Template::parse(tok);
+    ASSERT_EQ(val.inspect(), amf0::Value::strictArray({"quote", "a"}).inspect());
+
+    tok = temp.tokenize("1");
+    val = Template::parse(tok);
+    ASSERT_EQ(val.inspect(), amf0::Value("1").inspect());
 }

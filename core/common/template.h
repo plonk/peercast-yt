@@ -89,9 +89,13 @@ public:
     bool    writeObjectProperty(amf0::Value& out, const String& varName, amf0::Value& obj);
 
     bool    evalCondition(const std::string& cond);
+    amf0::Value evalForm(const amf0::Value&);
+    amf0::Value evalExpression(const amf0::Value&);
+    amf0::Value evalExpression(const std::string&);
     std::vector<std::string> tokenize(const std::string& input);
+    static amf0::Value parse(std::vector<std::string>& tokens_);
     std::pair<std::string,std::string> readStringLiteral(const std::string& input);
-    std::string evalStringLiteral(const std::string& input);
+    static std::string evalStringLiteral(const std::string& input);
     std::string getStringVariable(const std::string& varName);
 
     std::string tmplArgs;

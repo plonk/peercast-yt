@@ -35,6 +35,8 @@
 
 using namespace std;
 
+static bool isTruish(const amf0::Value& value);
+
 // --------------------------------------
 Template::Template(const std::string& args)
 {
@@ -190,16 +192,7 @@ bool Template::getBoolVariable(const String &varName)
     bool written = writeVariable(value, varName.c_str());
     if (written)
     {
-        if (value.isNull())
-            return false;
-        else if (value.isString() && (value.string() == "" || value.string() == "0"))
-            return false;
-        else if (value.isNumber() && value.number() == 0)
-            return false;
-        else if (value.isBool() && value.boolean() == false)
-            return false;
-        else
-            return true;
+        return isTruish(value);
     } else {
         throw GeneralException(str::STR(varName, " is not defined"));
     }
@@ -234,7 +227,7 @@ void    Template::readFragment(Stream &in, Stream *outp)
 string Template::evalStringLiteral(const string& input)
 {
     if (input[0] != '\"' || input[input.size()-1] != '\"')
-        throw StreamException("no string literal");
+        throw StreamException(str::STR("Malformed string literal: ", input));
 
     string res;
     auto s = input.substr(1);
@@ -320,11 +313,6 @@ vector<string> Template::tokenize(const string& input)
             do {
                 s.erase(0,1);
             }while (isspace(s[0]));
-        }else if (s[0] == '\"')
-        {
-            string t;
-            tie(t, s) = readStringLiteral(s);
-            tokens.push_back(t);
         }else if (str::has_prefix(s, "==") ||
                   str::has_prefix(s, "!=") ||
                   str::has_prefix(s, "=~") ||
@@ -332,27 +320,24 @@ vector<string> Template::tokenize(const string& input)
         {
             tokens.push_back(s.substr(0,2));
             s.erase(0,2);
-        }else if (isident(s[0]) || s[0] == '!')
+        }else if (s[0] == '(' || s[0] == ')' || s[0] == '!')
         {
-            string bangs, var;
-            while (!s.empty() && s[0] == '!')
-            {
-                bangs += s[0];
-                s.erase(0,1);
-            }
-
-            if (s.empty())
-                throw StreamException("Premature end of token");
-
-            if (!(isalpha(s[0]) || s[0]=='_' || s[0]=='.'))
-                throw StreamException("Identifier expected after '!'");
-
+            tokens.push_back(s.substr(0, 1));
+            s.erase(0, 1);
+        }else if (s[0] == '\"')
+        {
+            string t;
+            tie(t, s) = readStringLiteral(s);
+            tokens.push_back(t);
+        }else if (isident(s[0]))
+        {
+            string var;
             while (!s.empty() && isident(s[0]))
             {
                 var += s[0];
                 s.erase(0,1);
             };
-            tokens.push_back(bangs + var);
+            tokens.push_back(var);
         }else
         {
             auto c = string() + s[0];
@@ -363,70 +348,190 @@ vector<string> Template::tokenize(const string& input)
 }
 
 // --------------------------------------
+static Regexp REG_OP("^==|=~|!=|!~$");
+static Regexp REG_NOT("^!$");
+static Regexp REG_IDENT("^[A-z0-9_.]+$");
+static Regexp REG_LPAREN("^\\($");
+static Regexp REG_RPAREN("^\\)$");
+static Regexp REG_STRING("^\".*?\"$");
+
+amf0::Value Template::parse(vector<string>& tokens_)
+{
+    /*
+
+      EXP := EXP2 OP EXP2 |           (op exp2 exp2)
+             EXP2 |                   
+             '!' EXP2                 (! exp2)
+
+      EXP2 := IDENT '(' EXP ')' |     (ident exp)
+              IDENT |                 ident
+              STRING                  (string STRING)
+
+      OP := '=~' | '!~' | '==' | '!='
+
+    */
+
+    std::list<std::string> tokens(tokens_.begin() ,tokens_.end());
+
+    auto accept =
+        [&](const Regexp& sym) -> shared_ptr<std::string>
+        {
+            if (tokens.empty())
+                return nullptr;
+            if (sym.matches(tokens.front()))
+            {
+                auto r = tokens.front();
+                tokens.pop_front();
+                return make_shared<std::string>(r);
+            }else
+                return nullptr;
+        };
+
+    auto expect =
+        [&](const Regexp& sym) -> void
+        {
+            if (tokens.empty())
+                throw GeneralException(str::STR("Premature end while expecting ", sym.m_exp));
+
+            if (!sym.matches(tokens.front()))
+                throw GeneralException(str::STR("Got ", tokens.front()," while expecting ", sym.m_exp));
+
+            tokens.pop_front();
+        };
+
+    std::function<shared_ptr<amf0::Value>()> exp, exp2;
+
+    exp =
+        [&]() -> shared_ptr<amf0::Value>
+        {
+            if (auto e1 = exp2()) {
+                if (auto op = accept(REG_OP)) {
+                    if (auto e2 = exp2()) {
+                        return make_shared<amf0::Value>(amf0::Value::strictArray({ *op, *e1, *e2 }));
+                    } else {
+                        return nullptr;
+                    }
+                } else {
+                    return e1;
+                }
+            } else if (accept(REG_NOT)) {
+                if (auto r = exp2()) {
+                    return make_shared<amf0::Value>(amf0::Value::strictArray({ "!", *r }));
+                } else
+                    return nullptr;
+            } else
+                return nullptr;
+        };
+
+    exp2 =
+        [&]() -> shared_ptr<amf0::Value>
+        {
+            if (auto ident = accept(REG_IDENT)) {
+                if (accept(REG_LPAREN)) {
+                    if (auto e = exp()) {
+                        expect(REG_RPAREN);
+                        return make_shared<amf0::Value>(amf0::Value::strictArray({ *ident, *e }));
+                    } else
+                        return nullptr;
+                } else {
+                    return make_shared<amf0::Value>(*ident);
+                }
+            } else if (auto s = accept(REG_STRING)) {
+                return make_shared<amf0::Value>(amf0::Value::strictArray({ "quote", evalStringLiteral(*s) }));
+            } else
+                return nullptr;
+        };
+
+
+    auto pvalue = exp();
+    if (!pvalue) {
+        throw GeneralException(" something weird ");
+    }
+    if (tokens.size()) {
+        throw GeneralException(str::STR("Unexpected token ", tokens.front()));
+    }
+    return *pvalue;
+}
+
+// --------------------------------------
+static bool isTruish(const amf0::Value& value)
+{
+    if (value.isNull())
+        return false;
+    else if (value.isString() && (value.string() == "" || value.string() == "0"))
+        return false;
+    else if (value.isNumber() && value.number() == 0)
+        return false;
+    else if (value.isBool() && value.boolean() == false)
+        return false;
+    else
+        return true;
+}
+
+// --------------------------------------
+amf0::Value Template::evalForm(const amf0::Value& exp)
+{
+    const auto& arr = exp.strictArray();
+
+    if (arr.size() == 0) {
+        throw GeneralException("empty list form");
+    } else {
+        const auto& name = arr.at(0).string();
+        if (name == "==") {
+            return evalExpression(arr.at(1)) == evalExpression(arr.at(2));
+        } else if (name == "!=") {
+            return evalExpression(arr.at(1)) != evalExpression(arr.at(2));
+        } else if (name == "=~") {
+            return Regexp(evalExpression(arr.at(2)).string()).matches(evalExpression(arr.at(1)).string());
+        } else if (name == "!~") {
+            return !Regexp(evalExpression(arr.at(2)).string()).matches(evalExpression(arr.at(1)).string());
+        } else if (name == "!") {
+            return !isTruish(evalExpression(arr.at(1)));
+        } else if (name == "quote") {
+            return arr.at(1);
+        } else if (name == "length") {
+            return evalExpression(arr.at(1)).strictArray().size();
+        } else if (name == "inspect") {
+            return evalExpression(arr.at(1)).inspect();
+        } else {
+            throw GeneralException(str::STR("Unknown function name or operator name ", name));
+        }
+    }
+}
+
+// --------------------------------------
+static Regexp REG_INTEGER("^[0-9]$");
+
+amf0::Value Template::evalExpression(const amf0::Value& exp)
+{
+    if (exp.isStrictArray()) {
+        return evalForm(exp);
+    } else if (exp.isString()) {
+        if (REG_INTEGER.matches(exp.string())) {
+            return atoi(exp.string().c_str());
+        } else { // variable
+            amf0::Value value;
+            if (writeVariable(value, exp.string().c_str()))
+                return value;
+            else
+                throw GeneralException(str::STR(exp.string(), " is not defined"));
+        }
+    } else
+        throw GeneralException("evalExpression: unknown type of expression");
+}
+
+// --------------------------------------
+amf0::Value Template::evalExpression(const string& str)
+{
+    auto tokens = tokenize(str);
+    auto exp = parse(tokens);
+    return evalExpression(exp);
+}
+
+// --------------------------------------
 bool    Template::evalCondition(const string& cond)
 {
-    auto tokens = tokenize(cond);
-    bool res = false;
-
-    if (tokens.size() == 3) // 二項演算
-    {
-        auto op = tokens[1];
-        if (op == "=~" || op == "!~")
-        {
-            bool pred = (op == "=~");
-
-            string lhs, rhs;
-
-            if (tokens[0][0] == '\"')
-                lhs = evalStringLiteral(tokens[0]);
-            else
-                lhs = getStringVariable(tokens[0].c_str());
-
-            if (tokens[2][0] == '\"')
-                rhs = evalStringLiteral(tokens[2]);
-            else
-                rhs = getStringVariable(tokens[2].c_str());
-
-            res = ((!Regexp(rhs).exec(lhs).empty()) == pred);
-        }else if (op == "==" || op == "!=")
-        {
-            bool pred = (op == "==");
-
-            string lhs, rhs;
-
-            if (tokens[0][0] == '\"')
-                lhs = evalStringLiteral(tokens[0]);
-            else
-                lhs = getStringVariable(tokens[0]);
-
-            if (tokens[2][0] == '\"')
-                rhs = evalStringLiteral(tokens[2]);
-            else
-                rhs = getStringVariable(tokens[2]);
-
-            res = ((lhs==rhs) == pred);
-        }
-        else
-            throw StreamException(("Unrecognized condition operator " + op).c_str());
-    }else if (tokens.size() == 1)
-    {
-        string varName;
-        bool pred = true;
-
-        for (auto c : tokens[0])
-        {
-            if (c == '!')
-                pred = !pred;
-            else
-                varName += c;
-        }
-
-        res = getBoolVariable(varName.c_str()) == pred;
-    }else
-    {
-        throw StreamException("Malformed condition expression");
-    }
-    return res;
+    return isTruish(evalExpression(cond));
 }
 
 // --------------------------------------
@@ -459,7 +564,7 @@ void    Template::readIf(Stream &in, Stream *outp)
             cmd = readTemplate(in, hadActive ? NULL : outp);
         }else if (cmd == TMPL_IF || cmd == TMPL_ELSIF)
         {
-            String cond = readCondition(in);
+            std::string cond = readCondition(in).c_str();
             if (!hadActive && evalCondition(cond))
             {
                 hadActive = true;
@@ -640,9 +745,8 @@ void Template::readVariable_(Stream &in, Stream *outp, std::function<std::string
             if (!inSelectedFragment() || !outp)
                 return;
 
-            amf0::Value out;
+            auto out = evalExpression(var);
             std::string str;
-            writeVariable(out, var);
             to_s(out, str);
             outp->writeString(filter(str));
 
