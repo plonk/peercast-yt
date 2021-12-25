@@ -224,3 +224,19 @@ input[readonly="readonly"] {
     color: rgb(109,109,109);
 }
 
+/* ボックスの左端に感嘆符を表示。 */
+.alert-warning {
+    background-color: #dc0;
+    margin: 1em 0;
+    padding: .7em .7em .7em 48px;
+    position: relative;
+    max-width: 640px;
+}
+.alert-warning::after { 
+    color: #fff;
+    content: "!";
+    font-size: 32px;
+    position: absolute;
+    left:20px; top:calc(50% - 20px)
+}
+
