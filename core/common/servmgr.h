@@ -331,6 +331,7 @@ public:
     bool                chat;
 
     FlagRegistory       flags;
+    std::string         preferredTheme;
 };
 
 // ----------------------------------

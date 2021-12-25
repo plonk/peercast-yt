@@ -51,6 +51,7 @@ ServMgr::ServMgr()
             {"forceFirewalled", "ファイアーウォール オンであるかの様に振る舞う。", false},
             {"startPlayingFromKeyFrame", "DIRECT接続でキーフレームまで継続パケットをスキップする。", true},
         })
+    , preferredTheme("system")
 {
     authType = AUTH_COOKIE;
 
@@ -2134,6 +2135,7 @@ amf0::Value ServMgr::getState()
                                           }
                                       }()},
             {"configurationFile", peercastApp->getIniFilename()},
+            {"preferredTheme", this->preferredTheme},
         });
 }
 

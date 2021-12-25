@@ -12,3 +12,19 @@
     {$servMgr.serverIP}:{$servMgr.serverPort}
   {@end}
 {^end}
+
+{^define DARK_THEME_STYLES_BEGIN}
+  {@if servMgr.preferredTheme == "dark"}
+    @media screen, (not screen) {
+  {@elsif servMgr.preferredTheme == "system"}
+    @media (prefers-color-scheme: dark) {
+  {@elsif servMgr.preferredTheme == "light"}
+    @media screen and (not screen) {
+  {@end}
+  /* dark theme styles begin */
+{^end}
+
+{^define DARK_THEME_STYLES_END}
+  /* dark theme styles end */
+  }
+{^end}

@@ -141,6 +141,16 @@
           <th class="left-heading">{#Chat}</th>
           <td><input type="checkbox" name="chat" value="1" {@if servMgr.chat}checked{@end}></td>
         </tr>
+        <tr>
+          <th class="left-heading">{#Theme}</th>
+          <td>
+            <select name="preferredTheme">
+              <option value="system" {@if servMgr.preferredTheme == "system"} selected {@end}>{#System}</option>
+              <option value="light" {@if servMgr.preferredTheme == "light"} selected {@end}>{#Light}</option>
+              <option value="dark" {@if servMgr.preferredTheme == "dark"} selected {@end}>{#Dark}</option>
+            </select>
+          </td>
+        </tr>
       </table>
 
       <table class="table-panel" width="100%" align=center border=0>
