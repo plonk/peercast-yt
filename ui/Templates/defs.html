@@ -28,3 +28,77 @@
   /* dark theme styles end */
   }
 {^end}
+
+{^define BASIC_DARK_THEME_STYLE_TAG}
+<style>
+  {^DARK_THEME_STYLES_BEGIN}
+  body { color: #fff; background-color: #222 }
+
+  table.table-panel tbody tr:nth-child(odd) {
+      background-color: #333;
+  }
+
+  table.table-panel tbody tr:nth-child(even) {
+      background-color: #444;
+  }
+
+  /* パネルの上部のスパンする見出し行。他の行よりも背景が濃い。 */
+  table.table-panel tbody tr:nth-child(1) {
+      background-color: #555;
+  }
+
+  /* 通常、上の指定で十分。 */
+  table.table-panel tbody tr.heading-row {
+      background-color: #555;
+  }
+  a[href] {
+      color: #92b2ff;
+  }
+
+  .navbar {
+      border-color: #111;
+  }
+
+  .navbar > a {
+      background-color: #555;
+      border: 1px solid #111;
+  }
+
+  input { background-color: #111; color: #fff; }
+  input[type=submit], button { background-color: #555; color: #fff; }
+  input[type=text] { padding: 5px }
+  input:not([type]) { padding: 5px }
+  input[type=password] { padding: 5px }
+  input[readonly="readonly"] { background-color: #111; color: #888 }
+  select { background-color: #111; color: #fff; padding: 5px }
+  input { accent-color: #92b2ff }
+  button:disabled { color: #bbb }
+
+  .text-danger {
+      color: #d22;
+  }
+
+  .text-muted {
+      color: #bbb;
+  }
+
+  ::-webkit-scrollbar {
+      width: 15px;
+  }
+  ::-webkit-scrollbar-track {
+      background: #333; 
+  }
+  ::-webkit-scrollbar-thumb {
+      background: #577bc3; 
+  }
+  ::-webkit-scrollbar-thumb:hover {
+      background: #92b2ff; 
+  }
+
+  .alert-warning { background-color: #ba0 }
+  .alert-warning::after { color: #000 }
+
+  {^DARK_THEME_STYLES_END}
+
+</style>
+{^end}
