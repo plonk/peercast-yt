@@ -145,9 +145,15 @@
           <th class="left-heading">{#Theme}</th>
           <td>
             <select name="preferredTheme">
-              <option value="system" {@if servMgr.preferredTheme == "system"} selected {@end}>{#System}</option>
-              <option value="light" {@if servMgr.preferredTheme == "light"} selected {@end}>{#Light}</option>
-              <option value="dark" {@if servMgr.preferredTheme == "dark"} selected {@end}>{#Dark}</option>
+              <option value="system" {@if servMgr.preferredTheme == "system"}selected{@end}>
+                &#x1f4bb; <!-- laptop --> {#System}
+              </option>
+              <option value="light" {@if servMgr.preferredTheme == "light"}selected{@end}>
+                &#x2600;&#xfe0f; <!-- sun --> {#Light}
+              </option>
+              <option value="dark" {@if servMgr.preferredTheme == "dark"}selected{@end}>
+                &#x1f303; <!-- night with stars --> {#Dark}
+              </option>
             </select>
           </td>
         </tr>

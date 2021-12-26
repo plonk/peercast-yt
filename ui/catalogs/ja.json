@@ -252,6 +252,11 @@
     "Heisei"                  : "平成",
     "Event YP"                : "イベントYP",
 
+    "Theme"                   : "テーマ",
+    "System"                  : "システム",
+    "Light"                   : "明",
+    "Dark"                    : "暗",
+
     // rtmp.html
     "Start"                   : "開始",
     "Process ID"              : "プロセスID",
