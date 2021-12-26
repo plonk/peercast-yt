@@ -26,6 +26,9 @@ static string MIMEType(const string& path)
     }else if (contains(path, ".js"))
     {
         return MIME_JS;
+    }else if (contains(path, ".svg"))
+    {
+        return "image/svg+xml";
     }else
     {
         return "application/octet-stream";
