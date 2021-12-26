@@ -49,9 +49,10 @@
       {@foreach chanMgr.channels}
       <tr>
         <TD width="1" align="left">
-          <a href="play.html?id={$this.id}">
-            <img src="/assets/images/play.png" border="0">
-          </a>
+          <form action="play.html">
+            <input type="hidden" name="id" value="{$this.id}">
+            <input type="submit" value="Play" style="color:#f00; font-weight:bold">
+          </form>
         </TD>
         <TD align="left">
           <div class="channel-name">
