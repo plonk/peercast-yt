@@ -53,36 +53,36 @@ input[type=checkbox] {
 }
 
 .navbar {
-    margin-top: 10px; margin-bottom: 15px;
-    border-style: solid;
-    border-width: 0 0 1px 0;
-    border-color: #aaa;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    background-color: #eee;
+    padding: 3px;
 }
 
 .navbar > a {
-    display: table;
+    margin: 2px;
     width: calc(7em + calc( 2 * 10px ));
     font-size: 9pt;
     color: black;
-    background-color: #eee;
-    height: 2em;
-    border: 1px solid #aaa;
-    border-bottom: 0;
-    border-radius: 10px 10px 0 0;
+    border-radius: 5px;
     text-align: left;
     vertical-align: middle;
-    padding: 3px 10px 3px 10px;
+    padding: 7px 10px;
 }
 
 .navbar > a:hover {
     color: black;
-    background-color: #fff;
+    background-color: #ddd;
     text-decoration: none;
 }
 
 .navbar > a > span {
-    display: table-cell;
     vertical-align: middle;
+}
+
+.navbar > a.active-tab {
+    background-color: #fff;
+    box-shadow: 0 0 3px rgba(0,0,0,0.3);
 }
 
 td {
