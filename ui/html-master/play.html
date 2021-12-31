@@ -4,6 +4,7 @@
     <title>{$channel.name} - {#PeerCast on} {^SERVER_NAME}</title>
     <link rel="stylesheet" href="/assets/css/peercast.css">
     <meta charset="utf-8">
+    {^BASIC_DARK_THEME_STYLE_TAG}
     <style>
       body { margin: 0; }
       .toolbar {
@@ -106,7 +107,7 @@
 	  }
       }
 
-      @media (prefers-color-scheme: dark) {
+      {^DARK_THEME_STYLES_BEGIN}
           .toolbar {
 	      background-color: #222;
           }
@@ -118,7 +119,7 @@
           #bbs-view-container {
 	      background-color: #222;
           }
-      }
+      {^DARK_THEME_STYLES_END}
     </style>
     <script src="/assets/js/jquery-3.2.1.min.js"></script>
     <script>
