@@ -107,6 +107,16 @@
 	  }
       }
 
+      @keyframes highlight {
+          from { background-color: #ff9 }
+          to { background-color: transparent }
+      }
+
+      .highlight {
+          animation-name: highlight;
+          animation-duration: 1s;
+      }
+
       {^DARK_THEME_STYLES_BEGIN}
           .toolbar {
 	      background-color: #222;
@@ -118,6 +128,10 @@
 
           #bbs-view-container {
 	      background-color: #222;
+          }
+
+          @keyframes highlight {
+              from { background-color: #553 }
           }
       {^DARK_THEME_STYLES_END}
     </style>
