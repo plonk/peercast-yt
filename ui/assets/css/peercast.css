@@ -243,3 +243,5 @@ input[readonly="readonly"] {
     color-scheme: light dark;
 }
 
+img[alt=Chat] { filter: invert(1) }
+img[alt=Stats] { filter: invert(1) }
