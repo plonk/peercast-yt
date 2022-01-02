@@ -6,6 +6,10 @@
   <script src="js/httppush.js"></script>
   <script src="js/wmhttp.js"></script>
   <script>SERVER = "{$servMgr.serverIP}:{$servMgr.serverPort}";</script>
+  <style>
+    .table-panel { min-width: 320px }
+    input[type=text], input:not([type]), input[type=url] { width: 100% }
+  </style>
 {^end}
 
 <DIV style="margin-left: auto; margin-right: auto; text-align: left; display: inline-block; margin-bottom: 1em;">
@@ -26,22 +30,22 @@
         <TD colSpan=2><B>{#External Source}</B></TD></TR>
       <TR align=left>
         <TD>{#URL (Required)}</TD>
-        <TD><INPUT size=40 name=url></TD></TR>
+        <TD><INPUT name=url></TD></TR>
       <TR align=left>
         <TD>{#Name}</TD>
-        <TD><INPUT size=40 name=name></TD></TR>
+        <TD><INPUT name=name></TD></TR>
       <TR align=left>
         <TD>{#Genre}</TD>
-        <TD><INPUT size=40 name=genre></TD></TR>
+        <TD><INPUT name=genre></TD></TR>
       <TR align=left>
         <TD>{#Description}</TD>
-        <TD><INPUT size=40 name=desc></TD></TR>
+        <TD><INPUT name=desc></TD></TR>
       <TR align=left>
         <TD>{#Contact}</TD>
-        <TD><INPUT size=40 name=contact type="url"></TD></TR>
+        <TD><INPUT name=contact type="url"></TD></TR>
       <TR align=left>
         <TD>{#Bitrate (kb/s)}</TD>
-        <TD><INPUT size=40 name=bitrate></TD></TR>
+        <TD><INPUT name=bitrate></TD></TR>
       <TR align=left>
         <TD>{#Type}</TD>
         <TD>
@@ -84,16 +88,16 @@
       <TD colSpan=2><B>{#HTTP Push Stream}</B></TD></TR>
     <TR align=left>
       <TD>{#Name}</TD>
-      <TD><INPUT size=40 id=name></TD></TR>
+      <TD><INPUT id=name></TD></TR>
     <TR align=left>
       <TD>{#Genre}</TD>
-      <TD><INPUT size=40 id=genre></TD></TR>
+      <TD><INPUT id=genre></TD></TR>
     <TR align=left>
       <TD>{#Description}</TD>
-      <TD><INPUT size=40 id=desc></TD></TR>
+      <TD><INPUT id=desc></TD></TR>
     <TR align=left>
       <TD>{#Contact}</TD>
-      <TD><INPUT size=40 id=url type="url"></TD></TR>
+      <TD><INPUT id=url type="url"></TD></TR>
     <TR align=left>
       <TD>{#Type}</TD>
       <TD>
@@ -141,22 +145,22 @@
       <TD colSpan=2><B>{#Windows Media HTTP Push Stream}</B></TD></TR>
     <TR align=left>
       <TD>{#Name}</TD>
-      <TD><INPUT size=40 id=wm_name></TD></TR>
+      <TD><INPUT id=wm_name></TD></TR>
     <TR align=left>
       <TD>{#Genre}</TD>
-      <TD><INPUT size=40 id=wm_genre></TD></TR>
+      <TD><INPUT id=wm_genre></TD></TR>
     <TR align=left>
       <TD>{#Description}</TD>
-      <TD><INPUT size=40 id=wm_desc></TD></TR>
+      <TD><INPUT id=wm_desc></TD></TR>
     <TR align=left>
       <TD>{#Contact}</TD>
-      <TD><INPUT size=40 id=wm_url type="url"></TD>
+      <TD><INPUT id=wm_url type="url"></TD>
     </TR>
     <TR align=middle>
       <TD colSpan=2><B>{#Encoder Settings}</B></TD></TR>
     <TR align=left>
       <TD>{#Server Name}</TD>
-      <TD><INPUT size=40 id=wm_output_server_name type="text"></TD>
+      <TD><INPUT id=wm_output_server_name type="text"></TD>
     </TR>
     <TR align=left>
       <TD>{#Publishing Point}</TD>
