@@ -8,6 +8,11 @@
         unmuteButton.style.visibility = "hidden";
         videoElement.muted = false;
     });
+    videoElement.addEventListener('volumechange', function(){
+        // ビデオコントロールでミュート解除された時にミュート解除ボタンを隠す。
+        if (!videoElement.muted)
+            unmuteButton.style.visibility = 'hidden';
+    });
   </script>
 {^end}
 
