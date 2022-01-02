@@ -250,6 +250,11 @@ async function mainAsync(url) {
     }
 }
 
+function handleSubmit() {
+    var value = $('#message-input').prop('value');
+    postMessage(value);
+}
+
 $(function(){
     switchChatVisibility();
 
@@ -259,9 +264,12 @@ $(function(){
     });
 
     // 投稿ボタンが押された。
-    $('#post-button').on('click',function(){
-        var value = $('#message-input').prop('value');
-        postMessage(value);
+    $('#post-button').on('click', handleSubmit);
+    $('#message-input').on('keydown',function(ev){
+        if (ev.keyCode == 13 && ev.shiftKey) {
+            handleSubmit();
+            ev.preventDefault();
+        }
     });
 
     mainAsync(CONTACT_URL);
