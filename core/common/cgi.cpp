@@ -1,5 +1,6 @@
 #include "cgi.h"
 #include "str.h"
+#include "regexp.h"
 
 namespace cgi {
 
@@ -119,8 +120,8 @@ void Query::add(const std::string& key, const std::string& value)
     m_dict[key].push_back(value);
 }
 
-static const char* daysOfWeek[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
-static const char* monthNames[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Nov", "Oct", "Dec" };
+static const char* daysOfWeek[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", nullptr };
+static const char* monthNames[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", nullptr };
 
 std::string rfc1123Time(time_t t)
 {
@@ -141,6 +142,75 @@ std::string rfc1123Time(time_t t)
 #endif
 
     return buf;
+}
+
+static Regexp rfc1123("^([A-z]{3}), (\\d+) ([A-z]{3}) (\\d+) (\\d+):(\\d+):(\\d+) (GMT|UTC)$");
+static Regexp rfc1036("^([A-z]+)day, (\\d+)-([A-z]{3})-(\\d{2}) (\\d+):(\\d+):(\\d+) (GMT|UTC)$");
+static Regexp asctime("^([A-z]{3}) ([A-z]{3}) +(\\d+) (\\d+):(\\d+):(\\d+) (\\d+)$");
+
+struct tm parseHttpDate_lasttm = {};
+
+#ifdef WIN32
+#define timegm _mkgmtime
+#endif
+
+time_t parseHttpDate(const std::string& str)
+{
+    int sec = -1, min = -1, hour = -1, mday = -1, mon = -1, year = -1, wday = -1;
+    std::vector<std::string> match;
+
+    if ((match = rfc1123.exec(str)).size())
+    {
+        // Sun, 06 Nov 1994 08:49:37 GMT
+        for (int i = 0; daysOfWeek[i]; i++)
+            if (daysOfWeek[i] == match[1])
+                wday = i;
+        mday = std::stoi(match[2]);
+        for (int i = 0; monthNames[i]; i++)
+            if (monthNames[i] == match[3])
+                mon = i;
+        year = std::stoi(match[4]) - 1900;
+        hour = std::stoi(match[5]);
+        min = std::stoi(match[6]);
+        sec = std::stoi(match[7]);
+    }else if ((match = rfc1036.exec(str)).size())
+    {
+        // Sunday, 06-Nov-94 08:49:37 GMT
+        for (int i = 0; daysOfWeek[i]; i++)
+            if (daysOfWeek[i] == match[1])
+                wday = i;
+        mday = std::stoi(match[2]);
+        for (int i = 0; monthNames[i]; i++)
+            if (monthNames[i] == match[3])
+                mon = i;
+        year = std::stoi(match[4]);
+        hour = std::stoi(match[5]);
+        min = std::stoi(match[6]);
+        sec = std::stoi(match[7]);
+    }else if ((match = asctime.exec(str)).size())
+    {
+        // Sun Nov  6 08:49:37 1994
+        for (int i = 0; daysOfWeek[i]; i++)
+            if (daysOfWeek[i] == match[1])
+                wday = i;
+        for (int i = 0; monthNames[i]; i++)
+            if (monthNames[i] == match[2])
+                mon = i;
+        mday = std::stoi(match[3]);
+        hour = std::stoi(match[4]);
+        min = std::stoi(match[5]);
+        sec = std::stoi(match[6]);
+        year = std::stoi(match[7]) - 1900;
+    }
+
+    if (sec == -1 || min == -1 || hour == -1 || mday == -1 || mon == -1 || year == -1 || wday == -1)
+        return -1;
+    else
+    {
+        struct tm tm = { sec, min, hour, mday, mon, year, wday, };
+        parseHttpDate_lasttm = tm;
+        return timegm(&tm);
+    }
 }
 
 static const std::map<std::string,uint32_t> entities = {

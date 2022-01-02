@@ -8,10 +8,38 @@
         unmuteButton.style.visibility = "hidden";
         videoElement.muted = false;
     });
+    videoElement.addEventListener('volumechange', function(){
+        // ビデオコントロールでミュート解除された時にミュート解除ボタンを隠す。
+        if (!videoElement.muted)
+            unmuteButton.style.visibility = 'hidden';
+    });
   </script>
 {^end}
 
-{@if page.channel.type == "FLV"}
+{^define SETUP_flvPlayer}
+  flvPlayer.on('error', (errorType, errorCode, details) => {
+      if (errorType == 'NetworkError' && errorCode == 'HttpStatusCodeInvalid') {
+          let msg = `ストリームURLが取得できませんでした。\n` +
+                    `ページをリロードしますか？\n` +
+                    `\n` + 
+                    `${details.code} ${details.msg}`;
+          if (window.confirm(msg)) {
+              window.location.reload();
+          }
+      } else {
+          console.error(errorType, errorCode, details);
+      }
+  });
+  flvPlayer.attachMediaElement(videoElement);
+  flvPlayer.load();
+  flvPlayer.play().catch(error => {
+    videoElement.muted = true;
+    unmuteButton.style.visibility = "visible";
+    flvPlayer.play();
+  });
+{^end}
+
+{@if channel.type == "FLV"}
   <div class="message" style="text-align: center">
     <script src="/assets/js/flv.min.js"></script>
     <div style="position: relative">
@@ -25,23 +53,17 @@
        var flvPlayer = flvjs.createPlayer({
          type: 'flv',
          isLive: true,
-         url: '/stream/{$page.channel.id}.flv'
+         url: '/stream/{$channel.id}.flv'
        });
-       flvPlayer.attachMediaElement(videoElement);
-       flvPlayer.load();
-       flvPlayer.play().catch(error => {
-         videoElement.muted = true;
-         unmuteButton.style.visibility = "visible";
-         flvPlayer.play();
-       });
+       {^SETUP_flvPlayer}
      }
     </script>
   </div>
-{@elsif page.channel.type == "WMV"}
+{@elsif channel.type == "WMV"}
   {@if servMgr.transcodingEnabled}
     <div class="message" style="text-align: center">
       <script src="/assets/js/flv.min.js"></script>
-      <div style="postion: relative">
+      <div style="position: relative">
         <video id="videoElement" controls autoplay>
           {#Your browser doesn't seem to support playback of FLV videos.} {#Try the playlist link below.}
         </video>
@@ -53,15 +75,9 @@
             var flvPlayer = flvjs.createPlayer({
                 type: 'flv',
                 isLive: true,
-                url: '/cgi-bin/flv.cgi?id={$page.channel.id}&type={$page.channel.type}&bitrate={$page.channel.bitrate}&preset={$servMgr.preset}&audio_codec={$servMgr.audioCodec}'
+                url: '/cgi-bin/flv.cgi?id={$channel.id}&type={$channel.type}&bitrate={$channel.bitrate}&preset={$servMgr.preset}&audio_codec={$servMgr.audioCodec}'
             });
-            flvPlayer.attachMediaElement(videoElement);
-            flvPlayer.load();
-            flvPlayer.play().catch(error => {
-                videoElement.muted = true;
-                unmuteButton.style.visibility = "visible";
-                flvPlayer.play();
-            });
+            {^SETUP_flvPlayer}
         }
       </script>
     </div>
@@ -75,7 +91,7 @@
         standby="Loading MicrosoftR WindowsR Media Player components..."
         type="application/x-oleobject">
 
-        <param name="FileName" value="/pls/{$page.channel.id}.asx?auth={$page.channel.authToken}" />
+        <param name="FileName" value="/pls/{$channel.id}.asx?auth={$channel.authToken}" />
         <!-- 自動再生の有無 -->
         <param name="AutoStart" value="true" />
         <!-- コントロール表示の有無 -->
@@ -85,15 +101,15 @@
       </object>
     </div>
   {@end}
-{@elsif page.channel.type == "MP3"}
+{@elsif channel.type == "MP3"}
   <div class="message" style="text-align: center">
     <audio controls autoplay style="min-width: 640px">
-      <source src="/stream/{$page.channel.id}.mp3?auth={$page.channel.authToken}" type="audio/mpeg">
+      <source src="/stream/{$channel.id}.mp3?auth={$channel.authToken}" type="audio/mpeg">
       {#Your browser doesn't seem to support playback of MP3 audio.} {#Try the playlist link below.}
       <!-- Your browser does not support the audio element. -->
     </audio>
   </div>
-{@elsif page.channel.type == "MKV"}
+{@elsif channel.type == "MKV"}
   {@if servMgr.transcodingEnabled}
     <div class="message" style="text-align: center">
       <script src="/assets/js/flv.min.js"></script>
@@ -109,15 +125,9 @@
             var flvPlayer = flvjs.createPlayer({
                 type: 'flv',
                 isLive: true,
-                url: '/cgi-bin/flv.cgi?id={$page.channel.id}&type={$page.channel.type}&bitrate={$page.channel.bitrate}&preset={$servMgr.preset}&audio_codec={$servMgr.audioCodec}'
+                url: '/cgi-bin/flv.cgi?id={$channel.id}&type={$channel.type}&bitrate={$channel.bitrate}&preset={$servMgr.preset}&audio_codec={$servMgr.audioCodec}'
             });
-            flvPlayer.attachMediaElement(videoElement);
-            flvPlayer.load();
-            flvPlayer.play().catch(error => {
-                videoElement.muted = true;
-                unmuteButton.style.visibility = "visible";
-                flvPlayer.play();
-            });
+            {^SETUP_flvPlayer}
         }
       </script>
     </div>
@@ -125,7 +135,7 @@
     <div class="message" style="text-align: center">
       <div style="position: relative">
         <video id="videoElement" controls autoplay>
-          <source src="/stream/{$page.channel.id}.mkv?auth={$page.channel.authToken}" type="video/webm">
+          <source src="/stream/{$channel.id}.mkv?auth={$channel.authToken}" type="video/webm">
             {#Your browser doesn't seem to support playback of MKV videos.} {#Try the playlist link below.}
         </video>
       	{^UNMUTE_BUTTON}
@@ -133,21 +143,21 @@
       <div>{#Should the playback fail, try the playlist link below.}</div>
     </div>
   {@end}
-{@elsif page.channel.type == "WEBM"}
+{@elsif channel.type == "WEBM"}
   <div class="message" style="text-align: center">
     <div style="position: relative">
       <video id="videoElement" controls autoplay>
-        <source src="/stream/{$page.channel.id}.webm?auth={$page.channel.authToken}" type="video/webm">
+        <source src="/stream/{$channel.id}.webm?auth={$channel.authToken}" type="video/webm">
           {#Your browser doesn't seem to support playback of WebM videos.} {#Try the playlist link below.}
       </video>
       {^UNMUTE_BUTTON}
     </div>
   </div>
-{@elsif page.channel.type == "MP4"}
+{@elsif channel.type == "MP4"}
   <div class="message" style="text-align: center">
     <div style="position: relative">
       <video id="videoElement" controls autoplay>
-        <source src="/stream/{$page.channel.id}.mp4?auth={$page.channel.authToken}" type="video/mp4">
+        <source src="/stream/{$channel.id}.mp4?auth={$channel.authToken}" type="video/mp4">
           {#Your browser doesn't seem to support playback of WebM videos.} {#Try the playlist link below.}
       </video>
       {^UNMUTE_BUTTON}
@@ -155,7 +165,7 @@
   </div>
 {@else}
   <div class="message" style="margin: 5em auto; text-align: center">
-    {#Playback of this type of stream is not supported.} ({$page.channel.type})
+    {#Playback of this type of stream is not supported.} ({$channel.type})
     {#Try the playlist link below.}
   </div>
 {@end}

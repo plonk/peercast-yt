@@ -61,7 +61,9 @@ void HTML::writeOK(const char *content, const std::map<std::string,std::string>&
 }
 
 // --------------------------------------
-void HTML::writeTemplate(const char *fileName, const char *args, HTTPRequestScope& reqScope)
+#include <map>
+
+void HTML::writeTemplate(const char *fileName, const char *args, const std::vector<Template::Scope*>& scopes)
 {
     FileStream file;
     try
@@ -71,16 +73,26 @@ void HTML::writeTemplate(const char *fileName, const char *args, HTTPRequestScop
         file.writeTo(mem, file.length());
         mem.rewind();
 
-        WriteBufferedStream bufferedOut(out);
+        StringStream bufferedOut;
         Template temp(args);
-        temp.prependScope(reqScope);
+        RootObjectScope globals;
+        temp.prependScope(globals);
+        for (auto scope : scopes)
+            temp.prependScope(*scope);
+
         if (args)
         {
             cgi::Query query(args);
             temp.selectedFragment = query.get("fragment");
         }
-        temp.readTemplate(mem, &bufferedOut, 0);
+        temp.readTemplate(mem, &bufferedOut);
+        out->writeString(bufferedOut.str());
     }catch (StreamException &e)
+    {
+        out->writeString(e.msg);
+        out->writeString(" : ");
+        out->writeString(fileName);
+    }catch (GeneralException &e)
     {
         out->writeString(e.msg);
         out->writeString(" : ");
@@ -115,7 +127,12 @@ void HTML::writeRawFile(const char *fileName, const char *mimeType)
         time_t t = mtime(fileName);
 
         if (t != -1)
+        {
             additionalHeaders["Last-Modified"] = cgi::rfc1123Time(t);
+        }else
+        {
+            LOG_ERROR("Failed to get mtime of %s", fileName);
+        }
 
         writeOK(mimeType, additionalHeaders);
         file.writeTo(*out, file.length());

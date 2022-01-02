@@ -66,7 +66,7 @@ public:
         MAX
     };
 
-    bool    writeVariable(class Stream &, const class String &) override;
+    amf0::Value    getState() override;
 
     void    clearRange(STAT s, STAT e)
     {

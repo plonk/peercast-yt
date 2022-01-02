@@ -1,9 +1,10 @@
 <!doctype html>
 <html>
   <head>
-    <title>{$page.channel.name} - {#PeerCast on} {^SERVER_NAME}</title>
-    <link rel="stylesheet" href="peercast.css">
+    <title>{$channel.name} - {#PeerCast on} {^SERVER_NAME}</title>
+    <link rel="stylesheet" href="/assets/css/peercast.css">
     <meta charset="utf-8">
+    {^BASIC_DARK_THEME_STYLE_TAG}
     <style>
       body { margin: 0; }
       .toolbar {
@@ -96,6 +97,8 @@
 	  }
           #bbs-view-container {
               flex: 1 1 120px;
+              border-left: none;
+              border-top: solid 1px gray;
           }
           .message {
               flex-grow: 0;
@@ -105,10 +108,38 @@
 	      padding-top: 0.5em;
 	  }
       }
+
+      @keyframes highlight {
+          from { background-color: #ff9 }
+          to { background-color: transparent }
+      }
+
+      .highlight {
+          animation-name: highlight;
+          animation-duration: 1s;
+      }
+
+      {^DARK_THEME_STYLES_BEGIN}
+          .toolbar {
+	      background-color: #222;
+          }
+
+          .message {
+              color: white;
+          }
+
+          #bbs-view-container {
+	      background-color: #222;
+          }
+
+          @keyframes highlight {
+              from { background-color: #553 }
+          }
+      {^DARK_THEME_STYLES_END}
     </style>
     <script src="/assets/js/jquery-3.2.1.min.js"></script>
     <script>
-     var CONTACT_URL = "{\page.channel.contactURL}";
+     var CONTACT_URL = "{\channel.contactURL}";
     </script>
     {@if servMgr.chat}
     <script src="bbs.js"></script>
@@ -118,28 +149,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon">
   </head>
-  <body class="normal" style="background-color: #222">
+  <body style="background-color: #222">
 
     <div class="vstack">
       <div class="toolbar">
 	<div>
 	  <a href="channels.html">&#x2b05; {#Back}</a> <span style="color: #aaa">|</span>
-	  <b>{$page.channel.name}</b>
+	  <b>{$channel.name}</b>
 	  <a target="_blank"
-	     href="/pls/{$page.channel.id}{$page.channel.plsExt}?auth={$page.channel.authToken}">
+	     href="/pls/{$channel.id}{$channel.plsExt}?auth={$channel.authToken}">
 	    {#Playlist}
 	  </a>
 	  -
-	  {@if page.channel.contactURL}
+	  {@if channel.contactURL}
 	  <a target="_blank"
-	     href="{$page.channel.contactURL}">
+	     href="{$channel.contactURL}">
 	    {#Contact}
 	  </a>
 	  {@else}
 	  {#Contact}
 	  {@end}
 	  -
-	  <a href="/admin?cmd=bump&amp;id={$page.channel.id}">{#Bump}</a>
+	  <a href="/admin?cmd=bump&amp;id={$channel.id}">{#Bump}</a>
 	</div>
 
         {@if servMgr.chat}
@@ -157,7 +188,7 @@
           <div id="bbs-view"></div>
           <div class="post-form" style="text-align: right">
             <input type="text" id="message-input" placeholder="{#Send a message}" style="padding: 5px; border-radius: 5px;">
-            <button id="post-button" style="margin-top: 5px; color: white; font-weight: bold; background-color: #348; border-radius: 5px">{#Chat}</button>
+            <button id="post-button" style="margin-top: 5px; color: white; font-weight: bold; background-color: #348; border-radius: 5px">{#Chat} <span class="text-muted small">Shift + Enter</span></button>
           </div>
         </div>
         {@end}

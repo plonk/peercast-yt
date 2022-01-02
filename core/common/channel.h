@@ -224,7 +224,7 @@ public:
     void         broadcastTrackerUpdate(const GnuID &, bool = false);
     bool         sendPacketUp(ChanPacket &, const GnuID &, const GnuID &, const GnuID &);
 
-    bool         writeVariable(Stream &, const String &) override;
+    amf0::Value  getState() override;
     bool         acceptGIV(std::shared_ptr<ClientSocket>);
     void         updateInfo(const ChanInfo &);
     int          readStream(Stream &, std::shared_ptr<ChannelStream>);

@@ -62,29 +62,37 @@ TEST_F(UptestServiceRegistryFixture, isIndexValid)
     ASSERT_FALSE(r.isIndexValid(1));
 }
 
-TEST_F(UptestServiceRegistryFixture, writeVariable)
+TEST_F(UptestServiceRegistryFixture, getState)
 {
-    ASSERT_EQ("0", r.getVariable("numURLs"));
+    auto state = r.getState();
+
+    ASSERT_EQ(state.object().count("providers"), 1);
+    ASSERT_EQ(state.object().at("providers").strictArray().size(), 0);
 }
 
-TEST_F(UptestServiceRegistryFixture, writeVariable_loop)
+TEST_F(UptestServiceRegistryFixture, getState2)
 {
     r.addURL("http://example.com/1");
 
-    ASSERT_EQ("http://example.com/1", r.getVariable("url", 0));
-    ASSERT_EQ("Untried", r.getVariable("status", 0));
+    auto state = r.getState();
+    ASSERT_EQ(state.at("providers").size(), 1);
 
-    ASSERT_EQ("", r.getVariable("speed", 0));
-    ASSERT_EQ("", r.getVariable("over", 0));
-    ASSERT_EQ("", r.getVariable("checkable", 0));
+    ASSERT_EQ("http://example.com/1", state.at("providers").at(0).at("url").string());
+    ASSERT_EQ("Untried", state.at("providers").at(0).at("status").string());
 
-    r.m_providers[0].m_info.speed = "100";
-    r.m_providers[0].m_info.over = "0";
-    r.m_providers[0].m_info.checkable = "1";
+    ASSERT_EQ("", state.at("providers").at(0).at("speed").string());
+    ASSERT_EQ("", state.at("providers").at(0).at("over").string());
+    ASSERT_EQ("", state.at("providers").at(0).at("checkable").string());
 
-    ASSERT_EQ("100", r.getVariable("speed", 0));
-    ASSERT_EQ("0", r.getVariable("over", 0));
-    ASSERT_EQ("1", r.getVariable("checkable", 0));
+    r.m_providers.at(0).m_info.speed = "100";
+    r.m_providers.at(0).m_info.over = "0";
+    r.m_providers.at(0).m_info.checkable = "1";
+
+    state = r.getState();
+
+    ASSERT_EQ("100", state.at("providers").at(0).at("speed").string());
+    ASSERT_EQ("0", state.at("providers").at(0).at("over").string());
+    ASSERT_EQ("1", state.at("providers").at(0).at("checkable").string());
 }
 
 TEST_F(UptestServiceRegistryFixture, deleteByIndex)

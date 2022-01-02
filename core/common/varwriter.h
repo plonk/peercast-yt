@@ -2,6 +2,7 @@
 #define _VARWRITER_H
 
 #include <string>
+#include "amf0.h"
 
 class String;
 class Stream;
@@ -9,19 +10,9 @@ class Stream;
 class VariableWriter
 {
 public:
-    virtual bool writeVariable(Stream&, const String&)
-    {
-        return false;
-    }
-
-    // for collection variables
-    virtual bool writeVariable(Stream&, const String&, int)
-    {
-        return false;
-    }
-
-    std::string getVariable(const std::string& name);
-    std::string getVariable(const std::string& name, int loop);
+    virtual amf0::Value getState();
+    virtual std::string getVariable(const std::string&, int = 0);
+    virtual bool writeVariable(Stream&, const String&, int = 0);
 
     virtual ~VariableWriter() {};
 };

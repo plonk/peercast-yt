@@ -3,19 +3,19 @@
 {#_View Log_navbar} - {#PeerCast on} {^SERVER_NAME}
 {^end}
 
-<div align="left" class="normal">
+<div align="left">
   <A href="/admin?cmd=clearlog">{#Clear log}</A><BR>
   <A href="#bottom">{#View tail}</A>
   <a name="top"></a>
   <br>
   <br>
   <div class="hscroll">
-    <div class="normal-small" style="white-space: nowrap">{!sys.log.dumpHTML}</div>
+    <div class="tiny" style="white-space: nowrap">{!sys.log.dumpHTML}</div>
   </div>
   <A href="#top"><BR>
-    <span class="normal">{#View top}</span>
+    <span>{#View top}</span>
   </A>
-  <span class="normal">
+  <span>
     <A name=bottom></A>
   </span>
 </div>

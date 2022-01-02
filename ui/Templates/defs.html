@@ -12,3 +12,94 @@
     {$servMgr.serverIP}:{$servMgr.serverPort}
   {@end}
 {^end}
+
+{^define DARK_THEME_STYLES_BEGIN}
+  {@if servMgr.preferredTheme == "dark"}
+    @media screen, (not screen) {
+  {@elsif servMgr.preferredTheme == "system"}
+    @media (prefers-color-scheme: dark) {
+  {@elsif servMgr.preferredTheme == "light"}
+    @media screen and (not screen) {
+  {@end}
+  /* dark theme styles begin */
+{^end}
+
+{^define DARK_THEME_STYLES_END}
+  /* dark theme styles end */
+  }
+{^end}
+
+{^define BASIC_DARK_THEME_STYLE_TAG}
+<style>
+  {^DARK_THEME_STYLES_BEGIN}
+  body { color: #fff; background-color: #222 }
+
+  table.table-panel tbody tr:nth-child(odd) {
+      background-color: #333;
+  }
+
+  table.table-panel tbody tr:nth-child(even) {
+      background-color: #444;
+  }
+
+  /* パネルの上部のスパンする見出し行。他の行よりも背景が濃い。 */
+  table.table-panel tbody tr:nth-child(1) {
+      background-color: #555;
+  }
+
+  /* 通常、上の指定で十分。 */
+  table.table-panel tbody tr.heading-row {
+      background-color: #555;
+  }
+  a[href] {
+      color: #92b2ff;
+  }
+
+  input { background-color: #222; color: #fff; }
+  input[type=submit], button { background-color: #555; color: #fff; }
+  input[type=text], input:not([type]), input[type=url], input[type=password] { padding: 5px }
+  input[readonly="readonly"] { background-color: #222; color: #888 }
+  select { background-color: #222; color: #fff; padding: 5px }
+  input { accent-color: #92b2ff }
+  button:disabled { color: #bbb }
+
+  textarea { background-color: #222; color: #fff; }
+
+  .text-danger {
+      color: #d22;
+  }
+
+  .text-muted {
+      color: #bbb;
+  }
+
+  ::-webkit-scrollbar {
+      width: 15px;
+  }
+  ::-webkit-scrollbar-track {
+      background: #333; 
+  }
+  ::-webkit-scrollbar-thumb {
+      background: #577bc3; 
+  }
+  ::-webkit-scrollbar-thumb:hover {
+      background: #92b2ff; 
+  }
+
+  .alert-warning { background-color: #ba0 }
+  .alert-warning::after { color: #000 }
+
+  .navbar { background-color: #333 }
+  .navbar > a { color: #fff }
+  .navbar > a:hover { color: #fff; background-color: #333 }
+  .navbar > a.active-tab {
+    background-color: #444;
+  }
+
+  img[alt=Chat] { filter: invert(1) }
+  img[alt=Stats] { filter: invert(1) }
+
+  {^DARK_THEME_STYLES_END}
+
+</style>
+{^end}

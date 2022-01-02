@@ -41,6 +41,8 @@ public:
         data         = NULL;
     }
 
+    ~ThreadInfo();
+
     void    shutdown() noexcept;
 
     bool active() noexcept { return m_active.load(); }

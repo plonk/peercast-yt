@@ -51,6 +51,7 @@ ServMgr::ServMgr()
             {"forceFirewalled", "ファイアーウォール オンであるかの様に振る舞う。", false},
             {"startPlayingFromKeyFrame", "DIRECT接続でキーフレームまで継続パケットをスキップする。", true},
         })
+    , preferredTheme("system")
 {
     authType = AUTH_COOKIE;
 
@@ -1022,6 +1023,7 @@ ini::Document ServMgr::getSettings()
             {"preset", this->preset},
             {"audioCodec", this->audioCodec},
             {"wmvProtocol", this->wmvProtocol},
+            {"preferredTheme", this->preferredTheme},
         }
     });
 
@@ -1321,6 +1323,8 @@ void ServMgr::loadSettings(const char *fn)
                 this->audioCodec = iniFile.getStrValue();
             else if (iniFile.isName("wmvProtocol"))
                 this->wmvProtocol = iniFile.getStrValue();
+            else if (iniFile.isName("preferredTheme"))
+                this->preferredTheme = iniFile.getStrValue();
 
             // debug
             else if (iniFile.isName("logLevel"))
@@ -2034,213 +2038,106 @@ ServHost::TYPE ServHost::getTypeFromStr(const char *s)
 }
 
 // --------------------------------------------------
-bool ServMgr::writeVariable(Stream &out, const String &var)
+amf0::Value ServMgr::getState()
 {
-    using namespace std;
+    using std::to_string;
 
-    string buf;
+    std::vector<amf0::Value> filterArray;
+    for (int i = 0; i < this->numFilters; i++)
+        filterArray.push_back(this->filters[i].getState());
 
-    if (var == "version")
-        buf = PCX_VERSTRING;
-    else if (var == "buildDateTime")
-        buf = __DATE__ " " __TIME__;
-    else if (var == "uptime")
-    {
-        String str;
-        str.setFromStopwatch(getUptime());
-        buf = str.c_str();
-    }else if (var == "numRelays")
-        buf = to_string(numStreams(Servent::T_RELAY, true));
-    else if (var == "numDirect")
-        buf = to_string(numStreams(Servent::T_DIRECT, true));
-    else if (var == "totalConnected")
-        buf = to_string(totalConnected());
-    else if (var == "numServHosts")
-        buf = to_string(numHosts(ServHost::T_SERVENT));
-    else if (var == "numServents")
-        buf = to_string(numServents());
-    else if (var == "serverName")
-        buf = serverName.c_str();
-    else if (var == "serverPort")
-        buf = to_string(serverHost.port);
-    else if (var == "serverIP")
-        buf = serverHost.str(false);
-    else if (var == "serverIPv6")
-        buf = serverHostIPv6.str(false);
-    else if (var == "ypAddress")
-        buf = rootHost.c_str();
-    else if (var == "password")
-        buf = password;
-    else if (var == "isFirewalled")
-        buf = getFirewall(4)==FW_ON ? "1" : "0";
-    else if (var == "firewallKnown")
-        buf = getFirewall(4)==FW_UNKNOWN ? "0" : "1";
-    else if (var == "isFirewalledIPv6")
-        buf = getFirewall(6)==FW_ON ? "1" : "0";
-    else if (var == "firewallKnownIPv6")
-        buf = getFirewall(6)==FW_UNKNOWN ? "0" : "1";
-    else if (var == "rootMsg")
-        buf = rootMsg.c_str();
-    else if (var == "isRoot")
-        buf = to_string(isRoot ? 1 : 0);
-    else if (var == "isPrivate")
-        buf = "0";
-    else if (var == "forceYP")
-        buf = "0";
-    else if (var == "refreshHTML")
-        buf = to_string(refreshHTML ? refreshHTML : 0x0fffffff);
-    else if (var == "maxRelays")
-        buf = to_string(maxRelays);
-    else if (var == "maxDirect")
-        buf = to_string(maxDirect);
-    else if (var == "maxBitrateOut")
-        buf = to_string(maxBitrateOut);
-    else if (var == "maxControlsIn")
-        buf = to_string(maxControl);
-    else if (var == "maxServIn")
-        buf = to_string(maxServIn);
-    else if (var == "numFilters")
-        buf = to_string(numFilters+1); // 入力用の空欄を生成する為に+1する。
-    else if (var == "numActive1")
-        buf = to_string(numActiveOnPort(serverHost.port));
-    else if (var == "numCIN")
-        buf = to_string(numConnected(Servent::T_CIN));
-    else if (var == "numCOUT")
-        buf = to_string(numConnected(Servent::T_COUT));
-    else if (var == "numIncoming")
-        buf = to_string(numActive(Servent::T_INCOMING));
-    else if (var == "disabled")
-        buf = to_string(isDisabled);
-    else if (var == "serverPort1")
-        buf = to_string(serverHost.port);
-    else if (var == "serverLocalIP")
-    {
-        Host lh(sys->getInterfaceIPv4Address(), 0);
-        buf = lh.str(false);
-    }else if (var == "upgradeURL")
-        buf = this->downloadURL;
-    else if (var.startsWith("allow."))
-    {
-        if (var == "allow.HTML1")
-            buf = (allowServer1 & Servent::ALLOW_HTML) ? "1" : "0";
-        else if (var == "allow.broadcasting1")
-            buf = (allowServer1 & Servent::ALLOW_BROADCAST) ? "1" : "0";
-        else if (var == "allow.network1")
-            buf = (allowServer1 & Servent::ALLOW_NETWORK) ? "1" : "0";
-        else if (var == "allow.direct1")
-            buf = (allowServer1 & Servent::ALLOW_DIRECT) ? "1" : "0";
-    }else if (var.startsWith("auth."))
-    {
-        if (var == "auth.useCookies")
-            buf = (authType==AUTH_COOKIE) ? "1" : "0";
-        else if (var == "auth.useHTTP")
-            buf = (authType==AUTH_HTTPBASIC) ? "1" : "0";
-        else if (var == "auth.useSessionCookies")
-            buf = (cookieList.neverExpire==false) ? "1" : "0";
-    }else if (var.startsWith("log."))
-    {
-        if (var == "log.level")
-            buf = std::to_string(logLevel());
-        else
-            return false;
-    }else if (var.startsWith("lang."))
-    {
-        const char* lang = var.c_str() + 5;
+    std::vector<amf0::Value> serventArray;
+    for (auto sv = servents; sv != nullptr; sv = sv->next)
+        serventArray.push_back(sv->getState());
 
-        if (strrchr(htmlPath, '/') &&
-            strcmp(strrchr(htmlPath, '/') + 1, lang) == 0)
-            buf = "1";
-        else
-            buf = "0";
-    }else if (var == "numExternalChannels")
-    {
-        buf = to_string(channelDirectory->numChannels());
-    }else if (var == "numChannelFeedsPlusOne")
-    {
-        buf = to_string(channelDirectory->numFeeds() + 1);
-    }else if (var == "numChannelFeeds")
-    {
-        buf = to_string(channelDirectory->numFeeds());
-    }else if (var.startsWith("channelDirectory."))
-    {
-        return channelDirectory->writeVariable(out, var + strlen("channelDirectory."));
-    }else if (var.startsWith("uptestServiceRegistry."))
-    {
-        return uptestServiceRegistry->writeVariable(out, var + strlen("uptestServiceRegistry."));
-    }else if (var == "publicDirectoryEnabled")
-    {
-        buf = to_string(publicDirectoryEnabled);
-    }else if (var == "transcodingEnabled")
-    {
-        buf = to_string(this->transcodingEnabled);
-    }else if (var == "preset")
-    {
-        buf = this->preset;
-    }else if (var == "audioCodec")
-    {
-        buf = this->audioCodec;
-    }else if (var == "wmvProtocol")
-    {
-        buf = this->wmvProtocol;
-    }else if (var.startsWith("defaultChannelInfo."))
-    {
-        return this->defaultChannelInfo.writeVariable(out, var + strlen("defaultChannelInfo."));
-    }else if (var.startsWith("rtmpServerMonitor."))
-    {
-        return this->rtmpServerMonitor.writeVariable(out, var + strlen("rtmpServerMonitor."));
-    }else if (var == "rtmpPort")
-    {
-        buf = std::to_string(this->rtmpPort);
-    }else if (var == "hasUnsafeFilterSettings")
-    {
-        buf = std::to_string(this->hasUnsafeFilterSettings());
-    }else if (var == "chat")
-    {
-        buf = to_string(this->chat);
-    }else if (var == "randomizeBroadcastingChannelID")
-    {
-        buf = to_string(this->flags.get("randomizeBroadcastingChannelID"));
-    }else if (var.startsWith("flags."))
-    {
-        try {
-            buf = to_string(this->flags.get(var + strlen("flags.")));
-        } catch (std::out_of_range&) {
-            return false;
-        }
-    } else if (var == "installationDirectory")
-    {
-        try {
-            buf = sys->realPath(peercastApp->getPath());
-        } catch (GeneralException& e) {
-            LOG_ERROR("installationDirectory: %s", e.what());
-            buf = "[Error]";
-        }
-    } else if (var == "configurationFile")
-    {
-        buf = peercastApp->getIniFilename();
-    }else if (var == "test")
-    {
-        out.writeUTF8(0x304b);
-        out.writeUTF8(0x304d);
-        out.writeUTF8(0x304f);
-        out.writeUTF8(0x3051);
-        out.writeUTF8(0x3053);
-
-        out.writeUTF8(0x0041);
-        out.writeUTF8(0x0042);
-        out.writeUTF8(0x0043);
-        out.writeUTF8(0x0044);
-
-        out.writeChar('a');
-        out.writeChar('b');
-        out.writeChar('c');
-        out.writeChar('d');
-        return true;
-    }else
-        return false;
-
-    out.writeString(buf);
-    return true;
+    return amf0::Value::object(
+        {
+            {"version", PCX_VERSTRING},
+            {"buildDateTime", __DATE__ " " __TIME__},
+            {"uptime", String().setFromStopwatch(getUptime()).c_str()},
+            {"numRelays", to_string(numStreams(Servent::T_RELAY, true))},
+            {"numDirect", to_string(numStreams(Servent::T_DIRECT, true))},
+            {"totalConnected", to_string(totalConnected())},
+            {"numServHosts", to_string(numHosts(ServHost::T_SERVENT))},
+            {"numServents", to_string(numServents())},
+            {"servents", serventArray},
+            {"serverName", serverName.c_str()},
+            {"serverPort", to_string(serverHost.port)},
+            {"serverIP", serverHost.str(false)},
+            {"serverIPv6", serverHostIPv6.str(false)},
+            {"ypAddress", rootHost.c_str()},
+            {"password", password},
+            {"isFirewalled", getFirewall(4)==FW_ON ? "1" : "0"},
+            {"firewallKnown", getFirewall(4)==FW_UNKNOWN ? "0" : "1"},
+            {"isFirewalledIPv6", getFirewall(6)==FW_ON ? "1" : "0"},
+            {"firewallKnownIPv6", getFirewall(6)==FW_UNKNOWN ? "0" : "1"},
+            {"rootMsg", rootMsg.c_str()},
+            {"isRoot", to_string(isRoot ? 1 : 0)},
+            {"isPrivate", "0"},
+            {"forceYP", "0"},
+            {"refreshHTML", to_string(refreshHTML ? refreshHTML : 0x0fffffff)},
+            {"maxRelays", to_string(maxRelays)},
+            {"maxDirect", to_string(maxDirect)},
+            {"maxBitrateOut", to_string(maxBitrateOut)},
+            {"maxControlsIn", to_string(maxControl)},
+            {"maxServIn", to_string(maxServIn)},
+            {"numFilters", to_string(numFilters+1)},
+            {"filters", filterArray },
+            {"numActive1", to_string(numActiveOnPort(serverHost.port))},
+            {"numCIN", to_string(numConnected(Servent::T_CIN))},
+            {"numCOUT", to_string(numConnected(Servent::T_COUT))},
+            {"numIncoming", to_string(numActive(Servent::T_INCOMING))},
+            {"disabled", to_string(isDisabled)},
+            {"serverPort1", to_string(serverHost.port)},
+            {"serverLocalIP",Host(sys->getInterfaceIPv4Address(), 0).str(false) },
+            {"upgradeURL", this->downloadURL},
+            {"allow", amf0::Value::object(
+                    {
+                        {"HTML1", (allowServer1 & Servent::ALLOW_HTML) ? "1" : "0"},
+                        {"broadcasting1", (allowServer1 & Servent::ALLOW_BROADCAST) ? "1" : "0"},
+                        {"network1", (allowServer1 & Servent::ALLOW_NETWORK) ? "1" : "0"},
+                        {"direct1", (allowServer1 & Servent::ALLOW_DIRECT) ? "1" : "0"},
+                    })},
+            {"auth", amf0::Value::object(
+                    {
+                        {"useCookies", (authType==AUTH_COOKIE) ? "1" : "0"},
+                        {"useHTTP", (authType==AUTH_HTTPBASIC) ? "1" : "0"},
+                        {"useSessionCookies", (cookieList.neverExpire==false) ? "1" : "0"},
+                    })},
+            {"log", amf0::Value::object(
+                    {
+                        {"level", std::to_string(logLevel())}
+                    })},
+            {"lang", this->htmlPath + strlen("html/") },
+            {"numExternalChannels", to_string(channelDirectory->numChannels())},
+            {"numChannelFeedsPlusOne", channelDirectory->numFeeds() + 1},
+            {"numChannelFeeds", channelDirectory->numFeeds()},
+            {"channelDirectory", channelDirectory->getState()},
+            {"uptestServiceRegistry", uptestServiceRegistry->getState()},
+            {"publicDirectoryEnabled", to_string(publicDirectoryEnabled)},
+            {"transcodingEnabled", to_string(this->transcodingEnabled)},
+            {"preset", this->preset},
+            {"audioCodec", this->audioCodec},
+            {"wmvProtocol", this->wmvProtocol},
+            {"defaultChannelInfo", this->defaultChannelInfo.getState()},
+            {"rtmpServerMonitor", this->rtmpServerMonitor.getState()},
+            {"rtmpPort", std::to_string(this->rtmpPort)},
+            {"hasUnsafeFilterSettings", std::to_string(this->hasUnsafeFilterSettings())},
+            {"chat", to_string(this->chat)},
+            {"randomizeBroadcastingChannelID", to_string(this->flags.get("randomizeBroadcastingChannelID"))},
+            {"flags", this->flags.getState()},
+            {"installationDirectory", []()
+                                      {
+                                          try {
+                                              return sys->realPath(peercastApp->getPath());
+                                          } catch (GeneralException& e) {
+                                              LOG_ERROR("installationDirectory: %s", e.what());
+                                              return std::string("[Error]");
+                                          }
+                                      }()},
+            {"configurationFile", peercastApp->getIniFilename()},
+            {"preferredTheme", this->preferredTheme},
+        });
 }
 
 // --------------------------------------------------

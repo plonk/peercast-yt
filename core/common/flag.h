@@ -20,6 +20,7 @@
 #include <functional>
 #include <atomic>
 #include <string>
+#include "varwriter.h"
 
 class Flag
 {
@@ -37,7 +38,7 @@ public:
     std::atomic_bool currentValue;
 };
 
-class FlagRegistory
+class FlagRegistory : public VariableWriter
 {
 public:
     FlagRegistory(std::vector<Flag>&& flags);
@@ -45,6 +46,8 @@ public:
     Flag& get(const std::string&);
 
     void forEachFlag(std::function<void(Flag&)> func);
+
+    amf0::Value getState() override;
 
     std::vector<Flag> m_flags;
     std::map<std::string,int> m_indices;

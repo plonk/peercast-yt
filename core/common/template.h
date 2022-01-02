@@ -22,20 +22,18 @@
 
 #include <list>
 #include "stream.h"
-#include "json.hpp"
 #include "varwriter.h"
-
-using json = nlohmann::json;
+#include <functional>
 
 // HTML テンプレートシステム
 class Template
 {
 public:
 
-    class Scope : public VariableWriter
+    class Scope
     {
     public:
-        virtual bool writeVariable(Stream &, const String &, int) = 0;
+        virtual bool writeVariable(amf0::Value& out, const String &) = 0;
     };
 
     enum
@@ -50,7 +48,6 @@ public:
         TMPL_FOREACH
     };
 
-    Template(const char* args = NULL);
     Template(const std::string& args);
     ~Template();
 
@@ -71,40 +68,48 @@ public:
     }
 
     // 変数
-    void    writeVariable(Stream &, const String &, int);
-    void    writeGlobalVariable(Stream &, const String &, int);
-    bool    writeLoopVariable(Stream &s, const String &varName, int loop);
-    bool    writePageVariable(Stream &s, const String &varName, int loop);
-    int     getIntVariable(const String &, int);
-    bool    getBoolVariable(const String &, int);
+    bool    writeVariable(amf0::Value&, const String &);
+    bool    writeGlobalVariable(amf0::Value&, const String &);
+    bool    writePageVariable(amf0::Value&, const String &varName);
+    int     getIntVariable(const String &);
+    bool    getBoolVariable(const String &);
 
     // ディレクティブの実行
-    int     readCmd(Stream &, Stream *, int);
-    void    readIf(Stream &, Stream *, int);
-    void    readLoop(Stream &, Stream *, int);
-    void    readForeach(Stream &, Stream *, int);
-    void    readFragment(Stream &, Stream *, int);
+    int     readCmd(Stream &, Stream *);
+    void    readIf(Stream &, Stream *);
+    void    readLoop(Stream &, Stream *);
+    void    readForeach(Stream &, Stream *);
+    void    readFragment(Stream &, Stream *);
 
-    void    readVariable(Stream &, Stream *, int);
-    void    readVariableJavaScript(Stream &in, Stream *outp, int loop);
-    void    readVariableRaw(Stream &in, Stream *outp, int loop);
-    int     readTemplate(Stream &, Stream *, int);
-    bool    writeObjectProperty(Stream& s, const String& varName, json::object_t object);
-    json::array_t evaluateCollectionVariable(String& varName);
+    void    readVariable_(Stream &in, Stream *outp, std::function<std::string(const std::string&)> filter);
+    void    readVariable(Stream &, Stream *);
+    void    readVariableJavaScript(Stream &in, Stream *outp);
+    void    readVariableRaw(Stream &in, Stream *outp);
+    int     readTemplate(Stream &, Stream *);
+    bool    writeObjectProperty(amf0::Value& out, const String& varName, amf0::Value& obj);
 
-    bool    evalCondition(const std::string& cond, int loop);
+    bool    evalCondition(const std::string& cond);
+    amf0::Value evalForm(const amf0::Value&);
+    amf0::Value evalExpression(const amf0::Value&);
+    amf0::Value evalExpression(const std::string&);
     std::vector<std::string> tokenize(const std::string& input);
+    static amf0::Value parse(std::vector<std::string>& tokens_);
     std::pair<std::string,std::string> readStringLiteral(const std::string& input);
-    std::string evalStringLiteral(const std::string& input);
-    std::string getStringVariable(const std::string& varName, int loop);
+    static std::string evalStringLiteral(const std::string& input);
+    std::string getStringVariable(const std::string& varName);
 
-    char * tmplArgs;
+    std::string tmplArgs;
     std::string selectedFragment;
     std::string currentFragment;
-    json currentElement;
 
     std::list<Scope*> m_scopes;
-    std::map<std::string,VariableWriter*> m_variableWriters;
+};
+
+class GenericScope : public Template::Scope
+{
+public:
+    bool writeVariable(amf0::Value& out, const String& varName) override;
+    std::map<std::string,amf0::Value> vars;
 };
 
 #include "http.h"
@@ -118,9 +123,75 @@ public:
     {
     }
 
-    bool writeVariable(Stream &, const String &, int) override;
+    bool writeVariable(amf0::Value& out, const String &) override;
 
     const HTTPRequest& m_request;
+};
+
+class RootObjectScope : public Template::Scope
+{
+public:
+    RootObjectScope();
+
+    bool writeObjectProperty(amf0::Value& out, const String& varName, amf0::Value& obj)
+    {
+        auto names = str::split(varName.str(), ".");
+
+        if (names.size() == 1)
+        {
+            try
+            {
+                auto value = obj.object().at(varName.str());
+                out = value;
+                return true;
+            }catch (std::out_of_range&)
+            {
+                return false;
+            }
+        }else{
+            try
+            {
+                auto value = obj.object().at(names[0]);
+                if (value.isArray())
+                {
+                    return false;
+//writeObjectProperty(s, varName + strlen(names[0].c_str()) + 1, array_to_object(value));
+                }else if (value.isObject())
+                {
+                    return writeObjectProperty(out, varName + strlen(names[0].c_str()) + 1, value);
+                }else
+                    return false;
+            } catch (std::out_of_range&)
+            {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    // loop は無視。
+    bool writeVariable(amf0::Value& out, const String& varName) override
+    {
+        const std::string v = varName;
+        if (m_objects.count(v))
+        {
+            out =  m_objects[v];
+            return true;
+        }else{
+            auto idx = v.find('.');
+            if (idx != std::string::npos)
+            {
+                auto qual = v.substr(0, idx);
+                if (m_objects.count(qual))
+                {
+                    auto obj = m_objects[qual];
+                    return writeObjectProperty(out, varName + qual.size() + 1, obj);
+                }
+            }
+            return false;
+        }
+    }
+    std::map<std::string,amf0::Value> m_objects;
 };
 
 #endif

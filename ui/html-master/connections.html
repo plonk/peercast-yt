@@ -3,7 +3,26 @@
 {#_Connections_navbar} - {#PeerCast on} {^SERVER_NAME}
 {^end}
 
-{@if page.channel.id != "page.channel.id"}
+{^define SERVENT_TR}
+<tr>
+  <td style="text-align: right">{$this.id}</td>
+  <TD>{$this.type}</TD>
+  <TD>{$this.status}</TD>
+  <TD>{$this.uptime}</TD>
+  <TD>{$this.address}</TD>
+  <td>
+    {@if this.type != "SERVER"}
+      {@if this.isPrivate}{#Private}{@end}
+    {@end}
+  </td>
+  <TD>{$this.agent}</TD>
+  <TD align=right>{$this.bitrate}</TD>
+  <TD align=right>{$this.bitrateAvg}</TD>
+  <td style="text-align: center"><a class="text-danger" href="/admin?cmd=stop_servent&amp;servent_id={$this.id}">&#x23f9;<!-- BLACK SQUARE FOR STOP --></a></td>
+</TR>
+{^end}
+
+{@if page.id}
   <h3>
     {$page.channel.name}
     {$page.channel.bitrate}Kbps
@@ -11,12 +30,12 @@
     [{$page.channel.localListeners}/{$page.channel.localRelays}]
   </h3>
 {@end}
-<DIV class="reloader hscroll" data-url="connections.html?fragment=content&amp;id={$page.channel.id}" data-interval="{$servMgr.refreshHTML}">
+<DIV class="reloader hscroll" data-url="connections.html?fragment=content&amp;id={$page.id}" data-interval="{$servMgr.refreshHTML}">
   {@fragment content}
   <FORM action=/admin method=get>
-    <TABLE width="95%" align=center border=0>
+    <TABLE width="95%" align=center border=0 class="table-panel">
       <TBODY>
-        <TR align=middle bgColor=#cccccc class="normal" style="white-space: nowrap">
+        <TR align=middle bgColor=#cccccc style="white-space: nowrap">
           <TD style="width: 1.2em"><B>{#ID}</B></TD>
           <TD><B>{#_Type_connection}</B></TD>
           <TD><B>{#Status}</B></TD>
@@ -28,26 +47,14 @@
           <TD><B>{#Avg.}</B></TD>
           <td><b>{#Stop}</b></td>
         </TR>
-        {@loop servMgr.numServents}
-          <tr class="normal" {@if loop.indexEven} bgColor=#eeeeee {@else} bgColor=#dddddd {@end}
-              {@if page.channel.id != "page.channel.id"}
-                {@if page.channel.id != loop.servent.chanID} style="display: none" {@end}
-              {@end}>
-            <td style="text-align: right">{$loop.servent.id}</td>
-            <TD>{$loop.servent.type}</TD>
-            <TD>{$loop.servent.status}</TD>
-            <TD>{$loop.servent.uptime}</TD>
-            <TD>{$loop.servent.address}</TD>
-            <td>
-              {@if loop.servent.type != "SERVER"}
-                {@if loop.servent.isPrivate}{#Private}{@end}
-              {@end}
-            </td>
-            <TD>{$loop.servent.agent}</TD>
-            <TD align=right>{$loop.servent.bitrate}</TD>
-            <TD align=right>{$loop.servent.bitrateAvg}</TD>
-            <td style="text-align: center"><a class="text-danger" href="/admin?cmd=stop_servent&amp;servent_id={$loop.servent.id}">&#x23f9;<!-- BLACK SQUARE FOR STOP --></a></td>
-          </TR>
+        {@foreach servMgr.servents}
+          {@if page.id}
+            {@if page.id != loop.servent.chanID }
+              {^SERVENT_TR}
+            {@end}
+          {@else}
+            {^SERVENT_TR}
+          {@end}
         {@end}
       </TBODY>
     </TABLE>

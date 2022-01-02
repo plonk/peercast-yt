@@ -2,7 +2,7 @@
 {^define TITLE}{#_Information_navbar} - {#PeerCast on} {^SERVER_NAME}{^end}
 
 {@if servMgr.disabled}
-<div align="center" class="normal">
+<div align="center">
   <p><strong><font color="#FF0000">Broadcasting has been disabled</font></strong></p>
   <p><strong><font color="#FF0000">Please contact peercast.org</font></strong></p>
 </div>
@@ -13,7 +13,7 @@
   <div class="column">
   <TABLE class="table-panel" align=center border=0>
     <TR align=middle>
-      <TD colSpan=2 class="normal"><B>{#Information}</B></TD>
+      <TD colSpan=2><B>{#Information}</B></TD>
     </TR>
     <TR align=left>
       <th class="left-heading">{#Server IP} (v4)</th>
@@ -75,15 +75,15 @@
     </tr>
   </TABLE>
 
-  <table class="table-panel normal">
+  <table class="table-panel">
     <tr>
       <th colspan="3">{#Channel Feeds}</th>
     </tr>
 
-    {@loop servMgr.numChannelFeeds}
+    {@foreach servMgr.channelDirectory.feeds}
     <tr>
-      <td>{$loop.channelFeed.url}</td>
-      <td align="center">{$loop.channelFeed.status}</td>
+      <td>{$this.url}</td>
+      <td align="center">{$this.status}</td>
       <td align="center"><a href="/admin?cmd=chanfeedlog&amp;index={$loop.index}" class="alert-link">&#x2139;&#xFE0F;<!-- information source emoji --></a></td>
     </tr>
     {@end}
@@ -93,19 +93,19 @@
   <div class="column">
   <TABLE class="table-panel" align=center border=0>
     <TR align=middle>
-      <TD colSpan=3 class="normal"><B>{#Bandwidth}</B></TD>
+      <TD colSpan=3><B>{#Bandwidth}</B></TD>
     </TR>
-    <TR align=left class="normal">
+    <TR align=left>
       <th class="left-heading"></th>
       <TH>{#In}</TH>
       <TH>{#Out}</TH>
     </TR>
-    <TR align=left class="normal">
+    <TR align=left>
       <th class="left-heading">{#Internet (Kbit/s)}</th>
       <TD class="bandwidth-cell">{$stats.wanInPerSec}</TD>
       <TD class="bandwidth-cell">{$stats.wanOutPerSec}</TD>
     </TR>
-    <TR align=left class="normal">
+    <TR align=left>
       <th class="left-heading">{#Total (Kbit/s)}</th>
       <TD class="bandwidth-cell">{$stats.totalInPerSec}</TD>
       <TD class="bandwidth-cell">{$stats.totalOutPerSec}</TD>
@@ -114,15 +114,15 @@
 
   <table class="table-panel" border="0">
     <tr>
-      <td colspan="2"><div align="center" class="normal"><strong>{#Connections}</strong></div></td>
+      <td colspan="2"><div align="center"><strong>{#Connections}</strong></div></td>
     </tr>
     <tr>
       <th class="left-heading" width="66%">{#Direct}</th>
-      <td width="34%" class="normal">{$servMgr.numDirect}</td>
+      <td width="34%">{$servMgr.numDirect}</td>
     </tr>
     <tr>
       <th class="left-heading">{#Relay}</th>
-      <td class="normal">{$servMgr.numRelays}</td>
+      <td>{$servMgr.numRelays}</td>
     </tr>
     <tr>
       <th class="left-heading">{#CIN / COUT}</th>
@@ -154,10 +154,3 @@
   </script>
   {@end}
 </DIV>
-
-<script>
-  var socket = new WebSocket("ws://{$request.host}/api/console");
-  socket.onmessage = function(ev){
-    console.log(ev.data);
-  };
-</script>

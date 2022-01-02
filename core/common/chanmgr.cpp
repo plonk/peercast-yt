@@ -45,10 +45,24 @@ int ChanMgr::numIdleChannels()
 // -----------------------------------
 void ChanMgr::closeIdles()
 {
-    for (auto ch = channel; ch; ch = ch->next)
+    // 直接 this->channel をたどって、個々のチャンネルのスレッドを
+    // shutdownするとそのチャンネルスレッドが自身をリストから削除する
+    // ためにChanMgrをロックしようとしてデッドロックになるため、ここで
+    // チャンネルリストをコピーする。
+    std::vector<std::shared_ptr<Channel>> channels;
+    {
+        std::lock_guard<std::recursive_mutex> cs(lock);
+        for (auto ch = channel; ch; ch = ch->next)
+            channels.push_back(ch);
+    }
+
+    for (auto ch : channels)
     {
         if (ch->isIdle())
+        {
             ch->thread.shutdown();
+            sys->waitThread(&ch->thread);
+        }
     }
 }
 
@@ -314,29 +328,23 @@ ChanMgr::~ChanMgr()
 }
 
 // -----------------------------------
-bool ChanMgr::writeVariable(Stream &out, const String &var)
+amf0::Value ChanMgr::getState()
 {
-    char buf[1024];
-    if (var == "numHitLists")
-        sprintf(buf, "%d", numHitLists());
+    std::vector<amf0::Value> channelArray;
+    for (auto ch = channel; ch != nullptr; ch = ch->next)
+        channelArray.push_back(ch->getState());
 
-    else if (var == "numChannels")
-        sprintf(buf, "%d", numChannels());
-    else if (var == "djMessage")
-        strcpy(buf, broadcastMsg.cstr());
-    else if (var == "icyMetaInterval")
-        sprintf(buf, "%d", icyMetaInterval);
-    else if (var == "maxRelaysPerChannel")
-        sprintf(buf, "%d", maxRelaysPerChannel);
-    else if (var == "hostUpdateInterval")
-        sprintf(buf, "%d", hostUpdateInterval);
-    else if (var == "broadcastID")
-        broadcastID.toStr(buf);
-    else
-        return false;
-
-    out.writeString(buf);
-    return true;
+    return amf0::Value::object(
+        {
+            { "channels", channelArray },
+            { "numHitLists",numHitLists()},
+            { "numChannels",numChannels()},
+            { "djMessage", broadcastMsg.c_str()},
+            { "icyMetaInterval",icyMetaInterval},
+            { "maxRelaysPerChannel",maxRelaysPerChannel},
+            { "hostUpdateInterval",hostUpdateInterval},
+            { "broadcastID",         broadcastID.str() },
+        });
 }
 
 // -----------------------------------

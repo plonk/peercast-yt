@@ -1,12 +1,11 @@
 <div class="flex-container navbar">
-  <a href="index.html"><span>{#_Information_navbar}</span></a>
-  <a href="channels.html"><span>{#Channels}</span></a>
-  <a href="connections.html"><span>{#_Connections_navbar}</span></a>
-  <a href="settings.html"><span>{#_Settings_navbar}</span></a>
-  <a href="viewlog.html"><span>{#_View Log_navbar}</span></a>
-
-  <a href="notifications.html"><span>{#Notifications}</span></a>
-  <a href="rtmp.html"><span>{#RTMP Server}</span></a>
-  <a href="speedtest.html"><span>{#Speedtest}</span></a>
-  <a href="flags.html"><span>{#Flags}</span></a>
+  <a href="index.html" {@if request.path =~ "/index.html$"}class="active-tab"{@end}><span>{#_Information_navbar}</span></a>
+  <a href="channels.html" {@if request.path =~ "/channels.html$"}class="active-tab"{@end}><span>{#Channels}</span></a>
+  <a href="connections.html" {@if request.path =~ "/connections.html$"}class="active-tab"{@end}><span>{#_Connections_navbar}</span></a>
+  <a href="settings.html" {@if request.path =~ "/settings.html$"}class="active-tab"{@end}><span>{#_Settings_navbar}</span></a>
+  <a href="viewlog.html" {@if request.path =~ "/viewlog.html$"}class="active-tab"{@end}><span>{#_View Log_navbar}</span></a>
+  <a href="notifications.html" {@if request.path =~ "/notifications.html$"}class="active-tab"{@end}><span>{#Notifications}</span></a>
+  <a href="rtmp.html" {@if request.path =~ "/rtmp.html$"}class="active-tab"{@end}><span>{#RTMP Server}</span></a>
+  <a href="speedtest.html" {@if request.path =~ "/speedtest.html$"}class="active-tab"{@end}><span>{#Speedtest}</span></a>
+  <a href="flags.html" {@if request.path =~ "/flags.html$"}class="active-tab"{@end}><span>{#Flags}</span></a>
 </div>

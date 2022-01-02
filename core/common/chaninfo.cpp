@@ -795,23 +795,15 @@ const char* ChanInfo::getPlayListExt()
 }
 
 // -----------------------------------
-bool ChanInfo::writeVariable(Stream &out, const String &var)
+amf0::Value ChanInfo::getState()
 {
-    std::string buf;
-
-    if (var == "name")
-        buf = name.c_str();
-    else if (var == "desc")
-        buf = desc.c_str();
-    else if (var == "genre")
-        buf = genre.c_str();
-    else if (var == "url")
-        buf = url.c_str();
-    else if (var == "comment")
-        buf = comment.c_str();
-    else
-        return false;
-
-    out.writeString(buf);
-    return true;
+    return amf0::Value::object(
+        {
+            {"name", name.c_str()},
+            {"desc", desc.c_str()},
+            {"genre", genre.c_str()},
+            {"url", url.c_str()},
+            {"comment", comment.c_str()},
+        });
 }
+

@@ -29,7 +29,7 @@ class AtomStream;
 class ChanHitSearch;
 
 // ----------------------------------
-class ChanHit
+class ChanHit : public VariableWriter
 {
 public:
     ChanHit () { init(); }
@@ -39,7 +39,7 @@ public:
     XML::Node *createXML();
 
     void    writeAtoms(AtomStream &, const GnuID &);
-    bool    writeVariable(Stream &, const String &);
+    amf0::Value getState() override;
 
     void    pickNearestIP(Host &);
 

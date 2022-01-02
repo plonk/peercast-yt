@@ -3,114 +3,141 @@
 {#Channel Information} - {#PeerCast on} {^SERVER_NAME}
 {^end}
 
-<div class="reloader" data-url="?id={$page.channel.id}&amp;fragment=content" data-interval="{$servMgr.refreshHTML}">
+<div class="reloader" data-url="?id={$channel.id}&amp;fragment=content" data-interval="{$servMgr.refreshHTML}">
   {@fragment content}
-  {@if page.channel.exist}
+  {@if channel}
   <div class="hscroll">
   <TABLE border=0 class="table-panel">
     <TBODY>
-      <TR align=middle class="normal">
+      <TR align=middle>
         <TD colSpan=2><B>{#Channel Information}</B></TD>
       </TR>
-      <TR class="normal">
+      <TR>
         <th class="left-heading">{#Name}</th>
-        <TD>{$page.channel.name}</TD>
+        <TD>{$channel.name}</TD>
       </TR>
-      <TR class="normal">
+      <TR>
         <th class="left-heading">{#Genre}</th>
-        <TD>{$page.channel.genre}</TD>
+        <TD>{$channel.genre}</TD>
       </TR>
-      <TR class="normal">
+      <TR>
         <th class="left-heading">{#Desc.}</th>
-        <TD>{$page.channel.desc}</TD>
+        <TD>{$channel.desc}</TD>
       </TR>
-      <TR class="normal">
+      <TR>
         <th class="left-heading">{#URL}</th>
-        <TD style="word-break: break-all; word-wrap: break-word; overflow-wrap: break-word">
-          <A href="/admin?cmd=redirect&amp;url={$page.channel.contactURL}"
-             target=_blank>{$page.channel.contactURL}</A>
+        <TD class="break-word">
+          <A href="/admin?cmd=redirect&amp;url={$channel.contactURL}"
+             target=_blank>{$channel.contactURL}</A>
         </TD>
       </TR>
-      <TR class="normal">
+      <TR>
         <th class="left-heading">{#Comment}</th>
-        <TD>{$page.channel.comment}</TD>
+        <TD>{$channel.comment}</TD>
       </TR>
-      <TR class="normal">
+      <TR>
         <th class="left-heading">{#ID}</th>
-        <TD>{$page.channel.id}</TD>
+        <TD>{$channel.id}</TD>
       </TR>
-      <TR class="normal">
+      <TR>
         <th class="left-heading">{#Type}</th>
-        <TD>{$page.channel.typeLong}</TD>
+        <TD>{$channel.typeLong}</TD>
       </TR>
-      <TR class="normal">
+      <TR>
         <th class="left-heading">{#Bitrate}</th>
-        <TD>{$page.channel.bitrate} kb/s
+        <TD>{$channel.bitrate} kb/s
         </TD>
       </TR>
-      <TR class="normal">
+      <TR>
         <th class="left-heading">{#Source}</th>
-        <TD>{$page.channel.sourceType} - {$page.channel.sourceProtocol} - {$page.channel.srcrate} kb/s<BR>
-          {$page.channel.sourceURL}
+        <TD>{$channel.sourceType} - {$channel.sourceProtocol} - {$channel.srcrate} kb/s<BR>
+          {$channel.sourceURL}
         </TD>
       </TR>
-      <TR class="normal">
+      <TR>
         <th class="left-heading">{#_Uptime_relayinfo}</th>
-        <TD>{$page.channel.uptime}</TD>
+        <TD>{$channel.uptime}</TD>
       </TR>
-      <TR class="normal">
+      <TR>
         <th class="left-heading">{#Status}</th>
-        <TD>{$page.channel.status}</TD>
+        <TD>{$channel.status}</TD>
       </TR>
-      <TR class="normal">
+      <TR>
         <th class="left-heading">{#IP Version}</th>
-        <TD>{$page.channel.ipVersion}</TD>
+        <TD>{$channel.ipVersion}</TD>
       </TR>
-      <TR class="normal">
+      <TR>
         <th class="left-heading">{#Position}</th>
-        <TD>{$page.channel.streamPos}</TD>
+        <TD>{$channel.streamPos}</TD>
       </TR>
-      <TR class="normal">
+      <TR>
         <th class="left-heading">{#Head}</th>
-        <TD>{$page.channel.headPos} ({$page.channel.headLen} {#bytes}) <a href="head.html?id={$page.channel.id}">{#View}</a></TD>
+        <TD>{$channel.headPos} ({$channel.headLen} {#bytes}) <a href="head.html?id={$channel.id}">{#View}</a></TD>
       </TR>
-      <TR class="normal">
+      <TR>
         <th class="left-heading">{#Buffer}</th>
-        <TD><pre style="font-family: sans-serif; margin-bottom: 0; min-width: 25em">{$page.channel.buffer}</pre></TD>
+        <TD><pre style="font-family: sans-serif; margin-bottom: 0">{$channel.buffer}</pre></TD>
       </TR>
-      <TR class="heading-row normal">
+      <TR class="heading-row">
         <TD colSpan=2 align=middle><B>{#Current Track}</B></TD>
       </TR>
-      <TR class="normal">
+      <TR>
         <th class="left-heading">{#Artist}</th>
-        <TD>{$page.channel.track.artist}</TD>
+        <TD>{$channel.track.artist}</TD>
       </TR>
-      <TR class="normal">
+      <TR>
         <th class="left-heading">{#Title}</th>
-        <TD>{$page.channel.track.title}</TD>
+        <TD>{$channel.track.title}</TD>
       </TR>
-      <TR class="normal">
+      <TR>
         <th class="left-heading">{#Album}</th>
-        <TD>{$page.channel.track.album}</TD>
+        <TD>{$channel.track.album}</TD>
       </TR>
-      <TR class="normal">
+      <TR>
         <th class="left-heading">{#Genre}</th>
-        <TD>{$page.channel.track.genre}</TD>
+        <TD>{$channel.track.genre}</TD>
       </TR>
-      <TR class="normal">
+      <TR>
         <th class="left-heading">{#Contact}</th>
-        <TD>{$page.channel.track.contactURL}</TD>
+        <TD>{$channel.track.contactURL}</TD>
       </TR>
     </TBODY>
   </TABLE>
   </div>
-  
-  <BR>
 
-  <div class="hscroll">
+  <TABLE class="table-panel">
+    <TBODY>
+      <TR align=middle>
+        <TD colSpan=5><B>{#Connections}</B></TD>
+      </TR>
+      <TR align=middle style="white-space: nowrap">
+        <TD><B>{#_Type_connection}</B></TD>
+        <TD><B>{#Time}</B></TD>
+        <TD style="width: 11.5em"><B>{#IP}</B></TD>
+        <TD><B>{#Kbits/s}</B></TD>
+        <td><b>{#Stop}</b></td>
+      </TR>
+      {@foreach servMgr.servents}
+        {@if channel.id == this.chanID}
+          <tr>
+            <TD>{$this.type}</TD>
+            <TD>{$this.uptime}</TD>
+            <TD class="break-word"><a href="ip.html?">{$this.address}</a></TD>
+            <TD align=right>{$this.bitrate}</TD>
+            <td style="text-align: center"><a class="text-danger" href="/admin?cmd=stop_servent&amp;servent_id={$this.id}">&#x23f9;<!-- BLACK SQUARE FOR STOP --></a></td>
+          </TR>
+        {@end}
+      {@end}
+    </TBODY>
+  </TABLE>
+
+  <div class="hscroll" style="width:100%">
     <TABLE class="table-panel" border=0>
       <TBODY>
-	<TR align=middle class="normal">
+      <TR align=middle>
+        <TD colSpan=9><B>{#Known Hosts}</B></TD>
+      </TR>
+	<TR align=middle>
           <th colspan="2">{#IP:Port}</th>
           <th>{#Hops}</th>
           <th>{#Listeners}</th>
@@ -120,28 +147,29 @@
           <th>{#_Agent_relayinfo}</th>
           <th style="min-width: 7.5em">{#Update}</th>
 	</TR>
-	{@loop page.channel.numHits}
-	<tr class="normal" bgcolor={@if loop.indexEven}#eee{@else}#ddd{@end}>
-          <td align="left" style="{@if loop.hit.tracker}font-weight: bold;{@end}">
-            <a href="/admin?cmd=bump&amp;id={$page.channel.id}&amp;ip={$loop.hit.rhost0}">
-              {$loop.hit.rhost0}
+	{@foreach channel.hits}
+	<tr>
+          <td align="left" style="{@if this.tracker}font-weight: bold;{@end}">
+            <a href="/admin?cmd=bump&amp;id={$channel.id}&amp;ip={$this.rhost0}">
+              {$this.rhost0}
             </a>
           </td>
-          <td align="left">{$loop.hit.rhost1}</td>
-          <TD class="numeric">{$loop.hit.numHops}</TD>
-          <TD class="numeric">{$loop.hit.numListeners}</TD>
-          <TD class="numeric">{$loop.hit.numRelays}</TD>
-          <TD class="numeric">{$loop.hit.uptime}</TD>
-          <TD nowrap>{@if loop.hit.isFirewalled}{#Yes}{@else}{#No}{@end}</TD>
-          <TD class="numeric">{$loop.hit.version}</TD>
-          <TD class="numeric">{$loop.hit.update}</TD>
+          <td align="left">{$this.rhost1}</td>
+          <TD class="numeric">{$this.numHops}</TD>
+          <TD class="numeric">{$this.numListeners}</TD>
+          <TD class="numeric">{$this.numRelays}</TD>
+          <TD class="numeric">{$this.uptime}</TD>
+          <TD nowrap>{@if this.isFirewalled}{#Yes}{@else}{#No}{@end}</TD>
+          <TD class="numeric">{$this.version}</TD>
+          <TD class="numeric">{$this.update}</TD>
 	</TR>
 	{@end}
       </TBODY>
     </TABLE>
   </div>
+
   {@else}
-  <p class="normal" style="text-align: center">
+  <p style="text-align: center">
     {#Channel not found.}
   </p>
   {@end}

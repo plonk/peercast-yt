@@ -316,36 +316,69 @@ bool ChannelDirectory::writeFeedVariable(Stream& out, const String& varName, int
     return true;
 }
 
-bool ChannelDirectory::writeVariable(Stream& out, const String& varName, int index)
+static std::string formatTime(unsigned int diff)
 {
-    if (varName.startsWith("externalChannel.")) {
-        return writeChannelVariable(out, varName + strlen("externalChannel."), index);
-    } else if (varName.startsWith("channelFeed.")) {
-        return writeFeedVariable(out, varName + strlen("channelFeed."), index);
+    auto min = diff / 60;
+    auto sec = diff % 60;
+    if (min == 0) {
+        return str::format("%ds", sec);
     } else {
-        return false;
+        return str::format("%dm %ds", min, sec);
     }
 }
 
-bool ChannelDirectory::writeVariable(Stream& out, const String& varName)
+amf0::Value ChannelDirectory::getState()
 {
-    if (varName == "totalListeners") {
-        out.writeString(to_string(totalListeners()).c_str());
-    } else if (varName == "totalRelays") {
-        out.writeString(to_string(totalRelays()).c_str());
-    } else if (varName == "lastUpdate") {
-        auto diff = sys->getTime() - m_lastUpdate;
-        auto min = diff / 60;
-        auto sec = diff % 60;
-        if (min == 0) {
-            out.writeString(String::format("%ds", sec).cstr());
-        } else {
-            out.writeString(String::format("%dm %ds", min, sec).cstr());
-        }
-    } else {
-        return false;
+    std::vector<amf0::Value> channels;
+
+    for (auto& c : this->channels())
+    {
+        channels.push_back(amf0::Value::object(
+                          {
+                              { "name",           c.name },
+                              { "id",             c.id.str() },
+                              { "tip",            c.tip },
+                              { "url",            c.url },
+                              { "genre",          c.genre },
+                              { "desc",           c.desc },
+                              { "numDirects",     c.numDirects },
+                              { "numRelays",      c.numRelays },
+                              { "bitrate",        c.bitrate },
+                              { "contentTypeStr", c.contentTypeStr },
+                              { "trackArtist",    c.trackArtist },
+                              { "trackAlbum",     c.trackAlbum },
+                              { "trackName",      c.trackName },
+                              { "trackContact",   c.trackContact },
+                              { "encodedName",    c.encodedName },
+                              { "uptime",         c.uptime },
+                              { "status",         c.status },
+                              { "comment",        c.comment },
+                              { "direct",         c.direct },
+                              { "feedUrl",        c.feedUrl },
+                              { "chatUrl",        c.chatUrl() },
+                              { "statsUrl",       c.statsUrl() },
+                          }));
     }
-    return true;
+
+    std::vector<amf0::Value> feeds;
+    for (auto& f : this->feeds())
+    {
+        feeds.push_back(amf0::Value::object(
+                            {
+                                {"url", f.url},
+                                {"directoryUrl", str::replace_suffix(f.url, "index.txt", "")},
+                                {"status", ChannelFeed::statusToString(f.status) }
+                            }));
+    }
+
+    return amf0::Value::object(
+        {
+            {"totalListeners", totalListeners()},
+            {"totalRelays", totalRelays()},
+            {"lastUpdate", formatTime(sys->getTime() - m_lastUpdate)},
+            {"channels", amf0::Value::strictArray(channels) },
+            {"feeds", amf0::Value::strictArray(feeds) },
+        });
 }
 
 int ChannelDirectory::totalListeners() const

@@ -1,4 +1,5 @@
 #include "notif.h"
+#include "str.h"
 
 // global
 NotificationBuffer g_notificationBuffer;
@@ -77,48 +78,24 @@ void NotificationBuffer::addNotification(const Notification& notif)
     notifications.push_front(Entry(notif, false));
 }
 
-bool NotificationBuffer::writeVariable(Stream& out, const String& varName)
+amf0::Value NotificationBuffer::getState()
 {
-    if (varName == "numNotifications") {
-        out.writeString(std::to_string(numNotifications()).c_str());
-        return true;
-    } else if (varName == "numUnread") {
-        out.writeString(std::to_string(numUnread()).c_str());
-        return true;
-    } else if (varName == "markAsRead") {
-        markAsRead(sys->getTime());
-        out.writeString("marked all notifications as read");
-        return true;
-    } else {
-        return false;
-    }
+    std::vector<amf0::Value> notificationsArray;
+
+    for (auto& e : notifications)
+        notificationsArray.push_back(amf0::Value(
+                                         {
+                                             {"message", e.notif.message},
+                                             {"isRead", std::to_string((int) e.isRead)},
+                                             {"type", e.notif.getTypeStr()},
+                                             {"unixTime", std::to_string(e.notif.time)},
+                                             {"time", str::rstrip(String().setFromTime(e.notif.time))},
+                                         }));
+    return amf0::Value(
+        {
+            {"numNotifications" , std::to_string(numNotifications())},
+            {"numUnread" , std::to_string(numUnread())},
+            {"notifications", notificationsArray },
+        });
 }
 
-bool NotificationBuffer::writeVariable(Stream& out, const String& varName, int index)
-{
-    if (varName.startsWith("notification.")) {
-        String prop = varName + strlen("notification.");
-        Entry e = getNotification(index);
-        if (prop == "message") {
-            out.writeString(e.notif.message.c_str());
-            return true;
-        } else if (prop == "isRead") {
-            out.writeString(std::to_string((int) e.isRead).c_str());
-            return true;
-        } else if (prop == "type") {
-            out.writeString(e.notif.getTypeStr().c_str());
-            return true;
-        } else if (prop == "unixTime") {
-            out.writeString(std::to_string(e.notif.time).c_str());
-            return true;
-        } else if (prop == "time") {
-            String t;
-            t.setFromTime(e.notif.time);
-            if (t.cstr()[strlen(t)-1] == '\n')
-                t.cstr()[strlen(t)-1] = '\0';
-            out.writeString(t.cstr());
-            return true;
-        }
-    }
-    return false;
-}

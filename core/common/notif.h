@@ -67,8 +67,7 @@ public:
     Entry getNotification(int index);
     void addNotification(const Notification& notif);
 
-    bool writeVariable(Stream& out, const String& varName) override;
-    bool writeVariable(Stream& out, const String& varName, int loopCount) override;
+    amf0::Value getState() override;
 
     std::deque<Entry> notifications;
     std::recursive_mutex lock;

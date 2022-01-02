@@ -33,12 +33,12 @@
 class GeneralException : public std::exception
 {
 public:
-    GeneralException(const char *m, int e = 0);
+    GeneralException(const std::string& m, int e = 0);
 
     const char* what() const throw() override;
     
-    const char* msg;
     std::string msgbuf;
+    const char* msg;
     std::vector<std::string> backtrace;
     int  err;
 };
@@ -47,71 +47,72 @@ public:
 class NotImplementedException : public GeneralException
 {
 public:
-    NotImplementedException(const char *m) : GeneralException(m) {}
-    NotImplementedException(const char *m, int e) : GeneralException(m, e) {}
+    NotImplementedException(const std::string& m) : GeneralException(m) {}
+    NotImplementedException(const std::string& m, int e) : GeneralException(m, e) {}
 };
 
 // -------------------------------------
 class LogicError : public GeneralException
 {
 public:
-    LogicError(const char *m) : GeneralException(m) {}
-    LogicError(const char *m, int e) : GeneralException(m, e) {}
+    LogicError(const std::string& m) : GeneralException(m) {}
+    LogicError(const std::string& m, int e) : GeneralException(m, e) {}
 };
 
 // -------------------------------------
 class ArgumentException : public GeneralException
 {
 public:
-    ArgumentException(const char *m) : GeneralException(m) {}
-    ArgumentException(const char *m, int e) : GeneralException(m, e) {}
+    ArgumentException(const std::string& m) : GeneralException(m) {}
+    ArgumentException(const std::string& m, int e) : GeneralException(m, e) {}
 };
 
 // -------------------------------------
 class FormatException : public GeneralException
 {
 public:
-    FormatException(const char *m) : GeneralException(m) {}
-    FormatException(const char *m, int e) : GeneralException(m, e) {}
+    FormatException(const std::string& m) : GeneralException(m) {}
+    FormatException(const std::string& m, int e) : GeneralException(m, e) {}
 };
 
 // -------------------------------------
 class StreamException : public GeneralException
 {
 public:
-    StreamException(const char *m) : GeneralException(m) {}
-    StreamException(const char *m, int e) : GeneralException(m, e) {}
+    StreamException(const std::string& m) : GeneralException(m) {}
+    StreamException(const std::string& m, int e) : GeneralException(m, e) {}
 };
 
 // ----------------------------------
 class SockException : public StreamException
 {
 public:
-    SockException(const char *m="Socket") : StreamException(m) {}
-    SockException(const char *m, int e) : StreamException(m, e) {}
+    SockException(const std::string& m = "Socket") : StreamException(m) {}
+    SockException(const std::string& m, int e) : StreamException(m, e) {}
 };
 
 // ----------------------------------
 class EOFException : public StreamException
 {
 public:
-    EOFException(const char *m="EOF") : StreamException(m) {}
-    EOFException(const char *m, int e) : StreamException(m, e) {}
+    EOFException(const std::string& m = "EOF") : StreamException(m) {}
+    EOFException(const std::string& m, int e) : StreamException(m, e) {}
 };
 
 // ----------------------------------
+// unused
 class CryptException : public StreamException
 {
 public:
-    CryptException(const char *m="Crypt") : StreamException(m) {}
-    CryptException(const char *m, int e) : StreamException(m, e) {}
+    CryptException(const std::string& m = "Crypt") : StreamException(m) {}
+    CryptException(const std::string& m, int e) : StreamException(m, e) {}
 };
 
 // ----------------------------------
 class TimeoutException : public StreamException
 {
 public:
-    TimeoutException(const char *m="Timeout") : StreamException(m) {}
+    TimeoutException(const std::string& m = "Timeout") : StreamException(m) {}
 };
 
 // ----------------------------------
@@ -120,7 +121,7 @@ public:
 #define SWAP4(v) (((v&0xff)<<24) | ((v&0xff00)<<8) | ((v&0xff0000)>>8) | ((v&0xff000000)>>24))
 #define TOUPPER(c) ((((c) >= 'a') && ((c) <= 'z')) ? (c)+'A'-'a' : (c))
 #define TONIBBLE(c) ((((c) >= 'A')&&((c) <= 'F')) ? (((c)-'A')+10) : ((c)-'0'))
-#define BYTES_TO_KBPS(n) (float)(((((float)n)*8.0f)/1024.0f))
+#define BYTES_TO_KBPS(n) (float)(((((float)(n))*8.0f)/1024.0f))
 
 // -----------------------------------
 const char  *getCGIarg(const char *str, const char *arg);

@@ -51,21 +51,15 @@ void RTMPServerMonitor::disable()
         m_rtmpServer.terminate();
 }
 
-bool RTMPServerMonitor::writeVariable(Stream &out, const String &var)
+amf0::Value RTMPServerMonitor::getState()
 {
-    std::string buf;
-
-    if (var == "status")
-        buf = status();
-    else if (var == "processID")
-        buf = std::to_string( m_rtmpServer.pid() );
-    else if (var == "ipVersion")
-        buf = std::to_string(ipVersion);
-    else
-        return false;
-
-    out.writeString(buf);
-    return true;
+    std::lock_guard<std::recursive_mutex> cs(m_lock);
+    return amf0::Value(
+        {
+            {"status", status()},
+            {"processID", std::to_string( m_rtmpServer.pid() )},
+            {"ipVersion", std::to_string(ipVersion)},
+        });
 }
 
 void RTMPServerMonitor::start()

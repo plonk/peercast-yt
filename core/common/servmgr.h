@@ -132,7 +132,6 @@ public:
     Servent             *findServentByIndex(int);
     Servent             *findServentByID(int id);
 
-    bool                writeVariable(Stream &, const String &) override;
     Servent             *allocServent();
 
     unsigned int        numUsed(int);
@@ -245,6 +244,8 @@ public:
 
     static const char* getFirewallStateString(FW_STATE);
 
+    amf0::Value getState() override;
+
     ThreadInfo          serverThread;
     ThreadInfo          idleThread;
 
@@ -273,7 +274,7 @@ public:
     GnuID               networkID;
     unsigned int        firewallTimeout;
     std::atomic<int>    m_logLevel;
-    int                 shutdownTimer;
+    std::atomic<int>    shutdownTimer;
     bool                pauseLog;
     bool                forceNormal;
     bool                useFlowControl;
@@ -330,6 +331,7 @@ public:
     bool                chat;
 
     FlagRegistory       flags;
+    std::string         preferredTheme;
 };
 
 // ----------------------------------

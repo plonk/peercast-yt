@@ -67,67 +67,40 @@ void UptestServiceRegistry::clear()
     m_providers.clear();
 }
 
-bool UptestServiceRegistry::writeVariable(Stream& s, const String& v)
+static std::string textStatus(int status)
 {
-    std::lock_guard<std::recursive_mutex> cs(m_lock);
-
-    if (v == "numURLs")
+    switch (status)
     {
-        s.writeString(std::to_string(m_providers.size()));
-        return true;
+    case UptestEndpoint::kUntried:
+        return "Untried";
+    case UptestEndpoint::kSuccess:
+        return "Success";
+    case UptestEndpoint::kError:
+        return "Error";
+    default:
+        abort();
     }
-
-    return false;
 }
 
-bool UptestServiceRegistry::writeVariable(Stream& s, const String& v, int i)
+amf0::Value UptestServiceRegistry::getState()
 {
     std::lock_guard<std::recursive_mutex> cs(m_lock);
+    std::vector<amf0::Value> providers;
 
-    if (i < 0 || i >= m_providers.size())
-    {
-        LOG_TRACE("UptestServiceRegistry: Index out of range");
-        return false;
-    }
+    for (size_t i = 0; i < m_providers.size(); i++)
+        providers.push_back(
+            {
+                {"url", m_providers[i].url},
+                {"status", textStatus(m_providers[i].status)},
+                {"speed", m_providers[i].m_info.speed},
+                {"over", m_providers[i].m_info.over},
+                {"checkable", m_providers[i].m_info.checkable},
+            });
 
-    if (v == "url")
-    {
-        s.writeString(m_providers[i].url);
-        return true;
-    }else if (v == "status")
-    {
-        std::string text;
-        switch (m_providers[i].status)
+    return amf0::Value::object(
         {
-            case UptestEndpoint::kUntried:
-                text = "Untried";
-                break;
-            case UptestEndpoint::kSuccess:
-                text = "Success";
-                break;
-            case UptestEndpoint::kError:
-                text = "Error";
-                break;
-            default:
-                abort();
-        }
-        s.writeString(text);
-        return true;
-    }else if (v == "speed")
-    {
-        s.writeString(m_providers[i].m_info.speed);
-        return true;
-    }else if (v == "over")
-    {
-        s.writeString(m_providers[i].m_info.over);
-        return true;
-    }else if (v == "checkable")
-    {
-        s.writeString(m_providers[i].m_info.checkable);
-        return true;
-    }
-
-    return false;
+            {"providers", providers}
+        });
 }
 
 void UptestServiceRegistry::update()

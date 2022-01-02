@@ -5,7 +5,10 @@
 {^define HEAD}
   <style>
    input, select { font-size: 9pt }
-   .channel-list { font-family: Verdana, sans-serif; font-size: 9pt; color: #222; line-height: 1.3em; margin: 0}
+   .channel-list {
+       font-family: Verdana, sans-serif; font-size: 9pt; color: #222; line-height: 1.3em; margin: 0;
+       width:100%; max-width: 640px
+    }
    .channel-list tr { background-color: #FFECC4 }
    .channel-list th { font-size: 9pt; text-decoration: underline; padding: 3px 5px; color: black }
    .channel-list td { text-align: center; padding: 5px 5px; }
@@ -26,71 +29,82 @@
    .icons { margin-top: 2px }
    .play-button { margin-left: 8px; margin-right: 8px }
    .channel-list .bitrate { text-align: right }
-   .relay-list { max-width: 750px }
+   .relay-list { width:100%; max-width: 640px }
    .relay-list th { white-space: nowrap }
+    {^DARK_THEME_STYLES_BEGIN}
+        .channel-list { color: #ddd }
+        .channel-list tr { background-color: #544827 }
+        .channel-list th { color: #eee }
+    {^DARK_THEME_STYLES_END}
   </style>
 {^end}
 
 <div class="reloader hscroll" data-url="channels.html?fragment=relays" data-interval="{$servMgr.refreshHTML}">
   {@fragment relays}
-  <TABLE width="95%" class="relay-list" align=center border=0>
+  <TABLE class="relay-list table-panel" align=center border=0>
     <TBODY>
-      {@if chanMgr.numChannels}
-      <TR align=middle bgColor=#cccccc class="normal">
-        <th width="1">&nbsp;</th>
-        <th>{#Channel}</th>
-        <th>{#Bitrate (kb/s)}</th>
-        <th>{#Stream}</th>
-        <th>{#Total Relays}</th>
-        <th>{#Local Relays}</th>
-        <th>{#Status}</th>
-        <th>{#Keep}</th>
-        <th>{#Stop}</th>
+      <TR align=middle bgColor=#cccccc>
+        <th colspan=2>{#Relays}</th>
       </TR>
-      {@end}
-      {@loop chanMgr.numChannels}
-      <tr class="normal" bgcolor={@if loop.indexEven}#eeeeee{@else}#dddddd{@end}>
+      {@foreach chanMgr.channels}
+      <tr>
         <TD width="1" align="left">
-          <a href="play.html?id={$loop.channel.id}">
-            <img src="/assets/images/play.png" border="0">
-          </a>
+          <form action="play.html">
+            <input type="hidden" name="id" value="{$this.id}">
+            <input type="submit" value="Play" style="color:#f00; font-weight:bold">
+          </form>
         </TD>
-        <TD align="left"><span class="normal"><b>{$loop.channel.name}</b></span><br>
-          <span class="normal" style="white-space: nowrap">
-            <b><a href="relayinfo.html?id={$loop.channel.id}">{#Info}</a></b>
-            {@if loop.channel.status == "BROADCAST"}
-              - <b><a href="editinfo.html?id={$loop.channel.id}">{#Edit}</a></b>
+        <TD align="left">
+          <div class="channel-name">
+            {$this.name}
+            <form style="float:right" action="/admin">
+              <input type="hidden" name="cmd" value="stop">
+              <input type="hidden" name="id" value="{$this.id}">
+              <button type="submit" style="font-size:16px">&times;</button>
+            </form>
+          </div>
+          {$this.srcrate} / {$this.bitrate}Kbps
+          <a href="/stream/{$this.id}{$this.ext}">{$this.type}</a>
+          ({$this.totalListeners}/{$this.totalRelays})
+          <a href="connections.html?id={$this.id}">
+            [{$this.localListeners}/{$this.localRelays}]
+          </a>
+          {$this.status}
+          <br>
+          <span>{#Keep}</span>
+          <a href="/admin?cmd=keep&amp;id={$this.id}"><b>{$this.keep}</b></a>
+
+          <div style="white-space: nowrap">
+            <b><a href="relayinfo.html?id={$this.id}">{#Info}</a></b>
+            {@if this.status == "BROADCAST"}
+              - <b><a href="editinfo.html?id={$this.id}">{#Edit}</a></b>
             {@else}
               - <b class="text-muted">{#Edit}</b>
             {@end}
-            {@if loop.channel.contactURL}
-              - <b><a href="{$loop.channel.contactURL}">{#WWW}</a></b>
+            {@if this.contactURL}
+              - <b><a href="{$this.contactURL}">{#WWW}</a></b>
             {@else}
               - <b class="text-muted">{#WWW}</b>
             {@end}
-            - <b><a href="/pls/{$loop.channel.id}{$loop.channel.plsExt}?auth={$loop.channel.authToken}">{#Playlist}</a></b>
-            - <b><a href="/admin?cmd=bump&amp;id={$loop.channel.id}">{#Bump}</a></b>
-          </span></TD>
-        <TD class="normal" align="center">{$loop.channel.srcrate} / {$loop.channel.bitrate}</TD>
-        <TD class="normal" align="center"><a href="/stream/{$loop.channel.id}{$loop.channel.ext}">{$loop.channel.type}</a></TD>
-        <TD class="normal" align="center">{$loop.channel.totalListeners} / {$loop.channel.totalRelays}</TD>
-        <TD class="normal" align="center">
-          <a href="connections.html?id={$loop.channel.id}">
-            {$loop.channel.localListeners} / {$loop.channel.localRelays}
-          </a>
+            - <b><a href="/pls/{$this.id}{$this.plsExt}?auth={$this.authToken}">{#Playlist}</a></b>
+            - <b><a href="/admin?cmd=bump&amp;id={$this.id}">{#Bump}</a></b>
+          </div>
         </TD>
-        <TD class="normal" align="center">{$loop.channel.status}</TD>
-        <TD class="normal" align="center"><a href="/admin?cmd=keep&amp;id={$loop.channel.id}">{$loop.channel.keep}</a></TD>
-        <td class="normal" align="center"><a href="/admin?cmd=stop&amp;id={$loop.channel.id}">×</a></td>
       </TR>
       {@end}
     </TBODY>
   </TABLE>
   {@end}
 </div>
-<div align="center" class="normal" style="margin-top: 1.5em; margin-bottom: 1.5em">
-  <a href="/admin?cmd=clear&amp;channels=1" class="button">{#Clear}</a>
-  <a href="broadcast.html" class="button">{#_Broadcast_navbar}…</a>
+<div align="center" style="margin-top: 1.5em; margin-bottom: 1.5em">
+  <form action="/admin" style="display: inline">
+    <input type="hidden" name="cmd" value="clear">
+    <input type="hidden" name="channels" value="1">
+    <input type="submit" value="{#Clear}" style="min-width: 64px">
+  </form>
+  <form action="broadcast.html" style="display: inline">
+    <input type="submit" value="{#_Broadcast_navbar}…" style="min-width: 64px">
+  </form>
 </div>
 
 <!-- index.txt の取得が5分ごとなので、あまり頻繁に更新しても仕方ない -->
@@ -100,9 +114,7 @@
     <tr>
       <td colspan="4" class="results">
         <b>Results:</b>
-        {$servMgr.numExternalChannels} channels,
-        {$servMgr.channelDirectory.totalListeners} listeners,
-        {$servMgr.channelDirectory.totalRelays} relays. ({$servMgr.channelDirectory.lastUpdate})
+        {$servMgr.numExternalChannels} channels.
         <a href="/admin?cmd=fetch_feeds" title="{#Auto-updates every 5 minutes. Manual updates have a cooldown of 30 seconds.}">{#Update}</a>
       </td>
     </tr>
@@ -110,7 +122,7 @@
       <th>Channel</th><th>Status</th><th>Bitrate</th><th>Type</th>
     </tr>
 
-    {@foreach externalChannels}
+    {@foreach servMgr.channelDirectory.channels}
     <tr>
       <td class="channel-description">
 	<a {@if this.id != "00000000000000000000000000000000"}href="play.html?id={$this.id}"{@end} style="display: block; text-decoration: none; max-width: 45vw">

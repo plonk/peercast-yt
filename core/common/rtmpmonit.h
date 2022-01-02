@@ -2,8 +2,9 @@
 #define _RTMPMONIT_H
 
 #include "subprog.h"
+#include "varwriter.h"
 
-class RTMPServerMonitor
+class RTMPServerMonitor : public VariableWriter
 {
 public:
     RTMPServerMonitor(const std::string& aPath);
@@ -15,7 +16,7 @@ public:
     void enable();
     void disable();
 
-    bool writeVariable(Stream &out, const String &var);
+    amf0::Value getState() override;
 
     void start();
     std::string makeEndpointURL();

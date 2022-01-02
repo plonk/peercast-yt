@@ -108,7 +108,7 @@ public:
 
     operator const char *() const { return data; }
 
-    void convertTo(TYPE t);
+    String& convertTo(TYPE t);
 
     char    *cstr() { return data; }
     const char* c_str() const { return data; }

@@ -15,6 +15,14 @@ TEST(StringTest, setFromStopwatchWorks) {
     ASSERT_STREQ("-", str);
 }
 
+#include "regexp.h"
+#include <time.h>
+TEST(StringTest, setFromTime) {
+    ASSERT_TRUE(Regexp("^(\\w+) (\\w+) +(\\d+) (\\d+):(\\d+):(\\d+) (\\d+)\n$").matches(String().setFromTime(0)));
+    time_t now = ::time(nullptr);
+    ASSERT_TRUE(Regexp("^(\\w+) (\\w+) +(\\d+) (\\d+):(\\d+):(\\d+) (\\d+)\n$").matches(String().setFromTime(now)));
+}
+
 TEST(StringTest, eqWorks) {
     String s1("abc");
     String s2("abc");

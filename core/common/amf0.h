@@ -22,9 +22,11 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "stream.h"
 #include <stdexcept>
+#include <cstddef> // for nullptr_t
 #include "str.h"
+
+class Stream;
 
 namespace amf0
 {
@@ -79,14 +81,23 @@ namespace amf0
         Value(std::nullptr_t p) : Value() {}
         Value(double d) : m_type(kNumber), m_number(d), m_bool(false) {}
         Value(const char* s) : m_type(kString), m_number(0.0), m_bool(false), m_string(s) {}
+        Value(const std::string& s) : m_type(kString), m_number(0.0), m_bool(false), m_string(s) {}
         Value(bool b) : m_type(kBool), m_number(0.0), m_bool(b) {}
         Value(int n) : m_type(kNumber), m_number(n), m_bool(false) {}
+        Value(unsigned int n) : m_type(kNumber), m_number(n), m_bool(false) {}
+        Value(long unsigned int n) : m_type(kNumber), m_number(n), m_bool(false) {}
+        Value(long long unsigned int n) : m_type(kNumber), m_number(n), m_bool(false) {} // can lose precision
         Value(std::initializer_list<KeyValuePair> l) : m_type(kObject), m_number(0.0), m_bool(false)
         {
             for (auto pair: l)
                 m_object[pair.first] = pair.second;
         }
         Value(const Date& d) : m_type(kDate), m_number(0.0), m_bool(false), m_date(d) {}
+        Value(const std::vector<Value>& arr) : m_type(kStrictArray), m_number(0.0), m_bool(false), m_strict_array(arr) {}
+        Value(const std::map<std::string,Value>& map) : m_type(kObject), m_number(0.0), m_bool(false), m_object(map) {}
+
+        static Value null(std::nullptr_t)
+        { return Value(); }
 
         static Value number(double d)
         { Value v; v.m_type = kNumber; v.m_number = d; return v; }
@@ -144,14 +155,14 @@ namespace amf0
         static Value date(double unixTime, uint16_t timezone = 0)
         { Value v; v.m_type = kDate; v.m_date = Date(unixTime, timezone); return v; }
 
-        bool isNumber() { return m_type == kNumber; }
-        bool isObject() { return m_type == kObject; }
-        bool isString() { return m_type == kString; }
-        bool isBool() { return m_type == kBool; }
-        bool isArray() { return m_type == kArray; }
-        bool isStrictArray() { return m_type == kStrictArray; }
-        bool isNull() { return m_type == kNull; }
-        bool isDate() { return m_type == kDate; }
+        bool isNumber() const { return m_type == kNumber; }
+        bool isObject() const { return m_type == kObject; }
+        bool isString() const { return m_type == kString; }
+        bool isBool() const { return m_type == kBool; }
+        bool isArray() const { return m_type == kArray; }
+        bool isStrictArray() const { return m_type == kStrictArray; }
+        bool isNull() const { return m_type == kNull; }
+        bool isDate() const { return m_type == kDate; }
 
         bool operator == (const Value& rhs) const
         {
@@ -171,6 +182,10 @@ namespace amf0
                 return this->m_strict_array == rhs.m_strict_array;
             case kDate:
                 return this->m_date == rhs.m_date;
+            case kNull:
+                return true;
+            case kBool:
+                return this->m_bool == rhs.m_bool;
             default:
                 throw std::runtime_error("unknown AMF value type " + std::to_string(m_type));
             }
@@ -236,7 +251,7 @@ namespace amf0
             }
         }
 
-        std::string inspect()
+        std::string inspect() const
         {
             switch (m_type)
             {
@@ -284,47 +299,80 @@ namespace amf0
             }
         }
 
-        double number()
+        double number() const
         {
             if (!isNumber()) throw std::runtime_error("not a number");
             return m_number;
         }
 
-        std::string string()
+        std::string string() const
         {
             if (!isString()) throw std::runtime_error("not a string");
             return m_string;
         }
 
-        bool boolean()
+        bool boolean() const
         {
             if (!isBool()) throw std::runtime_error("not a boolean");
             return m_bool;
         }
 
-        std::map<std::string,Value>& object()
+        const std::map<std::string,Value>& object() const
         {
-            if (!isObject() && !isArray()) throw std::runtime_error("not an object or an array (%d)");
+            if (!isObject() && !isArray()) throw std::runtime_error("not an object or an array");
             return m_object;
         }
 
-        std::vector<Value>& strictArray()
+        const std::vector<Value>& strictArray() const
         {
             if (!isStrictArray()) throw std::runtime_error("not a strict array");
             return m_strict_array;
         }
 
-        std::nullptr_t null()
+        std::nullptr_t null() const
         {
             if (!isNull()) throw std::runtime_error("not null");
             return nullptr;
         }
 
-        Date date()
+        Date date() const
         {
             if (!isDate()) throw std::runtime_error("not a date");
             return m_date;
         }
+
+        const Value& at(const std::string& key) const
+        {
+            if (!isObject())
+                throw std::runtime_error("not an object");
+
+            return m_object.at(key);
+        }
+
+        const Value& at(size_t index) const
+        {
+            if (!isStrictArray())
+                throw std::runtime_error("not a strict array");
+
+            return m_strict_array.at(index);
+        }
+
+        size_t count(const std::string& key) const
+        {
+            if (!isObject())
+                throw std::runtime_error("not an object");
+
+            return m_object.count(key);
+        }
+
+        size_t size() const
+        {
+            if (!isStrictArray())
+                throw std::runtime_error("not a strict array");
+
+            return m_strict_array.size();
+        }
+
 
         int                         m_type;
         double                      m_number;
@@ -338,103 +386,13 @@ namespace amf0
     class Deserializer
     {
     public:
-        bool readBool(Stream &in)
-        {
-            return in.readChar() != 0;
-        }
-
-        int32_t readInt32(Stream &in)
-        {
-            return (in.readChar() << 24) | (in.readChar() << 16) | (in.readChar() << 8) | (in.readChar());
-        }
-
-        int16_t readInt16(Stream& in)
-        {
-            return (in.readChar() << 8) | (in.readChar());
-        }
-
-        std::string readString(Stream &in)
-        {
-            int len = (in.readChar() << 8) | (in.readChar());
-            return in.read(len);
-        }
-
-        double readDouble(Stream &in)
-        {
-            double number;
-            char* data = reinterpret_cast<char*>(&number);
-            for (int i = 8; i > 0; i--) {
-                char c = in.readChar();
-                *(data + i - 1) = c;
-            }
-            return number;
-        }
-
-        std::vector<KeyValuePair> readObject(Stream &in)
-        {
-            std::vector<KeyValuePair> list;
-            while (true)
-            {
-                std::string key = readString(in);
-                if (key == "")
-                    break;
-
-                list.push_back({key, readValue(in)});
-            }
-            in.readChar(); // OBJECT_END
-            return list;
-        }
-
-        Value readValue(Stream &in)
-        {
-            char type = in.readChar();
-
-            switch (type)
-            {
-            case AMF_NUMBER:
-            {
-                return Value::number(readDouble(in));
-            }
-            case AMF_STRING:
-            {
-                return Value::string(readString(in));
-            }
-            case AMF_OBJECT:
-            {
-                return Value::object(readObject(in));
-            }
-            case AMF_BOOL:
-            {
-                return Value::boolean(readBool(in));
-            }
-            case AMF_ARRAY:
-            {
-                readInt32(in); // length
-                return Value::array(readObject(in));
-            }
-            case AMF_STRICTARRAY:
-            {
-                int len = readInt32(in);
-                std::vector<Value> list;
-                for (int i = 0; i < len; i++) {
-                    list.push_back(readValue(in));
-                }
-                return Value::strictArray(list);
-            }
-            case AMF_NULL:
-            {
-                return Value(nullptr);
-            }
-            case AMF_DATE:
-            {
-                double unixTime = readDouble(in);
-                uint16_t timeZone = readInt16(in);
-                return Value::date(unixTime, timeZone);
-            }
-            default:
-                throw std::runtime_error("unknown AMF value type " + std::to_string(type));
-            }
-        }
+        bool readBool(Stream &in);
+        int32_t readInt32(Stream &in);
+        int16_t readInt16(Stream& in);
+        std::string readString(Stream &in);
+        double readDouble(Stream &in);
+        std::vector<KeyValuePair> readObject(Stream &in);
+        Value readValue(Stream &in);
     };
 } // namespace amf
 #endif

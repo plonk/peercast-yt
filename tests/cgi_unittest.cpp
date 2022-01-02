@@ -35,6 +35,74 @@ TEST_F(cgiFixture, rfc1123Time)
     ASSERT_STREQ("Thu, 01 Jan 1970 00:00:00 GMT", cgi::rfc1123Time(0).c_str());
 }
 
+TEST_F(cgiFixture, rfc1123Time_seconds)
+{
+    ASSERT_EQ("Thu, 01 Jan 1970 00:00:00 GMT", cgi::rfc1123Time(0));
+    ASSERT_EQ("Thu, 01 Jan 1970 00:00:01 GMT", cgi::rfc1123Time(1));
+    ASSERT_EQ("Thu, 01 Jan 1970 00:00:59 GMT", cgi::rfc1123Time(59));
+    ASSERT_EQ("Thu, 01 Jan 1970 00:01:00 GMT", cgi::rfc1123Time(60));
+}
+
+TEST_F(cgiFixture, rfc1123Time_hours)
+{
+    ASSERT_EQ("Thu, 01 Jan 1970 00:00:00 GMT", cgi::rfc1123Time(0));
+    ASSERT_EQ("Thu, 01 Jan 1970 00:59:59 GMT", cgi::rfc1123Time(60*60 - 1));
+    ASSERT_EQ("Thu, 01 Jan 1970 01:00:00 GMT", cgi::rfc1123Time(60*60));
+}
+
+TEST_F(cgiFixture, rfc1123Time_days)
+{
+    ASSERT_EQ("Thu, 01 Jan 1970 00:00:00 GMT", cgi::rfc1123Time(0));
+    ASSERT_EQ("Fri, 02 Jan 1970 00:00:00 GMT", cgi::rfc1123Time(24*3600));
+    ASSERT_EQ("Sat, 03 Jan 1970 00:00:00 GMT", cgi::rfc1123Time(2*24*3600));
+    ASSERT_EQ("Sun, 04 Jan 1970 00:00:00 GMT", cgi::rfc1123Time(3*24*3600));
+    ASSERT_EQ("Mon, 05 Jan 1970 00:00:00 GMT", cgi::rfc1123Time(4*24*3600));
+    ASSERT_EQ("Tue, 06 Jan 1970 00:00:00 GMT", cgi::rfc1123Time(5*24*3600));
+    ASSERT_EQ("Wed, 07 Jan 1970 00:00:00 GMT", cgi::rfc1123Time(6*24*3600));
+    ASSERT_EQ("Thu, 08 Jan 1970 00:00:00 GMT", cgi::rfc1123Time(7*24*3600));
+}
+
+TEST_F(cgiFixture, rfc1123Time_months)
+{
+    ASSERT_EQ("Thu, 01 Jan 1970 00:00:00 GMT", cgi::rfc1123Time(0));
+    ASSERT_EQ("Sun, 01 Feb 1970 00:00:00 GMT", cgi::rfc1123Time(31 * 24 * 3600));
+    ASSERT_EQ("Sun, 01 Mar 1970 00:00:00 GMT", cgi::rfc1123Time((31+28) * 24 * 3600));
+    ASSERT_EQ("Wed, 01 Apr 1970 00:00:00 GMT", cgi::rfc1123Time((31+28+31) * 24 * 3600));
+    ASSERT_EQ("Fri, 01 May 1970 00:00:00 GMT", cgi::rfc1123Time((31+28+31+30) * 24 * 3600));
+    ASSERT_EQ("Mon, 01 Jun 1970 00:00:00 GMT", cgi::rfc1123Time((31+28+31+30+31) * 24 * 3600));
+    ASSERT_EQ("Wed, 01 Jul 1970 00:00:00 GMT", cgi::rfc1123Time((31+28+31+30+31+30) * 24 * 3600));
+    ASSERT_EQ("Sat, 01 Aug 1970 00:00:00 GMT", cgi::rfc1123Time((31+28+31+30+31+30+31) * 24 * 3600));
+    ASSERT_EQ("Tue, 01 Sep 1970 00:00:00 GMT", cgi::rfc1123Time((31+28+31+30+31+30+31+31) * 24 * 3600));
+    ASSERT_EQ("Thu, 01 Oct 1970 00:00:00 GMT", cgi::rfc1123Time((31+28+31+30+31+30+31+31+30) * 24 * 3600));
+    ASSERT_EQ("Sun, 01 Nov 1970 00:00:00 GMT", cgi::rfc1123Time((31+28+31+30+31+30+31+31+30+31) * 24 * 3600));
+    ASSERT_EQ("Tue, 01 Dec 1970 00:00:00 GMT", cgi::rfc1123Time((31+28+31+30+31+30+31+31+30+31+30) * 24 * 3600));
+    ASSERT_EQ("Fri, 01 Jan 1971 00:00:00 GMT", cgi::rfc1123Time((31+28+31+30+31+30+31+31+30+31+30+31) * 24 * 3600));
+}
+
+TEST_F(cgiFixture, rfc1123Time_years)
+{
+    ASSERT_EQ("Thu, 01 Jan 1970 00:00:00 GMT", cgi::rfc1123Time(0));
+    ASSERT_EQ("Fri, 01 Jan 1971 00:00:00 GMT", cgi::rfc1123Time(365*24*3600));
+    ASSERT_EQ("Fri, 31 Dec 1999 23:59:59 GMT", cgi::rfc1123Time(946684800-1));
+    ASSERT_EQ("Sat, 01 Jan 2000 00:00:00 GMT", cgi::rfc1123Time(946684800));
+}
+
+TEST_F(cgiFixture, parseHttpDate)
+{
+    ASSERT_EQ(784111777, cgi::parseHttpDate("Sun, 06 Nov 1994 08:49:37 GMT"));
+    ASSERT_EQ(784111777, cgi::parseHttpDate("Sunday, 06-Nov-94 08:49:37 GMT"));
+    ASSERT_EQ(784111777, cgi::parseHttpDate("Sun Nov  6 08:49:37 1994"));
+
+    ASSERT_EQ("Sun, 06 Nov 1994 08:49:37 GMT",
+              cgi::rfc1123Time(cgi::parseHttpDate("Sun, 06 Nov 1994 08:49:37 GMT")));
+}
+
+TEST_F(cgiFixture, parseHttpDate_epoch)
+{
+    ASSERT_EQ(0, cgi::parseHttpDate("Thu, 01 Jan 1970 00:00:00 GMT"));
+    ASSERT_EQ(0, cgi::parseHttpDate("Thu, 01 Jan 1970 00:00:00 UTC"));
+}
+
 TEST_F(cgiFixture, escape_html)
 {
     ASSERT_STREQ("", escape_html("").c_str());

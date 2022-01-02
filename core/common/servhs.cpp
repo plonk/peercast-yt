@@ -1172,6 +1172,8 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
             servMgr->audioCodec = arg;
         else if (strcmp(curr, "wmvProtocol") == 0)
             servMgr->wmvProtocol = arg;
+        else if (strcmp(curr, "preferredTheme") == 0)
+            servMgr->preferredTheme = arg;
     }
 
     servMgr->allowServer1 = allowServer1;
@@ -1366,9 +1368,11 @@ void Servent::CMD_stop(const char* cmd, HTTP& http, String& jumpStr)
 
     auto c = chanMgr->findChannelByID(id);
     if (c)
+    {
         c->thread.shutdown();
+        sys->waitThread(&c->thread);
+    }
 
-    sys->sleep(500);
     jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
 }
 
@@ -2399,7 +2403,12 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
 
     if (strcmp(mimeType, MIME_HTML) == 0)
     {
-        if (str::contains(fn, "play.html"))
+        auto req = http.getRequest();
+        GenericScope locals;
+        HTTPRequestScope reqScope(req);
+        std::vector<Template::Scope*> scopes = { &reqScope, &locals };
+
+        if (str::contains(fn, "/play.html"))
         {
             // 視聴ページだった場合はあらかじめチャンネルのリレーを開
             // 始しておく。
@@ -2416,19 +2425,36 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
             ChanInfo info;
             if (!servMgr->getChannel(id.cstr(), info, true))
                 throw HTTPException(HTTP_SC_NOTFOUND, 404);
+
+            auto ch = chanMgr->findChannelByID(GnuID(id.c_str()));
+            if (!ch)
+                throw HTTPException(HTTP_SC_NOTFOUND, 404);
+
+            locals.vars["channel"] = ch->getState();
+        }else if (str::contains(fn, "/relayinfo.html"))
+        {
+            auto vec = str::split(fn, "?");
+            if (vec.size() != 2)
+                throw HTTPException(HTTP_SC_BADREQUEST, 400);
+
+            String id = cgi::Query(vec[1]).get("id").c_str();
+
+            if (id.isEmpty())
+                throw HTTPException(HTTP_SC_BADREQUEST, 400);
+
+            auto ch = chanMgr->findChannelByID(GnuID(id.c_str()));
+            locals.vars["channel"] = ch ? ch->getState() : nullptr;
         }
 
         char *args = strstr(fileName.cstr(), "?");
         if (args)
             *args = '\0';
 
-        auto req = http.getRequest();
 
         validFileOrThrow(fileName.c_str(), documentRoot);
 
         html.writeOK(MIME_HTML);
-        HTTPRequestScope scope(req);
-        html.writeTemplate(fileName.cstr(), req.queryString.c_str(), scope);
+        html.writeTemplate(fileName.cstr(), req.queryString.c_str(), scopes);
     }else
     {
         validFileOrThrow(fileName.c_str(), documentRoot);

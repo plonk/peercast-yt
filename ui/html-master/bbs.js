@@ -5,7 +5,7 @@ $queue = [];
 
 function renderPost(p, info) {
     var buf = "";
-    buf += "<div style='padding: 2px; font-size: 13px'>";
+    buf += "<div class='highlight' style='padding: 2px; font-size: 13px'>";
     buf += `<a target='_blank' href='${threadUrl(info)}/${p.no}'><b>${p.no}</b></a>：${p.body}`;
     buf += "</div>"
     return buf;
@@ -33,7 +33,8 @@ function newPostsCallback(url, thread) {
     for (var i = 0; i < thread.posts.length; i++) {
         var p = thread.posts[i];
         var elements = $(renderPost(p, url));
-        div.append($(elements).hide().show('highlight'));
+
+        div.append(elements);
     }
 
     // 最下部にスクロール。
@@ -249,6 +250,11 @@ async function mainAsync(url) {
     }
 }
 
+function handleSubmit() {
+    var value = $('#message-input').prop('value');
+    postMessage(value);
+}
+
 $(function(){
     switchChatVisibility();
 
@@ -258,9 +264,12 @@ $(function(){
     });
 
     // 投稿ボタンが押された。
-    $('#post-button').on('click',function(){
-        var value = $('#message-input').prop('value');
-        postMessage(value);
+    $('#post-button').on('click', handleSubmit);
+    $('#message-input').on('keydown',function(ev){
+        if (ev.keyCode == 13 && ev.shiftKey) {
+            handleSubmit();
+            ev.preventDefault();
+        }
     });
 
     mainAsync(CONTACT_URL);

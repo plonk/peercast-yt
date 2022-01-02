@@ -363,6 +363,10 @@ TEST_F(ServentFixture, writeVariable)
 
     mem.str("");
     ASSERT_TRUE(s.writeVariable(mem, "address"));
+    ASSERT_STREQ("0.0.0.0", mem.str().c_str());
+
+    mem.str("");
+    ASSERT_TRUE(s.writeVariable(mem, "endpoint"));
     ASSERT_STREQ("0.0.0.0:0", mem.str().c_str());
 
     mem.str("");

@@ -34,12 +34,16 @@ spawn_peercast
 
   files = %w[bcid.html notifications.html settings.html
 broadcast.html connections.html login.html viewlog.html
-channels.html head.html logout.html relayinfo.html]
+channels.html head.html logout.html]
 
   files.each do |file|
     response = http_get("http://#{host}:7144/html/ja/#{file}")
     assert_eq(200, response.code, context: file)
   end
+
+  # id= キーがないから Bad Request になる。
+  response = http_get("http://#{host}:7144/html/ja/relayinfo.html")
+  assert_eq(400, response.code)
 
   response = http_get("http://#{host}:7144/html/ja/play.html")
   assert_eq(400, response.code)

@@ -4,124 +4,118 @@
     <title>{^TITLE}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="peercast.css" rel="stylesheet" type="text/css">
+    <link href="/assets/css/peercast.css" rel="stylesheet" type="text/css">
     <script src="/assets/js/jquery-3.2.1.min.js"></script>
     <script src="js/reloader.js"></script>
     <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon">
     {^HEAD}
+    {^BASIC_DARK_THEME_STYLE_TAG}
   </head>
   <body>
 
-    <div class="reloader" data-url="?fragment=notifications" data-interval="{$servMgr.refreshHTML}">
-      {@fragment notifications}
-      <script>
-        var notifications = [];
-        var t = {!sys.time};
-        var r = {!servMgr.refreshHTML};
-        {@loop notificationBuffer.numNotifications}
-          {@if !loop.notification.isRead}
-            if (t - {$loop.notification.unixTime} <= (2*r))
-              notifications.push({ time: "{\loop.notification.time}", type: "{\loop.notification.type}", message: "{\loop.notification.message}" });
-          {@end}
-        {@end}
+    <div align="center">
 
-        // {$notificationBuffer.markAsRead}
+      <div align="center">
 
-        function notifyMe() {
-          if (!("Notification" in window)) {
-            console.log("This browser does not support system notifications");
-          }
-          else if (Notification.permission === "granted") {
-            for (var i = 0; i < notifications.length; i++) {
-              spawnNotification(notifications[i].message, "/assets/images/small-logo.png", notifications[i].type);
-            }
-          }
-          else if (Notification.permission !== 'denied') {
-            Notification.requestPermission(function (permission) {
-              if (permission === "granted") {
-                for (var i = 0; i < notifications.length; i++) {
-                  spawnNotification(notifications[i].message, "/assets/images/small-logo.png", notifications[i].type);
-                }
-              }
-            });
-          }
-        }
+              <table border="0" align="center" cellpadding="1" cellspacing="0" style="float:left">
+                <tr>
+                  <td rowspan="2" valign="middle" style="fill:red">
+                    <!-- <img src="/assets/images/megaphone.svg" width=47 style="fill: red" alt="www.peercast.org" border="0"> -->
+                    <svg
+                        style="fill:red"
+                        width="48"
+                        height="48"
+                        viewBox="0 0 8.4666665 8.4666669"
+                        version="1.1"
+                        id="svg5"
+                        inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+                        sodipodi:docname="megaphone.svg"
+                        xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+                        xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+                        xmlns="http://www.w3.org/2000/svg"
+                        xmlns:svg="http://www.w3.org/2000/svg">
+                      <sodipodi:namedview
+                          id="namedview7"
+                          pagecolor="#ffffff"
+                          bordercolor="#666666"
+                          borderopacity="1.0"
+                          inkscape:pageshadow="2"
+                          inkscape:pageopacity="0.0"
+                          inkscape:pagecheckerboard="0"
+                          inkscape:document-units="px"
+                          showgrid="false"
+                          units="px"
+                          inkscape:zoom="23.71807"
+                          inkscape:cx="8.66428"
+                          inkscape:cy="14.566953"
+                          inkscape:window-width="1920"
+                          inkscape:window-height="1017"
+                          inkscape:window-x="-8"
+                          inkscape:window-y="1072"
+                          inkscape:window-maximized="1"
+                          inkscape:current-layer="layer1" />
+                      <defs
+                          id="defs2" />
+                      <g
+                          inkscape:label="レイヤー 1"
+                          inkscape:groupmode="layer"
+                          id="layer1">
+                        <g
+                            aria-label="U"
+                            id="text3971"
+                            style="font-size:8.00129px;line-height:1.25;font-family:Webdings;-inkscape-font-specification:Webdings;stroke-width:0.200032;fill-opacity:1">
+                          <path
+                              d="m 8.1408494,3.62831 q 0,1.1603433 -0.7032384,2.1448771 0.3438054,-0.7344934 0.3438054,-1.6526103 0,-0.8556067 -0.2773885,-1.5901001 Q 7.1641294,1.639708 6.523401,1.3076232 7.304777,1.5576635 7.730627,2.1827643 8.1408494,2.7922376 8.1408494,3.62831 Z M 7.4258903,3.757237 q 0,0.9298374 -0.5625907,1.7151203 0.2734816,-0.586032 0.2734816,-1.3205254 0,-0.683704 -0.2226922,-1.269736 Q 6.6445143,2.1671368 6.1288062,1.901469 6.753907,2.1007199 7.0938055,2.6047074 7.4258903,3.0891605 7.4258903,3.757237 Z M 6.7812551,3.8900709 q 0,0.7462141 -0.4531981,1.3752218 0.2226922,-0.4727325 0.2226922,-1.0587645 0,-0.5469632 -0.1797165,-1.0157888 Q 6.1561543,2.6203349 5.7459319,2.4054565 6.2421057,2.5656386 6.5116804,2.9641404 6.7812551,3.3587352 6.7812551,3.8900709 Z M 6.0780167,4.6440988 q 0,0.4336637 -0.082045,0.7618416 -0.1250201,0.5157081 -0.4102224,0.5157081 -0.074231,0 -0.324271,-0.1679958 Q 4.9567421,5.5465881 4.0972285,5.4098473 3.3861764,5.2926409 2.8509338,5.2926409 q -0.1484614,0 -0.1484614,0.2383196 0,0.082045 0.06251,0.2344128 0.06251,0.1484615 0.06251,0.2344128 0,0.085951 0.1015789,0.1914372 0.1015789,0.1054857 0.1015789,0.1679958 0,0.015627 -0.011721,0.046883 -0.00781,0.031255 -0.00781,0.046883 0,0.054696 0.089858,0.1562752 0.093765,0.1015789 0.093765,0.1758096 0,0.035162 -0.031255,0.089858 -0.027348,0.054696 -0.027348,0.085951 0,0.046883 0.046883,0.1054858 0.046883,0.06251 0.046883,0.085951 0,0.070324 -0.1875303,0.070324 -0.4102224,0 -0.5782182,-0.2422266 Q 2.3586669,6.8319516 2.2649018,6.3592191 2.0812784,5.4762642 1.639801,5.4762642 q -0.015628,0 -0.046883,0.00781 -0.031255,0.00391 -0.046883,0.00391 -0.5000807,0 -0.5000807,-0.91421 0,-0.5235219 0.5118013,-0.7540278 Q 1.8234244,3.7220751 2.3508532,3.5111036 2.9056301,3.2766908 3.5658929,2.7922376 4.1831799,2.3429464 4.4371271,2.0225823 4.538706,1.4834328 4.862977,1.4834328 q 0.3828743,0 0.7384004,0.8438861 0.2383196,0.5704045 0.3633398,1.1994122 0.1132995,0.5664976 0.1132995,1.1173677 z M 1.2725543,5.4450092 Q 0.85061122,5.417661 0.67480162,5.3356165 0.39741314,5.1988757 0.39741314,4.8394428 q 0,-0.3555261 0.22269216,-0.5274288 0.007814,-0.00781 0.5235219,-0.2773885 -0.18362333,0.2070646 -0.18362333,0.6329145 0,0.5157082 0.31255043,0.7774692 z M 5.0778554,4.3823378 q 0,-0.4141293 -0.1406477,-0.7774691 Q 4.7809325,3.1985532 4.5074509,3.0344642 4.6559124,4.4253135 4.9645559,5.1207381 5.0778554,4.7769327 5.0778554,4.3823378 Z m -0.00391,1.1369021 Q 4.7301431,4.995718 4.5269853,4.1948076 4.3394551,3.4564072 4.3394551,2.7687964 L 4.3902445,2.323412 Q 4.1284836,2.6633106 3.6713786,2.9602335 3.2572493,3.2063669 2.8470269,3.4564072 2.3625738,3.757237 2.3625738,4.1557388 q 0,0.3477123 0.1250202,0.6016595 0.1562752,0.3125504 0.4610118,0.3633398 0.019534,0.00391 0.4297568,0.019534 0.9728131,0.039069 1.6955859,0.3789674 z M 0.97953827,5.2809202 Q 0.82716994,4.8550703 0.82716994,4.6128437 q 0,-0.1679958 0.0429757,-0.2852022 l -0.0898582,0.023441 q -0.0468826,0.1797164 -0.0468826,0.3828742 0,0.1679959 0.1367408,0.5469632 z M 0.76465986,5.2574789 Q 0.62401218,4.9214873 0.62401218,4.7769327 q 0,-0.1445546 0.031255,-0.359433 l -0.10939264,0.074231 q -0.0273482,0.1562752 -0.0273482,0.2930161 0,0.1797164 0.14846144,0.4375705 z"
+                              id="path7664"
+                              style="fill-opacity:1" />
+                        </g>
+                      </g>
+                    </svg>
 
-        function spawnNotification(theBody,theIcon,theTitle) {
-          var options = {
-              body: theBody,
-              icon: theIcon
-          }
-          var n = new Notification(theTitle,options);
-          setTimeout(n.close.bind(n), 5000);
-        }
+                  </td>
+                  <td valign="bottom" style="padding: 0; padding-left: 2px">
+                    <span class="titlelinksBig">Peercast</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top" style="line-height: 0.8em; padding: 0; text-align: center">
+                    <a href="https://github.com/plonk/peercast-yt">
+                      <span class="small">{$servMgr.version}</span>
+                    </a>
+                  </td>
+                </tr>
+              </table>
 
-        notifyMe();
-      </script>
-    {@end}
-    </div>
-
-            <div align="center">
-              <div align="center">
-                <table width="100%" border="0">
-                  <tr>
-                    <td>
-                      <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                        <tr>
-                          <td valign="middle" nowrap>
-                            <table border="0" align="center" cellpadding="1" cellspacing="0">
-                              <tr>
-                                <td rowspan="2" valign="middle"><img src="/assets/images/small-logo.png" alt="www.peercast.org" border="0"></td>
-                                <td valign="bottom" style="padding: 0; padding-left: 2px">
-                                  <span class="titlelinksBig">Peercast</span>
-                                </td>
-                              </tr>
-                              <tr>
-                                <td valign="top" style="line-height: 0.8em; padding: 0; text-align: center">
-                                    <a href="https://github.com/plonk/peercast-yt">
-                                      <span class="normal-small" style="font-size: 11px">{$servMgr.version}</span>
-                                    </a>
-                                </td>
-                              </tr>
-                            </table>
-                            <div align="center"><span class="titlelinksBig"> </span>
-                          </div></td>
-                          <td style="padding: 0" align="right" style="white-space:normal">
-                            {@if servMgr.upgradeURL}
-                            <div align="center" class="normal">
-                              <a href="{$servMgr.upgradeURL}" target="_blank">
-                                <strong>
-                                  <font color="#FF0000">
-                                    {#Please upgrade your client, click here to download the latest version.}
-                                  </font>
-                                </strong>
-                              </a>
-                            </div>
-                            {@end}
-                            {@if servMgr.hasUnsafeFilterSettings}
-                            <span style="color: red" class="normal">
-                              {#Warning: The whole of the Internet is marked as Private.}
-                            </span>
-                            {@end}
-                            <div style="float:right">
-			      <a class="normal-small" href="/public/index.html">{#Public Directory}</a>
-			      <a class="normal-small" href="logout.html">{#_Logout_navbar}</a>
-                            </div>
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                </table>
+              <div class="small" style="float:right">
+	        <a href="/public/index.html">{#Public Directory}</a>
+	        <a href="logout.html">{#_Logout_navbar}</a>
               </div>
 
-	      {^include navbar.html}
+      </div>
 
-              {^yield}
+      <br clear=all>
 
-              <hr size="1">
-	      {^include footer.html}
-            </div>
+      {@if servMgr.upgradeURL}
+      <div class="alert-warning">
+        <a href="{$servMgr.upgradeURL}" target="_blank" style="color: inherit">
+          {#Please upgrade your client, click here to download the latest version.}
+        </a>
+      </div>
+      {@end}
+
+      {@if servMgr.hasUnsafeFilterSettings}
+      <div class="alert-warning">
+        {#Warning: The whole of the Internet is marked as Private.}
+      </div>
+      {@end}
+
+      {^include navbar.html}
+
+      {^yield}
+
+      <hr size="1">
+      {^include footer.html}
+    </div>
 
   </body>
 </html>

@@ -88,8 +88,7 @@ public:
     std::pair<bool,std::string> getXML(int index, std::string&) const;
     void clear();
 
-    bool writeVariable(Stream&, const String&) override;
-    bool writeVariable(Stream&, const String&, int) override;
+    amf0::Value getState() override;
 
     void update();
     void forceUpdate();

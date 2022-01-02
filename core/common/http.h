@@ -253,6 +253,12 @@ public:
         return res;
     }
 
+    static HTTPResponse notModified(const HTTPHeaders& aHeaders = {})
+    {
+        HTTPResponse res(304, aHeaders);
+        return res;
+    }
+
     std::string body;
     int statusCode;
     HTTPHeaders headers;

@@ -2060,54 +2060,23 @@ int Servent::serverProc(ThreadInfo *thread)
 }
 
 // -----------------------------------
-bool    Servent::writeVariable(Stream &s, const String &var)
+amf0::Value    Servent::getState()
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
 
-    using namespace std;
-
-    std::string buf;
-
-    if (var == "id")
-        buf = std::to_string(serventIndex);
-    else if (var == "type")
-        buf = getTypeStr();
-    else if (var == "status")
-        buf = getStatusStr();
-    else if (var == "address")
-        buf = getHost().str();
-    else if (var == "agent")
-        buf = agent.c_str();
-    else if (var == "bitrate")
-    {
-        unsigned int tot = 0;
-        if (sock)
-            tot = sock->bytesInPerSec() + sock->bytesOutPerSec();
-        buf = str::format("%.1f", BYTES_TO_KBPS(tot));
-    }else if (var == "bitrateAvg")
-    {
-        unsigned int tot = 0;
-        if (sock)
-            tot = sock->stat.bytesInPerSecAvg() + sock->stat.bytesOutPerSecAvg();
-        buf = str::format("%.1f", BYTES_TO_KBPS(tot));
-    }else if (var == "uptime")
-    {
-        String uptime;
-        if (lastConnect)
-            uptime.setFromStopwatch(sys->getTime() - lastConnect);
-        else
-            uptime.set("-");
-        buf = uptime.c_str();
-    }else if (var == "chanID")
-    {
-        buf = chanID.str();
-    }else if (var == "isPrivate")
-    {
-        buf = std::to_string(isPrivate());
-    }else
-        return false;
-
-    s.writeString(buf);
-
-    return true;
+    return amf0::Value::object(
+        {
+            {"id", std::to_string(serventIndex)},
+            {"type", getTypeStr()},
+            {"status", getStatusStr()},
+            {"address", getHost().ip.str()},
+            {"endpoint", getHost().str()},
+            {"agent", agent.c_str()},
+            {"bitrate", str::format("%.1f", BYTES_TO_KBPS(sock ? sock->bytesInPerSec() + sock->bytesOutPerSec() : 0))},
+            {"bitrateAvg", str::format("%.1f", BYTES_TO_KBPS(sock ? sock->stat.bytesInPerSecAvg() + sock->stat.bytesOutPerSecAvg() : 0))},
+            {"uptime", (lastConnect) ? String().setFromStopwatch(sys->getTime() - lastConnect).c_str() : "-"},
+            {"chanID", chanID.str()},
+            {"isPrivate", std::to_string(isPrivate())},
+        });
 }
+

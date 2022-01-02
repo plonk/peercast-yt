@@ -24,9 +24,23 @@ public:
     }
 };
 
-TEST_F(amf0Fixture, compile)
+TEST_F(amf0Fixture, Null)
 {
-    ASSERT_TRUE(true);
+    auto v = Value::null(nullptr);
+    ASSERT_FALSE(v.isString());
+    ASSERT_FALSE(v.isObject());
+    ASSERT_FALSE(v.isNumber());
+    ASSERT_TRUE(v.isNull());
+    ASSERT_EQ("null", v.inspect());
+    ASSERT_EQ(v.null(), nullptr);
+
+    v = Value();
+    ASSERT_FALSE(v.isString());
+    ASSERT_FALSE(v.isObject());
+    ASSERT_FALSE(v.isNumber());
+    ASSERT_TRUE(v.isNull());
+    ASSERT_EQ("null", v.inspect());
+    ASSERT_EQ(v.null(), nullptr);
 }
 
 TEST_F(amf0Fixture, Number)
@@ -142,9 +156,18 @@ TEST_F(amf0Fixture, Deserializer_Object)
     ASSERT_EQ("{\"age\":30,\"alias\":\"Mike\",\"name\":\"Mike\"}", v.inspect());
 }
 
+TEST_F(amf0Fixture, compare_Null)
+{
+    ASSERT_EQ(Value::null(nullptr), Value::null(nullptr));
+    ASSERT_EQ(Value::null(nullptr), nullptr);
+    ASSERT_NE(Value::null(nullptr), Value::string(""));
+    ASSERT_NE(Value::null(nullptr), Value::number(0));
+}
+
 TEST_F(amf0Fixture, compare_Number)
 {
     ASSERT_EQ(Value::number(1.234), Value::number(1.234));
+    ASSERT_EQ(Value::number(1.234), 1.234);
     ASSERT_NE(Value::number(1.234), Value::number(1.235));
 }
 
@@ -158,7 +181,15 @@ TEST_F(amf0Fixture, serialize_Number)
 TEST_F(amf0Fixture, compare_String)
 {
     ASSERT_EQ(Value::string("hoge"), Value::string("hoge"));
+    ASSERT_EQ(Value::string("hoge"), "hoge");
     ASSERT_NE(Value::string("fuga"), Value::string("hoge"));
+}
+
+TEST_F(amf0Fixture, compare_Boolean)
+{
+    ASSERT_EQ(Value::boolean(true), Value::boolean(true));
+    ASSERT_EQ(Value::boolean(false), Value::boolean(false));
+    ASSERT_NE(Value::boolean(true), Value::boolean(false));
 }
 
 TEST_F(amf0Fixture, serialize_String)
@@ -188,4 +219,64 @@ TEST_F(amf0Fixture, serialize_Date)
     Value d = amf0::Date(12, 34);
     StringStream mem(d.serialize());
     ASSERT_EQ(Value::date(12, 34), Deserializer().readValue(mem));
+}
+
+TEST_F(amf0Fixture, Object_at)
+{
+    Value v({ {"name","joe"} });
+
+    ASSERT_TRUE(v.isObject());
+    ASSERT_EQ(v.at("name"), "joe");
+    ASSERT_THROW(v.at("age"), std::out_of_range);
+}
+
+TEST_F(amf0Fixture, Object_count)
+{
+    Value v({ {"name","joe"} });
+
+    ASSERT_TRUE(v.isObject());
+    ASSERT_EQ(v.count("name"), 1);
+    ASSERT_EQ(v.count("age"), 0);
+}
+
+TEST_F(amf0Fixture, StrictArray_at_size)
+{
+    Value v({ "one", "two", 3 });
+
+    ASSERT_TRUE(v.isStrictArray());
+    ASSERT_EQ(v.size(), 3);
+    ASSERT_EQ(v.at(0), "one");
+    ASSERT_EQ(v.at(1), "two");
+    ASSERT_EQ(v.at(2), 3);
+    ASSERT_THROW(v.at(3), std::out_of_range);
+}
+
+TEST_F(amf0Fixture, Number_at_size_count)
+{
+    Value v(1);
+
+    ASSERT_THROW(v.at(0), std::runtime_error);
+    ASSERT_THROW(v.at("a"), std::runtime_error);
+    ASSERT_THROW(v.count("a"), std::runtime_error);
+    ASSERT_THROW(v.size(), std::runtime_error);
+}
+
+TEST_F(amf0Fixture, String_at_size_count)
+{
+    Value v("x");
+
+    ASSERT_THROW(v.at(0), std::runtime_error);
+    ASSERT_THROW(v.at("a"), std::runtime_error);
+    ASSERT_THROW(v.count("a"), std::runtime_error);
+    ASSERT_THROW(v.size(), std::runtime_error);
+}
+
+TEST_F(amf0Fixture, Null_at_size_count)
+{
+    Value v;
+
+    ASSERT_THROW(v.at(0), std::runtime_error);
+    ASSERT_THROW(v.at("a"), std::runtime_error);
+    ASSERT_THROW(v.count("a"), std::runtime_error);
+    ASSERT_THROW(v.size(), std::runtime_error);
 }
