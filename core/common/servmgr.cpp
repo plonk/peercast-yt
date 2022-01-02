@@ -1023,6 +1023,7 @@ ini::Document ServMgr::getSettings()
             {"preset", this->preset},
             {"audioCodec", this->audioCodec},
             {"wmvProtocol", this->wmvProtocol},
+            {"preferredTheme", this->preferredTheme},
         }
     });
 
@@ -1322,6 +1323,8 @@ void ServMgr::loadSettings(const char *fn)
                 this->audioCodec = iniFile.getStrValue();
             else if (iniFile.isName("wmvProtocol"))
                 this->wmvProtocol = iniFile.getStrValue();
+            else if (iniFile.isName("preferredTheme"))
+                this->preferredTheme = iniFile.getStrValue();
 
             // debug
             else if (iniFile.isName("logLevel"))
