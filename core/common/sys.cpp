@@ -163,11 +163,15 @@ ThreadInfo::~ThreadInfo()
     using str::STR;
     if (this->handle.joinable())
     {
-        this->handle.join();
-        LOG_DEBUG("%s", STR("thread ", this->handle.get_id(), " joined").c_str());
-    }else
-    {
-        LOG_DEBUG("%s", STR("dtor called for non-joinable thread (", this->handle.get_id(), ")").c_str());
+        if (std::this_thread::get_id() == this->handle.get_id())
+        {
+            LOG_DEBUG("~ThreadInfo: Self joining avoided");
+            this->handle.detach();
+        }else
+        {
+            this->handle.join();
+            LOG_DEBUG("%s", STR("thread ", this->handle.get_id(), " joined").c_str());
+        }
     }
 }
 
@@ -280,10 +284,17 @@ void Sys::waitThread(ThreadInfo* info)
 {
     if (info->handle.joinable())
     {
-        info->handle.join();
+        if (std::this_thread::get_id() == info->handle.get_id())
+        {
+            LOG_DEBUG("waitThread: Self joining avoided");
+            info->handle.detach();
+        }else
+        {
+            info->handle.join();
+        }
     }else
     {
-        LOG_ERROR("waitThread called on non-joinable thread");
+        LOG_WARN("waitThread called on non-joinable thread");
     }
 }
 
