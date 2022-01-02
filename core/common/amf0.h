@@ -93,7 +93,8 @@ namespace amf0
                 m_object[pair.first] = pair.second;
         }
         Value(const Date& d) : m_type(kDate), m_number(0.0), m_bool(false), m_date(d) {}
-        Value(std::vector<Value> arr) : m_type(kStrictArray), m_number(0.0), m_bool(false), m_strict_array(arr) {}
+        Value(const std::vector<Value>& arr) : m_type(kStrictArray), m_number(0.0), m_bool(false), m_strict_array(arr) {}
+        Value(const std::map<std::string,Value>& map) : m_type(kObject), m_number(0.0), m_bool(false), m_object(map) {}
 
         static Value null(std::nullptr_t)
         { return Value(); }
