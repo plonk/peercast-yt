@@ -12,6 +12,34 @@ using namespace std;
 using json = nlohmann::json;
 
 // ------------------------------------------------------------
+amf0::Value jsonToAmf(const json& j)
+{
+    if (j.is_string()) {
+        return j.get<std::string>();
+    } else if (j.is_object()) {
+        std::map<std::string,amf0::Value> m;
+        for (auto& entry : j.items()) {
+            m[entry.key()] = jsonToAmf(entry.value());
+        }
+        return m;
+    } else if (j.is_boolean()) {
+        return j.get<bool>();
+    } else if (j.is_array()) {
+        std::vector<amf0::Value> vec;
+        for (auto& v : j) {
+            vec.push_back(jsonToAmf(v));
+        }
+        return vec;
+    } else if (j.is_number()) {
+        return j.get<double>();
+    } else if (j.is_null()) {
+        return nullptr;
+    } else {
+        throw GeneralException("jsonToAmf: Unsupported nlohmann::json type");
+    }
+}
+
+// ------------------------------------------------------------
 PublicController::PublicController(const string& documentRoot)
     : mapper("/public", documentRoot)
 {
@@ -200,16 +228,23 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
         if (!success)
             return HTTPResponse::notFound();
 
+        auto ch = chanMgr->findChannelByID(GnuID(id.c_str()));
+        if (!ch)
+            return HTTPResponse::notFound();
+
         string path, lang;
         tie(path, lang) = mapper.toLocalFilePath(req.path, langs);
 
         FileStream file;
         StringStream mem;
         HTTPRequestScope scope(req);
+        GenericScope locals;
+        locals.vars["channel"] = ch->getState();
 
         file.openReadOnly(path.c_str());
         Template engine(req.queryString);
         engine.prependScope(scope);
+        engine.prependScope(locals);
         engine.readTemplate(file, &mem);
 
         map<string,string> headers;
@@ -233,7 +268,7 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
 
             StringStream mem;
             FileStream file;
-            HTTPRequestScope scope(req);
+            HTTPRequestScope reqscope(req);
 
             try
             {
@@ -241,7 +276,26 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
                 {
                     file.openReadOnly(path.c_str());
                     Template engine(req.queryString);
-                    engine.prependScope(scope);
+                    RootObjectScope globals;
+                    GenericScope locals;
+                    JrpcApi api;
+                    {
+                        json::array_t channels = api.getChannels({});
+                        auto newend = std::remove_if(channels.begin(), channels.end(),
+                                                     [] (json channel)
+                                                         { return !channel["status"]["isBroadcasting"]; });
+                        std::sort(channels.begin(), newend,
+                                  [] (json a, json b)
+                                      {
+                                          return a["status"]["totalDirects"] < b["status"]["totalDirects"];
+                                      });
+
+                        locals.vars["broadcastingChannels"] = jsonToAmf(json::array_t(channels.begin(), newend));
+                    }
+                    locals.vars["channelsFound"] = jsonToAmf(api.getChannelsFound({}));
+                    engine.prependScope(globals);
+                    engine.prependScope(reqscope);
+                    engine.prependScope(locals);
                     engine.readTemplate(file, &mem);
                 }else
                 {
