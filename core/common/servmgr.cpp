@@ -2039,8 +2039,6 @@ amf0::Value ServMgr::getState()
 {
     using std::to_string;
 
-    LOG_DEBUG("getState()");
-
     std::vector<amf0::Value> filterArray;
     for (int i = 0; i < this->numFilters; i++)
         filterArray.push_back(this->filters[i].getState());
