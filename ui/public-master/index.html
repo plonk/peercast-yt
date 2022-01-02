@@ -2,20 +2,34 @@
 <html>
   <head>
     <title>{#PeerCast on} {@if servMgr.serverName}{$servMgr.serverName}{@else}{$request.host}{@end}</title>
-    <link href="peercast.css" rel="stylesheet" type="text/css">
+    <link href="/assets/css/peercast.css" rel="stylesheet" type="text/css">
     <link href="index.css" rel="stylesheet" type="text/css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8">
+    {^BASIC_DARK_THEME_STYLE_TAG}
+
+    <style>
+      {^DARK_THEME_STYLES_BEGIN}
+      .container { background-color: #222; border-color: #888 }
+      img[src="/assets/images/peercast-logo.png"] { filter: invert(1) contrast(0.75); }
+      .channel-list { color: #ddd }
+      .channel-list tr { background-color: #544827 }
+      .channel-list th { color: #eee }
+      .index-txt-badge { background-color: #333; color: #ffa526;}
+      h1.server-name { color: #bbb }
+      {^DARK_THEME_STYLES_END}
+    </style>
   </head>
   <body>
     <div class="container">
       <center>
-        <img width="370" alt="PeerCast - p2p broadcasting for everyone" src="/assets/images/peercast-logo.png">
-        <h1 style="color: #111; font-size: 28px">{$servMgr.serverName}</h1>
+        <img style="max-width:100%" alt="PeerCast - p2p broadcasting for everyone" src="/assets/images/peercast-logo.png">
+        <h1 class="server-name">{$servMgr.serverName}</h1>
       </center>
       <hr>
 
       <h2>{#Local Channels}
-        <div style="display: inline-block; float: right">
+        <div style="display: inline-block; float: right; margin-top: 8px; margin-bottom: 8px">
           <a style="text-decoration: none" href="http://{$request.host}/public/index.txt">
             <span class="index-txt-badge"><span style="font-size: 133%">&#x1f4e1;</span>&thinsp;<b>index</b></span>
           </a>
@@ -23,7 +37,7 @@
         </div>
       </h2>
 
-      <table width="100%" class="channel-list">
+      <table class="channel-list">
         <tr>
           <th>{#Rank}</th>
           <th><img src="/assets/images/small-icon.png" alt="{#Small icon of a megaphone}"></th>
@@ -41,10 +55,10 @@
               <img class="play-button" src="/assets/images/play.png">
             </a>
           </td>
-          <td style="width: 600px" class="channel-description">
+          <td class="channel-description">
             <span style="font-weight: bold">
               {@if this.info.url}
-              <a class="link channel-name" href="{$this.info.url}">{$this.info.name}</a>
+              <a class="channel-name" href="{$this.info.url}">{$this.info.name}</a>
               {@else}
               {$this.info.name}
               {@end}
@@ -65,7 +79,7 @@
 
       <h2>{#Yellow Pages}</h2>
 
-      <table width="100%" class="channel-list">
+      <table class="channel-list">
       <tr>
       <th>{#Rank}</th>
       <th><img src="/assets/images/small-icon.png" alt="{#Small icon of a megaphone}"></th>
@@ -83,10 +97,10 @@
             <img class="play-button" src="/assets/images/play.png">
           </a>
         </td>
-        <td style="width: 600px" class="channel-description">
+        <td class="channel-description">
           <span style="font-weight: bold">
             {@if this.url}
-            <a class="link channel-name" href="{$this.url}">{$this.name}</a>
+            <a class="channel-name" href="{$this.url}">{$this.name}</a>
             {@else}
             {$this.name}
             {@end}
