@@ -128,4 +128,70 @@ public:
     const HTTPRequest& m_request;
 };
 
+class RootObjectScope : public Template::Scope
+{
+public:
+    RootObjectScope();
+
+    bool writeObjectProperty(amf0::Value& out, const String& varName, amf0::Value& obj)
+    {
+        auto names = str::split(varName.str(), ".");
+
+        if (names.size() == 1)
+        {
+            try
+            {
+                auto value = obj.object().at(varName.str());
+                out = value;
+                return true;
+            }catch (std::out_of_range&)
+            {
+                return false;
+            }
+        }else{
+            try
+            {
+                auto value = obj.object().at(names[0]);
+                if (value.isArray())
+                {
+                    return false;
+//writeObjectProperty(s, varName + strlen(names[0].c_str()) + 1, array_to_object(value));
+                }else if (value.isObject())
+                {
+                    return writeObjectProperty(out, varName + strlen(names[0].c_str()) + 1, value);
+                }else
+                    return false;
+            } catch (std::out_of_range&)
+            {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    // loop は無視。
+    bool writeVariable(amf0::Value& out, const String& varName) override
+    {
+        const std::string v = varName;
+        if (m_objects.count(v))
+        {
+            out =  m_objects[v];
+            return true;
+        }else{
+            auto idx = v.find('.');
+            if (idx != std::string::npos)
+            {
+                auto qual = v.substr(0, idx);
+                if (m_objects.count(qual))
+                {
+                    auto obj = m_objects[qual];
+                    return writeObjectProperty(out, varName + qual.size() + 1, obj);
+                }
+            }
+            return false;
+        }
+    }
+    std::map<std::string,amf0::Value> m_objects;
+};
+
 #endif

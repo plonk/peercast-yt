@@ -917,3 +917,12 @@ bool GenericScope::writeVariable(amf0::Value& out, const String& varName)
         return false;
     }
 }
+
+RootObjectScope::RootObjectScope()
+    : m_objects({{"servMgr" , servMgr->getState()},
+                 {"chanMgr" , chanMgr->getState()},
+                 {"stats"   , stats.getState()},
+                 {"notificationBuffer" , g_notificationBuffer.getState()},
+                 {"sys"     , sys->getState()}})
+{
+}
