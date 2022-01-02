@@ -1,6 +1,6 @@
 {^define LAYOUT bare_layout.html}
 
-<div><a href="/public/index.html">{#Public Directory}</a></div>
+<div style="position: fixed; left:8px; top:8px; z-index: 1"><a href="/public/index.html">{#Public Directory}</a></div>
 
 <div align=center style="margin-top: 80px">
   <form action="/admin?" method=POST>
@@ -13,7 +13,8 @@
                 height: 100%;
                 display:flex;
                 justify-content:center;
-                align-items:center">
+                align-items:center;
+                z-index: 0">
     <table class="table-panel" style="">
       <tr align=middle>
         <td colspan="2"><strong>PeerCast</strong></td>
