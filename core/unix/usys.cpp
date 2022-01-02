@@ -193,7 +193,7 @@ bool USys::getHostnameByAddress(const IP& ip, std::string& out)
                         NULL,
                         0,
                         NI_NAMEREQD)) {
-            LOG_ERROR("%s", gai_strerror(errcode));
+            LOG_ERROR("getnameinfo: %s (%s)", gai_strerror(errcode), ip.str().c_str());
             out = "";
             return false;
         } else {
@@ -211,7 +211,7 @@ bool USys::getHostnameByAddress(const IP& ip, std::string& out)
                         NULL,
                         0,
                         NI_NAMEREQD)) {
-            LOG_ERROR("%s", gai_strerror(errcode));
+            LOG_ERROR("getnameinfo: %s (%s)", gai_strerror(errcode), ip.str().c_str());
             out = "";
             return false;
         } else {
