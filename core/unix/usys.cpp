@@ -430,3 +430,26 @@ void USys::rename(const std::string& oldpath, const std::string& newpath)
         throw GeneralException( str::format("rename: %s", str::strerror(errno).c_str()).c_str() );
     }
 }
+
+// ---------------------------------
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+void USys::copyOwnershipPermission(const std::string& from, const std::string& to)
+{
+    struct stat statbuf = {};
+    if (::stat(from.c_str(), &statbuf) == -1) {
+        auto msg = str::STR("copyOwnershipPermission: Failed to get file status: ", from);
+        throw GeneralException(msg.c_str());
+    }
+
+    if (::chmod(to.c_str(), statbuf.st_mode) == -1) {
+        auto msg = str::STR("copyOwnershipPermission: Failed to set file mode: ", to);
+        throw GeneralException(msg.c_str());
+    }
+
+    if (::chown(to.c_str(), statbuf.st_uid, statbuf.st_gid) == -1) {
+        auto msg = str::STR("copyOwnershipPermission: Failed to set file owner/group: ", to);
+        throw GeneralException(msg.c_str());
+    }
+}

@@ -932,6 +932,11 @@ static ini::Section writeRelayChannel(std::shared_ptr<Channel> c)
 }
 
 // --------------------------------------------------
+#if _UNIX
+// for umask
+#include <sys/types.h>
+#include <sys/stat.h>
+#endif
 void ServMgr::saveSettings(const char *fn)
 {
     FileStream iniFile;
@@ -939,7 +944,17 @@ void ServMgr::saveSettings(const char *fn)
     std::string tmpname = str::STR(fn, ".tmp");
 
     try {
+#if _UNIX
+        // デフォルトのパーミッションが 600 になるようにマスクを設定す
+        // る。
+        mode_t prevMode = umask(066);
+#endif
+
         iniFile.openWriteReplace(tmpname.c_str());
+
+#if _UNIX
+        umask(prevMode);
+#endif
     } catch (StreamException&) {
         LOG_ERROR("Unable to open ini file");
     }
@@ -953,6 +968,15 @@ void ServMgr::saveSettings(const char *fn)
     iniFile.close();
 
     try {
+        // 古い設定ファイルがある場合はここでその所有者とモードがコピー
+        // される。
+        sys->copyOwnershipPermission(fn, tmpname);
+    } catch (GeneralException& e) {
+        LOG_WARN("%s", e.what());
+    }
+
+    try {
+        // アトミックに置き換える。
         sys->rename(tmpname, fn);
     } catch (GeneralException& e) {
         LOG_ERROR("rename failed: %s", e.what());

@@ -136,6 +136,11 @@ public:
 
     virtual void rename(const std::string& oldpath, const std::string& newpath) = 0;
 
+    virtual void copyOwnershipPermission(const std::string& from, const std::string& to)
+    {
+        throw NotImplementedException(__func__);
+    }
+
     unsigned int idleSleepTime;
 
     class LogBuffer *logBuf;

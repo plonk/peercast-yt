@@ -54,6 +54,8 @@ public:
 
     void rename(const std::string& oldpath, const std::string& newpath) override;
 
+    void copyOwnershipPermission(const std::string& from, const std::string& to) override;
+
     peercast::Random rndGen;
 private:
 
