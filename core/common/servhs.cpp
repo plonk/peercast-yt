@@ -2431,7 +2431,7 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
                 throw HTTPException(HTTP_SC_NOTFOUND, 404);
 
             locals.vars["channel"] = ch->getState();
-        }else if (str::contains(fn, "/relayinfo.html"))
+        }else if (str::contains(fn, "/relayinfo.html") || str::contains(fn, "/head.html"))
         {
             auto vec = str::split(fn, "?");
             if (vec.size() != 2)
