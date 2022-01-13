@@ -34,7 +34,7 @@ spawn_peercast
 
   files = %w[bcid.html notifications.html settings.html
 broadcast.html connections.html login.html viewlog.html
-channels.html head.html logout.html]
+channels.html logout.html]
 
   files.each do |file|
     response = http_get("http://#{host}:7144/html/ja/#{file}")
