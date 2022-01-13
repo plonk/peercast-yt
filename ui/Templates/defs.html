@@ -15,10 +15,13 @@
 
 {^define DARK_THEME_STYLES_BEGIN}
   {@if servMgr.preferredTheme == "dark"}
+    :root {color-scheme: dark;}
     @media screen, (not screen) {
   {@elsif servMgr.preferredTheme == "system"}
+    :root {color-scheme: light dark;}
     @media (prefers-color-scheme: dark) {
   {@elsif servMgr.preferredTheme == "light"}
+    :root {color-scheme: light;}
     @media screen and (not screen) {
   {@end}
   /* dark theme styles begin */

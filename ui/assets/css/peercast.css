@@ -238,7 +238,3 @@ input[readonly="readonly"] {
     position: absolute;
     left:20px; top:calc(50% - 20px)
 }
-
-:root {
-    color-scheme: light dark;
-}
