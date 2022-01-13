@@ -233,3 +233,31 @@ TEST_F(ServFilterFixture, isGlobal4)
     filter.setPattern("::/0");
     ASSERT_TRUE(filter.isGlobal());
 }
+
+TEST_F(ServFilterFixture, ipv4WildcardMatchesAnyIpv4Addr)
+{
+    filter.setPattern("255.255.255.255");
+    filter.flags = ServFilter::F_DIRECT;
+    ASSERT_TRUE( filter.matches(ServFilter::F_DIRECT, Host(IP::parse("127.0.0.1"),0)) );
+}
+
+TEST_F(ServFilterFixture, ipv4WildcardMatchesNoIpv6Addr)
+{
+    filter.setPattern("255.255.255.255");
+    filter.flags = ServFilter::F_DIRECT;
+    ASSERT_FALSE( filter.matches(ServFilter::F_DIRECT, Host(IP::parse("::1"), 0)) );
+}
+
+TEST_F(ServFilterFixture, ipv6WildcardMatchesAnyIpv6Addr)
+{
+    filter.setPattern("::/0");
+    filter.flags = ServFilter::F_DIRECT;
+    ASSERT_TRUE( filter.matches(ServFilter::F_DIRECT, Host(IP::parse("::1"),0)) );
+}
+
+TEST_F(ServFilterFixture, ipv6WildcardMatchesNoIpv4Addr)
+{
+    filter.setPattern("::/0");
+    filter.flags = ServFilter::F_DIRECT;
+    ASSERT_FALSE( filter.matches(ServFilter::F_DIRECT, Host(IP::parse("127.0.0.1"), 0)) );
+}
