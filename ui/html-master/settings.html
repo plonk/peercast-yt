@@ -157,6 +157,25 @@
             </select>
           </td>
         </tr>
+        <tr>
+          <th class="left-heading">{#Accent Color}</th>
+          <td>
+            <select name="accentColor">
+              <option value="blue" {@if servMgr.accentColor == "blue"}selected{@end}>
+                {#Blue}
+              </option>
+              <option value="orange" {@if servMgr.accentColor == "orange"}selected{@end}>
+                {#Orange}
+              </option>
+              <option value="magenta" {@if servMgr.accentColor == "magenta"}selected{@end}>
+                {#Magenta}
+              </option>
+              <option value="cyan" {@if servMgr.accentColor == "cyan"}selected{@end}>
+                {#Cyan}
+              </option>
+            </select>
+          </td>
+        </tr>
       </table>
 
       <table class="table-panel" width="100%" align=center border=0>

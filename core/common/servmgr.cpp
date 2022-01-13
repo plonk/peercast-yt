@@ -52,6 +52,7 @@ ServMgr::ServMgr()
             {"startPlayingFromKeyFrame", "DIRECT接続でキーフレームまで継続パケットをスキップする。", true},
         })
     , preferredTheme("system")
+    , accentColor("blue")
 {
     authType = AUTH_COOKIE;
 
@@ -1024,6 +1025,7 @@ ini::Document ServMgr::getSettings()
             {"audioCodec", this->audioCodec},
             {"wmvProtocol", this->wmvProtocol},
             {"preferredTheme", this->preferredTheme},
+            {"accentColor", this->accentColor},
         }
     });
 
@@ -1325,6 +1327,8 @@ void ServMgr::loadSettings(const char *fn)
                 this->wmvProtocol = iniFile.getStrValue();
             else if (iniFile.isName("preferredTheme"))
                 this->preferredTheme = iniFile.getStrValue();
+            else if (iniFile.isName("accentColor"))
+                this->accentColor = iniFile.getStrValue();
 
             // debug
             else if (iniFile.isName("logLevel"))
@@ -2137,6 +2141,7 @@ amf0::Value ServMgr::getState()
                                       }()},
             {"configurationFile", peercastApp->getIniFilename()},
             {"preferredTheme", this->preferredTheme},
+            {"accentColor", this->accentColor},
         });
 }
 

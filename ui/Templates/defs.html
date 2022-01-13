@@ -34,7 +34,31 @@
 
 {^define BASIC_DARK_THEME_STYLE_TAG}
 <style>
+  :root {
+      {@if servMgr.accentColor == "orange"}
+      --accent-color-light: #d47f03; /* L=61 */
+      --accent-color-dark: #ff9c0d; /* L=73 */
+      {@elsif servMgr.accentColor == "magenta"}
+      --accent-color-light: #a804a8; /* L=40 */
+      --accent-color-dark: #f65df5; /* L=65 */
+      {@elsif servMgr.accentColor == "cyan"}
+      --accent-color-light: #088396; /* L=50 */
+      --accent-color-dark: #04c5e1; /* L=73 */
+      {@else} /* defaults to blue */
+      --accent-color-light: #044b90; /* L=32 */
+      --accent-color-dark: #92b2ff; /* L=73 */
+      {@end}
+      --accent-color: var(--accent-color-light);
+  }
+  input { accent-color: var(--accent-color) }
+  a[href] {
+      color: var(--accent-color);
+  }
   {^DARK_THEME_STYLES_BEGIN}
+  :root {
+      --accent-color: var(--accent-color-dark);
+  }
+
   body { color: #fff; background-color: #222 }
 
   table.table-panel tbody tr:nth-child(odd) {
@@ -54,16 +78,12 @@
   table.table-panel tbody tr.heading-row {
       background-color: #555;
   }
-  a[href] {
-      color: #92b2ff;
-  }
 
   input { background-color: #222; color: #fff; }
   input[type=submit], button { background-color: #555; color: #fff; }
   input[type=text], input:not([type]), input[type=url], input[type=password] { padding: 5px }
   input[readonly="readonly"] { background-color: #222; color: #888 }
   select { background-color: #222; color: #fff; padding: 5px }
-  input { accent-color: #92b2ff }
   button:disabled { color: #bbb }
 
   textarea { background-color: #222; color: #fff; }

@@ -257,6 +257,12 @@
     "Light"                   : "明",
     "Dark"                    : "暗",
 
+    "Accent Color"            : "アクセントカラー",
+    "Blue"                    : "ブルー",
+    "Magenta"                 : "マゼンタ",
+    "Orange"                  : "オレンジ",
+    "Cyan"                    : "シアン",
+
     // rtmp.html
     "Start"                   : "開始",
     "Process ID"              : "プロセスID",

@@ -332,6 +332,7 @@ public:
 
     FlagRegistory       flags;
     std::string         preferredTheme;
+    std::string         accentColor;
 };
 
 // ----------------------------------

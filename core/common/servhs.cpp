@@ -1174,6 +1174,8 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
             servMgr->wmvProtocol = arg;
         else if (strcmp(curr, "preferredTheme") == 0)
             servMgr->preferredTheme = arg;
+        else if (strcmp(curr, "accentColor") == 0)
+            servMgr->accentColor = arg;
     }
 
     servMgr->allowServer1 = allowServer1;
