@@ -75,6 +75,9 @@ bool ServFilter::matches(int fl, const Host& h) const
         }
     case T_IPV6_WITH_NETMASK:
         {
+            if (h.ip.isIPv4Mapped())
+                return false; // IPv4アドレスにはマッチしない。
+
             const unsigned char* addr1 = host.ip.addr;
             const unsigned char* addr2 = h.ip.addr;
 
