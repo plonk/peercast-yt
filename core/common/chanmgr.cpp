@@ -6,16 +6,6 @@
 #include "md5.h"
 
 // -----------------------------------
-void ChanMgr::startSearch(ChanInfo &info)
-{
-    searchInfo = info;
-    clearHitLists();
-    numFinds = 0;
-    lastHit = 0;
-    searchActive = true;
-}
-
-// -----------------------------------
 void ChanMgr::quit()
 {
     LOG_DEBUG("ChanMgr is quitting..");
@@ -282,8 +272,6 @@ std::shared_ptr<Channel> ChanMgr::findAndRelay(ChanInfo &info)
 
 // -----------------------------------
 ChanMgr::ChanMgr()
-    : lastHit(0)
-    , searchActive(false)
 {
     channel = NULL;
 
@@ -301,8 +289,6 @@ ChanMgr::ChanMgr()
     icyIndex = 0;
     icyMetaInterval = 8192;
     maxRelaysPerChannel = 0;
-
-    searchInfo.init();
 
     minBroadcastTTL = 1;
     maxBroadcastTTL = 7;
@@ -653,9 +639,6 @@ void ChanMgr::addHit(Host &h, const GnuID &id, bool tracker)
 std::shared_ptr<ChanHit> ChanMgr::addHit(ChanHit &h)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
-
-    if (searchActive)
-        lastHit = sys->getTime();
 
     auto hl = findHitListByID(h.chanID);
 

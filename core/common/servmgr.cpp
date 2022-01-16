@@ -249,14 +249,6 @@ void ServMgr::ensureCatchallFilters()
 }
 
 // -----------------------------------
-void    ServMgr::setPassiveSearch(unsigned int t)
-{
-//  if ((t > 0) && (t < 60))
-//      t = 60;
-//  passiveSearch = t;
-}
-
-// -----------------------------------
 bool ServMgr::seenHost(Host &h, ServHost::TYPE type, unsigned int time)
 {
     time = sys->getTime()-time;

@@ -82,7 +82,6 @@ public:
 
     std::shared_ptr<Channel> createRelay(ChanInfo &, bool);
     std::shared_ptr<Channel> findAndRelay(ChanInfo &);
-    void        startSearch(ChanInfo &);
 
     void        playChannel(ChanInfo &);
     void        findAndPlayChannel(ChanInfo &, bool);
@@ -102,14 +101,9 @@ public:
 
     GnuID           broadcastID;
 
-    ChanInfo        searchInfo;
-
-    int             numFinds;
     ::String        broadcastMsg;
     unsigned int    broadcastMsgInterval;
-    unsigned int    lastHit;
     unsigned int    maxUptime;
-    bool            searchActive;
     unsigned int    deadHitAge;
     int             icyMetaInterval;
     int             maxRelaysPerChannel;
