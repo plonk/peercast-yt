@@ -856,7 +856,7 @@ bool Servent::handshakeStream_returnResponse(bool gotPCP,
 
 // -----------------------------------
 // リレー自動管理で切断の対象になるか。
-bool Servent::isTerminationCandidate(std::shared_ptr<ChanHit> hit)
+bool Servent::isTerminationCandidate(ChanHit* hit)
 {
     // リレー追加不可で現在リレーしていない。
     // あるいは、ポート0でGIVメソッドに対応してないクライアントである。
@@ -948,7 +948,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                     if (s->type == Servent::T_RELAY &&
                         s->chanID.isSame(chanInfo.id) &&
                         hit &&
-                        Servent::isTerminationCandidate(hit))
+                        Servent::isTerminationCandidate(hit.get()))
                     {
                         LOG_INFO("Terminating relay connection to %s (color=%s)",
                                  s->getHost().str().c_str(),

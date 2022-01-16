@@ -32,7 +32,7 @@ TEST_F(ChanMgrFixture, initialState)
     id.clear();
 
     ASSERT_EQ(nullptr, x->channel);
-    ASSERT_EQ(NULL, x->hitlist);
+    ASSERT_EQ(x->hitlist, nullptr);
     //ASSERT_EQ(PCP_BROADCAST_FLAGS, x->broadcastID.getFlags());
 
     ASSERT_TRUE(id.isSame(x->searchInfo.id));

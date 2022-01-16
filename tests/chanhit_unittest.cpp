@@ -64,7 +64,7 @@ TEST_F(ChanHitFixture, initialState)
     // ASSERT_EQ(false, hit->chfull);
     // ASSERT_EQ(false, hit->ratefull);
 
-    ASSERT_EQ(NULL, hit->next);
+    ASSERT_EQ(hit->next, nullptr);
 
     // ASSERT_EQ(0, hit->status);
     // ASSERT_EQ(0, hit->servent_id);

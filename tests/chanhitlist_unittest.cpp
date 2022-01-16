@@ -6,7 +6,7 @@ class ChanHitListFixture : public ::testing::Test {
 public:
     void SetUp()
     {
-        hitlist = new ChanHitList();
+        hitlist = std::make_shared<ChanHitList>();
 
         host.fromStrIP("209.209.209.209", 7144);
         global.fromStrIP("210.210.210.210", 7144);
@@ -20,11 +20,10 @@ public:
 
     void TearDown()
     {
-        delete hitlist;
     }
 
     ChanHit hit;
-    ChanHitList* hitlist;
+    std::shared_ptr<ChanHitList> hitlist;
     Host host;
     Host global;
     Host local;
@@ -34,7 +33,7 @@ TEST_F(ChanHitListFixture, initialState)
 {
     ASSERT_EQ(false, hitlist->used);
 
-    ASSERT_EQ(NULL, hitlist->hit);
+    ASSERT_EQ(hitlist->hit, nullptr);
 
     ASSERT_EQ(0, hitlist->lastHitTime);
 }
@@ -46,7 +45,7 @@ TEST_F(ChanHitListFixture, contactTrackers)
 }
 
 template <typename T>
-static int listCount(T* list)
+static int listCount(T list)
 {
     int count = 0;
 
@@ -165,14 +164,14 @@ TEST_F(ChanHitListFixture, createXML)
 
 TEST_F(ChanHitListFixture, deleteHit)
 {
-    ASSERT_EQ(NULL, hitlist->hit);
+    ASSERT_EQ(hitlist->hit, nullptr);
 
     hitlist->addHit(hit);
 
     ASSERT_EQ(1, listCount(hitlist->hit));
     // ASSERT_NE(NULL, hitlist->hit); // なんでコンパイルできない？
 
-    ASSERT_EQ(NULL, hitlist->deleteHit(hitlist->hit));
+    ASSERT_EQ(hitlist->deleteHit(hitlist->hit), nullptr);
     ASSERT_EQ(0, listCount(hitlist->hit));
 }
 
