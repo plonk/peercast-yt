@@ -126,7 +126,7 @@ Document parse(const std::string& str)
         } else if ((v = kRegexpSection.exec(line_i)).size()) {
             if (v[1] == "End") {
                 if (section.name == "") {
-                    auto msg = str::format("Syntax error in line %lu: Stray 'End'", i + 1);
+                    auto msg = str::STR("Syntax error in line ", i + 1 ,": Stray 'End'");
                     throw FormatException(msg.c_str());
                 } else {
                     section.endTag = "End";
@@ -155,7 +155,7 @@ Document parse(const std::string& str)
                 section = Section(sectionName, keys);
             }
         } else {
-            auto msg = str::format("Syntax error in line %lu", i + 1);
+            auto msg = str::STR("Syntax error in line ", i + 1);
             throw GeneralException(msg.c_str());
         }
     }
