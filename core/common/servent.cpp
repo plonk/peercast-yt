@@ -856,7 +856,7 @@ bool Servent::handshakeStream_returnResponse(bool gotPCP,
 
 // -----------------------------------
 // リレー自動管理で切断の対象になるか。
-bool Servent::isTerminationCandidate(ChanHit* hit)
+bool Servent::isTerminationCandidate(std::shared_ptr<ChanHit> hit)
 {
     // リレー追加不可で現在リレーしていない。
     // あるいは、ポート0でGIVメソッドに対応してないクライアントである。
@@ -921,13 +921,13 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
             {
                 autoManageTried = true;
                 LOG_DEBUG("Auto-manage relays");
-                ChanHitList* chl = chanMgr->findHitList(chanInfo);
+                auto chl = chanMgr->findHitList(chanInfo);
                 if (!chl)
                     break;
 
                 auto chanHitFor =
                     [=](Servent* t)
-                    -> ChanHit*
+                    -> std::shared_ptr<ChanHit>
                     {
                         for (auto h = chl->hit; h != nullptr; h = h->next)
                         {
@@ -943,7 +943,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                 {
                     if (s == this) continue;
 
-                    ChanHit* hit = chanHitFor(s);
+                    auto hit = chanHitFor(s);
 
                     if (s->type == Servent::T_RELAY &&
                         s->chanID.isSame(chanInfo.id) &&
@@ -965,9 +965,9 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
         }while (thread.active() && sock->active());
     }
 
-    ChanHitList *chl = chanMgr->findHitList(chanInfo);
+    auto chl = chanMgr->findHitList(chanInfo);
 
-    return handshakeStream_returnResponse(gotPCP, chanReady, ch, chl, chanInfo);
+    return handshakeStream_returnResponse(gotPCP, chanReady, ch, chl.get(), chanInfo);
 }
 
 // -----------------------------------
@@ -1433,7 +1433,7 @@ int Servent::outgoingProc(ThreadInfo *thread)
                     break;
                 }
 
-                ChanHitList *chl = chanMgr->findHitListByID(GnuID());
+                auto chl = chanMgr->findHitListByID(GnuID());
                 if (chl)
                 {
                     // find local tracker

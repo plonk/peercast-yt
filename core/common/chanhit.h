@@ -100,11 +100,11 @@ public:
             }
         }
 
-    ChanHit *next;
+    std::shared_ptr<ChanHit> next;
 };
 
 // ----------------------------------
-class ChanHitList
+class ChanHitList : public std::enable_shared_from_this<ChanHitList>
 {
 public:
     ChanHitList();
@@ -112,7 +112,7 @@ public:
 
     int          contactTrackers(bool, int, int, int);
 
-    ChanHit      *addHit(ChanHit &);
+    std::shared_ptr<ChanHit> addHit(ChanHit &);
     void         delHit(ChanHit &);
     void         deadHit(ChanHit &);
     int          numHits();
@@ -130,7 +130,7 @@ public:
     int          clearDeadHits(unsigned int, bool);
     XML::Node    *createXML(bool addHits = true);
 
-    ChanHit      *deleteHit(ChanHit *);
+    std::shared_ptr<ChanHit> deleteHit(std::shared_ptr<ChanHit>);
 
     int          getTotalListeners();
     int          getTotalRelays();
@@ -142,9 +142,9 @@ public:
 
     bool         used;
     ChanInfo     info;
-    ChanHit      *hit;
+    std::shared_ptr<ChanHit> hit;
     unsigned int lastHitTime;
-    ChanHitList  *next;
+    std::shared_ptr<ChanHitList> next;
 };
 
 // ----------------------------------

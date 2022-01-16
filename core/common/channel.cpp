@@ -147,7 +147,7 @@ void Channel::setStatus(STATUS s)
 
         if (isBroadcasting())
         {
-            ChanHitList *chl = chanMgr->findHitListByID(info.id);
+            auto chl = chanMgr->findHitListByID(info.id);
             if (!chl)
                 chanMgr->addHitList(info);
         }
@@ -262,7 +262,7 @@ int Channel::localListeners()
 int Channel::totalRelays()
 {
     int tot = 0;
-    ChanHitList *chl = chanMgr->findHitListByID(info.id);
+    auto chl = chanMgr->findHitListByID(info.id);
     if (chl)
         tot += chl->numHits();
     return tot;
@@ -272,7 +272,7 @@ int Channel::totalRelays()
 int Channel::totalListeners()
 {
     int tot = localListeners();
-    ChanHitList *chl = chanMgr->findHitListByID(info.id);
+    auto chl = chanMgr->findHitListByID(info.id);
     if (chl)
         tot += chl->numListeners();
     return tot;
@@ -355,7 +355,7 @@ THREAD_PROC Channel::stream(ThreadInfo *thread)
     {
         LOG_INFO("Channel started");
 
-        ChanHitList *chl = chanMgr->findHitList(ch->info);
+        auto chl = chanMgr->findHitList(ch->info);
         if (!chl)
             chanMgr->addHitList(ch->info);
 
@@ -506,9 +506,8 @@ int PeercastSource::getSourceRateAvg()
 ChanHit PeercastSource::pickFromHitList(std::shared_ptr<Channel> ch, ChanHit &oldHit)
 {
     ChanHit res = oldHit;
-    ChanHitList *chl = NULL;
 
-    chl = chanMgr->findHitList(ch->info);
+    auto chl = chanMgr->findHitList(ch->info);
     if (chl)
     {
         ChanHitSearch chs;
@@ -879,7 +878,7 @@ XML::Node *ChanHitList::createXML(bool addHits)
 
     if (addHits)
     {
-        ChanHit *h = hit;
+        auto h = hit;
         while (h)
         {
             if (h->host.ip)
@@ -900,7 +899,7 @@ XML::Node *Channel::createRelayXML(bool showStat)
         if ((status == S_RECEIVING) || (status == S_BROADCASTING))
             ststr = "OK";
 
-    ChanHitList *chl = chanMgr->findHitList(info);
+    auto chl = chanMgr->findHitList(info);
 
     return new XML::Node("relay listeners=\"%d\" relays=\"%d\" hosts=\"%d\" status=\"%s\"",
         localListeners(),
@@ -939,7 +938,7 @@ void ChanMeta::addMem(void *p, int l)
 // -----------------------------------
 void Channel::writeTrackerUpdateAtom(AtomStream& atom)
 {
-    ChanHitList *chl = chanMgr->findHitListByID(info.id);
+    auto chl = chanMgr->findHitListByID(info.id);
     if (!chl)
         throw StreamException("Broadcast channel has no hitlist");
 
@@ -1064,7 +1063,7 @@ void Channel::updateInfo(const ChanInfo &newInfo)
         }
     }
 
-    ChanHitList *chl = chanMgr->findHitList(info);
+    auto chl = chanMgr->findHitList(info);
     if (chl) {
         std::lock_guard<std::recursive_mutex> lock(chl->lock);
         chl->info = info;

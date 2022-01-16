@@ -32,7 +32,7 @@ bool ChannelStream::getStatus(std::shared_ptr<Channel> ch, ChanPacket &pack)
 {
     unsigned int ctime = sys->getTime();
 
-    ChanHitList *chl = chanMgr->findHitListByID(ch->info.id);
+    auto chl = chanMgr->findHitListByID(ch->info.id);
 
     if (!chl)
         return false;

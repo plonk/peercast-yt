@@ -269,7 +269,7 @@ bool ChanHit::canGiv()
 int ChanHitList::getTotalListeners()
 {
     int cnt = 0;
-    ChanHit *h = hit;
+    auto h = hit;
     while (h)
     {
         if (h->host.ip)
@@ -283,7 +283,7 @@ int ChanHitList::getTotalListeners()
 int ChanHitList::getTotalRelays()
 {
     int cnt = 0;
-    ChanHit *h = hit;
+    auto h = hit;
     while (h)
     {
         if (h->host.ip)
@@ -297,7 +297,7 @@ int ChanHitList::getTotalRelays()
 int ChanHitList::getTotalFirewalled()
 {
     int cnt = 0;
-    ChanHit *h = hit;
+    auto h = hit;
     while (h)
     {
         if (h->host.ip)
@@ -315,20 +315,20 @@ int ChanHitList::contactTrackers(bool connected, int numl, int nums, int uptm)
 }
 
 // -----------------------------------
-ChanHit *ChanHitList::deleteHit(ChanHit *ch)
+// ch で参照される項目を削除し、次の項目へのポインタ、あるいは次の項目
+// が存在しない場合は nullptr を返す。
+std::shared_ptr<ChanHit> ChanHitList::deleteHit(std::shared_ptr<ChanHit> ch)
 {
-    ChanHit *c = hit, *prev = NULL;
+    std::shared_ptr<ChanHit> c = hit, prev = nullptr;
     while (c)
     {
         if (c == ch)
         {
-            ChanHit *next = c->next;
+            auto next = c->next;
             if (prev)
                 prev->next = next;
             else
                 hit = next;
-
-            delete c;
 
             return next;
         }
@@ -336,11 +336,11 @@ ChanHit *ChanHitList::deleteHit(ChanHit *ch)
         c = c->next;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 // -----------------------------------
-ChanHit *ChanHitList::addHit(ChanHit &h)
+std::shared_ptr<ChanHit> ChanHitList::addHit(ChanHit &h)
 {
     LOG_DEBUG("Add hit: %s/%s", h.rhost[0].str().c_str(), h.rhost[1].str().c_str());
 
@@ -351,7 +351,7 @@ ChanHit *ChanHitList::addHit(ChanHit &h)
     lastHitTime = sys->getTime();
     h.time = lastHitTime;
 
-    ChanHit *ch = hit;
+    auto ch = hit;
     while (ch)
     {
         if ((ch->rhost[0].ip == h.rhost[0].ip) &&
@@ -361,7 +361,7 @@ ChanHit *ChanHitList::addHit(ChanHit &h)
             {
                 if (!ch->dead)
                 {
-                    ChanHit *next = ch->next;
+                    auto next = ch->next;
                     *ch = h;
                     ch->next = next;
                     return ch;
@@ -373,7 +373,7 @@ ChanHit *ChanHitList::addHit(ChanHit &h)
     // clear hits with same session ID (IP may have changed)
     if (h.sessionID.isSet())
     {
-        ChanHit *ch = hit;
+        auto ch = hit;
         while (ch)
         {
             if (ch->host.ip)
@@ -388,7 +388,7 @@ ChanHit *ChanHitList::addHit(ChanHit &h)
 
     // else add new hit
     {
-        ChanHit *ch = new ChanHit();
+        auto ch = std::make_shared<ChanHit>();
         *ch = h;
         ch->chanID = info.id;
         ch->next = hit;
@@ -406,7 +406,7 @@ int ChanHitList::clearDeadHits(unsigned int timeout, bool clearTrackers)
     int cnt = 0;
     unsigned int ctime = sys->getTime();
 
-    ChanHit *ch = hit;
+    auto ch = hit;
     while (ch)
     {
         if (ch->host.ip)
@@ -430,7 +430,7 @@ void    ChanHitList::deadHit(ChanHit &h)
 {
     LOG_DEBUG("Dead hit: %s/%s", h.rhost[0].str().c_str(), h.rhost[1].str().c_str());
 
-    ChanHit *ch = hit;
+    auto ch = hit;
     while (ch)
     {
         if (ch->host.ip)
@@ -447,7 +447,7 @@ void    ChanHitList::delHit(ChanHit &h)
 {
     LOG_DEBUG("Del hit: %s/%s", h.rhost[0].str().c_str(), h.rhost[1].str().c_str());
 
-    ChanHit *ch = hit;
+    auto ch = hit;
     while (ch)
     {
         if (ch->host.ip)
@@ -464,7 +464,7 @@ void    ChanHitList::delHit(ChanHit &h)
 int ChanHitList::numHits()
 {
     int cnt = 0;
-    ChanHit *ch = hit;
+    auto ch = hit;
     while (ch)
     {
         if (ch->host.ip && !ch->dead)
@@ -479,7 +479,7 @@ int ChanHitList::numHits()
 int ChanHitList::numListeners()
 {
     int cnt = 0;
-    ChanHit *ch = hit;
+    auto ch = hit;
     while (ch)
     {
         if (ch->host.ip && !ch->dead)
@@ -494,7 +494,7 @@ int ChanHitList::numListeners()
 int ChanHitList::numRelays()
 {
     int cnt = 0;
-    ChanHit *ch = hit;
+    auto ch = hit;
     while (ch)
     {
         if (ch->host.ip && !ch->dead)
@@ -509,7 +509,7 @@ int ChanHitList::numRelays()
 int ChanHitList::numTrackers()
 {
     int cnt = 0;
-    ChanHit *ch = hit;
+    auto ch = hit;
     while (ch)
     {
         if ((ch->host.ip && !ch->dead) && (ch->tracker))
@@ -523,7 +523,7 @@ int ChanHitList::numTrackers()
 int ChanHitList::numFirewalled()
 {
     int cnt = 0;
-    ChanHit *ch = hit;
+    auto ch = hit;
     while (ch)
     {
         if (ch->host.ip && !ch->dead)
@@ -537,7 +537,7 @@ int ChanHitList::numFirewalled()
 int ChanHitList::closestHit()
 {
     unsigned int hop = 10000;
-    ChanHit *ch = hit;
+    auto ch = hit;
     while (ch)
     {
         if (ch->host.ip && !ch->dead)
@@ -553,7 +553,7 @@ int ChanHitList::closestHit()
 int ChanHitList::furthestHit()
 {
     unsigned int hop = 0;
-    ChanHit *ch = hit;
+    auto ch = hit;
     while (ch)
     {
         if (ch->host.ip && !ch->dead)
@@ -569,7 +569,7 @@ int ChanHitList::furthestHit()
 unsigned int    ChanHitList::newestHit()
 {
     unsigned int time = 0;
-    ChanHit *ch = hit;
+    auto ch = hit;
     while (ch)
     {
         if (ch->host.ip && !ch->dead)
@@ -584,16 +584,16 @@ unsigned int    ChanHitList::newestHit()
 // -----------------------------------
 void ChanHitList::forEachHit(std::function<void(ChanHit*)> block)
 {
-    ChanHitList* chl = this;
+    auto chl = shared_from_this();
 
     while (chl)
     {
         if (chl->isUsed())
         {
-            ChanHit* hit = chl->hit;
+            auto hit = chl->hit;
             while (hit)
             {
-                block(hit);
+                block(hit.get());
                 hit = hit->next;
             }
         }
@@ -604,14 +604,15 @@ void ChanHitList::forEachHit(std::function<void(ChanHit*)> block)
 // -----------------------------------
 int ChanHitList::pickHits(ChanHitSearch &chs)
 {
-    ChanHit best, *bestP = NULL;
+    ChanHit best;
+    std::shared_ptr<ChanHit> bestP = nullptr;
     best.init();
     best.numHops = 255;
     best.time = 0;
 
     unsigned int ctime = sys->getTime();
 
-    ChanHit *c = hit;
+    auto c = hit;
     while (c)
     {
         if (c->host.ip && !c->dead)

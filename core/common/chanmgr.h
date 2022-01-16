@@ -65,14 +65,14 @@ public:
     void    quit();
 
     void    addHit(Host &, const GnuID &, bool);
-    ChanHit *addHit(ChanHit &);
+    std::shared_ptr<ChanHit> addHit(ChanHit &);
     void    delHit(ChanHit &);
     void    deadHit(ChanHit &);
     void    setFirewalled(Host &);
 
-    ChanHitList *findHitList(ChanInfo &);
-    ChanHitList *findHitListByID(const GnuID &);
-    ChanHitList *addHitList(ChanInfo &);
+    std::shared_ptr<ChanHitList> findHitList(ChanInfo &);
+    std::shared_ptr<ChanHitList> findHitListByID(const GnuID &);
+    std::shared_ptr<ChanHitList> addHitList(ChanInfo &);
 
     void        clearHitLists();
     void        clearDeadHits(bool);
@@ -98,7 +98,7 @@ public:
     amf0::Value getState() override;
 
     std::shared_ptr<Channel> channel;
-    ChanHitList     *hitlist;
+    std::shared_ptr<ChanHitList> hitlist;
 
     GnuID           broadcastID;
 

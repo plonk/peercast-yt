@@ -53,7 +53,7 @@ HostGraph::HostGraph(std::shared_ptr<Channel> ch, ChanHitList *hitList, int ipVe
         m_hit[id(self)] = self;
     }
 
-    for (ChanHit *p = hitList->hit;
+    for (auto p = hitList->hit;
          p;
          p = p->next)
     {

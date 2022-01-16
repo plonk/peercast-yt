@@ -251,7 +251,7 @@ public:
 
     static std::string formatTimeDifference(unsigned int t, unsigned int currentTime);
 
-    static bool isTerminationCandidate(ChanHit* hit);
+    static bool isTerminationCandidate(std::shared_ptr<ChanHit> hit);
 
     static void writeHeloAtom(AtomStream &atom, bool sendPort, bool sendPing, bool sendBCID, const GnuID& sessionID, uint16_t port, const GnuID& broadcastID);
 

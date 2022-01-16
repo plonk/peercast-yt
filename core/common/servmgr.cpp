@@ -909,7 +909,7 @@ static ini::Section writeRelayChannel(std::shared_ptr<Channel> c)
     keys.emplace_back("stayConnected", c->stayConnected);
 
     // トラッカーIPの書き出し。
-    ChanHitList *chl = chanMgr->findHitListByID(c->info.id);
+    auto chl = chanMgr->findHitListByID(c->info.id);
     if (chl)
     {
         ChanHitSearch chs;
