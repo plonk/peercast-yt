@@ -244,16 +244,25 @@ void    ChanPacketBuffer::readPacket(ChanPacket &pack)
 {
     unsigned int tim = sys->getTime();
 
+    lock.lock();
+
     if (readPos < firstPos)
+    {
+        lock.unlock();
         throw StreamException("Read too far behind");
+    }
 
     while (readPos >= writePos)
     {
+        lock.unlock();
         sys->sleepIdle();
         if ((sys->getTime() - tim) > 30)
+        {
             throw TimeoutException();
+        }
+        lock.lock();
     }
-    lock.lock();
+
     pack = packets[readPos%MAX_PACKETS];
     readPos++;
     lock.unlock();
