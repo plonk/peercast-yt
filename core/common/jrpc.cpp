@@ -342,11 +342,28 @@ json JrpcApi::to_json(Channel::STATUS status)
     }
 }
 
+static std::string sourceUri(std::shared_ptr<Channel> c)
+{
+    std::string sourceURL = c->sourceURL.c_str();
+    if (sourceURL != "") {
+        return sourceURL;
+    } else {
+        auto s = str::downcase(c->info.id.str());
+        auto idstring = str::STR(s.substr(0, 8), "-",
+                                 s.substr(8, 4), "-",
+                                 s.substr(12, 4), "-",
+                                 s.substr(16, 4), "-",
+                                 s.substr(20, 12));
+
+        return str::STR("pcp://", c->sourceHost.host.str(true), "/", idstring);
+    }
+}
+
 json JrpcApi::channelStatus(std::shared_ptr<Channel> c)
 {
     return {
         {"status", to_json(c->status)},
-        {"source", c->sourceURL.cstr() },
+        {"source", sourceUri(c)},
         {"uptime", c->info.getUptime()},
         {"localRelays", c->localRelays()},
         {"localDirects", c->localListeners()},
