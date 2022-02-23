@@ -2446,7 +2446,7 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
 
             auto ch = chanMgr->findChannelByID(GnuID(id.c_str()));
             locals.vars["channel"] = ch ? ch->getState() : nullptr;
-        }else if (str::contains(fn, "connections.html"))
+        }else if (str::contains(fn, "connections.html") || str::contains(fn, "editinfo.html"))
         {
             auto vec = str::split(fn, "?");
             if (vec.size() == 2)
