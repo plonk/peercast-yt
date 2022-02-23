@@ -2446,6 +2446,19 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
 
             auto ch = chanMgr->findChannelByID(GnuID(id.c_str()));
             locals.vars["channel"] = ch ? ch->getState() : nullptr;
+        }else if (str::contains(fn, "connections.html"))
+        {
+            auto vec = str::split(fn, "?");
+            if (vec.size() == 2)
+            {
+                String id = cgi::Query(vec[1]).get("id").c_str();
+
+                if (!id.isEmpty())
+                {
+                    auto ch = chanMgr->findChannelByID(GnuID(id.c_str()));
+                    locals.vars["channel"] = ch ? ch->getState() : nullptr;
+                }
+            }
         }
 
         char *args = strstr(fileName.cstr(), "?");

@@ -22,12 +22,12 @@
 </TR>
 {^end}
 
-{@if page.id}
+{@if channel}
   <h3>
-    {$page.channel.name}
-    {$page.channel.bitrate}Kbps
-    ({$page.channel.totalListeners}/{$page.channel.totalRelays})
-    [{$page.channel.localListeners}/{$page.channel.localRelays}]
+    {$channel.name}
+    {$channel.bitrate}Kbps
+    ({$channel.totalListeners}/{$channel.totalRelays})
+    [{$channel.localListeners}/{$channel.localRelays}]
   </h3>
 {@end}
 <DIV class="reloader hscroll" data-url="connections.html?fragment=content&amp;id={$page.id}" data-interval="{$servMgr.refreshHTML}">
