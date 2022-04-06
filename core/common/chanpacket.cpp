@@ -93,23 +93,33 @@ bool ChanPacketBuffer::findPacket(unsigned int spos, ChanPacket &pack)
     if (writePos == 0)
         return false;
 
-    unsigned int fpos = getStreamPos(firstPos);
-    if (spos < fpos)
-        spos = fpos;
+    // unsigned int fpos = getStreamPos(firstPos);
+    // if (spos < fpos)
+    //     spos = fpos;
 
     // このループ、lastPos == UINT_MAX の時終了しないのでは？ …4G パ
     // ケットも送らないか。
+    ChanPacket* candidate = nullptr;
     for (unsigned int i = firstPos; i <= lastPos; i++)
     {
-        ChanPacket &p = packets[i%MAX_PACKETS];
+        ChanPacket& p = packets[i%MAX_PACKETS];
         if (p.pos >= spos)
         {
-            pack = p;
-            return true;
+            if (!candidate)
+                candidate = &p;
+            else if (p.pos < candidate->pos)
+                candidate = &p;
         }
     }
 
-    return false;
+    if (candidate)
+    {
+        pack = *candidate;
+        return true;
+    }else
+    {
+        return false;
+    }
 }
 
 // ------------------------------------------------------------------
