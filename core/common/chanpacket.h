@@ -66,7 +66,7 @@ public:
 
     TYPE            type;
     unsigned int    len;
-    unsigned int    pos;
+    unsigned int    pos; // パケットのストリーム中でのバイト位置
     unsigned int    sync;
     bool            cont; // true if this is a continuation packet
     char            data[MAX_DATALEN];
