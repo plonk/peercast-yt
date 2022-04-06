@@ -56,6 +56,74 @@ TEST_F(ChanPacketBufferFixture, addPacket)
     EXPECT_EQ(1, data.numPending());
 }
 
+TEST_F(ChanPacketBufferFixture, streamPositionDoesntOverflow)
+{
+    ChanPacket pack;
+
+    pack.type = ChanPacket::T_DATA;
+    pack.len = 8192;
+    pack.pos = 100;
+
+    bool result;
+
+    result = data.writePacket(pack);
+    ASSERT_TRUE(result);
+
+    ChanPacket outpack;
+
+    {
+        result = data.findPacket(0, outpack);
+        ASSERT_TRUE(result);
+        ASSERT_EQ(outpack.pos, 100);
+    }
+
+    pack.pos += 8192;
+    ASSERT_EQ(pack.pos, 8292);
+
+    result = data.writePacket(pack);
+    ASSERT_TRUE(result);
+
+    {
+        result = data.findPacket(8292, outpack);
+        ASSERT_TRUE(result);
+        ASSERT_EQ(outpack.pos, 8292);
+    }
+}
+
+TEST_F(ChanPacketBufferFixture, streamPositionOverflows)
+{
+    ChanPacket pack;
+
+    pack.type = ChanPacket::T_DATA;
+    pack.len = 8192;
+    pack.pos = 4294965566;
+
+    bool result;
+
+    result = data.writePacket(pack);
+    ASSERT_TRUE(result);
+
+    ChanPacket outpack;
+
+    {
+        result = data.findPacket(0, outpack);
+        ASSERT_TRUE(result);
+        ASSERT_EQ(outpack.pos, 4294965566);
+    }
+
+    pack.pos += 8192;
+    ASSERT_EQ(pack.pos, 6462);
+
+    result = data.writePacket(pack);
+    ASSERT_TRUE(result);
+
+    {
+        result = data.findPacket(6462, outpack);
+        ASSERT_TRUE(result);
+        ASSERT_EQ(outpack.pos, 6462);
+    }
+}
+
 TEST_F(ChanPacketBufferFixture, addPacket_init)
 {
     ChanPacket packet;
