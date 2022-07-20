@@ -137,7 +137,7 @@ int FLVStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
 
     // メタ情報からのビットレートが無い場合、ストリームからの実測値が
     // 現在の公称値を超えていれば公称値を更新する。
-    if (metaBitrate == 0) {
+    //if (metaBitrate == 0) {
         ChanInfo info = ch->info;
 
         int newBitrate = in.stat.bytesInPerSecAvg() / 1000 * 8;
@@ -145,7 +145,7 @@ int FLVStream::readPacket(Stream &in, std::shared_ptr<Channel> ch)
             info.bitrate = newBitrate;
             ch->updateInfo(info);
         }
-    }
+    //}
 
     if (headerUpdate && fileHeader.size>0) {
         int len = fileHeader.size;
