@@ -23,6 +23,7 @@
 #include <atomic>
 #include <mutex>
 #include <thread>
+#include <memory>
 
 // ------------------------------------
 class ThreadInfo;
