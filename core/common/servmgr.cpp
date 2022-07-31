@@ -140,7 +140,6 @@ ServMgr::ServMgr()
     channelDirectory->addFeed("http://yp.pcgw.pgw.jp/index.txt");
 
     uptestServiceRegistry->addURL("http://bayonet.ddo.jp/sp/yp4g.xml");
-    uptestServiceRegistry->addURL("http://temp.orz.hm/yp/yp4g.xml");
 
     chat = true;
 }
