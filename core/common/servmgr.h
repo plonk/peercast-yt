@@ -244,6 +244,7 @@ public:
     static const char* getFirewallStateString(FW_STATE);
 
     amf0::Value getState() override;
+    bool isBlacklisted(const Host& h);
 
     ThreadInfo          serverThread;
     ThreadInfo          idleThread;
