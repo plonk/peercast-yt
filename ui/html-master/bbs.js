@@ -138,7 +138,7 @@ function delay(ms) {
 function encodeForm(obj) {
     let buf = ""
     for (var key of Object.keys(obj)) {
-        buf += `&${key}=${encodeURI(obj[key])}`;
+        buf += `&${key}=${encodeURIComponent(obj[key])}`;
     }
     return buf.substring(1);
 }
