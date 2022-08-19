@@ -1,7 +1,7 @@
 # Uncomment following line to enabled RTMP fetch support
 WITH_RTMP = yes
 
-CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -U__STRICT_ANSI__ -DWIN32 -D_REENTRANT -D_UNICODE -DUNICODE $(INCLUDES) $(shell pkg-config openssl --cflags)
+CPPFLAGS = -g -Wno-multichar -Wno-unused-variable -std=c++11 -DWIN32 -D_REENTRANT -D_UNICODE -DUNICODE $(INCLUDES) $(shell pkg-config openssl --cflags)
 ifeq ($(WITH_RTMP),yes)
   CPPFLAGS += -DWITH_RTMP $(shell pkg-config librtmp --cflags)
 endif
