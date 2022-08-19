@@ -18,10 +18,6 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
-#ifdef WIN32
-#undef __STRICT_ANSI__
-#include <stdio.h>
-#endif
 #include <algorithm>
 
 #include "stream.h"
