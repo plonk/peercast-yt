@@ -27,6 +27,7 @@ CXXFLAGS += -g -Wno-multichar -Wno-unused-variable -std=c++11
 
 LDFLAGS = 
 LIBS = -lwinpthread -lws2_32 -lShlwapi $(shell pkg-config librtmp --libs) $(shell pkg-config openssl --libs)
+LIBS += -lgtest
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
