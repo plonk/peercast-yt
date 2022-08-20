@@ -1,10 +1,14 @@
 # CMakeのバージョンを設定
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.18)
+
 
 # プロジェクト名と使用する言語を設定
 project(peercast-yt CXX)
 set(CMAKE_CXX_STANDARD, 11) # 標準の言語仕様をC++11にする
 
+if(NOT WIN32)
+  include(GNUInstallDirs)
+endif()
 # CMAKE_INSTALL_DIR
 # CMAKE_INSTALL_DOCDIR
 # set(CMAKE_INSTALL_DATADIR)
@@ -125,12 +129,21 @@ set_property(DIRECTORY PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${PROJECT_SOURCE_DI
 ################################################################################
 # Linxu用Install
 ################################################################################
+if(NOT WIN32)
 install(TARGETS peercast)
-install(DIRECTORY "${PROJECT_SOURCE_DIR}/ui/html"
-        TYPE DATA
+install(DIRECTORY
+          "${PROJECT_SOURCE_DIR}/ui/assets"
+          "${PROJECT_SOURCE_DIR}/ui/cgi-bin"
+          "${PROJECT_SOURCE_DIR}/ui/html"
+          "${PROJECT_SOURCE_DIR}/ui/public"
+       # ${CMAKE_INSTALL_PREFIX}/share/peercast以下に保存される
+        DESTINATION share/peercast
 )
-
-
+install(DIRECTORY
+          "${PROJECT_SOURCE_DIR}/licenses"
+        DESTINATION share/doc/peercast
+)
+endif()
 
 ################################################################################
 # DEBUG用 cmake -S . -B build で変数が全部出る
