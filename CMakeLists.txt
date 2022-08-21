@@ -27,7 +27,7 @@ endif()
 #     - linux(cli binary, zip packaging)
 #       - AppImage(packaging)
 #     - windows(cli/gui binary, zip packaging)
-#   - html
+#   - html, public
 #   - rtmp-server
 #
 ################################################################################
@@ -141,12 +141,20 @@ if(NOT WIN32)
 install(TARGETS linux-bin)
 install(DIRECTORY
           "${PROJECT_SOURCE_DIR}/ui/assets"
-          "${PROJECT_SOURCE_DIR}/ui/cgi-bin"
           "${PROJECT_SOURCE_DIR}/ui/html"
           "${PROJECT_SOURCE_DIR}/ui/public"
        # ${CMAKE_INSTALL_PREFIX}/share/peercast以下に保存される
         DESTINATION share/peercast
 )
+install(DIRECTORY
+          "${PROJECT_SOURCE_DIR}/ui/cgi-bin"
+        DESTINATION share/peercast
+        PATTERN "*.cgi"
+        PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+                    GROUP_EXECUTE             GROUP_READ
+                                              WORLD_READ
+)
+# CHECKME: cgi-bin/bbs_reader.pyは実行属性は必要ないか？
 install(DIRECTORY
           "${PROJECT_SOURCE_DIR}/licenses"
         DESTINATION share/doc/peercast
