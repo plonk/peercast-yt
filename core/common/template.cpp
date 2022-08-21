@@ -321,7 +321,7 @@ vector<string> Template::tokenize(const string& input)
         {
             tokens.push_back(s.substr(0,2));
             s.erase(0,2);
-        }else if (s[0] == '(' || s[0] == ')' || s[0] == '!')
+        }else if (s[0] == '(' || s[0] == ')' || s[0] == '!' || s[0] == ',')
         {
             tokens.push_back(s.substr(0, 1));
             s.erase(0, 1);
@@ -355,6 +355,7 @@ static Regexp REG_IDENT("^[A-z0-9_.]+$");
 static Regexp REG_LPAREN("^\\($");
 static Regexp REG_RPAREN("^\\)$");
 static Regexp REG_STRING("^\".*?\"$");
+static Regexp REG_COMMA("^,$");
 
 amf0::Value Template::parse(vector<string>& tokens_)
 {
@@ -429,11 +430,21 @@ amf0::Value Template::parse(vector<string>& tokens_)
         {
             if (auto ident = accept(REG_IDENT)) {
                 if (accept(REG_LPAREN)) {
-                    if (auto e = exp()) {
-                        expect(REG_RPAREN);
-                        return make_shared<amf0::Value>(amf0::Value::strictArray({ *ident, *e }));
-                    } else
-                        return nullptr;
+                    std::vector<amf0::Value> funcall = { *ident };
+                    while (true) {
+                        auto e = exp();
+                        if (!e)
+                            return nullptr;
+                        funcall.push_back(*e);
+                        if (accept(REG_COMMA))
+                        {
+                            continue;
+                        } else if (accept(REG_RPAREN))
+                        {
+                            return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
+                        } else
+                            throw GeneralException(str::STR("Got ", tokens.front()," while expecting ',' or ')'"));
+                    }
                 } else {
                     return make_shared<amf0::Value>(*ident);
                 }
