@@ -96,6 +96,16 @@ std::vector<std::string> Query::getAll(const std::string& key)
     }
 }
 
+std::vector<std::string> Query::getKeys() const
+{
+    std::vector<std::string> result;
+    for (const auto& pair : m_dict)
+    {
+        result.push_back(pair.first);
+    }
+    return result;
+}
+
 std::string Query::str()
 {
     std::string res;
