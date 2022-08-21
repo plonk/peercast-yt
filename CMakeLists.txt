@@ -29,9 +29,10 @@ if(NOT WIN32)
   # install()で利用する
   include(GNUInstallDirs)
   # CPack用に使われる
-  # 現在のプラットフォーム用のランタイムライブラリを含めるために必要
-  include(InstallRequiredSystemLibraries)
 endif()
+
+# 現在のプラットフォーム用のランタイムライブラリを含めるために必要
+include(InstallRequiredSystemLibraries)
 
 # CTestの有効化
 enable_testing()
@@ -47,9 +48,7 @@ include(GoogleTest)
 # 実行ファイルをmain.cppから作成
 add_library(core STATIC)
 # SET_TARGET_PROPERTIES(lib-core PROPERTIES OUTPUT_NAME libpeercast)
-
 # set_property(TARGET libpeercast PROPERTY CXX_STANDARD 11)
-target_compile_definitions(core PUBLIC _UNIX)
 
 # コンパイル・リンクするソースコードを変数に格納
 if(WIN32)
@@ -62,6 +61,7 @@ else()
     "${PROJECT_SOURCE_DIR}/core/common/*.cpp"
     "${PROJECT_SOURCE_DIR}/core/unix/*.cpp"
   )
+  target_compile_definitions(core PUBLIC _UNIX)
 endif()
 target_sources(core
   PRIVATE ${MY_LIBPEERCAST_SRCS}
@@ -81,6 +81,13 @@ set(OPENSSL_USE_STATIC_LIBS TRUE)
 find_package(OpenSSL REQUIRED)
 # NOTE: INTERFACE指定することでcoreをリンクするターゲットが自動でOpenSSLのライブラリをリンクする
 target_link_libraries(core INTERFACE OpenSSL::SSL)
+
+if(WIN32)
+  set(CMAKE_EXE_LINKER_FLAGS " -static")
+  target_link_options(core PRIVATE -static-libgcc -static-libstdc++)
+  target_link_libraries(core INTERFACE winpthread)
+  target_link_libraries(core INTERFACE Shlwapi)
+endif()
 
 ################################################################################
 # core_test
@@ -116,9 +123,58 @@ add_custom_command(
 ################################################################################
 # Project: peercast(linux)
 ################################################################################
-add_executable(linux-bin ui/linux/main.cpp)
-SET_TARGET_PROPERTIES(linux-bin PROPERTIES OUTPUT_NAME peercast)
-target_link_libraries(linux-bin core)
+if(NOT WIN32)
+  add_executable(linux-bin ui/linux/main.cpp)
+  SET_TARGET_PROPERTIES(linux-bin PROPERTIES OUTPUT_NAME peercast)
+  target_link_libraries(linux-bin core)
+
+################################################################################
+# Linxu用Install
+################################################################################
+  install(TARGETS linux-bin)
+  install(DIRECTORY
+            "${PROJECT_SOURCE_DIR}/ui/assets"
+            "${PROJECT_SOURCE_DIR}/ui/html"
+            "${PROJECT_SOURCE_DIR}/ui/public"
+         # NOTE: ${CMAKE_INSTALL_PREFIX}/share/peercast以下に保存される
+          DESTINATION share/peercast
+  )
+  install(DIRECTORY
+            "${PROJECT_SOURCE_DIR}/ui/cgi-bin"
+          DESTINATION share/peercast
+          PATTERN "*.cgi"
+          PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+                      GROUP_EXECUTE             GROUP_READ
+                                                WORLD_READ
+  )
+  # REVIEW: cgi-bin/bbs_reader.pyは実行属性は必要ないか？
+  install(DIRECTORY
+            "${PROJECT_SOURCE_DIR}/licenses"
+          DESTINATION share/doc/peercast
+  )
+
+################################################################################
+# Linxu用 Packaging
+# peercast-yt[PEERCAST_YT_VERSION]-[CMAKE_CXX_PLATFORM_ID]-[ARCHITECTURE].tar.gz
+# https://cmake.org/cmake/help/latest/module/CPack.html#module:CPack
+################################################################################
+  set(CPACK_GENERATOR "TGZ")
+  include(CPack) # Install定義からArchiveを自動で作る
+endif() # if(NOT WIN32)
+
+################################################################################
+# Project: peercast(win32)
+################################################################################
+if(WIN32)
+  add_executable(win-bin ui/mingui/Simple.cpp ui/mingui/gui.cpp)
+  SET_TARGET_PROPERTIES(win-bin PROPERTIES OUTPUT_NAME peercast)
+  target_link_libraries(win-bin core)
+
+  target_sources(win-bin PRIVATE
+    ui/mingui/Simple.rc
+  )
+
+endif() # if(NOT WIN32)
 
 
 ################################################################################
@@ -137,16 +193,27 @@ file(GLOB_RECURSE MY_PUBLIC_TEMPLATES
     "${PROJECT_SOURCE_DIR}/ui/public-master/*.*"
 )
 
+# FIXME:どうしよう
+#  https://cmake.org/cmake/help/latest/policy/CMP0058.html
 # make相当
 # all: html
 # html: html.tar
+# add_custom_target(html ALL
+#     DEPENDS html.tar)
+# # ファイル更新を検出するために add_custom_commandを利用する
+# add_custom_command(
+#   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/html.tar
+#   COMMAND ruby --disable-gems "${PROJECT_SOURCE_DIR}/ui/generate-html"
+#   COMMAND tar cf "${CMAKE_CURRENT_BINARY_DIR}/html.tar" html
+#   DEPENDS ${MY_HTML_CATALOGS} ${MY_HTML_TEMPLATES}
+#   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/ui"
+# )
 add_custom_target(html ALL
-    DEPENDS html.tar)
-# ファイル更新を検出するために add_custom_commandを利用する
+    DEPENDS html.touch.txt)
 add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/html.tar
+  OUTPUT html.touch.txt
   COMMAND ruby --disable-gems "${PROJECT_SOURCE_DIR}/ui/generate-html"
-  COMMAND tar cf "${CMAKE_CURRENT_BINARY_DIR}/html.tar" html
+  COMMAND ${CMAKE_COMMAND} -E touch "${CMAKE_CURRENT_BINARY_DIR}/html.touch.txt"
   DEPENDS ${MY_HTML_CATALOGS} ${MY_HTML_TEMPLATES}
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/ui"
 )
@@ -154,12 +221,11 @@ add_custom_command(
 set_property(DIRECTORY PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${PROJECT_SOURCE_DIR}/ui/html")
 
 add_custom_target(public ALL
-    DEPENDS public.tar)
+    DEPENDS public.touch.txt)
 add_custom_command(
-  # OUTPUT public.tar
-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/public.tar
+  OUTPUT public.touch.txt
   COMMAND ruby --disable-gems "${PROJECT_SOURCE_DIR}/ui/generate-public"
-  COMMAND tar cf "${CMAKE_CURRENT_BINARY_DIR}/public.tar" public
+  COMMAND ${CMAKE_COMMAND} -E touch "${CMAKE_CURRENT_BINARY_DIR}/public.touch.txt"
   DEPENDS ${MY_HTML_CATALOGS} ${MY_PUBLIC_TEMPLATES}
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/ui"
 )
@@ -167,50 +233,12 @@ set_property(DIRECTORY PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${PROJECT_SOURCE_DI
 
 
 ################################################################################
-# Linxu用Install
-################################################################################
-if(NOT WIN32)
-install(TARGETS linux-bin)
-install(DIRECTORY
-          "${PROJECT_SOURCE_DIR}/ui/assets"
-          "${PROJECT_SOURCE_DIR}/ui/html"
-          "${PROJECT_SOURCE_DIR}/ui/public"
-       # NOTE: ${CMAKE_INSTALL_PREFIX}/share/peercast以下に保存される
-        DESTINATION share/peercast
-)
-install(DIRECTORY
-          "${PROJECT_SOURCE_DIR}/ui/cgi-bin"
-        DESTINATION share/peercast
-        PATTERN "*.cgi"
-        PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
-                    GROUP_EXECUTE             GROUP_READ
-                                              WORLD_READ
-)
-# REVIEW: cgi-bin/bbs_reader.pyは実行属性は必要ないか？
-install(DIRECTORY
-          "${PROJECT_SOURCE_DIR}/licenses"
-        DESTINATION share/doc/peercast
-)
-endif()
-
-################################################################################
-# Linxu用 Packaging
-# peercast-yt[PEERCAST_YT_VERSION]-[CMAKE_CXX_PLATFORM_ID]-[ARCHITECTURE].tar.gz
-# https://cmake.org/cmake/help/latest/module/CPack.html#module:CPack
-################################################################################
-if(NOT WIN32)
-  set(CPACK_GENERATOR "TGZ")
-  include(CPack) # Install定義からArchiveを自動で作る
-endif()
-
-
-################################################################################
 # DEBUG用 cmake -S . -B build で変数が全部出る
 ################################################################################
-# get_cmake_property(_variableNames VARIABLES)
-# foreach (_variableName ${_variableNames})
-#     message(STATUS "${_variableName}=${${_variableName}}")
-# endforeach()
+get_cmake_property(_variableNames VARIABLES)
+foreach (_variableName ${_variableNames})
+    message(STATUS "${_variableName}=${${_variableName}}")
+endforeach()
 
 
 ################################################################################

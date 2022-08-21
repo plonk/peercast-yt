@@ -50,6 +50,17 @@ sudo apt install build-essential \
                   libgtest-dev
 ```
 
+# Mingw-w64でのビルドに必要なライブラリなど
+```shell
+pacman -S base-devel \
+          mingw-w64-x86_64-toolchain \
+          mingw-w64-x86_64-cmake \
+          git \
+          mingw-w64-x86_64-gtest \
+          mingw-w64-x86_64-openssl \
+          ruby
+```
+
 # Ninja で高速ビルド on Ubuntu(22.04)
 ```shell
 sudo apt install ninja-build
