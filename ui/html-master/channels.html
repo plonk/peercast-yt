@@ -10,7 +10,8 @@
        width:100%; max-width: 640px
     }
    .channel-list tr { background-color: #FFECC4 }
-   .channel-list th { font-size: 9pt; text-decoration: underline; padding: 3px 5px; color: black }
+   .channel-list th { font-size: 9pt; padding: 3px 5px; color: black }
+   .channel-list th a { color: inherit }
    .channel-list td { text-align: center; padding: 5px 5px; }
    .channel-list td.channel-description {
        text-align: left;
@@ -31,6 +32,8 @@
    .channel-list .bitrate { text-align: right }
    .relay-list { width:100%; max-width: 640px }
    .relay-list th { white-space: nowrap }
+   .accented { color: var(--accent-color) !important; }
+   .muted { color: grey !important; }
     {^DARK_THEME_STYLES_BEGIN}
         .channel-list { color: #ddd }
         .channel-list tr { background-color: #544827 }
@@ -39,22 +42,36 @@
   </style>
 {^end}
 
+<a href="/admin?cmd=fetch_feeds" title="{#Auto-updates every 5 minutes. Manual updates have a cooldown of 30 seconds.}">{#Update}</a>
+
 <!-- index.txt の取得が5分ごとなので、あまり頻繁に更新しても仕方ない -->
-<div class="reloader hscroll" data-url="channels.html?fragment=channels" data-interval="60">
+<div class="reloader hscroll" data-url="channels.html?fragment=channels&{$request.queryString}" data-interval="60">
   {@fragment channels}
   <table class="channel-list">
     <tr>
-      <td colspan="4" class="results">
-        <b>Results:</b>
-        {$servMgr.numExternalChannels} channels.
-        <a href="/admin?cmd=fetch_feeds" title="{#Auto-updates every 5 minutes. Manual updates have a cooldown of 30 seconds.}">{#Update}</a>
-      </td>
-    </tr>
-    <tr>
-      <th>Channel</th><th>Status</th><th>Bitrate</th><th>Type</th>
+      <th>
+        <a class='{$ if(page.sort_by=="name", "accented") }' href="?sort_by=name&order=asc">{#Channel}</a>
+        <a class='sort-triangle {$ if(and(page.sort_by=="name",page.order=="desc"), "accented", "muted") }' href="?sort_by=name&order=desc">▼</a>
+        <a class='sort-triangle {$ if(and(page.sort_by=="name",page.order=="asc"), "accented", "muted") }' href="?sort_by=name&order=asc">▲</a>
+      </th>
+      <th>
+        <a class='{$ if(page.sort_by=="numDirects", "accented") }' href="?sort_by=numDirects&order=desc">{#Status}</a>
+        <a class='sort-triangle {$ if(and(page.sort_by=="numDirects",page.order=="desc"), "accented", "muted") }' href="?sort_by=numDirects&order=desc">▼</a>
+        <a class='sort-triangle {$ if(and(page.sort_by=="numDirects",page.order=="asc"), "accented", "muted") }' href="?sort_by=numDirects&order=asc">▲</a>
+      </th>
+      <th>
+        <a class='{$ if(page.sort_by=="bitrate", "accented") }' href="?sort_by=bitrate&order=desc">{#Bitrate}</a>
+        <a class='sort-triangle {$ if(and(page.sort_by=="bitrate",page.order=="desc"), "accented", "muted") }' href="?sort_by=bitrate&order=desc">▼</a>
+        <a class='sort-triangle {$ if(and(page.sort_by=="bitrate",page.order=="asc"), "accented", "muted") }' href="?sort_by=bitrate&order=asc">▲</a>
+      </th>
+      <th>
+        <a class='{$ if(page.sort_by=="contentTypeStr", "accented") }' href="?sort_by=contentTypeStr&order=asc">{#Type}</a>
+        <a class='sort-triangle {$ if(and(page.sort_by=="contentTypeStr",page.order=="desc"), "accented", "muted") }' href="?sort_by=contentTypeStr&order=desc">▼</a>
+        <a class='sort-triangle {$ if(and(page.sort_by=="contentTypeStr",page.order=="asc"), "accented", "muted") }' href="?sort_by=contentTypeStr&order=asc">▲</a>
+      </th>
     </tr>
 
-    {@foreach servMgr.channelDirectory.channels}
+    {@foreach channels}
     <tr>
       <td class="channel-description">
 	<a {@if this.id != "00000000000000000000000000000000"}href="play.html?id={$this.id}"{@end} style="display: block; text-decoration: none; max-width: 45vw">

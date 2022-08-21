@@ -2464,6 +2464,38 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
                     locals.vars["channel"] = ch ? ch->getState() : nullptr;
                 }
             }
+        }else if (str::contains(fn, "channels.html"))
+        {
+            auto params = cgi::Query(req.queryString);
+
+            auto channels = servMgr->getState().object().at("channelDirectory").object().at("channels").strictArray();
+
+            auto key = params.get("sort_by");
+            auto comp = [](const amf0::Value& a, const amf0::Value& b)
+                        {
+                            if (a.isString())
+                                return a.string() < b.string();
+                            else if (a.isNumber())
+                                return a.number() < b.number();
+                            else
+                                throw std::runtime_error("comp: type error");
+                        };
+
+            try {
+                if (key != "")
+                {
+                    sort(channels.begin(), channels.end(),
+                         [=](const amf0::Value& a, const amf0::Value& b)
+                         {
+                             return comp(a.object().at(key), b.object().at(key));
+                         });
+                    if (params.get("order") == "desc")
+                        std::reverse(channels.begin(), channels.end());
+                }
+            }catch(std::exception& e) {
+                throw HTTPException(HTTP_SC_SERVERERROR, 500, e.what());
+            }
+            locals.vars["channels"] = channels;
         }
 
         char *args = strstr(fileName.cstr(), "?");
