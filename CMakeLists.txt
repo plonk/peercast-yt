@@ -1,25 +1,3 @@
-# CMakeのバージョンを設定
-cmake_minimum_required(VERSION 3.18)
-
-
-# プロジェクト名と使用する言語を設定
-project(peercast-yt CXX)
-set(CMAKE_CXX_STANDARD, 11) # 標準の言語仕様をC++11にする
-
-# CPack用に使われる
-# 現在のプラットフォーム用のランタイムライブラリを含めるために必要
-if(NOT WIN32)
-  include(InstallRequiredSystemLibraries)
-endif()
-
-if(NOT WIN32)
-  include(GNUInstallDirs)
-endif()
-# CMAKE_INSTALL_DIR
-# CMAKE_INSTALL_DOCDIR
-# set(CMAKE_INSTALL_DATADIR)
-# CMAKE_INSTALL_DATADIR
-
 ################################################################################
 # Projectの依存関係
 # - TOP(peercast-yt)
@@ -33,10 +11,27 @@ endif()
 ################################################################################
 
 ################################################################################
-# やり残したこと
-# FIXME: generate-[html|public]で生成される一時フォルダが/ui/{html|public}のまま
+# やり残したなど
+# FIXME: generate-[html|public]で生成される一時フォルダがsrc/ui/{html|public}のまま
 #
 ################################################################################
+
+# CMakeのバージョンを設定
+cmake_minimum_required(VERSION 3.18)
+
+
+# プロジェクト名と使用する言語を設定
+project(peercast-yt CXX)
+set(CMAKE_CXX_STANDARD, 11) # 標準の言語仕様をC++11にする
+
+if(NOT WIN32)
+  # install()で利用する
+  include(GNUInstallDirs)
+  # CPack用に使われる
+  # 現在のプラットフォーム用のランタイムライブラリを含めるために必要
+  include(InstallRequiredSystemLibraries)
+endif()
+
 
 ################################################################################
 # Project: libpeercast
@@ -115,7 +110,7 @@ add_custom_command(
   DEPENDS ${MY_HTML_CATALOGS} ${MY_HTML_TEMPLATES}
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/ui"
 )
-# clean時に消されるようにする
+# NOTE: clean時に消されるようにする
 set_property(DIRECTORY PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${PROJECT_SOURCE_DIR}/ui/html")
 
 add_custom_target(public ALL
@@ -130,9 +125,6 @@ add_custom_command(
 )
 set_property(DIRECTORY PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${PROJECT_SOURCE_DIR}/ui/public")
 
-# add_custom_target(clean-html ALL
-#     COMMAND rm -rf "${PROJECT_SOURCE_DIR}/ui/html"
-# )
 
 ################################################################################
 # Linxu用Install
@@ -143,7 +135,7 @@ install(DIRECTORY
           "${PROJECT_SOURCE_DIR}/ui/assets"
           "${PROJECT_SOURCE_DIR}/ui/html"
           "${PROJECT_SOURCE_DIR}/ui/public"
-       # ${CMAKE_INSTALL_PREFIX}/share/peercast以下に保存される
+       # NOTE: ${CMAKE_INSTALL_PREFIX}/share/peercast以下に保存される
         DESTINATION share/peercast
 )
 install(DIRECTORY
@@ -154,7 +146,7 @@ install(DIRECTORY
                     GROUP_EXECUTE             GROUP_READ
                                               WORLD_READ
 )
-# CHECKME: cgi-bin/bbs_reader.pyは実行属性は必要ないか？
+# REVIEW: cgi-bin/bbs_reader.pyは実行属性は必要ないか？
 install(DIRECTORY
           "${PROJECT_SOURCE_DIR}/licenses"
         DESTINATION share/doc/peercast
