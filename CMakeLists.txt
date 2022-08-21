@@ -2,24 +2,20 @@
 # Projectの依存関係
 # - TOP(peercast-yt)
 #   - core (/core以下)
-#     - core_test
+#     - test-all
 #     - linux-bin
 #       - install
 #     - windows(cli/gui binary, zip packaging)
 #   - html, public
 #   - rtmp-server
 #
-################################################################################
-
-################################################################################
-# やり残したなど
+# やり残しなど
 # FIXME: generate-[html|public]で生成される一時フォルダがsrc/ui/{html|public}のまま
 #
 ################################################################################
 
 # CMakeのバージョンを設定
 cmake_minimum_required(VERSION 3.18)
-
 
 # プロジェクト名と使用する言語を設定
 project(peercast-yt CXX)
@@ -28,9 +24,11 @@ set(CMAKE_CXX_STANDARD, 11) # 標準の言語仕様をC++11にする
 if(NOT WIN32)
   # install()で利用する
   include(GNUInstallDirs)
-  # CPack用に使われる
 endif()
 
+find_package(PkgConfig REQUIRED)
+
+# CPack用に使われる
 # 現在のプラットフォーム用のランタイムライブラリを含めるために必要
 include(InstallRequiredSystemLibraries)
 
@@ -40,7 +38,13 @@ enable_testing()
 find_package(GTest REQUIRED)
 include(GoogleTest)
 
-
+# RTMPの確認とデフォルトのリンク設定
+pkg_check_modules(LIBRTMP QUIET librtmp)
+if(LIBRTMP_FOUND)
+  option(USE_RTMP "USE_RTMP" ON)
+else()
+  option(USE_RTMP "USE_RTMP" OFF)
+endif()
 
 ################################################################################
 # Project: libpeercast
@@ -90,7 +94,7 @@ if(WIN32)
 endif()
 
 ################################################################################
-# core_test
+# tests-all
 ################################################################################
 file(GLOB_RECURSE MY_TESTS_SRCS
   "${PROJECT_SOURCE_DIR}/tests/*.cpp"
@@ -100,25 +104,30 @@ file(GLOB_RECURSE MY_TESTS_SRCS
 # list(REMOVE_ITEM MY_TESTS_SRCS
 #   "${PROJECT_SOURCE_DIR}/tests/template.cpp"
 # )
-add_executable(core_test
+add_executable(test-all
   ${MY_TESTS_SRCS}
 )
-target_link_libraries(core_test core GTest::GTest GTest::Main)
+target_link_libraries(test-all core GTest::GTest GTest::Main)
 
 # NOTE: CTest Runnerで走らせる?テストケース毎に走らせるので実行が遅くなる
-gtest_discover_tests(core_test)
+gtest_discover_tests(test-all)
 
 # リンクされたバイナリをビルドが終わったタイミングで実行する
 add_custom_command(
-     TARGET core_test
+     TARGET test-all
      COMMENT "Run tests"
      POST_BUILD
      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-     COMMAND core_test
+     COMMAND test-all
      # ctestでテストケース毎に実行するので遅い
      #  COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION> -R "^${UNIT_TEST}$" --output-on-failures
 )
 
+################################################################################
+# rtmp_server
+################################################################################
+add_executable(rtmp-server rtmp-server/rtmp-server.cpp)
+target_link_libraries(rtmp-server core)
 
 ################################################################################
 # Project: peercast(linux)
@@ -127,11 +136,15 @@ if(NOT WIN32)
   add_executable(linux-bin ui/linux/main.cpp)
   SET_TARGET_PROPERTIES(linux-bin PROPERTIES OUTPUT_NAME peercast)
   target_link_libraries(linux-bin core)
+  if(USE_RTMP)
+    target_compile_definitions(linux-bin PRIVATE WITH_RTMP)
+    target_link_libraries(linux-bin ${LIBRTMP_LIBRARIES})
+  endif()
 
 ################################################################################
 # Linxu用Install
 ################################################################################
-  install(TARGETS linux-bin)
+  install(TARGETS linux-bin rtmp-server)
   install(DIRECTORY
             "${PROJECT_SOURCE_DIR}/ui/assets"
             "${PROJECT_SOURCE_DIR}/ui/html"
@@ -174,6 +187,10 @@ if(WIN32)
     ui/mingui/Simple.rc
   )
 
+  if(USE_RTMP)
+    target_compile_definitions(win-bin PRIVATE WITH_RTMP)
+    target_link_libraries(win-bin ${LIBRTMP_LIBRARIES})
+  endif()
 endif() # if(NOT WIN32)
 
 
@@ -198,16 +215,6 @@ file(GLOB_RECURSE MY_PUBLIC_TEMPLATES
 # make相当
 # all: html
 # html: html.tar
-# add_custom_target(html ALL
-#     DEPENDS html.tar)
-# # ファイル更新を検出するために add_custom_commandを利用する
-# add_custom_command(
-#   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/html.tar
-#   COMMAND ruby --disable-gems "${PROJECT_SOURCE_DIR}/ui/generate-html"
-#   COMMAND tar cf "${CMAKE_CURRENT_BINARY_DIR}/html.tar" html
-#   DEPENDS ${MY_HTML_CATALOGS} ${MY_HTML_TEMPLATES}
-#   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/ui"
-# )
 add_custom_target(html ALL
     DEPENDS html.touch.txt)
 add_custom_command(
@@ -240,10 +247,10 @@ set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_CLEAN_FILES
 ################################################################################
 # DEBUG用 cmake -S . -B build で変数が全部出る
 ################################################################################
-get_cmake_property(_variableNames VARIABLES)
-foreach (_variableName ${_variableNames})
-    message(STATUS "${_variableName}=${${_variableName}}")
-endforeach()
+# get_cmake_property(_variableNames VARIABLES)
+# foreach (_variableName ${_variableNames})
+#     message(STATUS "${_variableName}=${${_variableName}}")
+# endforeach()
 
 
 ################################################################################
