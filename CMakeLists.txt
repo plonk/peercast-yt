@@ -86,6 +86,11 @@ find_package(OpenSSL REQUIRED)
 # NOTE: INTERFACE指定することでcoreをリンクするターゲットが自動でOpenSSLのライブラリをリンクする
 target_link_libraries(core INTERFACE OpenSSL::SSL)
 
+if(USE_RTMP)
+  target_compile_definitions(core INTERFACE WITH_RTMP)
+  target_link_libraries(core INTERFACE ${LIBRTMP_LIBRARIES})
+endif()
+
 if(WIN32)
   set(CMAKE_EXE_LINKER_FLAGS " -static")
   target_link_options(core PRIVATE -static-libgcc -static-libstdc++)
@@ -136,10 +141,6 @@ if(NOT WIN32)
   add_executable(linux-bin ui/linux/main.cpp)
   SET_TARGET_PROPERTIES(linux-bin PROPERTIES OUTPUT_NAME peercast)
   target_link_libraries(linux-bin core)
-  if(USE_RTMP)
-    target_compile_definitions(linux-bin PRIVATE WITH_RTMP)
-    target_link_libraries(linux-bin ${LIBRTMP_LIBRARIES})
-  endif()
 
 ################################################################################
 # Linxu用Install
@@ -186,11 +187,6 @@ if(WIN32)
   target_sources(win-bin PRIVATE
     ui/mingui/Simple.rc
   )
-
-  if(USE_RTMP)
-    target_compile_definitions(win-bin PRIVATE WITH_RTMP)
-    target_link_libraries(win-bin ${LIBRTMP_LIBRARIES})
-  endif()
 endif() # if(NOT WIN32)
 
 

@@ -60,6 +60,8 @@ pacman -S base-devel \
 
 # Ninja で高速ビルド on Ubuntu(22.04)
 FIXME: 現在、Windows(MinGW-w64環境）においてNinjaによるビルドはできない
+       ようなできるようなよくわからない・・・
+
 ```shell
 sudo apt install ninja-build
 # cmake -S . -B build -G "Unix Makefiles"
