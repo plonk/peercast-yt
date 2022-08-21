@@ -218,7 +218,9 @@ add_custom_command(
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/ui"
 )
 # NOTE: clean時に消されるようにする
-set_property(DIRECTORY PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${PROJECT_SOURCE_DIR}/ui/html")
+set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_CLEAN_FILES
+  "${PROJECT_SOURCE_DIR}/ui/html"
+)
 
 add_custom_target(public ALL
     DEPENDS public.touch.txt)
@@ -229,7 +231,10 @@ add_custom_command(
   DEPENDS ${MY_HTML_CATALOGS} ${MY_PUBLIC_TEMPLATES}
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/ui"
 )
-set_property(DIRECTORY PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${PROJECT_SOURCE_DIR}/ui/public")
+
+set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_CLEAN_FILES
+  "${PROJECT_SOURCE_DIR}/ui/public"
+)
 
 
 ################################################################################
