@@ -41,11 +41,22 @@ static bool isTruish(const amf0::Value& value);
 Template::Template(const std::string& args)
 {
     tmplArgs = args;
+    m_pageScope = new GenericScope;
+
+    cgi::Query query(tmplArgs);
+    std::map<std::string,amf0::Value> page;
+    for (auto& key : query.getKeys())
+    {
+        page[key] = query.get(key);
+    }
+    m_pageScope->vars["page"] = page;
+    m_scopes.push_front(m_pageScope);
 }
 
 // --------------------------------------
 Template::~Template()
 {
+    delete m_pageScope;
 }
 
 // --------------------------------------
@@ -100,33 +111,11 @@ bool Template::writeVariable(amf0::Value& out, const String &varName)
 }
 
 // --------------------------------------
-bool Template::writePageVariable(amf0::Value& out, const String &varName)
-{
-    String v = varName+5;
-    v.append('=');
-    const char *a = getCGIarg(tmplArgs.c_str(), v);
-    if (a)
-    {
-        Regexp pat("^([^&]*)");
-        auto vec = pat.exec(a);
-        assert(vec.size() > 0);
-
-        out = cgi::unescape(vec[0]);
-        return true;
-    }
-
-    return false;
-}
-
-// --------------------------------------
 bool Template::writeGlobalVariable(amf0::Value& out, const String &varName)
 {
     bool r = false;
 
-    if (varName.startsWith("page."))
-    {
-        r = writePageVariable(out, varName);
-    }else if (varName == "TRUE")
+    if (varName == "TRUE")
     {
         out = "1";
         r = true;

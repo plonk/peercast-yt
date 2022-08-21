@@ -33,6 +33,7 @@ public:
     class Scope
     {
     public:
+        virtual ~Scope() {}
         virtual bool writeVariable(amf0::Value& out, const String &) = 0;
     };
 
@@ -70,7 +71,6 @@ public:
     // 変数
     bool    writeVariable(amf0::Value&, const String &);
     bool    writeGlobalVariable(amf0::Value&, const String &);
-    bool    writePageVariable(amf0::Value&, const String &varName);
     int     getIntVariable(const String &);
     bool    getBoolVariable(const String &);
 
@@ -103,6 +103,7 @@ public:
     std::string currentFragment;
 
     std::list<Scope*> m_scopes;
+    class GenericScope* m_pageScope;
 };
 
 class GenericScope : public Template::Scope
