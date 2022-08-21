@@ -6,6 +6,12 @@ cmake_minimum_required(VERSION 3.18)
 project(peercast-yt CXX)
 set(CMAKE_CXX_STANDARD, 11) # 標準の言語仕様をC++11にする
 
+# CPack用に使われる
+# 現在のプラットフォーム用のランタイムライブラリを含めるために必要
+if(NOT WIN32)
+  include(InstallRequiredSystemLibraries)
+endif()
+
 if(NOT WIN32)
   include(GNUInstallDirs)
 endif()
@@ -36,9 +42,11 @@ endif()
 # Project: libpeercast
 ################################################################################
 # 実行ファイルをmain.cppから作成
-add_library(libpeercast STATIC)
+add_library(core STATIC)
+# SET_TARGET_PROPERTIES(lib-core PROPERTIES OUTPUT_NAME libpeercast)
+
 # set_property(TARGET libpeercast PROPERTY CXX_STANDARD 11)
-target_compile_definitions(libpeercast PRIVATE _UNIX)
+target_compile_definitions(core PRIVATE _UNIX)
 
 # コンパイル・リンクするソースコードを変数に格納
 if(WIN32)
@@ -52,31 +60,31 @@ else()
     "${PROJECT_SOURCE_DIR}/core/unix/*.cpp"
   )
 endif()
-target_sources(libpeercast
+target_sources(core
   PRIVATE ${MY_LIBPEERCAST_SRCS}
 )
 
 # Includeディレクトリを登録
 # PUBLICにすることでリンクするターゲットで自動的に読み込まれる
-target_include_directories(libpeercast
+target_include_directories(core
   PUBLIC ${PROJECT_SOURCE_DIR}/core/common
   )
-target_include_directories(libpeercast
+target_include_directories(core
   PUBLIC ${PROJECT_SOURCE_DIR}/core
   )
 
 ################################################################################
 # Project: peercast(linux)
 ################################################################################
-add_executable(peercast ui/linux/main.cpp)
-# set_property(TARGET libpeercast PROPERTY CXX_STANDARD 11)
-target_link_libraries(peercast libpeercast)
+add_executable(linux-bin ui/linux/main.cpp)
+SET_TARGET_PROPERTIES(linux-bin PROPERTIES OUTPUT_NAME peercast)
+target_link_libraries(linux-bin core)
 
 # OpenSSLライブラリを探してリンク
 set(OPENSSL_USE_STATIC_LIBS TRUE)
 find_package(OpenSSL REQUIRED)
 # target_link_libraries(peercast-yt-cli PRIVATE OpenSSL::SSL)
-target_link_libraries(peercast OpenSSL::SSL)
+target_link_libraries(linux-bin OpenSSL::SSL)
 
 ################################################################################
 # Project: html
@@ -130,7 +138,7 @@ set_property(DIRECTORY PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${PROJECT_SOURCE_DI
 # Linxu用Install
 ################################################################################
 if(NOT WIN32)
-install(TARGETS peercast)
+install(TARGETS linux-bin)
 install(DIRECTORY
           "${PROJECT_SOURCE_DIR}/ui/assets"
           "${PROJECT_SOURCE_DIR}/ui/cgi-bin"
@@ -146,6 +154,17 @@ install(DIRECTORY
 endif()
 
 ################################################################################
+# Linxu用 Packaging
+# peercast-yt[PEERCAST_YT_VERSION]-[CMAKE_CXX_PLATFORM_ID]-[ARCHITECTURE].tar.gz
+# https://cmake.org/cmake/help/latest/module/CPack.html#module:CPack
+################################################################################
+if(NOT WIN32)
+  set(CPACK_GENERATOR "TGZ")
+  include(CPack) # Install定義からArchiveを自動で作る
+endif()
+
+
+################################################################################
 # DEBUG用 cmake -S . -B build で変数が全部出る
 ################################################################################
 # get_cmake_property(_variableNames VARIABLES)
@@ -156,13 +175,13 @@ endif()
 
 
 
-
 ################################################################################
 # MEMO
 ################################################################################
 # - add_custom_command / add_custom_target あたりの使い分けについて
 #   https://theolizer.com/cpp-school3/cpp-school3-4/
-#
+# - LinuxでのTarボール化
+#   https://cmake.org/cmake/help/latest/guide/tutorial/Packaging%20an%20Installer.html
 
 
 
