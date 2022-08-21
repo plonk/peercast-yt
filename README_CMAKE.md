@@ -13,13 +13,6 @@ cmake -S . -B build
 # build
 cmake --build ./build
 
-# テストケース毎に実行(遅い)
-cmake --build build --target test
-
-# テストを一括で実行(早い)
-# カレントディレクトリに.tmpファイルが作成されるので注意
-pushd build && test-all && popd
-
 # clean
 cmake --build ./build --target clean
 ```
@@ -28,12 +21,26 @@ cmake --build ./build --target clean
 # テストの実行
 ```shell
 cd peercast-yt
-cmake -S . -B build
-cmake --build build
 
+# テストケース毎に実行(遅い)
+cmake --build build --target test
+
+# テストを一括で実行(早い)
+# カレントディレクトリに.tmpファイルが作成されるので注意
+pushd build && test-all && popd
+
+# CTestコマンドで実行
+pushd build && ctest
+```
+
+# 成果物の作成
+```shell
+# tar.gzボールにまとめる
 cd build
-ctest
-#~~~~ 注意
+
+cpack
+
+ls -la peercast*.tar.gz
 ```
 
 
@@ -64,14 +71,24 @@ FIXME: 現在、Windows(MinGW-w64環境）においてNinjaによるビルドは
 
 ```shell
 sudo apt install ninja-build
-# cmake -S . -B build -G "Unix Makefiles"
+
+# Ninjaを使う場合
 cmake -S . -B build -G "Ninja"
+
+# 明示的にmakeを使う場合
+cmake -S . -B build -G "Unix Makefiles"
+
 cmake --build ./build
 ```
 
 # TUIでCONFIGする場合
 ```
 sudo apt install cmake-curses-gui
+
 cmake -S . -B build
+
+# TUIでオプションを変更できる
+ccmake build
+
 cmake build
 ```
