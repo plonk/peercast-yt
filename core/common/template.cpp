@@ -505,6 +505,35 @@ amf0::Value Template::evalForm(const amf0::Value& exp)
             return evalExpression(arr.at(1)).strictArray().size();
         } else if (name == "inspect") {
             return evalExpression(arr.at(1)).inspect();
+        } else if (name == "if") {
+            if (arr.size() == 3) {
+                return isTruish(evalExpression(arr.at(1))) ? evalExpression(arr.at(2)) : nullptr;
+            }else if (arr.size() == 4) {
+                return isTruish(evalExpression(arr.at(1))) ? evalExpression(arr.at(2)) : evalExpression(arr.at(3));
+            }else
+                throw GeneralException("malformed if form");
+        } else if (name == "and") {
+            size_t index = 1;
+            amf0::Value v = true;
+            while (index < arr.size())
+            {
+                v = evalExpression(arr.at(index));
+                if (!isTruish(v))
+                    break;
+                index++;
+            }
+            return v;
+        } else if (name == "or") {
+            size_t index = 1;
+            amf0::Value v = false;
+            while (index < arr.size())
+            {
+                v = evalExpression(arr.at(index));
+                if (isTruish(v))
+                    break;
+                index++;
+            }
+            return v;
         } else {
             throw GeneralException(str::STR("Unknown function name or operator name ", name));
         }
