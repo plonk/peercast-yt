@@ -1,9 +1,10 @@
 ################################################################################
 # Projectの依存関係
 # - TOP(peercast-yt)
-#   - libpeercast (/core以下)
-#     - linux(cli binary, zip packaging)
-#       - AppImage(packaging)
+#   - core (/core以下)
+#     - core_test
+#     - linux-bin
+#       - install
 #     - windows(cli/gui binary, zip packaging)
 #   - html, public
 #   - rtmp-server
@@ -32,6 +33,13 @@ if(NOT WIN32)
   include(InstallRequiredSystemLibraries)
 endif()
 
+# CTestの有効化
+enable_testing()
+# GoogleTestを有効化
+find_package(GTest REQUIRED)
+include(GoogleTest)
+
+
 
 ################################################################################
 # Project: libpeercast
@@ -41,7 +49,7 @@ add_library(core STATIC)
 # SET_TARGET_PROPERTIES(lib-core PROPERTIES OUTPUT_NAME libpeercast)
 
 # set_property(TARGET libpeercast PROPERTY CXX_STANDARD 11)
-target_compile_definitions(core PRIVATE _UNIX)
+target_compile_definitions(core PUBLIC _UNIX)
 
 # コンパイル・リンクするソースコードを変数に格納
 if(WIN32)
@@ -68,6 +76,43 @@ target_include_directories(core
   PUBLIC ${PROJECT_SOURCE_DIR}/core
   )
 
+# OpenSSLライブラリを探してリンク
+set(OPENSSL_USE_STATIC_LIBS TRUE)
+find_package(OpenSSL REQUIRED)
+# NOTE: INTERFACE指定することでcoreをリンクするターゲットが自動でOpenSSLのライブラリをリンクする
+target_link_libraries(core INTERFACE OpenSSL::SSL)
+
+################################################################################
+# core_test
+################################################################################
+file(GLOB_RECURSE MY_TESTS_SRCS
+  "${PROJECT_SOURCE_DIR}/tests/*.cpp"
+)
+# NOTE: template.cppにテスト名を追加してエラーを取り除いた
+# 下はtemplate.cppをリストから取り除く場合の解決方法
+# list(REMOVE_ITEM MY_TESTS_SRCS
+#   "${PROJECT_SOURCE_DIR}/tests/template.cpp"
+# )
+add_executable(core_test
+  ${MY_TESTS_SRCS}
+)
+target_link_libraries(core_test core GTest::GTest GTest::Main)
+
+# NOTE: CTest Runnerで走らせる?テストケース毎に走らせるので実行が遅くなる
+gtest_discover_tests(core_test)
+
+# リンクされたバイナリをビルドが終わったタイミングで実行する
+add_custom_command(
+     TARGET core_test
+     COMMENT "Run tests"
+     POST_BUILD
+     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+     COMMAND core_test
+     # ctestでテストケース毎に実行するので遅い
+     #  COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION> -R "^${UNIT_TEST}$" --output-on-failures
+)
+
+
 ################################################################################
 # Project: peercast(linux)
 ################################################################################
@@ -75,11 +120,6 @@ add_executable(linux-bin ui/linux/main.cpp)
 SET_TARGET_PROPERTIES(linux-bin PROPERTIES OUTPUT_NAME peercast)
 target_link_libraries(linux-bin core)
 
-# OpenSSLライブラリを探してリンク
-set(OPENSSL_USE_STATIC_LIBS TRUE)
-find_package(OpenSSL REQUIRED)
-# target_link_libraries(peercast-yt-cli PRIVATE OpenSSL::SSL)
-target_link_libraries(linux-bin OpenSSL::SSL)
 
 ################################################################################
 # Project: html
@@ -171,8 +211,6 @@ endif()
 # foreach (_variableName ${_variableNames})
 #     message(STATUS "${_variableName}=${${_variableName}}")
 # endforeach()
-
-
 
 
 ################################################################################

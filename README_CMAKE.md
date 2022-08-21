@@ -15,7 +15,7 @@ git clone ttps://github.com/plonk1/peercast-yt
 cd peercast-yt
 
 # フォルダ内で作業
-cmake -S . -B build
+# cmake -S . -B build # 分かってる人はこちらで
 cmake --build ./build
 
 
@@ -24,7 +24,6 @@ cd ../
 cmake -S peercast-yt -B build
 cmake --build ./build
 
-
 ```
 
 <!-- cmake --install <ビルドツリー> --prefix <インストールprefix>
@@ -32,16 +31,30 @@ cmake --build ./build
 困ったらこれTUI(ccmake)もいいぞ
 sudo apt install cmake-curses-gui -->
 
+# テストの実行
+```shell
+cd peercast-yt
+cmake -S . -B build
+cmake --build build
+
+cd build
+ctest
+#~~~~ 注意
+```
+
+
 # Ubuntu(22.04)でのビルドに必要なライブラリなど
 ```shell
 sudo apt install build-essential \
                   cmake \
+                  libgtest-dev
 ```
 
 # Ninja で高速ビルド on Ubuntu(22.04)
-```
+```shell
 sudo apt install ninja-build
-cmake -G Ninja -S ./peercast-yt -B build
+# cmake -S . -B build -G "Unix Makefiles"
+cmake -S . -B build -G "Ninja"
 cmake --build ./build
 ```
 
