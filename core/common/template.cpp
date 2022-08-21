@@ -123,6 +123,18 @@ bool Template::writeGlobalVariable(amf0::Value& out, const String &varName)
     {
         out = "0";
         r = true;
+    }else if (varName == "true")
+    {
+        out = true;
+        r = true;
+    }else if (varName == "false")
+    {
+        out = false;
+        r = true;
+    }else if (varName == "null")
+    {
+        out = nullptr;
+        r = true;
     }
 
     return r;
