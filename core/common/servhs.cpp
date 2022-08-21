@@ -1943,6 +1943,11 @@ void Servent::handshakeCMD(HTTP& http, const std::string& query)
 
         http.writeStringF("<h1>ERROR - %s</h1>\n", cgi::escape_html(e.msg).c_str());
 
+        if (e.additionalMessage != "")
+        {
+            http.writeStringF("<pre>%s</pre>\n", cgi::escape_html(e.additionalMessage).c_str());
+        }
+
         LOG_ERROR("html: %s", e.msg);
     }
 
