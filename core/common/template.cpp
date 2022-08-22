@@ -322,7 +322,7 @@ std::list<std::string> Template::tokenize(const string& input)
         {
             tokens.push_back(s.substr(0,2));
             s.erase(0,2);
-        }else if (s[0] == '(' || s[0] == ')' || s[0] == '!' || s[0] == ',' || s[0] == '=' || s[0] == '{' || s[0] == '}' || s[0] == ':')
+        }else if (s[0] == '(' || s[0] == ')' || s[0] == '!' || s[0] == ',' || s[0] == '=' || s[0] == '{' || s[0] == '}' || s[0] == ':' || s[0] == '[' || s[0] == ']')
         {
             tokens.push_back(s.substr(0, 1));
             s.erase(0, 1);
@@ -361,6 +361,8 @@ static Regexp REG_COLON("^:$");
 static Regexp REG_ASSIGN("^=$");
 static Regexp REG_LBRACE("^\\{$");
 static Regexp REG_RBRACE("^\\}$");
+static Regexp REG_LBRACKET("^\\[$");
+static Regexp REG_RBRACKET("^\\]$");
 
 amf0::Value Template::parse(std::list<std::string>& tokens)
 {
@@ -410,17 +412,7 @@ amf0::Value Template::parse(std::list<std::string>& tokens)
     exp =
         [&]() -> shared_ptr<amf0::Value>
         {
-            if (auto e1 = exp2()) {
-                if (auto op = accept(REG_OP)) {
-                    if (auto e2 = exp()) {
-                        return make_shared<amf0::Value>(amf0::Value::strictArray({ *op, *e1, *e2 }));
-                    } else {
-                        return nullptr;
-                    }
-                } else {
-                    return e1;
-                }
-            } else if (accept(REG_NOT)) {
+            if (accept(REG_NOT)) {
                 if (auto r = exp()) {
                     return make_shared<amf0::Value>(amf0::Value::strictArray({ "!", *r }));
                 } else
@@ -452,6 +444,37 @@ amf0::Value Template::parse(std::list<std::string>& tokens)
                         expect(REG_RBRACE);
                         return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
                     }
+                }
+            } else if (accept(REG_LBRACKET)) {
+                std::vector<amf0::Value> funcall = { "array" };
+                if (accept(REG_RBRACKET))
+                {
+                    return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
+                }
+                while (true) {
+                    auto e = exp();
+                    if (!e)
+                    {
+                        return nullptr;
+                    }
+                    funcall.push_back(*e);
+                    if (accept(REG_COMMA))
+                    {
+                        continue;
+                    }else{
+                        expect(REG_RBRACKET);
+                        return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
+                    }
+                }
+            } else if (auto e1 = exp2()) {
+                if (auto op = accept(REG_OP)) {
+                    if (auto e2 = exp()) {
+                        return make_shared<amf0::Value>(amf0::Value::strictArray({ *op, *e1, *e2 }));
+                    } else {
+                        return nullptr;
+                    }
+                } else {
+                    return e1;
                 }
             } else
                 return nullptr;

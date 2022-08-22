@@ -349,4 +349,9 @@ TEST_F(TemplateFixture, parse)
     tok = temp.tokenize("{\"a\":1,\"b\":2}");
     val = Template::parse(tok);
     ASSERT_EQ(val.inspect(), "[\"object\",[\"quote\",\"a\"],\"1\",[\"quote\",\"b\"],\"2\"]");
+
+    tok = temp.tokenize("[]");
+    ASSERT_EQ(tok.size(), 2);
+    val = Template::parse(tok);
+    ASSERT_EQ(val.inspect(), "[\"array\"]");
 }
