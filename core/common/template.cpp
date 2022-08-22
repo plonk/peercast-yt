@@ -586,6 +586,22 @@ amf0::Value Template::evalForm(const amf0::Value& exp)
                 object[key.string()] = value;
             }
             return object;
+        } else if (name == "merge") {
+            if (arr.size() - 1 < 1)
+            {
+                throw GeneralException("merge: Wrong number of arguments");
+            }
+            std::map<std::string,amf0::Value> result = evalExpression(arr[1]).object();
+            for (size_t i = 2; i < arr.size(); i++)
+            {
+                auto evaluated = evalExpression(arr[i]);
+                const auto& src = evaluated.object();
+                for (auto& pair : src)
+                {
+                    result[pair.first] = pair.second;
+                }
+            }
+            return result;
         } else {
             throw GeneralException(str::STR("Unknown function name or operator name ", name));
         }
