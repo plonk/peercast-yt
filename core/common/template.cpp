@@ -661,6 +661,19 @@ amf0::Value Template::evalForm(const amf0::Value& exp)
             auto subscript = evalExpression(arr[1]);
             auto array = evalExpression(arr[2]);
             return array.strictArray()[subscript.number()];
+        } else if (name == "removeKey") {
+            if (arr.size() - 1 < 1)
+            {
+                throw GeneralException("merge: Wrong number of arguments");
+            }
+            auto object = evalExpression(arr[1]).object();
+
+            for (size_t i = 2; i < arr.size(); i++)
+            {
+                auto key = evalExpression(arr[i]).string();
+                object.erase(key);
+            }
+            return object;
         } else {
             throw GeneralException(str::STR("Unknown function name or operator name ", name));
         }

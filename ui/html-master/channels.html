@@ -42,6 +42,30 @@
   </style>
 {^end}
 
+<div class="navbar" style="padding: 11px">
+  <a class='{$if(page.feed_url, "", "active-tab")}' href='?{$toQueryString(removeKey(page,"feed_url"))}'>すべて ({$servMgr.numExternalChannels})</a>
+  {@foreach servMgr.channelDirectory.feeds}
+    <a class='{$if(page.feed_url==this.url, "active-tab")}' href='?{$toQueryString(merge(page,object("feed_url", this.url)))}'>
+      {@if this.url == "http://bayonet.ddo.jp/sp/index.txt"}
+        SP
+      {@elsif this.url == "http://peercast.takami98.net/turf-page/index.txt"}
+        {#Turf}
+      {@elsif this.url == "http://yp.pcgw.pgw.jp/index.txt"}
+        {#Heisei}
+      {@elsif this.url == "https://p-at.net/index.txt"}
+        P@
+      {@elsif this.url == "http://ypv6.pecastation.org/index.txt"}
+        YPv6
+      {@elsif this.url == "http://eventyp.xrea.jp/index.txt"}
+        {#Event YP}
+      {@else}
+        {$this.directoryUrl}
+      {@end}
+      ({$this.numChannels})
+    </a>
+  {@end}
+</div>
+
 <a href="/admin?cmd=fetch_feeds" title="{#Auto-updates every 5 minutes. Manual updates have a cooldown of 30 seconds.}">{#Update}</a>
 
 <!-- index.txt の取得が5分ごとなので、あまり頻繁に更新しても仕方ない -->
@@ -52,7 +76,7 @@
       {@foreach [["name","{#Channel}","asc"], ["numDirects","{#Status}","desc"], ["bitrate","{#Bitrate}","desc"], ["contentTypeStr","{#Type}","asc"]]}
         {@let key = nth(0,this), header = nth(1,this), order = nth(2,this)}
           <th>
-            <a class='{$ if(page.sort_by==key, "accented") }' href="?sort_by={$key}&order={$order}">{$header}</a>
+            <a class='{$ if(page.sort_by==key, "accented") }' href='?{$toQueryString(merge(page,object("sort_by",key,"order",order)))}'>{$header}</a>
             <a class='sort-triangle {$ if(and(page.sort_by==key,page.order=="desc"), "accented", "muted") }' href='?{$toQueryString(merge(page,object("sort_by",key,"order","desc")))}'>▼</a>
             <a class='sort-triangle {$ if(and(page.sort_by==key,page.order=="asc"), "accented", "muted") }' href='?{$toQueryString(merge(page,object("sort_by",key,"order","asc")))}'>▲</a>
           </th>

@@ -2470,6 +2470,14 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
 
             auto channels = servMgr->getState().object().at("channelDirectory").object().at("channels").strictArray();
 
+
+            if (params.get("feed_url") != "")
+            {
+                auto target = params.get("feed_url");
+                auto notFromTarget = [=](const amf0::Value& v) { return v.object().at("feedUrl") != target; };
+                channels.erase(std::remove_if(channels.begin(), channels.end(), notFromTarget), channels.end());
+            }
+
             auto key = params.get("sort_by");
             auto comp = [](const amf0::Value& a, const amf0::Value& b)
                         {
