@@ -1938,7 +1938,7 @@ void Servent::handshakeCMD(HTTP& http, const std::string& query)
     {
         http.writeLine(e.msg);
         http.writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
-        http.writeLineF("%s %s", HTTP_HS_CONTENT, "text/html");
+        http.writeLineF("%s %s", HTTP_HS_CONTENT, "text/html; charset=utf-8");
         http.writeLine("");
 
         http.writeStringF("<h1>ERROR - %s</h1>\n", cgi::escape_html(e.msg).c_str());
@@ -2505,7 +2505,7 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
 
         validFileOrThrow(fileName.c_str(), documentRoot);
 
-        html.writeOK(MIME_HTML);
+        html.writeOK("text/html; charset=utf-8");
         html.writeTemplate(fileName.cstr(), req.queryString.c_str(), scopes);
     }else
     {
