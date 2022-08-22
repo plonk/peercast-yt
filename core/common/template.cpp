@@ -531,6 +531,24 @@ amf0::Value Template::evalForm(const amf0::Value& exp)
                 index++;
             }
             return v;
+        } else if (name == "object") {
+            std::map<std::string,amf0::Value> object;
+            if ((arr.size() - 1) % 2) // odd
+            {
+                throw GeneralException("object: Odd number of arguments given");
+            }
+            for (size_t i = 1; i < arr.size(); i += 2)
+            {
+                auto key = evalExpression(arr.at(i));
+                if (!key.isString())
+                {
+                    throw GeneralException("object: Non-string key");
+                }
+                auto value = evalExpression(arr.at(i+1));
+
+                object[key.string()] = value;
+            }
+            return object;
         } else {
             throw GeneralException(str::STR("Unknown function name or operator name ", name));
         }
