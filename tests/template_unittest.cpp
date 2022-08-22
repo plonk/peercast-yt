@@ -318,6 +318,10 @@ TEST_F(TemplateFixture, parse)
     val = Template::parse(tok);
     ASSERT_EQ(val.inspect(), amf0::Value::strictArray({"!", "x.y"}).inspect());
 
+    tok = temp.tokenize("!!x");
+    val = Template::parse(tok);
+    ASSERT_EQ(val.inspect(), amf0::Value::strictArray({"!", amf0::Value::strictArray({"!", "x"})}).inspect());
+
     tok = temp.tokenize("x.y");
     val = Template::parse(tok);
     ASSERT_EQ(val.inspect(), amf0::Value("x.y").inspect());

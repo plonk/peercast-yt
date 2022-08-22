@@ -416,7 +416,7 @@ amf0::Value Template::parse(std::list<std::string>& tokens)
                     return e1;
                 }
             } else if (accept(REG_NOT)) {
-                if (auto r = exp2()) {
+                if (auto r = exp()) {
                     return make_shared<amf0::Value>(amf0::Value::strictArray({ "!", *r }));
                 } else
                     return nullptr;
