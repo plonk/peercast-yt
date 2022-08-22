@@ -49,26 +49,15 @@
   {@fragment channels}
   <table class="channel-list">
     <tr>
-      <th>
-        <a class='{$ if(page.sort_by=="name", "accented") }' href="?sort_by=name&order=asc">{#Channel}</a>
-        <a class='sort-triangle {$ if(and(page.sort_by=="name",page.order=="desc"), "accented", "muted") }' href="?sort_by=name&order=desc">▼</a>
-        <a class='sort-triangle {$ if(and(page.sort_by=="name",page.order=="asc"), "accented", "muted") }' href="?sort_by=name&order=asc">▲</a>
-      </th>
-      <th>
-        <a class='{$ if(page.sort_by=="numDirects", "accented") }' href="?sort_by=numDirects&order=desc">{#Status}</a>
-        <a class='sort-triangle {$ if(and(page.sort_by=="numDirects",page.order=="desc"), "accented", "muted") }' href="?sort_by=numDirects&order=desc">▼</a>
-        <a class='sort-triangle {$ if(and(page.sort_by=="numDirects",page.order=="asc"), "accented", "muted") }' href="?sort_by=numDirects&order=asc">▲</a>
-      </th>
-      <th>
-        <a class='{$ if(page.sort_by=="bitrate", "accented") }' href="?sort_by=bitrate&order=desc">{#Bitrate}</a>
-        <a class='sort-triangle {$ if(and(page.sort_by=="bitrate",page.order=="desc"), "accented", "muted") }' href="?sort_by=bitrate&order=desc">▼</a>
-        <a class='sort-triangle {$ if(and(page.sort_by=="bitrate",page.order=="asc"), "accented", "muted") }' href="?sort_by=bitrate&order=asc">▲</a>
-      </th>
-      <th>
-        <a class='{$ if(page.sort_by=="contentTypeStr", "accented") }' href="?sort_by=contentTypeStr&order=asc">{#Type}</a>
-        <a class='sort-triangle {$ if(and(page.sort_by=="contentTypeStr",page.order=="desc"), "accented", "muted") }' href="?sort_by=contentTypeStr&order=desc">▼</a>
-        <a class='sort-triangle {$ if(and(page.sort_by=="contentTypeStr",page.order=="asc"), "accented", "muted") }' href="?sort_by=contentTypeStr&order=asc">▲</a>
-      </th>
+      {@foreach [["name","{#Channel}","asc"], ["numDirects","{#Status}","desc"], ["bitrate","{#Bitrate}","desc"], ["contentTypeStr","{#Type}","asc"]]}
+        {@let key = nth(0,this), header = nth(1,this), order = nth(2,this)}
+          <th>
+            <a class='{$ if(page.sort_by==key, "accented") }' href="?sort_by={$key}&order={$order}">{$header}</a>
+            <a class='sort-triangle {$ if(and(page.sort_by==key,page.order=="desc"), "accented", "muted") }' href='?{$toQueryString(merge(page,object("sort_by",key,"order","desc")))}'>▼</a>
+            <a class='sort-triangle {$ if(and(page.sort_by==key,page.order=="asc"), "accented", "muted") }' href='?{$toQueryString(merge(page,object("sort_by",key,"order","asc")))}'>▲</a>
+          </th>
+        {@end}
+      {@end}
     </tr>
 
     {@foreach channels}
