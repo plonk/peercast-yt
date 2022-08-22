@@ -341,4 +341,12 @@ TEST_F(TemplateFixture, parse)
     tok = temp.tokenize("1");
     val = Template::parse(tok);
     ASSERT_EQ(val.inspect(), amf0::Value("1").inspect());
+
+    tok = temp.tokenize("{}");
+    val = Template::parse(tok);
+    ASSERT_EQ(val.inspect(), "[\"object\"]");
+
+    tok = temp.tokenize("{\"a\":1,\"b\":2}");
+    val = Template::parse(tok);
+    ASSERT_EQ(val.inspect(), "[\"object\",[\"quote\",\"a\"],\"1\",[\"quote\",\"b\"],\"2\"]");
 }

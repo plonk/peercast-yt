@@ -321,7 +321,7 @@ std::list<std::string> Template::tokenize(const string& input)
         {
             tokens.push_back(s.substr(0,2));
             s.erase(0,2);
-        }else if (s[0] == '(' || s[0] == ')' || s[0] == '!' || s[0] == ',' || s[0] == '=')
+        }else if (s[0] == '(' || s[0] == ')' || s[0] == '!' || s[0] == ',' || s[0] == '=' || s[0] == '{' || s[0] == '}' || s[0] == ':')
         {
             tokens.push_back(s.substr(0, 1));
             s.erase(0, 1);
@@ -356,7 +356,10 @@ static Regexp REG_LPAREN("^\\($");
 static Regexp REG_RPAREN("^\\)$");
 static Regexp REG_STRING("^\".*?\"$");
 static Regexp REG_COMMA("^,$");
+static Regexp REG_COLON("^:$");
 static Regexp REG_ASSIGN("^=$");
+static Regexp REG_LBRACE("^\\{$");
+static Regexp REG_RBRACE("^\\}$");
 
 amf0::Value Template::parse(std::list<std::string>& tokens)
 {
@@ -365,10 +368,11 @@ amf0::Value Template::parse(std::list<std::string>& tokens)
       EXP := EXP2 OP EXP |                       (op exp2 exp)
              EXP2 |                   
              '!' EXP                             (! exp)
+             '{' ( EXP ':' EXP ( ',' EXP )* )? '}' (object exp exp ...)
 
-      EXP2 := IDENT '(' EXP ')' |     (ident exp)
-              IDENT |                 ident
-              STRING                  (string STRING)
+      EXP2 := IDENT '(' EXP (',' EXP)* ')' |     (ident exp ...)
+              IDENT |                            ident
+              STRING                             (quote STRING)
 
       OP := '=~' | '!~' | '==' | '!='
 
@@ -420,6 +424,34 @@ amf0::Value Template::parse(std::list<std::string>& tokens)
                     return make_shared<amf0::Value>(amf0::Value::strictArray({ "!", *r }));
                 } else
                     return nullptr;
+            } else if (accept(REG_LBRACE)) {
+                std::vector<amf0::Value> funcall = { "object" };
+                if (accept(REG_RBRACE))
+                {
+                    return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
+                }
+                while (true) {
+                    auto e = exp();
+                    if (!e)
+                    {
+                        return nullptr;
+                    }
+                    funcall.push_back(*e);
+                    expect(REG_COLON);
+                    e = exp();
+                    if (!e)
+                    {
+                        return nullptr;
+                    }
+                    funcall.push_back(*e);
+                    if (accept(REG_COMMA))
+                    {
+                        continue;
+                    }else{
+                        expect(REG_RBRACE);
+                        return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
+                    }
+                }
             } else
                 return nullptr;
         };
@@ -430,19 +462,24 @@ amf0::Value Template::parse(std::list<std::string>& tokens)
             if (auto ident = accept(REG_IDENT)) {
                 if (accept(REG_LPAREN)) {
                     std::vector<amf0::Value> funcall = { *ident };
+                    if (accept(REG_RPAREN))
+                    {
+                        return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
+                    }
                     while (true) {
                         auto e = exp();
                         if (!e)
+                        {
                             return nullptr;
+                        }
                         funcall.push_back(*e);
                         if (accept(REG_COMMA))
                         {
                             continue;
-                        } else if (accept(REG_RPAREN))
-                        {
+                        }else{
+                            expect(REG_RPAREN);
                             return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
-                        } else
-                            throw GeneralException(str::STR("Got ", tokens.front()," while expecting ',' or ')'"));
+                        }
                     }
                 } else {
                     return make_shared<amf0::Value>(*ident);
