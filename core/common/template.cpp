@@ -362,9 +362,9 @@ amf0::Value Template::parse(std::list<std::string>& tokens)
 {
     /*
 
-      EXP := EXP2 OP EXP2 |           (op exp2 exp2)
+      EXP := EXP2 OP EXP |                       (op exp2 exp)
              EXP2 |                   
-             '!' EXP2                 (! exp2)
+             '!' EXP                             (! exp)
 
       EXP2 := IDENT '(' EXP ')' |     (ident exp)
               IDENT |                 ident
@@ -407,7 +407,7 @@ amf0::Value Template::parse(std::list<std::string>& tokens)
         {
             if (auto e1 = exp2()) {
                 if (auto op = accept(REG_OP)) {
-                    if (auto e2 = exp2()) {
+                    if (auto e2 = exp()) {
                         return make_shared<amf0::Value>(amf0::Value::strictArray({ *op, *e1, *e2 }));
                     } else {
                         return nullptr;
