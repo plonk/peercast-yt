@@ -46,7 +46,8 @@ public:
         TMPL_ELSIF,
         TMPL_END,
         TMPL_FRAGMENT,
-        TMPL_FOREACH
+        TMPL_FOREACH,
+        TMPL_LET
     };
 
     Template(const std::string& args);
@@ -79,6 +80,7 @@ public:
     void    readIf(Stream &, Stream *);
     void    readLoop(Stream &, Stream *);
     void    readForeach(Stream &, Stream *);
+    void    readLet(Stream &in, Stream *outp);
     void    readFragment(Stream &, Stream *);
 
     void    readVariable_(Stream &in, Stream *outp, std::function<std::string(const std::string&)> filter);
@@ -93,7 +95,8 @@ public:
     amf0::Value evalExpression(const amf0::Value&);
     amf0::Value evalExpression(const std::string&);
     std::vector<std::string> tokenize(const std::string& input);
-    static amf0::Value parse(std::vector<std::string>& tokens_);
+    static amf0::Value parse(std::list<std::string>& tokens_);
+    static std::vector<std::pair<std::string,amf0::Value>> parseLetSpec(std::list<std::string>& tokens);
     std::pair<std::string,std::string> readStringLiteral(const std::string& input);
     static std::string evalStringLiteral(const std::string& input);
     std::string getStringVariable(const std::string& varName);

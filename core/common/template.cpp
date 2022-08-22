@@ -321,7 +321,7 @@ vector<string> Template::tokenize(const string& input)
         {
             tokens.push_back(s.substr(0,2));
             s.erase(0,2);
-        }else if (s[0] == '(' || s[0] == ')' || s[0] == '!' || s[0] == ',')
+        }else if (s[0] == '(' || s[0] == ')' || s[0] == '!' || s[0] == ',' || s[0] == '=')
         {
             tokens.push_back(s.substr(0, 1));
             s.erase(0, 1);
@@ -356,8 +356,9 @@ static Regexp REG_LPAREN("^\\($");
 static Regexp REG_RPAREN("^\\)$");
 static Regexp REG_STRING("^\".*?\"$");
 static Regexp REG_COMMA("^,$");
+static Regexp REG_ASSIGN("^=$");
 
-amf0::Value Template::parse(vector<string>& tokens_)
+amf0::Value Template::parse(std::list<std::string>& tokens)
 {
     /*
 
@@ -372,8 +373,6 @@ amf0::Value Template::parse(vector<string>& tokens_)
       OP := '=~' | '!~' | '==' | '!='
 
     */
-
-    std::list<std::string> tokens(tokens_.begin() ,tokens_.end());
 
     auto accept =
         [&](const Regexp& sym) -> shared_ptr<std::string>
@@ -459,11 +458,9 @@ amf0::Value Template::parse(vector<string>& tokens_)
     if (!pvalue) {
         throw GeneralException(" something weird ");
     }
-    if (tokens.size()) {
-        throw GeneralException(str::STR("Unexpected token ", tokens.front()));
-    }
     return *pvalue;
 }
+
 
 // --------------------------------------
 static bool isTruish(const amf0::Value& value)
@@ -565,7 +562,12 @@ amf0::Value Template::evalExpression(const amf0::Value& exp)
 amf0::Value Template::evalExpression(const string& str)
 {
     auto tokens = tokenize(str);
-    auto exp = parse(tokens);
+    std::list<std::string> toklist(tokens.begin() ,tokens.end());
+
+    auto exp = parse(toklist);
+    if (toklist.size()) {
+        throw GeneralException(str::STR("Unexpected token ", toklist.front()));
+    }
     return evalExpression(exp);
 }
 
@@ -715,6 +717,96 @@ void    Template::readForeach(Stream &in, Stream *outp)
 }
 
 // --------------------------------------
+std::vector<std::pair<std::string,amf0::Value>> Template::parseLetSpec(std::list<std::string>& tokens)
+{
+    std::vector<std::pair<std::string,amf0::Value>> result;
+
+    auto accept =
+        [&](const Regexp& sym) -> shared_ptr<std::string>
+        {
+            if (tokens.empty())
+                return nullptr;
+            if (sym.matches(tokens.front()))
+            {
+                auto r = tokens.front();
+                tokens.pop_front();
+                return make_shared<std::string>(r);
+            }else
+                return nullptr;
+        };
+
+    auto expect =
+        [&](const Regexp& sym) -> void
+        {
+            if (tokens.empty())
+                throw GeneralException(str::STR("Premature end while expecting ", sym.m_exp));
+
+            if (!sym.matches(tokens.front()))
+                throw GeneralException(str::STR("Got ", tokens.front()," while expecting ", sym.m_exp));
+
+            tokens.pop_front();
+        };
+
+    while (true)
+    {
+        if (auto ident = accept(REG_IDENT))
+        {
+            expect(REG_ASSIGN);
+            auto exp = parse(tokens);
+
+            result.push_back(std::pair<std::string,amf0::Value>(*ident, exp));
+            if (tokens.size())
+            {
+                expect(REG_COMMA);
+                continue;
+            }else{
+                break;
+            }
+        }else{
+            throw GeneralException("Identifier expected");
+        }
+    }
+    return result;
+}
+
+// --------------------------------------
+void    Template::readLet(Stream &in, Stream *outp)
+{
+    String var;
+    while (!in.eof())
+    {
+        char c = in.readChar();
+
+        if (c == '}')
+        {
+            if (!inSelectedFragment() || !outp)
+            {
+                readTemplate(in, NULL);
+                return;
+            }
+
+            auto tokvec = tokenize(var.c_str());
+            std::list<std::string> tokens(tokvec.begin(), tokvec.end());
+            std::vector<std::pair<std::string,amf0::Value>> letspec = parseLetSpec(tokens);
+
+            GenericScope newScope;
+            prependScope(newScope);
+            for (size_t i = 0; i < letspec.size(); ++i)
+            {
+                auto& pair = letspec[i];
+                newScope.vars[pair.first] = evalExpression(pair.second);
+            }
+            readTemplate(in, outp);
+            m_scopes.pop_front();
+            return;
+        }else
+        {
+            var.append(c);
+        }
+    }
+}
+
+// --------------------------------------
 int Template::readCmd(Stream &in, Stream *outp)
 {
     String cmd;
@@ -746,6 +838,10 @@ int Template::readCmd(Stream &in, Stream *outp)
             {
                 readForeach(in, outp);
                 tmpl = TMPL_FOREACH;
+            }else if (cmd == "let")
+            {
+                readLet(in, outp);
+                tmpl = TMPL_LET;
             }else if (cmd == "end")
             {
                 tmpl = TMPL_END;
