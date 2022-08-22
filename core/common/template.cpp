@@ -630,6 +630,14 @@ amf0::Value Template::evalForm(const amf0::Value& exp)
                 res += cgi::escape(pair.first) + "=" + cgi::escape(stringified);
             }
             return res;
+        } else if (name == "nth") {
+            if (arr.size() - 1 != 2)
+            {
+                throw GeneralException("merge: Wrong number of arguments");
+            }
+            auto subscript = evalExpression(arr[1]);
+            auto array = evalExpression(arr[2]);
+            return array.strictArray()[subscript.number()];
         } else {
             throw GeneralException(str::STR("Unknown function name or operator name ", name));
         }
