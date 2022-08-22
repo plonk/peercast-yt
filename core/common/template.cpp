@@ -766,16 +766,8 @@ void    Template::readForeach(Stream &in, Stream *outp)
                 return;
             }
 
-            amf0::Value value;
-            bool written = false;
-            for (auto scope : m_scopes)
-            {
-                written = scope->writeVariable(value, var);
-                if (written)
-                {
-                    break;
-                }
-            }
+            std::list<std::string> tokens = tokenize(var.c_str());
+            amf0::Value value = evalExpression(parse(tokens));
             if (!value.isStrictArray())
                 throw GeneralException(str::STR(var, " is not a strictArray. Value: ", value.inspect()));
 
