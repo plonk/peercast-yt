@@ -294,7 +294,7 @@ pair<string,string> Template::readStringLiteral(const string& input)
 }
 
 // --------------------------------------
-vector<string> Template::tokenize(const string& input)
+std::list<std::string> Template::tokenize(const string& input)
 {
     using namespace std;
 
@@ -345,7 +345,7 @@ vector<string> Template::tokenize(const string& input)
             throw StreamException(("Unrecognized token. Error at " + str::inspect(c)).c_str());
         }
     }
-    return tokens;
+    return { tokens.begin(), tokens.end() };
 }
 
 // --------------------------------------
@@ -561,12 +561,11 @@ amf0::Value Template::evalExpression(const amf0::Value& exp)
 // --------------------------------------
 amf0::Value Template::evalExpression(const string& str)
 {
-    auto tokens = tokenize(str);
-    std::list<std::string> toklist(tokens.begin() ,tokens.end());
+    std::list<std::string> tokens = tokenize(str);
 
-    auto exp = parse(toklist);
-    if (toklist.size()) {
-        throw GeneralException(str::STR("Unexpected token ", toklist.front()));
+    auto exp = parse(tokens);
+    if (tokens.size()) {
+        throw GeneralException(str::STR("Unexpected token ", tokens.front()));
     }
     return evalExpression(exp);
 }
@@ -785,8 +784,7 @@ void    Template::readLet(Stream &in, Stream *outp)
                 return;
             }
 
-            auto tokvec = tokenize(var.c_str());
-            std::list<std::string> tokens(tokvec.begin(), tokvec.end());
+            std::list<std::string> tokens = tokenize(var.c_str());
             std::vector<std::pair<std::string,amf0::Value>> letspec = parseLetSpec(tokens);
 
             GenericScope newScope;
