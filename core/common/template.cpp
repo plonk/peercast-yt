@@ -587,6 +587,13 @@ amf0::Value Template::evalForm(const amf0::Value& exp)
                 object[key.string()] = value;
             }
             return object;
+        } else if (name == "array") {
+            std::vector<amf0::Value> array;
+            for (size_t i = 1; i < arr.size(); i++)
+            {
+                array.push_back(evalExpression(arr.at(i)));
+            }
+            return array;
         } else if (name == "merge") {
             if (arr.size() - 1 < 1)
             {
