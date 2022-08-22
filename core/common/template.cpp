@@ -36,6 +36,7 @@
 using namespace std;
 
 static bool isTruish(const amf0::Value& value);
+static void to_s(const amf0::Value& value, std::string& out);
 
 // --------------------------------------
 Template::Template(const std::string& args)
@@ -602,6 +603,26 @@ amf0::Value Template::evalForm(const amf0::Value& exp)
                 }
             }
             return result;
+        } else if (name == "toQueryString") {
+            if (arr.size() - 1 != 1)
+            {
+                throw GeneralException("merge: Wrong number of arguments");
+            }
+            std::map<std::string,amf0::Value> dict = evalExpression(arr[1]).object();
+            std::string res;
+            bool firstTime = true;
+            for (auto pair : dict)
+            {
+                if (firstTime)
+                    firstTime = false;
+                else
+                    res += "&";
+
+                std::string stringified;
+                to_s(pair.second, stringified);
+                res += cgi::escape(pair.first) + "=" + cgi::escape(stringified);
+            }
+            return res;
         } else {
             throw GeneralException(str::STR("Unknown function name or operator name ", name));
         }
