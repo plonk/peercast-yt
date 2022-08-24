@@ -229,19 +229,23 @@ void    Template::readFragment(Stream &in, Stream *outp)
 // --------------------------------------
 string Template::evalStringLiteral(const string& input)
 {
-    if (input[0] != '\"' || input[input.size()-1] != '\"')
+    if (input[0] != '\"' && input[0] != '\'')
+        throw StreamException(str::STR("Malformed string literal: ", input));
+
+    const char quotechar = input[0];
+
+    if (input[input.size()-1] != quotechar)
         throw StreamException(str::STR("Malformed string literal: ", input));
 
     string res;
     auto s = input.substr(1);
 
-    while (!s.empty() && s[0] != '\"')
+    while (!s.empty() && s[0] != quotechar)
     {
         if (s[0] == '\\')
         {
-            // バックスラッシュが最後の文字ではないことはわかっている
-            // ので末端チェックはしない。
-            res += s[0];
+            // 最後の文字は二重引用符で、バックスラッシュではないこと
+            // はわかっているので末端チェックはしない。
             res += s[1];
             s.erase(0,2);
         }else
@@ -262,14 +266,17 @@ pair<string,string> Template::readStringLiteral(const string& input)
     if (input.empty())
         throw StreamException("empty input");
 
-    if (input[0] != '\"')
+    if (input[0] != '\"' && input[0] != '\'')
         throw StreamException("no string literal");
 
+    const char quotechar = input[0];
+
     auto s = input;
-    string res = "\"";
+    string res;
+    res += input[0];
     s.erase(0,1);
 
-    while (!s.empty() && s[0] != '\"')
+    while (!s.empty() && s[0] != quotechar)
     {
         if (s[0] == '\\')
         {
@@ -290,7 +297,7 @@ pair<string,string> Template::readStringLiteral(const string& input)
     if (s.empty())
         throw StreamException("Premature end of string");
 
-    res += "\"";
+    res += quotechar;
     s.erase(0,1);
     return make_pair(res, s);
 }
@@ -327,7 +334,7 @@ std::list<std::string> Template::tokenize(const string& input)
         {
             tokens.push_back(s.substr(0, 1));
             s.erase(0, 1);
-        }else if (s[0] == '\"')
+        }else if (s[0] == '\"' || s[0] == '\'')
         {
             string t;
             tie(t, s) = readStringLiteral(s);
@@ -356,7 +363,7 @@ static Regexp REG_NOT("^!$");
 static Regexp REG_IDENT("^[A-z0-9_.]+$");
 static Regexp REG_LPAREN("^\\($");
 static Regexp REG_RPAREN("^\\)$");
-static Regexp REG_STRING("^\".*?\"$");
+static Regexp REG_STRING("^\".*?\"|\'.*?\'$");
 static Regexp REG_COMMA("^,$");
 static Regexp REG_COLON("^:$");
 static Regexp REG_ASSIGN("^=$");
@@ -764,7 +771,7 @@ static bool readUntil(Stream& in, String& var /*OUT*/, std::function<bool(char)>
     while (!in.eof())
     {
         char c = in.readChar();
-        if (c == '\\')
+        if (!escape_next && c == '\\')
         {
             escape_next = true;
             continue;

@@ -338,6 +338,10 @@ TEST_F(TemplateFixture, parse)
     val = Template::parse(tok);
     ASSERT_EQ(val.inspect(), amf0::Value::strictArray({"quote", "a"}).inspect());
 
+    tok = temp.tokenize("\"say \\\"hello\\\".\"");
+    val = Template::parse(tok);
+    ASSERT_EQ(val.inspect(), amf0::Value::strictArray({"quote", "say \\\"hello\\\"."}).inspect());
+
     tok = temp.tokenize("1");
     val = Template::parse(tok);
     ASSERT_EQ(val.inspect(), amf0::Value("1").inspect());
