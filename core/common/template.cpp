@@ -37,6 +37,7 @@ using namespace std;
 
 static bool isTruish(const amf0::Value& value);
 static void to_s(const amf0::Value& value, std::string& out);
+static bool readUntil(Stream& in, String& var /*OUT*/, std::function<bool(char)> pred);
 
 // --------------------------------------
 Template::Template(const std::string& args)
@@ -724,15 +725,8 @@ static String readCondition(Stream &in)
 {
     String cond;
 
-    while (!in.eof())
-    {
-        char c = in.readChar();
+    readUntil(in, cond, [](char c){ return c == '}'; });
 
-        if (c == '}')
-            break;
-        else
-            cond.append(c);
-    }
     return cond;
 }
 
@@ -764,40 +758,55 @@ void    Template::readIf(Stream &in, Stream *outp)
 }
 
 // --------------------------------------
-void    Template::readLoop(Stream &in, Stream *outp)
+static bool readUntil(Stream& in, String& var /*OUT*/, std::function<bool(char)> pred)
 {
-    String var;
+    bool escape_next = false;
     while (!in.eof())
     {
         char c = in.readChar();
-
-        if (c == '}')
+        if (c == '\\')
         {
-            if (!inSelectedFragment() || !outp)
-            {
-                readTemplate(in, NULL);
-                return;
-            }
-
-            int cnt = getIntVariable(var);
-
-            if (cnt)
-            {
-                int spos = in.getPosition();
-                for (int i=0; i<cnt; i++)
-                {
-                    in.seekTo(spos);
-                    readTemplate(in, outp);
-                }
-            }else
-            {
-                readTemplate(in, NULL);
-            }
-            return;
-        }else
+            escape_next = true;
+            continue;
+        }
+            
+        if (!escape_next && pred(c))
+            return true;
+        else
         {
             var.append(c);
+            escape_next = false;
         }
+    }
+    return false;
+}
+
+// --------------------------------------
+void    Template::readLoop(Stream &in, Stream *outp)
+{
+    String var;
+    if (!readUntil(in, var, [](char c){ return c == '}'; }))
+        return;
+
+    if (!inSelectedFragment() || !outp)
+    {
+        readTemplate(in, NULL);
+        return;
+    }
+
+    int cnt = getIntVariable(var);
+
+    if (cnt)
+    {
+        int spos = in.getPosition();
+        for (int i=0; i<cnt; i++)
+        {
+            in.seekTo(spos);
+            readTemplate(in, outp);
+        }
+    }else
+    {
+        readTemplate(in, NULL);
     }
 }
 
@@ -805,49 +814,41 @@ void    Template::readLoop(Stream &in, Stream *outp)
 void    Template::readForeach(Stream &in, Stream *outp)
 {
     String var;
-    while (!in.eof())
+    if (!readUntil(in, var, [](char c){ return c == '}'; }))
+        return;
+
+    if (!inSelectedFragment() || !outp)
     {
-        char c = in.readChar();
-
-        if (c == '}')
-        {
-            if (!inSelectedFragment() || !outp)
-            {
-                readTemplate(in, NULL);
-                return;
-            }
-
-            std::list<std::string> tokens = tokenize(var.c_str());
-            amf0::Value value = evalExpression(parse(tokens));
-            if (!value.isStrictArray())
-                throw GeneralException(str::STR(var, " is not a strictArray. Value: ", value.inspect()));
-
-            auto& coll = value.strictArray();
-
-            if (coll.size() == 0)
-            {
-                readTemplate(in, NULL);
-            }else
-            {
-                GenericScope loopScope;
-                prependScope(loopScope);
-                int start = in.getPosition();
-                for (size_t i = 0; i < coll.size(); i++)
-                {
-                    loopScope.vars["this"] = coll[i];
-                    loopScope.vars["loop.index"] = i;
-                    loopScope.vars["loop.indexBaseOne"] = i + 1;
-                    in.seekTo(start);
-                    readTemplate(in, outp);
-                }
-                m_scopes.pop_front();
-            }
-            return;
-        }else
-        {
-            var.append(c);
-        }
+        readTemplate(in, NULL);
+        return;
     }
+
+    std::list<std::string> tokens = tokenize(var.c_str());
+    amf0::Value value = evalExpression(parse(tokens));
+    if (!value.isStrictArray())
+        throw GeneralException(str::STR(var, " is not a strictArray. Value: ", value.inspect()));
+
+    auto& coll = value.strictArray();
+
+    if (coll.size() == 0)
+    {
+        readTemplate(in, NULL);
+    }else
+    {
+        GenericScope loopScope;
+        prependScope(loopScope);
+        int start = in.getPosition();
+        for (size_t i = 0; i < coll.size(); i++)
+        {
+            loopScope.vars["this"] = coll[i];
+            loopScope.vars["loop.index"] = i;
+            loopScope.vars["loop.indexBaseOne"] = i + 1;
+            in.seekTo(start);
+            readTemplate(in, outp);
+        }
+        m_scopes.pop_front();
+    }
+    return;
 }
 
 // --------------------------------------
@@ -907,36 +908,28 @@ std::vector<std::pair<std::string,amf0::Value>> Template::parseLetSpec(std::list
 void    Template::readLet(Stream &in, Stream *outp)
 {
     String var;
-    while (!in.eof())
+    if (!readUntil(in, var, [](char c){ return c == '}'; }))
+        return;
+
+    if (!inSelectedFragment() || !outp)
     {
-        char c = in.readChar();
-
-        if (c == '}')
-        {
-            if (!inSelectedFragment() || !outp)
-            {
-                readTemplate(in, NULL);
-                return;
-            }
-
-            std::list<std::string> tokens = tokenize(var.c_str());
-            std::vector<std::pair<std::string,amf0::Value>> letspec = parseLetSpec(tokens);
-
-            GenericScope newScope;
-            prependScope(newScope);
-            for (size_t i = 0; i < letspec.size(); ++i)
-            {
-                auto& pair = letspec[i];
-                newScope.vars[pair.first] = evalExpression(pair.second);
-            }
-            readTemplate(in, outp);
-            m_scopes.pop_front();
-            return;
-        }else
-        {
-            var.append(c);
-        }
+        readTemplate(in, NULL);
+        return;
     }
+
+    std::list<std::string> tokens = tokenize(var.c_str());
+    std::vector<std::pair<std::string,amf0::Value>> letspec = parseLetSpec(tokens);
+
+    GenericScope newScope;
+    prependScope(newScope);
+    for (size_t i = 0; i < letspec.size(); ++i)
+    {
+        auto& pair = letspec[i];
+        newScope.vars[pair.first] = evalExpression(pair.second);
+    }
+    readTemplate(in, outp);
+    m_scopes.pop_front();
+    return;
 }
 
 // --------------------------------------
@@ -946,48 +939,39 @@ int Template::readCmd(Stream &in, Stream *outp)
 
     int tmpl = TMPL_UNKNOWN;
 
-    while (!in.eof())
-    {
-        char c = in.readChar();
+    if (!readUntil(in, cmd, [](char c){ return String::isWhitespace(c) || (c=='}'); }))
+        return tmpl;
 
-        if (String::isWhitespace(c) || (c=='}'))
-        {
-            if (cmd == "loop")
-            {
-                readLoop(in, outp);
-                tmpl = TMPL_LOOP;
-            }else if (cmd == "if")
-            {
-                readIf(in, outp);
-                tmpl = TMPL_IF;
-            }else if (cmd == "elsif")
-            {
-                tmpl = TMPL_ELSIF;
-            }else if (cmd == "fragment")
-            {
-                readFragment(in, outp);
-                tmpl = TMPL_FRAGMENT;
-            }else if (cmd == "foreach")
-            {
-                readForeach(in, outp);
-                tmpl = TMPL_FOREACH;
-            }else if (cmd == "let")
-            {
-                readLet(in, outp);
-                tmpl = TMPL_LET;
-            }else if (cmd == "end")
-            {
-                tmpl = TMPL_END;
-            }
-            else if (cmd == "else")
-            {
-                tmpl = TMPL_ELSE;
-            }
-            break;
-        }else
-        {
-            cmd.append(c);
-        }
+    if (cmd == "loop")
+    {
+        readLoop(in, outp);
+        tmpl = TMPL_LOOP;
+    }else if (cmd == "if")
+    {
+        readIf(in, outp);
+        tmpl = TMPL_IF;
+    }else if (cmd == "elsif")
+    {
+        tmpl = TMPL_ELSIF;
+    }else if (cmd == "fragment")
+    {
+        readFragment(in, outp);
+        tmpl = TMPL_FRAGMENT;
+    }else if (cmd == "foreach")
+    {
+        readForeach(in, outp);
+        tmpl = TMPL_FOREACH;
+    }else if (cmd == "let")
+    {
+        readLet(in, outp);
+        tmpl = TMPL_LET;
+    }else if (cmd == "end")
+    {
+        tmpl = TMPL_END;
+    }
+    else if (cmd == "else")
+    {
+        tmpl = TMPL_ELSE;
     }
     return tmpl;
 }
@@ -1007,25 +991,18 @@ static void to_s(const amf0::Value& value, std::string& out)
 void Template::readVariable_(Stream &in, Stream *outp, std::function<std::string(const std::string&)> filter)
 {
     String var;
-    while (!in.eof())
-    {
-        char c = in.readChar();
-        if (c == '}')
-        {
-            if (!inSelectedFragment() || !outp)
-                return;
+    if (!readUntil(in, var, [](char c){ return c == '}'; }))
+        return;
 
-            auto out = evalExpression(var);
-            std::string str;
-            to_s(out, str);
-            outp->writeString(filter(str));
+    if (!inSelectedFragment() || !outp)
+        return;
 
-            return;
-        }else
-        {
-            var.append(c);
-        }
-    }
+    auto out = evalExpression(var);
+    std::string str;
+    to_s(out, str);
+    outp->writeString(filter(str));
+
+    return;
 }
 // --------------------------------------
 void    Template::readVariable(Stream &in, Stream *outp)
