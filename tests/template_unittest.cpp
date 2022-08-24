@@ -66,6 +66,30 @@ TEST_F(TemplateFixture, readTemplate)
     ASSERT_STREQ("hoge", out.str().c_str());
 }
 
+TEST_F(TemplateFixture, escapeByBackslash)
+{
+    StringStream in, out;
+    int res;
+
+    in.writeString("{$\"\\}\"}"); // {$"\}"}
+    in.rewind();
+    res = temp.readTemplate(in, &out);
+    ASSERT_EQ(Template::TMPL_END, res);
+    ASSERT_STREQ("}", out.str().c_str());
+}
+
+TEST_F(TemplateFixture, escapeByBackslash2)
+{
+    StringStream in, out;
+    int res;
+
+    in.writeString("{$\"\\\\\\\\\"}"); // {$"\\\\"}
+    in.rewind();
+    res = temp.readTemplate(in, &out);
+    ASSERT_EQ(Template::TMPL_END, res);
+    ASSERT_STREQ("\\", out.str().c_str());
+}
+
 TEST_F(TemplateFixture, getStringVariable)
 {
     ASSERT_STREQ("1", temp.getStringVariable("TRUE").c_str());
@@ -338,9 +362,9 @@ TEST_F(TemplateFixture, parse)
     val = Template::parse(tok);
     ASSERT_EQ(val.inspect(), amf0::Value::strictArray({"quote", "a"}).inspect());
 
-    tok = temp.tokenize("\"say \\\"hello\\\".\"");
+    tok = temp.tokenize("\"\\\"\"");
     val = Template::parse(tok);
-    ASSERT_EQ(val.inspect(), amf0::Value::strictArray({"quote", "say \\\"hello\\\"."}).inspect());
+    ASSERT_EQ(val.inspect(), amf0::Value::strictArray({"quote", "\""}).inspect());
 
     tok = temp.tokenize("1");
     val = Template::parse(tok);
