@@ -619,6 +619,16 @@ amf0::Value Template::evalForm(const amf0::Value& exp)
                 return isTruish(evalExpression(arr.at(1))) ? evalExpression(arr.at(2)) : evalExpression(arr.at(3));
             }else
                 throw GeneralException("malformed if form");
+        } else if (name == "cond") {
+            if (arr.size() % 2 != 1)
+                throw GeneralException("Malformed cond");
+
+            for (size_t i = 1; i < arr.size(); i += 2)
+            {
+                if (isTruish(evalExpression(arr.at(i))))
+                    return evalExpression(arr.at(i + 1));
+            }
+            return nullptr;
         } else if (name == "and") {
             size_t index = 1;
             amf0::Value v = true;
