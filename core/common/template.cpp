@@ -378,12 +378,13 @@ amf0::Value Template::parse(std::list<std::string>& tokens)
 
       EXP := EXP2 OP EXP |                       (op exp2 exp)
              EXP2 |                   
-             '!' EXP                             (! exp)
-             '{' ( EXP ':' EXP ( ',' EXP )* )? '}' (object exp exp ...)
 
       EXP2 := IDENT '(' EXP (',' EXP)* ')' |     (ident exp ...)
+              '(' EXP ')' '(' EXP (',' EXP)* ')' |     (ident exp ...)
               IDENT |                            ident
               STRING                             (quote STRING)
+             '!' EXP                             (! exp)
+             '{' ( EXP ':' EXP ( ',' EXP )* )? '}' (object exp exp ...)
 
       OP := '=~' | '!~' | '==' | '!='
 
@@ -415,9 +416,64 @@ amf0::Value Template::parse(std::list<std::string>& tokens)
             tokens.pop_front();
         };
 
-    std::function<shared_ptr<amf0::Value>()> exp, exp2;
+    auto peek = 
+        [&](const Regexp& sym) -> bool
+        {
+            if (tokens.empty())
+                return false;
+            else
+                return sym.matches(tokens.front());
+        };
 
-    exp =
+    std::function<shared_ptr<amf0::Value>()> exp, exp2, exp3, callee;
+
+    exp = 
+        [&]() -> shared_ptr<amf0::Value>
+        {
+            if (auto e = exp3()) {
+                if (peek(REG_LPAREN))
+                {
+                    expect(REG_LPAREN);
+
+                    std::vector<amf0::Value> funcall = { *e };
+                    if (accept(REG_RPAREN))
+                    {
+                        return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
+                    }
+                    while (true) {
+                        auto e = exp();
+                        if (!e)
+                        {
+                            throw GeneralException("exp expected");
+                        }
+                        funcall.push_back(*e);
+                        if (accept(REG_COMMA))
+                        {
+                            continue;
+                        }else{
+                            expect(REG_RPAREN);
+                            return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
+                        }
+                    }
+                } else if (peek(REG_OP))
+                {
+                    // 右結合になっちゃった。
+                    auto op = accept(REG_OP);
+                    if (auto e2 = exp()) {
+                        return make_shared<amf0::Value>(amf0::Value::strictArray({ *op, *e, *e2 }));
+                    } else {
+                        return nullptr;
+                    }
+                    
+                } else {
+                    return e;
+                }
+            } else {
+                return nullptr;
+            }
+        };
+
+    exp3 =
         [&]() -> shared_ptr<amf0::Value>
         {
             if (accept(REG_NOT)) {
@@ -475,15 +531,7 @@ amf0::Value Template::parse(std::list<std::string>& tokens)
                     }
                 }
             } else if (auto e1 = exp2()) {
-                if (auto op = accept(REG_OP)) {
-                    if (auto e2 = exp()) {
-                        return make_shared<amf0::Value>(amf0::Value::strictArray({ *op, *e1, *e2 }));
-                    } else {
-                        return nullptr;
-                    }
-                } else {
-                    return e1;
-                }
+                return e1;
             } else
                 return nullptr;
         };
@@ -515,6 +563,34 @@ amf0::Value Template::parse(std::list<std::string>& tokens)
                     }
                 } else {
                     return make_shared<amf0::Value>(*ident);
+                }
+            } else if (accept(REG_LPAREN)) {
+                if (auto e = exp()) {
+                    expect(REG_RPAREN);
+                    expect(REG_LPAREN);
+
+                    std::vector<amf0::Value> funcall = { *e };
+                    if (accept(REG_RPAREN))
+                    {
+                        return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
+                    }
+                    while (true) {
+                        auto e = exp();
+                        if (!e)
+                        {
+                            return nullptr;
+                        }
+                        funcall.push_back(*e);
+                        if (accept(REG_COMMA))
+                        {
+                            continue;
+                        }else{
+                            expect(REG_RPAREN);
+                            return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
+                        }
+                    }
+                } else {
+                    return nullptr;
                 }
             } else if (auto s = accept(REG_STRING)) {
                 return make_shared<amf0::Value>(amf0::Value::strictArray({ "quote", evalStringLiteral(*s) }));
@@ -957,6 +1033,15 @@ std::vector<std::pair<std::string,amf0::Value>> Template::parseLetSpec(std::list
                 throw GeneralException(str::STR("Got ", tokens.front()," while expecting ", sym.m_exp));
 
             tokens.pop_front();
+        };
+
+    auto peek = 
+        [&](const Regexp& sym) -> bool
+        {
+            if (tokens.empty())
+                return false;
+            else
+                return sym.matches(tokens.front());
         };
 
     while (true)
