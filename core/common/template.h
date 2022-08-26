@@ -100,6 +100,7 @@ public:
     std::pair<std::string,std::string> readStringLiteral(const std::string& input);
     static std::string evalStringLiteral(const std::string& input);
     std::string getStringVariable(const std::string& varName);
+    amf0::Value apply(const amf0::Value& lambda, const std::vector<amf0::Value>& arr);
 
     std::string tmplArgs;
     std::string selectedFragment;

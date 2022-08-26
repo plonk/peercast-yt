@@ -547,6 +547,44 @@ static bool isTruish(const amf0::Value& value)
 }
 
 // --------------------------------------
+amf0::Value Template::apply(const amf0::Value& lambda, const std::vector<amf0::Value>& arr)
+{
+    auto name = arr.at(0).inspect();
+
+    if (!lambda.isStrictArray())
+        throw GeneralException(name + " is not a function");
+    auto array = lambda.strictArray();
+    if (!(array.size() > 2 && array[0].isString() && array.at(0).string() == "lambda"))
+        throw GeneralException(name + " is not a function");
+    if (!(array.at(1).isStrictArray()))
+        throw GeneralException(name + " is not a function");
+
+    auto& params = array[1].strictArray();
+    if (!(params.size() > 0 && params.at(0).isString() && params.at(0).string() == "array"))
+        throw GeneralException(name + " is not a function");
+
+    GenericScope frame;
+    for (size_t i = 1; i < params.size(); i++)
+    {
+        frame.vars[params.at(i).string()] = (i >= arr.size()) ? nullptr : evalExpression(arr.at(i));
+    }
+
+    prependScope(frame);
+
+    amf0::Value v = nullptr;
+    for (size_t i = 2; i < array.size(); i++)
+    {
+        if (i < array.size() - 1)
+            evalExpression(array.at(i));
+        else
+            v = evalExpression(array.at(i));
+    }
+
+    m_scopes.pop_front();
+    return v;
+}
+
+// --------------------------------------
 amf0::Value Template::evalForm(const amf0::Value& exp)
 {
     const auto& arr = exp.strictArray();
@@ -554,6 +592,9 @@ amf0::Value Template::evalForm(const amf0::Value& exp)
     if (arr.size() == 0) {
         throw GeneralException("empty list form");
     } else {
+        if (!arr.at(0).isString()) {
+            return apply(evalExpression(arr.at(0)), arr);
+        }
         const auto& name = arr.at(0).string();
         if (name == "==") {
             return evalExpression(arr.at(1)) == evalExpression(arr.at(2));
@@ -682,8 +723,23 @@ amf0::Value Template::evalForm(const amf0::Value& exp)
                 object.erase(key);
             }
             return object;
+        } else if (name == "lambda") {
+            return arr;
+        } else if (name == "define") {
+            GenericScope* topScope = dynamic_cast<GenericScope*>(m_scopes.front());
+            if (!topScope)
+            {
+                throw GeneralException("Cannot change this scope.");
+            }
+            topScope->vars[arr.at(1).string()] = arr.at(2);
+            return nullptr;
         } else {
-            throw GeneralException(str::STR("Unknown function name or operator name ", name));
+            amf0::Value value;
+            if (writeVariable(value, name.c_str()))
+            {
+                return apply(value, arr);
+            }else
+                throw GeneralException(str::STR("Unknown function name or operator name ", name));
         }
     }
 }
