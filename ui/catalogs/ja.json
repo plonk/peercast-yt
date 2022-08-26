@@ -86,6 +86,8 @@
     "Speed"                   : "速度",
 
     // channels.html
+    "All"                     : "すべて",
+
     "Channel"                 : "チャンネル",
     "Bitrate (kb/s)"          : "転送速度 (Kbps)",
     "Stream"                  : "タイプ",
