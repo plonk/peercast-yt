@@ -62,7 +62,6 @@ input[type=checkbox] {
 
 .navbar > a {
     margin: 2px;
-    width: calc(7em + calc( 2 * 10px ));
     font-size: 9pt;
     color: black;
     border-radius: 5px;
