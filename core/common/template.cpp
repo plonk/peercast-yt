@@ -689,7 +689,7 @@ amf0::Value Template::evalForm(const amf0::Value& exp)
 }
 
 // --------------------------------------
-static Regexp REG_INTEGER("^[0-9]$");
+static Regexp REG_INTEGER("^[0-9]+$");
 
 amf0::Value Template::evalExpression(const amf0::Value& exp)
 {
