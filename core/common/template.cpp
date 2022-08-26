@@ -37,7 +37,7 @@ using namespace std;
 
 static bool isTruish(const amf0::Value& value);
 static void to_s(const amf0::Value& value, std::string& out);
-static bool readUntil(Stream& in, String& var /*OUT*/, std::function<bool(char)> pred);
+static bool readUntil(Stream& in, std::string& var /*OUT*/, std::function<bool(char)> pred);
 
 // --------------------------------------
 Template::Template(const std::string& args)
@@ -728,9 +728,9 @@ bool    Template::evalCondition(const string& cond)
 }
 
 // --------------------------------------
-static String readCondition(Stream &in)
+static std::string readCondition(Stream &in)
 {
-    String cond;
+    std::string cond;
 
     readUntil(in, cond, [](char c){ return c == '}'; });
 
@@ -765,7 +765,7 @@ void    Template::readIf(Stream &in, Stream *outp)
 }
 
 // --------------------------------------
-static bool readUntil(Stream& in, String& var /*OUT*/, std::function<bool(char)> pred)
+static bool readUntil(Stream& in, std::string& var /*OUT*/, std::function<bool(char)> pred)
 {
     bool escape_next = false;
     while (!in.eof())
@@ -781,7 +781,7 @@ static bool readUntil(Stream& in, String& var /*OUT*/, std::function<bool(char)>
             return true;
         else
         {
-            var.append(c);
+            var += c;
             escape_next = false;
         }
     }
@@ -791,7 +791,7 @@ static bool readUntil(Stream& in, String& var /*OUT*/, std::function<bool(char)>
 // --------------------------------------
 void    Template::readLoop(Stream &in, Stream *outp)
 {
-    String var;
+    std::string var;
     if (!readUntil(in, var, [](char c){ return c == '}'; }))
         return;
 
@@ -801,7 +801,7 @@ void    Template::readLoop(Stream &in, Stream *outp)
         return;
     }
 
-    int cnt = getIntVariable(var);
+    int cnt = getIntVariable(var.c_str());
 
     if (cnt)
     {
@@ -820,7 +820,7 @@ void    Template::readLoop(Stream &in, Stream *outp)
 // --------------------------------------
 void    Template::readForeach(Stream &in, Stream *outp)
 {
-    String var;
+    std::string var;
     if (!readUntil(in, var, [](char c){ return c == '}'; }))
         return;
 
@@ -914,7 +914,7 @@ std::vector<std::pair<std::string,amf0::Value>> Template::parseLetSpec(std::list
 // --------------------------------------
 void    Template::readLet(Stream &in, Stream *outp)
 {
-    String var;
+    std::string var;
     if (!readUntil(in, var, [](char c){ return c == '}'; }))
         return;
 
@@ -942,7 +942,7 @@ void    Template::readLet(Stream &in, Stream *outp)
 // --------------------------------------
 int Template::readCmd(Stream &in, Stream *outp)
 {
-    String cmd;
+    std::string cmd;
 
     int tmpl = TMPL_UNKNOWN;
 
@@ -997,7 +997,7 @@ static void to_s(const amf0::Value& value, std::string& out)
 // --------------------------------------
 void Template::readVariable_(Stream &in, Stream *outp, std::function<std::string(const std::string&)> filter)
 {
-    String var;
+    std::string var;
     if (!readUntil(in, var, [](char c){ return c == '}'; }))
         return;
 
