@@ -101,7 +101,7 @@
           <th>
             <a class="{$ if(page.sort_by==key, 'accented') }" href="?{$toQueryString(merge(page,{'sort_by':key,'order':order\}))}">{$header}</a>
             <a class="sort-triangle {$ if(and(page.sort_by==key,page.order=='desc'), 'accented', 'muted') }" href="?{$toQueryString(merge(page,{'sort_by':key,'order':'desc'\}))}">▼</a>
-            <a class="sort-triangle {$ if(and(page.sort_by==key,page.order=='asc'), 'accented', 'muted') }' href='?{$toQueryString(merge(page,{'sort_by':key,'order':'asc'\}))}">▲</a>
+            <a class="sort-triangle {$ if(and(page.sort_by==key,page.order=='asc'), 'accented', 'muted') }" href="?{$toQueryString(merge(page,{'sort_by':key,'order':'asc'\}))}">▲</a>
           </th>
         {@end}
       {@end}
