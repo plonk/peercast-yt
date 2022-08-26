@@ -97,6 +97,11 @@ void HTML::writeTemplate(const char *fileName, const char *args, const std::vect
         out->writeString(e.msg);
         out->writeString(" : ");
         out->writeString(fileName);
+    }catch (std::exception &e)
+    {
+        out->writeString(e.what());
+        out->writeString(" : ");
+        out->writeString(fileName);
     }
     file.close();
 }
