@@ -256,7 +256,7 @@ string Template::evalStringLiteral(const string& input)
     }
 
     if (s.empty())
-        throw StreamException("Premature end of string");
+        throw StreamException("Premature end of string: " + input);
     return res;
 }
 
@@ -295,7 +295,7 @@ pair<string,string> Template::readStringLiteral(const string& input)
     }
 
     if (s.empty())
-        throw StreamException("Premature end of string");
+        throw StreamException("Premature end of string: " + input);
 
     res += quotechar;
     s.erase(0,1);
