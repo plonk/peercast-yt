@@ -42,25 +42,48 @@
   </style>
 {^end}
 
-<div class="navbar" style="padding: 11px">
-  <a class="{$if(page.feed_url, '', 'active-tab')}' href='?{$toQueryString(removeKey(page,'feed_url'))}">すべて ({$servMgr.numExternalChannels})</a>
+{$
+  define(simplify,
+    lambda([url],
+      replaceSuffix(
+        replacePrefix(
+          replacePrefix(url, "http://", ""),
+          "https://", ""
+        ),
+        "/", ""
+      )
+    )
+  )
+}
+
+{$
+  define(feednick,
+    lambda([feed],
+      cond(
+        feed.url == "http://bayonet.ddo.jp/sp/index.txt",
+          "SP",
+        feed.url == "http://peercast.takami98.net/turf-page/index.txt",
+          "{#Turf}",
+        feed.url == "http://yp.pcgw.pgw.jp/index.txt",
+          "{#Heisei}",
+        feed.url == "https://p-at.net/index.txt",
+          "P@",
+        feed.url == "http://ypv6.pecastation.org/index.txt",
+          "YPv6",
+        feed.url == "http://eventyp.xrea.jp/index.txt",
+          "{#Event YP}",
+        true,
+          simplify(feed.directoryUrl)
+      )
+    )
+  )
+}
+
+<div class="flex-container navbar">
+  <a class="{$if(page.feed_url, '', 'active-tab')}" href="?{$toQueryString(removeKey(page,'feed_url'))}">{#All} ({$servMgr.numExternalChannels})</a>
   {@foreach servMgr.channelDirectory.feeds}
-    <a class="{$if(page.feed_url==this.url, 'active-tab')}' href='?{$toQueryString(merge(page,{'feed_url':this.url\}))}">
-      {@if this.url == "http://bayonet.ddo.jp/sp/index.txt"}
-        SP
-      {@elsif this.url == "http://peercast.takami98.net/turf-page/index.txt"}
-        {#Turf}
-      {@elsif this.url == "http://yp.pcgw.pgw.jp/index.txt"}
-        {#Heisei}
-      {@elsif this.url == "https://p-at.net/index.txt"}
-        P@
-      {@elsif this.url == "http://ypv6.pecastation.org/index.txt"}
-        YPv6
-      {@elsif this.url == "http://eventyp.xrea.jp/index.txt"}
-        {#Event YP}
-      {@else}
-        {$this.directoryUrl}
-      {@end}
+    <a class="{$if(page.feed_url==this.url, 'active-tab')}" href="?{$toQueryString(merge(page,{'feed_url':this.url\}))}" style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden" title="{$feednick(this)} ({$this.numChannels})">
+      {$feednick(this)}
       ({$this.numChannels})
     </a>
   {@end}
