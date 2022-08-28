@@ -455,6 +455,21 @@ amf0::Value Template::parse(std::list<std::string>& tokens)
                             return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
                         }
                     }
+                } else if (peek(REG_LBRACKET))
+                {
+                    expect(REG_LBRACKET);
+
+                    std::vector<amf0::Value> funcall = { "prop", *e };
+
+                    auto e2 = exp();
+                    if (!e2)
+                    {
+                        throw GeneralException("exp expected");
+                    }
+                    funcall.push_back(*e2);
+
+                    expect(REG_RBRACKET);
+                    return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
                 } else if (peek(REG_OP))
                 {
                     // 右結合になっちゃった。
@@ -796,6 +811,23 @@ amf0::Value Template::evalForm(const amf0::Value& exp)
             auto subscript = evalExpression(arr[1]);
             auto array = evalExpression(arr[2]);
             return array.strictArray()[subscript.number()];
+        } else if (name == "prop") {
+            if (arr.size() - 1 != 2)
+            {
+                throw GeneralException("prop: Wrong number of arguments");
+            }
+            auto object = evalExpression(arr[1]);
+            auto key = evalExpression(arr[2]);
+            if (!object.isObject())
+            {
+                throw GeneralException("prop: " + object.inspect() + " is not an object");
+            }
+            try {
+                return object.object().at(key.string());
+            } catch(std::out_of_range& e)
+            {
+                return nullptr;
+            }
         } else if (name == "removeKey") {
             if (arr.size() - 1 < 1)
             {
