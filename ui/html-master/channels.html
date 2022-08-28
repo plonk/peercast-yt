@@ -173,6 +173,8 @@
   })
 </script>
 
+{$ define(removeUnneededKeys, lambda([obj], removeKey(obj, '_', 'fragment'))) }
+
 <!-- index.txt の取得が5分ごとなので、あまり頻繁に更新しても仕方ない -->
 <div class="reloader hscroll" data-url="channels.html?fragment=channels&{$request.queryString}" data-interval="60">
   {@fragment channels}
@@ -181,9 +183,9 @@
       {@foreach COLUMNS}
         {@let key = nth(0,this), header = nth(1,this), order = nth(2,this)}
           <th style="display:{$if(columnVisibility[key], 'table-cell', 'none')}">
-            <a class="{$ if(page.sort_by==key, 'accented') }" href="?{$toQueryString(merge(page,{'sort_by':key,'order':order\}))}">{$header}</a>
-            <a class="sort-triangle {$ if(and(page.sort_by==key,page.order=='desc'), 'accented', 'muted') }" href="?{$toQueryString(merge(page,{'sort_by':key,'order':'desc'\}))}">▼</a>
-            <a class="sort-triangle {$ if(and(page.sort_by==key,page.order=='asc'), 'accented', 'muted') }" href="?{$toQueryString(merge(page,{'sort_by':key,'order':'asc'\}))}">▲</a>
+            <a class="{$ if(page.sort_by==key, 'accented') }" href="?{$toQueryString(removeUnneededKeys(merge(page,{'sort_by':key,'order':order\})))}">{$header}</a>
+            <a class="sort-triangle {$ if(and(page.sort_by==key,page.order=='desc'), 'accented', 'muted') }" href="?{$toQueryString(removeUnneededKeys(merge(page,{'sort_by':key,'order':'desc'\})))}">▼</a>
+            <a class="sort-triangle {$ if(and(page.sort_by==key,page.order=='asc'), 'accented', 'muted') }" href="?{$toQueryString(removeUnneededKeys(merge(page,{'sort_by':key,'order':'asc'\})))}">▲</a>
           </th>
         {@end}
       {@end}
