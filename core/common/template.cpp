@@ -849,7 +849,7 @@ amf0::Value Template::evalForm(const amf0::Value& exp)
             {
                 throw GeneralException("Cannot change this scope.");
             }
-            topScope->vars[arr.at(1).string()] = arr.at(2);
+            topScope->vars[arr.at(1).string()] = evalExpression(arr.at(2));
             return nullptr;
         } else if (name == "replacePrefix") {
             return str::replace_prefix(evalExpression(arr.at(1)).string(), evalExpression(arr.at(2)).string(), evalExpression(arr.at(3)).string());
