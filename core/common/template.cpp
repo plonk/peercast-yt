@@ -831,7 +831,7 @@ amf0::Value Template::evalForm(const amf0::Value& exp)
         } else if (name == "removeKey") {
             if (arr.size() - 1 < 1)
             {
-                throw GeneralException("merge: Wrong number of arguments");
+                throw GeneralException("removeKey: Wrong number of arguments");
             }
             auto object = evalExpression(arr[1]).object();
 
