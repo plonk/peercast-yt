@@ -87,10 +87,53 @@
               </table>
 
               <div class="small" style="float:right">
+                <button onclick="$('#appearance_modal').show()" title="表示をカスタマイズする">&#x1F3A8<!-- artist palette --></button>
 	        <a href="/public/index.html">{#Public Directory}</a>
 	        <a href="logout.html">{#_Logout_navbar}</a>
               </div>
 
+      </div>
+
+      <div class="modal" id="appearance_modal" align="left">
+        <div class="modal-contents default-bg">
+          <h3 style="margin:0">表示をカスタマイズする</h3>
+          <div class="modal-body">
+            <div style="margin:15px 0">
+              <select name="preferredTheme" style="font-size:16pt">
+                <option value="system" {@if servMgr.preferredTheme == "system"}selected{@end}>
+                  &#x1f4bb; <!-- laptop --> {#System}
+                </option>
+                <option value="light" {@if servMgr.preferredTheme == "light"}selected{@end}>
+                  &#x2600;&#xfe0f; <!-- sun --> {#Light}
+                </option>
+                <option value="dark" {@if servMgr.preferredTheme == "dark"}selected{@end}>
+                  &#x1f303; <!-- night with stars --> {#Dark}
+                </option>
+              </select>
+            </div>
+
+            <div style="margin:15px 0">
+              <select name="accentColor" style="font-size:16pt">
+                <option value="blue" {@if servMgr.accentColor == "blue"}selected{@end}>
+                  {#Blue}
+                </option>
+                <option value="orange" {@if servMgr.accentColor == "orange"}selected{@end}>
+                  {#Orange}
+                </option>
+                <option value="magenta" {@if servMgr.accentColor == "magenta"}selected{@end}>
+                  {#Magenta}
+                </option>
+                <option value="cyan" {@if servMgr.accentColor == "cyan"}selected{@end}>
+                  {#Cyan}
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer" style="margin-top:15px; text-align:right">
+            <button style="min-height:2rem; vertical-align:middle; padding: 0 10px; margin-right:10px" onclick="javascript:closeModal()">OK</button>
+            <button style="min-height:2rem; vertical-align:middle; padding: 0 10px" onclick="javascript:closeModal()">キャンセル</button>
+          </div>
+        </div>
       </div>
 
       <br clear=all>
