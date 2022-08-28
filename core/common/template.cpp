@@ -868,6 +868,12 @@ amf0::Value Template::evalForm(const amf0::Value& exp)
                     result += value.inspect();
             }
             return result;
+        } else if (name == "evalString") {
+            if (arr.size() != 2)
+                throw GeneralException("eval: Wrong number of arguments");
+
+            std::list<std::string> tokens = tokenize(evalExpression(arr.at(1)).string());
+            return evalExpression(parse(tokens));
         } else {
             amf0::Value value;
             if (writeVariable(value, name.c_str()))
