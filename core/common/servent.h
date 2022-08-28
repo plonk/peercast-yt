@@ -321,6 +321,7 @@ private:
     void CMD_take_speedtest(const char* cmd, HTTP& http, String& jumpStr);
     void CMD_update_channel_info(const char* cmd, HTTP& http, String& jumpStr);
     void CMD_viewxml(const char* cmd, HTTP& http, String& jumpStr);
+    void CMD_saveColumnVisibility(const char* cmd, HTTP& http, String& jumpStr);
 };
 
 extern const char *nextCGIarg(const char *cp, char *cmd, char *arg);

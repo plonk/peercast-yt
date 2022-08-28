@@ -25,6 +25,10 @@ body {
         color: #000;
 }
 
+.default-bg {
+        background-color: #fff;
+}
+
 .small {
 	font-size: 11px;
 }
@@ -237,4 +241,31 @@ input[readonly="readonly"] {
     font-size: 32px;
     position: absolute;
     left:20px; top:calc(50% - 20px)
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    left:0;
+    top:0;
+    width:100vw;
+    height:100vh;
+    background-color: rgba(0,0,0,0.3);
+    z-index: 1
+}
+
+.modal-contents {
+    max-width: 90vw;
+    max-height: 90vh;
+    padding: 15px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    border-radius: 5px;
+    overflow-y: scroll;
+}
+
+.modal-body {
 }

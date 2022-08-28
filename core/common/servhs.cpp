@@ -998,6 +998,35 @@ void Servent::CMD_viewxml(const char* cmd, HTTP& http, String& jumpStr)
     handshakeXML();
 }
 
+void Servent::CMD_saveColumnVisibility(const char* cmd, HTTP& http, String& jumpStr)
+{
+    LOG_DEBUG("cmd = %s", cmd);
+    cgi::Query query(cmd);
+
+    std::map<std::string,amf0::Value> dict;
+    for (auto key : query.getKeys())
+    {
+        if (key == "cmd")
+            continue;
+        dict[key] = true;
+    }
+
+    HTTPResponse response(0, {});
+    if (!http.headers.get("Referer").empty())
+    {
+        response = HTTPResponse::redirectTo(http.headers.get("Referer"));
+    }else
+    {
+        response = HTTPResponse::redirectTo("/");
+        
+    }
+    auto header_value = str::format("%d_columnVisibility=%s; path=/; expires=\"Mon, 01-Jan-3000 00:00:00 GMT\"",
+                                    (int) servMgr->serverHost.port,
+                                    cgi::escape(amf0::Value(dict).inspect()).c_str());
+    response.headers.set("Set-Cookie", header_value);
+    http.send(response);
+}
+
 void Servent::CMD_clearlog(const char* cmd, HTTP& http, String& jumpStr)
 {
     sys->logBuf->clear();
@@ -1931,6 +1960,9 @@ void Servent::handshakeCMD(HTTP& http, const std::string& query)
         }else if (cmd == "viewxml")
         {
             CMD_viewxml(query.c_str(), http, jumpStr);
+        }else if (cmd == "saveColumnVisibility")
+        {
+            CMD_saveColumnVisibility(query.c_str(), http, jumpStr);
         }else{
             throw HTTPException(HTTP_SC_BADREQUEST, 400);
         }
@@ -2414,6 +2446,19 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
         GenericScope locals;
         HTTPRequestScope reqScope(req);
         std::vector<Template::Scope*> scopes = { &reqScope, &locals };
+
+        std::map<std::string,amf0::Value> dict;
+        for (auto assign : str::split(req.headers.get("Cookie"), "; "))
+        {
+            auto vec = str::split(assign, "=", 2);
+            if (vec.size() != 2)
+            {
+                LOG_ERROR("Cookie format error: %s", assign.c_str());
+                continue;
+            }
+            dict[vec[0]] = cgi::unescape(vec[1]);
+        }
+        locals.vars["cookie"] = dict;
 
         if (str::contains(fn, "/play.html"))
         {

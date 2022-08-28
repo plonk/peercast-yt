@@ -89,16 +89,98 @@
   {@end}
 </div>
 
-<a href="/admin?cmd=fetch_feeds" title="{#Auto-updates every 5 minutes. Manual updates have a cooldown of 30 seconds.}">{#Update}</a>
+<div align=right>
+  <a href="/admin?cmd=fetch_feeds" title="{#Auto-updates every 5 minutes. Manual updates have a cooldown of 30 seconds.}">{#Update}</a>
+  <button onclick="$('#column_modal').show()" title="カラム表示の設定">&#x2699;&#xFE0F;</button>
+</div>
+
+<script>
+  function showModal(info)
+  {
+      $('#channel_modal').show()
+      //$('.modal #info').text(JSON.stringify(info))
+      let buf = "<table>"
+      console.log(info)
+      for (const key in info)
+      {
+          buf += `<tr><th>${key}</th><td>${info[key]}</td></tr>`
+      }
+      buf += "</table>"
+      console.log(buf)
+      $('.modal #info').html(buf)
+  }
+  function closeModal()
+  {
+      $('#channel_modal').hide()
+  }
+  $(function(){
+      $('.modal').on('click', function(){ $(this).hide() });
+      $('.modal .modal-contents').on('click', (e) => e.stopPropagation());
+  })
+</script>
+
+<div class="modal" id="channel_modal">
+  <div class="modal-contents default-bg">
+    <h3 style="margin:0">もーだるだよ。</h3>
+    <div class="modal-body">
+      <div id="info"></div>
+    </div>
+    <div class="modal-footer" style="margin-top:15px; text-align:right">
+      <button onclick="javascript:closeModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+{$
+  define(COLUMNS,
+         [
+           ["name","{#Channel}","asc"],
+           ["numDirects","{#Status}","desc"],
+           ["uptime","{#Uptime}","desc"],
+           ["bitrate","{#Bitrate}","desc"],
+           ["contentTypeStr","{#Type}","asc"]
+         ])
+}
+
+{$ define(columnVisibility, evalString(or(cookie[str(servMgr.serverPort1, "_columnVisibility")], "{'name':true,'numDirects':true,'uptime':true,'bitrate':true,'contentTypeStr':true\}"))) }
+
+<div class="modal" id="column_modal">
+  <div class="modal-contents default-bg">
+    <h3 style="margin:0">カラム表示の設定</h3>
+    <form action="/admin" method="POST">
+      <div class="modal-body" align="left">
+        <input type=hidden name="cmd" value="saveColumnVisibility">
+        <input type=hidden name="name" value="on">
+        {@foreach COLUMNS}
+          {@let key = nth(0,this), header = nth(1,this), order = nth(2,this)}
+            <label style="display:block"><input type="checkbox" onchange="changeColumnVisibility('{$key}', this.checked); savePreferences()" data-key="{$key}" name="{$key}" {$if(columnVisibility[key], 'checked')} {$if(key == 'name', 'disabled')}> {$header}</label>
+          {@end}
+        {@end}
+      </div>
+      <div class="modal-footer" style="margin-top:15px; text-align:right">
+        <input type="submit" value="{#Save}">
+        <!-- <button onclick="javascript:$('#column_modal').hide()">閉じる</button> -->
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  $(function(){
+      loadPreferences()
+      for (const checkbox of $('#column_modal .modal-body input[type=checkbox]'))
+          changeColumnVisibility($(checkbox).data('key'), checkbox.checked)
+  })
+</script>
 
 <!-- index.txt の取得が5分ごとなので、あまり頻繁に更新しても仕方ない -->
 <div class="reloader hscroll" data-url="channels.html?fragment=channels&{$request.queryString}" data-interval="60">
   {@fragment channels}
   <table class="channel-list">
     <tr>
-      {@foreach [["name","{#Channel}","asc"], ["numDirects","{#Status}","desc"], ["bitrate","{#Bitrate}","desc"], ["contentTypeStr","{#Type}","asc"]]}
+      {@foreach COLUMNS}
         {@let key = nth(0,this), header = nth(1,this), order = nth(2,this)}
-          <th>
+          <th style="display:{$if(columnVisibility[key], 'table-cell', 'none')}">
             <a class="{$ if(page.sort_by==key, 'accented') }" href="?{$toQueryString(merge(page,{'sort_by':key,'order':order\}))}">{$header}</a>
             <a class="sort-triangle {$ if(and(page.sort_by==key,page.order=='desc'), 'accented', 'muted') }" href="?{$toQueryString(merge(page,{'sort_by':key,'order':'desc'\}))}">▼</a>
             <a class="sort-triangle {$ if(and(page.sort_by==key,page.order=='asc'), 'accented', 'muted') }" href="?{$toQueryString(merge(page,{'sort_by':key,'order':'asc'\}))}">▲</a>
@@ -108,35 +190,39 @@
     </tr>
 
     {@foreach channels}
-    <tr>
-      <td class="channel-description">
-	<a {@if this.id != "00000000000000000000000000000000"}href="play.html?id={$this.id}"{@end} style="display: block; text-decoration: none; max-width: 45vw">
-          <div class="channel-name">
-            {!this.name}
+      <tr>
+        <td class="channel-description" style="display:{$if(columnVisibility['name'], 'table-cell', 'none')}">
+            <button onclick="javascript:showModal({$ inspect(this) })">[i]</button>
+  	<a {@if this.id != "00000000000000000000000000000000"}href="play.html?id={$this.id}"{@end} style="display: block; text-decoration: none; max-width: 45vw">
+            <div class="channel-name">
+              {!this.name}
+            </div>
+            <div class="detail text-muted">
+              {@if this.genre}{!this.genre} - {@end}{!this.desc}
+            </div>
+  	</a>
+        </td>
+        <td align=center nowrap style="display:{$if(columnVisibility['numDirects'], 'table-cell', 'none')}">
+          <span class="listeners">
+            {$this.numDirects}/{$this.numRelays}
+          </span>
+          {@if this.encodedName}
+          <div class="icons">
+            <a href="{$this.chatUrl}"><img alt="Chat" src="/assets/images/chat.png"></a>
+            <a href="{$this.statsUrl}"><img alt="Stats" src="/assets/images/graph.png"></a>
           </div>
-          <div class="detail text-muted">
-            {@if this.genre}{!this.genre} - {@end}{!this.desc}
-          </div>
-	</a>
-      </td>
-      <td align=center nowrap>
-        <span class="listeners">
-          {$this.numDirects}/{$this.numRelays}
-        </span>
-        {@if this.encodedName}
-        <div class="icons">
-          <a href="{$this.chatUrl}"><img alt="Chat" src="/assets/images/chat.png"></a>
-          <a href="{$this.statsUrl}"><img alt="Stats" src="/assets/images/graph.png"></a>
-        </div>
-        {@end}
-      </td>
-      <td class="bitrate" align=center nowrap>
-        {$this.bitrate} kb/s
-      </td>
-      <td align=center>
-        {$this.contentTypeStr}
-      </td>
-    </tr>
+          {@end}
+        </td>
+        <td align=center nowrap style="display:{$if(columnVisibility['uptime'], 'table-cell', 'none')}">
+          {$this.uptime}
+        </td>
+        <td class="bitrate" align=center nowrap style="display:{$if(columnVisibility['bitrate'], 'table-cell', 'none')}">
+          {$this.bitrate} kb/s
+        </td>
+        <td align=center style="display:{$if(columnVisibility['contentTypeStr'], 'table-cell', 'none')}">
+          {$this.contentTypeStr}
+        </td>
+      </tr>
     {@end}
   </table>
   {@end} <!-- fragment content -->
