@@ -941,12 +941,6 @@ void    Template::readLoop(Stream &in, Stream *outp)
     if (!readUntil(in, var, [](char c){ return c == '}'; }))
         return;
 
-    if (!inSelectedFragment() || !outp)
-    {
-        readTemplate(in, NULL);
-        return;
-    }
-
     int cnt = getIntVariable(var.c_str());
 
     if (cnt)
@@ -969,12 +963,6 @@ void    Template::readForeach(Stream &in, Stream *outp)
     std::string var;
     if (!readUntil(in, var, [](char c){ return c == '}'; }))
         return;
-
-    if (!inSelectedFragment() || !outp)
-    {
-        readTemplate(in, NULL);
-        return;
-    }
 
     std::list<std::string> tokens = tokenize(var.c_str());
     amf0::Value value = evalExpression(parse(tokens));
@@ -1073,12 +1061,6 @@ void    Template::readLet(Stream &in, Stream *outp)
     if (!readUntil(in, var, [](char c){ return c == '}'; }))
         return;
 
-    if (!inSelectedFragment() || !outp)
-    {
-        readTemplate(in, NULL);
-        return;
-    }
-
     std::list<std::string> tokens = tokenize(var.c_str());
     std::vector<std::pair<std::string,amf0::Value>> letspec = parseLetSpec(tokens);
 
@@ -1156,10 +1138,11 @@ void Template::readVariable_(Stream &in, Stream *outp, std::function<std::string
     if (!readUntil(in, var, [](char c){ return c == '}'; }))
         return;
 
-    if (!inSelectedFragment() || !outp)
-        return;
-
     auto out = evalExpression(var);
+
+    if (!inSelectedFragment() || !outp)
+        return; // eval するけど表示しない。
+
     std::string str;
     to_s(out, str);
     outp->writeString(filter(str));
