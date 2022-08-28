@@ -855,6 +855,19 @@ amf0::Value Template::evalForm(const amf0::Value& exp)
             return str::replace_prefix(evalExpression(arr.at(1)).string(), evalExpression(arr.at(2)).string(), evalExpression(arr.at(3)).string());
         } else if (name == "replaceSuffix") {
             return str::replace_suffix(evalExpression(arr.at(1)).string(), evalExpression(arr.at(2)).string(), evalExpression(arr.at(3)).string());
+        } else if (name == "str") {
+            std::string result;
+            for (size_t i = 1; i < arr.size(); i++)
+            {
+                auto value = evalExpression(arr.at(i));
+                if (value.isString())
+                    result += value.string();
+                else if (value.isNull())
+                    result += "";
+                else
+                    result += value.inspect();
+            }
+            return result;
         } else {
             amf0::Value value;
             if (writeVariable(value, name.c_str()))
