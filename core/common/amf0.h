@@ -273,7 +273,7 @@ namespace amf0
                 return buf;
             }
             case kString:
-                return str::inspect(m_string);
+                return str::json_inspect(m_string);
             case kNull:
                 return "null";
             case kBool:

@@ -69,6 +69,53 @@ std::string inspect(const std::string& str)
     return res;
 }
 
+static std::string json_inspect(char c)
+{
+    int d = static_cast<unsigned char>(c);
+
+    if (d >= 0x80)
+        return string() + (char) d;
+
+    if (isprint(d)) {
+        switch (d) {
+        case '\'': return "\\\'";
+        case '\"': return "\\\"";
+        case '\\': return "\\\\";
+        default:
+            return string() + (char) d;
+        }
+    }
+
+    switch (d) {
+    case '\b': return "\\b";
+    case '\f': return "\\f";
+    case '\n': return "\\n";
+    case '\r': return "\\r";
+    case '\t': return "\\t";
+    default:
+        return string("\\u00")
+            + "0123456789abcdef"[d>>4]
+            + "0123456789abcdef"[d&0xf];
+    }
+}
+
+std::string json_inspect(const std::string& str)
+{
+    bool utf8 = validate_utf8(str);
+
+    if (!utf8)
+    {
+        throw std::invalid_argument("UTF-8 validation failed");
+    }
+    std::string res = "\"";
+
+    for (auto c : str) {
+        res += json_inspect(c);
+    }
+    res += "\"";
+    return res;
+}
+
 std::string repeat(const std::string& in, int n)
 {
     std::string res;
