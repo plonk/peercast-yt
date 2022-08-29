@@ -57,7 +57,7 @@ static std::string inspect(char c, bool utf8)
     }
 }
 
-std::string inspect(const std::string str)
+std::string inspect(const std::string& str)
 {
     bool utf8 = validate_utf8(str);
     std::string res = "\"";
