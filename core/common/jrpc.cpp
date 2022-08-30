@@ -743,6 +743,32 @@ json JrpcApi::getStatus(json::array_t)
     return j;
 }
 
+#include "stats.h"
+#include "notif.h"
+
+json JrpcApi::getState(json::array_t args)
+{
+    std::vector<std::string> objectNames = args[0];
+    auto json = json::object();
+
+    for (auto& name : objectNames)
+    {
+        if (name == "servMgr")
+            json[name] = json::parse(servMgr->getState().inspect());
+        else if (name == "chanMgr")
+            json[name] = json::parse(chanMgr->getState().inspect());
+        else if (name == "stats")
+            json[name] = json::parse(stats.getState().inspect());
+        else if (name == "notificationBuffer")
+            json[name] = json::parse(g_notificationBuffer.getState().inspect());
+        else if (name == "sys")
+            json[name] = json::parse(sys->getState().inspect());
+        else
+            throw invalid_params("Unknown object name: " + name);
+    }
+    return json;
+}
+
 json JrpcApi::getNewVersions(json::array_t)
 {
     return json::array();

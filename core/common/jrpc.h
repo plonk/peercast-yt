@@ -81,6 +81,7 @@ public:
             { "getPlugins",              &JrpcApi::getPlugins,              {} },
             { "getSettings",             &JrpcApi::getSettings,             {} },
             { "getStatus",               &JrpcApi::getStatus,               {} },
+            { "getState",                &JrpcApi::getState,                { "objectNames" } },
             { "getVersionInfo",          &JrpcApi::getVersionInfo,          {} },
             { "getYellowPageProtocols",  &JrpcApi::getYellowPageProtocols,  {} },
             { "getYellowPages",          &JrpcApi::getYellowPages,          {} },
@@ -122,6 +123,7 @@ public:
     json getPlugins(json::array_t);
     json getSettings(json::array_t);
     json getStatus(json::array_t);
+    json getState(json::array_t);
     json getVersionInfo(json::array_t);
     json getYPChannels(json::array_t args);
     json getYPChannelsInternal(json::array_t args = {});
