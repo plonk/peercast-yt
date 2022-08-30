@@ -841,6 +841,19 @@ amf0::Value Template::evalForm(const amf0::Value& exp)
                 object.erase(key);
             }
             return object;
+        } else if (name == "keys") {
+            if (arr.size() - 1 != 1)
+            {
+                throw GeneralException("keys: Wrong number of arguments");
+            }
+            auto object = evalExpression(arr[1]).object();
+
+            std::vector<amf0::Value> result;
+            for (auto& pair : object)
+            {
+                result.push_back(pair.first);
+            }
+            return result;
         } else if (name == "lambda") {
             return arr;
         } else if (name == "define") {

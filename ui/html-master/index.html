@@ -35,14 +35,14 @@
       <th class="left-heading">{#Firewalled} (v4)</th>
       <TD>{@if servMgr.firewallKnown} {@if servMgr.isFirewalled}
         {#Yes} {@else} {#No} {@end} {@else} {#Unknown} {@end}
-        {@if servMgr.flags.forceFirewalled} <b title="{#The forceFirewalled flag is on.}">{#(forced)}</b> {@end}
+        {@if servMgr.flags.forceFirewalled.currentValue} <b title="{#The forceFirewalled flag is on.}">{#(forced)}</b> {@end}
         - <a class="alert-link" href="/admin?cmd=portcheck4">{#Check}</a></TD>
     </TR>
     <TR align=left>
       <th class="left-heading">{#Firewalled} (v6)</th>
       <TD>{@if servMgr.firewallKnownIPv6} {@if servMgr.isFirewalledIPv6}
         {#Yes} {@else} {#No} {@end} {@else} {#Unknown} {@end}
-        {@if servMgr.flags.forceFirewalled} <b title="{#The forceFirewalled flag is on.}">{#(forced)}</b> {@end}
+        {@if servMgr.flags.forceFirewalled.currentValue} <b title="{#The forceFirewalled flag is on.}">{#(forced)}</b> {@end}
         - <a class="alert-link" href="/admin?cmd=portcheck6">{#Check}</a></TD>
     </TR>
     <TR align=left>
