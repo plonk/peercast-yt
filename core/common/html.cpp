@@ -138,6 +138,7 @@ void HTML::writeRawFile(const char *fileName, const char *mimeType)
         {
             LOG_ERROR("Failed to get mtime of %s", fileName);
         }
+        additionalHeaders["Content-Length"] = str::STR(file.length());
 
         writeOK(mimeType, additionalHeaders);
         file.writeTo(*out, file.length());
