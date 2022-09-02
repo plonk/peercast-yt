@@ -34,6 +34,7 @@
    .relay-list th { white-space: nowrap }
    .accented { color: var(--accent-color) !important; }
    .muted { color: grey !important; }
+    .sort-triangle { display:inline-block; min-width:1.5em }
     {^DARK_THEME_STYLES_BEGIN}
         .channel-list { color: #ddd }
         .channel-list tr { background-color: #544827 }
@@ -42,51 +43,33 @@
   </style>
 {^end}
 
-{$
-  define(simplify,
-    lambda([url],
-      replaceSuffix(
-        replacePrefix(
-          replacePrefix(url, "http://", ""),
-          "https://", ""
-        ),
-        "/", ""
-      )
-    )
-  )
-}
+  <script>
+    function simplify(url)
+    {
+        return url.replace(/^https?:\/\//, '').replace(/\/$/, '')
+    }
 
-{$
-  define(feednick,
-    lambda([feed],
-      cond(
-        feed.url == "http://bayonet.ddo.jp/sp/index.txt",
-          "SP",
-        feed.url == "http://peercast.takami98.net/turf-page/index.txt",
-          "{#Turf}",
-        feed.url == "http://yp.pcgw.pgw.jp/index.txt",
-          "{#Heisei}",
-        feed.url == "https://p-at.net/index.txt",
-          "P@",
-        feed.url == "http://ypv6.pecastation.org/index.txt",
-          "YPv6",
-        feed.url == "http://eventyp.xrea.jp/index.txt",
-          "{#Event YP}",
-        true,
-          simplify(feed.directoryUrl)
-      )
-    )
-  )
-}
 
-<div class="flex-container navbar">
-  <a class="{$if(page.feed_url, '', 'active-tab')}" href="?{$toQueryString(removeKey(page,'feed_url'))}">{#All} ({$servMgr.numExternalChannels})</a>
-  {@foreach servMgr.channelDirectory.feeds}
-    <a class="{$if(page.feed_url==this.url, 'active-tab')}" href="?{$toQueryString(merge(page,{'feed_url':this.url\}))}" style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden" title="{$feednick(this)} ({$this.numChannels})">
-      {$feednick(this)}
-      ({$this.numChannels})
-    </a>
-  {@end}
+    function feednick(feed)
+    {
+        if (feed.url == "http://bayonet.ddo.jp/sp/index.txt")
+            return "SP"
+        else if (feed.url == "http://peercast.takami98.net/turf-page/index.txt")
+            return "{#Turf}"
+        else if (feed.url == "http://yp.pcgw.pgw.jp/index.txt")
+            return "{#Heisei}"
+        else if (feed.url == "https://p-at.net/index.txt")
+            return "P@"
+        else if (feed.url == "http://ypv6.pecastation.org/index.txt")
+            return "YPv6"
+        else if (feed.url == "http://eventyp.xrea.jp/index.txt")
+            return "{#Event YP}"
+        else
+            simplify(feed.directoryUrl)
+    }
+  </script>
+
+<div class="flex-container navbar" id="group_tab">
 </div>
 
 <div align=right>
@@ -95,8 +78,14 @@
 </div>
 
 <script>
-  function showModal(info)
+  function showModal(chid)
   {
+      const info = servMgr.channelDirectory.channels.find(ch => ch.id == chid)
+      if (!info)
+      {
+          alert(`No info about ${chid} found`)
+          return
+      }
       $('#channel_modal').show()
       //$('.modal #info').text(JSON.stringify(info))
       let buf = "<table>"
@@ -147,85 +136,270 @@
 <div class="modal" id="column_modal">
   <div class="modal-contents default-bg">
     <h3 style="margin:0">カラム表示の設定</h3>
-    <form action="/admin" method="POST">
-      <div class="modal-body" align="left">
-        <input type=hidden name="cmd" value="saveColumnVisibility">
-        <input type=hidden name="name" value="on">
-        {@foreach COLUMNS}
-          {@let key = nth(0,this), header = nth(1,this), order = nth(2,this)}
-            <label style="display:block"><input type="checkbox" onchange="changeColumnVisibility('{$key}', this.checked); savePreferences()" data-key="{$key}" name="{$key}" {$if(columnVisibility[key], 'checked')} {$if(key == 'name', 'disabled')}> {$header}</label>
-          {@end}
+    <div class="modal-body" align="left">
+      {@foreach COLUMNS}
+        {@let key = nth(0,this), header = nth(1,this), order = nth(2,this)}
+          <label style="display:block"><input type="checkbox" onchange='columnVisibility["{$key}"] = this.checked; savePreferences(); updateView()' data-key="{$key}" {$if(key == 'name', 'disabled')}> {$header}</label>
         {@end}
-      </div>
-      <div class="modal-footer" style="margin-top:15px; text-align:right">
-        <input type="submit" value="{#Save}">
-        <!-- <button onclick="javascript:$('#column_modal').hide()">閉じる</button> -->
-      </div>
-    </form>
+      {@end}
+    </div>
+    <div class="modal-footer" style="margin-top:15px; text-align:right">
+      <!-- <input type="submit" value="{#Save}"> -->
+      <button onclick="javascript:$('#column_modal').hide()">{#Close}</button>
+    </div>
   </div>
 </div>
 
 <script>
+  var columnVisibility = {}
+  var sortColumn = null
+  var sortOrder = null
+  var selectedGroup = null
+
+  function loadPreferences()
+  {
+      if (localStorage["columnVisibility"])
+      {
+          columnVisibility = JSON.parse(localStorage["columnVisibility"])
+      }
+      Object.assign(columnVisibility, { "name": true })
+
+      sortColumn = localStorage["sortColumn"]
+      sortOrder = localStorage["sortOrder"]
+  }
+
+  function savePreferences()
+  {
+      localStorage["columnVisibility"] = JSON.stringify(columnVisibility)
+      localStorage["sortColumn"] = sortColumn
+      localStorage["sortOrder"] = sortOrder
+  }
+
   $(function(){
       loadPreferences()
       for (const checkbox of $('#column_modal .modal-body input[type=checkbox]'))
-          changeColumnVisibility($(checkbox).data('key'), checkbox.checked)
+      {
+          if (columnVisibility[checkbox.dataset.key])
+              checkbox.checked = true
+          else
+              checkbox.checked = false
+      }
   })
 </script>
 
 {$ define(removeUnneededKeys, lambda([obj], removeKey(obj, '_', 'fragment'))) }
 
 <!-- index.txt の取得が5分ごとなので、あまり頻繁に更新しても仕方ない -->
-<div class="reloader hscroll" data-url="channels.html?fragment=channels&{$request.queryString}" data-interval="60">
-  {@fragment channels}
-  <table class="channel-list">
-    <tr>
-      {@foreach COLUMNS}
-        {@let key = nth(0,this), header = nth(1,this), order = nth(2,this)}
-          <th style="display:{$if(columnVisibility[key], 'table-cell', 'none')}">
-            <a class="{$ if(page.sort_by==key, 'accented') }" href="?{$toQueryString(removeUnneededKeys(merge(page,{'sort_by':key,'order':order\})))}">{$header}</a>
-            <a class="sort-triangle {$ if(and(page.sort_by==key,page.order=='desc'), 'accented', 'muted') }" href="?{$toQueryString(removeUnneededKeys(merge(page,{'sort_by':key,'order':'desc'\})))}">▼</a>
-            <a class="sort-triangle {$ if(and(page.sort_by==key,page.order=='asc'), 'accented', 'muted') }" href="?{$toQueryString(removeUnneededKeys(merge(page,{'sort_by':key,'order':'asc'\})))}">▲</a>
-          </th>
-        {@end}
-      {@end}
-    </tr>
+<table class="channel-list">
+</table>
 
-    {@foreach channels}
-      <tr>
-        <td class="channel-description" style="display:{$if(columnVisibility['name'], 'table-cell', 'none')}">
-            <button onclick="javascript:showModal({$ inspect(this) })">[i]</button>
-  	<a {@if this.id != "00000000000000000000000000000000"}href="play.html?id={$this.id}"{@end} style="display: block; text-decoration: none; max-width: 45vw">
-            <div class="channel-name">
-              {!this.name}
-            </div>
-            <div class="detail text-muted">
-              {@if this.genre}{!this.genre} - {@end}{!this.desc}
-            </div>
-  	</a>
-        </td>
-        <td align=center nowrap style="display:{$if(columnVisibility['numDirects'], 'table-cell', 'none')}">
-          <span class="listeners">
-            {$this.numDirects}/{$this.numRelays}
-          </span>
-          {@if this.encodedName}
-          <div class="icons">
-            <a href="{$this.chatUrl}"><img alt="Chat" src="/assets/images/chat.png"></a>
-            <a href="{$this.statsUrl}"><img alt="Stats" src="/assets/images/graph.png"></a>
-          </div>
-          {@end}
-        </td>
-        <td align=center nowrap style="display:{$if(columnVisibility['uptime'], 'table-cell', 'none')}">
-          {$this.uptime}
-        </td>
-        <td class="bitrate" align=center nowrap style="display:{$if(columnVisibility['bitrate'], 'table-cell', 'none')}">
-          {$this.bitrate} kb/s
-        </td>
-        <td align=center style="display:{$if(columnVisibility['contentTypeStr'], 'table-cell', 'none')}">
-          {$this.contentTypeStr}
-        </td>
-      </tr>
-    {@end}
-  </table>
-  {@end} <!-- fragment content -->
-</div>
+<script>
+
+function h(str)
+{
+      return str.replace(/[&<>"']/g, (c) => ({'&': "&amp;", '<': "&lt;", '>': "&gt;", '\"': "&quot;", '\'': "&#39;"})[c])
+}
+
+const NoCloseTagRequired = { 'img':true, 'br':true, 'meta':true, 'link':true }
+
+function who(...args)
+{
+      let buf = ""
+      let firstTime = true
+
+      for (const arg of args)
+      {
+          if (firstTime)
+              firstTime = false
+          else
+              buf += ' '
+
+          if (typeof(arg) == 'string')
+              buf += h(arg)
+          else if (arg instanceof Array)
+          {
+              let buf2 = "";
+              const [elem, attrs, ...inner] = arg
+              if (!elem)
+                  throw new Error("elem")
+              if (elem == '!')
+              {
+                  buf += [attrs, ...inner].join('')
+                  continue;
+              }
+              buf2 += `<${elem}`
+              if (attrs && typeof(attrs) == 'object' && !(attrs instanceof Array))
+              {
+                  for (const key of Object.keys(attrs))
+                  {
+                      if (attrs[key] === true)
+                          buf2 += ` ${key}`
+                      else if (attrs[key] === false || attrs[key] === null)
+                          buf2 += ''
+                      else
+                          buf2 += ` ${key}="${h(attrs[key])}"`
+                  }
+              }else
+                  inner.unshift(attrs)
+              buf2 += ">"
+              buf2 += who(...inner)
+              if (!NoCloseTagRequired[elem])
+                  buf2 += `</${elem}>`
+              buf += buf2
+          } else
+              throw new Error("Unknown type")
+      }
+      return buf;
+}
+
+function unescapeHtml(str)
+{
+      return $($.parseHTML(str)).text()
+}
+
+function onColumnClicked(key, defaultOrder)
+{
+      if (sortColumn != key)
+      {
+          sortColumn = key
+          sortOrder = defaultOrder
+      } else
+      {
+          if (sortOrder == "asc")
+              sortOrder = "desc"
+          else
+              sortOrder = "asc"
+      }
+
+      savePreferences()
+      updateView()
+}
+
+function uptimeComparer(a,b)
+{
+    const [ah, am] = a.split(':')
+    const [bh, bm] = b.split(':')
+    return (+ah * 60 + +am) - (+bh * 60 + +bm)
+}
+
+function stringComparer(a,b)
+{
+    return (a === b) ? 0 : (a < b ? -1 : 1)
+}
+
+function numericComparer(a,b)
+{
+  return +a - +b
+}
+
+var servMgr
+
+function updateView()
+{
+      updateGroup()
+      updateTable()
+}
+
+function updateTable()
+{
+      const COLUMNS = {!COLUMNS}
+
+      let channels = servMgr.channelDirectory.channels
+
+      if (selectedGroup)
+      {
+          channels = channels.filter(channel => channel.feedUrl == selectedGroup)
+      }
+
+      let compr
+      if (sortColumn == 'uptime')
+          compr = (a,b) => uptimeComparer(a[sortColumn], b[sortColumn])
+      else if (sortColumn == 'numDirects' || sortColumn == 'bitrate')
+          compr = (a,b) => numericComparer(a[sortColumn], b[sortColumn])
+      else
+          compr = (a,b) => stringComparer(a[sortColumn], b[sortColumn])
+
+      channels.sort(compr)
+
+      if (sortOrder == "desc")
+          channels.reverse()
+
+      const html = who(
+          ['tr',
+           ... COLUMNS.flatMap(([key, header, order]) => 
+               columnVisibility[key] ?
+               [
+                   ['th', { class: sortColumn == key ? "accented" : null, style: `cursor: pointer`, onclick: `onColumnClicked("${key}", "${order}"); updateView()` },
+                    ['span', {}, header],
+                    (sortColumn == key && sortOrder == "desc") ? ['span', { class: "sort-triangle" }, '▼'] : "",
+                    (sortColumn == key && sortOrder == "asc") ? ['span', { class: "sort-triangle" }, '▲'] : "",
+                    (sortColumn != key) ? ['span', { class: "sort-triangle" }, unescapeHtml('&nbsp;')] : ""]
+               ] : [])
+          ],
+          ... channels.flatMap(channel =>
+              [
+                  ['tr',
+                   columnVisibility['name'] ?
+                   ['td', { class:"channel-description", style: `display:` },
+                    ['button', { style:"float:right", onclick:`javascript:showModal('${channel.id}')`}, unescapeHtml('&#x2139;&#xfe0f;')],
+                    ['a', { href: channel.id != "00000000000000000000000000000000" ? `play.html?id=${channel.id}` : null, style:"display: block; text-decoration: none; max-width: 45vw" }, 
+                     // name, genre, desc はエスケープ済みなので一度アンエスケープする。
+                     ['div', { class:"channel-name" }, unescapeHtml(channel.name)],
+                     ['div', { class:"detail text-muted"}, (channel.genre ? `${unescapeHtml(channel.genre)} - ` : ''), unescapeHtml(channel.desc)],
+                    ],
+                   ] : '',
+                   columnVisibility['numDirects'] ?
+                   ['td', { align:'center', nowrap:true },
+                    ['span', { class:"listeners" }, `${channel.numDirects}/${channel.numRelays}`],
+                    channel.encodedName ? ['div', { class:"icons"},
+                                           ['a', { href:channel.chatUrl}, ['img', { alt:"Chat", src:"/assets/images/chat.png"}]],
+                                           ['a', { href: channel.statsUrl}, ['img', { alt:"Stats", src:"/assets/images/graph.png"}]]] : ''] : '',
+
+                   columnVisibility['uptime'] ?
+                   ['td', { align:'center', nowrap:true, style: `display:` }, channel.uptime] : '',
+
+                   columnVisibility['bitrate'] ?
+                   ['td', { class:"bitrate", align:'center', nowrap:true }, `${channel.bitrate} kb/s`] : '',
+
+                   columnVisibility['contentTypeStr'] ?
+                   ['td', { align:'center' }, channel.contentTypeStr] : '',
+                  ]
+              ]
+          )
+      )
+
+      $('.channel-list').html(html)
+}
+
+  function updateGroup()
+  {
+      const html = who(
+          ['a', { class: !selectedGroup ? 'active-tab' : null, onclick:`selectedGroup = null; updateView()`, style:"cursor: pointer" }, `{#All} (${servMgr.numExternalChannels})`],
+          ... servMgr.channelDirectory.feeds.map((feed) =>
+              ['a', {class: selectedGroup==feed.url ? 'active-tab' : null, onclick:`selectedGroup = '${feed.url}'; updateView()`, style: "cursor:pointer; text-overflow: ellipsis; white-space: nowrap; overflow: hidden", title:`${feednick(feed)} (${feed.numChannels})` }, `${feednick(feed)} (${feed.numChannels})`])
+      )
+
+      $('#group_tab').html(html)
+  }
+
+$(function(){
+      const request = {
+          "jsonrpc": "2.0",
+          "method": "getState",
+          "params": [["servMgr"]],
+          "id": null
+      }
+      fetch("/api/1", { method: 'POST', body: JSON.stringify(request) })
+      .then(response => response.json())
+      .then(data => {
+          console.log(data.result)
+          servMgr = data.result.servMgr
+          updateView()
+      })
+      .catch(error => {
+          console.error(error)
+      })
+})
+</script>
+
+
