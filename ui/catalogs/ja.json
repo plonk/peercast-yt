@@ -103,6 +103,9 @@
     "Auto-updates every 5 minutes. Manual updates have a cooldown of 30 seconds." : "5分間隔で自動更新。手動更新は30秒のクールダウンが必要です。",
     "Category"                : "カテゴリー",
 
+    "Close"                   : "閉じる",
+    "Display Columns"         : "カラムの表示",
+
     // relayinfo.html
     "Channel Information"     : "チャンネル情報",
     "Desc."                   : "説明",

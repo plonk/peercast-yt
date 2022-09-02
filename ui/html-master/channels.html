@@ -115,7 +115,7 @@
       <div id="info"></div>
     </div>
     <div class="modal-footer" style="margin-top:15px; text-align:right">
-      <button onclick="javascript:closeModal()">閉じる</button>
+      <button onclick="$('#channel_modal').hide()">{#Close}</button>
     </div>
   </div>
 </div>
@@ -135,7 +135,7 @@
 
 <div class="modal" id="column_modal">
   <div class="modal-contents default-bg">
-    <h3 style="margin:0">カラム表示の設定</h3>
+    <h3 style="margin:0">{#Display Columns}</h3>
     <div class="modal-body" align="left">
       {@foreach COLUMNS}
         {@let key = nth(0,this), header = nth(1,this), order = nth(2,this)}
@@ -145,7 +145,7 @@
     </div>
     <div class="modal-footer" style="margin-top:15px; text-align:right">
       <!-- <input type="submit" value="{#Save}"> -->
-      <button onclick="javascript:$('#column_modal').hide()">{#Close}</button>
+      <button onclick="$('#column_modal').hide()">{#Close}</button>
     </div>
   </div>
 </div>
@@ -341,7 +341,7 @@ function updateTable()
                   ['tr',
                    columnVisibility['name'] ?
                    ['td', { class:"channel-description", style: `display:` },
-                    ['button', { style:"float:right", onclick:`javascript:showModal('${channel.id}')`}, unescapeHtml('&#x2139;&#xfe0f;')],
+                    ['button', { style:"float:right", onclick:`showModal('${channel.id}')`}, unescapeHtml('&#x2139;&#xfe0f;')],
                     ['a', { href: channel.id != "00000000000000000000000000000000" ? `play.html?id=${channel.id}` : null, style:"display: block; text-decoration: none; max-width: 45vw" }, 
                      // name, genre, desc はエスケープ済みなので一度アンエスケープする。
                      ['div', { class:"channel-name" }, unescapeHtml(channel.name)],
