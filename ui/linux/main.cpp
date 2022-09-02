@@ -208,6 +208,9 @@ static const char* getConfDir()
 // ----------------------------------
 static void init()
 {
+    // 設定ファイルやアクセストークンファイルを作るときに自分しか読めなくする。
+    umask(0077);
+
     // readlink does not append a null byte to the buffer, so we zero it out beforehand.
     char path[PATH_MAX + 1] = "";
     if (readlink("/proc/self/exe", path, PATH_MAX) == -1) {
