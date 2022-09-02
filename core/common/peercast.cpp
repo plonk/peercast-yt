@@ -23,6 +23,8 @@ void APICALL PeercastInstance::init()
     if (peercastApp->getIniFilename())
         servMgr->loadSettings(peercastApp->getIniFilename());
 
+    servMgr->loadTokenList();
+
     servMgr->start();
 }
 

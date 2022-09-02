@@ -25,6 +25,7 @@
 #include "servmgr.h"
 #include "unix/usys.h"
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -46,6 +47,7 @@ bool forkDaemon = false;
 bool setPidFile = false;
 bool logToFile = false;
 std::recursive_mutex loglock;
+static std::string s_tokenListFilename;
 
 // ---------------------------------
 class MyPeercastInst : public PeercastInstance
@@ -63,6 +65,11 @@ public:
     virtual const char * APICALL getIniFilename()
     {
         return iniFileName;
+    }
+
+    virtual const char * APICALL getTokenListFilename()
+    {
+        return s_tokenListFilename.c_str();
     }
 
     virtual const char * APICALL getPath()
@@ -205,6 +212,32 @@ static const char* getConfDir()
     return confdir.c_str();
 }
 
+static const char* getStateDir()
+{
+    static ::String statedir;
+
+    if (statedir.c_str()[0] == '\0')
+    {
+        char* dir;
+        dir = getenv("XDG_STATE_HOME");
+        if (dir) {
+            statedir.set(dir);
+        } else {
+            dir = getenv("HOME");
+            if (!dir)
+                dir = getpwuid(getuid())->pw_dir;
+            statedir.set(dir);
+            statedir.append("/.local/state");
+        }
+        statedir.append("/peercast");
+
+        if (statedir.c_str()[0] == '/') {
+            mkdir_p(statedir.c_str());
+        }
+    }
+    return statedir.c_str();
+}
+
 // ----------------------------------
 static void init()
 {
@@ -228,6 +261,9 @@ static void init()
     pidFileName.append("/peercast.pid");
     logFileName.set(confdir);
     logFileName.append("/peercast.log");
+
+    std::string stateDir = getStateDir();
+    s_tokenListFilename = stateDir + "/tokens.json";
 }
 
 // ----------------------------------

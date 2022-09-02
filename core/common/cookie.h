@@ -23,6 +23,7 @@
 
 #include <list>
 #include "ip.h"
+#include "varwriter.h"
 
 // --------------------------------------------
 class Cookie
@@ -39,7 +40,7 @@ public:
 };
 
 // --------------------------------------------
-class CookieList
+class CookieList : public VariableWriter
 {
 public:
     enum {
@@ -52,6 +53,8 @@ public:
     bool    add(Cookie &);
     void    remove(Cookie &);
     bool    contains(Cookie &);
+
+    amf0::Value getState();
 
     std::list<Cookie> list;
     bool    neverExpire;

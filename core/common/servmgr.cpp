@@ -19,6 +19,8 @@
 // ------------------------------------------------
 
 #include <memory>
+#include <fstream>
+#include <sstream>
 
 #include "servent.h"
 #include "servmgr.h"
@@ -32,6 +34,7 @@
 #include "chandir.h"
 #include "uptest.h"
 #include "portcheck.h"
+#include "json.hpp"
 
 // -----------------------------------
 ServMgr::ServMgr()
@@ -51,6 +54,7 @@ ServMgr::ServMgr()
             {"forceFirewalled", "ファイアーウォール オンであるかの様に振る舞う。", false},
             {"startPlayingFromKeyFrame", "DIRECT接続でキーフレームまで継続パケットをスキップする。", true},
             {"banTrackersWhileBroadcasting", "配信中他の配信者による視聴をBANする。", false},
+            {"persistTokenList", "アクセストークンリストを永続化する。", false},
         })
     , preferredTheme("system")
     , accentColor("blue")
@@ -971,6 +975,36 @@ void ServMgr::saveSettings(const char *fn)
     } catch (GeneralException& e) {
         LOG_ERROR("rename failed: %s", e.what());
     }
+
+    this->saveTokenList();
+}
+
+// --------------------------------------------------
+void ServMgr::saveTokenList()
+{
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
+    if (!this->flags.get("persistTokenList"))
+        return;
+
+    std::string tokenListFilename = peercastApp->getTokenListFilename();
+    std::string tmpname = str::STR(tokenListFilename, ".tmp");
+
+    std::ofstream tmp(tmpname);
+    if (tmp.fail())
+    {
+        LOG_ERROR("saveTokenList: Failed to open %s for writing", tmpname.c_str());
+        return;
+    }
+
+    tmp << this->cookieList.getState().inspect();
+    tmp.close();
+
+    try {
+        sys->rename(tmpname, tokenListFilename);
+    } catch (GeneralException& e) {
+        LOG_ERROR("rename failed: %s", e.what());
+    }
 }
 
 // --------------------------------------------------
@@ -1507,6 +1541,57 @@ void ServMgr::loadSettings(const char *fn)
     }
 
     ensureCatchallFilters();
+}
+
+// --------------------------------------------------
+void ServMgr::loadTokenList()
+{
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
+    if (!this->flags.get("persistTokenList"))
+        return;
+
+    try {
+        std::string filename = peercastApp->getTokenListFilename();
+
+        std::ifstream input(filename.c_str());
+        if (input.fail())
+        {
+            LOG_ERROR("loadTokenList: Failed to open %s", filename.c_str());
+            return;
+        }
+        std::stringstream buf;
+        buf << input.rdbuf();
+        nlohmann::json arr = nlohmann::json::parse(buf.str());
+
+        if (!arr.is_array())
+            throw std::runtime_error("json format error: array expected");
+
+        std::vector<Cookie> cookies;
+        for (auto& obj : arr)
+        {
+            if (!obj.is_object())
+                throw std::runtime_error("json format error: object expected");
+
+            Cookie cookie;
+            try {
+                cookie.set(static_cast<std::string>(obj.at("id")).c_str(), IP::parse(obj.at("ip")));
+            } catch(FormatException& e) // IP::parse
+            {
+                LOG_ERROR("Failed to parse an entry in token list. Skipping");
+            }
+            cookies.push_back(cookie);
+        }
+
+        this->cookieList.init();
+        for (auto& cookie : cookies)
+        {
+            this->cookieList.add(cookie);
+        }
+    }catch(std::exception& e)
+    {
+        LOG_ERROR("loadTokenList: %s", e.what());
+    }
 }
 
 // --------------------------------------------------
