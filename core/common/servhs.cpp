@@ -404,16 +404,14 @@ void Servent::handshakeGET(HTTP &http)
         if (!isAllowed(ALLOW_HTML))
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-        if (handshakeHTTPBasicAuth(http))
-        {
-            JrpcApi api;
-            std::string response = api.getVersionInfo(nlohmann::json::array_t()).dump();
+        http.readHeaders();
+        JrpcApi api;
+        std::string response = api.getVersionInfo(nlohmann::json::array_t()).dump();
 
-            http.writeLine(HTTP_SC_OK);
-            http.writeLineF("%s %zu", HTTP_HS_LENGTH, response.size());
-            http.writeLine("");
-            http.writeString(response.c_str());
-        }
+        http.writeLine(HTTP_SC_OK);
+        http.writeLineF("%s %zu", HTTP_HS_LENGTH, response.size());
+        http.writeLine("");
+        http.writeString(response.c_str());
     }else if (strcmp(fn, "/public")== 0 ||
               strncmp(fn, "/public/", strlen("/public/"))==0)
     {
@@ -504,7 +502,7 @@ void Servent::handshakePOST(HTTP &http)
         if (!isAllowed(ALLOW_HTML))
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-        if (handshakeHTTPBasicAuth(http))
+        if (handshakeAuth(http, args.c_str()))
             handshakeJRPC(http);
     }else if (path == "/")
     {
