@@ -179,6 +179,32 @@ static bool mkdir_p(const char* dir)
     }
 }
 
+static const char* getConfDir()
+{
+    static ::String confdir;
+
+    if (confdir.c_str()[0] == '\0')
+    {
+        char* dir;
+        dir = getenv("XDG_CONFIG_HOME");
+        if (dir) {
+            confdir.set(dir);
+        } else {
+            dir = getenv("HOME");
+            if (!dir)
+                dir = getpwuid(getuid())->pw_dir;
+            confdir.set(dir);
+            confdir.append("/.config");
+        }
+        confdir.append("/peercast");
+
+        if (confdir.c_str()[0] == '/') {
+            mkdir_p(confdir.c_str());
+        }
+    }
+    return confdir.c_str();
+}
+
 // ----------------------------------
 static void init()
 {
@@ -192,24 +218,7 @@ static void init()
     htmlPath.set(bindir);
     htmlPath.append("/../share/peercast/");
 
-    ::String confdir;
-    char* dir;
-    dir = getenv("XDG_CONFIG_DIR");
-    if (dir) {
-        confdir.set(dir);
-    } else {
-        dir = getenv("HOME");
-        if (!dir)
-            dir = getpwuid(getuid())->pw_dir;
-        confdir.set(dir);
-        confdir.append("/.config");
-    }
-    confdir.append("/peercast");
-
-    if (confdir.c_str()[0] == '/') {
-        mkdir_p(confdir.c_str());
-    }
-
+    const char* confdir = getConfDir();
     iniFileName.set(confdir);
     iniFileName.append("/peercast.ini");
     pidFileName.set(confdir);
