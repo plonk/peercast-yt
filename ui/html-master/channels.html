@@ -35,6 +35,9 @@
    .accented { color: var(--accent-color) !important; }
    .muted { color: grey !important; }
     .sort-triangle { display:inline-block; min-width:1.5em }
+
+    .channel-list td.channel-description a { display: block; text-decoration: none; max-width: 45vw }
+    .channel-list th { cursor: pointer }
     {^DARK_THEME_STYLES_BEGIN}
         .channel-list { color: #ddd }
         .channel-list tr { background-color: #544827 }
@@ -78,6 +81,7 @@
 </div>
 
 <script>
+  // チャンネルの詳細な情報を表示するモーダルにデータを設定。
   function showModal(chid)
   {
       const info = servMgr.channelDirectory.channels.find(ch => ch.id == chid)
@@ -87,7 +91,6 @@
           return
       }
       $('#channel_modal').show()
-      //$('.modal #info').text(JSON.stringify(info))
       let buf = "<table>"
       console.log(info)
       for (const key in info)
@@ -98,11 +101,9 @@
       console.log(buf)
       $('.modal #info').html(buf)
   }
-  function closeModal()
-  {
-      $('#channel_modal').hide()
-  }
+
   $(function(){
+      // 全てのモーダルは、矩形の外をクリックすると閉じられる。
       $('.modal').on('click', function(){ $(this).hide() });
       $('.modal .modal-contents').on('click', (e) => e.stopPropagation());
   })
@@ -131,8 +132,6 @@
          ])
 }
 
-{$ define(columnVisibility, evalString(or(cookie[str(servMgr.serverPort1, "_columnVisibility")], "{'name':true,'numDirects':true,'uptime':true,'bitrate':true,'contentTypeStr':true\}"))) }
-
 <div class="modal" id="column_modal">
   <div class="modal-contents default-bg">
     <h3 style="margin:0">{#Display Columns}</h3>
@@ -150,24 +149,32 @@
   </div>
 </div>
 
+<!-- index.txt の取得が5分ごとなので、あまり頻繁に更新しても仕方ない -->
+<table class="channel-list">
+</table>
+
 <script>
   var columnVisibility = {}
   var sortColumn = null
   var sortOrder = null
   var selectedGroup = null
 
+  // localStorageからコラムの表示に関するユーザー設定を取得して上のパラメータにセットする。
   function loadPreferences()
   {
       if (localStorage["columnVisibility"])
       {
           columnVisibility = JSON.parse(localStorage["columnVisibility"])
       }
+      // チャンネル名は常に表示する。
       Object.assign(columnVisibility, { "name": true })
 
       sortColumn = localStorage["sortColumn"]
       sortOrder = localStorage["sortOrder"]
   }
 
+
+  // localStorage に表示設定を保存。
   function savePreferences()
   {
       localStorage["columnVisibility"] = JSON.stringify(columnVisibility)
@@ -177,6 +184,8 @@
 
   $(function(){
       loadPreferences()
+
+      // カラム表示モーダルのチェックボックスの状態を設定する。
       for (const checkbox of $('#column_modal .modal-body input[type=checkbox]'))
       {
           if (columnVisibility[checkbox.dataset.key])
@@ -185,21 +194,14 @@
               checkbox.checked = false
       }
   })
-</script>
 
-{$ define(removeUnneededKeys, lambda([obj], removeKey(obj, '_', 'fragment'))) }
-
-<!-- index.txt の取得が5分ごとなので、あまり頻繁に更新しても仕方ない -->
-<table class="channel-list">
-</table>
-
-<script>
-
+// HTMLエスケープをする関数。
 function h(str)
 {
       return str.replace(/[&<>"']/g, (c) => ({'&': "&amp;", '<': "&lt;", '>': "&gt;", '\"': "&quot;", '\'': "&#39;"})[c])
 }
 
+// who。HTMLを書くための関数。
 const NoCloseTagRequired = { 'img':true, 'br':true, 'meta':true, 'link':true }
 
 function who(...args)
@@ -252,6 +254,7 @@ function who(...args)
       return buf;
 }
 
+// 実体参照を文字にするための関数。タグは除去される。重いかもしれない。
 function unescapeHtml(str)
 {
       return $($.parseHTML(str)).text()
@@ -275,6 +278,7 @@ function onColumnClicked(key, defaultOrder)
       updateView()
 }
 
+// コラムのソート用比較関数1
 function uptimeComparer(a,b)
 {
     const [ah, am] = a.split(':')
@@ -282,24 +286,29 @@ function uptimeComparer(a,b)
     return (+ah * 60 + +am) - (+bh * 60 + +bm)
 }
 
+// コラムのソート用比較関数2
 function stringComparer(a,b)
 {
     return (a === b) ? 0 : (a < b ? -1 : 1)
 }
 
+// コラムのソート用比較関数3
 function numericComparer(a,b)
 {
   return +a - +b
 }
 
+// getState RPC で取ってきたデータがここにささる。
 var servMgr
 
+// グループタブとチャンネルリストを再描画。
 function updateView()
 {
       updateGroup()
       updateTable()
 }
 
+// チャンネルリストの再描画。
 function updateTable()
 {
       const COLUMNS = {!COLUMNS}
@@ -329,7 +338,7 @@ function updateTable()
            ... COLUMNS.flatMap(([key, header, order]) => 
                columnVisibility[key] ?
                [
-                   ['th', { class: sortColumn == key ? "accented" : null, style: `cursor: pointer`, onclick: `onColumnClicked("${key}", "${order}"); updateView()` },
+                   ['th', { class: sortColumn == key ? "accented" : null, onclick: `onColumnClicked("${key}", "${order}"); updateView()` },
                     ['span', {}, header],
                     (sortColumn == key && sortOrder == "desc") ? ['span', { class: "sort-triangle" }, '▼'] : "",
                     (sortColumn == key && sortOrder == "asc") ? ['span', { class: "sort-triangle" }, '▲'] : "",
@@ -340,9 +349,9 @@ function updateTable()
               [
                   ['tr',
                    columnVisibility['name'] ?
-                   ['td', { class:"channel-description", style: `display:` },
+                   ['td', { class:"channel-description" },
                     ['button', { style:"float:right", onclick:`showModal('${channel.id}')`}, unescapeHtml('&#x2139;&#xfe0f;')],
-                    ['a', { href: channel.id != "00000000000000000000000000000000" ? `play.html?id=${channel.id}` : null, style:"display: block; text-decoration: none; max-width: 45vw" }, 
+                    ['a', { href: channel.id != "00000000000000000000000000000000" ? `play.html?id=${channel.id}` : null }, 
                      // name, genre, desc はエスケープ済みなので一度アンエスケープする。
                      ['div', { class:"channel-name" }, unescapeHtml(channel.name)],
                      ['div', { class:"detail text-muted"}, (channel.genre ? `${unescapeHtml(channel.genre)} - ` : ''), unescapeHtml(channel.desc)],
@@ -356,7 +365,7 @@ function updateTable()
                                            ['a', { href: channel.statsUrl}, ['img', { alt:"Stats", src:"/assets/images/graph.png"}]]] : ''] : '',
 
                    columnVisibility['uptime'] ?
-                   ['td', { align:'center', nowrap:true, style: `display:` }, channel.uptime] : '',
+                   ['td', { align:'center', nowrap:true }, channel.uptime] : '',
 
                    columnVisibility['bitrate'] ?
                    ['td', { class:"bitrate", align:'center', nowrap:true }, `${channel.bitrate} kb/s`] : '',
@@ -371,6 +380,7 @@ function updateTable()
       $('.channel-list').html(html)
 }
 
+// グループタブの更新。
   function updateGroup()
   {
       const html = who(
@@ -383,6 +393,7 @@ function updateTable()
   }
 
 $(function(){
+      // チャンネルリストを取得して描画する。
       const request = {
           "jsonrpc": "2.0",
           "method": "getState",
