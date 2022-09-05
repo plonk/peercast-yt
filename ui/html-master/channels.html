@@ -339,7 +339,8 @@ function updateTable()
                columnVisibility[key] ?
                [
                    ['th', { class: sortColumn == key ? "accented" : null, onclick: `onColumnClicked("${key}", "${order}"); updateView()` },
-                    ['span', {}, header],
+                    ['span', { class: "sort-triangle" }, unescapeHtml('&nbsp;')],
+                    ['span', header],
                     (sortColumn == key && sortOrder == "desc") ? ['span', { class: "sort-triangle" }, '▼'] : "",
                     (sortColumn == key && sortOrder == "asc") ? ['span', { class: "sort-triangle" }, '▲'] : "",
                     (sortColumn != key) ? ['span', { class: "sort-triangle" }, unescapeHtml('&nbsp;')] : ""]
