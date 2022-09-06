@@ -4,14 +4,21 @@
 {^end}
 {^define HEAD}
   <style>
+    .update-link { display:block; padding: 15px; margin-bottom:3px }
+    .update-link:hover { background-color: #eee; text-decoration:none }
    input, select { font-size: 9pt }
    .channel-list {
-       font-family: Verdana, sans-serif; font-size: 9pt; color: #222; line-height: 1.3em; margin: 0;
-       width:100%; max-width: 640px
+       font-family: Verdana, sans-serif; font-size: 9pt; line-height: 1.3em; margin: 0;
+       width:100%;
+       border-collapse: collapse;
+       background-color: #eee;
+       border: none;
     }
-   .channel-list tr { background-color: #FFECC4 }
-   .channel-list th { font-size: 9pt; padding: 3px 5px; color: black }
-   .channel-list th a { color: inherit }
+    .channel-list th, .channel-list td { border-right-style: solid; border-width: 1px; border-bottom-style: solid;
+        border-color: rgba(0,0,0,0.5); border-right-color: rgba(0,0,0,0.2) }
+    .channel-list th:last-child, .channel-list td:last-child { border-right-style: none }
+    .channel-list tr:last-child td { border-bottom-style: none }
+   .channel-list th { font-size: 9pt; padding: 3px 5px }
    .channel-list td { text-align: center; padding: 5px 5px; }
    .channel-list td.channel-description {
        text-align: left;
@@ -32,16 +39,19 @@
    .channel-list .bitrate { text-align: right }
    .relay-list { width:100%; max-width: 640px }
    .relay-list th { white-space: nowrap }
-   .accented { color: var(--accent-color) !important; }
+   .accented { color: var(--accent-color); }
    .muted { color: grey !important; }
     .sort-triangle { display:inline-block; min-width:1.5em }
 
     .channel-list td.channel-description a { display: block; text-decoration: none; max-width: 45vw }
     .channel-list th { cursor: pointer }
+
+    #group_tab a { cursor:pointer; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; line-height: 1.5em }
+
     {^DARK_THEME_STYLES_BEGIN}
-        .channel-list { color: #ddd }
-        .channel-list tr { background-color: #544827 }
-        .channel-list th { color: #eee }
+    .channel-list { background-color: #333 }
+    .channel-list th, .channel-list td { border-color: rgba(255,255,255,0.5); border-right-color: rgba(255,255,255,0.3) }
+    .update-link:hover { background-color: #333 }
     {^DARK_THEME_STYLES_END}
   </style>
 {^end}
@@ -76,7 +86,6 @@
 </div>
 
 <div align=right>
-  <a href="/admin?cmd=fetch_feeds" title="{#Auto-updates every 5 minutes. Manual updates have a cooldown of 30 seconds.}">{#Update}</a>
   <button onclick="$('#column_modal').show()" title="カラム表示の設定">&#x2699;&#xFE0F;</button>
 </div>
 
@@ -150,8 +159,11 @@
 </div>
 
 <!-- index.txt の取得が5分ごとなので、あまり頻繁に更新しても仕方ない -->
-<table class="channel-list">
-</table>
+<div style="max-width: 640px">
+  <a href="/admin?cmd=fetch_feeds" class="update-link" title="{#Auto-updates every 5 minutes. Manual updates have a cooldown of 30 seconds.}">{#Update}</a>
+  <table class="channel-list">
+  </table>
+</div>
 
 <script>
   var columnVisibility = {}
@@ -308,6 +320,64 @@ function updateView()
       updateTable()
 }
 
+function findFilterFor(channel)
+{
+      let colors = [];
+
+      if (channel.trackArtist.match(/Peercast Gateway/))
+          colors.push('rgba(204,202,102,0.75)')
+
+      if (channel.desc.match(/プログラミング/) || channel.genre.match(/プログラミング/))
+          colors.push('rgba(128,255,128,0.75)')
+
+      if (channel.genre.match(/アスカ/) || channel.desc.match(/アスカ/))
+          colors.push('rgba(255,196,197,0.75)')
+
+      if (colors.length == 0)
+          return null
+      else
+          return { rowStyle: "background: linear-gradient(95deg, rgba(255,255,255,0), " + colors.join(", ") }
+}
+
+function renderChannelRow(channel)
+{
+      let filter
+      let rowStyle = ""
+      if (filter = findFilterFor(channel))
+      {
+          rowStyle = filter.rowStyle
+      }
+
+      return [
+          'tr',
+          { style: rowStyle },
+          columnVisibility['name'] ?
+          ['td', { class: "channel-description" },
+           ['button', { style:"float:right", onclick:`showModal('${channel.id}')`}, unescapeHtml('&#x2139;&#xfe0f;')],
+           ['a', { href: channel.id != "00000000000000000000000000000000" ? `play.html?id=${channel.id}` : null }, 
+            // name, genre, desc はエスケープ済みなので一度アンエスケープする。
+            ['div', { class:"channel-name" }, unescapeHtml(channel.name)],
+            ['div', { class:"detail text-muted"}, (channel.genre ? `${unescapeHtml(channel.genre)} - ` : ''), unescapeHtml(channel.desc)],
+           ],
+          ] : '',
+          columnVisibility['numDirects'] ?
+          ['td', { align:'center', nowrap:true },
+           ['span', { class:"listeners" }, `${channel.numDirects}/${channel.numRelays}`],
+           channel.encodedName ? ['div', { class:"icons"},
+                                  ['a', { href:channel.chatUrl}, ['img', { alt:"Chat", src:"/assets/images/chat.png"}]],
+                                  ['a', { href: channel.statsUrl}, ['img', { alt:"Stats", src:"/assets/images/graph.png"}]]] : ''] : '',
+
+          columnVisibility['uptime'] ?
+          ['td', { align:'center', nowrap:true }, channel.uptime] : '',
+
+          columnVisibility['bitrate'] ?
+          ['td', { class:"bitrate", align:'center', nowrap:true }, `${channel.bitrate} kb/s`] : '',
+
+          columnVisibility['contentTypeStr'] ?
+          ['td', { align:'center' }, channel.contentTypeStr] : '',
+      ]
+}
+
 // チャンネルリストの再描画。
 function updateTable()
 {
@@ -348,32 +418,7 @@ function updateTable()
           ],
           ... channels.flatMap(channel =>
               [
-                  ['tr',
-                   columnVisibility['name'] ?
-                   ['td', { class:"channel-description" },
-                    ['button', { style:"float:right", onclick:`showModal('${channel.id}')`}, unescapeHtml('&#x2139;&#xfe0f;')],
-                    ['a', { href: channel.id != "00000000000000000000000000000000" ? `play.html?id=${channel.id}` : null }, 
-                     // name, genre, desc はエスケープ済みなので一度アンエスケープする。
-                     ['div', { class:"channel-name" }, unescapeHtml(channel.name)],
-                     ['div', { class:"detail text-muted"}, (channel.genre ? `${unescapeHtml(channel.genre)} - ` : ''), unescapeHtml(channel.desc)],
-                    ],
-                   ] : '',
-                   columnVisibility['numDirects'] ?
-                   ['td', { align:'center', nowrap:true },
-                    ['span', { class:"listeners" }, `${channel.numDirects}/${channel.numRelays}`],
-                    channel.encodedName ? ['div', { class:"icons"},
-                                           ['a', { href:channel.chatUrl}, ['img', { alt:"Chat", src:"/assets/images/chat.png"}]],
-                                           ['a', { href: channel.statsUrl}, ['img', { alt:"Stats", src:"/assets/images/graph.png"}]]] : ''] : '',
-
-                   columnVisibility['uptime'] ?
-                   ['td', { align:'center', nowrap:true }, channel.uptime] : '',
-
-                   columnVisibility['bitrate'] ?
-                   ['td', { class:"bitrate", align:'center', nowrap:true }, `${channel.bitrate} kb/s`] : '',
-
-                   columnVisibility['contentTypeStr'] ?
-                   ['td', { align:'center' }, channel.contentTypeStr] : '',
-                  ]
+                  renderChannelRow(channel)
               ]
           )
       )
@@ -385,15 +430,22 @@ function updateTable()
   function updateGroup()
   {
       const html = who(
-          ['a', { class: !selectedGroup ? 'active-tab' : null, onclick:`selectedGroup = null; updateView()`, style:"cursor: pointer" }, `{#All} (${servMgr.numExternalChannels})`],
+          ['a', { class: !selectedGroup ? 'active-tab' : null, onclick:`selectedGroup = null; updateView()` },
+           ['span', `{#All} (${servMgr.numExternalChannels})`]],
           ... servMgr.channelDirectory.feeds.map((feed) =>
-              ['a', {class: selectedGroup==feed.url ? 'active-tab' : null, onclick:`selectedGroup = '${feed.url}'; updateView()`, style: "cursor:pointer; text-overflow: ellipsis; white-space: nowrap; overflow: hidden", title:`${feednick(feed)} (${feed.numChannels})` }, `${feednick(feed)} (${feed.numChannels})`])
+              ['a', {class: selectedGroup==feed.url ? 'active-tab' : null, onclick:`selectedGroup = '${feed.url}'; updateView()`, title:`${feednick(feed)} (${feed.numChannels})` },
+               ['span', `${feednick(feed)} (${feed.numChannels})`]])
       )
 
       $('#group_tab').html(html)
   }
 
-$(function(){
+  function delay(ms) {
+      return new Promise((resolve, _reject) => setTimeout(resolve, ms));
+  }
+
+  async function main()
+  {
       // チャンネルリストを取得して描画する。
       const request = {
           "jsonrpc": "2.0",
@@ -401,16 +453,23 @@ $(function(){
           "params": [["servMgr"]],
           "id": null
       }
-      fetch("/api/1", { method: 'POST', body: JSON.stringify(request) })
-      .then(response => response.json())
-      .then(data => {
-          console.log(data.result)
-          servMgr = data.result.servMgr
-          updateView()
-      })
-      .catch(error => {
-          console.error(error)
-      })
+      while (true)
+      {
+          try {
+              const response = await fetch("/api/1", { method: 'POST', body: JSON.stringify(request) })
+              const data = await response.json()
+              console.log(data.result)
+              servMgr = data.result.servMgr
+              updateView()
+          } catch(error) {
+              console.error(error)
+          }
+          await delay(60 * 1000)
+      }
+  }
+
+$(function(){
+      main()
 })
 </script>
 
