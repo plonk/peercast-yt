@@ -341,3 +341,33 @@ TEST_F(strFixture, strip)
     ASSERT_EQ("a", str::strip(" a "));
     ASSERT_EQ("a", str::strip({ '\0', '\n', 'a', '\0', '\n' }));
 }
+
+TEST_F(strFixture, truncate_utf8)
+{
+    ASSERT_EQ(str::truncate_utf8("", 1000), "");
+
+    ASSERT_EQ(str::truncate_utf8("a", 0), "");
+    ASSERT_EQ(str::truncate_utf8("a", 1), "a");
+
+    ASSERT_EQ(str::truncate_utf8("あ", 0), "");
+    ASSERT_EQ(str::truncate_utf8("あ", 1), "");
+    ASSERT_EQ(str::truncate_utf8("あ", 2), "");
+    ASSERT_EQ(str::truncate_utf8("あ", 3), "あ");
+    ASSERT_EQ(str::truncate_utf8("あ", 4), "あ");
+
+    // PILE OF POO
+    ASSERT_EQ(str::truncate_utf8("💩", 0), "");
+    ASSERT_EQ(str::truncate_utf8("💩", 1), "");
+    ASSERT_EQ(str::truncate_utf8("💩", 2), "");
+    ASSERT_EQ(str::truncate_utf8("💩", 3), "");
+    ASSERT_EQ(str::truncate_utf8("💩", 4), "💩");
+    ASSERT_EQ(str::truncate_utf8("💩", 5), "💩");
+
+    ASSERT_THROW(str::truncate_utf8("\xff", 1), std::invalid_argument);
+
+    // Shift_JIS
+    ASSERT_THROW(str::truncate_utf8("\x95\\", 2), std::invalid_argument);   // 表
+    ASSERT_THROW(str::truncate_utf8("\x8A\xBF", 2), std::invalid_argument); // 漢
+    ASSERT_THROW(str::truncate_utf8("\x83" "A", 2), std::invalid_argument); // ア; KATAKANA LETTER A
+    ASSERT_THROW(str::truncate_utf8("\xB1", 1), std::invalid_argument);     // ｱ; HALFWIDTH KATAKANA LETTER A
+}

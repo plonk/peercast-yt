@@ -571,4 +571,68 @@ bool validate_utf8(const std::string& str)
     return true;
 }
 
+std::string truncate_utf8(const std::string& str, size_t length)
+{
+    std::string dest;
+
+    auto it = str.begin();
+    while (it != str.end())
+    {
+        if ((*it & 0x80) == 0) // 0xxx xxxx
+        {
+            if (dest.size() + 1  > length)
+                break;
+            dest += *it++;
+            continue;
+        }else if ((*it & 0xE0) == 0xC0) // 110x xxxx
+        {
+            if (dest.size() + 2 > length)
+                break;
+            dest += *it++;
+            if (it == str.end())
+                goto Error;
+            if ((*it & 0xC0) == 0x80)
+            {
+                dest += *it++;
+            }else
+                goto Error;
+        }else if ((*it & 0xF0) == 0xE0) // 1110 xxxx
+        {
+            if (dest.size() + 3 > length)
+                break;
+            dest += *it++;
+            for (int i = 0; i < 2; ++i)
+            {
+                if (it == str.end())
+                    goto Error;
+                if ((*it & 0xC0) == 0x80)
+                {
+                    dest += *it++;
+                }else
+                    goto Error;
+            }
+        }else if ((*it & 0xF8) == 0xF0) // 1111 0xxx
+        {
+            if (dest.size() + 4 > length)
+                break;
+            dest += *it++;
+            for (int i = 0; i < 3; ++i)
+            {
+                if (it == str.end())
+                    goto Error;
+                if ((*it & 0xC0) == 0x80)
+                {
+                    dest += *it++;
+                }else
+                    goto Error;
+            }
+        }else
+            goto Error;
+    }
+    return dest;
+
+Error:
+    throw std::invalid_argument("UTF-8 validation failed");
+}
+
 } // namespace str

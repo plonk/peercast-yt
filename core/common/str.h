@@ -59,6 +59,7 @@ namespace str
     }
 
     bool validate_utf8(const std::string& str);
+    std::string truncate_utf8(const std::string& str, size_t length);
 }
 
 #endif
