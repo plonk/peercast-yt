@@ -177,9 +177,13 @@ void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)
     if (!sys) return;
 
     const int MAX_LINELEN = 1024;
-    char str[MAX_LINELEN+1];
-    vsnprintf(str, MAX_LINELEN-1, fmt, ap);
-    str[MAX_LINELEN-1]=0;
+    std::string tmp = str::vformat(fmt, ap);
+    tmp = str::truncate_utf8(tmp, MAX_LINELEN);
+
+    if (!str::validate_utf8(tmp))
+        throw std::runtime_error("ADDLOG: invalid utf8 detected");
+
+    const char* str = tmp.c_str();
 
     // ログレベルに関わらず出力する。
     if (AUX_LOG_FUNC_VECTOR) {
