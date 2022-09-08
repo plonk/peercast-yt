@@ -158,8 +158,6 @@ static Regexp rfc1123("^([A-z]{3}), (\\d+) ([A-z]{3}) (\\d+) (\\d+):(\\d+):(\\d+
 static Regexp rfc1036("^([A-z]+)day, (\\d+)-([A-z]{3})-(\\d{2}) (\\d+):(\\d+):(\\d+) (GMT|UTC)$");
 static Regexp asctime("^([A-z]{3}) ([A-z]{3}) +(\\d+) (\\d+):(\\d+):(\\d+) (\\d+)$");
 
-struct tm parseHttpDate_lasttm = {};
-
 #ifdef WIN32
 #define timegm _mkgmtime
 #endif
@@ -218,7 +216,6 @@ time_t parseHttpDate(const std::string& str)
     else
     {
         struct tm tm = { sec, min, hour, mday, mon, year, wday, };
-        parseHttpDate_lasttm = tm;
         return timegm(&tm);
     }
 }
