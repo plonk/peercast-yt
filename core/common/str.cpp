@@ -259,6 +259,22 @@ std::string format(const char* fmt, ...)
     return res;
 }
 
+std::string vformat(const char* fmt, va_list ap)
+{
+    va_list aq;
+    std::string res;
+
+    va_copy(aq, ap);
+    int size = vsnprintf(NULL, 0, fmt, ap);
+    char *data = new char[size + 1];
+    vsnprintf(data, size + 1, fmt, aq);
+    va_end(aq);
+
+    res = data;
+    delete[] data;
+    return res;
+}
+
 bool contains(const std::string& haystack, const std::string& needle)
 {
     return haystack.find(needle) != std::string::npos;
