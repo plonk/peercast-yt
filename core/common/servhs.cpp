@@ -996,9 +996,8 @@ void Servent::CMD_viewxml(const char* cmd, HTTP& http, String& jumpStr)
     handshakeXML();
 }
 
-void Servent::CMD_saveColumnVisibility(const char* cmd, HTTP& http, String& jumpStr)
+void Servent::CMD_customizeApperance(const char* cmd, HTTP& http, String& jumpStr)
 {
-    LOG_DEBUG("cmd = %s", cmd);
     cgi::Query query(cmd);
 
     std::map<std::string,amf0::Value> dict;
@@ -1006,23 +1005,21 @@ void Servent::CMD_saveColumnVisibility(const char* cmd, HTTP& http, String& jump
     {
         if (key == "cmd")
             continue;
-        dict[key] = true;
+        else if (key == "preferredTheme")
+        {
+            std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
+            servMgr->preferredTheme = query.get(key);
+        }else if (key == "accentColor")
+        {
+            std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
+            servMgr->accentColor = query.get(key);
+        }else
+            LOG_WARN("Unexpected key `%s`", key.c_str());
     }
 
-    HTTPResponse response(0, {});
-    if (!http.headers.get("Referer").empty())
-    {
-        response = HTTPResponse::redirectTo(http.headers.get("Referer"));
-    }else
-    {
-        response = HTTPResponse::redirectTo("/");
-        
-    }
-    auto header_value = str::format("%d_columnVisibility=%s; path=/; expires=\"Mon, 01-Jan-3000 00:00:00 GMT\"",
-                                    (int) servMgr->serverHost.port,
-                                    cgi::escape(amf0::Value(dict).inspect()).c_str());
-    response.headers.set("Set-Cookie", header_value);
-    http.send(response);
+    http.send(http.headers.get("Referer").empty()
+              ? HTTPResponse::redirectTo("/")
+              : HTTPResponse::redirectTo(http.headers.get("Referer")));
 }
 
 void Servent::CMD_clearlog(const char* cmd, HTTP& http, String& jumpStr)
@@ -1958,9 +1955,9 @@ void Servent::handshakeCMD(HTTP& http, const std::string& query)
         }else if (cmd == "viewxml")
         {
             CMD_viewxml(query.c_str(), http, jumpStr);
-        }else if (cmd == "saveColumnVisibility")
+        }else if (cmd == "customizeAppearance")
         {
-            CMD_saveColumnVisibility(query.c_str(), http, jumpStr);
+            CMD_customizeApperance(query.c_str(), http, jumpStr);
         }else{
             throw HTTPException(HTTP_SC_BADREQUEST, 400);
         }
