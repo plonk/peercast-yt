@@ -1022,6 +1022,47 @@ void Servent::CMD_customizeApperance(const char* cmd, HTTP& http, String& jumpSt
               : HTTPResponse::redirectTo(http.headers.get("Referer")));
 }
 
+void Servent::CMD_chooseLanguage(const char* cmd, HTTP& http, String& jumpStr)
+{
+    cgi::Query query(cmd);
+
+    auto referer = http.headers.get("Referer");
+    LOG_DEBUG("old referer: %s", referer.c_str());
+
+    for (auto key : query.getKeys())
+    {
+        if (key == "cmd")
+            continue;
+        else if (key == "htmlPath")
+        {
+            std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
+
+            auto newHtmlPath = "html/" + query.get(key);
+            auto vec = Regexp("html/[^/]+").exec(referer);
+            if (vec.size())
+            {
+                auto pos = referer.find(vec[0]);
+                if (pos != std::string::npos)
+                {
+                    referer = referer.substr(0, pos) + newHtmlPath + referer.substr(pos + vec[0].size());
+                    LOG_DEBUG("new referer: %s", referer.c_str());
+                }
+            }else{
+                LOG_WARN("CMD_chooseLanguage: Failed to rewrite referer: %s", referer.c_str());
+            }
+
+            Sys::strcpy_truncate(servMgr->htmlPath, sizeof(servMgr->htmlPath), newHtmlPath.c_str());
+
+            http.send(referer.empty()
+                      ? HTTPResponse::redirectTo("/")
+                      : HTTPResponse::redirectTo(referer));
+            return;
+        }else
+            LOG_WARN("Unexpected key `%s`", key.c_str());
+    }
+    http.send(HTTPResponse::badRequest()); // No htmlPath key.
+}
+
 void Servent::CMD_clearlog(const char* cmd, HTTP& http, String& jumpStr)
 {
     sys->logBuf->clear();
@@ -1958,6 +1999,9 @@ void Servent::handshakeCMD(HTTP& http, const std::string& query)
         }else if (cmd == "customizeAppearance")
         {
             CMD_customizeApperance(query.c_str(), http, jumpStr);
+        }else if (cmd == "chooseLanguage")
+        {
+            CMD_chooseLanguage(query.c_str(), http, jumpStr);
         }else{
             throw HTTPException(HTTP_SC_BADREQUEST, 400);
         }

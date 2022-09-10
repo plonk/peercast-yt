@@ -105,6 +105,9 @@
 
     "Close"                   : "閉じる",
     "Display Columns"         : "カラムの表示",
+    "Cancel"                  : "キャンセル",
+    "Choose Language"         : "表示言語を選択",
+    "Customize Appearance"    : "見た目のカスタマイズ",
 
     // relayinfo.html
     "Channel Information"     : "チャンネル情報",
