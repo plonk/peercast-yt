@@ -109,6 +109,15 @@
     "Choose Language"         : "表示言語を選択",
     "Customize Appearance"    : "見た目のカスタマイズ",
 
+    "Contact URL"             : "コンタクトURL",
+    "Chat URL"                : "チャットURL",
+    "Stats URL"               : "統計URL",
+
+    "Tracker"                 : "トラッカー",
+    "Channel ID"              : "チャンネルID",
+    "Feed"                    : "フィード",
+    "Track URL"               : "トラックのURL",
+
     // relayinfo.html
     "Channel Information"     : "チャンネル情報",
     "Desc."                   : "説明",

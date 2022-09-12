@@ -100,15 +100,45 @@
           return
       }
       $('#channel_modal').show()
-      let buf = "<table>"
-      console.log(info)
-      for (const key in info)
+
+      function link(url)
       {
-          buf += `<tr><th>${key}</th><td>${info[key]}</td></tr>`
+          return url ? ['a', { href:url }, url] : ['span', { class:'text-muted' }, 'n/a']
       }
-      buf += "</table>"
-      console.log(buf)
-      $('.modal #info').html(buf)
+      function text(value)
+      {
+          if (typeof(value) === 'string')
+          {
+              if (value === "")
+                  return ['span', { class:'text-muted' }, 'n/a']
+              else
+                  return value
+          }else
+              return ""+value
+      }
+      $('#info').html(who(
+          ['table',
+           ['tr',['th','{#Name}'],['td', text(unescapeHtml(info.name))]],
+           ['tr',['th','{#Genre}'],['td', text(unescapeHtml(info.genre))]],
+           ['tr',['th','{#Description}'],['td', text(unescapeHtml(info.desc))]],
+           ['tr',['th','{#Comment}'],['td', text(unescapeHtml(info.comment))]],
+           ['tr',['th','{#Contact URL}'],['td', link(info.url)]],
+           ['tr',['th','{#Uptime}'],['td', text(info.uptime)]],
+           ['tr',['th','{#Listeners}'],['td', text(info.numDirects)]],
+           ['tr',['th','{#Relays}'],['td', text(info.numRelays)]],
+           ['tr',['th','{#Bitrate}'],['td', text(info.bitrate)]],
+           ['tr',['th','{#Type}'],['td', text(info.contentTypeStr)]],
+           ['tr',['th','{#Chat URL}'],['td', link(info.chatUrl)]],
+           ['tr',['th','{#Stats URL}'],['td', link(info.statsUrl)]],
+           ['tr',['th','{#Tracker}'],['td', text(info.tip)]],
+           ['tr',['th','{#Channel ID}'],['td', text(info.id)]],
+           ['tr',['th','{#Direct}'],['td', info.direct == '1' ? '{#Yes}' : '{#No}']],
+           ['tr',['th','{#Feed}'],['td', text(info.feedUrl)]],
+           ['tr',['th','{#Title}'],['td', text(info.trackName)]],
+           ['tr',['th','{#Artist}'],['td', text(info.trackArtist)]],
+           ['tr',['th','{#Album}'],['td', text(info.trackAlbum)]],
+           ['tr',['th','{#Track URL}'],['td', link(info.trackContact)]],
+          ]))
   }
 
   $(function(){
@@ -120,9 +150,10 @@
 
 <div class="modal" id="channel_modal">
   <div class="modal-contents default-bg">
-    <h3 style="margin:0">もーだるだよ。</h3>
+    <h3 style="margin:0">{#Channel Information}</h3>
     <div class="modal-body">
-      <div id="info"></div>
+      <div id="info">
+      </div>
     </div>
     <div class="modal-footer" style="margin-top:15px; text-align:right">
       <button onclick="$('#channel_modal').hide()">{#Close}</button>
