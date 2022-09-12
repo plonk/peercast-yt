@@ -208,9 +208,13 @@
       if (localStorage["columnVisibility"])
       {
           columnVisibility = JSON.parse(localStorage["columnVisibility"])
+          // チャンネル名は常に表示する。
+          Object.assign(columnVisibility, { "name": true })
+      }else
+      {
+          // デフォルト設定。
+          columnVisibility = { name:true, numDirects:true, uptime:true, bitrate:false, contentTypeStr:false }
       }
-      // チャンネル名は常に表示する。
-      Object.assign(columnVisibility, { "name": true })
 
       sortColumn = localStorage["sortColumn"]
       sortOrder = localStorage["sortOrder"]
