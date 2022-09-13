@@ -89,7 +89,8 @@
 </div>
 
 <div align=right>
-  <button class="customize-button" onclick="$('#column_modal').show()" title="{#Display Columns}">&#x2699;&#xFE0F;</button>
+  <button class="customize-button" title="{#Filters}" onclick="window.location = 'chanfilters.html'">&#x1F308;<!-- rainbow --></button>
+  <button class="customize-button" onclick="$('#column_modal').show()" title="{#Display Columns}">&#x2699;&#xFE0F;<!-- gear --></button>
 </div>
 
 <script>
@@ -431,6 +432,8 @@ function updateTable()
           try {
               const response = await fetch("/api/1", { method: 'POST', body: JSON.stringify(request) })
               const data = await response.json()
+              if (data.error)
+                  throw new Error(data.error.message);
               console.log(data.result)
               servMgr = data.result.servMgr
               updateView()

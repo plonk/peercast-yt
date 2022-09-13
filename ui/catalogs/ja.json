@@ -118,6 +118,20 @@
     "Feed"                    : "フィード",
     "Track URL"               : "トラックのURL",
 
+    // chanfilters.html
+
+    "Channel Filters"         : "チャンネルフィルター",
+    "Enabled"                 : "有効",
+    "Disabled"                : "無効",
+    "Filter Name"             : "フィルター名",
+    "Base Search"             : "基本検索",
+    "AND Search"              : "AND検索",
+    "NOT Search"              : "NOT検索",
+    "Channel Name"            : "チャンネル名",
+    "Feed URL"                : "フィードURL",
+    "Regular Expression"      : "正規表現",
+    "Filter"                  : "フィルター",
+
     // relayinfo.html
     "Channel Information"     : "チャンネル情報",
     "Desc."                   : "説明",

@@ -49,6 +49,9 @@
       --accent-color-dark: #92b2ff; /* L=73 */
       {@end}
       --accent-color: var(--accent-color-light);
+
+      --bg-color-l1: #fff;
+      --bg-color-l2: #eee;
   }
   input { accent-color: var(--accent-color) }
   a[href] {
@@ -57,6 +60,8 @@
   {^DARK_THEME_STYLES_BEGIN}
   :root {
       --accent-color: var(--accent-color-dark);
+      --bg-color-l1: #222;
+      --bg-color-l2: #333;
   }
 
   body { color: #fff; background-color: #222 }

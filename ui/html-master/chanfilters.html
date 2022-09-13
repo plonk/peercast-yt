@@ -1,0 +1,194 @@
+{^define LAYOUT layout.html}
+{^define TITLE}
+  {#Channel Filters} - {#PeerCast on} {^SERVER_NAME}
+{^end}
+{^define HEAD}
+  <style>
+  </style>
+{^end}
+
+<!-- who etc. -->
+<script src="/assets/js/render_helpers.js"></script>
+
+<script>
+  let FILTERS
+
+  function backgroundStyle(colors)
+  {
+      if (colors.length == 0)
+          return "transparent"
+      else
+          return "linear-gradient(95deg, rgba(255,255,255,0), " + colors.map(triple => `rgba(${triple.join(", ")},0.75)`).join(", ")
+  }
+
+  function renderFilterTable()
+  {
+      const renderOptionalSearch = (search => search.enabled ? search.search : ["span", { /* class:"text-muted" */ }, "<{#Disabled}>"])
+
+      $('#filter_table').html(who(
+          ['table', { class: 'table-panel' },
+           ['tr',
+            ['th', '{#Enabled}' ],
+            ['th', '{#Filter Name}'],
+            ['th', '{#Base Search}'],
+            ['th', '{#AND Search}'],
+            ['th', '{#NOT Search}']],
+
+           ... FILTERS.map((f, index) => [
+               'tr', { style: `background: ${backgroundStyle([f.color])}`, onclick: `showFilterModal(${index})` },
+               ['td', { style: 'text-align: center' }, ['input', { type: 'checkbox', checked: true, disabled: true }]],
+               ['td', f.name],
+               ['td', f.base_search.search],
+               ['td', renderOptionalSearch(f.and_search)],
+               ['td', renderOptionalSearch(f.base_search)],
+           ]),
+      ]))
+  }
+
+  function selectTab(index)
+  {
+      $(`#search_tabset a`).removeClass('active-tab')
+      $(`#search_tabset a:nth-child(${index})`).addClass('active-tab')
+
+      $('.search-pane').hide()
+
+      if (index == 1)
+      {
+          $('#base_search_pane').show()
+      }else if (index == 2)
+      {
+          $('#and_search_pane').show()
+      }else if (index == 3)
+      {
+          $('#not_search_pane').show()
+      }
+  }
+
+  function showFilterModal(index)
+  {
+      const f = FILTERS[index]
+
+      if (!f)
+      {
+          console.error("Filter index out of range")
+          return;
+      }
+
+      const fields = [
+          ['name',           '{#Channel Name}'],
+          ['genre',          '{#Genre}'],
+          ['desc',           '{#Description}'],
+          ['comment',        '{#Comment}'],
+          ['trackArtist',    '{#Artist}'],
+          ['trackName',      '{#Title}'],
+          ['trackAlbum',     '{#Album}'],
+          ['feedUrl',        '{#Feed URL}'],
+          ['url',            '{#Contact URL}'],
+          ['trackContact',   '{#Track URL}'],
+          ['contentTypeStr', '{#Type}'],
+          ['status',         '{#Status}'],
+          ['id',             '{#Channel ID}'],
+          ['tip',            '{#Tracker}'],
+          // ['channelName', 'Channel Name'],
+          // ['genre',       'Genre'],
+          // ['detail',      'Description'],
+          // ['comment',     'Comment'],
+          // ['artist',      'Artist'],
+          // ['title',       'Title'],
+          // ['album',       'Album'],
+          // ['ypName',      'YP Name'],
+          // ['ypUrl',       'Feed URL'],
+          // ['contactUrl',  'Contact URL'],
+          // ['trackContactUrl', 'Track URL'],
+          // ['type',        'Type'],
+          // ['status',      'Status'],
+          // ['id',          'Channel ID'],
+          // ['tip',         'Tracker'],
+      ]
+
+      $('#filter_modal #info').html(who(
+          ['label',
+           ['input', { type: 'checkbox', checked: f.enabled }],
+           '{#Enabled}'],
+          ['div',
+           ['label', "{#Filter Name}: "],
+           ['input', { type: 'text', name: 'name', value: f.name }]],
+          ['div', { class: "flex-container navbar", style: "margin-bottom:0", id: "search_tabset" }, 
+           ['a', { class: 'tab', onclick: "selectTab(1)" }, '{#Base Search}'],
+           ['a', { class: 'tab', onclick: "selectTab(2)" }, '{#AND Search}'],
+           ['a', { class: 'tab', onclick: "selectTab(3)" }, '{#NOT Search}'],
+          ],
+          ['div', { style: "background-color: var(--bg-color-l2); padding: 0 8px 4px 8px" },
+           ['div', { class: 'search-pane', id: 'base_search_pane' },
+            ['label', ['input', { id: 'base_search_checkbox', type: 'checkbox', checked: true, disabled: true }], '{#Enabled}'],
+            ['label', { style: "display:block" }, "{#Regular Expression}: ", ['input', { type: 'text', name: 'base_search_search', value: f.base_search.search }]],
+            ['div',
+             ... fields.map(([field, human_readable]) =>
+                 ['label', { style: 'display:inline-block' }, ['input', { type: 'checkbox', name: field, checked: f.base_search.fields.includes(field) }], human_readable])]],
+
+           ['div', { class: 'search-pane', id: 'and_search_pane' },
+            ['label', { style: "display:block" }, ['input', { id: 'and_search_checkbox', type: 'checkbox', checked: f.and_search.enabled }], '{#Enabled}'],
+            ['label', "{#Regular Expression}: ", ['input', { type: 'text', name: 'and_search_search', value: f.and_search.search }]],
+            ['div',
+             ... fields.map(([field, human_readable]) =>
+                 ['label', { style: 'display:inline-block' }, ['input', { type: 'checkbox', name: field, checked: f.and_search.fields.includes(field) }], human_readable])]],
+
+           ['div', { class: 'search-pane', id: 'not_search_pane' },
+            ['label', { style: "display:block" }, ['input', { id: 'not_search_checkbox', type: 'checkbox', checked: f.not_search.enabled }], '{#Enabled}'],
+            ['label', "{#Regular Expression}: ", ['input', { type: 'text', name: 'not_search_search', value: f.not_search.search }]],
+            ['div',
+             ... fields.map(([field, human_readable]) =>
+                 ['label', { style: 'display:inline-block' }, ['input', { type: 'checkbox', name: field, checked: f.not_search.fields.includes(field) }], human_readable])]],
+          ],
+      ))
+
+      selectTab(1)
+
+      $('#filter_modal').show()
+  }
+
+  async function main()
+  {
+      const request = {
+          "jsonrpc": "2.0",
+          "method": "getServerStorageItem",
+          "params": ["channelFilters"],
+          "id": null
+      }
+      try {
+          const response = await fetch("/api/1", { method: 'POST', body: JSON.stringify(request) })
+          const data = await response.json()
+          if (data.error)
+              throw new Error(data.error.message)
+          console.log(data.result)
+          FILTERS = data.result
+          //FILTERS = []
+          renderFilterTable()
+      } catch(error) {
+          console.error(error)
+          $('#flash').text(`${error.name}: ${error.message}`)
+      }
+  }
+
+  $(function(){
+      main()
+  })
+
+</script>
+
+<div id="flash"></div>
+
+<div id="filter_table"></div>
+
+<div class="modal" id="filter_modal">
+  <div class="modal-contents default-bg">
+    <h3 style="margin:0">{#Filter}</h3>
+    <div class="modal-body">
+      <div id="info" align="left">
+      </div>
+    </div>
+    <div class="modal-footer" style="margin-top:15px; text-align:right">
+      <button onclick="$('#filter_modal').hide()">{#Close}</button>
+    </div>
+  </div>
+</div>

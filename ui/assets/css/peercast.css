@@ -270,3 +270,5 @@ input[readonly="readonly"] {
 }
 
 .customize-button { font-size: 18px }
+
+.tab { cursor: pointer }
