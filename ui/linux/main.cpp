@@ -48,6 +48,7 @@ bool setPidFile = false;
 bool logToFile = false;
 std::recursive_mutex loglock;
 static std::string s_tokenListFilename;
+static std::string s_stateDirPath;
 
 // ---------------------------------
 class MyPeercastInst : public PeercastInstance
@@ -70,6 +71,11 @@ public:
     virtual const char * APICALL getTokenListFilename()
     {
         return s_tokenListFilename.c_str();
+    }
+
+    virtual const char * APICALL getStateDirPath()
+    {
+        return s_stateDirPath.c_str();
     }
 
     virtual const char * APICALL getPath()
@@ -262,8 +268,8 @@ static void init()
     logFileName.set(confdir);
     logFileName.append("/peercast.log");
 
-    std::string stateDir = getStateDir();
-    s_tokenListFilename = stateDir + "/tokens.json";
+    s_stateDirPath = getStateDir();
+    s_tokenListFilename = s_stateDirPath + "/tokens.json";
 }
 
 // ----------------------------------
