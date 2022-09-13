@@ -9,6 +9,7 @@
 
 <!-- who etc. -->
 <script src="/assets/js/render_helpers.js"></script>
+<script src="/assets/js/peercast.js"></script>
 
 <script>
   let FILTERS
@@ -149,19 +150,9 @@
 
   async function main()
   {
-      const request = {
-          "jsonrpc": "2.0",
-          "method": "getServerStorageItem",
-          "params": ["channelFilters"],
-          "id": null
-      }
       try {
-          const response = await fetch("/api/1", { method: 'POST', body: JSON.stringify(request) })
-          const data = await response.json()
-          if (data.error)
-              throw new Error(data.error.message)
-          console.log(data.result)
-          FILTERS = data.result
+          const result = await peercast("getServerStorageItem", "channelFilters")
+          FILTERS = result
           //FILTERS = []
           renderFilterTable()
       } catch(error) {

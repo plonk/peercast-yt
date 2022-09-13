@@ -58,6 +58,7 @@
 
 <!-- who h unescapeHtml -->
 <script src="/assets/js/render_helpers.js"></script>
+<script src="/assets/js/peercast.js"></script>
 
   <script>
     function simplify(url)
@@ -421,21 +422,10 @@ function updateTable()
   async function main()
   {
       // チャンネルリストを取得して描画する。
-      const request = {
-          "jsonrpc": "2.0",
-          "method": "getState",
-          "params": [["servMgr"]],
-          "id": null
-      }
       while (true)
       {
           try {
-              const response = await fetch("/api/1", { method: 'POST', body: JSON.stringify(request) })
-              const data = await response.json()
-              if (data.error)
-                  throw new Error(data.error.message);
-              console.log(data.result)
-              servMgr = data.result.servMgr
+              servMgr = (await peercast("getState", ["servMgr"])).servMgr
               updateView()
           } catch(error) {
               console.error(error)
