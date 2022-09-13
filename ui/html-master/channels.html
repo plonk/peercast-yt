@@ -295,34 +295,42 @@ function updateView()
       updateTable()
 }
 
-function findFilterFor(channel)
+function satisfies(search, channel)
 {
-      let colors = [];
+      const reg = new RegExp(search.search)
+      return search.fields.some(f => {
+          if (typeof(channel[f]) !== 'string')
+              console.warn(f, "is not string")
+          return reg.exec(channel[f]) !== null
+      })
+}
 
-      if (channel.trackArtist.match(/Peercast Gateway/))
-          colors.push('rgba(204,202,102,0.75)')
-
-      if (channel.desc.match(/プログラミング/) || channel.genre.match(/プログラミング/))
-          colors.push('rgba(128,255,128,0.75)')
-
-      if (channel.genre.match(/アスカ/) || channel.desc.match(/アスカ/))
-          colors.push('rgba(255,196,197,0.75)')
+function getRowStyleFor(channel)
+{
+      let colors = []
+      for (const f of Filters)
+      {
+          if (satisfies(f.base_search, channel) &&
+              (!f.and_search.enabled || satisfies(f.and_search, channel)) &&
+              (!f.not_search.enabled || !satisfies(f.not_search, channel)))
+          {
+              colors.push(f.color)
+          }
+      }
 
       if (colors.length == 0)
-          return null
+          return ""
       else
-          return { rowStyle: "background: linear-gradient(95deg, rgba(255,255,255,0), " + colors.join(", ") }
+          return "background: linear-gradient(95deg, rgba(255,255,255,0), " + colors.map(([r,g,b]) => `rgba(${r},${g},${b},0.75)`).join(", ")
 }
+
+let Filters
 
 function renderChannelRow(channel)
 {
       let filter
-      let rowStyle = ""
-      if (filter = findFilterFor(channel))
-      {
-          rowStyle = filter.rowStyle
-      }
-
+      let rowStyle = getRowStyleFor(channel)
+      
       return [
           'tr',
           { style: rowStyle },
@@ -421,6 +429,8 @@ function updateTable()
 
   async function main()
   {
+      Filters = await peercast("getServerStorageItem", "channelFilters")
+
       // チャンネルリストを取得して描画する。
       while (true)
       {
