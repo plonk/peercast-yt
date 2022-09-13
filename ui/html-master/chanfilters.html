@@ -10,6 +10,7 @@
 <!-- who etc. -->
 <script src="/assets/js/render_helpers.js"></script>
 <script src="/assets/js/peercast.js"></script>
+<script src="/assets/js/jscolor.js"></script>
 
 <script>
   let FILTERS
@@ -65,6 +66,14 @@
       }
   }
 
+  function toHashNotation(color)
+  {
+      return "#" + color.map(n => {
+          const hex = n.toString(16)
+          return new Array(2 - hex.length + 1).join('0') + hex
+      }).join("")
+  }
+
   function showFilterModal(index)
   {
       const f = FILTERS[index]
@@ -107,6 +116,7 @@
           // ['tip',         'Tracker'],
       ]
 
+      const swabStyle = `background-color: rgb(${f.color[0]},${f.color[1]},${f.color[2]})`
       $('#filter_modal #info').html(who(
           ['label',
            ['input', { type: 'checkbox', checked: f.enabled }],
@@ -141,8 +151,14 @@
              ... fields.map(([field, human_readable]) =>
                  ['label', { style: 'display:inline-block' }, ['input', { type: 'checkbox', name: field, checked: f.not_search.fields.includes(field) }], human_readable])]],
           ],
+          //['div', { style: swabStyle + "; width: 48px; height: 48px" }],
+          ['label',
+           '{#Color}: ',
+           ['input', { "data-jscolor": "{}", value: toHashNotation(f.color), style: "margin-top: 10px" }]
+          ]
       ))
 
+      jscolor.install()
       selectTab(1)
 
       $('#filter_modal').show()
