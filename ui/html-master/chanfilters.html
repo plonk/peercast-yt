@@ -38,7 +38,7 @@
 
            ... FILTERS.map((f, index) => [
                'tr', { style: `background: ${backgroundStyle([f.color])}`, onclick: `showFilterModal(${index})` },
-               ['td', { style: 'text-align: center' }, ['input', { type: 'checkbox', checked: true, disabled: true }]],
+               ['td', { style: 'text-align: center' }, ['input', { type: 'checkbox', checked: f.enabled, disabled: true }]],
                ['td', f.name],
                ['td', f.base_search.search],
                ['td', renderOptionalSearch(f.and_search)],
@@ -74,6 +74,18 @@
       }).join("")
   }
 
+  function toTriples(hash)
+  {
+      const arr = /^#(..)(..)(..)/.exec(hash)
+      if (arr)
+      {
+          return arr.slice(1).map(s => Number.parseInt(s, 16))
+      }else
+          throw new Error("toTriples: Format error")
+  }
+
+  let filterIndex
+
   function showFilterModal(index)
   {
       const f = FILTERS[index]
@@ -83,6 +95,7 @@
           console.error("Filter index out of range")
           return;
       }
+      filterIndex = index
 
       const fields = [
           ['name',           '{#Channel Name}'],
@@ -119,42 +132,37 @@
       const swabStyle = `background-color: rgb(${f.color[0]},${f.color[1]},${f.color[2]})`
       $('#filter_modal #info').html(who(
           ['label',
-           ['input', { type: 'checkbox', checked: f.enabled }],
+           ['input', { id: "main_enabled_checkbox", type: 'checkbox', name: 'enabled', checked: f.enabled }],
            '{#Enabled}'],
           ['div',
-           ['label', "{#Filter Name}: "],
+           ['label', '{#Filter Name}: '],
            ['input', { type: 'text', name: 'name', value: f.name }]],
-          ['div', { class: "flex-container navbar", style: "margin-bottom:0", id: "search_tabset" }, 
-           ['a', { class: 'tab', onclick: "selectTab(1)" }, '{#Base Search}'],
-           ['a', { class: 'tab', onclick: "selectTab(2)" }, '{#AND Search}'],
-           ['a', { class: 'tab', onclick: "selectTab(3)" }, '{#NOT Search}'],
+          ['div', { class: 'flex-container navbar', style: 'margin-bottom:0', id: 'search_tabset' }, 
+           ... ['{#Base Search}', '{#AND Search}', '{#NOT Search}'].map((text, index) =>
+               ['a', { class: 'tab', onclick: `selectTab(${index+1})` }, text])
           ],
-          ['div', { style: "background-color: var(--bg-color-l2); padding: 0 8px 4px 8px" },
+          ['div', { style: 'background-color: var(--bg-color-l2); padding: 0 8px 4px 8px' },
+
+           // ----------------------------------------------------------------------------
            ['div', { class: 'search-pane', id: 'base_search_pane' },
-            ['label', ['input', { id: 'base_search_checkbox', type: 'checkbox', checked: true, disabled: true }], '{#Enabled}'],
-            ['label', { style: "display:block" }, "{#Regular Expression}: ", ['input', { type: 'text', name: 'base_search_search', value: f.base_search.search }]],
+            ['label', { style: 'display:block' }, ['input', { id: 'base_search_checkbox', type: 'checkbox', checked: true, disabled: true }], '{#Enabled}'],
+            ['label', '{#Regular Expression}: ', ['input', { type: 'text', name: 'search', value: f.base_search.search }]],
             ['div',
              ... fields.map(([field, human_readable]) =>
-                 ['label', { style: 'display:inline-block' }, ['input', { type: 'checkbox', name: field, checked: f.base_search.fields.includes(field) }], human_readable])]],
+                 ['label', { style: 'display:inline-block' }, ['input', { type: 'checkbox', name: "fields", value: field, checked: f.base_search.fields.includes(field) }], human_readable])]],
 
-           ['div', { class: 'search-pane', id: 'and_search_pane' },
-            ['label', { style: "display:block" }, ['input', { id: 'and_search_checkbox', type: 'checkbox', checked: f.and_search.enabled }], '{#Enabled}'],
-            ['label', "{#Regular Expression}: ", ['input', { type: 'text', name: 'and_search_search', value: f.and_search.search }]],
-            ['div',
-             ... fields.map(([field, human_readable]) =>
-                 ['label', { style: 'display:inline-block' }, ['input', { type: 'checkbox', name: field, checked: f.and_search.fields.includes(field) }], human_readable])]],
-
-           ['div', { class: 'search-pane', id: 'not_search_pane' },
-            ['label', { style: "display:block" }, ['input', { id: 'not_search_checkbox', type: 'checkbox', checked: f.not_search.enabled }], '{#Enabled}'],
-            ['label', "{#Regular Expression}: ", ['input', { type: 'text', name: 'not_search_search', value: f.not_search.search }]],
-            ['div',
-             ... fields.map(([field, human_readable]) =>
-                 ['label', { style: 'display:inline-block' }, ['input', { type: 'checkbox', name: field, checked: f.not_search.fields.includes(field) }], human_readable])]],
+           // ----------------------------------------------------------------------------
+           ... ['and', 'not'].map(kind =>
+               ['div', { class: 'search-pane', id: `${kind}_search_pane` },
+                ['label', { style: 'display:block' }, ['input', { name: 'enabled', type: 'checkbox', checked: f[`${kind}_search`].enabled }], '{#Enabled}'],
+                ['label', '{#Regular Expression}: ', ['input', { type: 'text', name: 'search', value: f[`${kind}_search`].search }]],
+                ['div',
+                 ... fields.map(([field, human_readable]) =>
+                     ['label', { style: 'display:inline-block' }, ['input', { type: 'checkbox', name: "fields", value: field, checked: f[`${kind}_search`].fields.includes(field) }], human_readable])]]),
           ],
-          //['div', { style: swabStyle + "; width: 48px; height: 48px" }],
           ['label',
            '{#Color}: ',
-           ['input', { "data-jscolor": "{}", value: toHashNotation(f.color), style: "margin-top: 10px" }]
+           ['input', { name: "color", 'data-jscolor': '{}', value: toHashNotation(f.color), style: 'margin-top: 10px' }]
           ]
       ))
 
@@ -162,6 +170,51 @@
       selectTab(1)
 
       $('#filter_modal').show()
+  }
+
+  function readModalFilterSettings()
+  {
+      
+      return {
+          "enabled": $('#filter_modal #info #main_enabled_checkbox')[0].checked,
+          "name": $('#filter_modal #info input[name=name]')[0].value,
+          "base_search":
+          {
+              "fields": $('#base_search_pane input[name=fields]').toArray().flatMap(e => e.checked ? [e.value] : []),
+              "search": $('#base_search_pane input[name=search]')[0].value,
+          },
+          "and_search":
+          {
+              "enabled": $('#and_search_pane input[name=enabled]')[0].checked,
+              "fields": $('#and_search_pane input[name=fields]').toArray().flatMap(e => e.checked ? [e.value] : []),
+              "search": $('#and_search_pane input[name=search]')[0].value,
+          },
+          "not_search":
+          {
+              "enabled": $('#not_search_pane input[name=enabled]')[0].checked,
+              "fields": $('#not_search_pane input[name=fields]').toArray().flatMap(e => e.checked ? [e.value] : []),
+              "search": $('#not_search_pane input[name=search]')[0].value,
+          },
+          "color": toTriples($('#filter_modal #info input[name=color]')[0].value),
+      }
+  }
+
+  function onFilterModalOk()
+  {
+      FILTERS[filterIndex] = readModalFilterSettings()
+      renderFilterTable()
+      $('#filter_modal').hide()
+      return saveChannelFiltersAsync()
+  }
+
+  async function saveChannelFiltersAsync()
+  {
+      try {
+          await peercast("setServerStorageItem", "channelFilters", FILTERS)
+          console.log("filters saved")
+      } catch (e) {
+          console.error(e)
+      }
   }
 
   async function main()
@@ -195,7 +248,8 @@
       </div>
     </div>
     <div class="modal-footer" style="margin-top:15px; text-align:right">
-      <button onclick="$('#filter_modal').hide()">{#Close}</button>
+      <button onclick="onFilterModalOk()">{#OK}</button>
+      <button onclick="$('#filter_modal').hide()">{#Cancel}</button>
     </div>
   </div>
 </div>
