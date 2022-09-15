@@ -265,15 +265,12 @@
   {
       f = Filters[filterIndex]
 
-      if (window.confirm(`フィルター「${f.name}」を削除します。`))
-      {
-          const left = Filters.slice(0, filterIndex)
-          const right = Filters.slice(filterIndex + 1)
-          Filters = left.concat(right)
-          $('#filter_modal').hide()
-          renderFilterTable()
-          saveChannelFiltersAsync()
-      }
+      const left = Filters.slice(0, filterIndex)
+      const right = Filters.slice(filterIndex + 1)
+      Filters = left.concat(right)
+      $('#filter_modal').hide()
+      renderFilterTable()
+      saveChannelFiltersAsync()
   }
 
   function onFilterModalReorder()
