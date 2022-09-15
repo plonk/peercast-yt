@@ -269,6 +269,11 @@ input[readonly="readonly"] {
 .modal-body {
 }
 
+.modal-footer button, .modal-footer input[type=submit] {
+    line-height: 1.5em; /* 「OK」と「キャンセル」の高さが同じになりますように。 */
+    min-width: 6.5em;
+}
+
 .customize-button { font-size: 18px }
 
 .tab { cursor: pointer }
