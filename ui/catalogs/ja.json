@@ -132,6 +132,9 @@
     "Regular Expression"      : "正規表現",
     "Filter"                  : "フィルター",
 
+    "New Filter"              : "新しいフィルター",
+    "Reorder"                 : "並べ替え",
+
     // relayinfo.html
     "Channel Information"     : "チャンネル情報",
     "Desc."                   : "説明",

@@ -13,7 +13,7 @@
 <script src="/assets/js/jscolor.js"></script>
 
 <script>
-  let FILTERS
+  let Filters
 
   function backgroundStyle(colors)
   {
@@ -25,7 +25,7 @@
 
   function renderFilterTable()
   {
-      const renderOptionalSearch = (search => search.enabled ? search.search : ["span", { /* class:"text-muted" */ }, "<{#Disabled}>"])
+      const renderOptionalSearch = (search => search.enabled ? search.search : ["span", "<{#Disabled}>"])
 
       $('#filter_table').html(who(
           ['table', { class: 'table-panel' },
@@ -36,15 +36,17 @@
             ['th', '{#AND Search}'],
             ['th', '{#NOT Search}']],
 
-           ... FILTERS.map((f, index) => [
-               'tr', { style: `background: ${backgroundStyle([f.color])}`, onclick: `showFilterModal(${index})` },
-               ['td', { style: 'text-align: center' }, ['input', { type: 'checkbox', checked: f.enabled, disabled: true }]],
-               ['td', f.name],
-               ['td', f.base_search.search],
-               ['td', renderOptionalSearch(f.and_search)],
-               ['td', renderOptionalSearch(f.base_search)],
+           ... Filters.map((f, index) => [
+               'tr', { style: `background: ${backgroundStyle([f.color])}` },
+               ['td', { style: 'text-align: center' }, ['input', { type: 'checkbox', checked: f.enabled, onchange: `Filters[${index}].enabled = this.checked; saveChannelFiltersAsync()` }]],
+               ['td', { onclick: `showFilterModal(${index})`, style: 'cursor: pointer' }, f.name],
+               ['td', { onclick: `showFilterModal(${index}, 1)`, style: 'cursor: pointer' }, f.base_search.search],
+               ['td', { onclick: `showFilterModal(${index}, 2)`, style: 'cursor: pointer' }, renderOptionalSearch(f.and_search)],
+               ['td', { onclick: `showFilterModal(${index}, 3)`, style: 'cursor: pointer' }, renderOptionalSearch(f.base_search)],
            ]),
-      ]))
+          ],
+          ['button', { onclick: 'showFilterModal(-1)' }, "\u2795 {#Add}"],
+      ))
   }
 
   function selectTab(index)
@@ -86,14 +88,23 @@
 
   let filterIndex
 
-  function showFilterModal(index)
+  function showFilterModal(index, tabIndex)
   {
-      const f = FILTERS[index]
+      let f
 
-      if (!f)
+      if (index === -1)
       {
-          console.error("Filter index out of range")
-          return;
+          f = newFilter()
+      }
+      else
+      {
+          f = Filters[index]
+
+          if (!f)
+          {
+              console.error("Filter index out of range")
+              return;
+          }
       }
       filterIndex = index
 
@@ -112,21 +123,6 @@
           ['status',         '{#Status}'],
           ['id',             '{#Channel ID}'],
           ['tip',            '{#Tracker}'],
-          // ['channelName', 'Channel Name'],
-          // ['genre',       'Genre'],
-          // ['detail',      'Description'],
-          // ['comment',     'Comment'],
-          // ['artist',      'Artist'],
-          // ['title',       'Title'],
-          // ['album',       'Album'],
-          // ['ypName',      'YP Name'],
-          // ['ypUrl',       'Feed URL'],
-          // ['contactUrl',  'Contact URL'],
-          // ['trackContactUrl', 'Track URL'],
-          // ['type',        'Type'],
-          // ['status',      'Status'],
-          // ['id',          'Channel ID'],
-          // ['tip',         'Tracker'],
       ]
 
       const swabStyle = `background-color: rgb(${f.color[0]},${f.color[1]},${f.color[2]})`
@@ -167,9 +163,35 @@
       ))
 
       jscolor.install()
-      selectTab(1)
+      selectTab(tabIndex || 1)
 
       $('#filter_modal').show()
+  }
+
+  function newFilter()
+  {
+      return {
+          "enabled": true,
+          "name": "{#New Filter}",
+          "base_search":
+          {
+              "fields": ["name"],
+              "search": "",
+          },
+          "and_search":
+          {
+              "enabled": false,
+              "fields": [],
+              "search": "",
+          },
+          "not_search":
+          {
+              "enabled": false,
+              "fields": [],
+              "search": "",
+          },
+          "color": [0,0,0],
+      }
   }
 
   function readModalFilterSettings()
@@ -201,7 +223,11 @@
 
   function onFilterModalOk()
   {
-      FILTERS[filterIndex] = readModalFilterSettings()
+      if (filterIndex === -1)
+          Filters.push(readModalFilterSettings())
+      else          
+          Filters[filterIndex] = readModalFilterSettings()
+
       renderFilterTable()
       $('#filter_modal').hide()
       return saveChannelFiltersAsync()
@@ -210,7 +236,7 @@
   async function saveChannelFiltersAsync()
   {
       try {
-          await peercast("setServerStorageItem", "channelFilters", JSON.stringify(FILTERS))
+          await peercast("setServerStorageItem", "channelFilters", JSON.stringify(Filters))
           console.log("filters saved")
       } catch (e) {
           console.error(e)
@@ -222,14 +248,55 @@
       try {
           const data = await peercast("getServerStorageItem", "channelFilters")
           if (data)
-              FILTERS = JSON.parse(data)
+              Filters = JSON.parse(data)
           else
-              FILTERS = []
+              Filters = []
           renderFilterTable()
       } catch(error) {
           console.error(error)
           $('#flash').text(`${error.name}: ${error.message}`)
       }
+  }
+
+  function onFilterModalDelete()
+  {
+      f = Filters[filterIndex]
+
+      if (window.confirm(`フィルター「${f.name}」を削除します。`))
+      {
+          const left = Filters.slice(0, filterIndex)
+          const right = Filters.slice(filterIndex + 1)
+          Filters = left.concat(right)
+          $('#filter_modal').hide()
+          renderFilterTable()
+          saveChannelFiltersAsync()
+      }
+  }
+
+  function onFilterModalReorder()
+  {
+      $('#reorder_modal .modal-body').html(who(
+          ['span', "{#New Place}:"],
+          ['input', { type: "number", id: "new_place_input", value: (filterIndex + 1).toString(), min: "1", max: Filters.length.toString() }]
+      ))
+      $('#reorder_modal').show()
+  }
+
+  function onReorderModalOk()
+  {
+      f = Filters[filterIndex]
+
+      const left = Filters.slice(0, filterIndex)
+      const right = Filters.slice(filterIndex + 1)
+      Filters = left.concat(right)
+
+      const newPlace = +$('#reorder_modal #new_place_input')[0].value - 1
+      Filters.splice(newPlace, 0 /*deleteCount*/, f)
+
+      $('#reorder_modal').hide()
+      $('#filter_modal').hide()
+      renderFilterTable()
+      saveChannelFiltersAsync()
   }
 
   $(function(){
@@ -244,14 +311,34 @@
 
 <div class="modal" id="filter_modal">
   <div class="modal-contents default-bg">
-    <h3 style="margin:0">{#Filter}</h3>
+    <div class="modal-header">
+      <h3 style="margin:0">{#Filter}</h3>
+    </div>
     <div class="modal-body">
+      <div style="float: right">
+        <button onclick="onFilterModalDelete()">&#x1f5d1;&#xfe0f;<!-- wastebasket -->{#Delete}</button>
+        <button onclick="onFilterModalReorder()">{#Reorder}</button>
+      </div>
       <div id="info" align="left">
       </div>
     </div>
     <div class="modal-footer" style="margin-top:15px; text-align:right">
       <button onclick="onFilterModalOk()">{#OK}</button>
       <button onclick="$('#filter_modal').hide()">{#Cancel}</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="reorder_modal">
+  <div class="modal-contents default-bg">
+    <div class="modal-header">
+      <h3 style="margin:0">{#Reorder}</h3>
+    </div>
+    <div class="modal-body">
+    </div>
+    <div class="modal-footer" style="margin-top:15px; text-align:right">
+      <button onclick="onReorderModalOk()">{#OK}</button>
+      <button onclick="$('#reorder_modal').hide()">{#Cancel}</button>
     </div>
   </div>
 </div>
