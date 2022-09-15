@@ -37,7 +37,7 @@
             ['th', '{#NOT Search}']],
 
            ... Filters.map((f, index) => [
-               'tr', { style: `background: ${backgroundStyle([f.color])}` },
+               'tr', { style: f.enable_color ? `background: ${backgroundStyle([f.color])}` : "" },
                ['td', { style: 'text-align: center' }, ['input', { type: 'checkbox', checked: f.enabled, onchange: `Filters[${index}].enabled = this.checked; saveChannelFiltersAsync()` }]],
                ['td', { onclick: `showFilterModal(${index})`, style: 'cursor: pointer' }, f.name],
                ['td', { onclick: `showFilterModal(${index}, 1)`, style: 'cursor: pointer' }, f.base_search.search],
@@ -158,6 +158,7 @@
           ],
           ['label',
            '{#Color}: ',
+           ['input', { name: "enable_color", type: 'checkbox', checked: f.enable_color }],
            ['input', { name: "color", 'data-jscolor': '{}', value: toHashNotation(f.color), style: 'margin-top: 10px' }]
           ]
       ))
@@ -190,13 +191,14 @@
               "fields": [],
               "search": "",
           },
+          "enable_color": false,
           "color": [0,0,0],
       }
   }
 
   function readModalFilterSettings()
   {
-      
+
       return {
           "enabled": $('#filter_modal #info #main_enabled_checkbox')[0].checked,
           "name": $('#filter_modal #info input[name=name]')[0].value,
@@ -217,6 +219,7 @@
               "fields": $('#not_search_pane input[name=fields]').toArray().flatMap(e => e.checked ? [e.value] : []),
               "search": $('#not_search_pane input[name=search]')[0].value,
           },
+          "enable_color": $('#filter_modal #info input[name=enable_color]')[0].checked,
           "color": toTriples($('#filter_modal #info input[name=color]')[0].value),
       }
   }

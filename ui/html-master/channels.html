@@ -304,7 +304,7 @@ function getRowStyleFor(channel)
       let colors = []
       for (const f of Filters)
       {
-          if (!f.enabled)
+          if (!f.enabled || !f.enable_color)
               continue
 
           if (satisfies(f.base_search, channel) &&
