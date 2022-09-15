@@ -413,8 +413,13 @@ function updateTable()
           ['a', { class: !selectedGroup ? 'active-tab' : null, onclick:`selectedGroup = null; updateView()` },
            ['span', `{#All} (${servMgr.numExternalChannels})`]],
           ... servMgr.channelDirectory.feeds.map((feed) =>
-              ['a', {class: selectedGroup==feed.url ? 'active-tab' : null, onclick:`selectedGroup = '${feed.url}'; updateView()`, title:`${feednick(feed)} (${feed.numChannels})` },
-               ['span', `${feednick(feed)} (${feed.numChannels})`]])
+              ['a',
+               {
+                   class: selectedGroup==feed.url ? 'active-tab' : null,
+                   onclick: `selectedGroup = '${feed.url}'; updateView()`,
+                   title: feed.numChannels ? `${feednick(feed)} (${feed.numChannels})` : feednick(feed),
+               },
+               ['span', feed.numChannels ? `${feednick(feed)} (${feed.numChannels})` : feednick(feed)]])
       )
 
       $('#group_tab').html(html)
