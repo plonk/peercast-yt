@@ -210,7 +210,7 @@
   async function saveChannelFiltersAsync()
   {
       try {
-          await peercast("setServerStorageItem", "channelFilters", FILTERS)
+          await peercast("setServerStorageItem", "channelFilters", JSON.stringify(FILTERS))
           console.log("filters saved")
       } catch (e) {
           console.error(e)
@@ -220,9 +220,11 @@
   async function main()
   {
       try {
-          const result = await peercast("getServerStorageItem", "channelFilters")
-          FILTERS = result
-          //FILTERS = []
+          const data = await peercast("getServerStorageItem", "channelFilters")
+          if (data)
+              FILTERS = JSON.parse(data)
+          else
+              FILTERS = []
           renderFilterTable()
       } catch(error) {
           console.error(error)

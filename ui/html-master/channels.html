@@ -432,7 +432,14 @@ function updateTable()
 
   async function main()
   {
-      Filters = await peercast("getServerStorageItem", "channelFilters")
+      const data = await peercast("getServerStorageItem", "channelFilters")
+      if (data)
+          Filters = JSON.parse(data)
+      else
+      {
+          console.warn("getServerStorageItem returned: ", data) // null for example.
+          Filters = []
+      }
 
       // チャンネルリストを取得して描画する。
       while (true)

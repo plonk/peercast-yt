@@ -963,13 +963,13 @@ json JrpcApi::getServerStorageItem(json::array_t args)
     std::string str(buf, buf + size);
     delete[] buf;
 
-    return json::parse(str);
+    return str;
 }
 
 json JrpcApi::setServerStorageItem(json::array_t args)
 {
     std::string key = args[0].get<std::string>();
-    json value = args[1];
+    std::string value = args[1].get<std::string>();
 
     if (std::find(knownKeys.begin(), knownKeys.end(), key) == knownKeys.end())
         throw application_error(kUnknownError, "invalid key");
@@ -980,7 +980,7 @@ json JrpcApi::setServerStorageItem(json::array_t args)
     FileStream fs;
     fs.openWriteReplace(path);
 
-    fs.writeString(args[1].dump());
+    fs.writeString(value);
     fs.close();
 
     return nullptr;
