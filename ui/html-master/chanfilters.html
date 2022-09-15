@@ -305,9 +305,107 @@
 
 </script>
 
+<script>
+  function toFields($search)
+  {
+      // Filter.xml -> YP
+      const table =
+          [
+              ['channelName',     'name'],
+              ['genre',           'genre'],
+              ['detail',          'desc'],
+              ['comment',         'comment'],
+              ['artist',          'trackArtist'],
+              ['title',           'trackName'],
+              ['album',           'trackAlbum'],
+              ['ypUrl',           'feedUrl'],
+              ['contactUrl',      'url'],
+              ['trackContactUrl', 'trackContact'],
+              ['type',            'contentTypeStr'],
+              ['status',          'status'],
+              ['id',              'id'],
+              ['tip',             'tip'],
+          ]
+
+      const fields = []
+      const normal = $search.find("normal")[0].attributes
+      const extra = $search.find("extra")[0].attributes
+
+      for (const [from, to] of table)
+      {
+          let attr = normal.getNamedItem(from)
+          if (!attr)
+          {
+              attr = extra.getNamedItem(from)
+              if (!attr)
+                  throw new Error(`${from} attribute not found`)
+          }
+
+          if (attr.value == "true")
+              fields.push(to)
+      }
+      return fields
+  }
+
+  function integerToTriples(n)
+  {
+      let r, g, b
+      b = n >> 16
+      g = (n & 0xffff) >> 8
+      r = n & 0xff
+      return [r, g, b]
+  }
+
+  async function onFilterXmlInput()
+  {
+      const file = $("#filter_xml")[0].files[0]
+      console.log(file)
+      const text = await file.text()
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(text, "application/xml");
+
+      console.log(xmlDoc)
+      const items = Array.from(xmlDoc.getElementsByTagName('item'))
+      const filters =
+          items.map(item => {
+              const f = newFilter()
+              f.enabled = ($(item).attr('enable') == "true")
+              f.name = $(item).attr('name')
+              f.enable_color = $(item).find("common").attr("enableBg") == "true"
+              f.color = integerToTriples(+$(item).find("common").attr("bg"))
+
+              const $base = $(item).find("base")
+              f.base_search.search = $base.find("search").text()
+              f.base_search.fields = toFields($base)
+
+              const $and = $(item).find("and")
+              f.and_search.enabled = ($and.attr("enable") == "true")
+              f.and_search.search = $and.find("search").text()
+              f.and_search.fields = toFields($and)
+
+              const $not = $(item).find("not")
+              f.not_search.enabled = ($not.attr("enable") == "true")
+              f.not_search.search = $not.find("search").text()
+              f.not_search.fields = toFields($not)
+
+              return f
+          })
+
+      Filters = filters
+      renderFilterTable()
+      await saveChannelFiltersAsync()
+  }
+</script>
+
 <div id="flash"></div>
 
-<div id="filter_table"></div>
+<div>
+  <div>
+    <button>&#x2b06;&#xfe0f<!-- up arrow  -->PeCaRecorder のフィルターをインポート</button>
+    <input id="filter_xml" type="file" accept="application/xml, .xml" oninput="onFilterXmlInput()">
+  </div>
+  <div id="filter_table"></div>
+</div>
 
 <div class="modal" id="filter_modal">
   <div class="modal-contents default-bg">
