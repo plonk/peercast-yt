@@ -145,12 +145,6 @@
            ['tr',['th','{#Track URL}'],['td', link(info.trackContact)]],
           ]))
   }
-
-  $(function(){
-      // 全てのモーダルは、矩形の外をクリックすると閉じられる。
-      $('.modal').on('click', function(){ $(this).hide() });
-      $('.modal .modal-contents').on('click', (e) => e.stopPropagation());
-  })
 </script>
 
 <div class="modal" id="channel_modal">
