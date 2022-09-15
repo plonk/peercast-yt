@@ -89,11 +89,6 @@
 <div class="flex-container navbar" id="group_tab">
 </div>
 
-<div align=right>
-  <button class="customize-button" title="{#Filters}" onclick="window.location = 'chanfilters.html'">&#x1F308;<!-- rainbow --></button>
-  <button class="customize-button" onclick="$('#column_modal').show()" title="{#Display Columns}">&#x2699;&#xFE0F;<!-- gear --></button>
-</div>
-
 <script>
   // チャンネルの詳細な情報を表示するモーダルにデータを設定。
   function showModal(chid)
@@ -190,6 +185,10 @@
 
 <!-- index.txt の取得が5分ごとなので、あまり頻繁に更新しても仕方ない -->
 <div style="max-width: 640px">
+  <div align=right>
+    <button class="customize-button" title="{#Filters}" onclick="window.location = 'chanfilters.html'">&#x1F308;<!-- rainbow --></button>
+    <button class="customize-button" onclick="$('#column_modal').show()" title="{#Display Columns}">&#x2699;&#xFE0F;<!-- gear --></button>
+  </div>
   <a href="/admin?cmd=fetch_feeds" class="update-link" title="{#Auto-updates every 5 minutes. Manual updates have a cooldown of 30 seconds.}">{#Update}</a>
   <table class="channel-list">
   </table>
