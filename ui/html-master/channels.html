@@ -93,7 +93,7 @@
   // チャンネルの詳細な情報を表示するモーダルにデータを設定。
   function showModal(chid)
   {
-      const info = servMgr.channelDirectory.channels.find(ch => ch.id == chid)
+      const info = Groups.find(g => g.id == 'all').channels.find(ch => ch.id == chid)
       if (!info)
       {
           alert(`No info about ${chid} found`)
