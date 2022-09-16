@@ -133,6 +133,14 @@
           ['div',
            ['label', '{#Filter Name}: '],
            ['input', { type: 'text', name: 'name', value: f.name }]],
+          ['div',
+           ['label',
+            ['input', { type: 'checkbox', name: 'favorite', checked: f.favorite }],
+            '{#Add to Favorites}'],
+           ['label',
+            ['input', { type: 'checkbox', name: 'ignore', checked: f.ignore }],
+            '{#Ignore}'],
+          ],
           ['div', { class: 'flex-container navbar', style: 'margin-bottom:0', id: 'search_tabset' }, 
            ... ['{#Base Search}', '{#AND Search}', '{#NOT Search}'].map((text, index) =>
                ['a', { class: 'tab', onclick: `selectTab(${index+1})` }, text])
@@ -174,6 +182,8 @@
       return {
           "enabled": true,
           "name": "{#New Filter}",
+          "favorite": true,
+          "ignore": false,
           "base_search":
           {
               "fields": ["name"],
@@ -202,6 +212,8 @@
       return {
           "enabled": $('#filter_modal #info #main_enabled_checkbox')[0].checked,
           "name": $('#filter_modal #info input[name=name]')[0].value,
+          "favorite": $('#filter_modal #info input[name=favorite]')[0].checked,
+          "ignore": $('#filter_modal #info input[name=ignore]')[0].checked,
           "base_search":
           {
               "fields": $('#base_search_pane input[name=fields]').toArray().flatMap(e => e.checked ? [e.value] : []),
@@ -370,6 +382,8 @@
           items.map(item => {
               const f = newFilter()
               f.enabled = ($(item).attr('enable') == "true")
+              f.favorite = ($(item).attr('favorite') == "true")
+              f.ignore = ($(item).attr('ignore') == "true")
               f.name = $(item).attr('name')
               f.enable_color = $(item).find("common").attr("enableBg") == "true"
               f.color = integerToTriples(+$(item).find("common").attr("bg"))

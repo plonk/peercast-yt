@@ -278,13 +278,10 @@ function numericComparer(a,b)
   return +a - +b
 }
 
-// getState RPC で取ってきたデータがここにささる。
-var servMgr
-
 // グループタブとチャンネルリストを再描画。
 function updateView()
 {
-      updateGroup()
+      updateGroupTab()
       updateTable()
 }
 
@@ -357,17 +354,27 @@ function renderChannelRow(channel)
       ]
 }
 
+function filterMatches(f, channel)
+{
+      if (!f.enabled)
+          return false
+
+      if (satisfies(f.base_search, channel) &&
+          (!f.and_search.enabled || satisfies(f.and_search, channel)) &&
+          (!f.not_search.enabled || !satisfies(f.not_search, channel)))
+          return true
+
+      return false
+}
+
 // チャンネルリストの再描画。
 function updateTable()
 {
       const COLUMNS = {!COLUMNS}
 
-      let channels = servMgr.channelDirectory.channels
+      const group = Groups.find(g => g.id == selectedGroup)
 
-      if (selectedGroup)
-      {
-          channels = channels.filter(channel => channel.feedUrl == selectedGroup)
-      }
+      const channels = Array.from(group.channels) // copy
 
       let compr
       if (sortColumn == 'uptime')
@@ -405,23 +412,62 @@ function updateTable()
       $('.channel-list').html(html)
 }
 
-// グループタブの更新。
-  function updateGroup()
+  // グループタブの更新。
+  function updateGroupTab()
   {
       const html = who(
-          ['a', { class: !selectedGroup ? 'active-tab' : null, onclick:`selectedGroup = null; updateView()` },
-           ['span', `{#All} (${servMgr.numExternalChannels})`]],
-          ... servMgr.channelDirectory.feeds.map((feed) =>
+          ... Groups.map(g =>
               ['a',
                {
-                   class: selectedGroup==feed.url ? 'active-tab' : null,
-                   onclick: `selectedGroup = '${feed.url}'; updateView()`,
-                   title: feed.numChannels ? `${feednick(feed)} (${feed.numChannels})` : feednick(feed),
+                   class: selectedGroup == g.id ? 'active-tab' : null,
+                   onclick: `selectedGroup = '${g.id}'; updateView()`,
                },
-               ['span', feed.numChannels ? `${feednick(feed)} (${feed.numChannels})` : feednick(feed)]])
+               ['span', g.channels.length ? `${g.title} (${g.channels.length})` : g.title]]
+          ),
       )
 
       $('#group_tab').html(html)
+  }
+
+  Groups = [
+  ]
+
+  function updateGroups(servMgr)
+  {
+      ignoreFilters = Filters.filter(f => f.ignore)
+      favFilters = Filters.filter(f => f.favorite)
+
+      Groups = []
+      Groups.push({
+          id: "favorites",
+          title: "{#Favorites}",
+          mustSatisfy: ch => favFilters.some(f => filterMatches(f, ch)) && !ignoreFilters.some(f => filterMatches(f, ch))
+      })
+      Groups.push({
+          id: "all",
+          title: "{#All}",
+          mustSatisfy: ch => !ignoreFilters.some(f => filterMatches(f, ch))
+      })
+
+      for (const feed of servMgr.channelDirectory.feeds)
+      {
+          Groups.push({
+              id: feed.url,
+              title: feednick(feed),
+              mustSatisfy: ch => ch.feedUrl == feed.url && !ignoreFilters.some(f => filterMatches(f, ch))
+          })
+      }
+
+      Groups.push({
+          id: "ignore",
+          title: "{#Ignoring}",
+          mustSatisfy: ch => ignoreFilters.some(f => filterMatches(f, ch))
+      })
+
+      for (const group of Groups)
+          group.channels = servMgr.channelDirectory.channels.filter(group.mustSatisfy)
+
+      selectedGroup = "all"
   }
 
   function delay(ms) {
@@ -443,7 +489,8 @@ function updateTable()
       while (true)
       {
           try {
-              servMgr = (await peercast("getState", ["servMgr"])).servMgr
+              const servMgr = (await peercast("getState", ["servMgr"])).servMgr
+              updateGroups(servMgr)
               updateView()
           } catch(error) {
               console.error(error)
