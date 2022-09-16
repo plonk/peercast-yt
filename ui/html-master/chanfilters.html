@@ -28,7 +28,7 @@
       const renderOptionalSearch = (search => search.enabled ? search.search : ["span", "<{#Disabled}>"])
 
       $('#filter_table').html(who(
-          ['table', { class: 'table-panel' },
+          ['table', { class: 'table-panel', style: "width: 100%" },
            ['tr',
             ['th', '{#Enabled}' ],
             ['th', '{#Filter Name}'],
@@ -368,55 +368,104 @@
       return [r, g, b]
   }
 
+  let ImportingFilters
+
   async function onFilterXmlInput()
   {
       const file = $("#filter_xml")[0].files[0]
       console.log(file)
-      const text = await file.text()
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(text, "application/xml");
 
-      console.log(xmlDoc)
-      const items = Array.from(xmlDoc.getElementsByTagName('item'))
-      const filters =
-          items.map(item => {
-              const f = newFilter()
-              f.enabled = ($(item).attr('enable') == "true")
-              f.favorite = ($(item).attr('favorite') == "true")
-              f.ignore = ($(item).attr('ignore') == "true")
-              f.name = $(item).attr('name')
-              f.enable_color = $(item).find("common").attr("enableBg") == "true"
-              f.color = integerToTriples(+$(item).find("common").attr("bg"))
+      if (!file)
+      {
+          $('#import_modal output').text("{#Please select the Filter.xml file in your PeCaRecorder folder.}")
+          ImportingFilters = undefined
+          $('#import_modal #ok_button')[0].disabled = true
+          return
+      }
 
-              const $base = $(item).find("base")
-              f.base_search.search = $base.find("search").text()
-              f.base_search.fields = toFields($base)
+      try {
+          const text = await file.text()
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(text, "application/xml");
 
-              const $and = $(item).find("and")
-              f.and_search.enabled = ($and.attr("enable") == "true")
-              f.and_search.search = $and.find("search").text()
-              f.and_search.fields = toFields($and)
+          console.log(xmlDoc)
+          const items = Array.from(xmlDoc.getElementsByTagName('item'))
+          const filters =
+              items.map(item => {
+                  const f = newFilter()
+                  f.enabled = ($(item).attr('enable') == "true")
+                  f.favorite = ($(item).attr('favorite') == "true")
+                  f.ignore = ($(item).attr('ignore') == "true")
+                  f.name = $(item).attr('name')
+                  f.enable_color = $(item).find("common").attr("enableBg") == "true"
+                  f.color = integerToTriples(+$(item).find("common").attr("bg"))
 
-              const $not = $(item).find("not")
-              f.not_search.enabled = ($not.attr("enable") == "true")
-              f.not_search.search = $not.find("search").text()
-              f.not_search.fields = toFields($not)
+                  const $base = $(item).find("base")
+                  f.base_search.search = $base.find("search").text()
+                  f.base_search.fields = toFields($base)
 
-              return f
-          })
+                  const $and = $(item).find("and")
+                  f.and_search.enabled = ($and.attr("enable") == "true")
+                  f.and_search.search = $and.find("search").text()
+                  f.and_search.fields = toFields($and)
 
-      Filters = filters
+                  const $not = $(item).find("not")
+                  f.not_search.enabled = ($not.attr("enable") == "true")
+                  f.not_search.search = $not.find("search").text()
+                  f.not_search.fields = toFields($not)
+
+                  return f
+              })
+
+          ImportingFilters = filters
+      } catch(e) {
+          console.error(e)
+          $('#import_modal output').text("Oops, something went wrong!")
+          ImportingFilters = undefined
+          $('#import_modal #ok_button')[0].disabled = true
+          return
+      }
+      
+      const toBeDeleted = {}
+      for (const f of ImportingFilters)
+          toBeDeleted[f.name] = true
+
+      const num = Filters.filter(f => toBeDeleted[f.name]).length
+      if (num > 0)
+          $('#import_modal output').text(`${num}{# existing filters will be replaced.}`)
+      else
+          $('#import_modal output').text(`${ImportingFilters.length}{# filters will be imported.}`)
+
+      $('#import_modal #ok_button')[0].disabled = false
+  }
+
+  async function onImportModalOk()
+  {
+      if (!ImportingFilters)
+      {
+          console.error("onImportModalOk: ImportingFilters is not set. Aborting.")
+          return
+      }
+
+      const toBeDeleted = {}
+      for (const f of ImportingFilters)
+          toBeDeleted[f.name] = true
+
+      let filters = Filters.filter(f => !toBeDeleted[f.name])
+      Filters = filters.concat(ImportingFilters)
+
+      $('#import_modal').hide()
       renderFilterTable()
       await saveChannelFiltersAsync()
   }
+
 </script>
 
 <div id="flash"></div>
 
-<div>
-  <div>
-    <button>&#x2b06;&#xfe0f<!-- up arrow  -->PeCaRecorder のフィルターをインポート</button>
-    <input id="filter_xml" type="file" accept="application/xml, .xml" oninput="onFilterXmlInput()">
+<div style="max-width: 640px">
+  <div style="text-align: right; margin-bottom: 12px">
+    <button onclick="$('#import_modal').show(); onFilterXmlInput()"><span class="emoji-icon">&#x2b06;&#xfe0f<!-- up arrow  --></span> {#Import}</button>
   </div>
   <div id="filter_table"></div>
 </div>
@@ -451,6 +500,24 @@
     <div class="modal-footer" style="margin-top:15px; text-align:right">
       <button onclick="onReorderModalOk()">{#OK}</button>
       <button onclick="$('#reorder_modal').hide()">{#Cancel}</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="import_modal">
+  <div class="modal-contents default-bg">
+    <div class="modal-header">
+      <h3>{#Import Filters from PeCaRecorder}</h3>
+    </div>
+    <div class="modal-body" style="min-width:320">
+      <div>
+        <input id="filter_xml" type="file" accept="application/xml, .xml" oninput="onFilterXmlInput()">
+      </div>
+      <output></output>
+    </div>
+    <div class="modal-footer" style="margin-top:15px; text-align:right">
+      <button id="ok_button" onclick="onImportModalOk()" disabled>{#OK}</button>
+      <button onclick="$('#import_modal').hide()">{#Cancel}</button>
     </div>
   </div>
 </div>

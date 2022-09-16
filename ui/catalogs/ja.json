@@ -142,6 +142,12 @@
     "Ignoring"                : "無視",
     "Favorites"               : "お気に入り",
 
+    " existing filters will be replaced." : "個の既存のフィルターが置き換えられます。",
+    " filters will be imported." : "個のフィルターがインポートされます。",
+    "Import Filters from PeCaRecorder" : "PeCaRecorder からフィルターをインポート",
+    "Import"                  : "インポート",
+    "Please select the Filter.xml file in your PeCaRecorder folder." : "PeCaRecorder フォルダの Filter.xml ファイルを選択してください。",
+
     // relayinfo.html
     "Channel Information"     : "チャンネル情報",
     "Desc."                   : "説明",
