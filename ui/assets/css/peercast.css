@@ -49,14 +49,6 @@ input {
     box-sizing: border-box;
 }
 
-input[type=radio] {
-	vertical-align: -3px;
-}
-
-input[type=checkbox] {
-	vertical-align: -3px;
-}
-
 .navbar {
     margin-top: 10px;
     margin-bottom: 15px;
