@@ -118,7 +118,14 @@
       }
       $('#info').html(who(
           ['table',
-           ['tr',['th','{#Name}'],['td', text(unescapeHtml(info.name))]],
+           ['tr',
+            ['th','{#Name}'],
+            ['td',
+             text(unescapeHtml(info.name)),
+             ['button', { onclick: `window.location = "chanfilters.html?fav=${unescapeHtml(info.name)}"` },
+              "{#Create Filter}"],
+            ],
+           ],
            ['tr',['th','{#Genre}'],['td', text(unescapeHtml(info.genre))]],
            ['tr',['th','{#Description}'],['td', text(unescapeHtml(info.desc))]],
            ['tr',['th','{#Comment}'],['td', text(unescapeHtml(info.comment))]],
