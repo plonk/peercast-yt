@@ -1342,10 +1342,9 @@ void Servent::CMD_fetch_feeds(const char* cmd, HTTP& http, String& jumpStr)
 {
     servMgr->channelDirectory->update(ChannelDirectory::kUpdateManual);
 
-    if (!http.headers.get("Referer").empty())
-        jumpStr.sprintf("%s", http.headers.get("Referer").c_str());
-    else
-        jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
+    // Referer に戻すと、admin?cmd=fetch_feeds でログインした場合に同
+    // URLが Referer になってループ転送になるので決め打ちする。
+    jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
 }
 
 // サーバントを停止する。
