@@ -117,7 +117,7 @@ a.button {
 }
 
 .text-muted {
-	color: #777;
+	color: rgba(0,0,0,0.6);
 }
 
 .text-danger {
