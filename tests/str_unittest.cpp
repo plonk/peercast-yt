@@ -49,6 +49,10 @@ TEST_F(strFixture, split)
     vec = split("a", ",");
     ASSERT_EQ(1, vec.size());
     ASSERT_STREQ("a", vec[0].c_str());
+
+    vec = split("", ",");
+    ASSERT_EQ(vec.size(), 1);
+    ASSERT_EQ(vec[0], "");
 }
 
 TEST_F(strFixture, split_with_limit)
