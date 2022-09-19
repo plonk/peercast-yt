@@ -277,7 +277,7 @@
           const chname = new URLSearchParams(window.location.search).get("fav")
           showFilterModal(-1)
           $('#filter_modal #info input[name=name]')[0].value = chname
-          $('#filter_modal #info #base_search_pane input[name=search]')[0].value = chname.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
+          $('#filter_modal #info #base_search_pane input[name=search]')[0].value = chname.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') // escape regexp
       }
   }
 
