@@ -2485,19 +2485,6 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
         HTTPRequestScope reqScope(req);
         std::vector<Template::Scope*> scopes = { &reqScope, &locals };
 
-        std::map<std::string,amf0::Value> dict;
-        for (auto assign : str::split(req.headers.get("Cookie"), "; "))
-        {
-            auto vec = str::split(assign, "=", 2);
-            if (vec.size() != 2)
-            {
-                LOG_ERROR("Cookie format error: %s", assign.c_str());
-                continue;
-            }
-            dict[vec[0]] = cgi::unescape(vec[1]);
-        }
-        locals.vars["cookie"] = dict;
-
         if (str::contains(fn, "/play.html"))
         {
             // 視聴ページだった場合はあらかじめチャンネルのリレーを開
