@@ -205,7 +205,7 @@
   var columnVisibility = {}
   var sortColumn = null
   var sortOrder = null
-  var selectedGroup = null
+  var selectedGroup = localStorage['selectedGroup']
 
   // localStorageからコラムの表示に関するユーザー設定を取得して上のパラメータにセットする。
   function loadPreferences()
@@ -427,7 +427,7 @@ function updateTable()
               ['a',
                {
                    class: selectedGroup == g.id ? 'active-tab' : null,
-                   onclick: `selectedGroup = '${g.id}'; updateView()`,
+                   onclick: `setSelectedGroup('${g.id}'); updateView()`,
                },
                ['span', g.channels.length ? `${g.title} (${g.channels.length})` : g.title]]
           ),
@@ -474,7 +474,15 @@ function updateTable()
       for (const group of Groups)
           group.channels = servMgr.channelDirectory.channels.filter(group.mustSatisfy)
 
-      selectedGroup = "all"
+      if (!Groups.find(g => g.id == selectedGroup))
+          setSelectedGroup("all")
+  }
+
+  function setSelectedGroup(id)
+  {
+      console.debug("setSelectedGroup", localStorage["selectedGroup"], "->", id)
+      selectedGroup = id
+      localStorage["selectedGroup"] = id
   }
 
   function delay(ms) {
