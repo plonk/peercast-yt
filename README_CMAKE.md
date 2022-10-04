@@ -7,8 +7,11 @@
 git clone ttps://github.com/plonk1/peercast-yt
 cd peercast-yt
 
-# Build環境の作成
-cmake -S . -B build
+# Build環境の作成(明示しない場合は不定)
+cmake -S . -B build   -DCMAKE_BUILD_TYPE=Release
+# cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+# cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
+# cmake -S . -B build -DCMAKE_BUILD_TYPE=MinSizeRel
 
 # build
 cmake --build ./build
@@ -27,10 +30,10 @@ cmake --build build --target test
 
 # テストを一括で実行(早い)
 # カレントディレクトリに.tmpファイルが作成されるので注意
-pushd build && test-all && popd
+pushd build && ./test-all && popd
 
-# CTestコマンドで実行
-pushd build && ctest
+# CTestコマンドで実行(cmake ～ --target testと同じハズ)
+pushd build && ctest && popd
 ```
 
 # 成果物の作成
@@ -73,10 +76,10 @@ FIXME: 現在、Windows(MinGW-w64環境）においてNinjaによるビルドは
 sudo apt install ninja-build
 
 # Ninjaを使う場合
-cmake -S . -B build -G "Ninja"
+cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release
 
 # 明示的にmakeを使う場合
-cmake -S . -B build -G "Unix Makefiles"
+cmake -S . -B build -G "Unix Makefiles"-DCMAKE_BUILD_TYPE=Release
 
 cmake --build ./build
 ```
@@ -85,7 +88,7 @@ cmake --build ./build
 ```
 sudo apt install cmake-curses-gui
 
-cmake -S . -B build
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
 # TUIでオプションを変更できる
 ccmake build
