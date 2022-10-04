@@ -48,7 +48,6 @@ bool    CookieList::add(Cookie &c)
         return false;
 
     list.push_back(c);
-    LOG_DEBUG("Added cookie: %s - %s", c.ip.str().c_str(), c.id);
     while (list.size() > MAX_COOKIES)
         list.pop_front();
     
