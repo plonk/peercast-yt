@@ -150,6 +150,8 @@
     "Import"                  : "インポート",
     "Please select the Filter.xml file in your PeCaRecorder folder." : "PeCaRecorder フォルダの Filter.xml ファイルを選択してください。",
 
+    "Background Color"        : "背景色",
+
     // relayinfo.html
     "Channel Information"     : "チャンネル情報",
     "Desc."                   : "説明",

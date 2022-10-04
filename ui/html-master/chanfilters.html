@@ -165,8 +165,8 @@
                      ['label', { style: 'display:inline-block' }, ['input', { type: 'checkbox', name: "fields", value: field, checked: f[`${kind}_search`].fields.includes(field) }], human_readable])]]),
           ],
           ['label',
-           '{#Color}: ',
            ['input', { name: "enable_color", type: 'checkbox', checked: f.enable_color }],
+           '{#Background Color}',
            ['input', { name: "color", 'data-jscolor': '{}', value: toHashNotation(f.color), style: 'margin-top: 10px' }]
           ]
       ))
