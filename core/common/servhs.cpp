@@ -404,16 +404,14 @@ void Servent::handshakeGET(HTTP &http)
         if (!isAllowed(ALLOW_HTML))
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-        if (handshakeHTTPBasicAuth(http))
-        {
-            JrpcApi api;
-            std::string response = api.getVersionInfo(nlohmann::json::array_t()).dump();
+        http.readHeaders();
+        JrpcApi api;
+        std::string response = api.getVersionInfo(nlohmann::json::array_t()).dump();
 
-            http.writeLine(HTTP_SC_OK);
-            http.writeLineF("%s %zu", HTTP_HS_LENGTH, response.size());
-            http.writeLine("");
-            http.writeString(response.c_str());
-        }
+        http.writeLine(HTTP_SC_OK);
+        http.writeLineF("%s %zu", HTTP_HS_LENGTH, response.size());
+        http.writeLine("");
+        http.writeString(response.c_str());
     }else if (strcmp(fn, "/public")== 0 ||
               strncmp(fn, "/public/", strlen("/public/"))==0)
     {
@@ -504,7 +502,7 @@ void Servent::handshakePOST(HTTP &http)
         if (!isAllowed(ALLOW_HTML))
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-        if (handshakeHTTPBasicAuth(http))
+        if (handshakeAuth(http, args.c_str()))
             handshakeJRPC(http);
     }else if (path == "/")
     {
@@ -998,6 +996,73 @@ void Servent::CMD_viewxml(const char* cmd, HTTP& http, String& jumpStr)
     handshakeXML();
 }
 
+void Servent::CMD_customizeApperance(const char* cmd, HTTP& http, String& jumpStr)
+{
+    cgi::Query query(cmd);
+
+    std::map<std::string,amf0::Value> dict;
+    for (auto key : query.getKeys())
+    {
+        if (key == "cmd")
+            continue;
+        else if (key == "preferredTheme")
+        {
+            std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
+            servMgr->preferredTheme = query.get(key);
+        }else if (key == "accentColor")
+        {
+            std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
+            servMgr->accentColor = query.get(key);
+        }else
+            LOG_WARN("Unexpected key `%s`", key.c_str());
+    }
+
+    http.send(http.headers.get("Referer").empty()
+              ? HTTPResponse::redirectTo("/")
+              : HTTPResponse::redirectTo(http.headers.get("Referer")));
+}
+
+void Servent::CMD_chooseLanguage(const char* cmd, HTTP& http, String& jumpStr)
+{
+    cgi::Query query(cmd);
+
+    auto referer = http.headers.get("Referer");
+    LOG_DEBUG("old referer: %s", referer.c_str());
+
+    for (auto key : query.getKeys())
+    {
+        if (key == "cmd")
+            continue;
+        else if (key == "htmlPath")
+        {
+            std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
+
+            auto newHtmlPath = "html/" + query.get(key);
+            auto vec = Regexp("html/[^/]+").exec(referer);
+            if (vec.size())
+            {
+                auto pos = referer.find(vec[0]);
+                if (pos != std::string::npos)
+                {
+                    referer = referer.substr(0, pos) + newHtmlPath + referer.substr(pos + vec[0].size());
+                    LOG_DEBUG("new referer: %s", referer.c_str());
+                }
+            }else{
+                LOG_WARN("CMD_chooseLanguage: Failed to rewrite referer: %s", referer.c_str());
+            }
+
+            Sys::strcpy_truncate(servMgr->htmlPath, sizeof(servMgr->htmlPath), newHtmlPath.c_str());
+
+            http.send(referer.empty()
+                      ? HTTPResponse::redirectTo("/")
+                      : HTTPResponse::redirectTo(referer));
+            return;
+        }else
+            LOG_WARN("Unexpected key `%s`", key.c_str());
+    }
+    http.send(HTTPResponse::badRequest()); // No htmlPath key.
+}
+
 void Servent::CMD_clearlog(const char* cmd, HTTP& http, String& jumpStr)
 {
     sys->logBuf->clear();
@@ -1277,10 +1342,9 @@ void Servent::CMD_fetch_feeds(const char* cmd, HTTP& http, String& jumpStr)
 {
     servMgr->channelDirectory->update(ChannelDirectory::kUpdateManual);
 
-    if (!http.headers.get("Referer").empty())
-        jumpStr.sprintf("%s", http.headers.get("Referer").c_str());
-    else
-        jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
+    // Referer に戻すと、admin?cmd=fetch_feeds でログインした場合に同
+    // URLが Referer になってループ転送になるので決め打ちする。
+    jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
 }
 
 // サーバントを停止する。
@@ -1931,6 +1995,12 @@ void Servent::handshakeCMD(HTTP& http, const std::string& query)
         }else if (cmd == "viewxml")
         {
             CMD_viewxml(query.c_str(), http, jumpStr);
+        }else if (cmd == "customizeAppearance")
+        {
+            CMD_customizeApperance(query.c_str(), http, jumpStr);
+        }else if (cmd == "chooseLanguage")
+        {
+            CMD_chooseLanguage(query.c_str(), http, jumpStr);
         }else{
             throw HTTPException(HTTP_SC_BADREQUEST, 400);
         }
@@ -1938,10 +2008,15 @@ void Servent::handshakeCMD(HTTP& http, const std::string& query)
     {
         http.writeLine(e.msg);
         http.writeLineF("%s %s", HTTP_HS_SERVER, PCX_AGENT);
-        http.writeLineF("%s %s", HTTP_HS_CONTENT, "text/html");
+        http.writeLineF("%s %s", HTTP_HS_CONTENT, "text/html; charset=utf-8");
         http.writeLine("");
 
         http.writeStringF("<h1>ERROR - %s</h1>\n", cgi::escape_html(e.msg).c_str());
+
+        if (e.additionalMessage != "")
+        {
+            http.writeStringF("<pre>%s</pre>\n", cgi::escape_html(e.additionalMessage).c_str());
+        }
 
         LOG_ERROR("html: %s", e.msg);
     }
@@ -2468,7 +2543,7 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
 
         validFileOrThrow(fileName.c_str(), documentRoot);
 
-        html.writeOK(MIME_HTML);
+        html.writeOK("text/html; charset=utf-8");
         html.writeTemplate(fileName.cstr(), req.queryString.c_str(), scopes);
     }else
     {

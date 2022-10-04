@@ -97,6 +97,11 @@ void HTML::writeTemplate(const char *fileName, const char *args, const std::vect
         out->writeString(e.msg);
         out->writeString(" : ");
         out->writeString(fileName);
+    }catch (std::exception &e)
+    {
+        out->writeString(e.what());
+        out->writeString(" : ");
+        out->writeString(fileName);
     }
     file.close();
 }
@@ -133,6 +138,7 @@ void HTML::writeRawFile(const char *fileName, const char *mimeType)
         {
             LOG_ERROR("Failed to get mtime of %s", fileName);
         }
+        additionalHeaders["Content-Length"] = str::STR(file.length());
 
         writeOK(mimeType, additionalHeaders);
         file.writeTo(*out, file.length());

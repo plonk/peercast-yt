@@ -1,0 +1,531 @@
+{^define LAYOUT layout.html}
+{^define TITLE}
+  {#Channel Filters} - {#PeerCast on} {^SERVER_NAME}
+{^end}
+{^define HEAD}
+  <style>
+  </style>
+{^end}
+
+<!-- who etc. -->
+<script src="/assets/js/render_helpers.js"></script>
+<script src="/assets/js/peercast.js"></script>
+<script src="/assets/js/jscolor.js"></script>
+
+<script>
+  let Filters
+
+  function backgroundStyle(colors)
+  {
+      if (colors.length == 0)
+          return "transparent"
+      else
+          return "linear-gradient(95deg, rgba(255,255,255,0), " + colors.map(triple => `rgba(${triple.join(", ")},0.75)`).join(", ")
+  }
+
+  function renderFilterTable()
+  {
+      const renderOptionalSearch = (search => search.enabled ? search.search : ["span", "<{#Disabled}>"])
+
+      $('#filter_table').html(who(
+          ['table', { class: 'table-panel', style: "width: 100%" },
+           ['tr',
+            ['th', '{#Enabled}' ],
+            ['th', '{#Filter Name}'],
+            ['th', '{#Base Search}'],
+            ['th', '{#AND Search}'],
+            ['th', '{#NOT Search}']],
+
+           ... Filters.map((f, index) => [
+               'tr', { style: f.enable_color ? `background: ${backgroundStyle([f.color])}` : "" },
+               ['td', { style: 'text-align: center' }, ['input', { type: 'checkbox', checked: f.enabled, onchange: `Filters[${index}].enabled = this.checked; saveChannelFiltersAsync()` }]],
+               ['td', { onclick: `showFilterModal(${index})`, style: 'cursor: pointer' }, f.name],
+               ['td', { onclick: `showFilterModal(${index}, 1)`, style: 'cursor: pointer' }, f.base_search.search],
+               ['td', { onclick: `showFilterModal(${index}, 2)`, style: 'cursor: pointer' }, renderOptionalSearch(f.and_search)],
+               ['td', { onclick: `showFilterModal(${index}, 3)`, style: 'cursor: pointer' }, renderOptionalSearch(f.base_search)],
+           ]),
+          ],
+          ['button', { onclick: 'showFilterModal(-1)' }, "\u2795 {#Add}"],
+      ))
+  }
+
+  function selectTab(index)
+  {
+      $(`#search_tabset a`).removeClass('active-tab')
+      $(`#search_tabset a:nth-child(${index})`).addClass('active-tab')
+
+      $('.search-pane').hide()
+
+      if (index == 1)
+      {
+          $('#base_search_pane').show()
+      }else if (index == 2)
+      {
+          $('#and_search_pane').show()
+      }else if (index == 3)
+      {
+          $('#not_search_pane').show()
+      }
+  }
+
+  function toHashNotation(color)
+  {
+      return "#" + color.map(n => {
+          const hex = n.toString(16)
+          return new Array(2 - hex.length + 1).join('0') + hex
+      }).join("")
+  }
+
+  function toTriples(hash)
+  {
+      const arr = /^#(..)(..)(..)/.exec(hash)
+      if (arr)
+      {
+          return arr.slice(1).map(s => Number.parseInt(s, 16))
+      }else
+          throw new Error("toTriples: Format error")
+  }
+
+  let filterIndex
+
+  function showFilterModal(index, tabIndex)
+  {
+      let f
+
+      if (index === -1)
+      {
+          f = newFilter()
+      }
+      else
+      {
+          f = Filters[index]
+
+          if (!f)
+          {
+              console.error("Filter index out of range")
+              return;
+          }
+      }
+      filterIndex = index
+
+      const fields = [
+          ['name',           '{#Channel Name}'],
+          ['genre',          '{#Genre}'],
+          ['desc',           '{#Description}'],
+          ['comment',        '{#Comment}'],
+          ['trackArtist',    '{#Artist}'],
+          ['trackName',      '{#Title}'],
+          ['trackAlbum',     '{#Album}'],
+          ['feedUrl',        '{#Feed URL}'],
+          ['url',            '{#Contact URL}'],
+          ['trackContact',   '{#Track URL}'],
+          ['contentTypeStr', '{#Type}'],
+          ['status',         '{#Status}'],
+          ['id',             '{#Channel ID}'],
+          ['tip',            '{#Tracker}'],
+      ]
+
+      const swabStyle = `background-color: rgb(${f.color[0]},${f.color[1]},${f.color[2]})`
+      $('#filter_modal #info').html(who(
+          ['label',
+           ['input', { id: "main_enabled_checkbox", type: 'checkbox', name: 'enabled', checked: f.enabled }],
+           '{#Enabled}'],
+          ['div',
+           ['label', '{#Filter Name}: '],
+           ['input', { type: 'text', name: 'name', value: f.name }]],
+          ['div',
+           ['label',
+            ['input', { type: 'checkbox', name: 'favorite', checked: f.favorite }],
+            '{#Add to Favorites}'],
+           ['label',
+            ['input', { type: 'checkbox', name: 'ignore', checked: f.ignore }],
+            '{#Ignore}'],
+          ],
+          ['div', { class: 'flex-container navbar', style: 'margin-bottom:0', id: 'search_tabset' }, 
+           ... ['{#Base Search}', '{#AND Search}', '{#NOT Search}'].map((text, index) =>
+               ['a', { class: 'tab', onclick: `selectTab(${index+1})` }, text])
+          ],
+          ['div', { style: 'background-color: var(--bg-color-l2); padding: 0 8px 4px 8px' },
+
+           // ----------------------------------------------------------------------------
+           ['div', { class: 'search-pane', id: 'base_search_pane' },
+            ['label', { style: 'display:block' }, ['input', { id: 'base_search_checkbox', type: 'checkbox', checked: true, disabled: true }], '{#Enabled}'],
+            ['label', '{#Regular Expression}: ', ['input', { type: 'text', name: 'search', value: f.base_search.search }]],
+            ['div',
+             ... fields.map(([field, human_readable]) =>
+                 ['label', { style: 'display:inline-block' }, ['input', { type: 'checkbox', name: "fields", value: field, checked: f.base_search.fields.includes(field) }], human_readable])]],
+
+           // ----------------------------------------------------------------------------
+           ... ['and', 'not'].map(kind =>
+               ['div', { class: 'search-pane', id: `${kind}_search_pane` },
+                ['label', { style: 'display:block' }, ['input', { name: 'enabled', type: 'checkbox', checked: f[`${kind}_search`].enabled }], '{#Enabled}'],
+                ['label', '{#Regular Expression}: ', ['input', { type: 'text', name: 'search', value: f[`${kind}_search`].search }]],
+                ['div',
+                 ... fields.map(([field, human_readable]) =>
+                     ['label', { style: 'display:inline-block' }, ['input', { type: 'checkbox', name: "fields", value: field, checked: f[`${kind}_search`].fields.includes(field) }], human_readable])]]),
+          ],
+          ['label',
+           ['input', { name: "enable_color", type: 'checkbox', checked: f.enable_color }],
+           '{#Background Color}',
+           ['input', { name: "color", 'data-jscolor': '{}', value: toHashNotation(f.color), style: 'margin-top: 10px' }]
+          ]
+      ))
+
+      jscolor.install()
+      selectTab(tabIndex || 1)
+
+      $('#filter_modal').show()
+  }
+
+  function newFilter()
+  {
+      return {
+          "enabled": true,
+          "name": "{#New Filter}",
+          "favorite": true,
+          "ignore": false,
+          "base_search":
+          {
+              "fields": ["name"],
+              "search": "",
+          },
+          "and_search":
+          {
+              "enabled": false,
+              "fields": [],
+              "search": "",
+          },
+          "not_search":
+          {
+              "enabled": false,
+              "fields": [],
+              "search": "",
+          },
+          "enable_color": false,
+          "color": [0,0,0],
+      }
+  }
+
+  function readModalFilterSettings()
+  {
+
+      return {
+          "enabled": $('#filter_modal #info #main_enabled_checkbox')[0].checked,
+          "name": $('#filter_modal #info input[name=name]')[0].value,
+          "favorite": $('#filter_modal #info input[name=favorite]')[0].checked,
+          "ignore": $('#filter_modal #info input[name=ignore]')[0].checked,
+          "base_search":
+          {
+              "fields": $('#base_search_pane input[name=fields]').toArray().flatMap(e => e.checked ? [e.value] : []),
+              "search": $('#base_search_pane input[name=search]')[0].value,
+          },
+          "and_search":
+          {
+              "enabled": $('#and_search_pane input[name=enabled]')[0].checked,
+              "fields": $('#and_search_pane input[name=fields]').toArray().flatMap(e => e.checked ? [e.value] : []),
+              "search": $('#and_search_pane input[name=search]')[0].value,
+          },
+          "not_search":
+          {
+              "enabled": $('#not_search_pane input[name=enabled]')[0].checked,
+              "fields": $('#not_search_pane input[name=fields]').toArray().flatMap(e => e.checked ? [e.value] : []),
+              "search": $('#not_search_pane input[name=search]')[0].value,
+          },
+          "enable_color": $('#filter_modal #info input[name=enable_color]')[0].checked,
+          "color": toTriples($('#filter_modal #info input[name=color]')[0].value),
+      }
+  }
+
+  function onFilterModalOk()
+  {
+      if (filterIndex === -1)
+          Filters.push(readModalFilterSettings())
+      else          
+          Filters[filterIndex] = readModalFilterSettings()
+
+      renderFilterTable()
+      $('#filter_modal').hide()
+      return saveChannelFiltersAsync()
+  }
+
+  async function saveChannelFiltersAsync()
+  {
+      try {
+          await peercast("setServerStorageItem", "channelFilters", JSON.stringify(Filters))
+          console.log("filters saved")
+      } catch (e) {
+          console.error(e)
+      }
+  }
+
+  async function main()
+  {
+      try {
+          const data = await peercast("getServerStorageItem", "channelFilters")
+          if (data)
+              Filters = JSON.parse(data)
+          else
+              Filters = []
+          renderFilterTable()
+      } catch(error) {
+          console.error(error)
+          $('#flash').text(`${error.name}: ${error.message}`)
+      }
+
+      if (new URLSearchParams(window.location.search).get("fav"))
+      {
+          const chname = new URLSearchParams(window.location.search).get("fav")
+          showFilterModal(-1)
+          $('#filter_modal #info input[name=name]')[0].value = chname
+          $('#filter_modal #info #base_search_pane input[name=search]')[0].value = chname.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') // escape regexp
+      }
+  }
+
+  function onFilterModalDelete()
+  {
+      f = Filters[filterIndex]
+
+      const left = Filters.slice(0, filterIndex)
+      const right = Filters.slice(filterIndex + 1)
+      Filters = left.concat(right)
+      $('#filter_modal').hide()
+      renderFilterTable()
+      saveChannelFiltersAsync()
+  }
+
+  function onFilterModalReorder()
+  {
+      $('#reorder_modal .modal-body').html(who(
+          ['span', "{#New Place}:"],
+          ['input', { type: "number", id: "new_place_input", value: (filterIndex + 1).toString(), min: "1", max: Filters.length.toString() }]
+      ))
+      $('#reorder_modal').show()
+  }
+
+  function onReorderModalOk()
+  {
+      f = Filters[filterIndex]
+
+      const left = Filters.slice(0, filterIndex)
+      const right = Filters.slice(filterIndex + 1)
+      Filters = left.concat(right)
+
+      const newPlace = +$('#reorder_modal #new_place_input')[0].value - 1
+      Filters.splice(newPlace, 0 /*deleteCount*/, f)
+
+      $('#reorder_modal').hide()
+      $('#filter_modal').hide()
+      renderFilterTable()
+      saveChannelFiltersAsync()
+  }
+
+  $(function(){
+      main()
+  })
+
+</script>
+
+<script>
+  function toFields($search)
+  {
+      // Filter.xml -> YP
+      const table =
+          [
+              ['channelName',     'name'],
+              ['genre',           'genre'],
+              ['detail',          'desc'],
+              ['comment',         'comment'],
+              ['artist',          'trackArtist'],
+              ['title',           'trackName'],
+              ['album',           'trackAlbum'],
+              ['ypUrl',           'feedUrl'],
+              ['contactUrl',      'url'],
+              ['trackContactUrl', 'trackContact'],
+              ['type',            'contentTypeStr'],
+              ['status',          'status'],
+              ['id',              'id'],
+              ['tip',             'tip'],
+          ]
+
+      const fields = []
+      const normal = $search.find("normal")[0].attributes
+      const extra = $search.find("extra")[0].attributes
+
+      for (const [from, to] of table)
+      {
+          let attr = normal.getNamedItem(from)
+          if (!attr)
+          {
+              attr = extra.getNamedItem(from)
+              if (!attr)
+                  throw new Error(`${from} attribute not found`)
+          }
+
+          if (attr.value == "true")
+              fields.push(to)
+      }
+      return fields
+  }
+
+  function integerToTriples(n)
+  {
+      let r, g, b
+      b = n >> 16
+      g = (n & 0xffff) >> 8
+      r = n & 0xff
+      return [r, g, b]
+  }
+
+  let ImportingFilters
+
+  async function onFilterXmlInput()
+  {
+      const file = $("#filter_xml")[0].files[0]
+      console.log(file)
+
+      if (!file)
+      {
+          $('#import_modal output').text("{#Please select the Filter.xml file in your PeCaRecorder folder.}")
+          ImportingFilters = undefined
+          $('#import_modal #ok_button')[0].disabled = true
+          return
+      }
+
+      try {
+          const text = await file.text()
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(text, "application/xml");
+
+          console.log(xmlDoc)
+          const items = Array.from(xmlDoc.getElementsByTagName('item'))
+          const filters =
+              items.map(item => {
+                  const f = newFilter()
+                  f.enabled = ($(item).attr('enable') == "true")
+                  f.favorite = ($(item).attr('favorite') == "true")
+                  f.ignore = ($(item).attr('ignore') == "true")
+                  f.name = $(item).attr('name')
+                  f.enable_color = $(item).find("common").attr("enableBg") == "true"
+                  f.color = integerToTriples(+$(item).find("common").attr("bg"))
+
+                  const $base = $(item).find("base")
+                  f.base_search.search = $base.find("search").text()
+                  f.base_search.fields = toFields($base)
+
+                  const $and = $(item).find("and")
+                  f.and_search.enabled = ($and.attr("enable") == "true")
+                  f.and_search.search = $and.find("search").text()
+                  f.and_search.fields = toFields($and)
+
+                  const $not = $(item).find("not")
+                  f.not_search.enabled = ($not.attr("enable") == "true")
+                  f.not_search.search = $not.find("search").text()
+                  f.not_search.fields = toFields($not)
+
+                  return f
+              })
+
+          ImportingFilters = filters
+      } catch(e) {
+          console.error(e)
+          $('#import_modal output').text("Oops, something went wrong!")
+          ImportingFilters = undefined
+          $('#import_modal #ok_button')[0].disabled = true
+          return
+      }
+      
+      const toBeDeleted = {}
+      for (const f of ImportingFilters)
+          toBeDeleted[f.name] = true
+
+      const num = Filters.filter(f => toBeDeleted[f.name]).length
+      if (num > 0)
+          $('#import_modal output').text(`${num}{# existing filters will be replaced.}`)
+      else
+          $('#import_modal output').text(`${ImportingFilters.length}{# filters will be imported.}`)
+
+      $('#import_modal #ok_button')[0].disabled = false
+  }
+
+  async function onImportModalOk()
+  {
+      if (!ImportingFilters)
+      {
+          console.error("onImportModalOk: ImportingFilters is not set. Aborting.")
+          return
+      }
+
+      const toBeDeleted = {}
+      for (const f of ImportingFilters)
+          toBeDeleted[f.name] = true
+
+      let filters = Filters.filter(f => !toBeDeleted[f.name])
+      Filters = filters.concat(ImportingFilters)
+
+      $('#import_modal').hide()
+      renderFilterTable()
+      await saveChannelFiltersAsync()
+  }
+
+</script>
+
+<div id="flash"></div>
+
+<div style="max-width: 640px">
+  <div style="text-align: right; margin-bottom: 12px">
+    <button onclick="$('#import_modal').show(); onFilterXmlInput()"><span class="emoji-icon">&#x2b06;&#xfe0f<!-- up arrow  --></span> {#Import}</button>
+  </div>
+  <div id="filter_table"></div>
+</div>
+
+<div class="modal" id="filter_modal">
+  <div class="modal-contents default-bg">
+    <div class="modal-header">
+      <h3 style="margin:0">{#Filter}</h3>
+    </div>
+    <div class="modal-body">
+      <div style="float: right">
+        <button onclick="onFilterModalDelete()">&#x1f5d1;&#xfe0f;<!-- wastebasket -->{#Delete}</button>
+        <button onclick="onFilterModalReorder()">{#Reorder}</button>
+      </div>
+      <div id="info" align="left">
+      </div>
+    </div>
+    <div class="modal-footer" style="margin-top:15px; text-align:right">
+      <button onclick="onFilterModalOk()">{#OK}</button>
+      <button onclick="$('#filter_modal').hide()">{#Cancel}</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="reorder_modal">
+  <div class="modal-contents default-bg">
+    <div class="modal-header">
+      <h3 style="margin:0">{#Reorder}</h3>
+    </div>
+    <div class="modal-body">
+    </div>
+    <div class="modal-footer" style="margin-top:15px; text-align:right">
+      <button onclick="onReorderModalOk()">{#OK}</button>
+      <button onclick="$('#reorder_modal').hide()">{#Cancel}</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="import_modal">
+  <div class="modal-contents default-bg">
+    <div class="modal-header">
+      <h3>{#Import Filters from PeCaRecorder}</h3>
+    </div>
+    <div class="modal-body" style="min-width:320">
+      <div>
+        <input id="filter_xml" type="file" accept="application/xml, .xml" oninput="onFilterXmlInput()">
+      </div>
+      <output></output>
+    </div>
+    <div class="modal-footer" style="margin-top:15px; text-align:right">
+      <button id="ok_button" onclick="onImportModalOk()" disabled>{#OK}</button>
+      <button onclick="$('#import_modal').hide()">{#Cancel}</button>
+    </div>
+  </div>
+</div>

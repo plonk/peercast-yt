@@ -25,6 +25,7 @@
 #include "servmgr.h"
 #include "unix/usys.h"
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -46,6 +47,8 @@ bool forkDaemon = false;
 bool setPidFile = false;
 bool logToFile = false;
 std::recursive_mutex loglock;
+static std::string s_tokenListFilename;
+static std::string s_stateDirPath;
 
 // ---------------------------------
 class MyPeercastInst : public PeercastInstance
@@ -63,6 +66,16 @@ public:
     virtual const char * APICALL getIniFilename()
     {
         return iniFileName;
+    }
+
+    virtual const char * APICALL getTokenListFilename()
+    {
+        return s_tokenListFilename.c_str();
+    }
+
+    virtual const char * APICALL getStateDirPath()
+    {
+        return s_stateDirPath.c_str();
     }
 
     virtual const char * APICALL getPath()
@@ -179,9 +192,64 @@ static bool mkdir_p(const char* dir)
     }
 }
 
+static const char* getConfDir()
+{
+    static ::String confdir;
+
+    if (confdir.c_str()[0] == '\0')
+    {
+        char* dir;
+        dir = getenv("XDG_CONFIG_HOME");
+        if (dir) {
+            confdir.set(dir);
+        } else {
+            dir = getenv("HOME");
+            if (!dir)
+                dir = getpwuid(getuid())->pw_dir;
+            confdir.set(dir);
+            confdir.append("/.config");
+        }
+        confdir.append("/peercast");
+
+        if (confdir.c_str()[0] == '/') {
+            mkdir_p(confdir.c_str());
+        }
+    }
+    return confdir.c_str();
+}
+
+static const char* getStateDir()
+{
+    static ::String statedir;
+
+    if (statedir.c_str()[0] == '\0')
+    {
+        char* dir;
+        dir = getenv("XDG_STATE_HOME");
+        if (dir) {
+            statedir.set(dir);
+        } else {
+            dir = getenv("HOME");
+            if (!dir)
+                dir = getpwuid(getuid())->pw_dir;
+            statedir.set(dir);
+            statedir.append("/.local/state");
+        }
+        statedir.append("/peercast");
+
+        if (statedir.c_str()[0] == '/') {
+            mkdir_p(statedir.c_str());
+        }
+    }
+    return statedir.c_str();
+}
+
 // ----------------------------------
 static void init()
 {
+    // 設定ファイルやアクセストークンファイルを作るときに自分しか読めなくする。
+    umask(0077);
+
     // readlink does not append a null byte to the buffer, so we zero it out beforehand.
     char path[PATH_MAX + 1] = "";
     if (readlink("/proc/self/exe", path, PATH_MAX) == -1) {
@@ -192,30 +260,16 @@ static void init()
     htmlPath.set(bindir);
     htmlPath.append("/../share/peercast/");
 
-    ::String confdir;
-    char* dir;
-    dir = getenv("XDG_CONFIG_DIR");
-    if (dir) {
-        confdir.set(dir);
-    } else {
-        dir = getenv("HOME");
-        if (!dir)
-            dir = getpwuid(getuid())->pw_dir;
-        confdir.set(dir);
-        confdir.append("/.config");
-    }
-    confdir.append("/peercast");
-
-    if (confdir.c_str()[0] == '/') {
-        mkdir_p(confdir.c_str());
-    }
-
+    const char* confdir = getConfDir();
     iniFileName.set(confdir);
     iniFileName.append("/peercast.ini");
     pidFileName.set(confdir);
     pidFileName.append("/peercast.pid");
     logFileName.set(confdir);
     logFileName.append("/peercast.log");
+
+    s_stateDirPath = getStateDir();
+    s_tokenListFilename = s_stateDirPath + "/tokens.json";
 }
 
 // ----------------------------------

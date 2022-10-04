@@ -25,6 +25,10 @@ body {
         color: #000;
 }
 
+.default-bg {
+        background-color: #fff;
+}
+
 .small {
 	font-size: 11px;
 }
@@ -45,14 +49,6 @@ input {
     box-sizing: border-box;
 }
 
-input[type=radio] {
-	vertical-align: -3px;
-}
-
-input[type=checkbox] {
-	vertical-align: -3px;
-}
-
 .navbar {
     margin-top: 10px;
     margin-bottom: 15px;
@@ -62,9 +58,7 @@ input[type=checkbox] {
 
 .navbar > a {
     margin: 2px;
-    width: calc(7em + calc( 2 * 10px ));
     font-size: 9pt;
-    color: black;
     border-radius: 5px;
     text-align: left;
     vertical-align: middle;
@@ -123,7 +117,7 @@ a.button {
 }
 
 .text-muted {
-	color: #777;
+	color: rgba(0,0,0,0.6);
 }
 
 .text-danger {
@@ -239,3 +233,41 @@ input[readonly="readonly"] {
     position: absolute;
     left:20px; top:calc(50% - 20px)
 }
+
+.modal {
+    display: none;
+    position: fixed;
+    left:0;
+    top:0;
+    width:100vw;
+    height:100vh;
+    background-color: rgba(0,0,0,0.3);
+    z-index: 1
+}
+
+.modal-contents {
+    max-width: 90vw;
+    max-height: 90vh;
+    padding: 15px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    border-radius: 5px;
+    overflow-y: scroll;
+}
+
+.modal-body {
+}
+
+.modal-footer button, .modal-footer input[type=submit] {
+    line-height: 1.5em; /* 「OK」と「キャンセル」の高さが同じになりますように。 */
+    min-width: 6.5em;
+}
+
+.customize-button { font-size: 18px }
+
+.tab { cursor: pointer }
+
+.emoji-icon { font-size: 18px }

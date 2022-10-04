@@ -147,7 +147,7 @@ TEST_F(ServentFixture, handshakeIncomingJRPCGetUnauthorized)
 
     std::string output = mock->outgoing.str();
 
-    ASSERT_STREQ("HTTP/1.0 401 Unauthorized\r\nWWW-Authenticate: Basic realm=\"PeerCast Admin\"\r\n\r\n", output.c_str());
+    ASSERT_TRUE(str::has_prefix(output, "HTTP/1.0 200 OK\r\n"));
 }
 
 #include "servmgr.h"
@@ -161,7 +161,9 @@ TEST_F(ServentFixture, handshakeIncomingJRPCGetAuthorized_noAuthInfoSupplied)
 
     s.handshakeIncoming();
 
-    ASSERT_TRUE(str::contains(mock->outgoing.str(), "401 Unauthorized"));
+    std::string output = mock->outgoing.str();
+
+    ASSERT_TRUE(str::has_prefix(output, "HTTP/1.0 200 OK\r\n"));
 }
 
 TEST_F(ServentFixture, handshakeIncomingJRPCGetAuthorized_authInfoSupplied)

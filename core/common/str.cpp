@@ -57,13 +57,60 @@ static std::string inspect(char c, bool utf8)
     }
 }
 
-std::string inspect(const std::string str)
+std::string inspect(const std::string& str)
 {
     bool utf8 = validate_utf8(str);
     std::string res = "\"";
 
     for (auto c : str) {
         res += inspect(c, utf8);
+    }
+    res += "\"";
+    return res;
+}
+
+static std::string json_inspect(char c)
+{
+    int d = static_cast<unsigned char>(c);
+
+    if (d >= 0x80)
+        return string() + (char) d;
+
+    if (isprint(d)) {
+        switch (d) {
+        case '\'': return "\\\'";
+        case '\"': return "\\\"";
+        case '\\': return "\\\\";
+        default:
+            return string() + (char) d;
+        }
+    }
+
+    switch (d) {
+    case '\b': return "\\b";
+    case '\f': return "\\f";
+    case '\n': return "\\n";
+    case '\r': return "\\r";
+    case '\t': return "\\t";
+    default:
+        return string("\\u00")
+            + "0123456789abcdef"[d>>4]
+            + "0123456789abcdef"[d&0xf];
+    }
+}
+
+std::string json_inspect(const std::string& str)
+{
+    bool utf8 = validate_utf8(str);
+
+    if (!utf8)
+    {
+        throw std::invalid_argument("UTF-8 validation failed");
+    }
+    std::string res = "\"";
+
+    for (auto c : str) {
+        res += json_inspect(c);
     }
     res += "\"";
     return res;
@@ -206,6 +253,22 @@ std::string format(const char* fmt, ...)
     vsnprintf(data, size + 1, fmt, aq);
     va_end(aq);
     va_end(ap);
+
+    res = data;
+    delete[] data;
+    return res;
+}
+
+std::string vformat(const char* fmt, va_list ap)
+{
+    va_list aq;
+    std::string res;
+
+    va_copy(aq, ap);
+    int size = vsnprintf(NULL, 0, fmt, ap);
+    char *data = new char[size + 1];
+    vsnprintf(data, size + 1, fmt, aq);
+    va_end(aq);
 
     res = data;
     delete[] data;
@@ -506,6 +569,70 @@ bool validate_utf8(const std::string& str)
             return false;
     }
     return true;
+}
+
+std::string truncate_utf8(const std::string& str, size_t length)
+{
+    std::string dest;
+
+    auto it = str.begin();
+    while (it != str.end())
+    {
+        if ((*it & 0x80) == 0) // 0xxx xxxx
+        {
+            if (dest.size() + 1  > length)
+                break;
+            dest += *it++;
+            continue;
+        }else if ((*it & 0xE0) == 0xC0) // 110x xxxx
+        {
+            if (dest.size() + 2 > length)
+                break;
+            dest += *it++;
+            if (it == str.end())
+                goto Error;
+            if ((*it & 0xC0) == 0x80)
+            {
+                dest += *it++;
+            }else
+                goto Error;
+        }else if ((*it & 0xF0) == 0xE0) // 1110 xxxx
+        {
+            if (dest.size() + 3 > length)
+                break;
+            dest += *it++;
+            for (int i = 0; i < 2; ++i)
+            {
+                if (it == str.end())
+                    goto Error;
+                if ((*it & 0xC0) == 0x80)
+                {
+                    dest += *it++;
+                }else
+                    goto Error;
+            }
+        }else if ((*it & 0xF8) == 0xF0) // 1111 0xxx
+        {
+            if (dest.size() + 4 > length)
+                break;
+            dest += *it++;
+            for (int i = 0; i < 3; ++i)
+            {
+                if (it == str.end())
+                    goto Error;
+                if ((*it & 0xC0) == 0x80)
+                {
+                    dest += *it++;
+                }else
+                    goto Error;
+            }
+        }else
+            goto Error;
+    }
+    return dest;
+
+Error:
+    throw std::invalid_argument("UTF-8 validation failed");
 }
 
 } // namespace str

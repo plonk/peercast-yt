@@ -4,13 +4,21 @@
 {^end}
 {^define HEAD}
   <style>
+    .update-link { display:block; padding: 15px; margin-bottom:3px }
+    .update-link:hover { background-color: #eee; text-decoration:none }
    input, select { font-size: 9pt }
    .channel-list {
-       font-family: Verdana, sans-serif; font-size: 9pt; color: #222; line-height: 1.3em; margin: 0;
-       width:100%; max-width: 640px
+       font-family: Verdana, sans-serif; font-size: 9pt; line-height: 1.3em; margin: 0;
+       width:100%;
+       border-collapse: collapse;
+       background-color: #eee;
+       border: none;
     }
-   .channel-list tr { background-color: #FFECC4 }
-   .channel-list th { font-size: 9pt; text-decoration: underline; padding: 3px 5px; color: black }
+    .channel-list th, .channel-list td { border-right-style: solid; border-width: 1px; border-bottom-style: solid;
+        border-color: rgba(0,0,0,0.5); border-right-color: rgba(0,0,0,0.2) }
+    .channel-list th:last-child, .channel-list td:last-child { border-right-style: none }
+    .channel-list tr:last-child td { border-bottom-style: none }
+   .channel-list th { font-size: 9pt; padding: 3px 5px }
    .channel-list td { text-align: center; padding: 5px 5px; }
    .channel-list td.channel-description {
        text-align: left;
@@ -31,128 +39,484 @@
    .channel-list .bitrate { text-align: right }
    .relay-list { width:100%; max-width: 640px }
    .relay-list th { white-space: nowrap }
+   .accented { color: var(--accent-color); }
+   .muted { color: grey !important; }
+    .sort-triangle { display:inline-block; min-width:1.5em }
+
+    .channel-list td.channel-description a { display: block; text-decoration: none; max-width: 45vw }
+    .channel-list th { cursor: pointer }
+
+    #group_tab a { cursor:pointer; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; line-height: 1.5em }
+
     {^DARK_THEME_STYLES_BEGIN}
-        .channel-list { color: #ddd }
-        .channel-list tr { background-color: #544827 }
-        .channel-list th { color: #eee }
+    .channel-list { background-color: #333 }
+    .channel-list th, .channel-list td { border-color: rgba(255,255,255,0.5); border-right-color: rgba(255,255,255,0.3) }
+    .update-link:hover { background-color: #333 }
     {^DARK_THEME_STYLES_END}
   </style>
 {^end}
 
-<div class="reloader hscroll" data-url="channels.html?fragment=relays" data-interval="{$servMgr.refreshHTML}">
-  {@fragment relays}
-  <TABLE class="relay-list table-panel" align=center border=0>
-    <TBODY>
-      <TR align=middle bgColor=#cccccc>
-        <th colspan=2>{#Relays}</th>
-      </TR>
-      {@foreach chanMgr.channels}
-      <tr>
-        <TD width="1" align="left">
-          <form action="play.html">
-            <input type="hidden" name="id" value="{$this.id}">
-            <input type="submit" value="Play" style="color:#f00; font-weight:bold">
-          </form>
-        </TD>
-        <TD align="left">
-          <div class="channel-name">
-            {$this.name}
-            <form style="float:right" action="/admin">
-              <input type="hidden" name="cmd" value="stop">
-              <input type="hidden" name="id" value="{$this.id}">
-              <button type="submit" style="font-size:16px">&times;</button>
-            </form>
-          </div>
-          {$this.srcrate} / {$this.bitrate}Kbps
-          <a href="/stream/{$this.id}{$this.ext}">{$this.type}</a>
-          ({$this.totalListeners}/{$this.totalRelays})
-          <a href="connections.html?id={$this.id}">
-            [{$this.localListeners}/{$this.localRelays}]
-          </a>
-          {$this.status}
-          <br>
-          <span>{#Keep}</span>
-          <a href="/admin?cmd=keep&amp;id={$this.id}"><b>{$this.keep}</b></a>
+<!-- who h unescapeHtml -->
+<script src="/assets/js/render_helpers.js"></script>
+<script src="/assets/js/peercast.js"></script>
 
-          <div style="white-space: nowrap">
-            <b><a href="relayinfo.html?id={$this.id}">{#Info}</a></b>
-            {@if this.status == "BROADCAST"}
-              - <b><a href="editinfo.html?id={$this.id}">{#Edit}</a></b>
-            {@else}
-              - <b class="text-muted">{#Edit}</b>
-            {@end}
-            {@if this.contactURL}
-              - <b><a href="{$this.contactURL}">{#WWW}</a></b>
-            {@else}
-              - <b class="text-muted">{#WWW}</b>
-            {@end}
-            - <b><a href="/pls/{$this.id}{$this.plsExt}?auth={$this.authToken}">{#Playlist}</a></b>
-            - <b><a href="/admin?cmd=bump&amp;id={$this.id}">{#Bump}</a></b>
-          </div>
-        </TD>
-      </TR>
-      {@end}
-    </TBODY>
-  </TABLE>
-  {@end}
+  <script>
+    function simplify(url)
+    {
+        return url.replace(/^https?:\/\//, '').replace(/\/$/, '')
+    }
+
+
+    function feednick(feed)
+    {
+        if (feed.url == "http://bayonet.ddo.jp/sp/index.txt")
+            return "SP"
+        else if (feed.url == "http://peercast.takami98.net/turf-page/index.txt")
+            return "{#Turf}"
+        else if (feed.url == "http://yp.pcgw.pgw.jp/index.txt")
+            return "{#Heisei}"
+        else if (feed.url == "https://p-at.net/index.txt")
+            return "P@"
+        else if (feed.url == "http://ypv6.pecastation.org/index.txt")
+            return "YPv6"
+        else if (feed.url == "http://eventyp.xrea.jp/index.txt")
+            return "{#Event YP}"
+        else
+            simplify(feed.directoryUrl)
+    }
+  </script>
+
+<div class="flex-container navbar" id="group_tab">
 </div>
-<div align="center" style="margin-top: 1.5em; margin-bottom: 1.5em">
-  <form action="/admin" style="display: inline">
-    <input type="hidden" name="cmd" value="clear">
-    <input type="hidden" name="channels" value="1">
-    <input type="submit" value="{#Clear}" style="min-width: 64px">
-  </form>
-  <form action="broadcast.html" style="display: inline">
-    <input type="submit" value="{#_Broadcast_navbar}…" style="min-width: 64px">
-  </form>
+
+<script>
+  // チャンネルの詳細な情報を表示するモーダルにデータを設定。
+  function showModal(chid)
+  {
+      const info = Groups.find(g => g.id == 'all').channels.find(ch => ch.id == chid)
+      if (!info)
+      {
+          alert(`No info about ${chid} found`)
+          return
+      }
+      $('#channel_modal').show()
+
+      function link(url)
+      {
+          return url ? ['a', { href:url }, url] : ['span', { class:'text-muted' }, 'n/a']
+      }
+      function text(value)
+      {
+          if (typeof(value) === 'string')
+          {
+              if (value === "")
+                  return ['span', { class:'text-muted' }, 'n/a']
+              else
+                  return value
+          }else
+              return ""+value
+      }
+      $('#info').html(who(
+          ['table',
+           ['tr',
+            ['th','{#Name}'],
+            ['td',
+             text(unescapeHtml(info.name)),
+             ['button', { onclick: `window.location = "chanfilters.html?fav=${unescapeHtml(info.name)}"` },
+              "{#Create Filter}"],
+            ],
+           ],
+           ['tr',['th','{#Genre}'],['td', text(unescapeHtml(info.genre))]],
+           ['tr',['th','{#Description}'],['td', text(unescapeHtml(info.desc))]],
+           ['tr',['th','{#Comment}'],['td', text(unescapeHtml(info.comment))]],
+           ['tr',['th','{#Contact URL}'],['td', link(info.url)]],
+           ['tr',['th','{#Uptime}'],['td', text(info.uptime)]],
+           ['tr',['th','{#Listeners}'],['td', text(info.numDirects)]],
+           ['tr',['th','{#Relays}'],['td', text(info.numRelays)]],
+           ['tr',['th','{#Bitrate}'],['td', text(info.bitrate)]],
+           ['tr',['th','{#Type}'],['td', text(info.contentTypeStr)]],
+           ['tr',['th','{#Chat URL}'],['td', link(info.chatUrl)]],
+           ['tr',['th','{#Stats URL}'],['td', link(info.statsUrl)]],
+           ['tr',['th','{#Tracker}'],['td', text(info.tip)]],
+           ['tr',['th','{#Channel ID}'],['td', text(info.id)]],
+           ['tr',['th','{#Direct}'],['td', info.direct == '1' ? '{#Yes}' : '{#No}']],
+           ['tr',['th','{#Feed}'],['td', text(info.feedUrl)]],
+           ['tr',['th','{#Title}'],['td', text(info.trackName)]],
+           ['tr',['th','{#Artist}'],['td', text(info.trackArtist)]],
+           ['tr',['th','{#Album}'],['td', text(info.trackAlbum)]],
+           ['tr',['th','{#Track URL}'],['td', link(info.trackContact)]],
+          ]))
+  }
+</script>
+
+<div class="modal" id="channel_modal">
+  <div class="modal-contents default-bg">
+    <h3 style="margin:0">{#Channel Information}</h3>
+    <div class="modal-body">
+      <div id="info">
+      </div>
+    </div>
+    <div class="modal-footer" style="margin-top:15px; text-align:right">
+      <button onclick="$('#channel_modal').hide()">{#Close}</button>
+    </div>
+  </div>
+</div>
+
+{$
+  define(COLUMNS,
+         [
+           ["name","{#Channel}","asc"],
+           ["numDirects","{#Status}","desc"],
+           ["uptime","{#Uptime}","desc"],
+           ["bitrate","{#Bitrate}","desc"],
+           ["contentTypeStr","{#Type}","asc"]
+         ])
+}
+
+<div class="modal" id="column_modal">
+  <div class="modal-contents default-bg">
+    <h3 style="margin:0">{#Display Columns}</h3>
+    <div class="modal-body" align="left">
+      {@foreach COLUMNS}
+        {@let key = nth(0,this), header = nth(1,this), order = nth(2,this)}
+          <label style="display:block"><input type="checkbox" onchange='columnVisibility["{$key}"] = this.checked; savePreferences(); updateView()' data-key="{$key}" {$if(key == 'name', 'disabled')}> {$header}</label>
+        {@end}
+      {@end}
+    </div>
+    <div class="modal-footer" style="margin-top:15px; text-align:right">
+      <!-- <input type="submit" value="{#Save}"> -->
+      <button onclick="$('#column_modal').hide()">{#Close}</button>
+    </div>
+  </div>
 </div>
 
 <!-- index.txt の取得が5分ごとなので、あまり頻繁に更新しても仕方ない -->
-<div class="reloader hscroll" data-url="channels.html?fragment=channels" data-interval="60">
-  {@fragment channels}
+<div style="max-width: 640px">
+  <div align=right>
+    <button class="customize-button" title="{#Filters}" onclick="window.location = 'chanfilters.html'">&#x1F308;<!-- rainbow --></button>
+    <button class="customize-button" onclick="$('#column_modal').show()" title="{#Display Columns}">&#x2699;&#xFE0F;<!-- gear --></button>
+  </div>
+  <a href="/admin?cmd=fetch_feeds" class="update-link" title="{#Auto-updates every 5 minutes. Manual updates have a cooldown of 30 seconds.}">{#Update}</a>
   <table class="channel-list">
-    <tr>
-      <td colspan="4" class="results">
-        <b>Results:</b>
-        {$servMgr.numExternalChannels} channels.
-        <a href="/admin?cmd=fetch_feeds" title="{#Auto-updates every 5 minutes. Manual updates have a cooldown of 30 seconds.}">{#Update}</a>
-      </td>
-    </tr>
-    <tr>
-      <th>Channel</th><th>Status</th><th>Bitrate</th><th>Type</th>
-    </tr>
-
-    {@foreach servMgr.channelDirectory.channels}
-    <tr>
-      <td class="channel-description">
-	<a {@if this.id != "00000000000000000000000000000000"}href="play.html?id={$this.id}"{@end} style="display: block; text-decoration: none; max-width: 45vw">
-          <div class="channel-name">
-            {!this.name}
-          </div>
-          <div class="detail text-muted">
-            {@if this.genre}{!this.genre} - {@end}{!this.desc}
-          </div>
-	</a>
-      </td>
-      <td align=center nowrap>
-        <span class="listeners">
-          {$this.numDirects}/{$this.numRelays}
-        </span>
-        {@if this.encodedName}
-        <div class="icons">
-          <a href="{$this.chatUrl}"><img alt="Chat" src="/assets/images/chat.png"></a>
-          <a href="{$this.statsUrl}"><img alt="Stats" src="/assets/images/graph.png"></a>
-        </div>
-        {@end}
-      </td>
-      <td class="bitrate" align=center nowrap>
-        {$this.bitrate} kb/s
-      </td>
-      <td align=center>
-        {$this.contentTypeStr}
-      </td>
-    </tr>
-    {@end}
   </table>
-  {@end} <!-- fragment content -->
 </div>
+
+<script>
+  var columnVisibility = {}
+  var sortColumn = null
+  var sortOrder = null
+  var selectedGroup = localStorage['selectedGroup']
+
+  // localStorageからコラムの表示に関するユーザー設定を取得して上のパラメータにセットする。
+  function loadPreferences()
+  {
+      if (localStorage["columnVisibility"])
+      {
+          columnVisibility = JSON.parse(localStorage["columnVisibility"])
+          // チャンネル名は常に表示する。
+          Object.assign(columnVisibility, { "name": true })
+      }else
+      {
+          // デフォルト設定。
+          columnVisibility = { name:true, numDirects:true, uptime:true, bitrate:false, contentTypeStr:false }
+      }
+
+      sortColumn = localStorage["sortColumn"]
+      sortOrder = localStorage["sortOrder"]
+  }
+
+
+  // localStorage に表示設定を保存。
+  function savePreferences()
+  {
+      localStorage["columnVisibility"] = JSON.stringify(columnVisibility)
+      localStorage["sortColumn"] = sortColumn
+      localStorage["sortOrder"] = sortOrder
+  }
+
+  $(function(){
+      loadPreferences()
+
+      // カラム表示モーダルのチェックボックスの状態を設定する。
+      for (const checkbox of $('#column_modal .modal-body input[type=checkbox]'))
+      {
+          if (columnVisibility[checkbox.dataset.key])
+              checkbox.checked = true
+          else
+              checkbox.checked = false
+      }
+  })
+
+function onColumnClicked(key, defaultOrder)
+{
+      if (sortColumn != key)
+      {
+          sortColumn = key
+          sortOrder = defaultOrder
+      } else
+      {
+          if (sortOrder == "asc")
+              sortOrder = "desc"
+          else
+              sortOrder = "asc"
+      }
+
+      savePreferences()
+      updateView()
+}
+
+// コラムのソート用比較関数1
+function uptimeComparer(a,b)
+{
+    const [ah, am] = a.split(':')
+    const [bh, bm] = b.split(':')
+    return (+ah * 60 + +am) - (+bh * 60 + +bm)
+}
+
+// コラムのソート用比較関数2
+function stringComparer(a,b)
+{
+    return (a === b) ? 0 : (a < b ? -1 : 1)
+}
+
+// コラムのソート用比較関数3
+function numericComparer(a,b)
+{
+  return +a - +b
+}
+
+// グループタブとチャンネルリストを再描画。
+function updateView()
+{
+      updateGroupTab()
+      updateTable()
+}
+
+function satisfies(search, channel)
+{
+      const reg = new RegExp(search.search)
+      return search.fields.some(f => {
+          if (typeof(channel[f]) !== 'string')
+              console.warn(f, "is not string")
+          return reg.exec(channel[f]) !== null
+      })
+}
+
+function getRowStyleFor(channel)
+{
+      let colors = []
+      for (const f of Filters)
+      {
+          if (!f.enabled || !f.enable_color)
+              continue
+
+          if (satisfies(f.base_search, channel) &&
+              (!f.and_search.enabled || satisfies(f.and_search, channel)) &&
+              (!f.not_search.enabled || !satisfies(f.not_search, channel)))
+          {
+              colors.push(f.color)
+          }
+      }
+
+      if (colors.length == 0)
+          return ""
+      else
+          return "background: linear-gradient(95deg, rgba(255,255,255,0), " + colors.map(([r,g,b]) => `rgba(${r},${g},${b},0.75)`).join(", ")
+}
+
+let Filters
+
+function renderChannelRow(channel)
+{
+      let filter
+      let rowStyle = getRowStyleFor(channel)
+      
+      return [
+          'tr',
+          { style: rowStyle },
+          columnVisibility['name'] ?
+          ['td', { class: "channel-description" },
+           ['button', { style:"float:right", onclick:`showModal('${channel.id}')`}, unescapeHtml('&#x2139;&#xfe0f;')],
+           ['a', { href: channel.id != "00000000000000000000000000000000" ? `play.html?id=${channel.id}` : null }, 
+            // name, genre, desc はエスケープ済みなので一度アンエスケープする。
+            ['div', { class:"channel-name" }, unescapeHtml(channel.name)],
+            ['div', { class:"detail text-muted"}, (channel.genre ? `${unescapeHtml(channel.genre)} - ` : ''), unescapeHtml(channel.desc)],
+           ],
+          ] : '',
+          columnVisibility['numDirects'] ?
+          ['td', { align:'center', nowrap:true },
+           ['span', { class:"listeners" }, `${channel.numDirects}/${channel.numRelays}`],
+           channel.encodedName ? ['div', { class:"icons"},
+                                  ['a', { href:channel.chatUrl}, ['img', { alt:"Chat", src:"/assets/images/chat.png"}]],
+                                  ['a', { href: channel.statsUrl}, ['img', { alt:"Stats", src:"/assets/images/graph.png"}]]] : ''] : '',
+
+          columnVisibility['uptime'] ?
+          ['td', { align:'center', nowrap:true }, channel.uptime] : '',
+
+          columnVisibility['bitrate'] ?
+          ['td', { class:"bitrate", align:'center', nowrap:true }, `${channel.bitrate} kb/s`] : '',
+
+          columnVisibility['contentTypeStr'] ?
+          ['td', { align:'center' }, channel.contentTypeStr] : '',
+      ]
+}
+
+function filterMatches(f, channel)
+{
+      if (!f.enabled)
+          return false
+
+      if (satisfies(f.base_search, channel) &&
+          (!f.and_search.enabled || satisfies(f.and_search, channel)) &&
+          (!f.not_search.enabled || !satisfies(f.not_search, channel)))
+          return true
+
+      return false
+}
+
+// チャンネルリストの再描画。
+function updateTable()
+{
+      const COLUMNS = {!COLUMNS}
+
+      const group = Groups.find(g => g.id == selectedGroup)
+
+      const channels = Array.from(group.channels) // copy
+
+      let compr
+      if (sortColumn == 'uptime')
+          compr = (a,b) => uptimeComparer(a[sortColumn], b[sortColumn])
+      else if (sortColumn == 'numDirects' || sortColumn == 'bitrate')
+          compr = (a,b) => numericComparer(a[sortColumn], b[sortColumn])
+      else
+          compr = (a,b) => stringComparer(a[sortColumn], b[sortColumn])
+
+      channels.sort(compr)
+
+      if (sortOrder == "desc")
+          channels.reverse()
+
+      const html = who(
+          ['tr',
+           ... COLUMNS.flatMap(([key, header, order]) => 
+               columnVisibility[key] ?
+               [
+                   ['th', { class: sortColumn == key ? "accented" : null, onclick: `onColumnClicked("${key}", "${order}"); updateView()` },
+                    ['span', { class: "sort-triangle" }, unescapeHtml('&nbsp;')],
+                    ['span', header],
+                    (sortColumn == key && sortOrder == "desc") ? ['span', { class: "sort-triangle" }, '▼'] : "",
+                    (sortColumn == key && sortOrder == "asc") ? ['span', { class: "sort-triangle" }, '▲'] : "",
+                    (sortColumn != key) ? ['span', { class: "sort-triangle" }, unescapeHtml('&nbsp;')] : ""]
+               ] : [])
+          ],
+          ... channels.flatMap(channel =>
+              [
+                  renderChannelRow(channel)
+              ]
+          )
+      )
+
+      $('.channel-list').html(html)
+}
+
+  // グループタブの更新。
+  function updateGroupTab()
+  {
+      const html = who(
+          ... Groups.map(g =>
+              ['a',
+               {
+                   class: selectedGroup == g.id ? 'active-tab' : null,
+                   onclick: `setSelectedGroup('${g.id}'); updateView()`,
+               },
+               ['span', g.channels.length ? `${g.title} (${g.channels.length})` : g.title]]
+          ),
+      )
+
+      $('#group_tab').html(html)
+  }
+
+  Groups = [
+  ]
+
+  function updateGroups(servMgr)
+  {
+      ignoreFilters = Filters.filter(f => f.ignore)
+      favFilters = Filters.filter(f => f.favorite)
+
+      Groups = []
+      Groups.push({
+          id: "favorites",
+          title: "{#Favorites}",
+          mustSatisfy: ch => favFilters.some(f => filterMatches(f, ch)) && !ignoreFilters.some(f => filterMatches(f, ch))
+      })
+      Groups.push({
+          id: "all",
+          title: "{#All}",
+          mustSatisfy: ch => !ignoreFilters.some(f => filterMatches(f, ch))
+      })
+
+      for (const feed of servMgr.channelDirectory.feeds)
+      {
+          Groups.push({
+              id: feed.url,
+              title: feednick(feed),
+              mustSatisfy: ch => ch.feedUrl == feed.url && !ignoreFilters.some(f => filterMatches(f, ch))
+          })
+      }
+
+      Groups.push({
+          id: "ignore",
+          title: "{#Ignoring}",
+          mustSatisfy: ch => ignoreFilters.some(f => filterMatches(f, ch))
+      })
+
+      for (const group of Groups)
+          group.channels = servMgr.channelDirectory.channels.filter(group.mustSatisfy)
+
+      if (!Groups.find(g => g.id == selectedGroup))
+          setSelectedGroup("all")
+  }
+
+  function setSelectedGroup(id)
+  {
+      console.debug("setSelectedGroup", localStorage["selectedGroup"], "->", id)
+      selectedGroup = id
+      localStorage["selectedGroup"] = id
+  }
+
+  function delay(ms) {
+      return new Promise((resolve, _reject) => setTimeout(resolve, ms));
+  }
+
+  async function main()
+  {
+      const data = await peercast("getServerStorageItem", "channelFilters")
+      if (data)
+          Filters = JSON.parse(data)
+      else
+      {
+          console.warn("getServerStorageItem returned: ", data) // null for example.
+          Filters = []
+      }
+
+      // チャンネルリストを取得して描画する。
+      while (true)
+      {
+          try {
+              const servMgr = (await peercast("getState", ["servMgr"])).servMgr
+              updateGroups(servMgr)
+              updateView()
+          } catch(error) {
+              console.error(error)
+          }
+          await delay(60 * 1000)
+      }
+  }
+
+$(function(){
+      main()
+})
+</script>
+
+

@@ -48,10 +48,25 @@ public:
 
         void    add(Node *);
         void    write(Stream &, int);   // output, level
-        char    *getName() { return getAttrName(0); }
+        char    *getName()
+            {
+                if (numAttr < 1)
+                    throw StreamException("getName: Out of range");
+                return getAttrName(0);
+            }
 
-        char    *getAttrValue(int i) { return &attrData[attr[i].valuePos]; }
-        char    *getAttrName(int i) { return &attrData[attr[i].namePos]; }
+        char    *getAttrValue(int i)
+            {
+                if (i >= numAttr)
+                    throw StreamException("getAttrValue: Out of range");
+                return &attrData[attr[i].valuePos];
+            }
+        char    *getAttrName(int i)
+            {
+                if (i >= numAttr)
+                    throw StreamException("getAttrName: Out of range");
+                return &attrData[attr[i].namePos];
+            }
         char    *getContent()  { return contData; }
         int     getBinaryContent(void *, int);
 

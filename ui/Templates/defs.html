@@ -49,6 +49,9 @@
       --accent-color-dark: #92b2ff; /* L=73 */
       {@end}
       --accent-color: var(--accent-color-light);
+
+      --bg-color-l1: #fff; /* background color level 1 */
+      --bg-color-l2: #eee;
   }
   input { accent-color: var(--accent-color) }
   a[href] {
@@ -57,6 +60,8 @@
   {^DARK_THEME_STYLES_BEGIN}
   :root {
       --accent-color: var(--accent-color-dark);
+      --bg-color-l1: #222;
+      --bg-color-l2: #333;
   }
 
   body { color: #fff; background-color: #222 }
@@ -93,7 +98,7 @@
   }
 
   .text-muted {
-      color: #bbb;
+      color: rgba(255,255,255,0.7);
   }
 
   ::-webkit-scrollbar {
@@ -113,14 +118,17 @@
   .alert-warning::after { color: #000 }
 
   .navbar { background-color: #333 }
-  .navbar > a { color: #fff }
-  .navbar > a:hover { color: #fff; background-color: #333 }
+  .navbar > a:hover { color: #eee; background-color: #222 }
   .navbar > a.active-tab {
     background-color: #444;
   }
 
   img[alt=Chat] { filter: invert(1) }
   img[alt=Stats] { filter: invert(1) }
+
+  .default-bg { background-color: #222 }
+
+  .modal-contents { border: solid 2px #eee; border-radius: 0 }
 
   {^DARK_THEME_STYLES_END}
 

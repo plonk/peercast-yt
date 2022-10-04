@@ -116,8 +116,8 @@ class Thread:
       else:
         query = "{0}-{1}".format(r.start, r.stop)
       url = self.dat_url() + query
-      return self.board.download(url).decode(self.board.external_encoding)
+      return self.board.download(url).decode(self.board.external_encoding, 'replace')
     else:
       url = self.dat_url()
-      lines = self.board.download(url).decode(self.board.external_encoding).splitlines()
+      lines = self.board.download(url).decode(self.board.external_encoding, 'replace').splitlines()
       return "".join(map(lambda line: line + "\n", lines[r.start-1:]))
