@@ -743,6 +743,32 @@ json JrpcApi::getStatus(json::array_t)
     return j;
 }
 
+#include "stats.h"
+#include "notif.h"
+
+json JrpcApi::getState(json::array_t args)
+{
+    std::vector<std::string> objectNames = args[0];
+    auto json = json::object();
+
+    for (auto& name : objectNames)
+    {
+        if (name == "servMgr")
+            json[name] = json::parse(servMgr->getState().inspect());
+        else if (name == "chanMgr")
+            json[name] = json::parse(chanMgr->getState().inspect());
+        else if (name == "stats")
+            json[name] = json::parse(stats.getState().inspect());
+        else if (name == "notificationBuffer")
+            json[name] = json::parse(g_notificationBuffer.getState().inspect());
+        else if (name == "sys")
+            json[name] = json::parse(sys->getState().inspect());
+        else
+            throw invalid_params("Unknown object name: " + name);
+    }
+    return json;
+}
+
 json JrpcApi::getNewVersions(json::array_t)
 {
     return json::array();
@@ -909,4 +935,53 @@ json JrpcApi::getYPChannelsInternal(json::array_t args)
             });
     }
     return res;
+}
+
+static const std::array<std::string, 1> knownKeys = { "channelFilters" };
+
+json JrpcApi::getServerStorageItem(json::array_t args)
+{
+    std::string key = args[0].get<std::string>();
+
+    if (std::find(knownKeys.begin(), knownKeys.end(), key) == knownKeys.end())
+        throw application_error(kUnknownError, "invalid key");
+
+    std::string dir = peercastApp->getStateDirPath();
+    std::string path = dir + "/" + key + ".json";
+
+    FileStream fs;
+    try {
+        fs.openReadOnly(path);
+    } catch (StreamException& e)
+    {
+        return nullptr;
+    }
+    auto size = fs.length();
+    char* buf = new char [size];
+    fs.read(buf, size);
+    fs.close();
+    std::string str(buf, buf + size);
+    delete[] buf;
+
+    return str;
+}
+
+json JrpcApi::setServerStorageItem(json::array_t args)
+{
+    std::string key = args[0].get<std::string>();
+    std::string value = args[1].get<std::string>();
+
+    if (std::find(knownKeys.begin(), knownKeys.end(), key) == knownKeys.end())
+        throw application_error(kUnknownError, "invalid key");
+
+    std::string dir = peercastApp->getStateDirPath();
+    std::string path = dir + "/" + key + ".json";
+
+    FileStream fs;
+    fs.openWriteReplace(path);
+
+    fs.writeString(value);
+    fs.close();
+
+    return nullptr;
 }

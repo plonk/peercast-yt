@@ -26,6 +26,7 @@ public:
     std::vector<std::string> getAll(const std::string&);
     void add(const std::string&, const std::string&);
     std::string str();
+    std::vector<std::string> getKeys() const;
 
     std::map<std::string,std::vector<std::string> > m_dict;
 };

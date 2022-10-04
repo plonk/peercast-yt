@@ -363,11 +363,13 @@ amf0::Value ChannelDirectory::getState()
     std::vector<amf0::Value> feeds;
     for (auto& f : this->feeds())
     {
+        int count = std::count_if(channels.begin(), channels.end(), [&](const amf0::Value& v) { return v.object().at("feedUrl")==f.url; });
         feeds.push_back(amf0::Value::object(
                             {
                                 {"url", f.url},
                                 {"directoryUrl", str::replace_suffix(f.url, "index.txt", "")},
-                                {"status", ChannelFeed::statusToString(f.status) }
+                                {"status", ChannelFeed::statusToString(f.status) },
+                                {"numChannels", count }
                             }));
     }
 

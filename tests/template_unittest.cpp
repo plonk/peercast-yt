@@ -66,6 +66,30 @@ TEST_F(TemplateFixture, readTemplate)
     ASSERT_STREQ("hoge", out.str().c_str());
 }
 
+TEST_F(TemplateFixture, escapeByBackslash)
+{
+    StringStream in, out;
+    int res;
+
+    in.writeString("{$\"\\}\"}"); // {$"\}"}
+    in.rewind();
+    res = temp.readTemplate(in, &out);
+    ASSERT_EQ(Template::TMPL_END, res);
+    ASSERT_STREQ("}", out.str().c_str());
+}
+
+TEST_F(TemplateFixture, escapeByBackslash2)
+{
+    StringStream in, out;
+    int res;
+
+    in.writeString("{$\"\\\\\\\\\"}"); // {$"\\\\"}
+    in.rewind();
+    res = temp.readTemplate(in, &out);
+    ASSERT_EQ(Template::TMPL_END, res);
+    ASSERT_STREQ("\\", out.str().c_str());
+}
+
 TEST_F(TemplateFixture, getStringVariable)
 {
     ASSERT_STREQ("1", temp.getStringVariable("TRUE").c_str());
@@ -87,9 +111,14 @@ TEST_F(TemplateFixture, readStringLiteral)
     ASSERT_STREQ("def", rest.c_str());
 }
 
+static std::vector<std::string> toVector(const std::list<std::string>& ls)
+{
+    return { ls.begin(), ls.end() };
+}
+
 TEST_F(TemplateFixture, tokenizeBinaryExpression)
 {
-    auto tok = temp.tokenize("a==b");
+    std::vector<std::string> tok = toVector(temp.tokenize("a==b"));
 
     ASSERT_EQ(3, tok.size());
     ASSERT_STREQ("a", tok[0].c_str());
@@ -99,12 +128,12 @@ TEST_F(TemplateFixture, tokenizeBinaryExpression)
 
 TEST_F(TemplateFixture, tokenizeVariableExpression)
 {
-    auto tok = temp.tokenize("a");
+    std::vector<std::string> tok = toVector(temp.tokenize("a"));
 
     ASSERT_EQ(1, tok.size());
     ASSERT_STREQ("a", tok[0].c_str());
 
-    tok = temp.tokenize("!a");
+    tok = toVector(temp.tokenize("!a"));
     ASSERT_EQ(2, tok.size());
     ASSERT_STREQ("!", tok[0].c_str());
     ASSERT_STREQ("a", tok[1].c_str());
@@ -112,7 +141,7 @@ TEST_F(TemplateFixture, tokenizeVariableExpression)
 
 TEST_F(TemplateFixture, tokenizeCallExpression)
 {
-    auto tok = temp.tokenize("inspect(x)");
+    std::vector<std::string> tok = toVector(temp.tokenize("inspect(x)"));
 
     ASSERT_EQ(4, tok.size());
     ASSERT_EQ(tok[0], "inspect");
@@ -313,6 +342,10 @@ TEST_F(TemplateFixture, parse)
     val = Template::parse(tok);
     ASSERT_EQ(val.inspect(), amf0::Value::strictArray({"!", "x.y"}).inspect());
 
+    tok = temp.tokenize("!!x");
+    val = Template::parse(tok);
+    ASSERT_EQ(val.inspect(), amf0::Value::strictArray({"!", amf0::Value::strictArray({"!", "x"})}).inspect());
+
     tok = temp.tokenize("x.y");
     val = Template::parse(tok);
     ASSERT_EQ(val.inspect(), amf0::Value("x.y").inspect());
@@ -329,7 +362,28 @@ TEST_F(TemplateFixture, parse)
     val = Template::parse(tok);
     ASSERT_EQ(val.inspect(), amf0::Value::strictArray({"quote", "a"}).inspect());
 
+    tok = temp.tokenize("'a'");
+    val = Template::parse(tok);
+    ASSERT_EQ(val.inspect(), amf0::Value::strictArray({"quote", "a"}).inspect());
+
+    tok = temp.tokenize("\"\\\"\"");
+    val = Template::parse(tok);
+    ASSERT_EQ(val.inspect(), amf0::Value::strictArray({"quote", "\""}).inspect());
+
     tok = temp.tokenize("1");
     val = Template::parse(tok);
     ASSERT_EQ(val.inspect(), amf0::Value("1").inspect());
+
+    tok = temp.tokenize("{}");
+    val = Template::parse(tok);
+    ASSERT_EQ(val.inspect(), "[\"object\"]");
+
+    tok = temp.tokenize("{\"a\":1,\"b\":2}");
+    val = Template::parse(tok);
+    ASSERT_EQ(val.inspect(), "[\"object\",[\"quote\",\"a\"],\"1\",[\"quote\",\"b\"],\"2\"]");
+
+    tok = temp.tokenize("[]");
+    ASSERT_EQ(tok.size(), 2);
+    val = Template::parse(tok);
+    ASSERT_EQ(val.inspect(), "[\"array\"]");
 }

@@ -246,6 +246,9 @@ public:
     amf0::Value getState() override;
     bool isBlacklisted(const Host& h);
 
+    void loadTokenList();
+    void saveTokenList();
+
     ThreadInfo          serverThread;
     ThreadInfo          idleThread;
 

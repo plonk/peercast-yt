@@ -87,3 +87,15 @@ Cookie::Cookie()
 {
     clear();
 }
+
+// -----------------------------------
+amf0::Value CookieList::getState()
+{
+    std::vector<amf0::Value> arr;
+
+    for (auto& cookie : list)
+    {
+        arr.push_back(amf0::Value::object({ { "ip", cookie.ip.str() }, { "id", cookie.id } }));
+    }
+    return arr;
+}

@@ -36,16 +36,29 @@
 using namespace std;
 
 static bool isTruish(const amf0::Value& value);
+static void to_s(const amf0::Value& value, std::string& out);
+static bool readUntil(Stream& in, std::string& var /*OUT*/, std::function<bool(char)> pred);
 
 // --------------------------------------
 Template::Template(const std::string& args)
 {
     tmplArgs = args;
+    m_pageScope = new GenericScope;
+
+    cgi::Query query(tmplArgs);
+    std::map<std::string,amf0::Value> page;
+    for (auto& key : query.getKeys())
+    {
+        page[key] = query.get(key);
+    }
+    m_pageScope->vars["page"] = page;
+    m_scopes.push_front(m_pageScope);
 }
 
 // --------------------------------------
 Template::~Template()
 {
+    delete m_pageScope;
 }
 
 // --------------------------------------
@@ -100,39 +113,29 @@ bool Template::writeVariable(amf0::Value& out, const String &varName)
 }
 
 // --------------------------------------
-bool Template::writePageVariable(amf0::Value& out, const String &varName)
-{
-    String v = varName+5;
-    v.append('=');
-    const char *a = getCGIarg(tmplArgs.c_str(), v);
-    if (a)
-    {
-        Regexp pat("^([^&]*)");
-        auto vec = pat.exec(a);
-        assert(vec.size() > 0);
-
-        out = cgi::unescape(vec[0]);
-        return true;
-    }
-
-    return false;
-}
-
-// --------------------------------------
 bool Template::writeGlobalVariable(amf0::Value& out, const String &varName)
 {
     bool r = false;
 
-    if (varName.startsWith("page."))
-    {
-        r = writePageVariable(out, varName);
-    }else if (varName == "TRUE")
+    if (varName == "TRUE")
     {
         out = "1";
         r = true;
     }else if (varName == "FALSE")
     {
         out = "0";
+        r = true;
+    }else if (varName == "true")
+    {
+        out = true;
+        r = true;
+    }else if (varName == "false")
+    {
+        out = false;
+        r = true;
+    }else if (varName == "null")
+    {
+        out = nullptr;
         r = true;
     }
 
@@ -226,19 +229,23 @@ void    Template::readFragment(Stream &in, Stream *outp)
 // --------------------------------------
 string Template::evalStringLiteral(const string& input)
 {
-    if (input[0] != '\"' || input[input.size()-1] != '\"')
+    if (input[0] != '\"' && input[0] != '\'')
+        throw StreamException(str::STR("Malformed string literal: ", input));
+
+    const char quotechar = input[0];
+
+    if (input[input.size()-1] != quotechar)
         throw StreamException(str::STR("Malformed string literal: ", input));
 
     string res;
     auto s = input.substr(1);
 
-    while (!s.empty() && s[0] != '\"')
+    while (!s.empty() && s[0] != quotechar)
     {
         if (s[0] == '\\')
         {
-            // バックスラッシュが最後の文字ではないことはわかっている
-            // ので末端チェックはしない。
-            res += s[0];
+            // 最後の文字は二重引用符で、バックスラッシュではないこと
+            // はわかっているので末端チェックはしない。
             res += s[1];
             s.erase(0,2);
         }else
@@ -249,7 +256,7 @@ string Template::evalStringLiteral(const string& input)
     }
 
     if (s.empty())
-        throw StreamException("Premature end of string");
+        throw StreamException("Premature end of string: " + input);
     return res;
 }
 
@@ -259,14 +266,17 @@ pair<string,string> Template::readStringLiteral(const string& input)
     if (input.empty())
         throw StreamException("empty input");
 
-    if (input[0] != '\"')
+    if (input[0] != '\"' && input[0] != '\'')
         throw StreamException("no string literal");
 
+    const char quotechar = input[0];
+
     auto s = input;
-    string res = "\"";
+    string res;
+    res += input[0];
     s.erase(0,1);
 
-    while (!s.empty() && s[0] != '\"')
+    while (!s.empty() && s[0] != quotechar)
     {
         if (s[0] == '\\')
         {
@@ -285,15 +295,15 @@ pair<string,string> Template::readStringLiteral(const string& input)
     }
 
     if (s.empty())
-        throw StreamException("Premature end of string");
+        throw StreamException("Premature end of string: " + input);
 
-    res += "\"";
+    res += quotechar;
     s.erase(0,1);
     return make_pair(res, s);
 }
 
 // --------------------------------------
-vector<string> Template::tokenize(const string& input)
+std::list<std::string> Template::tokenize(const string& input)
 {
     using namespace std;
 
@@ -320,11 +330,11 @@ vector<string> Template::tokenize(const string& input)
         {
             tokens.push_back(s.substr(0,2));
             s.erase(0,2);
-        }else if (s[0] == '(' || s[0] == ')' || s[0] == '!')
+        }else if (s[0] == '(' || s[0] == ')' || s[0] == '!' || s[0] == ',' || s[0] == '=' || s[0] == '{' || s[0] == '}' || s[0] == ':' || s[0] == '[' || s[0] == ']')
         {
             tokens.push_back(s.substr(0, 1));
             s.erase(0, 1);
-        }else if (s[0] == '\"')
+        }else if (s[0] == '\"' || s[0] == '\'')
         {
             string t;
             tie(t, s) = readStringLiteral(s);
@@ -344,7 +354,7 @@ vector<string> Template::tokenize(const string& input)
             throw StreamException(("Unrecognized token. Error at " + str::inspect(c)).c_str());
         }
     }
-    return tokens;
+    return { tokens.begin(), tokens.end() };
 }
 
 // --------------------------------------
@@ -353,25 +363,32 @@ static Regexp REG_NOT("^!$");
 static Regexp REG_IDENT("^[A-z0-9_.]+$");
 static Regexp REG_LPAREN("^\\($");
 static Regexp REG_RPAREN("^\\)$");
-static Regexp REG_STRING("^\".*?\"$");
+static Regexp REG_STRING("^\".*?\"|\'.*?\'$");
+static Regexp REG_COMMA("^,$");
+static Regexp REG_COLON("^:$");
+static Regexp REG_ASSIGN("^=$");
+static Regexp REG_LBRACE("^\\{$");
+static Regexp REG_RBRACE("^\\}$");
+static Regexp REG_LBRACKET("^\\[$");
+static Regexp REG_RBRACKET("^\\]$");
 
-amf0::Value Template::parse(vector<string>& tokens_)
+amf0::Value Template::parse(std::list<std::string>& tokens)
 {
     /*
 
-      EXP := EXP2 OP EXP2 |           (op exp2 exp2)
+      EXP := EXP2 OP EXP |                       (op exp2 exp)
              EXP2 |                   
-             '!' EXP2                 (! exp2)
 
-      EXP2 := IDENT '(' EXP ')' |     (ident exp)
-              IDENT |                 ident
-              STRING                  (string STRING)
+      EXP2 := IDENT '(' EXP (',' EXP)* ')' |     (ident exp ...)
+              '(' EXP ')' '(' EXP (',' EXP)* ')' |     (ident exp ...)
+              IDENT |                            ident
+              STRING                             (quote STRING)
+             '!' EXP                             (! exp)
+             '{' ( EXP ':' EXP ( ',' EXP )* )? '}' (object exp exp ...)
 
       OP := '=~' | '!~' | '==' | '!='
 
     */
-
-    std::list<std::string> tokens(tokens_.begin() ,tokens_.end());
 
     auto accept =
         [&](const Regexp& sym) -> shared_ptr<std::string>
@@ -399,26 +416,137 @@ amf0::Value Template::parse(vector<string>& tokens_)
             tokens.pop_front();
         };
 
-    std::function<shared_ptr<amf0::Value>()> exp, exp2;
+    auto peek = 
+        [&](const Regexp& sym) -> bool
+        {
+            if (tokens.empty())
+                return false;
+            else
+                return sym.matches(tokens.front());
+        };
 
-    exp =
+    std::function<shared_ptr<amf0::Value>()> exp, exp2, exp3, callee;
+
+    exp = 
         [&]() -> shared_ptr<amf0::Value>
         {
-            if (auto e1 = exp2()) {
-                if (auto op = accept(REG_OP)) {
-                    if (auto e2 = exp2()) {
-                        return make_shared<amf0::Value>(amf0::Value::strictArray({ *op, *e1, *e2 }));
+            if (auto e = exp3()) {
+                if (peek(REG_LPAREN))
+                {
+                    expect(REG_LPAREN);
+
+                    std::vector<amf0::Value> funcall = { *e };
+                    if (accept(REG_RPAREN))
+                    {
+                        return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
+                    }
+                    while (true) {
+                        auto e = exp();
+                        if (!e)
+                        {
+                            throw GeneralException("exp expected");
+                        }
+                        funcall.push_back(*e);
+                        if (accept(REG_COMMA))
+                        {
+                            continue;
+                        }else{
+                            expect(REG_RPAREN);
+                            return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
+                        }
+                    }
+                } else if (peek(REG_LBRACKET))
+                {
+                    expect(REG_LBRACKET);
+
+                    std::vector<amf0::Value> funcall = { "prop", *e };
+
+                    auto e2 = exp();
+                    if (!e2)
+                    {
+                        throw GeneralException("exp expected");
+                    }
+                    funcall.push_back(*e2);
+
+                    expect(REG_RBRACKET);
+                    return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
+                } else if (peek(REG_OP))
+                {
+                    // 右結合になっちゃった。
+                    auto op = accept(REG_OP);
+                    if (auto e2 = exp()) {
+                        return make_shared<amf0::Value>(amf0::Value::strictArray({ *op, *e, *e2 }));
                     } else {
                         return nullptr;
                     }
+                    
                 } else {
-                    return e1;
+                    return e;
                 }
-            } else if (accept(REG_NOT)) {
-                if (auto r = exp2()) {
+            } else {
+                return nullptr;
+            }
+        };
+
+    exp3 =
+        [&]() -> shared_ptr<amf0::Value>
+        {
+            if (accept(REG_NOT)) {
+                if (auto r = exp()) {
                     return make_shared<amf0::Value>(amf0::Value::strictArray({ "!", *r }));
                 } else
                     return nullptr;
+            } else if (accept(REG_LBRACE)) {
+                std::vector<amf0::Value> funcall = { "object" };
+                if (accept(REG_RBRACE))
+                {
+                    return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
+                }
+                while (true) {
+                    auto e = exp();
+                    if (!e)
+                    {
+                        return nullptr;
+                    }
+                    funcall.push_back(*e);
+                    expect(REG_COLON);
+                    e = exp();
+                    if (!e)
+                    {
+                        return nullptr;
+                    }
+                    funcall.push_back(*e);
+                    if (accept(REG_COMMA))
+                    {
+                        continue;
+                    }else{
+                        expect(REG_RBRACE);
+                        return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
+                    }
+                }
+            } else if (accept(REG_LBRACKET)) {
+                std::vector<amf0::Value> funcall = { "array" };
+                if (accept(REG_RBRACKET))
+                {
+                    return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
+                }
+                while (true) {
+                    auto e = exp();
+                    if (!e)
+                    {
+                        return nullptr;
+                    }
+                    funcall.push_back(*e);
+                    if (accept(REG_COMMA))
+                    {
+                        continue;
+                    }else{
+                        expect(REG_RBRACKET);
+                        return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
+                    }
+                }
+            } else if (auto e1 = exp2()) {
+                return e1;
             } else
                 return nullptr;
         };
@@ -428,13 +556,56 @@ amf0::Value Template::parse(vector<string>& tokens_)
         {
             if (auto ident = accept(REG_IDENT)) {
                 if (accept(REG_LPAREN)) {
-                    if (auto e = exp()) {
-                        expect(REG_RPAREN);
-                        return make_shared<amf0::Value>(amf0::Value::strictArray({ *ident, *e }));
-                    } else
-                        return nullptr;
+                    std::vector<amf0::Value> funcall = { *ident };
+                    if (accept(REG_RPAREN))
+                    {
+                        return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
+                    }
+                    while (true) {
+                        auto e = exp();
+                        if (!e)
+                        {
+                            return nullptr;
+                        }
+                        funcall.push_back(*e);
+                        if (accept(REG_COMMA))
+                        {
+                            continue;
+                        }else{
+                            expect(REG_RPAREN);
+                            return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
+                        }
+                    }
                 } else {
                     return make_shared<amf0::Value>(*ident);
+                }
+            } else if (accept(REG_LPAREN)) {
+                if (auto e = exp()) {
+                    expect(REG_RPAREN);
+                    expect(REG_LPAREN);
+
+                    std::vector<amf0::Value> funcall = { *e };
+                    if (accept(REG_RPAREN))
+                    {
+                        return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
+                    }
+                    while (true) {
+                        auto e = exp();
+                        if (!e)
+                        {
+                            return nullptr;
+                        }
+                        funcall.push_back(*e);
+                        if (accept(REG_COMMA))
+                        {
+                            continue;
+                        }else{
+                            expect(REG_RPAREN);
+                            return make_shared<amf0::Value>(amf0::Value::strictArray(funcall));
+                        }
+                    }
+                } else {
+                    return nullptr;
                 }
             } else if (auto s = accept(REG_STRING)) {
                 return make_shared<amf0::Value>(amf0::Value::strictArray({ "quote", evalStringLiteral(*s) }));
@@ -447,11 +618,9 @@ amf0::Value Template::parse(vector<string>& tokens_)
     if (!pvalue) {
         throw GeneralException(" something weird ");
     }
-    if (tokens.size()) {
-        throw GeneralException(str::STR("Unexpected token ", tokens.front()));
-    }
     return *pvalue;
 }
+
 
 // --------------------------------------
 static bool isTruish(const amf0::Value& value)
@@ -469,6 +638,44 @@ static bool isTruish(const amf0::Value& value)
 }
 
 // --------------------------------------
+amf0::Value Template::apply(const amf0::Value& lambda, const std::vector<amf0::Value>& arr)
+{
+    auto name = arr.at(0).inspect();
+
+    if (!lambda.isStrictArray())
+        throw GeneralException(name + " is not a function");
+    auto array = lambda.strictArray();
+    if (!(array.size() > 2 && array[0].isString() && array.at(0).string() == "lambda"))
+        throw GeneralException(name + " is not a function");
+    if (!(array.at(1).isStrictArray()))
+        throw GeneralException(name + " is not a function");
+
+    auto& params = array[1].strictArray();
+    if (!(params.size() > 0 && params.at(0).isString() && params.at(0).string() == "array"))
+        throw GeneralException(name + " is not a function");
+
+    GenericScope frame;
+    for (size_t i = 1; i < params.size(); i++)
+    {
+        frame.vars[params.at(i).string()] = (i >= arr.size()) ? nullptr : evalExpression(arr.at(i));
+    }
+
+    prependScope(frame);
+
+    amf0::Value v = nullptr;
+    for (size_t i = 2; i < array.size(); i++)
+    {
+        if (i < array.size() - 1)
+            evalExpression(array.at(i));
+        else
+            v = evalExpression(array.at(i));
+    }
+
+    m_scopes.pop_front();
+    return v;
+}
+
+// --------------------------------------
 amf0::Value Template::evalForm(const amf0::Value& exp)
 {
     const auto& arr = exp.strictArray();
@@ -476,6 +683,9 @@ amf0::Value Template::evalForm(const amf0::Value& exp)
     if (arr.size() == 0) {
         throw GeneralException("empty list form");
     } else {
+        if (!arr.at(0).isString()) {
+            return apply(evalExpression(arr.at(0)), arr);
+        }
         const auto& name = arr.at(0).string();
         if (name == "==") {
             return evalExpression(arr.at(1)) == evalExpression(arr.at(2));
@@ -493,14 +703,203 @@ amf0::Value Template::evalForm(const amf0::Value& exp)
             return evalExpression(arr.at(1)).strictArray().size();
         } else if (name == "inspect") {
             return evalExpression(arr.at(1)).inspect();
+        } else if (name == "if") {
+            if (arr.size() == 3) {
+                return isTruish(evalExpression(arr.at(1))) ? evalExpression(arr.at(2)) : nullptr;
+            }else if (arr.size() == 4) {
+                return isTruish(evalExpression(arr.at(1))) ? evalExpression(arr.at(2)) : evalExpression(arr.at(3));
+            }else
+                throw GeneralException("malformed if form");
+        } else if (name == "cond") {
+            if (arr.size() % 2 != 1)
+                throw GeneralException("Malformed cond");
+
+            for (size_t i = 1; i < arr.size(); i += 2)
+            {
+                if (isTruish(evalExpression(arr.at(i))))
+                    return evalExpression(arr.at(i + 1));
+            }
+            return nullptr;
+        } else if (name == "and") {
+            size_t index = 1;
+            amf0::Value v = true;
+            while (index < arr.size())
+            {
+                v = evalExpression(arr.at(index));
+                if (!isTruish(v))
+                    break;
+                index++;
+            }
+            return v;
+        } else if (name == "or") {
+            size_t index = 1;
+            amf0::Value v = false;
+            while (index < arr.size())
+            {
+                v = evalExpression(arr.at(index));
+                if (isTruish(v))
+                    break;
+                index++;
+            }
+            return v;
+        } else if (name == "object") {
+            std::map<std::string,amf0::Value> object;
+            if ((arr.size() - 1) % 2) // odd
+            {
+                throw GeneralException("object: Odd number of arguments given");
+            }
+            for (size_t i = 1; i < arr.size(); i += 2)
+            {
+                auto key = evalExpression(arr.at(i));
+                if (!key.isString())
+                {
+                    throw GeneralException("object: Non-string key");
+                }
+                auto value = evalExpression(arr.at(i+1));
+
+                object[key.string()] = value;
+            }
+            return object;
+        } else if (name == "array") {
+            std::vector<amf0::Value> array;
+            for (size_t i = 1; i < arr.size(); i++)
+            {
+                array.push_back(evalExpression(arr.at(i)));
+            }
+            return array;
+        } else if (name == "merge") {
+            if (arr.size() - 1 < 1)
+            {
+                throw GeneralException("merge: Wrong number of arguments");
+            }
+            std::map<std::string,amf0::Value> result = evalExpression(arr[1]).object();
+            for (size_t i = 2; i < arr.size(); i++)
+            {
+                auto evaluated = evalExpression(arr[i]);
+                const auto& src = evaluated.object();
+                for (auto& pair : src)
+                {
+                    result[pair.first] = pair.second;
+                }
+            }
+            return result;
+        } else if (name == "toQueryString") {
+            if (arr.size() - 1 != 1)
+            {
+                throw GeneralException("merge: Wrong number of arguments");
+            }
+            std::map<std::string,amf0::Value> dict = evalExpression(arr[1]).object();
+            std::string res;
+            bool firstTime = true;
+            for (auto pair : dict)
+            {
+                if (firstTime)
+                    firstTime = false;
+                else
+                    res += "&";
+
+                std::string stringified;
+                to_s(pair.second, stringified);
+                res += cgi::escape(pair.first) + "=" + cgi::escape(stringified);
+            }
+            return res;
+        } else if (name == "nth") {
+            if (arr.size() - 1 != 2)
+            {
+                throw GeneralException("merge: Wrong number of arguments");
+            }
+            auto subscript = evalExpression(arr[1]);
+            auto array = evalExpression(arr[2]);
+            return array.strictArray()[subscript.number()];
+        } else if (name == "prop") {
+            if (arr.size() - 1 != 2)
+            {
+                throw GeneralException("prop: Wrong number of arguments");
+            }
+            auto object = evalExpression(arr[1]);
+            auto key = evalExpression(arr[2]);
+            if (!object.isObject())
+            {
+                throw GeneralException("prop: " + object.inspect() + " is not an object");
+            }
+            try {
+                return object.object().at(key.string());
+            } catch(std::out_of_range& e)
+            {
+                return nullptr;
+            }
+        } else if (name == "removeKey") {
+            if (arr.size() - 1 < 1)
+            {
+                throw GeneralException("removeKey: Wrong number of arguments");
+            }
+            auto object = evalExpression(arr[1]).object();
+
+            for (size_t i = 2; i < arr.size(); i++)
+            {
+                auto key = evalExpression(arr[i]).string();
+                object.erase(key);
+            }
+            return object;
+        } else if (name == "keys") {
+            if (arr.size() - 1 != 1)
+            {
+                throw GeneralException("keys: Wrong number of arguments");
+            }
+            auto object = evalExpression(arr[1]).object();
+
+            std::vector<amf0::Value> result;
+            for (auto& pair : object)
+            {
+                result.push_back(pair.first);
+            }
+            return result;
+        } else if (name == "lambda") {
+            return arr;
+        } else if (name == "define") {
+            GenericScope* topScope = dynamic_cast<GenericScope*>(m_scopes.front());
+            if (!topScope)
+            {
+                throw GeneralException("Cannot change this scope.");
+            }
+            topScope->vars[arr.at(1).string()] = evalExpression(arr.at(2));
+            return nullptr;
+        } else if (name == "replacePrefix") {
+            return str::replace_prefix(evalExpression(arr.at(1)).string(), evalExpression(arr.at(2)).string(), evalExpression(arr.at(3)).string());
+        } else if (name == "replaceSuffix") {
+            return str::replace_suffix(evalExpression(arr.at(1)).string(), evalExpression(arr.at(2)).string(), evalExpression(arr.at(3)).string());
+        } else if (name == "str") {
+            std::string result;
+            for (size_t i = 1; i < arr.size(); i++)
+            {
+                auto value = evalExpression(arr.at(i));
+                if (value.isString())
+                    result += value.string();
+                else if (value.isNull())
+                    result += "";
+                else
+                    result += value.inspect();
+            }
+            return result;
+        } else if (name == "evalString") {
+            if (arr.size() != 2)
+                throw GeneralException("eval: Wrong number of arguments");
+
+            std::list<std::string> tokens = tokenize(evalExpression(arr.at(1)).string());
+            return evalExpression(parse(tokens));
         } else {
-            throw GeneralException(str::STR("Unknown function name or operator name ", name));
+            amf0::Value value;
+            if (writeVariable(value, name.c_str()))
+            {
+                return apply(value, arr);
+            }else
+                throw GeneralException(str::STR("Unknown function name or operator name ", name));
         }
     }
 }
 
 // --------------------------------------
-static Regexp REG_INTEGER("^[0-9]$");
+static Regexp REG_INTEGER("^[0-9]+$");
 
 amf0::Value Template::evalExpression(const amf0::Value& exp)
 {
@@ -523,8 +922,12 @@ amf0::Value Template::evalExpression(const amf0::Value& exp)
 // --------------------------------------
 amf0::Value Template::evalExpression(const string& str)
 {
-    auto tokens = tokenize(str);
+    std::list<std::string> tokens = tokenize(str);
+
     auto exp = parse(tokens);
+    if (tokens.size()) {
+        throw GeneralException(str::STR("Unexpected token ", tokens.front()));
+    }
     return evalExpression(exp);
 }
 
@@ -535,19 +938,12 @@ bool    Template::evalCondition(const string& cond)
 }
 
 // --------------------------------------
-static String readCondition(Stream &in)
+static std::string readCondition(Stream &in)
 {
-    String cond;
+    std::string cond;
 
-    while (!in.eof())
-    {
-        char c = in.readChar();
+    readUntil(in, cond, [](char c){ return c == '}'; });
 
-        if (c == '}')
-            break;
-        else
-            cond.append(c);
-    }
     return cond;
 }
 
@@ -579,145 +975,211 @@ void    Template::readIf(Stream &in, Stream *outp)
 }
 
 // --------------------------------------
-void    Template::readLoop(Stream &in, Stream *outp)
+static bool readUntil(Stream& in, std::string& var /*OUT*/, std::function<bool(char)> pred)
 {
-    String var;
+    bool escape_next = false;
     while (!in.eof())
     {
         char c = in.readChar();
-
-        if (c == '}')
+        if (!escape_next && c == '\\')
         {
-            if (!inSelectedFragment() || !outp)
-            {
-                readTemplate(in, NULL);
-                return;
-            }
-
-            int cnt = getIntVariable(var);
-
-            if (cnt)
-            {
-                int spos = in.getPosition();
-                for (int i=0; i<cnt; i++)
-                {
-                    in.seekTo(spos);
-                    readTemplate(in, outp);
-                }
-            }else
-            {
-                readTemplate(in, NULL);
-            }
-            return;
-        }else
-        {
-            var.append(c);
+            escape_next = true;
+            continue;
         }
+            
+        if (!escape_next && pred(c))
+            return true;
+        else
+        {
+            var += c;
+            escape_next = false;
+        }
+    }
+    return false;
+}
+
+// --------------------------------------
+void    Template::readLoop(Stream &in, Stream *outp)
+{
+    std::string var;
+    if (!readUntil(in, var, [](char c){ return c == '}'; }))
+        return;
+
+    int cnt = getIntVariable(var.c_str());
+
+    if (cnt)
+    {
+        int spos = in.getPosition();
+        for (int i=0; i<cnt; i++)
+        {
+            in.seekTo(spos);
+            readTemplate(in, outp);
+        }
+    }else
+    {
+        readTemplate(in, NULL);
     }
 }
 
 // --------------------------------------
 void    Template::readForeach(Stream &in, Stream *outp)
 {
-    String var;
-    while (!in.eof())
+    std::string var;
+    if (!readUntil(in, var, [](char c){ return c == '}'; }))
+        return;
+
+    std::list<std::string> tokens = tokenize(var.c_str());
+    amf0::Value value = evalExpression(parse(tokens));
+    if (!value.isStrictArray())
+        throw GeneralException(str::STR(var, " is not a strictArray. Value: ", value.inspect()));
+
+    auto& coll = value.strictArray();
+
+    if (coll.size() == 0)
     {
-        char c = in.readChar();
-
-        if (c == '}')
+        readTemplate(in, NULL);
+    }else
+    {
+        GenericScope loopScope;
+        prependScope(loopScope);
+        int start = in.getPosition();
+        for (size_t i = 0; i < coll.size(); i++)
         {
-            if (!inSelectedFragment() || !outp)
-            {
-                readTemplate(in, NULL);
-                return;
-            }
+            loopScope.vars["this"] = coll[i];
+            loopScope.vars["loop.index"] = i;
+            loopScope.vars["loop.indexBaseOne"] = i + 1;
+            in.seekTo(start);
+            readTemplate(in, outp);
+        }
+        m_scopes.pop_front();
+    }
+    return;
+}
 
-            amf0::Value value;
-            bool written = false;
-            for (auto scope : m_scopes)
-            {
-                written = scope->writeVariable(value, var);
-                if (written)
-                {
-                    break;
-                }
-            }
-            if (!value.isStrictArray())
-                throw GeneralException(str::STR(var, " is not a strictArray. Value: ", value.inspect()));
+// --------------------------------------
+std::vector<std::pair<std::string,amf0::Value>> Template::parseLetSpec(std::list<std::string>& tokens)
+{
+    std::vector<std::pair<std::string,amf0::Value>> result;
 
-            auto& coll = value.strictArray();
-
-            if (coll.size() == 0)
+    auto accept =
+        [&](const Regexp& sym) -> shared_ptr<std::string>
+        {
+            if (tokens.empty())
+                return nullptr;
+            if (sym.matches(tokens.front()))
             {
-                readTemplate(in, NULL);
+                auto r = tokens.front();
+                tokens.pop_front();
+                return make_shared<std::string>(r);
             }else
-            {
-                GenericScope loopScope;
-                prependScope(loopScope);
-                int start = in.getPosition();
-                for (size_t i = 0; i < coll.size(); i++)
-                {
-                    loopScope.vars["this"] = coll[i];
-                    loopScope.vars["loop.index"] = i;
-                    loopScope.vars["loop.indexBaseOne"] = i + 1;
-                    in.seekTo(start);
-                    readTemplate(in, outp);
-                }
-                m_scopes.pop_front();
-            }
-            return;
-        }else
+                return nullptr;
+        };
+
+    auto expect =
+        [&](const Regexp& sym) -> void
         {
-            var.append(c);
+            if (tokens.empty())
+                throw GeneralException(str::STR("Premature end while expecting ", sym.m_exp));
+
+            if (!sym.matches(tokens.front()))
+                throw GeneralException(str::STR("Got ", tokens.front()," while expecting ", sym.m_exp));
+
+            tokens.pop_front();
+        };
+
+    auto peek = 
+        [&](const Regexp& sym) -> bool
+        {
+            if (tokens.empty())
+                return false;
+            else
+                return sym.matches(tokens.front());
+        };
+
+    while (true)
+    {
+        if (auto ident = accept(REG_IDENT))
+        {
+            expect(REG_ASSIGN);
+            auto exp = parse(tokens);
+
+            result.push_back(std::pair<std::string,amf0::Value>(*ident, exp));
+            if (tokens.size())
+            {
+                expect(REG_COMMA);
+                continue;
+            }else{
+                break;
+            }
+        }else{
+            throw GeneralException("Identifier expected");
         }
     }
+    return result;
+}
+
+// --------------------------------------
+void    Template::readLet(Stream &in, Stream *outp)
+{
+    std::string var;
+    if (!readUntil(in, var, [](char c){ return c == '}'; }))
+        return;
+
+    std::list<std::string> tokens = tokenize(var.c_str());
+    std::vector<std::pair<std::string,amf0::Value>> letspec = parseLetSpec(tokens);
+
+    GenericScope newScope;
+    prependScope(newScope);
+    for (size_t i = 0; i < letspec.size(); ++i)
+    {
+        auto& pair = letspec[i];
+        newScope.vars[pair.first] = evalExpression(pair.second);
+    }
+    readTemplate(in, outp);
+    m_scopes.pop_front();
+    return;
 }
 
 // --------------------------------------
 int Template::readCmd(Stream &in, Stream *outp)
 {
-    String cmd;
+    std::string cmd;
 
     int tmpl = TMPL_UNKNOWN;
 
-    while (!in.eof())
-    {
-        char c = in.readChar();
+    if (!readUntil(in, cmd, [](char c){ return String::isWhitespace(c) || (c=='}'); }))
+        return tmpl;
 
-        if (String::isWhitespace(c) || (c=='}'))
-        {
-            if (cmd == "loop")
-            {
-                readLoop(in, outp);
-                tmpl = TMPL_LOOP;
-            }else if (cmd == "if")
-            {
-                readIf(in, outp);
-                tmpl = TMPL_IF;
-            }else if (cmd == "elsif")
-            {
-                tmpl = TMPL_ELSIF;
-            }else if (cmd == "fragment")
-            {
-                readFragment(in, outp);
-                tmpl = TMPL_FRAGMENT;
-            }else if (cmd == "foreach")
-            {
-                readForeach(in, outp);
-                tmpl = TMPL_FOREACH;
-            }else if (cmd == "end")
-            {
-                tmpl = TMPL_END;
-            }
-            else if (cmd == "else")
-            {
-                tmpl = TMPL_ELSE;
-            }
-            break;
-        }else
-        {
-            cmd.append(c);
-        }
+    if (cmd == "loop")
+    {
+        readLoop(in, outp);
+        tmpl = TMPL_LOOP;
+    }else if (cmd == "if")
+    {
+        readIf(in, outp);
+        tmpl = TMPL_IF;
+    }else if (cmd == "elsif")
+    {
+        tmpl = TMPL_ELSIF;
+    }else if (cmd == "fragment")
+    {
+        readFragment(in, outp);
+        tmpl = TMPL_FRAGMENT;
+    }else if (cmd == "foreach")
+    {
+        readForeach(in, outp);
+        tmpl = TMPL_FOREACH;
+    }else if (cmd == "let")
+    {
+        readLet(in, outp);
+        tmpl = TMPL_LET;
+    }else if (cmd == "end")
+    {
+        tmpl = TMPL_END;
+    }
+    else if (cmd == "else")
+    {
+        tmpl = TMPL_ELSE;
     }
     return tmpl;
 }
@@ -736,26 +1198,20 @@ static void to_s(const amf0::Value& value, std::string& out)
 // --------------------------------------
 void Template::readVariable_(Stream &in, Stream *outp, std::function<std::string(const std::string&)> filter)
 {
-    String var;
-    while (!in.eof())
-    {
-        char c = in.readChar();
-        if (c == '}')
-        {
-            if (!inSelectedFragment() || !outp)
-                return;
+    std::string var;
+    if (!readUntil(in, var, [](char c){ return c == '}'; }))
+        return;
 
-            auto out = evalExpression(var);
-            std::string str;
-            to_s(out, str);
-            outp->writeString(filter(str));
+    auto out = evalExpression(var);
 
-            return;
-        }else
-        {
-            var.append(c);
-        }
-    }
+    if (!inSelectedFragment() || !outp)
+        return; // eval するけど表示しない。
+
+    std::string str;
+    to_s(out, str);
+    outp->writeString(filter(str));
+
+    return;
 }
 // --------------------------------------
 void    Template::readVariable(Stream &in, Stream *outp)

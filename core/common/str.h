@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream> // to implement str
 #include <vector>
+#include <stdarg.h>
 
 namespace str
 {
@@ -13,9 +14,11 @@ namespace str
     bool        contains(const std::string& haystack, const std::string& needle);
     std::string downcase(const std::string& input);
     std::string format(const char* fmt, ...) __attribute__ ((format (printf, 1, 2)));
+    std::string vformat(const char* fmt, va_list ap);
     std::string group_digits(const std::string& in, const std::string& separator = ",");
     std::string hexdump(const std::string& in);
-    std::string inspect(const std::string str);
+    std::string inspect(const std::string& str);
+    std::string json_inspect(const std::string& str);
     bool        is_prefix_of(const std::string&, const std::string&); // deprecated
     bool        has_prefix(const std::string& subject, const std::string& prefix);
     bool        has_suffix(const std::string& subject, const std::string& suffix);
@@ -56,6 +59,7 @@ namespace str
     }
 
     bool validate_utf8(const std::string& str);
+    std::string truncate_utf8(const std::string& str, size_t length);
 }
 
 #endif

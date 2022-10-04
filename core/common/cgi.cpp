@@ -96,6 +96,16 @@ std::vector<std::string> Query::getAll(const std::string& key)
     }
 }
 
+std::vector<std::string> Query::getKeys() const
+{
+    std::vector<std::string> result;
+    for (const auto& pair : m_dict)
+    {
+        result.push_back(pair.first);
+    }
+    return result;
+}
+
 std::string Query::str()
 {
     std::string res;
@@ -147,8 +157,6 @@ std::string rfc1123Time(time_t t)
 static Regexp rfc1123("^([A-z]{3}), (\\d+) ([A-z]{3}) (\\d+) (\\d+):(\\d+):(\\d+) (GMT|UTC)$");
 static Regexp rfc1036("^([A-z]+)day, (\\d+)-([A-z]{3})-(\\d{2}) (\\d+):(\\d+):(\\d+) (GMT|UTC)$");
 static Regexp asctime("^([A-z]{3}) ([A-z]{3}) +(\\d+) (\\d+):(\\d+):(\\d+) (\\d+)$");
-
-struct tm parseHttpDate_lasttm = {};
 
 #ifdef WIN32
 #define timegm _mkgmtime
@@ -208,7 +216,6 @@ time_t parseHttpDate(const std::string& str)
     else
     {
         struct tm tm = { sec, min, hour, mday, mon, year, wday, };
-        parseHttpDate_lasttm = tm;
         return timegm(&tm);
     }
 }

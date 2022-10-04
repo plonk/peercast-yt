@@ -30,8 +30,14 @@
 class HTTPException : public StreamException
 {
 public:
-    HTTPException(const char *m, int c) : StreamException(m) { code=c; }
+    HTTPException(const char *m, int c, const std::string& message = "")
+        : StreamException(m)
+    {
+        code = c;
+        additionalMessage = message;
+    }
     int code;
+    std::string additionalMessage;
 };
 
 // --------------------------------------------

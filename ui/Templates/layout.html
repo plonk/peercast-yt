@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="{##lang}">
   <head>
     <title>{^TITLE}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -87,11 +87,94 @@
               </table>
 
               <div class="small" style="float:right">
+                <button class="customize-button" onclick="$('#language_modal').show()" title="{#Choose Language}">&#x1F310;<!-- globe with meridians --></button>
+                <button class="customize-button" onclick="$('#appearance_modal').show()" title="{#Customize Appearance}">&#x1F3A8;<!-- artist palette --></button>
 	        <a href="/public/index.html">{#Public Directory}</a>
 	        <a href="logout.html">{#_Logout_navbar}</a>
               </div>
 
       </div>
+
+      <div class="modal" id="appearance_modal" align="left">
+        <div class="modal-contents default-bg">
+          <h3 style="margin:0">{#Customize Appearance}</h3>
+          <form action="/admin" method="POST">
+            <input type="hidden" name="cmd" value="customizeAppearance">
+
+            <div class="modal-body">
+              <div style="margin:15px 0">
+                <label for="preferredTheme">{#Theme}:</label>
+                <select name="preferredTheme" style="font-size:16pt">
+                  <option value="system" {@if servMgr.preferredTheme == "system"}selected{@end}>
+                    &#x1f4bb; <!-- laptop --> {#System}
+                  </option>
+                  <option value="light" {@if servMgr.preferredTheme == "light"}selected{@end}>
+                    &#x2600;&#xfe0f; <!-- sun --> {#Light}
+                  </option>
+                  <option value="dark" {@if servMgr.preferredTheme == "dark"}selected{@end}>
+                    &#x1f303; <!-- night with stars --> {#Dark}
+                  </option>
+                </select>
+              </div>
+
+              <div style="margin:15px 0">
+                <label for="accentColor">{#Accent Color}:</label>
+                <select name="accentColor" style="font-size:16pt">
+                  <option value="blue" {@if servMgr.accentColor == "blue"}selected{@end}>
+                    {#Blue}
+                  </option>
+                  <option value="orange" {@if servMgr.accentColor == "orange"}selected{@end}>
+                    {#Orange}
+                  </option>
+                  <option value="magenta" {@if servMgr.accentColor == "magenta"}selected{@end}>
+                    {#Magenta}
+                  </option>
+                  <option value="cyan" {@if servMgr.accentColor == "cyan"}selected{@end}>
+                    {#Cyan}
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer" style="margin-top:15px; text-align:right">
+              <button style="margin-right:10px" type="submit">OK</button>
+              <button style="" type="button" onclick="$('#appearance_modal').hide()">{#Cancel}</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="modal" id="language_modal" align="left">
+        <div class="modal-contents default-bg">
+          <h3 style="margin:0">{#Choose Language}</h3>
+          <form action="/admin" method="POST">
+            <input type="hidden" name="cmd" value="chooseLanguage">
+
+            <div class="modal-body">
+              <div style="margin:15px 0">
+                <select name="htmlPath" style="font-size:16pt">
+                  <option value="en" {@if servMgr.lang == "en"} selected {@end}>{#English} en</option>
+                  <option value="fr" {@if servMgr.lang == "fr"} selected {@end}>{#French} fr</option>
+                  <option value="de" {@if servMgr.lang == "de"} selected {@end}>{#Deutsch} de</option>
+                  <option value="ja" {@if servMgr.lang == "ja"} selected {@end}>{#Japanese} ja</option>
+                </select>
+              </div>
+
+            </div>
+            <div class="modal-footer" style="margin-top:15px; text-align:right">
+              <button style="margin-right:10px" type="submit">OK</button>
+              <button style="" type="button" onclick="$('#language_modal').hide()">{#Cancel}</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <script>
+        $(function(){
+            // 全てのモーダルは、矩形の外をクリックすると閉じられる。
+            $('.modal').on('click', function(){ $(this).hide() });
+            $('.modal .modal-contents').on('click', (e) => e.stopPropagation());
+        })
+      </script>
 
       <br clear=all>
 

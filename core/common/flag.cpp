@@ -54,16 +54,16 @@ void FlagRegistory::forEachFlag(std::function<void(Flag&)> func)
 
 amf0::Value FlagRegistory::getState()
 {
-    std::vector<amf0::Value> arr;
+    std::map<std::string,amf0::Value> obj;
 
     for (auto& flag : m_flags) {
-        arr.push_back(
+        obj[flag.name] = 
             {
                 { "name", flag.name },
                 { "desc", flag.desc },
                 { "defaultValue", flag.defaultValue },
                 { "currentValue", flag.currentValue.load() },
-            });
+            };
     }
-    return arr;
+    return obj;
 }

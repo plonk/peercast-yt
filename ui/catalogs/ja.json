@@ -86,6 +86,8 @@
     "Speed"                   : "速度",
 
     // channels.html
+    "All"                     : "すべて",
+
     "Channel"                 : "チャンネル",
     "Bitrate (kb/s)"          : "転送速度 (Kbps)",
     "Stream"                  : "タイプ",
@@ -100,6 +102,55 @@
     "Edit"                    : "編集",
     "Auto-updates every 5 minutes. Manual updates have a cooldown of 30 seconds." : "5分間隔で自動更新。手動更新は30秒のクールダウンが必要です。",
     "Category"                : "カテゴリー",
+
+    "Close"                   : "閉じる",
+    "Display Columns"         : "カラムの表示",
+    "Cancel"                  : "キャンセル",
+    "Choose Language"         : "表示言語を選択",
+    "Customize Appearance"    : "見た目のカスタマイズ",
+
+    "Contact URL"             : "コンタクトURL",
+    "Chat URL"                : "チャットURL",
+    "Stats URL"               : "統計URL",
+
+    "Tracker"                 : "トラッカー",
+    "Channel ID"              : "チャンネルID",
+    "Feed"                    : "フィード",
+    "Track URL"               : "トラックのURL",
+
+    "Create Filter"           : "フィルター作成",
+
+    // chanfilters.html
+
+    "Channel Filters"         : "チャンネルフィルター",
+    "Enabled"                 : "有効",
+    "Disabled"                : "無効",
+    "Filter Name"             : "フィルター名",
+    "Base Search"             : "基本検索",
+    "AND Search"              : "AND検索",
+    "NOT Search"              : "NOT検索",
+    "Channel Name"            : "チャンネル名",
+    "Feed URL"                : "フィードURL",
+    "Regular Expression"      : "正規表現",
+    "Filter"                  : "フィルター",
+
+    "New Filter"              : "新しいフィルター",
+    "Reorder"                 : "並べ替え",
+    "New Place"               : "新しい順位",
+
+    "Add to Favorites"        : "お気に入り",
+    "Ignore"                  : "無視",
+
+    "Ignoring"                : "無視",
+    "Favorites"               : "お気に入り",
+
+    " existing filters will be replaced." : "個の既存のフィルターが置き換えられます。",
+    " filters will be imported." : "個のフィルターがインポートされます。",
+    "Import Filters from PeCaRecorder" : "PeCaRecorder からフィルターをインポート",
+    "Import"                  : "インポート",
+    "Please select the Filter.xml file in your PeCaRecorder folder." : "PeCaRecorder フォルダの Filter.xml ファイルを選択してください。",
+
+    "Background Color"        : "背景色",
 
     // relayinfo.html
     "Channel Information"     : "チャンネル情報",

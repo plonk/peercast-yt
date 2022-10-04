@@ -1584,10 +1584,12 @@ int Servent::incomingProc(ThreadInfo *thread)
             sv->sock->writeLine(e.msg);
             if (e.code == 401)
                 sv->sock->writeLine("WWW-Authenticate: Basic realm=\"PeerCast\"");
+
+            auto content = str::STR(e.msg, "\n\n", e.additionalMessage);
             sv->sock->writeLineF("Content-Type: text/plain; charset=utf-8");
-            sv->sock->writeLineF("Content-Length: %zu", strlen(e.msg));
+            sv->sock->writeLineF("Content-Length: %zu", content.size());
             sv->sock->writeLine("");
-            sv->sock->writeString(e.msg);
+            sv->sock->writeString(content.c_str());
         }catch (StreamException &) {}
 
         LOG_ERROR("Incoming from %s: %s", ipStr.c_str(), e.msg);

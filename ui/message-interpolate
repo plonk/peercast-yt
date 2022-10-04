@@ -43,6 +43,7 @@ def main
     $catalog = {}
   else
     $catalog = JSON.load(File.read($options[:catalog]))
+    $catalog['#lang'] = File.basename($options[:catalog], '.json')
   end
 
   if ARGV.size > 1
