@@ -26,11 +26,11 @@ static const int PCP_ROOT_VERSION       = 1218;
 
 static const int PCP_CLIENT_MINVERSION  = 1200;
 
-#define PCX_AGENT "PeerCast/0.1218 (YT44)"
-#define PCX_VERSTRING "v0.1218 YT44"
+#define PCX_AGENT "PeerCast/0.1218 (YT45)"
+#define PCX_VERSTRING "v0.1218 YT45"
 
 #define PCP_CLIENT_VERSION_EX_PREFIX "YT"
-static const int PCP_CLIENT_VERSION_EX_NUMBER = 44;
+static const int PCP_CLIENT_VERSION_EX_NUMBER = 45;
 // ------------------------------------------------
 
 #endif
