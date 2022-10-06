@@ -20,7 +20,7 @@ GTEST_DIR = /usr/src/gtest
 USER_DIR = ../../../tests
 
 # Flags passed to the preprocessor.
-CPPFLAGS += -D_UNIX -I$(GTEST_DIR)/include -I../../../core/common -I../../../core/unix
+CPPFLAGS += -D_UNIX -I$(GTEST_DIR)/include -I../../../core/common -I../../../core/unix -I../../../core
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g -Wno-multichar -Wno-unused-variable -std=c++11 -D_UNIX -D_REENTRANT
@@ -80,6 +80,6 @@ OBJS = $(notdir $(SRC:.cpp=.o))
 
 $(OBJS): %.o : ../../../tests/%.cpp $(wildcard $(USER_DIR)/*.h) $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $<
-        
+
 test-all : $(OBJS) ../libpeercast.a gtest.a
 	$(CXX) $(LDFLAGS) $^ -o $@ $(LIBS)
