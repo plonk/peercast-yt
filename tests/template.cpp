@@ -19,6 +19,6 @@ public:
     }
 };
 
-TEST_F(__Fixture, )
+TEST_F(__Fixture, changeMe)
 {
 }

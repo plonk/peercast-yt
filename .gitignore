@@ -27,3 +27,6 @@ ui/*/tests/test-all.exe
 ui/**/Makefile.local
 *.zip
 *.exe
+
+# CMake build dir
+build/

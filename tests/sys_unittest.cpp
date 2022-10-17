@@ -2,9 +2,9 @@
 
 #include "sys.h"
 #ifdef _UNIX
-#include "usys.h"
+#include "unix/usys.h"
 #else
-#include "wsys.h"
+#include "win32/wsys.h"
 #endif
 
 class SysFixture : public ::testing::Test {
