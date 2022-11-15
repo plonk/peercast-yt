@@ -258,6 +258,15 @@
       }
   }
 
+  async function onFilterResetAsync()
+  {
+      if (confirm("{#Are you sure you want to clear all filter settings?}")) {
+          Filters = []
+          await saveChannelFiltersAsync()
+          location.reload()
+      }
+  }
+
   async function main()
   {
       try {
@@ -473,6 +482,7 @@
 
 <div style="max-width: 640px">
   <div style="text-align: right; margin-bottom: 12px">
+    <button onclick="onFilterResetAsync()"><span class="emoji-icon">&#x26a0;&#xfe0f;<!-- danger sign --></span> {#Reset}</button>
     <button onclick="$('#import_modal').show(); onFilterXmlInput()"><span class="emoji-icon">&#x2b06;&#xfe0f;<!-- up arrow  --></span> {#Import}</button>
   </div>
   <div id="filter_table"></div>

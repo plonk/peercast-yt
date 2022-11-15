@@ -150,6 +150,9 @@
     "Import"                  : "インポート",
     "Please select the Filter.xml file in your PeCaRecorder folder." : "PeCaRecorder フォルダの Filter.xml ファイルを選択してください。",
 
+    "Are you sure you want to clear all filter settings?" : "フィルタ設定を完全に消去しても良いですか？",
+    "Reset"                   : "リセット",
+
     "Background Color"        : "背景色",
 
     // relayinfo.html
