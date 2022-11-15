@@ -492,8 +492,15 @@ function updateTable()
   async function main()
   {
       const data = await peercast("getServerStorageItem", "channelFilters")
-      if (data)
-          Filters = JSON.parse(data)
+      if (data) {
+          try {
+              Filters = JSON.parse(data)
+          } catch (e) {
+              console.error(e)
+              console.warn("Failed to parse channelFilters.json")
+              Filters = []
+          }
+      }
       else
       {
           console.warn("getServerStorageItem returned: ", data) // null for example.
