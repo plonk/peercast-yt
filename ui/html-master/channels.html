@@ -91,12 +91,12 @@
 
 <script>
   // チャンネルの詳細な情報を表示するモーダルにデータを設定。
-  function showModal(chid)
+  function showModal(serialNumber)
   {
-      const info = Groups.find(g => g.id == 'all').channels.find(ch => ch.id == chid)
+      const info = Groups.find(g => g.id == 'all').channels.find(ch => ch.serialNumber == serialNumber)
       if (!info)
       {
-          alert(`No info about ${chid} found`)
+          alert(`No info found (serialNumber = ${serialNumber})`)
           return
       }
       $('#channel_modal').show()
@@ -336,7 +336,7 @@ function renderChannelRow(channel)
           { style: rowStyle },
           columnVisibility['name'] ?
           ['td', { class: "channel-description" },
-           ['button', { style:"float:right", onclick:`showModal('${channel.id}')`}, unescapeHtml('&#x2139;&#xfe0f;')],
+           ['button', { style:"float:right", onclick:`showModal(${channel.serialNumber})`}, unescapeHtml('&#x2139;&#xfe0f;' /* info mark */)],
            ['a', { href: channel.id != "00000000000000000000000000000000" ? `play.html?id=${channel.id}` : null }, 
             // name, genre, desc はエスケープ済みなので一度アンエスケープする。
             ['div', { class:"channel-name" }, unescapeHtml(channel.name)],
@@ -439,6 +439,15 @@ function updateTable()
   Groups = [
   ]
 
+  // RPCで得られたチャンネルリストの各チャンネルにデータ項目の後々の峻別の為に連番を付ける。
+  function doSerialNumbering(channels)
+  {
+      let index = 0
+      for (const ch of channels) {
+          ch.serialNumber = index++
+      }
+  }
+
   function updateGroups(servMgr)
   {
       ignoreFilters = Filters.filter(f => f.ignore)
@@ -471,6 +480,7 @@ function updateTable()
           mustSatisfy: ch => ignoreFilters.some(f => filterMatches(f, ch))
       })
 
+      doSerialNumbering(servMgr.channelDirectory.channels)
       for (const group of Groups)
           group.channels = servMgr.channelDirectory.channels.filter(group.mustSatisfy)
 
