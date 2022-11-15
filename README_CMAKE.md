@@ -4,7 +4,7 @@
 ## 手順
 
 ```shell
-git clone ttps://github.com/plonk1/peercast-yt
+git clone https://github.com/plonk/peercast-yt.git
 cd peercast-yt
 
 # Build環境の作成(明示しない場合は不定)
