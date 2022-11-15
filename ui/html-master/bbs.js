@@ -6,9 +6,10 @@
 $queue = [];
 
 function renderPost(p, info) {
+    const title = [p.name, p.mail, p.date].join(' ')
     var buf = "";
     buf += "<div class='highlight' style='padding: 2px; font-size: 13px'>";
-    buf += `<a target='_blank' href='${threadUrl(info)}/${p.no}'><b>${p.no}</b></a>：${p.body}`;
+    buf += `<a target='_blank' title='${title}' href='${threadUrl(info)}/${p.no}'><b>${p.no}</b></a>：${p.body}`;
     buf += "</div>"
     return buf;
 }
