@@ -1,3 +1,5 @@
+// -*- mode: js; js-indent-level: 4 -*-
+
 // メイン処理に開いてほしいコマンドを入れるキュー。
 // ['open', URL] スレッド、板を開く。
 // ['post', MESSAGE] 投稿。
