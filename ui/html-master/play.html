@@ -151,6 +151,15 @@
   </head>
   <body style="background-color: #222">
 
+    <script>
+      $(function(){
+          $('.vstack').css('height', `${window.innerHeight}px`)
+          $(window).resize(() => {
+              $('.vstack').css('height', `${window.innerHeight}px`)
+          })
+      })
+    </script>
+
     <div class="vstack">
       <div class="toolbar">
 	<div>
