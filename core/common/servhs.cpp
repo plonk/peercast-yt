@@ -1439,7 +1439,10 @@ void Servent::CMD_stop(const char* cmd, HTTP& http, String& jumpStr)
         sys->waitThread(&c->thread);
     }
 
-    jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
+    if (!http.headers.get("Referer").empty())
+        jumpStr = http.headers.get("Referer").c_str();
+    else
+        jumpStr.sprintf("/%s/relays.html", servMgr->htmlPath);
 }
 
 void Servent::CMD_bump(const char* cmd, HTTP& http, String& jumpStr)
