@@ -1515,7 +1515,10 @@ void Servent::CMD_keep(const char* cmd, HTTP& http, String& jumpStr)
     if (c)
         c->stayConnected = !c->stayConnected;
 
-    jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
+    if (!http.headers.get("Referer").empty())
+        jumpStr = http.headers.get("Referer").c_str();
+    else
+        jumpStr.sprintf("/%s/relays.html", servMgr->htmlPath);
 }
 
 void Servent::CMD_logout(const char* cmd, HTTP& http, String& jumpStr)
