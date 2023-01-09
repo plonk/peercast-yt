@@ -23,7 +23,7 @@
 #include "channel.h"
 #include "servent.h"
 #include "servmgr.h"
-#include "unix/usys.h"
+#include "usys.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>

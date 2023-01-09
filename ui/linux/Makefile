@@ -21,7 +21,7 @@ APPIMAGETOOL = appimagetool-$(ARCH).AppImage
 LINUXDEPLOY = linuxdeploy-$(ARCH).AppImage
 AR = ar
 
-INCLUDES = -I../../core -I../../core/common
+INCLUDES = -I../../core/common -I../../core/unix
 
 TARGET = peercast
 RTMPSERVER = rtmp-server
