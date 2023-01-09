@@ -174,6 +174,7 @@ async function mainAsync(url) {
             board = await $.getJSON(boardCgi(info));
         } catch {
             $('#bbs-view').text("エラー: /cgi-bin/board.cgiの実行に失敗しました。");
+            return;
         }
         console.log(board);
 
@@ -215,10 +216,25 @@ async function mainAsync(url) {
             await delay(100);
         }
     } else if (info = getThreadInfo(url)) {
+        $('.post-form').hide();
+
+        let board;
+        let thread;
+        try {
+            board = await $.getJSON(`/cgi-bin/board.cgi?fqdn=${info.fqdn}&category=${info.category}&board_num=${info.board_num}`);
+        } catch {
+            $('#bbs-view').text("エラー: /cgi-bin/board.cgiの実行に失敗しました。");
+            return;
+        }
+        try {
+            thread = await $.getJSON(threadCgi(info, info.thread_id));
+        } catch {
+            $('#bbs-view').text("エラー: /cgi-bin/thread.cgiの実行に失敗しました。");
+            return;
+        }
+
         $('.post-form').show();
 
-        const board = await $.getJSON(`/cgi-bin/board.cgi?fqdn=${info.fqdn}&category=${info.category}&board_num=${info.board_num}`);
-        let thread = await $.getJSON(threadCgi(info, info.thread_id));
         console.log(thread);
         loadThread(info, thread, board.title);
         newPostsCallback(info, thread);
