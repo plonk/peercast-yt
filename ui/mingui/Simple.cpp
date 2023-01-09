@@ -817,7 +817,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case ID_POPUP_ADVANCED_RELAYEDCHANNELS:
         case ID_POPUP_FAVORITES_EDIT:
-            showHTML("channels.html");
+            showHTML("relays.html");
             break;
         case ID_POPUP_ADVANCED_BROADCAST:
             showHTML("broadcast.html");
