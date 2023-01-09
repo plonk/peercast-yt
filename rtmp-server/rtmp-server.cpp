@@ -6,9 +6,9 @@
 #include "sys.h"
 
 #ifdef _UNIX
-#include "unix/usys.h"
+#include "usys.h"
 #else
-#include "win32/wsys.h"
+#include "wsys.h"
 #endif
 
 #include "uri.h"

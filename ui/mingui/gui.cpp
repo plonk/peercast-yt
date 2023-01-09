@@ -25,7 +25,7 @@
 #include <stdarg.h>
 
 #include "resource.h"
-#include "win32/wsys.h"
+#include "wsys.h"
 #include "servent.h"
 #include "inifile.h"
 #include "gui.h"

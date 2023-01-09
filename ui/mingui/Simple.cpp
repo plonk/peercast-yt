@@ -24,7 +24,7 @@
 #include "channel.h"
 #include "servent.h"
 #include "servmgr.h"
-#include "win32/wsys.h"
+#include "wsys.h"
 #include "peercast.h"
 #include "simple.h"
 #include "version2.h"

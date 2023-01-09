@@ -76,9 +76,15 @@ target_sources(core
 target_include_directories(core
   PUBLIC ${PROJECT_SOURCE_DIR}/core/common
   )
-target_include_directories(core
-  PUBLIC ${PROJECT_SOURCE_DIR}/core
-  )
+if(WIN32)
+  target_include_directories(core
+    PUBLIC ${PROJECT_SOURCE_DIR}/core/win32
+    )
+else()
+  target_include_directories(core
+    PUBLIC ${PROJECT_SOURCE_DIR}/core/unix
+    )
+endif()
 
 # OpenSSLライブラリを探してリンク
 set(OPENSSL_USE_STATIC_LIBS TRUE)

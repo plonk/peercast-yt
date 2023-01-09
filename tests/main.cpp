@@ -4,7 +4,7 @@
 #include "mockpeercast.h"
 
 #if WIN32
-#include "win32/wsocket.h"
+#include "wsocket.h"
 #endif
 
 int main(int argc, char** argv)

@@ -20,8 +20,8 @@
 
 #include <process.h>
 #include <time.h>
-#include "win32/wsys.h"
-#include "win32/wsocket.h"
+#include "wsys.h"
+#include "wsocket.h"
 #include <windows.h>
 #include "stats.h"
 #include "peercast.h"
