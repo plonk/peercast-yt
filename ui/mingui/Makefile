@@ -30,7 +30,7 @@ CGIBIN = ../cgi-bin/
 
 LIBOBJSTATIC = libpeercast.a
 
-DLLS=$(MSYSTEM_PREFIX)/bin/lib{winpthread-*,gcc_s_*-*,stdc++-*,rtmp-*,gmp-*,hogweed-*,gnutls-*,nettle-*,p11-kit-*,idn2-*,tasn1-*,unistring-*,ffi-*,iconv-*,intl-*,crypto-*,ssl-*}.dll
+DLLS=$(MSYSTEM_PREFIX)/bin/lib{winpthread-*,gcc_s_*-*,stdc++-*,rtmp-*,gmp-*,hogweed-*,gnutls-*,nettle-*,p11-kit-*,idn2-*,tasn1-*,unistring-*,ffi-*,iconv-*,intl-*,crypto-*,ssl-*,zstd}.dll
 ifeq ($(MSYSTEM),MINGW64)
   DLLS += $(MSYSTEM_PREFIX)/bin/zlib1.dll
 endif
