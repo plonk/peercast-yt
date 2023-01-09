@@ -1335,7 +1335,7 @@ void Servent::CMD_fetch(const char* cmd, HTTP& http, String& jumpStr)
         c->startURL(curl.c_str());
     }
 
-    jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
+    jumpStr.sprintf("/%s/relays.html", servMgr->htmlPath);
 }
 
 void Servent::CMD_fetch_feeds(const char* cmd, HTTP& http, String& jumpStr)
