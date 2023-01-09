@@ -812,6 +812,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case ID_FIND_CHANNELS:
         case ID_POPUP_ADVANCED_ALLCHANNELS:
+            showHTML("channels.html");
+            break;
         case ID_POPUP_UPGRADE:
             sys->callLocalURL("admin?cmd=upgrade", servMgr->serverHost.port);
             break;

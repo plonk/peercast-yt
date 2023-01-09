@@ -83,6 +83,7 @@ BEGIN
         BEGIN
             MENUITEM "Information",                 ID_POPUP_ADVANCED_INFORMATION
 
+            MENUITEM "All Channels",                ID_POPUP_ADVANCED_ALLCHANNELS
             MENUITEM "Relayed Channels",            ID_POPUP_ADVANCED_RELAYEDCHANNELS
 
             MENUITEM "Broadcast",                   ID_POPUP_ADVANCED_BROADCAST
