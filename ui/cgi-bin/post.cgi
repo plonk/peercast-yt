@@ -13,9 +13,9 @@ def post_message_nichan(fqdn, category, thread_id, name, mail, body):
   referer = f'http://{fqdn}/#{category}/'
 
   form_data = {
-    "FROM":name.encode('shift_jis'),
-    "mail":mail.encode('shift_jis'),
-    "MESSAGE":body.encode('shift_jis'),
+    "FROM":name.encode('shift_jis',"xmlcharrefreplace"),
+    "mail":mail.encode('shift_jis',"xmlcharrefreplace"),
+    "MESSAGE":body.encode('shift_jis',"xmlcharrefreplace"),
     "bbs":category,
     "key":thread_id,
     "submit":"書き込む".encode('shift_jis')
@@ -38,9 +38,9 @@ def post_message_shitaraba(fqdn, category, board_num, thread_id, name, mail, bod
     "BBS": board_num,
     "KEY": thread_id,
     "DIR": category,
-    "NAME": name.encode('euc-jp'),
-    "MAIL": mail.encode('euc-jp'),
-    'MESSAGE': body.encode('euc-jp')
+    "NAME": name.encode('euc-jp',"xmlcharrefreplace"),
+    "MAIL": mail.encode('euc-jp',"xmlcharrefreplace"),
+    'MESSAGE': body.encode('euc-jp',"xmlcharrefreplace")
   }
   data = urllib.parse.urlencode(form_data).encode('ascii')
   headers = {'Referer':referer}
