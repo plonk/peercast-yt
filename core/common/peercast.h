@@ -90,6 +90,7 @@ __declspec( dllexport ) PeercastInstance * newPeercast(PeercastApplication *);
 // ----------------------------------
 namespace peercast {
 void notifyMessage(ServMgr::NOTIFY_TYPE, const std::string&);
+std::string log_escape(const std::string& str);
 }
 
 #endif

@@ -169,6 +169,30 @@ void    APICALL PeercastInstance::callLocalURL(const char *url)
 }
 
 // --------------------------------------------------
+namespace peercast
+{
+
+std::string log_escape(const std::string& str)
+{
+    std::string result;
+
+    for (auto it = str.cbegin(); it != str.cend(); ++it) {
+        unsigned char c = *it;
+        if (c >= 0x20 && c <= 0x7E) { // ascii printables
+            result.push_back(*it);
+        } else {
+            char tmp[5];
+
+            std::snprintf(tmp, sizeof(tmp), "[%02X]", c);
+            result += tmp;
+        }
+    }
+    return result;
+}
+
+}
+
+// --------------------------------------------------
 thread_local std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>* AUX_LOG_FUNC_VECTOR = nullptr;
 void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)
 {
@@ -178,10 +202,13 @@ void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)
 
     const int MAX_LINELEN = 1024;
     std::string tmp = str::vformat(fmt, ap);
-    tmp = str::truncate_utf8(tmp, MAX_LINELEN);
 
-    if (!str::validate_utf8(tmp))
-        throw std::runtime_error("ADDLOG: invalid utf8 detected");
+    if (str::validate_utf8(tmp)) {
+        tmp = str::truncate_utf8(tmp, MAX_LINELEN);
+    } else {
+        tmp = peercast::log_escape(tmp);
+        tmp = str::truncate_utf8(tmp, MAX_LINELEN);
+    }
 
     const char* str = tmp.c_str();
 
