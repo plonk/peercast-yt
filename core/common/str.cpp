@@ -105,7 +105,7 @@ std::string json_inspect(const std::string& str)
 
     if (!utf8)
     {
-        throw std::invalid_argument("UTF-8 validation failed");
+        throw std::invalid_argument("json_inspect: UTF-8 validation failed");
     }
     std::string res = "\"";
 
@@ -632,7 +632,7 @@ std::string truncate_utf8(const std::string& str, size_t length)
     return dest;
 
 Error:
-    throw std::invalid_argument("UTF-8 validation failed");
+    throw std::invalid_argument("truncate_utf8: UTF-8 validation failed");
 }
 
 } // namespace str
