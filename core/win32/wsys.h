@@ -55,6 +55,8 @@ public:
 
     void rename(const std::string& oldpath, const std::string& newpath) override;
 
+    std::string fromFilenameEncoding(const std::string& path) override;
+
     HWND    mainWindow;
     peercast::Random rndGen;
 };

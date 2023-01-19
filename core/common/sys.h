@@ -136,6 +136,11 @@ public:
 
     virtual void rename(const std::string& oldpath, const std::string& newpath) = 0;
 
+    virtual std::string fromFilenameEncoding(const std::string& path)
+    {
+        return path;
+    }
+
     unsigned int idleSleepTime;
 
     class LogBuffer *logBuf;

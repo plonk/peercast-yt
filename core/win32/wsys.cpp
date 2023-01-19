@@ -233,3 +233,31 @@ void WSys::rename(const std::string& oldpath, const std::string& newpath)
         throw GeneralException(str::format("rename: MoveFileExA failed: error = %lu", GetLastError()).c_str());
     }
 }
+
+// ---------------------------------
+#include <defer.h>
+
+std::string WSys::fromFilenameEncoding(const std::string& path)
+{
+    int count = MultiByteToWideChar(CP_ACP, 0, path.c_str(), -1, NULL, 0);
+    if (count == 0)
+        new GeneralException("fromFilenameEncoding: MultiByteToWideChar pass 1");
+
+    wchar_t* wbuf = new wchar_t[count];
+    Defer cb1([=](){ delete[] wbuf; });
+    count = MultiByteToWideChar(CP_ACP, 0, path.c_str(), -1, wbuf, count);
+    if (count == 0)
+        new GeneralException("fromFilenameEncoding: MultiByteToWideChar pass 2");
+
+    count = WideCharToMultiByte(CP_UTF8, 0, wbuf, -1, NULL, 0, NULL, NULL);
+    if (count == 0)
+        new GeneralException("fromFilenameEncoding: WideCharToMultiByte pass 1");
+
+    char *buf = new char[count];
+    Defer cb2([=](){ delete[] buf; });
+    count = WideCharToMultiByte(CP_UTF8, 0, wbuf, -1, buf, count, NULL, NULL);
+    if (count == 0)
+        new GeneralException("fromFilenameEncoding: WideCharToMultiByte pass 2");
+
+    return buf;
+}

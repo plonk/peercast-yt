@@ -2231,13 +2231,13 @@ amf0::Value ServMgr::getState()
             {"installationDirectory", []()
                                       {
                                           try {
-                                              return sys->realPath(peercastApp->getPath());
+                                              return sys->fromFilenameEncoding(sys->realPath(peercastApp->getPath()));
                                           } catch (GeneralException& e) {
                                               LOG_ERROR("installationDirectory: %s", e.what());
                                               return std::string("[Error]");
                                           }
                                       }()},
-            {"configurationFile", peercastApp->getIniFilename()},
+            {"configurationFile", sys->fromFilenameEncoding(peercastApp->getIniFilename())},
             {"preferredTheme", this->preferredTheme},
             {"accentColor", this->accentColor},
         });

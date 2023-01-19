@@ -2468,7 +2468,7 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
     try {
         documentRoot = sys->realPath(peercastApp->getPath()) + sys->getDirectorySeparator();
     } catch (GeneralException &e) {
-        LOG_ERROR("documentRoot: %s (%s)", e.what(), peercastApp->getPath());
+        LOG_ERROR("documentRoot: %s (%s)", e.what(), sys->fromFilenameEncoding(peercastApp->getPath()).c_str());
         throw HTTPException(HTTP_SC_SERVERERROR, 500);
     }
 

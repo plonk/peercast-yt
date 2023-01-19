@@ -253,3 +253,9 @@ TEST_F(SysFixture, getIPAddresses)
     ASSERT_GE(vec.size(), 2);
 }
 
+TEST_F(SysFixture, fromFilenameEncoding)
+{
+    ASSERT_EQ(m_sys->fromFilenameEncoding(""), "");
+    ASSERT_EQ(m_sys->fromFilenameEncoding("C:\\Program Files"), "C:\\Program Files");
+    ASSERT_EQ(m_sys->fromFilenameEncoding("/usr/bin"), "/usr/bin");
+}
