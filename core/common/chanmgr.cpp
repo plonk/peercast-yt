@@ -734,13 +734,13 @@ void ChanMgr::playChannel(ChanInfo &info)
     PlayList *pls = new PlayList(type, 1);
     pls->addChannel(str, info);
 
-    LOG_DEBUG("Writing %s", fname);
+    LOG_DEBUG("Writing %s", sys->fromFilenameEncoding(fname).c_str());
     FileStream file;
     file.openWriteReplace(fname);
     pls->write(file);
     file.close();
 
-    LOG_DEBUG("Executing: %s", fname);
+    LOG_DEBUG("Executing: %s", sys->fromFilenameEncoding(fname).c_str());
     sys->executeFile(fname);
     delete pls;
 }

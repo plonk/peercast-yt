@@ -262,7 +262,7 @@ HTTPResponse PublicController::operator()(const HTTPRequest& req, Stream& stream
             return HTTPResponse::notFound();
         else
         {
-            LOG_DEBUG("Writing `%s` lang=%s", path.c_str(), lang.c_str());
+            LOG_DEBUG("Writing `%s` lang=%s", sys->fromFilenameEncoding(path).c_str(), lang.c_str());
 
             auto type = MIMEType(path);
 

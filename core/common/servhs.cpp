@@ -2475,7 +2475,7 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
     String fileName = documentRoot.c_str();
     fileName.append(fn);
 
-    LOG_TRACE("Writing HTML file: %s", fileName.cstr());
+    LOG_TRACE("Writing HTML file: %s", sys->fromFilenameEncoding(fileName.cstr()).c_str());
 
     WriteBufferedStream bufferedSock(sock.get());
     HTML html("", bufferedSock);
