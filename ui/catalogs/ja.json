@@ -153,6 +153,8 @@
     "Are you sure you want to clear all filter settings?" : "フィルタ設定を完全に消去しても良いですか？",
     "Reset"                   : "リセット",
 
+    "Ignore Case"             : "大文字・小文字を区別しない",
+
     "Background Color"        : "背景色",
 
     // relayinfo.html

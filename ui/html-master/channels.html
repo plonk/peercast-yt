@@ -292,9 +292,9 @@ function updateView()
       updateTable()
 }
 
-function satisfies(search, channel)
+function satisfies(search, channel, opts)
 {
-      const reg = new RegExp(search.search)
+      const reg = new RegExp(search.search, opts.ignore_case ? 'i' : '')
       return search.fields.some(f => {
           if (typeof(channel[f]) !== 'string')
               console.warn(f, "is not string")
@@ -310,9 +310,9 @@ function getRowStyleFor(channel)
           if (!f.enabled || !f.enable_color)
               continue
 
-          if (satisfies(f.base_search, channel) &&
-              (!f.and_search.enabled || satisfies(f.and_search, channel)) &&
-              (!f.not_search.enabled || !satisfies(f.not_search, channel)))
+          if (satisfies(f.base_search, channel, searchOptions(f)) &&
+              (!f.and_search.enabled || satisfies(f.and_search, channel, searchOptions(f))) &&
+              (!f.not_search.enabled || !satisfies(f.not_search, channel, searchOptions(f))))
           {
               colors.push(f.color)
           }
@@ -361,14 +361,19 @@ function renderChannelRow(channel)
       ]
 }
 
+function searchOptions(filter)
+{
+      return { ignore_case: filter.ignore_case }
+}
+
 function filterMatches(f, channel)
 {
       if (!f.enabled)
           return false
 
-      if (satisfies(f.base_search, channel) &&
-          (!f.and_search.enabled || satisfies(f.and_search, channel)) &&
-          (!f.not_search.enabled || !satisfies(f.not_search, channel)))
+      if (satisfies(f.base_search, channel, searchOptions(f)) &&
+          (!f.and_search.enabled || satisfies(f.and_search, channel, searchOptions(f))) &&
+          (!f.not_search.enabled || !satisfies(f.not_search, channel, searchOptions(f))))
           return true
 
       return false

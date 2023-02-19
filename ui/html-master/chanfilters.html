@@ -164,6 +164,12 @@
                  ... fields.map(([field, human_readable]) =>
                      ['label', { style: 'display:inline-block' }, ['input', { type: 'checkbox', name: "fields", value: field, checked: f[`${kind}_search`].fields.includes(field) }], human_readable])]]),
           ],
+          ['div',
+           ['label',
+            ['input', { name: 'ignore_case' , type: 'checkbox', checked: f.ignore_case }],
+            '{#Ignore Case}',
+           ],
+          ],
           ['label',
            ['input', { name: "enable_color", type: 'checkbox', checked: f.enable_color }],
            '{#Background Color}',
@@ -201,6 +207,7 @@
               "fields": [],
               "search": "",
           },
+          "ignore_case": true,
           "enable_color": false,
           "color": [0,0,0],
       }
@@ -231,6 +238,7 @@
               "fields": $('#not_search_pane input[name=fields]').toArray().flatMap(e => e.checked ? [e.value] : []),
               "search": $('#not_search_pane input[name=search]')[0].value,
           },
+          "ignore_case": $('#filter_modal #info input[name=ignore_case]')[0].checked,
           "enable_color": $('#filter_modal #info input[name=enable_color]')[0].checked,
           "color": toTriples($('#filter_modal #info input[name=color]')[0].value),
       }
@@ -416,6 +424,8 @@
                   f.name = $(item).attr('name')
                   f.enable_color = $(item).find("common").attr("enableBg") == "true"
                   f.color = integerToTriples(+$(item).find("common").attr("bg"))
+
+                  f.ignore_case = $(item).find("option").attr("icase") == "true"
 
                   const $base = $(item).find("base")
                   f.base_search.search = $base.find("search").text()
