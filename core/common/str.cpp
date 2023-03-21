@@ -78,7 +78,6 @@ static std::string json_inspect(char c)
 
     if (isprint(d)) {
         switch (d) {
-        case '\'': return "\\\'";
         case '\"': return "\\\"";
         case '\\': return "\\\\";
         default:

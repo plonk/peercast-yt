@@ -85,6 +85,13 @@ TEST_F(amf0Fixture, String)
     ASSERT_EQ("hoge", s.string());
 }
 
+TEST_F(amf0Fixture, String_escapePrintableCharacters)
+{
+    Value s = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+    // double quote and blakslash, and only these, must be escaped (see RFC 4627)
+    ASSERT_EQ("\" !\\\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\"", s.inspect());
+}
+
 TEST_F(amf0Fixture, Object)
 {
     auto o = Value::object({

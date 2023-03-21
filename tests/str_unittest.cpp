@@ -375,3 +375,22 @@ TEST_F(strFixture, truncate_utf8)
     ASSERT_THROW(str::truncate_utf8("\x83" "A", 2), std::invalid_argument); // ア; KATAKANA LETTER A
     ASSERT_THROW(str::truncate_utf8("\xB1", 1), std::invalid_argument);     // ｱ; HALFWIDTH KATAKANA LETTER A
 }
+
+TEST_F(strFixture, json_inspect_invalidInput)
+{
+    ASSERT_THROW(str::json_inspect("\xff" "A"), std::invalid_argument); // invalid UTF-8
+    ASSERT_NO_THROW(str::json_inspect("A"));
+}
+
+TEST_F(strFixture, json_inspect)
+{
+    ASSERT_EQ( str::json_inspect(""),
+               "\"\"" );
+    ASSERT_EQ( str::json_inspect("ABCあいう"),
+               "\"ABCあいう\"" );
+    ASSERT_EQ( str::json_inspect(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"),
+               "\" !\\\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\"" ); // ASCII printables
+    ASSERT_EQ( str::json_inspect("\x01"),
+               "\"\\u0001\"" ); // ^A
+}
+
