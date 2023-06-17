@@ -340,13 +340,21 @@ HTTPResponse HTTP::send(const HTTPRequest& request)
     }else
     {
         std::string contentLengthStr = headers.get("Content-Length");
-        if (contentLengthStr.empty())
-            throw StreamException("Content-Length missing");
-        int length = atoi(contentLengthStr.c_str());
-        if (length < 0)
-            throw StreamException("invalid Content-Length value");
+        if (contentLengthStr.empty()) {
+            int length = atoi(contentLengthStr.c_str());
+            if (length < 0)
+                throw StreamException("invalid Content-Length value");
 
-        response.body = stream->read(length);
+            response.body = stream->read(length);
+        }else
+        {
+            try {
+                while (true)
+                    response.body += stream->readChar();
+            }catch(StreamException& e)
+            {
+            }
+        }
     }
     return response;
 }
