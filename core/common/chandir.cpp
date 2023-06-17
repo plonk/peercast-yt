@@ -9,6 +9,7 @@
 #include "chandir.h"
 #include "uri.h"
 #include "servmgr.h"
+#include "regexp.h"
 
 using namespace std;
 
@@ -312,29 +313,15 @@ bool ChannelDirectory::writeChannelVariable(Stream& out, const String& varName, 
     return true;
 }
 
-bool ChannelDirectory::writeFeedVariable(Stream& out, const String& varName, int index)
+static std::string directoryUrlOf(const std::string& url)
 {
-    std::lock_guard<std::recursive_mutex> cs(m_lock);
-
-    if (!(index >= 0 && (size_t)index < m_feeds.size())) {
-        // empty string
-        return true;
-    }
-
-    string value;
-
-    if (varName == "url") {
-        value = m_feeds[index].url;
-    } else if (varName == "directoryUrl") {
-        value = str::replace_suffix(m_feeds[index].url, "index.txt", "");
-    } else if (varName == "status") {
-        value = ChannelFeed::statusToString(m_feeds[index].status);
+    auto matches = Regexp("/[^/]*$").exec(url);
+        
+    if (matches.size() > 0) {
+        return str::replace_suffix(url, matches[0], "/");
     } else {
-        return false;
+        return url;
     }
-
-    out.writeString(value.c_str());
-    return true;
 }
 
 static std::string formatTime(unsigned int diff)
@@ -388,7 +375,7 @@ amf0::Value ChannelDirectory::getState()
         feeds.push_back(amf0::Value::object(
                             {
                                 {"url", f.url},
-                                {"directoryUrl", str::replace_suffix(f.url, "index.txt", "")},
+                                {"directoryUrl", directoryUrlOf(f.url)},
                                 {"status", ChannelFeed::statusToString(f.status) },
                                 {"numChannels", count }
                             }));
