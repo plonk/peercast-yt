@@ -81,6 +81,15 @@ int ChannelDirectory::numFeeds() const
 // が入っている場合がある。
 static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
 {
+    const std::string originalUrl = url;
+    int retryCount = 0;
+
+Retry:
+    if (retryCount > 1) {
+        LOG_ERROR("Too many redirections. Giving up ...");
+        return false;
+    }
+
     out.clear();
 
     URI feed(url);
@@ -125,13 +134,25 @@ static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
                         });
 
         HTTPResponse res = rhttp.send(req);
-        if (res.statusCode != 200) {
+        if (res.statusCode == 301 || res.statusCode == 302 || res.statusCode == 307 || res.statusCode == 308) {
+            const auto loc = res.headers.get("Location");
+            /* redirect */
+            if (loc != "") {
+                LOG_TRACE("Status code %d. Redirecting to %s ...", res.statusCode, loc.c_str());
+                url = loc;
+                retryCount++;
+                goto Retry;
+            }else {
+                LOG_ERROR("Status code %d. No Location header. Giving up ...", res.statusCode);
+                return false;
+            }
+        }else if (res.statusCode != 200) {
             LOG_ERROR("%s: status code %d", feed.host().c_str(), res.statusCode);
             return false;
         }
 
         std::vector<std::string> errors;
-        out = ChannelEntry::textToChannelEntries(res.body, url, errors);
+        out = ChannelEntry::textToChannelEntries(res.body, originalUrl, errors);
 
         for (auto& message : errors) {
             LOG_ERROR("%s", message.c_str());
