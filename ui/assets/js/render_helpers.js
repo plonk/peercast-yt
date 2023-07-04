@@ -57,9 +57,15 @@ function who(...args)
       return buf;
 }
 
-// 実体参照を文字にするための関数。タグは除去される。重いかもしれない。
+// 実体参照を文字にするための関数。タグは除去される。
+// HTMLパーズしてテキストだけ取り出す処理が重いので、結果をキャッシュする。
+const UHCache = {}
 function unescapeHtml(str)
 {
-      return $($.parseHTML(str)).text()
+    if (UHCache[str] !== undefined) {
+        return UHCache[str]
+    } else {
+        return (UHCache[str] = $($.parseHTML(str)).text())
+    }
 }
 
