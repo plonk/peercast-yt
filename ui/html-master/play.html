@@ -159,6 +159,31 @@
           })
       })
     </script>
+$(function(){
+      let aborted = false
+      flvjs.LoggingControl.addLogListener(function (level, message) {
+          if (level !== "warn")
+              return
+          if (aborted)
+              return
+
+          if (message.match(/\[FlvPlayer\] > Playback seems stuck at /))
+              return
+
+          const res = window.confirm("ストリームにフォーマットエラーが検出されました。\n" +
+                                     "再生が継続できない可能性があります。\n" +
+                                     "再生を停止しますか？\n" +
+                                     "\n" +
+                                     `詳細: ${message}`)
+
+          if (res) {
+              window.flvPlayer.unload()
+              $("#videoElement")[0].src = ""
+              aborted = true
+          } else {
+          }
+      })
+})
 
     <div class="vstack">
       <div class="toolbar">

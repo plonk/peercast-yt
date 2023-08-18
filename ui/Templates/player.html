@@ -50,7 +50,7 @@
     </div>
     <script>
      if (flvjs.isSupported()) {
-       var flvPlayer = flvjs.createPlayer({
+       window.flvPlayer = flvjs.createPlayer({
          type: 'flv',
          isLive: true,
          url: '/stream/{$channel.id}.flv'
@@ -72,7 +72,7 @@
       <script>
         if (flvjs.isSupported()) {
             var videoElement = document.getElementById('videoElement');
-            var flvPlayer = flvjs.createPlayer({
+            window.flvPlayer = flvjs.createPlayer({
                 type: 'flv',
                 isLive: true,
                 url: '/cgi-bin/flv.cgi?id={$channel.id}&type={$channel.type}&bitrate={$channel.bitrate}&preset={$servMgr.preset}&audio_codec={$servMgr.audioCodec}'
@@ -122,7 +122,7 @@
       <script>
         if (flvjs.isSupported()) {
             var videoElement = document.getElementById('videoElement');
-            var flvPlayer = flvjs.createPlayer({
+            window.flvPlayer = flvjs.createPlayer({
                 type: 'flv',
                 isLive: true,
                 url: '/cgi-bin/flv.cgi?id={$channel.id}&type={$channel.type}&bitrate={$channel.bitrate}&preset={$servMgr.preset}&audio_codec={$servMgr.audioCodec}'
