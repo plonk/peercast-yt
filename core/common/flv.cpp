@@ -58,12 +58,18 @@ std::pair<bool,int> FLVStream::readMetaData(void* data, int size)
         auto cmd = deserializer.readValue(flvmem);
         if (cmd.string() == "onMetaData")
         {
-            auto object = deserializer.readValue(flvmem).object();
+            auto amfValue = deserializer.readValue(flvmem);
+            auto object = amfValue.object();
 
+            LOG_DEBUG("onMetaData %s", amfValue.inspect().c_str());
             if (object.count("videodatarate"))
+            {
                 bitrate += object["videodatarate"].number();
+            }
             if (object.count("audiodatarate"))
+            {
                 bitrate += object["audiodatarate"].number();
+            }
 
             if (bitrate > 0)
                 return std::make_pair(true, ceil(bitrate));
