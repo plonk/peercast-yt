@@ -246,8 +246,14 @@ namespace amf0
                     b += p[i];
                 return b;
             }
+            case kBool:
+            {
+                b += AMF_BOOL;
+                b += m_bool;
+                return b;
+            }
             default:
-                throw std::runtime_error("serialize: unknown type");
+                throw std::runtime_error("serialize: unknown type " + std::to_string(m_type));
             }
         }
 

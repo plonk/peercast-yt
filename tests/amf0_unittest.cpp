@@ -228,6 +228,20 @@ TEST_F(amf0Fixture, serialize_Date)
     ASSERT_EQ(Value::date(12, 34), Deserializer().readValue(mem));
 }
 
+TEST_F(amf0Fixture, serialize_Bool_true)
+{
+    Value b(true);
+    StringStream mem(b.serialize());
+    ASSERT_EQ(Value::boolean(true), Deserializer().readValue(mem));
+}
+
+TEST_F(amf0Fixture, serialize_Bool_false)
+{
+    Value b(false);
+    StringStream mem(b.serialize());
+    ASSERT_EQ(Value::boolean(false), Deserializer().readValue(mem));
+}
+
 TEST_F(amf0Fixture, Object_at)
 {
     Value v({ {"name","joe"} });
