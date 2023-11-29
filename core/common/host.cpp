@@ -28,9 +28,9 @@ bool Host::isLocalhost()
 }
 
 // ------------------------------------------
-Host Host::fromString(const std::string& str)
+Host Host::fromString(const std::string& str, uint16_t defaultPort)
 {
-    uint16_t port = 0;
+    uint16_t port = defaultPort;
     IP ip = 0;
 
     auto it = str.begin();

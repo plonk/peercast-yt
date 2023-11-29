@@ -610,9 +610,12 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
                 {
                     peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルフィードで "+chName(ch->info)+" のトラッカーが見付かりました。");
 
-                    Host host = Host::fromString(trackerIP.c_str());
-                    if (!host.port)
-                        host.port = DEFAULT_PORT;
+                    Host host = Host::fromString(trackerIP, DEFAULT_PORT);
+                    if (host.port == 0)
+                    {
+                        LOG_DEBUG("ポート0のトラッカーIPはホストキャッシュに登録しない。(チャンネルフィードから)");
+                        goto Abort;
+                    }
 
                     ch->sourceHost.host = host;
                     ch->sourceHost.rhost[0] = host;
@@ -623,6 +626,8 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
                         chl->addHit(ch->sourceHost);
                     break;
                 }
+            Abort:
+                ;
             }
 
             // no trackers found so contact YP

@@ -132,8 +132,7 @@ public:
     // should go to IP
     bool    isLocalhost();
 
-    static Host fromString(const std::string& str);
-
+    static Host fromString(const std::string& str, uint16_t defaultPort = 0);
     IP              ip;
     unsigned short  port;
 };

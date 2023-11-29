@@ -221,3 +221,15 @@ TEST(HostTest, fromString)
     // ASSERT_EQ(0, host.ip);
     // ASSERT_EQ(0, host.port);
 }
+
+TEST(HostTest, fromString_defaultPort)
+{
+    Host host;
+    host = Host::fromString("localhost", 7144);
+    ASSERT_EQ(IP::parse("127.0.0.1"), host.ip);
+    ASSERT_EQ(7144, host.port);
+
+    host = Host::fromString("[::1]", 7144);
+    ASSERT_EQ(IP::parse("::1"), host.ip);
+    ASSERT_EQ(7144, host.port);
+}

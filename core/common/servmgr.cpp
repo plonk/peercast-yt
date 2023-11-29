@@ -1736,10 +1736,14 @@ void ServMgr::procConnectArgs(char *str, ChanInfo &info)
             }else if (strcmp(curr, "tip")==0)
             // tip - add tracker hit
             {
-                Host h = Host::fromString(arg);
+                Host h = Host::fromString(arg, DEFAULT_PORT);
                 if (h.port == 0)
-                    h.port = DEFAULT_PORT;
-                chanMgr->addHit(h, info.id, true);
+                {
+                    LOG_DEBUG("ポート0のトラッカーIPはホストキャッシュに登録しない。");
+                }else
+                {
+                    chanMgr->addHit(h, info.id, true);
+                }
             }
         }
     }
