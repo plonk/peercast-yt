@@ -65,6 +65,10 @@ namespace str
     // escape non-ASCII bytes in hexadecimal notation surrounded by
     // brackets ([XX]).
     std::string valid_utf8(const std::string& str);
+
+
+    // Truncate the UTF-8 string str to the maximum size of max bytes.
+    std::string truncate_utf8_bytecount(size_t max, const std::string& str);
 }
 
 #endif

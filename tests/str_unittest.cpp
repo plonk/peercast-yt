@@ -394,3 +394,32 @@ TEST_F(strFixture, json_inspect)
                "\"\\u0001\"" ); // ^A
 }
 
+TEST_F(strFixture, truncate_utf8_bytecount)
+{
+    ASSERT_EQ(truncate_utf8_bytecount(0, ""), "");
+    ASSERT_EQ(truncate_utf8_bytecount(1, ""), "");
+
+    ASSERT_EQ(truncate_utf8_bytecount(0, "A"), "");
+    ASSERT_EQ(truncate_utf8_bytecount(1, "A"), "A");
+    ASSERT_EQ(truncate_utf8_bytecount(2, "A"), "A");
+
+    ASSERT_EQ(truncate_utf8_bytecount(0, "あ"), "");
+    ASSERT_EQ(truncate_utf8_bytecount(1, "あ"), "");
+    ASSERT_EQ(truncate_utf8_bytecount(2, "あ"), "");
+    ASSERT_EQ(truncate_utf8_bytecount(3, "あ"), "あ");
+    ASSERT_EQ(truncate_utf8_bytecount(4, "あ"), "あ");
+
+    ASSERT_EQ(truncate_utf8_bytecount(0, "Aあ"), "");
+    ASSERT_EQ(truncate_utf8_bytecount(1, "Aあ"), "A");
+    ASSERT_EQ(truncate_utf8_bytecount(2, "Aあ"), "A");
+    ASSERT_EQ(truncate_utf8_bytecount(3, "Aあ"), "A");
+    ASSERT_EQ(truncate_utf8_bytecount(4, "Aあ"), "Aあ");
+    ASSERT_EQ(truncate_utf8_bytecount(5, "Aあ"), "Aあ");
+
+    // Can handle NUL
+    ASSERT_EQ(truncate_utf8_bytecount(0, {0}), std::string({}));
+    ASSERT_EQ(truncate_utf8_bytecount(1, {0}), std::string({0}));
+    ASSERT_EQ(truncate_utf8_bytecount(2, {0}), std::string({0}));
+    ASSERT_EQ(truncate_utf8_bytecount(3, {0}), std::string({0}));
+}
+
