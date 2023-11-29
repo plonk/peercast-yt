@@ -226,10 +226,10 @@ json JrpcApi::fetch(json::array_t params)
             network = params[7];
 
         ChanInfo info;
-        info.name    = name.c_str();
-        info.desc    = desc.c_str();
-        info.genre   = genre.c_str();
-        info.url     = contact.c_str();
+        info.name    = name;
+        info.desc    = desc;
+        info.genre   = genre;
+        info.url     = contact;
         info.bitrate = bitrate;
         {
             auto type = ChanInfo::getTypeFromStr(typeStr.c_str());
@@ -657,8 +657,8 @@ json JrpcApi::getYellowPages(json::array_t)
         j = {
             { "yellowPageId", 0 },
             { "name",  root },
-            { "uri", String::format("pcp://%s/", root).cstr() },
-            { "announceUri", String::format("pcp://%s/", root).cstr() },
+            { "uri", String::format("pcp://%s/", root) },
+            { "announceUri", String::format("pcp://%s/", root) },
             { "channelsUri", nullptr },
             { "protocol", "pcp" },
             { "channels", announcingChannels() }
