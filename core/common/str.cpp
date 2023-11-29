@@ -634,4 +634,23 @@ Error:
     throw std::invalid_argument("truncate_utf8: UTF-8 validation failed");
 }
 
+std::string valid_utf8(const std::string& bytes)
+{
+    if (str::validate_utf8(bytes))
+    {
+        return bytes;
+    } else {
+        std::string escaped;
+
+        for (auto it = bytes.begin(); it != bytes.end(); ++it)
+        {
+            if (*it < 0)
+                escaped += str::format("[%02X]", static_cast<unsigned char>(*it));
+            else
+                escaped += *it;
+        }
+        return escaped;
+    }
+}
+
 } // namespace str
