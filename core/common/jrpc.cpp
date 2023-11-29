@@ -66,6 +66,14 @@ json JrpcApi::call_internal(const string& input)
 
     try {
         result = dispatch(method, params);
+
+        result.dump(); // Check if it can properly be serialized (!).
+
+        return {
+            { "jsonrpc", "2.0" },
+            { "result", result },
+            { "id", id }
+        };
     } catch (method_not_found& e)
     {
         LOG_DEBUG("Method not found: %s", e.what());
@@ -81,12 +89,6 @@ json JrpcApi::call_internal(const string& input)
         // Unexpected errors are handled here.
         return error_object(kInternalError, e.what(), id);
     }
-
-    return {
-        { "jsonrpc", "2.0" },
-        { "result", result },
-        { "id", id }
-    };
 }
 
 json JrpcApi::getLog(json::array_t args)
