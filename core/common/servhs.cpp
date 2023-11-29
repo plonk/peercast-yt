@@ -1303,10 +1303,10 @@ void Servent::CMD_fetch(const char* cmd, HTTP& http, String& jumpStr)
     ChanInfo info;
 
     auto curl = query.get("url");
-    info.name = query.get("name");
-    info.desc = query.get("desc");
-    info.genre = query.get("genre");
-    info.url = query.get("contact");
+    info.name  = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("name")));
+    info.desc  = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("desc")));
+    info.genre = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("genre")));
+    info.url   = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("contact")));
     info.bitrate = atoi(query.get("bitrate").c_str());
     auto type = query.get("type");
     info.contentType = type;
@@ -1569,11 +1569,11 @@ void Servent::CMD_control_rtmp(const char* cmd, HTTP& http, String& jumpStr)
 
             servMgr->rtmpPort = port;
 
-            info.name    = query.get("name").c_str();
-            info.genre   = query.get("genre").c_str();
-            info.desc    = query.get("desc").c_str();
-            info.url     = query.get("url").c_str();
-            info.comment = query.get("comment").c_str();
+            info.name    = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("name")));
+            info.genre   = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("genre")));
+            info.desc    = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("desc")));
+            info.url     = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("url")));
+            info.comment = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("comment")));
         }
 
         servMgr->rtmpServerMonitor.ipVersion = (query.get("ipv") == "6") ? 6 : 4;
@@ -1604,17 +1604,17 @@ void Servent::CMD_update_channel_info(const char* cmd, HTTP& http, String& jumpS
 
     ChanInfo info = ch->info;
 
-    info.name    = query.get("name").c_str();
-    info.desc    = query.get("desc").c_str();
-    info.genre   = query.get("genre").c_str();
-    info.url     = query.get("contactURL").c_str();
-    info.comment = query.get("comment").c_str();
+    info.name    = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("name")));
+    info.desc    = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("desc")));
+    info.genre   = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("genre")));
+    info.url     = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("contactURL")));
+    info.comment = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("comment")));
 
-    info.track.contact = query.get("track.contactURL").c_str();
-    info.track.title   = query.get("track.title").c_str();
-    info.track.artist  = query.get("track.artist").c_str();
-    info.track.album   = query.get("track.album").c_str();
-    info.track.genre   = query.get("track.genre").c_str();
+    info.track.contact = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("track.contactURL")));
+    info.track.title   = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("track.title")));
+    info.track.artist  = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("track.artist")));
+    info.track.album   = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("track.album")));
+    info.track.genre   = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("track.genre")));
 
     ch->updateInfo(info);
 

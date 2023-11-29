@@ -227,10 +227,10 @@ json JrpcApi::fetch(json::array_t params)
             network = params[7];
 
         ChanInfo info;
-        info.name    = name;
-        info.desc    = desc;
-        info.genre   = genre;
-        info.url     = contact;
+        info.name    = str::truncate_utf8_bytecount(255, str::valid_utf8(name));
+        info.desc    = str::truncate_utf8_bytecount(255, str::valid_utf8(desc));
+        info.genre   = str::truncate_utf8_bytecount(255, str::valid_utf8(genre));
+        info.url     = str::truncate_utf8_bytecount(255, str::valid_utf8(contact));
         info.bitrate = bitrate;
         {
             auto type = ChanInfo::getTypeFromStr(typeStr.c_str());
