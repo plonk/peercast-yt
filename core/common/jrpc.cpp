@@ -7,6 +7,7 @@
 
 using namespace std;
 using json = nlohmann::json;
+using str::valid_utf8;
 
 static json error_object(int code, const char* message, json id = nullptr, json data = nullptr)
 {
@@ -282,15 +283,12 @@ json JrpcApi::to_json(GnuID id)
 
 json JrpcApi::to_json(ChanInfo& info)
 {
-    String comment = info.comment;
-    comment.convertTo(String::T_UNICODE);  // should not be needed
-
     return {
-        {"name", info.name.cstr()},
-        {"url", info.url.cstr()},
-        {"genre", info.genre.cstr()},
-        {"desc", info.desc.cstr()},
-        {"comment", comment.cstr()},
+        {"name", valid_utf8(info.name)},
+        {"url", valid_utf8(info.url)},
+        {"genre", valid_utf8(info.genre)},
+        {"desc", valid_utf8(info.desc)},
+        {"comment", valid_utf8(info.comment)},
         {"bitrate", info.bitrate},
         {"contentType", info.getTypeStr()}, //?
         {"mimeType", info.getMIMEType()}
@@ -300,11 +298,11 @@ json JrpcApi::to_json(ChanInfo& info)
 json JrpcApi::to_json(TrackInfo& track)
 {
     return {
-        {"name", track.title.cstr()},
-        {"genre", track.genre.cstr()},
-        {"album", track.album.cstr()},
-        {"creator", track.artist.cstr()},
-        {"url", track.contact.cstr()}
+        {"name", valid_utf8(track.title)},
+        {"genre", valid_utf8(track.genre)},
+        {"album", valid_utf8(track.album)},
+        {"creator", valid_utf8(track.artist)},
+        {"url", valid_utf8(track.contact)}
     };
 }
 
@@ -573,15 +571,15 @@ json JrpcApi::to_json(std::shared_ptr<ChanHitList> hitList)
 {
     ChanInfo info = hitList->info;
     return {
-        { "name", info.name.cstr() },
+        { "name", valid_utf8(info.name) },
         { "id",  (std::string) info.id },
         { "bitrate", info.bitrate },
         { "type", info.getTypeStr() },
-        { "genre", info.genre.cstr() },
-        { "desc", info.desc.cstr() },
-        { "url", info.url.cstr() },
+        { "genre", valid_utf8(info.genre) },
+        { "desc", valid_utf8(info.desc) },
+        { "url", info.url },
         { "uptime", info.getUptime() },
-        { "comment", info.comment.cstr() },
+        { "comment", valid_utf8(info.comment) },
         { "skips", info.numSkips },
         { "age", info.getAge() },
         { "bcflags", info.bcID.getFlags() },
