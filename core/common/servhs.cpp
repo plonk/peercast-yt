@@ -1303,10 +1303,10 @@ void Servent::CMD_fetch(const char* cmd, HTTP& http, String& jumpStr)
     ChanInfo info;
 
     auto curl = query.get("url");
-    info.name  = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("name")));
-    info.desc  = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("desc")));
-    info.genre = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("genre")));
-    info.url   = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("contact")));
+    info.name  = str::truncate_utf8(str::valid_utf8(query.get("name")), 255);
+    info.desc  = str::truncate_utf8(str::valid_utf8(query.get("desc")), 255);
+    info.genre = str::truncate_utf8(str::valid_utf8(query.get("genre")), 255);
+    info.url   = str::truncate_utf8(str::valid_utf8(query.get("contact")), 255);
     info.bitrate = atoi(query.get("bitrate").c_str());
     auto type = query.get("type");
     info.contentType = type;
@@ -1569,11 +1569,11 @@ void Servent::CMD_control_rtmp(const char* cmd, HTTP& http, String& jumpStr)
 
             servMgr->rtmpPort = port;
 
-            info.name    = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("name")));
-            info.genre   = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("genre")));
-            info.desc    = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("desc")));
-            info.url     = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("url")));
-            info.comment = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("comment")));
+            info.name    = str::truncate_utf8(str::valid_utf8(query.get("name")), 255);
+            info.genre   = str::truncate_utf8(str::valid_utf8(query.get("genre")), 255);
+            info.desc    = str::truncate_utf8(str::valid_utf8(query.get("desc")), 255);
+            info.url     = str::truncate_utf8(str::valid_utf8(query.get("url")), 255);
+            info.comment = str::truncate_utf8(str::valid_utf8(query.get("comment")), 255);
         }
 
         servMgr->rtmpServerMonitor.ipVersion = (query.get("ipv") == "6") ? 6 : 4;
@@ -1604,17 +1604,17 @@ void Servent::CMD_update_channel_info(const char* cmd, HTTP& http, String& jumpS
 
     ChanInfo info = ch->info;
 
-    info.name    = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("name")));
-    info.desc    = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("desc")));
-    info.genre   = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("genre")));
-    info.url     = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("contactURL")));
-    info.comment = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("comment")));
+    info.name    = str::truncate_utf8(str::valid_utf8(query.get("name")), 255);
+    info.desc    = str::truncate_utf8(str::valid_utf8(query.get("desc")), 255);
+    info.genre   = str::truncate_utf8(str::valid_utf8(query.get("genre")), 255);
+    info.url     = str::truncate_utf8(str::valid_utf8(query.get("contactURL")), 255);
+    info.comment = str::truncate_utf8(str::valid_utf8(query.get("comment")), 255);
 
-    info.track.contact = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("track.contactURL")));
-    info.track.title   = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("track.title")));
-    info.track.artist  = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("track.artist")));
-    info.track.album   = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("track.album")));
-    info.track.genre   = str::truncate_utf8_bytecount(255, str::valid_utf8(query.get("track.genre")));
+    info.track.contact = str::truncate_utf8(str::valid_utf8(query.get("track.contactURL")), 255);
+    info.track.title   = str::truncate_utf8(str::valid_utf8(query.get("track.title")), 255);
+    info.track.artist  = str::truncate_utf8(str::valid_utf8(query.get("track.artist")), 255);
+    info.track.album   = str::truncate_utf8(str::valid_utf8(query.get("track.album")), 255);
+    info.track.genre   = str::truncate_utf8(str::valid_utf8(query.get("track.genre")), 255);
 
     ch->updateInfo(info);
 

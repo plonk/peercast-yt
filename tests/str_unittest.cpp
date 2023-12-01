@@ -352,6 +352,7 @@ TEST_F(strFixture, truncate_utf8)
 
     ASSERT_EQ(str::truncate_utf8("a", 0), "");
     ASSERT_EQ(str::truncate_utf8("a", 1), "a");
+    ASSERT_EQ(str::truncate_utf8("a", 2), "a");
 
     ASSERT_EQ(str::truncate_utf8("あ", 0), "");
     ASSERT_EQ(str::truncate_utf8("あ", 1), "");
@@ -374,6 +375,19 @@ TEST_F(strFixture, truncate_utf8)
     ASSERT_THROW(str::truncate_utf8("\x8A\xBF", 2), std::invalid_argument); // 漢
     ASSERT_THROW(str::truncate_utf8("\x83" "A", 2), std::invalid_argument); // ア; KATAKANA LETTER A
     ASSERT_THROW(str::truncate_utf8("\xB1", 1), std::invalid_argument);     // ｱ; HALFWIDTH KATAKANA LETTER A
+
+    ASSERT_EQ(truncate_utf8("Aあ", 0), "");
+    ASSERT_EQ(truncate_utf8("Aあ", 1), "A");
+    ASSERT_EQ(truncate_utf8("Aあ", 2), "A");
+    ASSERT_EQ(truncate_utf8("Aあ", 3), "A");
+    ASSERT_EQ(truncate_utf8("Aあ", 4), "Aあ");
+    ASSERT_EQ(truncate_utf8("Aあ", 5), "Aあ");
+
+    // Can handle NUL
+    ASSERT_EQ(truncate_utf8({0}, 0), std::string({}));
+    ASSERT_EQ(truncate_utf8({0}, 1), std::string({0}));
+    ASSERT_EQ(truncate_utf8({0}, 2), std::string({0}));
+    ASSERT_EQ(truncate_utf8({0}, 3), std::string({0}));
 }
 
 TEST_F(strFixture, json_inspect_invalidInput)
@@ -393,33 +407,3 @@ TEST_F(strFixture, json_inspect)
     ASSERT_EQ( str::json_inspect("\x01"),
                "\"\\u0001\"" ); // ^A
 }
-
-TEST_F(strFixture, truncate_utf8_bytecount)
-{
-    ASSERT_EQ(truncate_utf8_bytecount(0, ""), "");
-    ASSERT_EQ(truncate_utf8_bytecount(1, ""), "");
-
-    ASSERT_EQ(truncate_utf8_bytecount(0, "A"), "");
-    ASSERT_EQ(truncate_utf8_bytecount(1, "A"), "A");
-    ASSERT_EQ(truncate_utf8_bytecount(2, "A"), "A");
-
-    ASSERT_EQ(truncate_utf8_bytecount(0, "あ"), "");
-    ASSERT_EQ(truncate_utf8_bytecount(1, "あ"), "");
-    ASSERT_EQ(truncate_utf8_bytecount(2, "あ"), "");
-    ASSERT_EQ(truncate_utf8_bytecount(3, "あ"), "あ");
-    ASSERT_EQ(truncate_utf8_bytecount(4, "あ"), "あ");
-
-    ASSERT_EQ(truncate_utf8_bytecount(0, "Aあ"), "");
-    ASSERT_EQ(truncate_utf8_bytecount(1, "Aあ"), "A");
-    ASSERT_EQ(truncate_utf8_bytecount(2, "Aあ"), "A");
-    ASSERT_EQ(truncate_utf8_bytecount(3, "Aあ"), "A");
-    ASSERT_EQ(truncate_utf8_bytecount(4, "Aあ"), "Aあ");
-    ASSERT_EQ(truncate_utf8_bytecount(5, "Aあ"), "Aあ");
-
-    // Can handle NUL
-    ASSERT_EQ(truncate_utf8_bytecount(0, {0}), std::string({}));
-    ASSERT_EQ(truncate_utf8_bytecount(1, {0}), std::string({0}));
-    ASSERT_EQ(truncate_utf8_bytecount(2, {0}), std::string({0}));
-    ASSERT_EQ(truncate_utf8_bytecount(3, {0}), std::string({0}));
-}
-

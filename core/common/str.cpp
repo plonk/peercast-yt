@@ -653,41 +653,4 @@ std::string valid_utf8(const std::string& bytes)
     }
 }
 
-std::string truncate_utf8_bytecount(size_t max, const std::string& str)
-{
-    std::string buf;
-    auto src = str.begin();
-
-    while (max && src != str.end()) {
-        size_t charlen;
-
-        if ((*src & 0x80) == 0) // 0xxx xxxx
-            charlen = 1;
-        else if ((*src & 0xE0) == 0xC0) // 110x xxxx
-            charlen = 2;
-        else if ((*src & 0xF0) == 0xE0) // 1110 xxxx
-            charlen = 3;
-        else if ((*src & 0xF8) == 0xF0) // 1111 0xxx
-            charlen = 4;
-        else {
-            // Malformed string!
-            throw std::logic_error("Malformed string!");
-        }
-
-        if (max < charlen)
-        {
-            // This character does not fit.
-            return buf;
-        }
-
-        // Copy the character.
-        for (size_t i = 0; i < charlen; i++)
-            buf += *src++;
-
-        max -= charlen;
-    }
-
-    return buf;
-}
-
 } // namespace str
