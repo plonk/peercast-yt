@@ -201,12 +201,13 @@ std::vector<std::string> split(const std::string& in, const std::string& separat
     }
 }
 
-std::string codepoint_to_utf8(uint32_t codepoint)
+std::string codepoint_to_utf8(unsigned long codepoint)
 {
     std::string res;
 
     if (codepoint >= 0x110000) {
-        throw std::out_of_range("Codepoint out of range [U+0000, U+10FFFF]");
+        auto message = str::format("Codepoint U+%04lX out of valid range [U+0000, U+10FFFF]", codepoint);
+        throw std::out_of_range(message);
     }
 
     if (/* codepoint >= 0 && */ codepoint <= 0x7f) {
