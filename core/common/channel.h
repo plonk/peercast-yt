@@ -226,7 +226,7 @@ public:
 
     amf0::Value  getState() override;
     bool         acceptGIV(std::shared_ptr<ClientSocket>);
-    void         updateInfo(const ChanInfo &);
+    bool         updateInfo(const ChanInfo &);
     int          readStream(Stream &, std::shared_ptr<ChannelStream>);
     void         checkReadDelay(unsigned int);
     void         processMp3Metadata(char *);

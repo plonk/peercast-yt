@@ -1598,7 +1598,7 @@ void Servent::CMD_update_channel_info(const char* cmd, HTTP& http, String& jumpS
     GnuID id(query.get("id"));
     auto ch = chanMgr->findChannelByID(id);
     if (ch == NULL)
-        throw HTTPException(HTTP_SC_SERVERERROR, 500);
+        throw HTTPException(HTTP_SC_SERVERERROR, 500, "No such channel");
 
     // I don't think this operation is safe
 
@@ -1616,7 +1616,9 @@ void Servent::CMD_update_channel_info(const char* cmd, HTTP& http, String& jumpS
     info.track.album   = str::truncate_utf8(str::valid_utf8(query.get("track.album")), 255);
     info.track.genre   = str::truncate_utf8(str::valid_utf8(query.get("track.genre")), 255);
 
-    ch->updateInfo(info);
+    bool changed = ch->updateInfo(info);
+    if (!changed)
+        throw HTTPException(HTTP_SC_SERVERERROR, 500, "Failed to update channel info");
 
     jumpStr.sprintf("/%s/relays.html", servMgr->htmlPath);
 }

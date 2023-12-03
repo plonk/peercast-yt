@@ -1018,12 +1018,14 @@ bool    Channel::sendPacketUp(ChanPacket &pack, const GnuID &cid, const GnuID &s
 }
 
 // -----------------------------------
-void Channel::updateInfo(const ChanInfo &newInfo)
+// 変更が成功したら true を、失敗したら false を返す。
+// -----------------------------------
+bool Channel::updateInfo(const ChanInfo &newInfo)
 {
     String oldComment = info.comment;
 
     if (!info.update(newInfo))
-        return; // チャンネル情報は更新されなかった。
+        return false; // チャンネル情報は更新されなかった。
 
     // コメント更新の通知。
     if (!oldComment.isSame(info.comment))
@@ -1076,6 +1078,7 @@ void Channel::updateInfo(const ChanInfo &newInfo)
     }
 
     peercastApp->channelUpdate(&info);
+    return true;
 }
 
 // -----------------------------------
