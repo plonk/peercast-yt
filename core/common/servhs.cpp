@@ -1618,7 +1618,7 @@ void Servent::CMD_update_channel_info(const char* cmd, HTTP& http, String& jumpS
 
     ch->updateInfo(info);
 
-    jumpStr.sprintf("/%s/channels.html", servMgr->htmlPath);
+    jumpStr.sprintf("/%s/relays.html", servMgr->htmlPath);
 }
 
 static std::string dumpHit(std::shared_ptr<ChanHit> hit)
