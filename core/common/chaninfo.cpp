@@ -578,8 +578,7 @@ XML::Node *ChanInfo::createChannelXML()
     String descUNI = desc;
     descUNI.convertTo(String::T_UNICODESAFE);
 
-    String commentUNI;
-    commentUNI = comment;
+    String commentUNI = comment;
     commentUNI.convertTo(String::T_UNICODESAFE);
 
     return new XML::Node("channel name=\"%s\" id=\"%s\" bitrate=\"%d\" type=\"%s\" genre=\"%s\" desc=\"%s\" url=\"%s\" uptime=\"%d\" comment=\"%s\" skips=\"%d\" age=\"%d\" bcflags=\"%d\"",
