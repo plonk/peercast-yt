@@ -23,12 +23,14 @@ def post_message_nichan(fqdn, category, thread_id, name, mail, body):
   data = urllib.parse.urlencode(form_data).encode('ascii')
   headers = {'Referer':referer}
   request = urllib.request.Request(url, data, headers)
-  response = urllib.request.urlopen(request)
-
-  if response.getcode() == 200:
-    return {'status':'ok'}
-  else:
-    return {'status':'error','code':response.getcode()}
+  try:
+    with urllib.request.urlopen(request) as response:
+      if response.getcode() == 200:
+        return {'status':'ok'}
+      else:
+        return {'status':'error','code':response.getcode()}
+  except urllib.error.HTTPError as err:
+    return {'status':'error','code':err.code}
 
 def post_message_shitaraba(fqdn, category, board_num, thread_id, name, mail, body):
   url = f'https://{fqdn}/bbs/write.cgi/{category}/{board_num}/{thread_id}/'
