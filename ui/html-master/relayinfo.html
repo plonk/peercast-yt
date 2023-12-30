@@ -27,7 +27,7 @@
       <TR>
         <th class="left-heading">{#URL}</th>
         <TD class="break-word">
-          <A href="/admin?cmd=redirect&amp;url={$channel.contactURL}"
+          <A href="/admin?cmd=redirect&amp;{$ toQueryString(object('url',channel.contactURL)) }"
              target=_blank>{$channel.contactURL}</A>
         </TD>
       </TR>
