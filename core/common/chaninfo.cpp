@@ -21,6 +21,7 @@
 #include "pcp.h"
 #include "chanmgr.h"
 #include "playlist.h"
+#include "cgi.h"
 
 const ::String ChanInfo::T_UNKNOWN = "UNKNOWN";
 const ::String ChanInfo::T_RAW = "RAW";
@@ -46,8 +47,7 @@ static void readXMLString(String &str, XML::Node *n, const char *arg)
     p = n->findAttr(arg);
     if (p)
     {
-        str.set(p, String::T_HTML);
-        str.convertTo(String::T_ASCII);
+        str = cgi::unescape_html(p);
     }
 }
 
