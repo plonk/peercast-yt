@@ -1,7 +1,5 @@
 # PeerCast YT
 
-[![Build Status](https://travis-ci.com/plonk/peercast-yt.svg?branch=master)](https://travis-ci.com/plonk/peercast-yt)
-
 PeerCast のフォークです。
 
 ## ブラウザインターフェイス
