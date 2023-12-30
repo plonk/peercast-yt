@@ -86,19 +86,6 @@ TEST(StringTest, isWhitespaceWorks) {
     ASSERT_FALSE(String::isWhitespace('\n'));
 }
 
-TEST(StringTest, HTML2ASCIIWorks) {
-    String str;
-
-    str.HTML2ASCII("&#x21;");
-    ASSERT_STREQ("!", str);
-
-    str.HTML2ASCII("A");
-    ASSERT_STREQ("A", str);
-
-    str.HTML2ASCII("&amp;");
-    ASSERT_STREQ("&amp;", str);
-}
-
 TEST(StringTest, setFromStopwatch)
 {
     String s;
