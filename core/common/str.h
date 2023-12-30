@@ -10,7 +10,7 @@ namespace str
 {
     std::string ascii_dump(const std::string& in, const std::string& replacement = ".");
     std::string capitalize(const std::string&);
-    std::string codepoint_to_utf8(unsigned long);
+    std::string codepoint_to_utf8(uint32_t);
     bool        contains(const std::string& haystack, const std::string& needle);
     std::string downcase(const std::string& input);
     std::string format(const char* fmt, ...) __attribute__ ((format (printf, 1, 2)));
