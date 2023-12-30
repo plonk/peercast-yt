@@ -54,25 +54,6 @@ void UClientSocket::init()
 static std::recursive_mutex staticDataLock;
 
 // --------------------------------------------------
-bool ClientSocket::getHostname(char *str, unsigned int ip)
-{
-    std::lock_guard<std::recursive_mutex> cs(staticDataLock);
-
-    hostent *he;
-
-    ip = htonl(ip);
-
-    he = gethostbyaddr((char *)&ip, sizeof(ip), AF_INET);
-
-    if (he)
-    {
-        strcpy(str, he->h_name);
-        return true;
-    }else
-        return false;
-}
-
-// --------------------------------------------------
 unsigned int ClientSocket::getIP(const char *name)
 {
     std::lock_guard<std::recursive_mutex> cs(staticDataLock);
