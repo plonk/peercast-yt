@@ -598,41 +598,6 @@ XML::Node *ChanInfo::createChannelXML()
 }
 
 // -----------------------------------
-XML::Node *ChanInfo::createQueryXML()
-{
-    char buf[512];
-
-    String nameHTML = name;
-    nameHTML.convertTo(String::T_HTML);
-    String genreHTML = genre;
-    genreHTML.convertTo(String::T_HTML);
-
-    buf[0]=0;
-    if (!nameHTML.isEmpty())
-    {
-        strcat(buf, " name=\"");
-        strcat(buf, nameHTML.cstr());
-        strcat(buf, "\"");
-    }
-
-    if (!genreHTML.isEmpty())
-    {
-        strcat(buf, " genre=\"");
-        strcat(buf, genreHTML.cstr());
-        strcat(buf, "\"");
-    }
-
-    if (id.isSet())
-    {
-        strcat(buf, " id=\"");
-        strcat(buf, id.str().c_str());
-        strcat(buf, "\"");
-    }
-
-    return new XML::Node("channel %s", buf);
-}
-
-// -----------------------------------
 XML::Node *ChanInfo::createRelayChannelXML()
 {
     return new XML::Node("channel id=\"%s\" uptime=\"%d\" skips=\"%d\" age=\"%d\"",

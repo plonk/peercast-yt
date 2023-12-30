@@ -106,7 +106,6 @@ public:
     void        readTrackXML(XML::Node *);
     void        readServentXML(XML::Node *);
     bool        update(const ChanInfo &);
-    XML::Node   *createQueryXML();
     XML::Node   *createChannelXML();
     XML::Node   *createRelayChannelXML();
     XML::Node   *createTrackXML();
