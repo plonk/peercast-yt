@@ -10,7 +10,7 @@ import urllib.parse
 
 def post_message_nichan(fqdn, category, thread_id, name, mail, body):
   url = f'http://{fqdn}/test/bbs.cgi'
-  referer = f'http://{fqdn}/#{category}/'
+  referer = f'http://{fqdn}/{category}/'
 
   form_data = {
     "FROM":name.encode('shift_jis',"xmlcharrefreplace"),
