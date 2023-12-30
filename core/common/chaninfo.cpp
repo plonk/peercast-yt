@@ -40,18 +40,6 @@ const ::String ChanInfo::T_PLS = "PLS";
 const ::String ChanInfo::T_ASX = "ASX";
 
 // -----------------------------------
-static void readXMLString(String &str, XML::Node *n, const char *arg)
-{
-    char *p;
-    p = n->findAttr(arg);
-    if (p)
-    {
-        str.set(p, String::T_HTML);
-        str.convertTo(String::T_ASCII);
-    }
-}
-
-// -----------------------------------
 const char *ChanInfo::getTypeStr()
 {
     return contentType.cstr();
@@ -440,17 +428,6 @@ void ChanInfo::init()
 }
 
 // -----------------------------------
-void ChanInfo::readTrackXML(XML::Node *n)
-{
-    track.clear();
-    readXMLString(track.title, n, "title");
-    readXMLString(track.contact, n, "contact");
-    readXMLString(track.artist, n, "artist");
-    readXMLString(track.album, n, "album");
-    readXMLString(track.genre, n, "genre");
-}
-
-// -----------------------------------
 unsigned int ChanInfo::getUptime()
 {
     // calculate uptime and cap if requested by settings.
@@ -669,44 +646,6 @@ XML::Node *ChanInfo::createTrackXML()
         genreUNI.cstr(),
         contactUNI.cstr()
         );
-}
-
-// -----------------------------------
-void ChanInfo::init(XML::Node *n)
-{
-    init();
-
-    updateFromXML(n);
-}
-
-// -----------------------------------
-void ChanInfo::updateFromXML(XML::Node *n)
-{
-    String typeStr, idStr;
-
-    readXMLString(name, n, "name");
-    readXMLString(genre, n, "genre");
-    readXMLString(url, n, "url");
-    readXMLString(desc, n, "desc");
-
-    int br = n->findAttrInt("bitrate");
-    if (br)
-        bitrate = br;
-
-    readXMLString(typeStr, n, "type");
-    if (!typeStr.isEmpty()) {
-        contentType = typeStr;
-    }
-
-    readXMLString(idStr, n, "id");
-    if (!idStr.isEmpty())
-        id.fromStr(idStr.cstr());
-
-    readXMLString(comment, n, "comment");
-
-    XML::Node *tn = n->findNode("track");
-    if (tn)
-        readTrackXML(tn);
 }
 
 // -----------------------------------
