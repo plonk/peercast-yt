@@ -2031,11 +2031,8 @@ void Servent::handshakeCMD(HTTP& http, const std::string& query)
 
     if (jumpStr != "")
     {
-        String jmp(jumpStr, String::T_HTML);
-        jmp.convertTo(String::T_ASCII);
-
         http.writeLine(HTTP_SC_FOUND);
-        http.writeLineF("Location: %s", jmp.c_str());
+        http.writeLineF("Location: %s", jumpStr.c_str());
         http.writeLine("");
     }
 }
