@@ -304,39 +304,6 @@ void String::ASCII2ESC(const char *in, bool safe)
 }
 
 // -----------------------------------
-void String::HTML2ASCII(const char *in)
-{
-    unsigned char c;
-    char *o = data;
-    char *oe = data+MAX_LEN-10;
-    const char *p = in;
-    while ((c = *p++) != '\0')
-    {
-        if ((c == '&') && (p[0] == '#'))
-        {
-            p++;
-            char code[8];
-            char *cp = code;
-            char ec = *p++;     // hex/dec
-            while ((c = *p++) != '\0')
-            {
-                if (c != ';')
-                    *cp++ = c;
-                else
-                    break;
-            }
-            *cp = 0;
-            c = (unsigned char)strtoul(code, NULL, ec=='x'?16:10);
-        }
-        *o++ = c;
-        if (o >= oe)
-            break;
-    }
-
-    *o = 0;
-}
-
-// -----------------------------------
 void String::ESC2ASCII(const char *in)
 {
     unsigned char c;

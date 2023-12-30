@@ -75,7 +75,6 @@ public:
     void ASCII2HTML(const char *);
     void ASCII2META(const char *, bool);
     void ESC2ASCII(const char *);
-    void HTML2ASCII(const char *);
     void BASE642ASCII(const char *);
     void UNKNOWN2UNICODE(const char *, bool);
 
