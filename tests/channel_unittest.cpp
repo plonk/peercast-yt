@@ -114,7 +114,7 @@ TEST_F(ChannelFixture, writeVariable)
 
     mem.str("");
     ASSERT_TRUE(c.writeVariable(mem, "name"));
-    ASSERT_STREQ("A&amp;B", mem.str().c_str());
+    ASSERT_STREQ("A&B", mem.str().c_str());
 
     mem.str("");
     ASSERT_TRUE(c.writeVariable(mem, "srcrate"));
