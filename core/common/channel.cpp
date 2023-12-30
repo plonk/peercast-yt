@@ -1374,7 +1374,7 @@ amf0::Value Channel::getState()
 
     return amf0::Value::object(
         {
-            {"name", String(info.name).convertTo(String::T_UNICODESAFE).c_str()},
+            {"name", String(info.name).convertTo(String::T_UNICODE).c_str()},
             {"bitrate", to_string(info.bitrate)},
             {"srcrate", (sourceData) ? str::format("%.0f", BYTES_TO_KBPS(sourceData->getSourceRate())) : "0"},
             {"genre", String(info.genre).convertTo(String::T_UNICODE).c_str()},
