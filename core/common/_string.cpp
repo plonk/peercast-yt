@@ -29,7 +29,6 @@
 #define isASCII(a) (a <= 0x7f)
 #define isPLAINASCII(a) (((a >= '0') && (a <= '9')) || ((a >= 'a') && (a <= 'z')) || ((a >= 'A') && (a <= 'Z')))
 #define isUTF8(a, b) ((a & 0xc0) == 0xc0 && (b & 0x80) == 0x80 )
-#define isESCAPE(a, b) ((a == '&') && (b == '#'))
 #define isHTMLSPECIAL(a) ((a == '&') || (a == '\"') || (a == '\'') || (a == '<') || (a == '>'))
 
 // -----------------------------------
@@ -226,21 +225,6 @@ void String::UNKNOWN2UNICODE(const char *in, bool safe)
         {
             buf += str::codepoint_to_utf8(JISConverter::eucToUnicode((c<<8 | d)));
             in++;
-        }
-        else if (isESCAPE(c, d))        // html escape tags &#xx;
-        {
-            in++;
-            std::string code;
-            while ((c = *in++) != '\0')
-            {
-                if (c != ';')
-                    code += c;
-                else
-                    break;
-            }
-
-            // Unicodeの範囲外のコードポイントが入ってきたらどうなるのっと。
-            buf += str::codepoint_to_utf8(strtoul(code.c_str(), nullptr, 10));
         }
         else if (isPLAINASCII(c))   // plain ascii : a-z 0-9 etc..
         {
