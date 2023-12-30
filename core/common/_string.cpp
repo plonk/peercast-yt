@@ -360,39 +360,6 @@ void String::HTML2ASCII(const char *in)
 }
 
 // -----------------------------------
-void String::HTML2UNICODE(const char *in)
-{
-    MemoryStream utf8(data, MAX_LEN-1);
-
-    unsigned char c;
-    while ((c = *in++) != '\0')
-    {
-        if ((c == '&') && (*in == '#'))
-        {
-            in++;
-            char code[16];
-            char *cp = code;
-            char ec = *in++;        // hex/dec
-            while ((c = *in++) != '\0')
-            {
-                if (c != ';')
-                    *cp++ = c;
-                else
-                    break;
-            }
-            *cp = 0;
-            utf8.writeUTF8(strtoul(code, NULL, ec=='x'?16:10));
-        }else
-            utf8.writeUTF8(c);
-
-        if (utf8.pos >= (MAX_LEN-10))
-            break;
-    }
-
-    utf8.writeUTF8(0);
-}
-
-// -----------------------------------
 void String::ESC2ASCII(const char *in)
 {
     unsigned char c;
