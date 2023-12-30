@@ -35,7 +35,6 @@ public:
     {
         T_UNKNOWN,
         T_ASCII,
-        T_HTML,
         T_ESC,
         T_ESCSAFE,
         T_META,

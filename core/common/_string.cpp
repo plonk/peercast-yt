@@ -278,29 +278,6 @@ void String::UNKNOWN2UNICODE(const char *in, bool safe)
 }
 
 // -----------------------------------
-void String::ASCII2HTML(const char *in)
-{
-    char *op = data;
-    char *oe = data+MAX_LEN - 10;
-    unsigned char c;
-    const char *p = in;
-    while ((c = *p++) != '\0')
-    {
-        if (((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z')))
-        {
-            *op++ = c;
-        }else
-        {
-            std::sprintf(op, "&#x%02X;", (int)c);
-            op += 6;
-        }
-        if (op >= oe)
-            break;
-    }
-    *op = 0;
-}
-
-// -----------------------------------
 void String::ASCII2ESC(const char *in, bool safe)
 {
     char *op = data;
@@ -428,9 +405,6 @@ String& String::convertTo(TYPE t)
             case T_UNKNOWN:
             case T_ASCII:
                 break;
-            case T_HTML:
-                tmp.HTML2ASCII(data);
-                break;
             case T_ESC:
             case T_ESCSAFE:
                 tmp.ESC2ASCII(data);
@@ -457,9 +431,6 @@ String& String::convertTo(TYPE t)
                 break;
             case T_UNICODESAFE:
                 UNKNOWN2UNICODE(tmp.data, true);
-                break;
-            case T_HTML:
-                ASCII2HTML(tmp.data);
                 break;
             case T_ESC:
                 ASCII2ESC(tmp.data, false);
