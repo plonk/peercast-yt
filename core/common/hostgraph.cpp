@@ -165,7 +165,7 @@ json::array_t HostGraph::getRelayTree()
 
     for (ID& root : m_children[kNullID])
     {
-        result.push_back(toRelayTree(root, {}));
+        result.push_back(toRelayTree(root, {root}));
     }
     return result;
 }
