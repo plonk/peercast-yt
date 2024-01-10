@@ -34,7 +34,7 @@ namespace rtmpserver
         void writeFileHeader(bool audio = true, bool video = true)
         {
             if (state != kExpectFileHeader)
-                throw std::runtime_error("invalid operation");
+                throw std::runtime_error("writeFileHeader: invalid operation");
 
             int type_flags = pack_bits({0, audio, 0, video}, {5, 1, 1, 1});
             std::string data("FLV");
@@ -49,7 +49,7 @@ namespace rtmpserver
         void writeScriptTag(int32_t timestamp, const std::string& data)
         {
             if (state != kExpectScriptTag)
-                throw std::runtime_error("invalid operation");
+                throw std::runtime_error("writeScriptTag: invalid operation");
 
             int32_t timestamp1;
             uint8_t timestamp_extended;
@@ -62,7 +62,7 @@ namespace rtmpserver
         void writeVideoTag(int32_t timestamp, const std::string& data)
         {
             if (state != kExpectDataTag)
-                throw std::runtime_error("invalid operation");
+                throw std::runtime_error("writeVideoTag: invalid operation");
 
             int32_t timestamp1;
             uint8_t timestamp_extended;
@@ -73,7 +73,7 @@ namespace rtmpserver
         void writeAudioTag(int32_t timestamp, const std::string& data)
         {
             if (state != kExpectDataTag)
-                throw std::runtime_error("invalid operation");
+                throw std::runtime_error("writeAudioTag: invalid operation");
 
             int32_t timestamp1;
             uint8_t timestamp_extended;
