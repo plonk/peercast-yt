@@ -188,8 +188,6 @@ namespace rtmpserver
                 message.add_data(data);
                 client->writeString(str::join("", message.to_chunks(max_outgoing_chunk_size, 3)));
             }
-
-            flv_writer.writeFileHeader();
         }
 
         void on_FCPublish(Value& transaction_id, const std::vector<Value>& params)
@@ -274,14 +272,40 @@ namespace rtmpserver
 
         void on_metadata(Message& message)
         {
+            // 3つのAMF0値を期待している。"@setDataFrame", "onMetaData", { ... }
             puts("Got metadata");
 
             StringStream mem(message.data);
             amf0::Deserializer d;
-            Value v = d.readValue(mem);
-            printf("%s\n", v.inspect().c_str());
+            {
+                Value v = d.readValue(mem);
+                printf("%s\n", v.inspect().c_str());
+            }
 
-            int pos = mem.getPosition();
+            const int pos = mem.getPosition();
+            bool hasVideo = false, hasAudio = false;
+            try {
+                // メタデータを読み取って、ファイルヘッダーを設定する。
+                if (d.readValue(mem).string() == "onMetaData") {
+                    Value v = d.readValue(mem);
+                    puts(v.inspect().c_str());
+                    try {
+                        v.at("videocodecid");
+                        hasVideo = true;
+                    } catch (std::out_of_range&) {
+                        // hasVideo = false
+                    }
+                    try {
+                        v.at("audiocodecid");
+                        hasAudio = true;
+                    } catch (std::out_of_range&) {
+                        // hasAudio = false
+                    }
+                }
+                flv_writer.writeFileHeader(hasAudio, hasVideo);
+            } catch (std::runtime_error &e) {
+                printf("Error: %s\n", e.what());
+            }
             flv_writer.writeScriptTag(message.timestamp, message.data.substr(pos));
         }
 
