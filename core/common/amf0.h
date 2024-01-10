@@ -343,8 +343,8 @@ namespace amf0
 
         const Value& at(const std::string& key) const
         {
-            if (!isObject())
-                throw std::runtime_error("not an object");
+            if (!isObject() && !isArray())
+                throw std::runtime_error("not an object or an array");
 
             return m_object.at(key);
         }
@@ -359,7 +359,7 @@ namespace amf0
 
         size_t count(const std::string& key) const
         {
-            if (!isObject())
+            if (!isObject() && !isArray())
                 throw std::runtime_error("not an object");
 
             return m_object.count(key);
