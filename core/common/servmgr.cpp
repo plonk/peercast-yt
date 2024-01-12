@@ -35,6 +35,7 @@
 #include "uptest.h"
 #include "portcheck.h"
 #include "json.hpp"
+#include "cgi.h"
 
 // -----------------------------------
 ServMgr::ServMgr()
@@ -1701,9 +1702,6 @@ Servent *ServMgr::findConnection(Servent::TYPE t, const GnuID &sid)
 // --------------------------------------------------
 void ServMgr::procConnectArgs(char *str, ChanInfo &info)
 {
-    char arg[MAX_CGI_LEN];
-    char curr[MAX_CGI_LEN];
-
     const char *args = strstr(str, "?");
     if (args)
     {
@@ -1713,38 +1711,32 @@ void ServMgr::procConnectArgs(char *str, ChanInfo &info)
 
     info.initNameID(str);
 
-    if (args)
+    cgi::Query query(args ? args : "");
+
+    if (!query.get("ip").empty())
+    // ip - add hit
     {
-        while ((args = nextCGIarg(args, curr, arg)) != nullptr)
+        Host h;
+        h.fromStrName(query.get("ip").c_str(), DEFAULT_PORT);
+        ChanHit hit;
+        hit.init();
+        hit.host = h;
+        hit.rhost[0] = h;
+        hit.rhost[1].init();
+        hit.chanID = info.id;
+        hit.recv = true;
+
+        chanMgr->addHit(hit);
+    }else if (!query.get("tip").empty())
+    // tip - add tracker hit
+    {
+        Host h = Host::fromString(query.get("tip"), DEFAULT_PORT);
+        if (h.port == 0)
         {
-            LOG_DEBUG("cmd: %s, arg: %s", curr, arg);
-
-            if (strcmp(curr, "ip")==0)
-            // ip - add hit
-            {
-                Host h;
-                h.fromStrName(arg, DEFAULT_PORT);
-                ChanHit hit;
-                hit.init();
-                hit.host = h;
-                hit.rhost[0] = h;
-                hit.rhost[1].init();
-                hit.chanID = info.id;
-                hit.recv = true;
-
-                chanMgr->addHit(hit);
-            }else if (strcmp(curr, "tip")==0)
-            // tip - add tracker hit
-            {
-                Host h = Host::fromString(arg, DEFAULT_PORT);
-                if (h.port == 0)
-                {
-                    LOG_DEBUG("ポート0のトラッカーIPはホストキャッシュに登録しない。");
-                }else
-                {
-                    chanMgr->addHit(h, info.id, true);
-                }
-            }
+            LOG_DEBUG("ポート0のトラッカーIPはホストキャッシュに登録しない。");
+        }else
+        {
+            chanMgr->addHit(h, info.id, true);
         }
     }
 }
