@@ -290,6 +290,8 @@ public:
 
     IP_VERSION          ipVersion;
 
+    std::string         rootHost;
+
     mutable std::recursive_mutex lock;
 
     std::shared_ptr<Channel> next;
