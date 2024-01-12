@@ -19,8 +19,8 @@
 #ifndef _FLV_H
 #define _FLV_H
 
-#include "stdio.h"
 #include <stdexcept>
+#include <string.h> // memcpy
 
 #include "channel.h"
 
