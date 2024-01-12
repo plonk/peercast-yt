@@ -1,6 +1,7 @@
 #ifndef _STR_H
 #define _STR_H
 
+#include <stdint.h>
 #include <string>
 #include <sstream> // to implement str
 #include <vector>

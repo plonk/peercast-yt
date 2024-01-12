@@ -1,6 +1,8 @@
 #ifndef _WMHTTP_H
 #define _WMHTTP_H
 
+#include <stdint.h>
+
 #include "asf.h"
 #include "mms.h"
 #include "stream.h"

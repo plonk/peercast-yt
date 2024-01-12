@@ -20,6 +20,7 @@
 #define _FLV_H
 
 #include <stdexcept>
+#include <stdint.h>
 #include <string.h> // memcpy
 
 #include "channel.h"

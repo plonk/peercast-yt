@@ -17,6 +17,8 @@
 #ifndef _MP4_H
 #define _MP4_H
 
+#include <stdint.h>
+
 class MP4Stream : public ChannelStream
 {
 public:

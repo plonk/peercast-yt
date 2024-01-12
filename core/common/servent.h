@@ -21,6 +21,8 @@
 #define _SERVENT_H
 
 // ----------------------------------
+#include <stdint.h>
+
 #include "socket.h"
 #include "sys.h"
 #include "channel.h"
