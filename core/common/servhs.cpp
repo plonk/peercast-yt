@@ -1258,7 +1258,7 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
             auto val = cgi::unescape(arg);
             if (val != servMgr->rootHost.cstr())
             {
-                LOG_INFO("Root host changed from %s to %s", servMgr->rootHost.cstr(), val.c_str());
+                LOG_INFO("Root host changed from '%s' to '%s'", servMgr->rootHost.cstr(), val.c_str());
                 servMgr->rootHost = val.c_str();
                 servMgr->rootMsg = "";
             }
