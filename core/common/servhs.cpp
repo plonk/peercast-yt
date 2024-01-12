@@ -1189,9 +1189,13 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
             servMgr->autoConnect = getCGIargBOOL(arg);
         else if (strcmp(curr, "yp") == 0)
         {
-            String str(arg, String::T_ESC);
-            str.convertTo(String::T_ASCII);
-            servMgr->rootHost = str;
+            auto val = cgi::unescape(arg);
+            if (val != servMgr->rootHost.cstr())
+            {
+                LOG_INFO("Root host changed from %s to %s", servMgr->rootHost.cstr(), val.c_str());
+                servMgr->rootHost = val.c_str();
+                servMgr->rootMsg = "";
+            }
         }
         else if (strcmp(curr, "deadhitage") == 0)
             chanMgr->deadHitAge = getCGIargINT(arg);
