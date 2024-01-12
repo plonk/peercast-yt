@@ -572,6 +572,17 @@ ChanHit PeercastSource::pickFromHitList(std::shared_ptr<Channel> ch, ChanHit &ol
 // }
 
 // -----------------------------------
+static std::string feedUrlToRootHost(const std::string& feedUrl)
+{
+    if (feedUrl == "https://p-at.net/index.txt")
+        return "root.p-at.net";
+    else if (feedUrl == "http://yp.pcgw.pgw.jp/index.txt")
+        return "pcgw.pgw.jp:7146";
+    else
+        return "";
+}
+
+// -----------------------------------
 void PeercastSource::stream(std::shared_ptr<Channel> ch)
 {
     m_channel = ch;
@@ -605,12 +616,27 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
             // consult channel directory
             if (!ch->sourceHost.host.ip)
             {
-                std::string trackerIP = servMgr->channelDirectory->findTracker(ch->info.id);
-                if (!trackerIP.empty())
+                std::shared_ptr<ChannelEntry> ent = servMgr->channelDirectory->findEntry(ch->info.id);
+                LOG_DEBUG("consulting chandir for %s", chName(ch->info).c_str());
+                LOG_DEBUG("ent == %p", ent.get());
+                if (ent)
                 {
-                    //peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルフィードで "+chName(ch->info)+" のトラッカーが見付かりました。");
+                    const auto rh = feedUrlToRootHost(ent->feedUrl);
+                    LOG_DEBUG("feedUrlToRooHost('%s') = '%s'", ent->feedUrl.c_str(), rh.c_str());
+                    if (!rh.empty())
+                    {
+                        ch->rootHost = rh;
+                        LOG_INFO("Root host for channel %s set to '%s'", chName(ch->info).c_str(), rh.c_str());
+                    }
+                }
 
-                    Host host = Host::fromString(trackerIP, DEFAULT_PORT);
+
+                if (ent && !ent->tip.empty())
+                    {
+                    //peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルフィードで "+chName(ch->info)+" のトラッカーが見付かりました。");
+                    LOG_DEBUG("%s", ("チャンネルフィードで " + chName(ch->info) + " のトラッカーが見付かりました。").c_str());
+
+                    Host host = Host::fromString(ent->tip, DEFAULT_PORT);
                     if (host.port == 0)
                     {
                         LOG_DEBUG("ポート0のトラッカーIPはホストキャッシュに登録しない。(チャンネルフィードから)");
@@ -633,7 +659,7 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
             // no trackers found so contact YP
             if (!ch->sourceHost.host.ip)
             {
-                if (servMgr->rootHost.isEmpty())
+                if (ch->rootHost.empty())
                     break;
 
                 if (numYPTries >= 3)
@@ -642,7 +668,7 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
                 unsigned int ctime = sys->getTime();
                 if ((ctime - chanMgr->lastYPConnect) > MIN_YP_RETRY)
                 {
-                    ch->sourceHost.host.fromStrName(servMgr->rootHost.cstr(), DEFAULT_PORT);
+                    ch->sourceHost.host.fromStrName(ch->rootHost.c_str(), DEFAULT_PORT);
                     ch->sourceHost.yp = true;
                     chanMgr->lastYPConnect = ctime;
                 }
@@ -1420,6 +1446,7 @@ amf0::Value Channel::getState()
             {"authToken", chanMgr->authToken(info.id).c_str()},
             {"plsExt", info.getPlayListExt()},
             {"ipVersion", std::to_string((int)ipVersion)},
+            {"rootHost", rootHost},
         });
 }
 

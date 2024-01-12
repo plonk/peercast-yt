@@ -444,6 +444,8 @@ std::shared_ptr<Channel> ChanMgr::createChannel(ChanInfo &info, const char *moun
     nc->type = Channel::T_ALLOCATED;
     nc->info.createdTime = sys->getTime();
 
+    nc->rootHost = servMgr->rootHost.c_str();
+
     LOG_INFO("New channel created");
 
     return nc;
