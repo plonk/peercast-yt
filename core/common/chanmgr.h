@@ -65,7 +65,7 @@ public:
     void    quit();
 
     void    addHit(Host &, const GnuID &, bool);
-    std::shared_ptr<ChanHit> addHit(ChanHit &);
+    virtual std::shared_ptr<ChanHit> addHit(ChanHit &);
     void    delHit(ChanHit &);
     void    deadHit(ChanHit &);
     void    setFirewalled(Host &);
