@@ -78,7 +78,7 @@ public:
     void        clearDeadHits(bool);
     int         numHitLists();
 
-    void        setBroadcastMsg(::String &);
+    void        setBroadcastMsg(const ::String &);
 
     std::shared_ptr<Channel> createRelay(ChanInfo &, bool);
     std::shared_ptr<Channel> findAndRelay(ChanInfo &);

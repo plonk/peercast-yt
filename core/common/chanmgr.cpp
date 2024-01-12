@@ -368,7 +368,7 @@ void ChanMgr::setUpdateInterval(unsigned int v)
 }
 
 // -----------------------------------
-void ChanMgr::setBroadcastMsg(String &msg)
+void ChanMgr::setBroadcastMsg(const String &msg)
 {
     if (!msg.isSame(broadcastMsg))
     {

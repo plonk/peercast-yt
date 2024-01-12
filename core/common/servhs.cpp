@@ -358,8 +358,7 @@ void Servent::handshakeGET(HTTP &http)
                     if (match)
                     {
                         ChanInfo newInfo = c->info;
-                        newInfo.track.title.set(songArg, String::T_ESC);
-                        newInfo.track.title.convertTo(String::T_UNICODE);
+                        newInfo.track.title = cgi::unescape(songArg).c_str();
 
                         if (urlArg)
                             if (urlArg[0])
@@ -1197,15 +1196,11 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
             strcat(servMgr->htmlPath, arg);
         }else if (strcmp(curr, "djmsg") == 0)
         {
-            String msg;
-            msg.set(arg, String::T_ESC);
-            msg.convertTo(String::T_UNICODE);
-            chanMgr->setBroadcastMsg(msg);
+            chanMgr->setBroadcastMsg(cgi::unescape(arg).c_str());
         }
         else if (strcmp(curr, "pcmsg") == 0)
         {
-            servMgr->rootMsg.set(arg, String::T_ESC);
-            servMgr->rootMsg.convertTo(String::T_UNICODE);
+            servMgr->rootMsg = cgi::unescape(arg).c_str();
         }
 
         // connections
@@ -1228,8 +1223,7 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
 
             if (strncmp(fs, "ip", 2) == 0)        // ip must be first
             {
-                String str(arg, String::T_ESC);
-                str.convertTo(String::T_ASCII);
+                auto str = cgi::unescape(arg);
 
                 currFilter = &servMgr->filters[servMgr->numFilters];
                 currFilter->init();
@@ -1252,9 +1246,7 @@ void Servent::CMD_apply(const char* cmd, HTTP& http, String& jumpStr)
         {
             if (strcmp(arg, "") != 0)
             {
-                String str(arg, String::T_ESC);
-                str.convertTo(String::T_ASCII);
-                servMgr->channelDirectory->addFeed(str.cstr());
+                servMgr->channelDirectory->addFeed(cgi::unescape(arg).c_str());
             }
         }
 
