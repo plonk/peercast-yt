@@ -1700,6 +1700,12 @@ Servent *ServMgr::findConnection(Servent::TYPE t, const GnuID &sid)
 }
 
 // --------------------------------------------------
+// "[チャンネルID](?クエリ文字列)" の形式の文字列から、info のチャンネ
+// ルIDを設定し、加えてクエリ文字列の ip, tip パラメータを元をチャンネ
+// ルのヒットリストに登録する。
+//
+// 注意: str, info 共に変更される。str からは ? で始まるクエリ文字列が
+// 削除される。
 void ServMgr::procConnectArgs(char *str, ChanInfo &info)
 {
     const char *args = strstr(str, "?");
@@ -1709,6 +1715,8 @@ void ServMgr::procConnectArgs(char *str, ChanInfo &info)
         args++;
     }
 
+    // IDでなかったら ChanInfo の名前フィールドにstrがコピーされるが、
+    // その挙動が今や役に立つのか疑問。
     info.initNameID(str);
 
     cgi::Query query(args ? args : "");
