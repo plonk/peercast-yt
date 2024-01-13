@@ -155,8 +155,6 @@ public:
     Servent             *findConnection(Servent::TYPE, const GnuID &);
 
     static THREAD_PROC  serverProc(ThreadInfo *);
-    static THREAD_PROC  clientProc(ThreadInfo *);
-    static THREAD_PROC  trackerProc(ThreadInfo *);
     static THREAD_PROC  idleProc(ThreadInfo *);
 
     XML::Node           *createServentXML();
@@ -273,7 +271,6 @@ public:
     char                downloadURL[128];
     String              rootMsg;
     String              forceIP;
-    char                connectHost[128];
     GnuID               networkID;
     unsigned int        firewallTimeout;
     std::atomic<int>    m_logLevel;

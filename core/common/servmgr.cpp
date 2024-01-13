@@ -95,7 +95,6 @@ ServMgr::ServMgr()
 
     forceIP.clear();
 
-    strcpy(connectHost, "connect1.peercast.org");
     strcpy(htmlPath, "html/en");
 
     rootHost = "yp.pcgw.pgw.jp:7146";
@@ -1779,74 +1778,6 @@ bool ServMgr::start()
         return false;
 
     return true;
-}
-
-// --------------------------------------------------
-int ServMgr::clientProc(ThreadInfo *thread)
-{
-#if 0
-    thread->lock();
-
-    GnuID netID;
-    netID = this->networkID;
-
-    while (thread->active)
-    {
-        if (this->autoConnect)
-        {
-            if (this->needConnections() || this->forceLookup)
-            {
-                if (this->needHosts() || this->forceLookup)
-                {
-                    // do lookup to find some hosts
-
-                    Host lh;
-                    lh.fromStrName(this->connectHost, DEFAULT_PORT);
-
-                    if (!this->findServent(lh.ip, lh.port, netID))
-                    {
-                        Servent *sv = this->allocServent();
-                        if (sv)
-                        {
-                            LOG_DEBUG("Lookup: %s", this->connectHost);
-                            sv->networkID = netID;
-                            sv->initOutgoing(lh, Servent::T_LOOKUP);
-                            this->forceLookup = false;
-                        }
-                    }
-                }
-
-                for (int i=0; i<MAX_TRYOUT; i++)
-                {
-                    if (this->outUsedFull())
-                        break;
-                    if (this->tryFull())
-                        break;
-
-                    ServHost sh = this->getOutgoingServent(netID);
-
-                    if (!this->addOutgoing(sh.host, netID, false))
-                        this->deadHost(sh.host, ServHost::T_SERVENT);
-                    sys->sleep(this->tryoutDelay);
-                    break;
-                }
-            }
-        }else{
-#if 0
-            Servent *s = this->servents;
-            while (s)
-            {
-                if (s->type == Servent::T_OUTGOING)
-                    s->thread.shutdown();
-                s=s->next;
-            }
-#endif
-        }
-        sys->sleepIdle();
-    }
-    thread->unlock();
-#endif
-    return 0;
 }
 
 // -----------------------------------
