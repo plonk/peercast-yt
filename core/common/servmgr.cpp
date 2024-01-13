@@ -39,7 +39,8 @@
 
 // -----------------------------------
 ServMgr::ServMgr()
-    : relayBroadcast(30) // オリジナルでは未初期化。
+    : serverIPAddresses({IP::parse("127.0.0.1"), IP::parse("::1")})
+    , relayBroadcast(30) // オリジナルでは未初期化。
     , channelDirectory(new ChannelDirectory())
     , publicDirectoryEnabled(false)
     , uptestServiceRegistry(new UptestServiceRegistry())
@@ -101,6 +102,8 @@ ServMgr::ServMgr()
 
     serverHost.fromStrIP("127.0.0.1", DEFAULT_PORT);
     serverHostIPv6 = Host(IP::parse("::1"), DEFAULT_PORT);
+    serverLocalIP = IP::parse("127.0.0.1");
+    serverLocalIPv6 = IP::parse("::1");
 
     firewalled = FW_UNKNOWN;
     firewalledIPv6 = FW_UNKNOWN;
@@ -160,29 +163,74 @@ ServMgr::~ServMgr()
 }
 
 // ------------------------------------
-bool ServMgr::updateIPAddress(const IP& newIP)
+void ServMgr::updateIPAddress(const IP& newIP)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
-    bool success = false;
 
-    if (newIP.isIPv4Mapped()) {
-        auto score = [](const IP& ip) -> int {
-            if (ip.isIPv4Loopback())
-                return 0;
-            else if (ip.isIPv4Private())
-                return 1;
-            else
-                return 2;
-        };
-        if (score(serverHost.ip) < score(newIP)) {
-            IP oldIP = serverHost.ip;
-            serverHost.ip = newIP;
-            LOG_INFO("Server IPv4 address changed to %s (was %s)",
-                     newIP.str().c_str(),
-                     oldIP.str().c_str());
-            success = true;
-        }
+    auto it = find(serverIPAddresses.begin(), serverIPAddresses.end(), newIP);
+    if (it == serverIPAddresses.end()) {
+        serverIPAddresses.push_front(newIP);
     } else {
+        return;
+    }
+
+    {//IPv4
+        auto score = [](const IP& ip) -> int {
+                         if (ip.isIPv4Loopback())
+                             return 0;
+                         else if (ip.isIPv4Private())
+                             return 1;
+                         else
+                             return 2;
+                     };
+        const int oldScore = score(serverHost.ip);
+
+        for (auto ip : serverIPAddresses) {
+            if (!ip.isIPv4Mapped())
+                continue;
+
+            if (oldScore <= score(ip)) {
+                IP oldIP = serverHost.ip;
+                if (oldIP != ip) {
+                    serverHost.ip = ip;
+                    LOG_INFO("Server IPv4 address changed to %s (was %s)",
+                             ip.str().c_str(),
+                             oldIP.str().c_str());
+                }
+                break;
+            }
+        }
+    }
+
+    {//IPv4 Local
+        auto score = [](const IP& ip) -> int {
+                         if (ip.isIPv4Loopback())
+                             return 0;
+                         else if (ip.isIPv4Private())
+                             return 1;
+                         else
+                             return 2;
+                     };
+        const int oldScore = score(serverLocalIP);
+
+        for (auto ip : serverIPAddresses) {
+            if (!ip.isIPv4Mapped())
+                continue;
+
+            if (oldScore <= score(ip) && score(ip) < 2) {
+                IP oldIP = serverLocalIP;
+                if (oldIP != ip) {
+                    serverLocalIP = ip;
+                    LOG_INFO("Server local IPv4 address changed to %s (was %s)",
+                             ip.str().c_str(),
+                             oldIP.str().c_str());
+                }
+                break;
+            }
+        }
+    }
+
+    {//IPv6
         auto score = [](const IP& ip) -> int {
             if (ip.isIPv6Loopback())
                 return 0;
@@ -193,16 +241,52 @@ bool ServMgr::updateIPAddress(const IP& newIP)
             else
                 return 3;
         };
-        if (score(serverHostIPv6.ip) < score(newIP)) {
-            IP oldIP = serverHostIPv6.ip;
-            serverHostIPv6.ip = newIP;
-            LOG_INFO("Server IPv6 address changed to %s (was %s)",
-                     newIP.str().c_str(),
-                     oldIP.str().c_str());
-            success = true;
+        const int oldScore = score(serverHostIPv6.ip);
+        for (auto ip : serverIPAddresses) {
+            if (ip.isIPv4Mapped())
+                continue;
+
+            if (oldScore <= score(ip)) {
+                IP oldIP = serverHostIPv6.ip;
+                if (oldIP != ip) {
+                    serverHostIPv6.ip = ip;
+                    LOG_INFO("Server IPv6 address changed to %s (was %s)",
+                             ip.str().c_str(),
+                             oldIP.str().c_str());
+                }
+                break;
+            }
         }
     }
-    return success;
+
+    {//IPv6 local
+        auto score = [](const IP& ip) -> int {
+            if (ip.isIPv6Loopback())
+                return 0;
+            else if (ip.isIPv6LinkLocal())
+                return 1;
+            else if (ip.isIPv6UniqueLocal())
+                return 2;
+            else
+                return 3;
+        };
+        const int oldScore = score(serverLocalIPv6);
+        for (auto ip : serverIPAddresses) {
+            if (ip.isIPv4Mapped())
+                continue;
+
+            if (oldScore <= score(ip) && score(ip) < 3) {
+                IP oldIP = serverLocalIPv6;
+                if (oldIP != ip) {
+                    serverLocalIPv6 = ip;
+                    LOG_INFO("Server local IPv6 address changed to %s (was %s)",
+                             ip.str().c_str(),
+                             oldIP.str().c_str());
+                }
+                break;
+            }
+        }
+    }
 }
 
 // -----------------------------------
@@ -2087,6 +2171,11 @@ amf0::Value ServMgr::getState()
     for (auto sv = servents; sv != nullptr; sv = sv->next)
         serventArray.push_back(sv->getState());
 
+    std::vector<amf0::Value> servaddrs;
+    for (auto ip : this->serverIPAddresses) {
+        servaddrs.push_back(ip.str());
+    }
+
     return amf0::Value::object(
         {
             {"version", PCX_VERSTRING},
@@ -2126,7 +2215,8 @@ amf0::Value ServMgr::getState()
             {"numIncoming", to_string(numActive(Servent::T_INCOMING))},
             {"disabled", to_string(isDisabled)},
             {"serverPort1", to_string(serverHost.port)},
-            {"serverLocalIP",Host(sys->getInterfaceIPv4Address(), 0).str(false) },
+            {"serverLocalIP",servMgr->serverLocalIP.str() },
+            {"serverLocalIPv6",servMgr->serverLocalIPv6.str() },
             {"upgradeURL", this->downloadURL},
             {"allow", amf0::Value::object(
                     {
@@ -2175,6 +2265,7 @@ amf0::Value ServMgr::getState()
             {"configurationFile", sys->fromFilenameEncoding(peercastApp->getIniFilename())},
             {"preferredTheme", this->preferredTheme},
             {"accentColor", this->accentColor},
+            {"serverIPAddresses", servaddrs},
         });
 }
 

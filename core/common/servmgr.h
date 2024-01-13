@@ -29,6 +29,9 @@
 #include "ini.h"
 #include "flag.h"
 
+#include <list>
+#include "ip.h"
+
 // ----------------------------------
 
 static const int DEFAULT_PORT   = 7144;
@@ -237,7 +240,7 @@ public:
 
     unsigned int    totalOutput(bool);
 
-    bool updateIPAddress(const IP& newIP);
+    void updateIPAddress(const IP& newIP);
 
     static const char* getFirewallStateString(FW_STATE);
 
@@ -267,6 +270,10 @@ public:
     Host                serverHost;
     Host                serverHostIPv6;
     String              rootHost;
+
+    IP                  serverLocalIP;
+    IP                  serverLocalIPv6;
+    std::list<IP>       serverIPAddresses;
 
     char                downloadURL[128];
     String              rootMsg;

@@ -729,7 +729,7 @@ json JrpcApi::getStatus(json::array_t)
 {
     std::string globalIP = servMgr->serverHost.IPtoStr();
     auto port            = servMgr->serverHost.port;
-    std::string localIP  = Host(sys->getInterfaceIPv4Address(), port).IPtoStr();
+    std::string localIP  = servMgr->serverLocalIP.str();
 
     json j = {
         { "uptime", servMgr->getUptime() },

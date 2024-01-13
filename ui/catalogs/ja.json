@@ -35,6 +35,7 @@
     // index.html
     "Information"             : "情報",
     "Server IP"               : "サーバーIP",
+    "Server Local IP"         : "サーバーローカルIP",
     "Uptime"                  : "稼働時間",
     "Channel cache"           : "チャンネルキャッシュ",
     "Clear"                   : "消去",
