@@ -35,6 +35,15 @@
 #include "uptest.h"
 #include "gnutella.h"
 
+#include "sstream.h"
+#include "defer.h"
+#include <assert.h>
+
+#include <queue>
+
+#include "chunker.h"
+#include "commands.h"
+
 using namespace std;
 
 static bool isDecimal(const std::string& str);
@@ -467,6 +476,54 @@ void Servent::handshakeGET(HTTP &http)
         {
             invokeCGIScript(http, fn);
         }
+    }else if (str::is_prefix_of("/cmd?", fn))
+    {
+        if (!isAllowed(ALLOW_HTML))
+            throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
+
+        cgi::Query query(fn + strlen("/cmd?"));
+        auto q = query.get("q");
+        if (q == "")
+        {
+            throw HTTPException(HTTP_SC_BADREQUEST, 400, "q missing");
+        }else
+        {
+            auto words = str::split(q, " ");
+            if (words.size() == 0)
+            {
+                throw HTTPException(HTTP_SC_BADREQUEST, 400, "Empty query");
+            }
+
+            const auto cmd = words[0];
+            const std::vector<std::string> args(words.begin() + 1, words.end());
+
+            if (!(cmd == "log" || cmd == "nslookup"))
+            {
+                throw HTTPException(HTTP_SC_BADREQUEST, 400, "No such command");
+            }
+
+            if (handshakeAuth(http, fn))
+            {
+                http.readHeaders();
+                http.writeLine(HTTP_SC_OK);
+                http.writeLine("Content-Type: text/plain; charset=utf-8");
+                http.writeLine("Transfer-Encoding: chunked");
+                http.writeLine("");
+
+                Chunker chunker(http);
+
+                try {
+                    auto cancellationRequested = [&]() -> bool { return !(thread.active() && sock->active()); };
+                    if (words[0] == "log")
+                        Commands::log(chunker, args, cancellationRequested);
+                    else if (words[0] == "nslookup")
+                        Commands::nslookup(chunker, args, cancellationRequested);
+                } catch (GeneralException& e)
+                {
+                    LOG_ERROR("Error: cmd %s %s", query.get("q").c_str(), e.msg);
+                }
+            }
+        }
     }else
     {
         // GET マッチなし
@@ -622,6 +679,82 @@ void Servent::handshakeSOURCE(char * in, bool isHTTP)
     sock = NULL;    // socket is taken over by channel, so don`t close it
 }
 
+
+// -----------------------------------
+static std::string format(const amf0::Value& value, int allowance = 80, int indent = 0)
+{
+    if (allowance <= 0 || value.inspect().size() <= allowance) {
+        return value.inspect();
+    } else if (value.isStrictArray()) {
+        std::string out = "[\n";
+        bool firstTime = true;
+        for (const auto& elt : value.strictArray()) {
+            if (!firstTime) {
+                out += ",\n";
+            }
+            out += str::repeat(" ", indent + 2) + format(elt, allowance - indent, indent + 2);
+            firstTime = false;
+        }
+        out += "\n" + str::repeat(" ", indent) + "]";
+        return out;
+    } else if (value.isObject() || value.isArray()) {
+        std::string out = "{\n";
+        bool firstTime = true;
+        for (const auto& pair : value.object()) {
+            if (!firstTime) {
+                out += ",\n";
+            }
+            auto key = amf0::Value::string(pair.first).inspect();
+            out += str::repeat(" ", indent + 2) + key + ": " + format(pair.second, allowance - indent - key.size() - 2 - 1, indent + 2);
+            firstTime = false;
+        }
+        out += "\n" + str::repeat(" ", indent) + "}";
+        return out;
+    } else {
+        return value.inspect();
+    }
+}
+
+#include "defer.h"
+// -----------------------------------
+static void shell(std::shared_ptr<Stream> term)
+{
+    while (true)
+    {
+
+        term->writeString("% ");
+        auto cmdline = term->readLine(256);
+        if (cmdline == "exit")
+        {
+            break;
+        }else if (cmdline == "sv")
+        {
+            term->writeLine(format(servMgr->getState()));
+        }else if (cmdline == "log")
+        {
+            try {
+                auto id = sys->logBuf->addListener([&](unsigned int time, LogBuffer::TYPE type, const char* msg) -> void
+                                                   {
+                                                       term->writeLineF("[%s] %s",
+                                                                        LogBuffer::getTypeStr(type),
+                                                                        msg);
+                                                   });
+                Defer defer([=]() { sys->logBuf->removeListener(id); });
+                term->readLine(256);
+            } catch(GeneralException& e) {
+                term->writeLineF("Error: %s\n", e.what());
+            }
+        }else
+        {
+            Template temp("");
+            RootObjectScope globals;
+            temp.prependScope(globals);
+
+            term->writeLine(format(temp.evalExpression(cmdline)));
+        }
+    }
+}
+
 // -----------------------------------
 void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 {
@@ -649,6 +782,23 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
         // Icecast 放送
 
         handshakeSOURCE(http.cmdLine, isHTTP);
+    }else if (http.isRequest("LOGIN"))
+    {
+        while (true)
+        {
+            sock->writeString("Password: ");
+            auto line = sock->readLine(256);
+            if (line == servMgr->password)
+                break;
+            else
+            {
+                sys->sleep(3000);
+                sock->writeLine("\nLogin incorrect");
+            }
+        }
+        sock->setReadTimeout(0);
+        shell(sock);
+        sock->close();
     }else if (servMgr->password[0] != '\0' && http.isRequest(servMgr->password))
     {
         // ShoutCast broadcast
@@ -899,10 +1049,6 @@ bool Servent::handshakeAuth(HTTP &http, const char *args)
 }
 
 // -----------------------------------
-#include "sstream.h"
-#include "defer.h"
-#include <assert.h>
-
 static std::string runProcess(std::function<void(Stream&)> action)
 {
     StringStream ss;
@@ -2557,4 +2703,3 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
         html.writeRawFile(fileName.cstr(), mimeType);
     }
 }
-

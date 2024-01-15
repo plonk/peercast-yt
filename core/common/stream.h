@@ -190,6 +190,10 @@ public:
 
     void    write(const char *, va_list);
     void    writeLine(const char *);
+    void    writeLine(const std::string& s)
+    {
+        writeLine(s.c_str());
+    }
     void    writeLineF(const char *, ...) __attribute__ ((format (printf, 2, 3)));
     void    writeString(const char *);
     void    writeString(const std::string& s)
