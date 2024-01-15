@@ -4,6 +4,8 @@
 #include "channel.h"
 #include "sstream.h"
 
+#include "servmgr.h"
+
 class ChanHitFixture : public ::testing::Test {
 public:
     ChanHitFixture()
@@ -342,7 +344,7 @@ TEST_F(ChanHitFixture, initLocal)
 
     ASSERT_EQ("127.0.0.1:7144", hit->host.str());
     ASSERT_EQ("127.0.0.1:0", hit->rhost[0].str());
-    ASSERT_EQ("192.168.0.2:7144", hit->rhost[1].str());
+    ASSERT_EQ(hit->rhost[1], Host(servMgr->serverLocalIP, servMgr->serverHost.port));
 }
 
 TEST_F(ChanHitFixture, str)

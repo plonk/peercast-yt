@@ -833,15 +833,34 @@ json JrpcApi::getChannelRelayTree(json::array_t args)
 {
     GnuID id = args[0].get<std::string>();
 
-    auto channel = chanMgr->findChannelByID(id);
-    if (!channel)
+    auto ch = chanMgr->findChannelByID(id);
+    if (!ch)
         throw application_error(kChannelNotFound, "Channel not found");
 
     auto hitList = chanMgr->findHitListByID(id);
     if (!hitList)
         throw application_error(kUnknownError, "Hit list not found");
 
-    HostGraph graph(channel, hitList.get(), channel->ipVersion);
+    ChanHit self;
+    Host uphost;
+    bool isTracker = ch->isBroadcasting();
+
+    if (!isTracker)
+        uphost = ch->sourceHost.host;
+
+    self.initLocal(ch->localListeners(),
+                   ch->localRelays(),
+                   ch->info.numSkips,
+                   ch->info.getUptime(),
+                   ch->isPlaying(),
+                   ch->rawData.getOldestPos(),
+                   ch->rawData.getLatestPos(),
+                   ch->canAddRelay(),
+                   uphost,
+                   (ch->ipVersion == 6));
+    self.tracker = isTracker;
+
+    HostGraph graph(self, hitList.get());
 
     return graph.getRelayTree();
 }
