@@ -2,6 +2,9 @@
 #include "amf0.h"
 #include "stream.h"
 
+#include <iomanip> // setprecision
+#include <sstream> // stringstream
+
 namespace amf0 {
 
 bool Deserializer::readBool(Stream &in)
@@ -99,6 +102,58 @@ Value Deserializer::readValue(Stream &in)
     }
     default:
         throw std::runtime_error("unknown AMF value type " + std::to_string(type));
+    }
+}
+
+std::string Value::inspect() const
+{
+    switch (m_type)
+    {
+    case kNumber:
+    {
+        std::stringstream ss;
+        ss << std::setprecision(std::numeric_limits<double>::max_digits10) << m_number;
+        return ss.str();
+    }
+    case kObject:
+    case kArray:
+    {
+        std::string buf = "{";
+        bool first = true;
+        for (auto pair : m_object)
+        {
+            if (!first)
+                buf += ",";
+            first = false;
+            buf += string(pair.first).inspect() + ":" + pair.second.inspect();
+        }
+        buf += "}";
+        return buf;
+    }
+    case kString:
+        return str::json_inspect(m_string);
+    case kNull:
+        return "null";
+    case kBool:
+        return (m_bool) ? "true" : "false";
+    case kDate:
+        return "(" + std::to_string(m_date.unixTime) + ", " + std::to_string(m_date.timezone) + ")";
+    case kStrictArray:
+    {
+        std::string buf = "[";
+        bool first = true;
+        for (auto elt : m_strict_array)
+        {
+            if (!first)
+                buf += ",";
+            first = false;
+            buf += elt.inspect();
+        }
+        buf += "]";
+        return buf;
+    }
+    default:
+        throw std::runtime_error(str::format("inspect: unknown type %d", m_type));
     }
 }
 
