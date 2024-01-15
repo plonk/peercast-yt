@@ -23,11 +23,12 @@
 #include "threading.h"
 #include <vector>
 #include <functional>
+#include "varwriter.h"
 
 class Stream;
 
 // ------------------------------------
-class LogBuffer
+class LogBuffer : public VariableWriter
 {
 public:
     enum TYPE
@@ -70,6 +71,9 @@ public:
 
     static std::string  lineRendererHTML(unsigned int time, TYPE type, const char* line);
     static size_t copy_utf8(char* dest, const char* src, size_t buflen);
+
+
+    amf0::Value getState() override;
 
     char                *buf;
     unsigned int        *times;
