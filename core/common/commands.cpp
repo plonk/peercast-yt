@@ -41,8 +41,30 @@ void Commands::nslookup(Stream& stream, const std::vector<std::string>& argv, st
         return;
     }
 
-    for (const auto& ip : sys->getIPAddresses(argv[0]))
+    const auto str = argv[0];
+    IP ip;
+    if (IP::tryParse(str, ip))
     {
-        stream.writeLine(ip);
+        std::string out;
+        if (sys->getHostnameByAddress(ip, out))
+        {
+            stream.writeLine(out);
+        }else
+        {
+            stream.writeLineF("Error: '%s' not found", str.c_str());
+        }
+    }else
+    {
+        try {
+            auto ips = sys->getIPAddresses(str);
+            for (const auto& ip : ips)
+            {
+                stream.writeLine(ip);
+            }
+        } catch (GeneralException &e)
+        {
+            stream.writeLineF("Error: '%s' not found: %s", str.c_str(), e.what());
+        }
     }
+    return;
 }
