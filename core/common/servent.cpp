@@ -1024,7 +1024,7 @@ void Servent::writeHeloAtom(AtomStream &atom, bool sendPort, bool sendPing, bool
 }
 
 // -----------------------------------
-void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, String &agent, bool isTrusted)
+void Servent::handshakeOutgoingPCP(AtomStream &atom, const Host &rhost, /*out*/ GnuID &rid, /*out*/ String &agent, bool isTrusted)
 {
     int ipv = rhost.ip.isIPv4Mapped() ? 4 : 6;
     if (servMgr->flags.get("sendPortAtomWhenFirewallUnknown"))
