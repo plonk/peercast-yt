@@ -816,7 +816,7 @@ void ServMgr::checkFirewall()
         }
 
         auto sock = sys->createSocket();
-        if (!sock)
+        if (!sock) // これは絶対に起こらない。
             throw StreamException("Unable to create socket");
         sock->setReadTimeout(30000);
         sock->open(host);
