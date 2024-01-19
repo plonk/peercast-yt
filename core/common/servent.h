@@ -207,7 +207,7 @@ public:
     void    handshakeLocalFile(const char *, HTTP& http);
     void    invokeCGIScript(HTTP &http, const char* fn);
 
-    static void handshakeOutgoingPCP(AtomStream &, Host &, GnuID &, String &, bool);
+    static void handshakeOutgoingPCP(AtomStream &, const Host &, GnuID &, String &, bool);
     static void handshakeIncomingPCP(AtomStream &, Host &, GnuID &, String &);
 
     void    processIncomingPCP(bool);
