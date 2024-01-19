@@ -68,3 +68,49 @@ void Commands::nslookup(Stream& stream, const std::vector<std::string>& argv, st
     }
     return;
 }
+
+#include "socket.h"
+#include "atom.h"
+#include "pcp.h"
+#include "servmgr.h" //DEFAULT_PORT
+void Commands::helo(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancellationRequested)
+{
+    Defer defer([&]() { stream.close(); });
+
+    if (argv.size() != 1)
+    {
+        stream.writeLine("Usage: helo HOST");
+        return;
+    }
+
+    try {
+        Host host = Host::fromString(argv[0], DEFAULT_PORT);
+
+        stream.writeLineF("HELO %s", host.str().c_str());
+
+        auto sock = sys->createSocket();
+        sock->setReadTimeout(30000);
+        sock->open(host);
+        sock->connect();
+
+        AtomStream atom(*sock);
+
+        atom.writeInt(PCP_CONNECT, 1);
+
+        GnuID remoteID;
+        String agent;
+        Servent::handshakeOutgoingPCP(atom,
+                                      sock->host,
+                                      remoteID,
+                                      agent,
+                                      false /* isTrusted */);
+
+        atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT);
+
+        sock->close();
+
+        stream.writeLine("OK");
+    } catch (GeneralException& e) {
+        stream.writeLineF("Error: %s", e.what());
+    }
+}
