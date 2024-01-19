@@ -497,7 +497,7 @@ void Servent::handshakeGET(HTTP &http)
             const auto cmd = words[0];
             const std::vector<std::string> args(words.begin() + 1, words.end());
 
-            if (!(cmd == "log" || cmd == "nslookup"))
+            if (!(cmd == "log" || cmd == "nslookup" || cmd == "helo"))
             {
                 throw HTTPException(HTTP_SC_BADREQUEST, 400, "No such command");
             }
@@ -518,9 +518,11 @@ void Servent::handshakeGET(HTTP &http)
                         Commands::log(chunker, args, cancellationRequested);
                     else if (words[0] == "nslookup")
                         Commands::nslookup(chunker, args, cancellationRequested);
+                    else if (words[0] == "helo")
+                        Commands::helo(chunker, args, cancellationRequested);
                 } catch (GeneralException& e)
                 {
-                    LOG_ERROR("Error: cmd %s %s", query.get("q").c_str(), e.msg);
+                    LOG_ERROR("Error: cmd '%s': %s", query.get("q").c_str(), e.msg);
                 }
             }
         }
