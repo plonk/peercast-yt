@@ -1068,7 +1068,7 @@ static std::string runProcess(std::function<void(Stream&)> action)
 
         action(ss);
     } catch(GeneralException& e) {
-        ss.writeLineF("Error: %s\n", e.what());
+        ss.writeLineF("Error: %s", e.what());
     }
     return ss.str();
 }
