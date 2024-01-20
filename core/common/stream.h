@@ -497,6 +497,44 @@ public:
 };
 
 // --------------------------------------------------
+class CopyingStream : public IndirectStream
+{
+public:
+    CopyingStream(Stream *s)
+    {
+        IndirectStream::init(s);
+    }
+
+    int read(void *p, int l) override
+    {
+        int bytes = stream->read(p, l);
+        const char *q = reinterpret_cast<const char*>(p);
+        dataRead += std::string(q, q + bytes);
+        return bytes;
+    }
+
+    void write(const void *p, int l) override
+    {
+        stream->write(p, l);
+        const char *q = reinterpret_cast<const char*>(p);
+        dataWritten += std::string(q, q + l);
+    }
+
+    bool eof() override
+    {
+        return stream->eof();
+    }
+
+    void close() override
+    {
+        stream->close();
+    }
+
+    std::string dataRead;
+    std::string dataWritten;
+};
+
+// --------------------------------------------------
 class WriteBufferedStream : public IndirectStream
 {
     static const int kBufSize = 64 * 1024;
