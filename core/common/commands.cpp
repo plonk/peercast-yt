@@ -73,27 +73,45 @@ void Commands::nslookup(Stream& stream, const std::vector<std::string>& argv, st
 #include "atom.h"
 #include "pcp.h"
 #include "servmgr.h" //DEFAULT_PORT
-void Commands::helo(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancellationRequested)
+void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::function<bool()> cancellationRequested)
 {
-    Defer defer([&]() { stream.close(); });
+    Defer defer([&]() { stdout.close(); });
 
     if (argv.size() != 1)
     {
-        stream.writeLine("Usage: helo HOST");
+        stdout.writeLine("Usage: helo HOST");
         return;
     }
 
     try {
+        assert(AUX_LOG_FUNC_VECTOR != nullptr);
+        AUX_LOG_FUNC_VECTOR->push_back([&](LogBuffer::TYPE type, const char* msg) -> void
+                                      {
+                                          if (type == LogBuffer::T_ERROR)
+                                              stdout.writeString("Error: ");
+                                          else if (type == LogBuffer::T_WARN)
+                                              stdout.writeString("Warning: ");
+                                          stdout.writeLine(msg);
+                                      });
+        Defer defer([]() { AUX_LOG_FUNC_VECTOR->pop_back(); });
+
         Host host = Host::fromString(argv[0], DEFAULT_PORT);
 
-        stream.writeLineF("HELO %s", host.str().c_str());
+        stdout.writeLineF("HELO %s", host.str().c_str());
 
         auto sock = sys->createSocket();
         sock->setReadTimeout(30000);
         sock->open(host);
         sock->connect();
 
-        AtomStream atom(*sock);
+        CopyingStream cs(sock.get());
+        Defer defer2([&]() {
+                         stdout.writeLine(str::ascii_dump(cs.dataWritten));
+                         stdout.writeLine(str::hexdump(cs.dataWritten));
+                         stdout.writeLine(str::ascii_dump(cs.dataRead));
+                         stdout.writeLine(str::hexdump(cs.dataRead));
+                     });
+        AtomStream atom(cs);
 
         atom.writeInt(PCP_CONNECT, 1);
 
@@ -104,13 +122,16 @@ void Commands::helo(Stream& stream, const std::vector<std::string>& argv, std::f
                                       remoteID,
                                       agent,
                                       false /* isTrusted */);
+        stdout.writeLineF("Remote ID: %s", remoteID.str().c_str());
+        stdout.writeLineF("Remote agent: %s", agent.c_str());
 
         atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT);
 
         sock->close();
 
-        stream.writeLine("OK");
-    } catch (GeneralException& e) {
-        stream.writeLineF("Error: %s", e.what());
+        stdout.writeLine("OK");
+
+    } catch(GeneralException& e) {
+        stdout.writeLineF("Error: %s", e.what());
     }
 }
