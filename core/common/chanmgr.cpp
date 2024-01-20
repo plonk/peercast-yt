@@ -629,6 +629,8 @@ void ChanMgr::addHit(Host &h, const GnuID &id, bool tracker)
     hit.host = h;
     hit.rhost[0] = h;
     hit.rhost[1].init();
+    if (!h.ip.isIPv4Mapped())
+        hit.rhost[1].ip = IP::parse("::");
     hit.tracker = tracker;
     hit.recv = true;
     hit.chanID = id;

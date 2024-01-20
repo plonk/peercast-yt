@@ -178,3 +178,18 @@ void    LogBuffer::clear()
     std::lock_guard<std::recursive_mutex> cs(lock);
     currLine = 0;
 }
+
+// ---------------------------
+#include "sstream.h"
+amf0::Value LogBuffer::getState()
+{
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
+    StringStream s;
+    this->dumpHTML(s);
+
+    return amf0::Value::object(
+        {
+            {"dumpHTML", s.str()},
+        });
+}

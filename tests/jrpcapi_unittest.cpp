@@ -45,7 +45,7 @@ TEST_F(JrpcApiFixture, getStatus)
 {
     json result = api.getStatus(json::array());
 
-    std::string localIP = sys->getInterfaceIPv4Address().str();
+    std::string localIP = servMgr->serverLocalIP.str();
 
     json expected = {
         { "globalDirectEndPoint", { "127.0.0.1", 7144 } },

@@ -54,17 +54,11 @@ void Sys::sleepIdle()
 }
 
 // -----------------------------------
-#include "sstream.h"
 amf0::Value Sys::getState()
 {
-    StringStream s;
-    logBuf->dumpHTML(s);
     return amf0::Value::object(
         {
-            { "log", amf0::Value::object(
-                    {
-                        {"dumpHTML", s.str()}
-                    })},
+            { "log", sys->logBuf->getState() },
             { "time", sys->getTime() },
         });
 }

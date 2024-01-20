@@ -1,23 +1,56 @@
 #include <gtest/gtest.h>
 #include "hostgraph.h"
+#include "servmgr.h"
 
 using json = nlohmann::json;
 
 class HostGraphFixture : public ::testing::Test {
 public:
+    HostGraphFixture()
+    {
+        serverLocalIP_bak = servMgr->serverLocalIP;
+        servMgr->serverLocalIP = IP::parse("192.168.0.2");
+
+        auto ch = std::make_shared<Channel>();
+        // setting up self
+        {
+            Host uphost;
+            bool isTracker = ch->isBroadcasting();
+
+            if (!isTracker)
+                uphost = ch->sourceHost.host;
+
+            self.initLocal(ch->localListeners(),
+                           ch->localRelays(),
+                           ch->info.numSkips,
+                           ch->info.getUptime(),
+                           ch->isPlaying(),
+                           ch->rawData.getOldestPos(),
+                           ch->rawData.getLatestPos(),
+                           ch->canAddRelay(),
+                           uphost,
+                           (ch->ipVersion == 6));
+            self.tracker = isTracker;
+        }
+    }
+
+    ~HostGraphFixture()
+    {
+        servMgr->serverLocalIP = serverLocalIP_bak;
+    }
+    ChanHit self;
+    IP serverLocalIP_bak;
 };
 
 TEST_F(HostGraphFixture, constructorNullChannel)
 {
-    ASSERT_THROW(HostGraph(nullptr, nullptr, 4), std::invalid_argument);
+    ASSERT_THROW(HostGraph(self, nullptr), std::invalid_argument);
 }
 
 TEST_F(HostGraphFixture, simplestCase)
 {
-    auto ch = std::make_shared<Channel>();
     auto hitList = std::make_shared<ChanHitList>();
-
-    HostGraph graph(ch, hitList.get(), 4);
+    HostGraph graph(self, hitList.get());
 
     json j = graph.getRelayTree();
 
@@ -41,7 +74,6 @@ TEST_F(HostGraphFixture, simplestCase)
 
 TEST_F(HostGraphFixture, noUphost)
 {
-    auto ch = std::make_shared<Channel>();
     auto hitList = std::make_shared<ChanHitList>();
     ChanHit hit;
 
@@ -51,7 +83,7 @@ TEST_F(HostGraphFixture, noUphost)
 
     hitList->addHit(hit);
 
-    HostGraph graph(ch, hitList.get(), 4);
+    HostGraph graph(self, hitList.get());
     json j = graph.getRelayTree();
 
     ASSERT_TRUE(j.is_array());
@@ -63,7 +95,6 @@ TEST_F(HostGraphFixture, noUphost)
 
 TEST_F(HostGraphFixture, withUphost)
 {
-    auto ch = std::make_shared<Channel>();
     auto hitList = std::make_shared<ChanHitList>();
 
     {
@@ -76,7 +107,7 @@ TEST_F(HostGraphFixture, withUphost)
         hitList->addHit(hit);
     }
 
-    HostGraph graph(ch, hitList.get(), 4);
+    HostGraph graph(self, hitList.get());
 
     auto relayTree = graph.getRelayTree();
 
@@ -89,7 +120,6 @@ TEST_F(HostGraphFixture, withUphost)
 
 TEST_F(HostGraphFixture, withUphostPush)
 {
-    auto ch = std::make_shared<Channel>();
     auto hitList = std::make_shared<ChanHitList>();
 
     {
@@ -103,7 +133,7 @@ TEST_F(HostGraphFixture, withUphostPush)
         hitList->addHit(hit);
     }
 
-    HostGraph graph(ch, hitList.get(), 4);
+    HostGraph graph(self, hitList.get());
 
     auto relayTree = graph.getRelayTree();
 
@@ -117,14 +147,13 @@ TEST_F(HostGraphFixture, withUphostPush)
 
 TEST_F(HostGraphFixture, localRelay)
 {
-    auto ch = std::make_shared<Channel>();
     auto hitList = std::make_shared<ChanHitList>();
 
     // このシナリオではホストA 127.0.0.1:0/192.168.0.2:7144 へホストB
     // 127.0.0.1:8144/192.168.0.3:8144 がLAN接続している。
 
     ASSERT_EQ(IP::parse("127.0.0.1"), servMgr->serverHost.ip);
-    ASSERT_EQ(IP::parse("192.168.0.2"), sys->getInterfaceIPv4Address());
+    //ASSERT_EQ(IP::parse("192.168.0.2"), sys->getInterfaceIPv4Address());
 
     {
         ChanHit hit;
@@ -137,7 +166,7 @@ TEST_F(HostGraphFixture, localRelay)
         hitList->addHit(hit);
     }
 
-    HostGraph graph(ch, hitList.get(), 4);
+    HostGraph graph(self, hitList.get());
 
     auto relayTree = graph.getRelayTree();
 
