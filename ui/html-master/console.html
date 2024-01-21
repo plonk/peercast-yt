@@ -40,7 +40,7 @@ $(function(){
           const q = this.value
           this.value = ""
 
-          const url = "/cmd?q=" + escape(q)
+          const url = "/cmd?q=" + encodeURIComponent(q)
           const index = nextIndex++
           const decoder = new TextDecoder()
           fetch(url)
