@@ -3,7 +3,7 @@
 #include "logbuf.h"
 #include "defer.h"
 
-void Commands::system(Stream& stream, const std::string& _cmdline, std::function<bool()> cancellationRequested)
+void Commands::system(Stream& stream, const std::string& _cmdline, std::function<bool()> cancel)
 {
     std::string cmdline = str::strip(_cmdline);
 
@@ -22,13 +22,13 @@ void Commands::system(Stream& stream, const std::string& _cmdline, std::function
     const std::vector<std::string> args(words.begin() + 1, words.end());
 
     if (words[0] == "log")
-        Commands::log(stream, args, cancellationRequested);
+        Commands::log(stream, args, cancel);
     else if (words[0] == "nslookup")
-        Commands::nslookup(stream, args, cancellationRequested);
+        Commands::nslookup(stream, args, cancel);
     else if (words[0] == "helo")
-        Commands::helo(stream, args, cancellationRequested);
+        Commands::helo(stream, args, cancel);
     else if (words[0] == "filter")
-        Commands::filter(stream, args, cancellationRequested);
+        Commands::filter(stream, args, cancel);
     else {
         stream.writeLineF("Error: No such command '%s'", words[0].c_str());
     }
@@ -36,7 +36,7 @@ void Commands::system(Stream& stream, const std::string& _cmdline, std::function
 
 #include "amf0.h"
 #include "servmgr.h"
-void Commands::filter(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancellationRequested)
+void Commands::filter(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
     if (argv.size() < 1) {
         stream.writeLine("Usage: filter show");
@@ -75,7 +75,7 @@ void Commands::filter(Stream& stream, const std::vector<std::string>& argv, std:
     }
 }
 
-void Commands::log(Stream& stream, const std::vector<std::string>&, std::function<bool()> cancellationRequested)
+void Commands::log(Stream& stream, const std::vector<std::string>&, std::function<bool()> cancel)
 {
     std::recursive_mutex lock;
 
@@ -88,7 +88,7 @@ void Commands::log(Stream& stream, const std::vector<std::string>&, std::functio
                                        });
     Defer defer([=]() { sys->logBuf->removeListener(id); });
 
-    while (!cancellationRequested())
+    while (!cancel())
     {
         {
             std::lock_guard<std::recursive_mutex> cs(lock);
@@ -103,7 +103,7 @@ void Commands::log(Stream& stream, const std::vector<std::string>&, std::functio
     }
 }
 
-void Commands::nslookup(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancellationRequested)
+void Commands::nslookup(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
     if (argv.size() != 1)
     {
@@ -143,7 +143,7 @@ void Commands::nslookup(Stream& stream, const std::vector<std::string>& argv, st
 #include "atom.h"
 #include "pcp.h"
 #include "servmgr.h" //DEFAULT_PORT
-void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::function<bool()> cancellationRequested)
+void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
     if (argv.size() != 1)
     {
