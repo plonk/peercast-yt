@@ -27,8 +27,51 @@ void Commands::system(Stream& stream, const std::string& _cmdline, std::function
         Commands::nslookup(stream, args, cancellationRequested);
     else if (words[0] == "helo")
         Commands::helo(stream, args, cancellationRequested);
+    else if (words[0] == "filter")
+        Commands::filter(stream, args, cancellationRequested);
     else {
         stream.writeLineF("Error: No such command '%s'", words[0].c_str());
+    }
+}
+
+#include "amf0.h"
+#include "servmgr.h"
+void Commands::filter(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancellationRequested)
+{
+    if (argv.size() < 1) {
+        stream.writeLine("Usage: filter show");
+        stream.writeLine("       filter ban TARGET");
+        return;
+    }
+
+    if (argv[0] == "show") {//
+        std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
+
+        for (int i = 0; i < servMgr->numFilters; i++) {
+            ServFilter* filter = &servMgr->filters[i];
+            std::vector<std::string> labels;
+
+            if (filter->flags & ServFilter::F_BAN) {
+                labels.push_back("banned");
+            }
+            if (filter->flags & ServFilter::F_NETWORK) {
+                labels.push_back("network");
+            }
+            if (filter->flags & ServFilter::F_DIRECT) {
+                labels.push_back("direct");
+            }
+            if (filter->flags & ServFilter::F_PRIVATE) {
+                labels.push_back("private");
+            }
+        
+            stream.writeLineF("%-20s %s",
+                              filter->getPattern().c_str(),
+                              str::join(" ", labels).c_str());
+        }
+    } else if (argv[0] == "ban") {
+        stream.writeLine("not implemented yet");
+    } else {
+        stream.writeLineF("Unknown subcommand '%s'", argv[0].c_str());
     }
 }
 

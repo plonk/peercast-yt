@@ -12,6 +12,7 @@ public:
     static void log(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancellationRequested);
     static void nslookup(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancellationRequested);
     static void helo(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancellationRequested);
+    static void filter(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancellationRequested);
 
     // typedef termination_point std::function<bool()>
     // stdin
