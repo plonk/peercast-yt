@@ -3,6 +3,35 @@
 #include "logbuf.h"
 #include "defer.h"
 
+void Commands::system(Stream& stream, const std::string& _cmdline, std::function<bool()> cancellationRequested)
+{
+    std::string cmdline = str::strip(_cmdline);
+
+    if (cmdline == "") {
+        stream.writeLine("Error: Empty command line");
+        return;
+    }
+
+    auto words = str::split(cmdline, " ");
+    if (words.size() == 0) {
+        stream.writeLine("Error: ???");
+        return;
+    }
+
+    const auto cmd = words[0];
+    const std::vector<std::string> args(words.begin() + 1, words.end());
+
+    if (words[0] == "log")
+        Commands::log(stream, args, cancellationRequested);
+    else if (words[0] == "nslookup")
+        Commands::nslookup(stream, args, cancellationRequested);
+    else if (words[0] == "helo")
+        Commands::helo(stream, args, cancellationRequested);
+    else {
+        stream.writeLineF("Error: No such command '%s'", words[0].c_str());
+    }
+}
+
 void Commands::log(Stream& stream, const std::vector<std::string>&, std::function<bool()> cancellationRequested)
 {
     std::recursive_mutex lock;
@@ -33,8 +62,6 @@ void Commands::log(Stream& stream, const std::vector<std::string>&, std::functio
 
 void Commands::nslookup(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancellationRequested)
 {
-    Defer defer([&]() { stream.close(); });
-
     if (argv.size() != 1)
     {
         stream.writeLine("Usage: nslookup NAME");
@@ -75,8 +102,6 @@ void Commands::nslookup(Stream& stream, const std::vector<std::string>& argv, st
 #include "servmgr.h" //DEFAULT_PORT
 void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::function<bool()> cancellationRequested)
 {
-    Defer defer([&]() { stdout.close(); });
-
     if (argv.size() != 1)
     {
         stdout.writeLine("Usage: helo HOST");

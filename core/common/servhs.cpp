@@ -488,20 +488,6 @@ void Servent::handshakeGET(HTTP &http)
             throw HTTPException(HTTP_SC_BADREQUEST, 400, "q missing");
         }else
         {
-            auto words = str::split(q, " ");
-            if (words.size() == 0)
-            {
-                throw HTTPException(HTTP_SC_BADREQUEST, 400, "Empty query");
-            }
-
-            const auto cmd = words[0];
-            const std::vector<std::string> args(words.begin() + 1, words.end());
-
-            if (!(cmd == "log" || cmd == "nslookup" || cmd == "helo"))
-            {
-                throw HTTPException(HTTP_SC_BADREQUEST, 400, "No such command");
-            }
-
             if (handshakeAuth(http, fn))
             {
                 http.readHeaders();
@@ -511,15 +497,18 @@ void Servent::handshakeGET(HTTP &http)
                 http.writeLine("");
 
                 Chunker chunker(http);
+                Defer defer([&]() {
+                                try {
+                                    // Finalize the stream by sending the end-of-stream marker.
+                                    chunker.close();
+                                } catch (GeneralException&) {
+                                    // We don't want to throw here if the underlying socket is closed.
+                                }
+                            });
 
                 try {
                     auto cancellationRequested = [&]() -> bool { return !(thread.active() && sock->active()); };
-                    if (words[0] == "log")
-                        Commands::log(chunker, args, cancellationRequested);
-                    else if (words[0] == "nslookup")
-                        Commands::nslookup(chunker, args, cancellationRequested);
-                    else if (words[0] == "helo")
-                        Commands::helo(chunker, args, cancellationRequested);
+                    Commands::system(chunker, q, cancellationRequested);
                 } catch (GeneralException& e)
                 {
                     LOG_ERROR("Error: cmd '%s': %s", query.get("q").c_str(), e.msg);
