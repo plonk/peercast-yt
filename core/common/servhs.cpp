@@ -490,6 +490,8 @@ void Servent::handshakeGET(HTTP &http)
         {
             if (handshakeAuth(http, fn))
             {
+                this->type = T_COMMAND;
+
                 http.readHeaders();
                 http.writeLine(HTTP_SC_OK);
                 http.writeLine("Content-Type: text/plain; charset=utf-8");
