@@ -29,9 +29,30 @@ void Commands::system(Stream& stream, const std::string& _cmdline, std::function
         Commands::helo(stream, args, cancel);
     else if (words[0] == "filter")
         Commands::filter(stream, args, cancel);
+    else if (words[0] == "get")
+        Commands::get(stream, args, cancel);
     else {
         stream.writeLineF("Error: No such command '%s'", words[0].c_str());
     }
+}
+
+#include "http.h"
+
+void Commands::get(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    if (argv.size() != 1) {
+        stream.writeLine("Usage: get URL");
+        return;
+    }
+
+    std::string body;
+    try {
+        body = http::get(argv[0]);
+    } catch (GeneralException& e) {
+        stream.writeStringF("Error: %s", e.what());
+        return;
+    }
+    stream.writeString(body);
 }
 
 #include "amf0.h"

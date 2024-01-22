@@ -13,6 +13,7 @@ public:
     static void nslookup(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
     static void helo(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
     static void filter(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
+    static void get(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
 
     // typedef termination_point std::function<bool()>
     // stdin
