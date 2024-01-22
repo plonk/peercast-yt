@@ -388,7 +388,9 @@ void USys::exit()
 // ---------------------------------
 void USys::getURL(const char *url)
 {
-    if (Sys::strnicmp(url, "http://", 7) || Sys::strnicmp(url, "mailto:", 7)) // XXX: ==0 が抜けてる？
+    if (Sys::strnicmp(url, "http://", 7) == 0 ||
+        Sys::strnicmp(url, "https://", 8) == 0 ||
+        Sys::strnicmp(url, "mailto:", 7) == 0)
     {
         openURL( url );
     }
