@@ -33,11 +33,18 @@ void Commands::system(Stream& stream, const std::string& _cmdline, std::function
         Commands::get(stream, args, cancel);
     else if (cmd == "chan")
         Commands::chan(stream, args, cancel);
+    else if (cmd == "echo")
+        Commands::echo(stream, args, cancel);
     // else if (cmd == "bbs")
     //     Commands::bbs(stream, args, cancel);
     else {
         stream.writeLineF("Error: No such command '%s'", cmd.c_str());
     }
+}
+
+void Commands::echo(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    stream.writeLine(str::join(" ", argv).c_str());
 }
 
 #include "chanmgr.h"
