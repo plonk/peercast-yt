@@ -309,6 +309,7 @@ void USys::callLocalURL(const char *str, int port)
 // ---------------------------------
 void USys::executeFile( const char *file )
 {
+    openURL(file);
 }
 
 // ---------------------------------

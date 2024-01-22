@@ -82,6 +82,7 @@ public:
     virtual bool            hasGUI() = 0;
     virtual void            callLocalURL(const char *, int)=0;
     virtual void            executeFile(const char *) = 0;
+    void                    executeFile(const std::string& file) { executeFile(file.c_str()); }
     virtual void            setThreadName(const char* name) {}
 
     virtual std::string     getHostname() { return "localhost"; }

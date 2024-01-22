@@ -881,6 +881,17 @@ json JrpcApi::bumpChannel(json::array_t args)
     return nullptr;
 }
 
+json JrpcApi::playChannel(json::array_t args)
+{
+    std::string id = args[0].get<std::string>();
+
+    ChanInfo info;
+    info.id.fromStr(id.c_str());
+    chanMgr->findAndPlayChannel(info, /*keep=*/ false);
+
+    return nullptr;
+}
+
 json JrpcApi::removeYellowPage(json::array_t args)
 {
     if (args[0].get<int>() == 0) {

@@ -49,6 +49,7 @@ bool logToFile = false;
 std::recursive_mutex loglock;
 static std::string s_tokenListFilename;
 static std::string s_stateDirPath;
+static std::string s_cacheDirPath;
 
 // ---------------------------------
 class MyPeercastInst : public PeercastInstance
@@ -71,6 +72,11 @@ public:
     virtual const char * APICALL getTokenListFilename()
     {
         return s_tokenListFilename.c_str();
+    }
+
+    virtual const char * APICALL getCacheDirPath()
+    {
+        return s_cacheDirPath.c_str();
     }
 
     virtual const char * APICALL getStateDirPath()
@@ -244,6 +250,32 @@ static const char* getStateDir()
     return statedir.c_str();
 }
 
+static const char* getCacheDir()
+{
+    static ::String cachedir;
+
+    if (cachedir.c_str()[0] == '\0')
+    {
+        char* dir;
+        dir = getenv("XDG_CACHE_HOME");
+        if (dir) {
+            cachedir.set(dir);
+        } else {
+            dir = getenv("HOME");
+            if (!dir)
+                dir = getpwuid(getuid())->pw_dir;
+            cachedir.set(dir);
+            cachedir.append("/.cache");
+        }
+        cachedir.append("/peercast");
+
+        if (cachedir.c_str()[0] == '/') {
+            mkdir_p(cachedir.c_str());
+        }
+    }
+    return cachedir.c_str();
+}
+
 // ----------------------------------
 static void init()
 {
@@ -269,6 +301,7 @@ static void init()
     logFileName.append("/peercast.log");
 
     s_stateDirPath = getStateDir();
+    s_cacheDirPath = getCacheDir();
     s_tokenListFilename = s_stateDirPath + "/tokens.json";
 }
 
