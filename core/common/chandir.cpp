@@ -83,84 +83,21 @@ int ChannelDirectory::numFeeds() const
 static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
 {
     const std::string originalUrl = url;
-    int retryCount = 0;
-
-Retry:
-    if (retryCount > 1) {
-        LOG_ERROR("Too many redirections. Giving up ...");
-        return false;
-    }
 
     out.clear();
 
-    URI feed(url);
-    if (!feed.isValid()) {
-        LOG_ERROR("invalid URL (%s)", url.c_str());
-        return false;
-    }
-    if (feed.scheme() != "http" && feed.scheme() != "https") {
-        LOG_ERROR("unsupported protocol (%s)", url.c_str());
-        return false;
-    }
-
-    Host host;
-    host.fromStrName(feed.host().c_str(), feed.port());
-    if (!host.ip) {
-        LOG_ERROR("Could not resolve %s", feed.host().c_str());
-        return false;
-    }
-
-    std::shared_ptr<ClientSocket> rsock;
-    if (feed.scheme() == "https") {
-        rsock = std::make_shared<SslClientSocket>();
-    } else {
-        rsock = sys->createSocket();
-    }
-
     try {
-        LOG_TRACE("Connecting to %s (%s) port %d ...", feed.host().c_str(), host.ip.str().c_str(), feed.port());
-        rsock->open(host);
-        rsock->connect();
-        LOG_TRACE("Connected to %s", host.str().c_str());
-
-        HTTP rhttp(*rsock);
-
-        HTTPRequest req("GET",
-                        feed.path() + "?host=" + cgi::escape(servMgr->serverHost),
-                        "HTTP/1.1",
-                        {
-                            { "Host", feed.host() },
-                            { "Connection", "close" },
-                            { "User-Agent", PCX_AGENT }
-                        });
-
-        HTTPResponse res = rhttp.send(req);
-        if (res.statusCode == 301 || res.statusCode == 302 || res.statusCode == 307 || res.statusCode == 308) {
-            const auto loc = res.headers.get("Location");
-            /* redirect */
-            if (loc != "") {
-                LOG_TRACE("Status code %d. Redirecting to %s ...", res.statusCode, loc.c_str());
-                url = loc;
-                retryCount++;
-                goto Retry;
-            }else {
-                LOG_ERROR("Status code %d. No Location header. Giving up ...", res.statusCode);
-                return false;
-            }
-        }else if (res.statusCode != 200) {
-            LOG_ERROR("%s: status code %d", feed.host().c_str(), res.statusCode);
-            return false;
-        }
+        auto body = http::get(url);
 
         std::vector<std::string> errors;
-        out = ChannelEntry::textToChannelEntries(res.body, originalUrl, errors);
+        out = ChannelEntry::textToChannelEntries(body, originalUrl, errors);
 
         for (auto& message : errors) {
             LOG_ERROR("%s", message.c_str());
         }
 
         return errors.empty();
-    } catch (StreamException& e) {
+    } catch (GeneralException& e) {
         LOG_ERROR("%s", e.msg);
         return false;
     }

@@ -358,3 +358,76 @@ HTTPResponse HTTP::send(const HTTPRequest& request)
     }
     return response;
 }
+
+#include "sslclientsocket.h" // SslClientSocket
+#include "uri.h"
+namespace http {
+
+std::string get(const std::string& _url)
+{
+    std::string url = _url;
+    const std::string originalUrl = url;
+    int retryCount = 0;
+
+Retry:
+    if (retryCount > 1) {
+        throw StreamException("Too many redirections. Giving up ...");
+    }
+
+    URI feed(url);
+    if (!feed.isValid()) {
+        throw ArgumentException(str::format("invalid URL (%s)", url.c_str()));
+    }
+    if (feed.scheme() != "http" && feed.scheme() != "https") {
+        throw ArgumentException(str::format("unsupported protocol (%s)", url.c_str()));
+    }
+
+    Host host;
+    host.fromStrName(feed.host().c_str(), feed.port());
+    if (!host.ip) {
+        throw StreamException(str::format("Could not resolve %s", feed.host().c_str()));
+    }
+
+    std::shared_ptr<ClientSocket> rsock;
+    if (feed.scheme() == "https") {
+        rsock = std::make_shared<SslClientSocket>();
+    } else {
+        rsock = sys->createSocket();
+    }
+
+    LOG_TRACE("Connecting to %s (%s) port %d ...", feed.host().c_str(), host.ip.str().c_str(), feed.port());
+    rsock->open(host);
+    rsock->connect();
+    LOG_TRACE("Connected to %s", host.str().c_str());
+
+    HTTP rhttp(*rsock);
+
+    HTTPRequest req("GET", feed.path(), "HTTP/1.1",
+                    {
+                     { "Host", feed.host() },
+                     { "Connection", "close" },
+                     { "User-Agent", PCX_AGENT }
+                    });
+
+    HTTPResponse res = rhttp.send(req);
+    if (res.statusCode == 301 || res.statusCode == 302 || res.statusCode == 307 || res.statusCode == 308) {
+        const auto loc = res.headers.get("Location");
+        /* redirect */
+        if (loc != "") {
+            LOG_TRACE("Status code %d. Redirecting to %s ...", res.statusCode, loc.c_str());
+            url = loc;
+            retryCount++;
+            goto Retry;
+        }else {
+            LOG_ERROR("Status code %d. No Location header. Giving up ...", res.statusCode);
+            throw StreamException("No Location header");
+        }
+    }else if (res.statusCode != 200) {
+        LOG_ERROR("%s: status code %d", feed.host().c_str(), res.statusCode);
+        throw StreamException(str::format("status code %d", res.statusCode));
+    }
+
+    return res.body;
+}
+
+} // namespace http
