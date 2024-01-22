@@ -21,18 +21,33 @@ void Commands::system(Stream& stream, const std::string& _cmdline, std::function
     const auto cmd = words[0];
     const std::vector<std::string> args(words.begin() + 1, words.end());
 
-    if (words[0] == "log")
+    if (cmd == "log")
         Commands::log(stream, args, cancel);
-    else if (words[0] == "nslookup")
+    else if (cmd == "nslookup")
         Commands::nslookup(stream, args, cancel);
-    else if (words[0] == "helo")
+    else if (cmd == "helo")
         Commands::helo(stream, args, cancel);
-    else if (words[0] == "filter")
+    else if (cmd == "filter")
         Commands::filter(stream, args, cancel);
-    else if (words[0] == "get")
+    else if (cmd == "get")
         Commands::get(stream, args, cancel);
+    else if (cmd == "chan")
+        Commands::chan(stream, args, cancel);
+    // else if (cmd == "bbs")
+    //     Commands::bbs(stream, args, cancel);
     else {
-        stream.writeLineF("Error: No such command '%s'", words[0].c_str());
+        stream.writeLineF("Error: No such command '%s'", cmd.c_str());
+    }
+}
+
+#include "chanmgr.h"
+void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    for (auto it = chanMgr->channel; it; it = it->next) {
+        stream.writeLineF("%s %s %s",
+                          it->getName(),
+                          it->getID().str().c_str(),
+                          it->getStatusStr());
     }
 }
 
