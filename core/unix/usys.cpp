@@ -297,11 +297,7 @@ std::string USys::joinPath(const std::vector<std::string>& vec)
 }
 
 #ifndef __APPLE__
-
-// ---------------------------------
-void USys::getURL(const char *url)
-{
-}
+// Defining callLocalURL, executeFile, exit and getURL for non-Apple systems.
 
 // ---------------------------------
 void USys::callLocalURL(const char *str, int port)
@@ -344,24 +340,13 @@ void USys::exit()
     ::exit(0);
 }
 
-#else
-
 // ---------------------------------
-void USys::openURL( const char* url )
+void USys::getURL(const char *url)
 {
-    CFStringRef urlString = CFStringCreateWithFormat( NULL, NULL, CFSTR("%s"), url );
-
-    if ( urlString )
-    {
-        CFURLRef pathRef = CFURLCreateWithString( NULL, urlString, NULL );
-        if ( pathRef )
-        {
-            OSStatus err = LSOpenCFURLRef( pathRef, NULL );
-            CFRelease(pathRef);
-        }
-        CFRelease( urlString );
-    }
 }
+
+#else
+// Defining callLocalURL, executeFile, exit, getURL and openURL for Apple systems.
 
 // ---------------------------------
 void USys::callLocalURL(const char *str, int port)
@@ -369,15 +354,6 @@ void USys::callLocalURL(const char *str, int port)
     char cmd[512];
     snprintf(cmd, sizeof(cmd), "http://localhost:%d/%s", port, str);
     openURL( cmd );
-}
-
-// ---------------------------------
-void USys::getURL(const char *url)
-{
-    if (Sys::strnicmp(url, "http://", 7) || Sys::strnicmp(url, "mailto:", 7)) // XXX: ==0 が抜けてる？
-    {
-        openURL( url );
-    }
 }
 
 // ---------------------------------
@@ -407,6 +383,32 @@ void USys::exit()
 #else
     ::exit(0);
 #endif
+}
+
+// ---------------------------------
+void USys::getURL(const char *url)
+{
+    if (Sys::strnicmp(url, "http://", 7) || Sys::strnicmp(url, "mailto:", 7)) // XXX: ==0 が抜けてる？
+    {
+        openURL( url );
+    }
+}
+
+// ---------------------------------
+void USys::openURL( const char* url )
+{
+    CFStringRef urlString = CFStringCreateWithFormat( NULL, NULL, CFSTR("%s"), url );
+
+    if ( urlString )
+    {
+        CFURLRef pathRef = CFURLCreateWithString( NULL, urlString, NULL );
+        if ( pathRef )
+        {
+            OSStatus err = LSOpenCFURLRef( pathRef, NULL );
+            CFRelease(pathRef);
+        }
+        CFRelease( urlString );
+    }
 }
 
 #endif
