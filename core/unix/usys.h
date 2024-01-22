@@ -57,9 +57,7 @@ public:
     peercast::Random rndGen;
 private:
 
-#ifdef __APPLE__
     void openURL( const char* url );
-#endif
 };
 
 // ------------------------------------

@@ -297,36 +297,13 @@ std::string USys::joinPath(const std::vector<std::string>& vec)
 }
 
 #ifndef __APPLE__
-// Defining callLocalURL, executeFile, exit and getURL for non-Apple systems.
+// Defining callLocalURL, executeFile, exit, getURL and openURL for non-Apple systems.
 
 // ---------------------------------
 void USys::callLocalURL(const char *str, int port)
 {
-    char* disp = getenv("DISPLAY");
-
     auto localURL = str::format("http://localhost:%d/%s", port, str);
-
-    if (disp == nullptr || disp[0] == '\0')
-    {
-        LOG_WARN("Ignoring openLocalURL request (no DISPLAY environment variable): %s", localURL.c_str());
-        return;
-    }
-
-    int retval;
-    std::string cmdLine = str::format("xdg-open %s", str::escapeshellarg_unix(localURL).c_str());
-    LOG_DEBUG("Calling system(%s)", str::inspect(cmdLine).c_str());
-    retval = system(cmdLine.c_str());
-    if (retval == -1)
-    {
-        LOG_ERROR("USys::callLocalURL: system(3) returned -1");;
-    }else if (!WIFEXITED(retval))
-    {
-        LOG_ERROR("Usys::callLocalURL: Shell terminated abnormally");
-    }else if (WEXITSTATUS(retval) != 0)
-    {
-        LOG_ERROR("Usys::callLocalURL: Shell exited with error status (%d)", WEXITSTATUS(retval));
-    }else
-        ; // Shell exited normally.
+    openURL(localURL.c_str());
 }
 
 // ---------------------------------
@@ -343,6 +320,34 @@ void USys::exit()
 // ---------------------------------
 void USys::getURL(const char *url)
 {
+}
+
+// ---------------------------------
+void USys::openURL( const char* url )
+{
+    char* disp = getenv("DISPLAY");
+
+    if (disp == nullptr || disp[0] == '\0')
+    {
+        LOG_WARN("%s: Ignoring request (no DISPLAY environment variable): %s", __func__, url);
+        return;
+    }
+
+    int retval;
+    std::string cmdLine = str::format("xdg-open %s", str::escapeshellarg_unix(url).c_str());
+    LOG_DEBUG("%s: Calling system(%s)", __func__, str::inspect(cmdLine).c_str());
+    retval = system(cmdLine.c_str());
+    if (retval == -1)
+    {
+        LOG_ERROR("%s: system(3) returned -1", __func__);
+    }else if (!WIFEXITED(retval))
+    {
+        LOG_ERROR("%s: Shell terminated abnormally", __func__);
+    }else if (WEXITSTATUS(retval) != 0)
+    {
+        LOG_ERROR("%s: Shell exited with error status (%d)", __func__, WEXITSTATUS(retval));
+    }else
+        ; // Shell exited normally.
 }
 
 #else
