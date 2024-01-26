@@ -3,7 +3,122 @@
 #include "logbuf.h"
 #include "defer.h"
 
-void Commands::log(Stream& stream, const std::vector<std::string>&, std::function<bool()> cancellationRequested)
+void Commands::system(Stream& stream, const std::string& _cmdline, std::function<bool()> cancel)
+{
+    std::string cmdline = str::strip(_cmdline);
+
+    if (cmdline == "") {
+        stream.writeLine("Error: Empty command line");
+        return;
+    }
+
+    auto words = str::split(cmdline, " ");
+    if (words.size() == 0) {
+        stream.writeLine("Error: ???");
+        return;
+    }
+
+    const auto cmd = words[0];
+    const std::vector<std::string> args(words.begin() + 1, words.end());
+
+    if (cmd == "log")
+        Commands::log(stream, args, cancel);
+    else if (cmd == "nslookup")
+        Commands::nslookup(stream, args, cancel);
+    else if (cmd == "helo")
+        Commands::helo(stream, args, cancel);
+    else if (cmd == "filter")
+        Commands::filter(stream, args, cancel);
+    else if (cmd == "get")
+        Commands::get(stream, args, cancel);
+    else if (cmd == "chan")
+        Commands::chan(stream, args, cancel);
+    else if (cmd == "echo")
+        Commands::echo(stream, args, cancel);
+    // else if (cmd == "bbs")
+    //     Commands::bbs(stream, args, cancel);
+    else {
+        stream.writeLineF("Error: No such command '%s'", cmd.c_str());
+    }
+}
+
+void Commands::echo(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    stream.writeLine(str::join(" ", argv).c_str());
+}
+
+#include "chanmgr.h"
+void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    for (auto it = chanMgr->channel; it; it = it->next) {
+        stream.writeLineF("%s %s %s",
+                          it->getName(),
+                          it->getID().str().c_str(),
+                          it->getStatusStr());
+    }
+}
+
+#include "http.h"
+
+void Commands::get(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    if (argv.size() != 1) {
+        stream.writeLine("Usage: get URL");
+        return;
+    }
+
+    std::string body;
+    try {
+        body = http::get(argv[0]);
+    } catch (GeneralException& e) {
+        stream.writeStringF("Error: %s", e.what());
+        return;
+    }
+    stream.writeString(body);
+}
+
+#include "amf0.h"
+#include "servmgr.h"
+void Commands::filter(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    if (argv.size() < 1) {
+        stream.writeLine("Usage: filter show");
+        stream.writeLine("       filter ban TARGET");
+        return;
+    }
+
+    if (argv[0] == "show") {//
+        std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
+
+        for (int i = 0; i < servMgr->numFilters; i++) {
+            ServFilter* filter = &servMgr->filters[i];
+            std::vector<std::string> labels;
+
+            if (filter->flags & ServFilter::F_BAN) {
+                labels.push_back("banned");
+            }
+            if (filter->flags & ServFilter::F_NETWORK) {
+                labels.push_back("network");
+            }
+            if (filter->flags & ServFilter::F_DIRECT) {
+                labels.push_back("direct");
+            }
+            if (filter->flags & ServFilter::F_PRIVATE) {
+                labels.push_back("private");
+            }
+        
+            stream.writeLineF("%-20s %s",
+                              filter->getPattern().c_str(),
+                              str::join(" ", labels).c_str());
+        }
+    } else if (argv[0] == "ban") {
+        stream.writeLine("not implemented yet");
+    } else {
+        stream.writeLineF("Unknown subcommand '%s'", argv[0].c_str());
+    }
+}
+
+void Commands::log(Stream& stream, const std::vector<std::string>&, std::function<bool()> cancel)
 {
     std::recursive_mutex lock;
 
@@ -16,7 +131,7 @@ void Commands::log(Stream& stream, const std::vector<std::string>&, std::functio
                                        });
     Defer defer([=]() { sys->logBuf->removeListener(id); });
 
-    while (!cancellationRequested())
+    while (!cancel())
     {
         {
             std::lock_guard<std::recursive_mutex> cs(lock);
@@ -31,10 +146,8 @@ void Commands::log(Stream& stream, const std::vector<std::string>&, std::functio
     }
 }
 
-void Commands::nslookup(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancellationRequested)
+void Commands::nslookup(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    Defer defer([&]() { stream.close(); });
-
     if (argv.size() != 1)
     {
         stream.writeLine("Usage: nslookup NAME");
@@ -73,10 +186,8 @@ void Commands::nslookup(Stream& stream, const std::vector<std::string>& argv, st
 #include "atom.h"
 #include "pcp.h"
 #include "servmgr.h" //DEFAULT_PORT
-void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::function<bool()> cancellationRequested)
+void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    Defer defer([&]() { stdout.close(); });
-
     if (argv.size() != 1)
     {
         stdout.writeLine("Usage: helo HOST");

@@ -60,6 +60,7 @@ public:
     virtual const char * APICALL getPath() { return "./"; }
     virtual const char * APICALL getIniFilename() { return "peercast.ini"; }
     virtual const char * APICALL getTokenListFilename() { return "tokens.json"; }
+    virtual const char * APICALL getCacheDirPath() { return "./"; }
     virtual const char * APICALL getStateDirPath() { return "./"; }
     virtual void    APICALL printLog(LogBuffer::TYPE, const char *) {}
     virtual void    APICALL addChannel(ChanInfo *) {}

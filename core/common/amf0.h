@@ -350,5 +350,7 @@ namespace amf0
         std::vector<KeyValuePair> readObject(Stream &in);
         Value readValue(Stream &in);
     };
+
+    std::string format(const amf0::Value& value, int allowance = 80, int indent = 0);
 } // namespace amf
 #endif

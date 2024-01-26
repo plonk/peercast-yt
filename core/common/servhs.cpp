@@ -488,22 +488,10 @@ void Servent::handshakeGET(HTTP &http)
             throw HTTPException(HTTP_SC_BADREQUEST, 400, "q missing");
         }else
         {
-            auto words = str::split(q, " ");
-            if (words.size() == 0)
-            {
-                throw HTTPException(HTTP_SC_BADREQUEST, 400, "Empty query");
-            }
-
-            const auto cmd = words[0];
-            const std::vector<std::string> args(words.begin() + 1, words.end());
-
-            if (!(cmd == "log" || cmd == "nslookup" || cmd == "helo"))
-            {
-                throw HTTPException(HTTP_SC_BADREQUEST, 400, "No such command");
-            }
-
             if (handshakeAuth(http, fn))
             {
+                this->type = T_COMMAND;
+
                 http.readHeaders();
                 http.writeLine(HTTP_SC_OK);
                 http.writeLine("Content-Type: text/plain; charset=utf-8");
@@ -511,15 +499,18 @@ void Servent::handshakeGET(HTTP &http)
                 http.writeLine("");
 
                 Chunker chunker(http);
+                Defer defer([&]() {
+                                try {
+                                    // Finalize the stream by sending the end-of-stream marker.
+                                    chunker.close();
+                                } catch (GeneralException&) {
+                                    // We don't want to throw here if the underlying socket is closed.
+                                }
+                            });
 
                 try {
                     auto cancellationRequested = [&]() -> bool { return !(thread.active() && sock->active()); };
-                    if (words[0] == "log")
-                        Commands::log(chunker, args, cancellationRequested);
-                    else if (words[0] == "nslookup")
-                        Commands::nslookup(chunker, args, cancellationRequested);
-                    else if (words[0] == "helo")
-                        Commands::helo(chunker, args, cancellationRequested);
+                    Commands::system(chunker, q, cancellationRequested);
                 } catch (GeneralException& e)
                 {
                     LOG_ERROR("Error: cmd '%s': %s", query.get("q").c_str(), e.msg);
@@ -681,42 +672,6 @@ void Servent::handshakeSOURCE(char * in, bool isHTTP)
     sock = NULL;    // socket is taken over by channel, so don`t close it
 }
 
-
-// -----------------------------------
-static std::string format(const amf0::Value& value, int allowance = 80, int indent = 0)
-{
-    if (allowance <= 0 || value.inspect().size() <= allowance) {
-        return value.inspect();
-    } else if (value.isStrictArray()) {
-        std::string out = "[\n";
-        bool firstTime = true;
-        for (const auto& elt : value.strictArray()) {
-            if (!firstTime) {
-                out += ",\n";
-            }
-            out += str::repeat(" ", indent + 2) + format(elt, allowance - indent, indent + 2);
-            firstTime = false;
-        }
-        out += "\n" + str::repeat(" ", indent) + "]";
-        return out;
-    } else if (value.isObject() || value.isArray()) {
-        std::string out = "{\n";
-        bool firstTime = true;
-        for (const auto& pair : value.object()) {
-            if (!firstTime) {
-                out += ",\n";
-            }
-            auto key = amf0::Value::string(pair.first).inspect();
-            out += str::repeat(" ", indent + 2) + key + ": " + format(pair.second, allowance - indent - key.size() - 2 - 1, indent + 2);
-            firstTime = false;
-        }
-        out += "\n" + str::repeat(" ", indent) + "}";
-        return out;
-    } else {
-        return value.inspect();
-    }
-}
-
 #include "defer.h"
 // -----------------------------------
 static void shell(std::shared_ptr<Stream> term)
@@ -731,7 +686,7 @@ static void shell(std::shared_ptr<Stream> term)
             break;
         }else if (cmdline == "sv")
         {
-            term->writeLine(format(servMgr->getState()));
+            term->writeLine(amf0::format(servMgr->getState()));
         }else if (cmdline == "log")
         {
             try {
@@ -752,7 +707,7 @@ static void shell(std::shared_ptr<Stream> term)
             RootObjectScope globals;
             temp.prependScope(globals);
 
-            term->writeLine(format(temp.evalExpression(cmdline)));
+            term->writeLine(amf0::format(temp.evalExpression(cmdline)));
         }
     }
 }
