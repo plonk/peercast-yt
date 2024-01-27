@@ -43,8 +43,14 @@ $(function(){
           const url = "/cmd?q=" + encodeURIComponent(q)
           const index = nextIndex++
           const decoder = new TextDecoder()
-          fetch(url)
-              .then(response => response.body.getReader())
+          const headers = { 'X-Requested-With': 'XMLHttpRequest' }
+          fetch(url, { headers })
+              .then(response => {
+                  if (response.status !== 200) {
+                      location.reload(true)
+                  }
+                  return response.body.getReader()
+              })
               .then(reader => {
                   function readChunk({done, value}) {
                       if (done) {
