@@ -302,10 +302,12 @@ void HTTP::send(const HTTPResponse& response)
 // -----------------------------------
 HTTPResponse HTTP::send(const HTTPRequest& request)
 {
+    const auto pathQuery = request.queryString.size() ? request.path + "?" + request.queryString : request.path;
+
     // send request
     stream->writeLineF("%s %s %s",
                        request.method.c_str(),
-                       request.path.c_str(),
+                       pathQuery.c_str(),
                        request.protocolVersion.c_str());
     for (auto it = request.headers.begin(); it != request.headers.end(); ++it)
     {
@@ -401,8 +403,10 @@ Retry:
     LOG_TRACE("Connected to %s", host.str().c_str());
 
     HTTP rhttp(*rsock);
+    const std::string reqPath =  feed.query().size() ? feed.path() + "?" + feed.query() : feed.path();
+    LOG_TRACE("GET %s HTTP/1.1", reqPath.c_str());
 
-    HTTPRequest req("GET", feed.path(), "HTTP/1.1",
+    HTTPRequest req("GET", reqPath, "HTTP/1.1",
                     {
                      { "Host", feed.host() },
                      { "Connection", "close" },
