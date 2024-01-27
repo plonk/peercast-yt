@@ -75,22 +75,22 @@ int ChannelDirectory::numFeeds() const
     return m_feeds.size();
 }
 
-#include "sslclientsocket.h"
 // index.txt を指す URL である url からチャンネルリストを読み込み、out
 // に格納する。成功した場合は true が返る。エラーが発生した場合は
 // false が返る。false を返した場合でも out に読み込めたチャンネル情報
 // が入っている場合がある。
-static bool getFeed(std::string url, std::vector<ChannelEntry>& out)
+static bool getFeed(const std::string& url, std::vector<ChannelEntry>& out)
 {
-    const std::string originalUrl = url;
-
     out.clear();
 
     try {
-        auto body = http::get(url);
+        const int serverPort = servMgr->serverHost.port;
+        cgi::Query query;
+        query.add("host", str::STR("localhost:", serverPort));
+        auto body = http::get(url + "?" + query.str());
 
         std::vector<std::string> errors;
-        out = ChannelEntry::textToChannelEntries(body, originalUrl, errors);
+        out = ChannelEntry::textToChannelEntries(body, url, errors);
 
         for (auto& message : errors) {
             LOG_ERROR("%s", message.c_str());
