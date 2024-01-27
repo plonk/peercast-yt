@@ -3,48 +3,130 @@
 #include "logbuf.h"
 #include "defer.h"
 
+#include <algorithm>
+static std::pair< std::map<std::string, bool>,
+                  std::vector<std::string> >
+parse_options(const std::vector<std::string>& args,
+              const std::vector<std::string>& option_names)
+{
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+
+    for (size_t i = 0; i < args.size(); i++) {
+        if (args[i] == "--") { // end of options
+            for (size_t j = i + 1; j < args.size(); j++) {
+                positionals.push_back(args[j]);
+            }
+            break;
+        } else if (std::find(option_names.begin(), option_names.end(), args[i]) != option_names.end()) {
+            options[args[i]] = true;
+        } else {
+            positionals.push_back(args[i]);
+        }
+    }
+    return { options, positionals };
+}
+
+static std::vector<std::string> command_words(const std::string& cmdline)
+{
+    std::string word;
+    std::vector<std::string> words;
+
+    auto p = cmdline.begin();
+    while (p != cmdline.end()) {
+        if (*p == ' ') {
+            if (word.size()) {
+                words.push_back(word);
+                word = "";
+            }
+            do {
+                p++;
+            } while (*p == ' ');
+            continue;
+        } else if (*p == '"') {
+            p++;
+            while (true) {
+                if (p == cmdline.end()) {
+                    throw FormatException("Premature end of quoted string");
+                } else if (*p == '\\') {
+                    p++;
+                    if (p == cmdline.end()) {
+                        throw FormatException("Premature end of escaped character");
+                    } else {
+                        word += *p;
+                    }
+                } else if (*p == '"') {
+                    words.push_back(word);
+                    word = "";
+                    break;
+                } else {
+                    word += *p;
+                }
+                p++;
+            }
+        } else {
+            word += *p;
+        }
+        p++;
+    }
+    if (word.size()) {
+        words.push_back(word);
+        word = "";
+    }
+    return words;
+}
+
 void Commands::system(Stream& stream, const std::string& _cmdline, std::function<bool()> cancel)
 {
-    std::string cmdline = str::strip(_cmdline);
+    try {
+        auto words = command_words(_cmdline);
+        if (words.size() == 0) {
+            stream.writeLine("Error: Empty command line");
+            return;
+        }
 
-    if (cmdline == "") {
-        stream.writeLine("Error: Empty command line");
-        return;
-    }
+        const auto cmd = words[0];
+        const std::vector<std::string> args(words.begin() + 1, words.end());
 
-    auto words = str::split(cmdline, " ");
-    if (words.size() == 0) {
-        stream.writeLine("Error: ???");
-        return;
-    }
-
-    const auto cmd = words[0];
-    const std::vector<std::string> args(words.begin() + 1, words.end());
-
-    if (cmd == "log")
-        Commands::log(stream, args, cancel);
-    else if (cmd == "nslookup")
-        Commands::nslookup(stream, args, cancel);
-    else if (cmd == "helo")
-        Commands::helo(stream, args, cancel);
-    else if (cmd == "filter")
-        Commands::filter(stream, args, cancel);
-    else if (cmd == "get")
-        Commands::get(stream, args, cancel);
-    else if (cmd == "chan")
-        Commands::chan(stream, args, cancel);
-    else if (cmd == "echo")
-        Commands::echo(stream, args, cancel);
-    // else if (cmd == "bbs")
-    //     Commands::bbs(stream, args, cancel);
-    else {
-        stream.writeLineF("Error: No such command '%s'", cmd.c_str());
+        if (cmd == "log")
+            Commands::log(stream, args, cancel);
+        else if (cmd == "nslookup")
+            Commands::nslookup(stream, args, cancel);
+        else if (cmd == "helo")
+            Commands::helo(stream, args, cancel);
+        else if (cmd == "filter")
+            Commands::filter(stream, args, cancel);
+        else if (cmd == "get")
+            Commands::get(stream, args, cancel);
+        else if (cmd == "chan")
+            Commands::chan(stream, args, cancel);
+        else if (cmd == "echo")
+            Commands::echo(stream, args, cancel);
+        // else if (cmd == "bbs")
+        //     Commands::bbs(stream, args, cancel);
+        else {
+            stream.writeLineF("Error: No such command '%s'", cmd.c_str());
+        }
+    } catch (GeneralException& e) {
+        stream.writeLineF("Error: %s", e.what());
     }
 }
 
 void Commands::echo(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    stream.writeLine(str::join(" ", argv).c_str());
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, { "-v" });
+
+    if (options.count("-v")) {
+        int i = 1;
+        for (auto& word : positionals) {
+            stream.writeLineF("[%d] %s", i, word.c_str());
+            i++;
+        }
+    } else {
+        stream.writeLine(str::join(" ", positionals).c_str());
+    }
 }
 
 #include "chanmgr.h"
@@ -188,11 +270,16 @@ void Commands::nslookup(Stream& stream, const std::vector<std::string>& argv, st
 #include "servmgr.h" //DEFAULT_PORT
 void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    if (argv.size() != 1)
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, { "-v" });
+
+    if (positionals.size() != 1)
     {
-        stdout.writeLine("Usage: helo HOST");
+        stdout.writeLine("Usage: helo [-v] HOST");
         return;
     }
+    const auto target = positionals[0];
 
     try {
         assert(AUX_LOG_FUNC_VECTOR != nullptr);
@@ -206,7 +293,7 @@ void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::f
                                       });
         Defer defer([]() { AUX_LOG_FUNC_VECTOR->pop_back(); });
 
-        Host host = Host::fromString(argv[0], DEFAULT_PORT);
+        Host host = Host::fromString(target, DEFAULT_PORT);
 
         stdout.writeLineF("HELO %s", host.str().c_str());
 
@@ -217,15 +304,17 @@ void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::f
 
         CopyingStream cs(sock.get());
         Defer defer2([&]() {
-                         stdout.writeLineF("--- %d bytes written", (int)cs.dataWritten.size());
-                         if (cs.dataWritten.size()) {
-                             stdout.writeLine(str::ascii_dump(cs.dataWritten));
-                             stdout.writeLine(str::hexdump(cs.dataWritten));
-                         }
-                         stdout.writeLineF("--- %d bytes read", (int)cs.dataRead.size());
-                         if (cs.dataRead.size()) {
-                             stdout.writeLine(str::ascii_dump(cs.dataRead));
-                             stdout.writeLine(str::hexdump(cs.dataRead));
+                         if (options.count("-v")) {
+                             stdout.writeLineF("--- %d bytes written", (int)cs.dataWritten.size());
+                             if (cs.dataWritten.size()) {
+                                 stdout.writeLine(str::ascii_dump(cs.dataWritten));
+                                 stdout.writeLine(str::hexdump(cs.dataWritten));
+                             }
+                             stdout.writeLineF("--- %d bytes read", (int)cs.dataRead.size());
+                             if (cs.dataRead.size()) {
+                                 stdout.writeLine(str::ascii_dump(cs.dataRead));
+                                 stdout.writeLine(str::hexdump(cs.dataRead));
+                             }
                          }
                      });
         AtomStream atom(cs);
