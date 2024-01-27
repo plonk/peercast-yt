@@ -23,6 +23,8 @@ public:
 
     void write(const void *buf, int size) override
     {
+        if (size == 0) // Cannot send zero sized data.
+            return;
         m_stream.writeStringF("%X\r\n", size);
         m_stream.write(buf, size);
         m_stream.writeStringF("\r\n");
