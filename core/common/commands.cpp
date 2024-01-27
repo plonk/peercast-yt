@@ -217,10 +217,16 @@ void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::f
 
         CopyingStream cs(sock.get());
         Defer defer2([&]() {
-                         stdout.writeLine(str::ascii_dump(cs.dataWritten));
-                         stdout.writeLine(str::hexdump(cs.dataWritten));
-                         stdout.writeLine(str::ascii_dump(cs.dataRead));
-                         stdout.writeLine(str::hexdump(cs.dataRead));
+                         stdout.writeLineF("--- %d bytes written", (int)cs.dataWritten.size());
+                         if (cs.dataWritten.size()) {
+                             stdout.writeLine(str::ascii_dump(cs.dataWritten));
+                             stdout.writeLine(str::hexdump(cs.dataWritten));
+                         }
+                         stdout.writeLineF("--- %d bytes read", (int)cs.dataRead.size());
+                         if (cs.dataRead.size()) {
+                             stdout.writeLine(str::ascii_dump(cs.dataRead));
+                             stdout.writeLine(str::hexdump(cs.dataRead));
+                         }
                      });
         AtomStream atom(cs);
 
