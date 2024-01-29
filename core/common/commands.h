@@ -16,6 +16,7 @@ public:
     static void get(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
     static void chan(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
     static void echo(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
+    static void bbs(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
 
     // typedef termination_point std::function<bool()>
     // stdin

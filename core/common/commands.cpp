@@ -102,14 +102,30 @@ void Commands::system(Stream& stream, const std::string& _cmdline, std::function
             Commands::chan(stream, args, cancel);
         else if (cmd == "echo")
             Commands::echo(stream, args, cancel);
-        // else if (cmd == "bbs")
-        //     Commands::bbs(stream, args, cancel);
+        else if (cmd == "bbs")
+            Commands::bbs(stream, args, cancel);
         else {
             stream.writeLineF("Error: No such command '%s'", cmd.c_str());
         }
     } catch (GeneralException& e) {
         stream.writeLineF("Error: %s", e.what());
     }
+}
+
+#include "bbs.h"
+void Commands::bbs(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, {});
+
+    if (positionals.size() < 1) {
+        stream.writeLine("Usage: bbs URL");
+        return;
+    }
+    auto url = positionals[0];
+    auto board = bbs::Board::tryCreate(url);
+    stream.writeLine(board->datUrl);
 }
 
 void Commands::echo(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
