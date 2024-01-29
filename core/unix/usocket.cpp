@@ -392,7 +392,7 @@ Host UClientSocket::getLocalHost()
 // --------------------------------------------------
 void UClientSocket::close()
 {
-    if (sockNum)
+    if (sockNum != -1)
     {
         // signal shutdown
         shutdown(sockNum, SHUT_WR);
@@ -411,7 +411,7 @@ void UClientSocket::close()
         // close handle
         ::close(sockNum);
 
-        sockNum = 0;
+        sockNum = -1;
     }
 }
 

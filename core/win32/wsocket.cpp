@@ -406,7 +406,7 @@ std::shared_ptr<ClientSocket> WSAClientSocket::accept()
 // --------------------------------------------------
 void WSAClientSocket::close()
 {
-    if (sockNum)
+    if (sockNum != INVALID_SOCKET)
     {
         shutdown(sockNum,SD_SEND);
 
@@ -421,7 +421,7 @@ void WSAClientSocket::close()
         if (closesocket(sockNum))
             LOG_ERROR("closesocket() error");
 
-        sockNum = 0;
+        sockNum = INVALID_SOCKET;
     }
 }
 

@@ -31,7 +31,7 @@ public:
     static void init();
 
     WSAClientSocket()
-    :sockNum(0)
+    :sockNum(INVALID_SOCKET)
     {
     }
 
@@ -48,7 +48,7 @@ public:
     void    connect() override;
     void    close() override;
     std::shared_ptr<ClientSocket> accept() override;
-    bool    active() override { return sockNum != 0; }
+    bool    active() override { return sockNum != INVALID_SOCKET; }
     bool    readReady(int timeoutMilliseconds) override;
     Host    getLocalHost() override;
     void    setBlocking(bool) override;

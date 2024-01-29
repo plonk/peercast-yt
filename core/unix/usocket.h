@@ -40,7 +40,7 @@ public:
     static void init();
 
     UClientSocket()
-    :sockNum(0)
+    :sockNum(-1)
     {
     }
 
@@ -57,7 +57,7 @@ public:
     void    connect() override;
     void    close() override;
     std::shared_ptr<ClientSocket> accept() override;
-    bool    active() override { return sockNum != 0; }
+    bool    active() override { return sockNum != -1; }
     bool    readReady(int milliSeconds = 0) override;
     int     numPending() override;
 
