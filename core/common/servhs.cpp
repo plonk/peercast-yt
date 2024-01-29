@@ -781,9 +781,18 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 }
 
 // -----------------------------------
+#include "sslclientsocket.h"
 void Servent::handshakeIncoming()
 {
     setStatus(S_HANDSHAKE);
+
+    if (sock->readReady(sock->readTimeout)) {
+        char c = sock->peekChar();
+        LOG_TRACE("peekChar -> %d", (unsigned char) c);
+        if (c == 22) {
+            sock = SslClientSocket::upgrade(sock);
+        }
+    }
 
     char buf[8192];
 

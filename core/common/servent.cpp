@@ -2062,10 +2062,13 @@ int Servent::serverProc(ThreadInfo *thread)
     return 0;
 }
 
+#include "sslclientsocket.h"
 // -----------------------------------
 amf0::Value    Servent::getState()
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
+
+    bool ssl = static_cast<bool>( std::dynamic_pointer_cast<SslClientSocket>(sock) );
 
     return amf0::Value::object(
         {
@@ -2080,6 +2083,7 @@ amf0::Value    Servent::getState()
             {"uptime", (lastConnect) ? String().setFromStopwatch(sys->getTime() - lastConnect).c_str() : "-"},
             {"chanID", chanID.str()},
             {"isPrivate", std::to_string(isPrivate())},
+            {"ssl", ssl},
         });
 }
 

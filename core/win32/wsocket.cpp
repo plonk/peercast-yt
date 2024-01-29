@@ -444,3 +444,14 @@ bool    WSAClientSocket::readReady(int timeoutMilliseconds)
 
     return num == 1;
 }
+
+// --------------------------------------------------
+char WSAClientSocket::peekChar()
+{
+    char c;
+
+    if (recv(sockNum, &c, 1, MSG_PEEK) != 1) {
+        throw StreamException("peekChar failed");
+    }
+    return c;
+}

@@ -20,6 +20,7 @@
 #endif
 #include <unistd.h>
 #include "str.h"
+#include "stats.h"
 
 using namespace str;
 
@@ -35,6 +36,7 @@ SslClientSocket::SslClientSocket()
             LOG_DEBUG("Initializing OpenSSL ...");
             SSL_load_error_strings();
             SSL_library_init();
+            OpenSSL_add_ssl_algorithms();
             s_openssl_initialized = true;
         }
     }
@@ -68,20 +70,8 @@ SslClientSocket::~SslClientSocket()
     }
 }
 
-void SslClientSocket::open(const Host &rh)
+void SslClientSocket::setTimeoutOptions()
 {
-    m_socket = socket(AF_INET6, SOCK_STREAM, 0);
-    if (m_socket == -1)
-	throw SockException("socket open error");
-
-#ifdef WIN32
-    // ソケットをデュアルスタックモードに入れる。
-    int disable = 0;
-    if (setsockopt(m_socket, IPPROTO_IPV6,  IPV6_V6ONLY, (const char*) &disable, sizeof(disable)) == SOCKET_ERROR) {
-        throw SockException("Can't reset V6ONLY");
-    }
-#endif
-
 #ifdef WIN32
     DWORD timeout;
     timeout = this->readTimeout;
@@ -103,6 +93,23 @@ void SslClientSocket::open(const Host &rh)
     if (setsockopt(m_socket, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof tv) != 0)
         throw SockException("Failed to set write timeout on socket");
 #endif
+}
+
+void SslClientSocket::open(const Host &rh)
+{
+    m_socket = socket(AF_INET6, SOCK_STREAM, 0);
+    if (m_socket == -1)
+	throw SockException("socket open error");
+
+#ifdef WIN32
+    // ソケットをデュアルスタックモードに入れる。
+    int disable = 0;
+    if (setsockopt(m_socket, IPPROTO_IPV6,  IPV6_V6ONLY, (const char*) &disable, sizeof(disable)) == SOCKET_ERROR) {
+        throw SockException("Can't reset V6ONLY");
+    }
+#endif
+
+    setTimeoutOptions();
 
     m_ctx = SSL_CTX_new(SSLv23_client_method());
     assert( m_ctx != nullptr ); // ライブラリが初期化されているから null は返らない。
@@ -111,7 +118,6 @@ void SslClientSocket::open(const Host &rh)
 
     host = rh;
 
-    memset(&m_remoteAddr, 0, sizeof(m_remoteAddr));
     m_remoteAddr.sin6_family = AF_INET6;
     m_remoteAddr.sin6_port = htons(host.port);
     m_remoteAddr.sin6_addr = host.ip.serialize();
@@ -187,6 +193,13 @@ int SslClientSocket::read(void *p, int l)
                 throw SockException( format("SSL_read failed, error = %d", err).c_str() );
             }
         } else {
+            {
+                stats.add(Stats::BYTESIN, r);
+                if (host.localIP())
+                    stats.add(Stats::LOCALBYTESIN, r);
+                updateTotals(r, 0);
+            }
+
             l -= r;
             p = (char *)p + r;
         }
@@ -226,5 +239,58 @@ void SslClientSocket::write(const void *p, int l)
 
         throw SockException( format("SSL_write failed: %s", buf).c_str() );
     }
+
     assert( r == l );
+
+    {
+        stats.add(Stats::BYTESOUT, r);
+        if (host.localIP())
+            stats.add(Stats::LOCALBYTESOUT, r);
+        updateTotals(0, r);
+    }
+}
+
+std::shared_ptr<SslClientSocket> SslClientSocket::upgrade(std::shared_ptr<ClientSocket> rawsock)
+{
+    SSL_CTX* ctx = SSL_CTX_new(SSLv23_server_method());
+    assert( ctx != nullptr );
+
+    SSL_CTX_set_ecdh_auto(ctx, 1);
+
+    if (SSL_CTX_use_certificate_file(ctx, "server.crt", SSL_FILETYPE_PEM) <= 0) {
+        throw GeneralException("Certificate file");
+    }
+
+    if (SSL_CTX_use_PrivateKey_file(ctx, "server.key", SSL_FILETYPE_PEM) <= 0) {
+        throw GeneralException("Private key file");
+    }
+
+    rawsock->setBlocking(true);
+
+    SSL* ssl = SSL_new(ctx);
+    assert( ssl != nullptr );
+    int ret;
+    ret = SSL_set_fd(ssl, rawsock->getDescriptor());
+    if (ret != 1) {
+        throw StreamException(str::format("%s: SSL_set_fd", __func__));
+    }
+    if ((ret = SSL_accept(ssl)) <= 0) {
+        int code = SSL_get_error(ssl, ret);
+        throw StreamException(str::format("%s: SSL_accept: ret = %d, code = %d", __func__, ret, code));
+    } else {
+        auto sock = std::make_shared<SslClientSocket>();
+
+        sock->m_remoteAddr.sin6_family = AF_INET6;
+        sock->m_remoteAddr.sin6_port = htons(rawsock->host.port);
+        sock->m_remoteAddr.sin6_addr = rawsock->host.ip.serialize();
+        sock->m_socket = rawsock->getDescriptor();
+        sock->m_ctx = ctx;
+        sock->m_ssl = ssl;
+        sock->host = rawsock->host;
+        sock->setTimeoutOptions();
+
+        rawsock->detach();
+
+        return sock;
+    }
 }

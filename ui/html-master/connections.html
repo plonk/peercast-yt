@@ -14,6 +14,9 @@
     {@if this.type != "SERVER"}
       {@if this.isPrivate}{#Private}{@end}
     {@end}
+    {@if this.ssl}
+      {#SSL}
+    {@end}
   </td>
   <TD>{$this.agent}</TD>
   <TD align=right>{$this.bitrate}</TD>
@@ -30,12 +33,13 @@
     [{$channel.localListeners}/{$channel.localRelays}]
   </h3>
 {@end}
+
 <DIV class="reloader hscroll" data-url="connections.html?fragment=content&amp;id={$page.id}" data-interval="{$servMgr.refreshHTML}">
   {@fragment content}
   <FORM action=/admin method=get>
     <TABLE width="95%" align=center border=0 class="table-panel">
       <TBODY>
-        <TR align=middle bgColor=#cccccc style="white-space: nowrap">
+        <TR align=middle bgColor="#cccccc" style="white-space: nowrap">
           <TD style="width: 1.2em"><B>{#ID}</B></TD>
           <TD><B>{#_Type_connection}</B></TD>
           <TD><B>{#Status}</B></TD>

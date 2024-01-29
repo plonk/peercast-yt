@@ -440,3 +440,14 @@ int UClientSocket::numPending()
 
     return (int)len;
 }
+
+// --------------------------------------------------
+char UClientSocket::peekChar()
+{
+    char c;
+
+    if (recv(sockNum, &c, 1, MSG_PEEK) != 1) {
+        throw StreamException("peekChar failed");
+    }
+    return c;
+}

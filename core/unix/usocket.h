@@ -71,6 +71,14 @@ public:
 
     void    checkTimeout(bool, bool);
 
+    int getDescriptor() const override { return sockNum; }
+    void detach() override
+    {
+        sockNum = -1;
+        remoteAddr = {};
+    }
+    char peekChar() override;
+
     int sockNum;
     struct sockaddr_in6 remoteAddr;
 };

@@ -60,6 +60,10 @@ public:
 
     void    checkTimeout(bool,bool);
 
+    int getDescriptor() const override { return sockNum; }
+    void detach() override { sockNum = INVALID_SOCKET; remoteAddr = {}; }
+    char peekChar() override;
+
     SOCKET sockNum;
     struct sockaddr_in6 remoteAddr;
 };
