@@ -55,7 +55,7 @@ static std::string s_cacheDirPath;
 class MyPeercastInst : public PeercastInstance
 {
 public:
-    virtual Sys * APICALL createSys()
+    Sys * APICALL createSys() override
     {
         return new USys();
     }
@@ -64,37 +64,37 @@ public:
 class MyPeercastApp : public PeercastApplication
 {
 public:
-    virtual const char * APICALL getIniFilename()
+    const char * APICALL getIniFilename() override
     {
         return iniFileName;
     }
 
-    virtual const char * APICALL getTokenListFilename()
+    const char * APICALL getTokenListFilename() override
     {
         return s_tokenListFilename.c_str();
     }
 
-    virtual const char * APICALL getCacheDirPath()
+    const char * APICALL getCacheDirPath() override
     {
         return s_cacheDirPath.c_str();
     }
 
-    virtual const char * APICALL getStateDirPath()
+    const char * APICALL getStateDirPath() override
     {
         return s_stateDirPath.c_str();
     }
 
-    virtual const char * APICALL getPath()
+    const char * APICALL getPath() override
     {
         return htmlPath;
     }
 
-    virtual const char *APICALL getClientTypeOS()
+    const char *APICALL getClientTypeOS() override
     {
         return PCX_OS_LINUX;
     }
 
-    virtual void APICALL printLog(LogBuffer::TYPE t, const char *str)
+    void APICALL printLog(LogBuffer::TYPE t, const char *str) override
     {
 	std::lock_guard<std::recursive_mutex> cs(loglock);
 
