@@ -76,6 +76,19 @@ static std::vector<std::string> command_words(const std::string& cmdline)
     return words;
 }
 
+static std::map<std::string,
+                std::function< void(Stream&,const std::vector<std::string>&,std::function<bool()>) > >
+s_commands = { { "log", Commands::log },
+               { "nslookup", Commands::nslookup },
+               { "helo", Commands::helo },
+               { "filter", Commands::filter },
+               { "get", Commands::get },
+               { "chan", Commands::chan },
+               { "echo", Commands::echo },
+               { "bbs", Commands::bbs },
+               { "notify", Commands::notify },
+               { "help", Commands::help } };
+
 void Commands::system(Stream& stream, const std::string& _cmdline, std::function<bool()> cancel)
 {
     try {
@@ -88,23 +101,9 @@ void Commands::system(Stream& stream, const std::string& _cmdline, std::function
         const auto cmd = words[0];
         const std::vector<std::string> args(words.begin() + 1, words.end());
 
-        if (cmd == "log")
-            Commands::log(stream, args, cancel);
-        else if (cmd == "nslookup")
-            Commands::nslookup(stream, args, cancel);
-        else if (cmd == "helo")
-            Commands::helo(stream, args, cancel);
-        else if (cmd == "filter")
-            Commands::filter(stream, args, cancel);
-        else if (cmd == "get")
-            Commands::get(stream, args, cancel);
-        else if (cmd == "chan")
-            Commands::chan(stream, args, cancel);
-        else if (cmd == "echo")
-            Commands::echo(stream, args, cancel);
-        else if (cmd == "bbs")
-            Commands::bbs(stream, args, cancel);
-        else {
+        if (s_commands.count(cmd)) {
+            s_commands[cmd](stream, args, cancel);
+        } else {
             stream.writeLineF("Error: No such command '%s'", cmd.c_str());
         }
     } catch (GeneralException& e) {
@@ -112,14 +111,53 @@ void Commands::system(Stream& stream, const std::string& _cmdline, std::function
     }
 }
 
-#include "bbs.h"
-void Commands::bbs(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+void Commands::help(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
     std::map<std::string, bool> options;
     std::vector<std::string> positionals;
     std::tie(options, positionals) = parse_options(argv, {});
 
-    if (positionals.size() < 1) {
+    if (positionals.size() == 0) {
+        for (const auto& pair : s_commands) {
+            stream.writeLineF("%s", pair.first.c_str());
+        }
+    } else if (positionals.size() == 1) {
+        const auto cmd = positionals[0];
+        if (s_commands.count(cmd)) {
+            s_commands[cmd](stream, {"--help"}, cancel);
+        } else {
+            stream.writeLineF("Error: No such command '%s'", cmd.c_str());
+        }
+    }else {
+        stream.writeLine("Usage: help [COMMAND]");
+    }
+    return;
+}
+
+#include "servmgr.h"
+#include "peercast.h"
+void Commands::notify(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, {"--help"});
+
+    if (positionals.size() != 1 || options.count("--help")) {
+        stream.writeLine("Usage: notify MESSAGE");
+        return;
+    }
+    peercast::notifyMessage(ServMgr::NT_PEERCAST, positionals[0]);
+    stream.writeLine("OK");
+}
+
+#include "bbs.h"
+void Commands::bbs(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, {"--help"});
+
+    if (positionals.size() < 1 || options.count("--help")) {
         stream.writeLine("Usage: bbs URL");
         return;
     }
@@ -132,7 +170,12 @@ void Commands::echo(Stream& stream, const std::vector<std::string>& argv, std::f
 {
     std::map<std::string, bool> options;
     std::vector<std::string> positionals;
-    std::tie(options, positionals) = parse_options(argv, { "-v" });
+    std::tie(options, positionals) = parse_options(argv, { "-v", "--help" });
+
+    if (options.count("--help")) {
+        stream.writeLine("Usage: echo [-v] WORDS...");
+        return;
+    }
 
     if (options.count("-v")) {
         int i = 1;
@@ -148,6 +191,15 @@ void Commands::echo(Stream& stream, const std::vector<std::string>& argv, std::f
 #include "chanmgr.h"
 void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, { "--help" });
+
+    if (options.count("--help")) {
+        stream.writeLine("Usage: chan");
+        return;
+    }
+
     for (auto it = chanMgr->channel; it; it = it->next) {
         stream.writeLineF("%s %s %s",
                           it->getName(),
@@ -160,7 +212,11 @@ void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::f
 
 void Commands::get(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    if (argv.size() != 1) {
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, { "--help" });
+
+    if (positionals.size() != 1 || options.count("--help")) {
         stream.writeLine("Usage: get URL");
         return;
     }
@@ -179,13 +235,17 @@ void Commands::get(Stream& stream, const std::vector<std::string>& argv, std::fu
 #include "servmgr.h"
 void Commands::filter(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    if (argv.size() < 1) {
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, { "--help" });
+
+    if (positionals.size() < 1 || options.count("--help")) {
         stream.writeLine("Usage: filter show");
         stream.writeLine("       filter ban TARGET");
         return;
     }
 
-    if (argv[0] == "show") {//
+    if (positionals[0] == "show") {//
         std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
 
         for (int i = 0; i < servMgr->numFilters; i++) {
@@ -209,15 +269,24 @@ void Commands::filter(Stream& stream, const std::vector<std::string>& argv, std:
                               filter->getPattern().c_str(),
                               str::join(" ", labels).c_str());
         }
-    } else if (argv[0] == "ban") {
+    } else if (positionals[0] == "ban") {
         stream.writeLine("not implemented yet");
     } else {
-        stream.writeLineF("Unknown subcommand '%s'", argv[0].c_str());
+        stream.writeLineF("Unknown subcommand '%s'", positionals[0].c_str());
     }
 }
 
-void Commands::log(Stream& stream, const std::vector<std::string>&, std::function<bool()> cancel)
+void Commands::log(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, { "--help" });
+
+    if (options.count("--help")) {
+        stream.writeLine("Usage: log");
+        return;
+    }
+
     std::recursive_mutex lock;
 
     std::queue<std::string> queue;
@@ -246,13 +315,17 @@ void Commands::log(Stream& stream, const std::vector<std::string>&, std::functio
 
 void Commands::nslookup(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    if (argv.size() != 1)
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, { "--help" });
+
+    if (positionals.size() != 1 || options.count("--help"))
     {
         stream.writeLine("Usage: nslookup NAME");
         return;
     }
 
-    const auto str = argv[0];
+    const auto str = positionals[0];
     IP ip;
     if (IP::tryParse(str, ip))
     {
@@ -288,9 +361,9 @@ void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::f
 {
     std::map<std::string, bool> options;
     std::vector<std::string> positionals;
-    std::tie(options, positionals) = parse_options(argv, { "-v" });
+    std::tie(options, positionals) = parse_options(argv, { "-v", "--help" });
 
-    if (positionals.size() != 1)
+    if (positionals.size() != 1 || options.count("--help"))
     {
         stdout.writeLine("Usage: helo [-v] HOST");
         return;
