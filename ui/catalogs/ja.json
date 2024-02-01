@@ -107,6 +107,10 @@
 
     "Close"                   : "閉じる",
     "Display Columns"         : "カラムの表示",
+    "Channel List Preferences" : "チャンネルリストの設定",
+    "Use server-side player"  : "サーバーサイドのプレーヤーを使う",
+    "Playback" : "再生",
+
     "Cancel"                  : "キャンセル",
     "Choose Language"         : "表示言語を選択",
     "Customize Appearance"    : "見た目のカスタマイズ",
