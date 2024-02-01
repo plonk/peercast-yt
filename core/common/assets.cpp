@@ -8,27 +8,30 @@ static string MIMEType(const string& path)
 {
     using namespace str;
 
-    if (contains(path, ".htm"))
+    if (has_suffix(path, ".htm") || has_suffix(path, ".html"))
     {
         return MIME_HTML;
-    }else if (contains(path, ".css"))
+    }else if (has_suffix(path, ".css"))
     {
         return MIME_CSS;
-    }else if (contains(path, ".jpg"))
+    }else if (has_suffix(path, ".jpg"))
     {
         return MIME_JPEG;
-    }else if (contains(path, ".gif"))
+    }else if (has_suffix(path, ".gif"))
     {
         return MIME_GIF;
-    }else if (contains(path, ".png"))
+    }else if (has_suffix(path, ".png"))
     {
         return MIME_PNG;
-    }else if (contains(path, ".js"))
+    }else if (has_suffix(path, ".js"))
     {
         return MIME_JS;
-    }else if (contains(path, ".svg"))
+    }else if (has_suffix(path, ".svg"))
     {
         return "image/svg+xml";
+    }else if (has_suffix(path, ".ico"))
+    {
+        return "image/vnd.microsoft.icon";
     }else
     {
         return "application/octet-stream";
