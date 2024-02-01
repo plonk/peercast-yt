@@ -88,6 +88,15 @@ $(function(){
           scrollToBottom()
       })
 
+      const firstMessage = "{#Type 'help' to get the list of available commands.}"
+      $('#screen').append(
+          who(['div', {class:'output-row'},
+               ['div', {class:'output'},
+                ['pre', {}, firstMessage],
+               ]
+              ])
+      )
+
       $('#commandLine').focus()
 })
 </script>

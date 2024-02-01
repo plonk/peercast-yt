@@ -380,6 +380,9 @@
 
     // Templates/player.html
     "Unmute": "ミュート解除",
-    
+
+    // console.html
+    "Type 'help' to get the list of available commands." : "コマンド一覧を表示するには「help」と打ってください。",
+
     "":""
 }
