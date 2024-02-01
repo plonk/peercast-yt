@@ -78,16 +78,19 @@ static std::vector<std::string> command_words(const std::string& cmdline)
 
 static std::map<std::string,
                 std::function< void(Stream&,const std::vector<std::string>&,std::function<bool()>) > >
-s_commands = { { "log", Commands::log },
-               { "nslookup", Commands::nslookup },
-               { "helo", Commands::helo },
-               { "filter", Commands::filter },
-               { "get", Commands::get },
-               { "chan", Commands::chan },
-               { "echo", Commands::echo },
-               { "bbs", Commands::bbs },
-               { "notify", Commands::notify },
-               { "help", Commands::help } };
+s_commands = {
+              { "log", Commands::log },
+              { "nslookup", Commands::nslookup },
+              { "helo", Commands::helo },
+              { "filter", Commands::filter },
+              { "get", Commands::get },
+              { "chan", Commands::chan },
+              { "echo", Commands::echo },
+              { "bbs", Commands::bbs },
+              { "notify", Commands::notify },
+              { "help", Commands::help },
+              { "pid", Commands::pid },
+};
 
 void Commands::system(Stream& stream, const std::string& _cmdline, std::function<bool()> cancel)
 {
@@ -109,6 +112,32 @@ void Commands::system(Stream& stream, const std::string& _cmdline, std::function
     } catch (GeneralException& e) {
         stream.writeLineF("Error: %s", e.what());
     }
+}
+
+#ifdef WIN32
+#include "processthreadsapi.h"
+#else
+#include <sys/types.h>
+#include <unistd.h>
+#endif
+void Commands::pid(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, {"--help"});
+
+    if (positionals.size() != 0 || options.count("--help")) {
+        stream.writeLine("Usage: pid");
+        return;
+    }
+
+#ifdef WIN32
+    auto id = GetCurrentProcessId();
+#else
+    auto id = getpid();
+#endif
+
+    stream.writeLineF("%s", std::to_string(id).c_str());
 }
 
 void Commands::help(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
