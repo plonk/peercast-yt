@@ -128,6 +128,7 @@ void Commands::pid(Stream& stream, const std::vector<std::string>& argv, std::fu
 
     if (positionals.size() != 0 || options.count("--help")) {
         stream.writeLine("Usage: pid");
+        stream.writeLine("Show the process ID of the server process.");
         return;
     }
 
@@ -159,6 +160,7 @@ void Commands::help(Stream& stream, const std::vector<std::string>& argv, std::f
         }
     }else {
         stream.writeLine("Usage: help [COMMAND]");
+        stream.writeLine("List available commands. Or print the help message of a specified command.");
     }
     return;
 }
@@ -173,6 +175,7 @@ void Commands::notify(Stream& stream, const std::vector<std::string>& argv, std:
 
     if (positionals.size() != 1 || options.count("--help")) {
         stream.writeLine("Usage: notify MESSAGE");
+        stream.writeLine("Send a notification message.");
         return;
     }
     peercast::notifyMessage(ServMgr::NT_PEERCAST, positionals[0]);
@@ -247,6 +250,7 @@ void Commands::get(Stream& stream, const std::vector<std::string>& argv, std::fu
 
     if (positionals.size() != 1 || options.count("--help")) {
         stream.writeLine("Usage: get URL");
+        stream.writeLine("Get a web resource and print it.");
         return;
     }
 
@@ -313,6 +317,7 @@ void Commands::log(Stream& stream, const std::vector<std::string>& argv, std::fu
 
     if (options.count("--help")) {
         stream.writeLine("Usage: log");
+        stream.writeLine("Start printing the log.");
         return;
     }
 
@@ -351,6 +356,7 @@ void Commands::nslookup(Stream& stream, const std::vector<std::string>& argv, st
     if (positionals.size() != 1 || options.count("--help"))
     {
         stream.writeLine("Usage: nslookup NAME");
+        stream.writeLine("Lookup a host name.");
         return;
     }
 
@@ -395,6 +401,7 @@ void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::f
     if (positionals.size() != 1 || options.count("--help"))
     {
         stdout.writeLine("Usage: helo [-v] HOST");
+        stdout.writeLine("Perform a PCP handshake with HOST.");
         return;
     }
     const auto target = positionals[0];
