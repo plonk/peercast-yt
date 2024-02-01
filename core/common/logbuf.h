@@ -23,6 +23,7 @@
 #include "threading.h"
 #include <vector>
 #include <functional>
+#include <map>
 #include "varwriter.h"
 
 class Stream;
@@ -47,6 +48,7 @@ public:
     LogBuffer(int aMaxLines, int aLineLen)
         : lineLen(aLineLen)
         , maxLines(aMaxLines)
+        , listenerID(0)
     {
         currLine = 0;
         buf = new char[lineLen*maxLines];
@@ -72,6 +74,8 @@ public:
     static std::string  lineRendererHTML(unsigned int time, TYPE type, const char* line);
     static size_t copy_utf8(char* dest, const char* src, size_t buflen);
 
+    unsigned int        addListener(std::function<void(unsigned int, TYPE, const char*)> listener);
+    void                removeListener(unsigned int id);
 
     amf0::Value getState() override;
 
@@ -83,6 +87,9 @@ public:
     TYPE                *types;
     std::recursive_mutex lock;
     static const char   *logTypes[];
+
+    unsigned int listenerID;
+    std::map<unsigned int, std::function<void(unsigned int, TYPE, const char*)> > listeners;
 };
 
 

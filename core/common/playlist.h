@@ -65,6 +65,7 @@ public:
     }
     void    addChannels(const char *, Channel **, int);
     void    addChannel(const char *, ChanInfo &);
+    void    addChannel(const std::string& path, ChanInfo & info) { addChannel(path.c_str(), info); }
 
     void    writeSCPLS(Stream &);
     void    writePLS(Stream &);

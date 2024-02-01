@@ -66,6 +66,7 @@ const char *Servent::typeMsgs[] =
     "DIRECT",
     "COUT",
     "CIN",
+    "COMMAND",
 };
 
 // -----------------------------------
@@ -1024,7 +1025,7 @@ void Servent::writeHeloAtom(AtomStream &atom, bool sendPort, bool sendPing, bool
 }
 
 // -----------------------------------
-void Servent::handshakeOutgoingPCP(AtomStream &atom, Host &rhost, GnuID &rid, String &agent, bool isTrusted)
+void Servent::handshakeOutgoingPCP(AtomStream &atom, const Host &rhost, /*out*/ GnuID &rid, /*out*/ String &agent, bool isTrusted)
 {
     int ipv = rhost.ip.isIPv4Mapped() ? 4 : 6;
     if (servMgr->flags.get("sendPortAtomWhenFirewallUnknown"))
@@ -2061,10 +2062,13 @@ int Servent::serverProc(ThreadInfo *thread)
     return 0;
 }
 
+#include "sslclientsocket.h"
 // -----------------------------------
 amf0::Value    Servent::getState()
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
+
+    bool ssl = static_cast<bool>( std::dynamic_pointer_cast<SslClientSocket>(sock) );
 
     return amf0::Value::object(
         {
@@ -2079,6 +2083,7 @@ amf0::Value    Servent::getState()
             {"uptime", (lastConnect) ? String().setFromStopwatch(sys->getTime() - lastConnect).c_str() : "-"},
             {"chanID", chanID.str()},
             {"isPrivate", std::to_string(isPrivate())},
+            {"ssl", ssl},
         });
 }
 

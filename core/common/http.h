@@ -332,4 +332,10 @@ public:
     HTTPHeaders headers;
 };
 
+namespace http {
+
+std::string get(const std::string& url);
+
+}
+
 #endif

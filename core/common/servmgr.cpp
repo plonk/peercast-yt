@@ -816,7 +816,7 @@ void ServMgr::checkFirewall()
         }
 
         auto sock = sys->createSocket();
-        if (!sock)
+        if (!sock) // これは絶対に起こらない。
             throw StreamException("Unable to create socket");
         sock->setReadTimeout(30000);
         sock->open(host);
@@ -2162,6 +2162,7 @@ ServHost::TYPE ServHost::getTypeFromStr(const char *s)
 amf0::Value ServMgr::getState()
 {
     using std::to_string;
+    std::lock_guard<std::recursive_mutex> cs(lock);
 
     std::vector<amf0::Value> filterArray;
     for (int i = 0; i < this->numFilters; i++)

@@ -66,6 +66,10 @@ public:
         return active()==false;
     }
 
+    virtual int getDescriptor() const { throw NotImplementedException(__func__); }
+    virtual void detach() { throw NotImplementedException(__func__); }
+    virtual char peekChar() { throw NotImplementedException(__func__); }
+
     Host            host;
 
     unsigned int    readTimeout, writeTimeout;

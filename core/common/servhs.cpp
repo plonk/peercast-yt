@@ -35,6 +35,15 @@
 #include "uptest.h"
 #include "gnutella.h"
 
+#include "sstream.h"
+#include "defer.h"
+#include <assert.h>
+
+#include <queue>
+
+#include "chunker.h"
+#include "commands.h"
+
 using namespace std;
 
 static bool isDecimal(const std::string& str);
@@ -467,6 +476,47 @@ void Servent::handshakeGET(HTTP &http)
         {
             invokeCGIScript(http, fn);
         }
+    }else if (str::is_prefix_of("/cmd?", fn))
+    {
+        if (!isAllowed(ALLOW_HTML))
+            throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
+
+        cgi::Query query(fn + strlen("/cmd?"));
+        auto q = query.get("q");
+        if (q == "")
+        {
+            throw HTTPException(HTTP_SC_BADREQUEST, 400, "q missing");
+        }else
+        {
+            if (handshakeAuth(http, fn))
+            {
+                this->type = T_COMMAND;
+
+                http.readHeaders();
+                http.writeLine(HTTP_SC_OK);
+                http.writeLine("Content-Type: text/plain; charset=utf-8");
+                http.writeLine("Transfer-Encoding: chunked");
+                http.writeLine("");
+
+                Chunker chunker(http);
+                Defer defer([&]() {
+                                try {
+                                    // Finalize the stream by sending the end-of-stream marker.
+                                    chunker.close();
+                                } catch (GeneralException&) {
+                                    // We don't want to throw here if the underlying socket is closed.
+                                }
+                            });
+
+                try {
+                    auto cancellationRequested = [&]() -> bool { return !(thread.active() && sock->active()); };
+                    Commands::system(chunker, q, cancellationRequested);
+                } catch (GeneralException& e)
+                {
+                    LOG_ERROR("Error: cmd '%s': %s", query.get("q").c_str(), e.msg);
+                }
+            }
+        }
     }else
     {
         // GET マッチなし
@@ -674,9 +724,22 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 }
 
 // -----------------------------------
+#include "sslclientsocket.h"
 void Servent::handshakeIncoming()
 {
     setStatus(S_HANDSHAKE);
+
+#if 0
+    // SSL ハンドシェイクを検出したらSSL通信を行う。
+    // ※ サーバー証明書を設定する機能を作るまで無効にする。
+    if (sock->readReady(sock->readTimeout)) {
+        char c = sock->peekChar();
+        LOG_TRACE("peekChar -> %d", (unsigned char) c);
+        if (c == 22) {
+            sock = SslClientSocket::upgrade(sock);
+        }
+    }
+#endif
 
     char buf[8192];
 
@@ -899,10 +962,6 @@ bool Servent::handshakeAuth(HTTP &http, const char *args)
 }
 
 // -----------------------------------
-#include "sstream.h"
-#include "defer.h"
-#include <assert.h>
-
 static std::string runProcess(std::function<void(Stream&)> action)
 {
     StringStream ss;
@@ -920,7 +979,7 @@ static std::string runProcess(std::function<void(Stream&)> action)
 
         action(ss);
     } catch(GeneralException& e) {
-        ss.writeLineF("Error: %s\n", e.what());
+        ss.writeLineF("Error: %s", e.what());
     }
     return ss.str();
 }
@@ -1291,7 +1350,7 @@ void Servent::CMD_applyflags(const char* cmd, HTTP& http, String& jumpStr)
     });
 
     peercastInst->saveSettings();
-    peercast::notifyMessage(ServMgr::NT_PEERCAST, "設定を保存しました。");
+    peercast::notifyMessage(ServMgr::NT_PEERCAST, "フラグ設定を保存しました。");
     peercastApp->updateSettings();
 
     jumpStr.sprintf("/%s/flags.html", servMgr->htmlPath);
@@ -2557,4 +2616,3 @@ void Servent::handshakeLocalFile(const char *fn, HTTP& http)
         html.writeRawFile(fileName.cstr(), mimeType);
     }
 }
-

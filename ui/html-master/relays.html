@@ -28,6 +28,8 @@
   </style>
 {^end}
 
+<script src="/assets/js/peercast.js"></script>
+
 <div class="reloader hscroll" data-url="relays.html?fragment=relays" data-interval="{$servMgr.refreshHTML}">
   {@fragment relays}
   <TABLE class="relay-list table-panel" align=center border=0>
@@ -40,7 +42,7 @@
         <TD width="1" align="left">
           <form action="play.html">
             <input type="hidden" name="id" value="{$this.id}">
-            <input type="submit" value="Play" style="color:#f00; font-weight:bold">
+            <input type="submit" value="Play" style="color:#f00; font-weight:bold" onclick="if (localStorage['useServersidePlayer'] == 'true') { peercast('playChannel', '{$this.id}'); event.preventDefault() }">
           </form>
         </TD>
         <TD align="left">

@@ -40,6 +40,9 @@ public:
     int readUpto(void *, int) override;
     void write(const void *, int) override;
 
+    static std::shared_ptr<SslClientSocket> upgrade(std::shared_ptr<ClientSocket>);
+    void setTimeoutOptions();
+
     struct sockaddr_in6 m_remoteAddr;
     int m_socket;
     SSL_CTX* m_ctx;

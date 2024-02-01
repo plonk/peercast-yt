@@ -52,7 +52,7 @@ public:
     {
         std::string result = call_internal(request).dump();
 
-        LOG_DEBUG("jrpc response: %s", result.c_str());
+        LOG_DEBUG("jrpc response: %s", str::truncate_utf8(result, 60).c_str());
 
         return result;
     }
@@ -79,18 +79,19 @@ public:
             { "getNewVersions",          &JrpcApi::getNewVersions,          {} },
             { "getNotificationMessages", &JrpcApi::getNotificationMessages, {} },
             { "getPlugins",              &JrpcApi::getPlugins,              {} },
-            { "getSettings",             &JrpcApi::getSettings,             {} },
-            { "getStatus",               &JrpcApi::getStatus,               {} },
-            { "getState",                &JrpcApi::getState,                { "objectNames" } },
             { "getServerStorageItem",    &JrpcApi::getServerStorageItem,    { "key" } },
-            { "setServerStorageItem",    &JrpcApi::setServerStorageItem,    { "key", "value" } },
+            { "getSettings",             &JrpcApi::getSettings,             {} },
+            { "getState",                &JrpcApi::getState,                { "objectNames" } },
+            { "getStatus",               &JrpcApi::getStatus,               {} },
             { "getVersionInfo",          &JrpcApi::getVersionInfo,          {} },
+            { "getYPChannels",           &JrpcApi::getYPChannels,           {} },
             { "getYellowPageProtocols",  &JrpcApi::getYellowPageProtocols,  {} },
             { "getYellowPages",          &JrpcApi::getYellowPages,          {} },
-            { "getYPChannels",           &JrpcApi::getYPChannels,           {} },
+            { "playChannel",             &JrpcApi::playChannel,   { "channelId" } },
             { "removeYellowPage",        &JrpcApi::removeYellowPage,        { "yellowPageId" } },
             { "setChannelInfo",          &JrpcApi::setChannelInfo,          { "channelId", "info", "track" } },
             { "setLogSettings",          &JrpcApi::setLogSettings,          { "settings" } },
+            { "setServerStorageItem",    &JrpcApi::setServerStorageItem,    { "key", "value" } },
             { "setSettings",             &JrpcApi::setSettings,             { "settings" } },
             { "stopChannel",             &JrpcApi::stopChannel,             { "channelId" } },
             { "stopChannelConnection",   &JrpcApi::stopChannelConnection,   { "channelId", "connectionId" } },
@@ -135,6 +136,7 @@ public:
     json getYellowPages(json::array_t);
     json::array_t hostsToJson(std::shared_ptr<ChanHitList> hitList);
     ChanInfo mergeChanInfo(const ChanInfo& orig, json::object_t info, json::object_t track);
+    json playChannel(json::array_t);
     json removeYellowPage(json::array_t args);
     json setChannelInfo(json::array_t args);
     json setLogSettings(json::array_t args);

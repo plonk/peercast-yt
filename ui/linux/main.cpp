@@ -35,6 +35,7 @@
 #include <limits.h> // PATH_MAX
 #include <libgen.h> // dirname
 #include "gnutella.h"
+#include "notif.h"
 
 // ----------------------------------
 String iniFileName;
@@ -49,12 +50,13 @@ bool logToFile = false;
 std::recursive_mutex loglock;
 static std::string s_tokenListFilename;
 static std::string s_stateDirPath;
+static std::string s_cacheDirPath;
 
 // ---------------------------------
 class MyPeercastInst : public PeercastInstance
 {
 public:
-    virtual Sys * APICALL createSys()
+    Sys * APICALL createSys() override
     {
         return new USys();
     }
@@ -63,32 +65,37 @@ public:
 class MyPeercastApp : public PeercastApplication
 {
 public:
-    virtual const char * APICALL getIniFilename()
+    const char * APICALL getIniFilename() override
     {
         return iniFileName;
     }
 
-    virtual const char * APICALL getTokenListFilename()
+    const char * APICALL getTokenListFilename() override
     {
         return s_tokenListFilename.c_str();
     }
 
-    virtual const char * APICALL getStateDirPath()
+    const char * APICALL getCacheDirPath() override
+    {
+        return s_cacheDirPath.c_str();
+    }
+
+    const char * APICALL getStateDirPath() override
     {
         return s_stateDirPath.c_str();
     }
 
-    virtual const char * APICALL getPath()
+    const char * APICALL getPath() override
     {
         return htmlPath;
     }
 
-    virtual const char *APICALL getClientTypeOS()
+    const char *APICALL getClientTypeOS() override
     {
         return PCX_OS_LINUX;
     }
 
-    virtual void APICALL printLog(LogBuffer::TYPE t, const char *str)
+    void APICALL printLog(LogBuffer::TYPE t, const char *str) override
     {
 	std::lock_guard<std::recursive_mutex> cs(loglock);
 
@@ -106,6 +113,18 @@ public:
             fprintf(out, "[%s] ", LogBuffer::getTypeStr(t));
         fprintf(out, "%s\n", str);
     }
+
+    void APICALL notifyMessage(ServMgr::NOTIFY_TYPE type, const char*  message) override
+    {
+        auto summary = str::escapeshellarg_unix(Notification::getTypeStr(type));
+        auto body = str::escapeshellarg_unix(message);
+        auto icon = str::escapeshellarg_unix(str::STR(getPath(), "assets/images/small-logo.png"));
+        auto cmdline = str::format("notify-send -i %s -- %s %s", icon.c_str(), summary.c_str(), body.c_str());
+        int ret;
+        ret = system( cmdline.c_str() );
+        LOG_DEBUG("notifyMessage: system(%s) = %d", str::inspect(cmdline).c_str(), ret);
+    }
+
 };
 
 // ----------------------------------
@@ -244,6 +263,32 @@ static const char* getStateDir()
     return statedir.c_str();
 }
 
+static const char* getCacheDir()
+{
+    static ::String cachedir;
+
+    if (cachedir.c_str()[0] == '\0')
+    {
+        char* dir;
+        dir = getenv("XDG_CACHE_HOME");
+        if (dir) {
+            cachedir.set(dir);
+        } else {
+            dir = getenv("HOME");
+            if (!dir)
+                dir = getpwuid(getuid())->pw_dir;
+            cachedir.set(dir);
+            cachedir.append("/.cache");
+        }
+        cachedir.append("/peercast");
+
+        if (cachedir.c_str()[0] == '/') {
+            mkdir_p(cachedir.c_str());
+        }
+    }
+    return cachedir.c_str();
+}
+
 // ----------------------------------
 static void init()
 {
@@ -269,6 +314,7 @@ static void init()
     logFileName.append("/peercast.log");
 
     s_stateDirPath = getStateDir();
+    s_cacheDirPath = getCacheDir();
     s_tokenListFilename = s_stateDirPath + "/tokens.json";
 }
 
