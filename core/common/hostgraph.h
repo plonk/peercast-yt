@@ -42,8 +42,7 @@ public:
 
     std::map<ID, ChanHit> m_hit;
     std::map<ID, std::vector<ID> > m_children;
-
-    static const ID kNullID;
+    std::vector<ID> m_roots;
 };
 
 #endif

@@ -19,8 +19,6 @@
 
 using json = nlohmann::json;
 
-const HostGraph::ID HostGraph::kNullID = { Host(), Host() };
-
 HostGraph::HostGraph(const ChanHit& self, ChanHitList *hitList)
 {
     if (hitList == nullptr)
@@ -45,7 +43,7 @@ HostGraph::HostGraph(const ChanHit& self, ChanHitList *hitList)
 
         // tracker
         if (hit.uphost == Host()) {
-            m_children[kNullID].push_back(id0);
+            m_roots.push_back(id0);
             found = true;
         }
 
@@ -87,7 +85,7 @@ HostGraph::HostGraph(const ChanHit& self, ChanHitList *hitList)
         }
 
         if (!found) {
-            m_children[kNullID].push_back(id0);
+            m_roots.push_back(id0);
         }
     }
 }
@@ -138,7 +136,7 @@ json::array_t HostGraph::getRelayTree()
 {
     json::array_t result;
 
-    for (ID& root : m_children[kNullID])
+    for (ID& root : m_roots)
     {
         result.push_back(toRelayTree(root, {root}));
     }
