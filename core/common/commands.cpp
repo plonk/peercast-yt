@@ -356,7 +356,7 @@ void Commands::nslookup(Stream& stream, const std::vector<std::string>& argv, st
     if (positionals.size() != 1 || options.count("--help"))
     {
         stream.writeLine("Usage: nslookup NAME");
-        stream.writeLine("Lookup a host name.");
+        stream.writeLine("Look up a host name.");
         return;
     }
 
