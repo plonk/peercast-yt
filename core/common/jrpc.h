@@ -52,7 +52,7 @@ public:
     {
         std::string result = call_internal(request).dump();
 
-        LOG_DEBUG("jrpc response: %s", result.c_str());
+        LOG_DEBUG("jrpc response: %s", str::truncate_utf8(result, 60).c_str());
 
         return result;
     }
