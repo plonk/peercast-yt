@@ -1403,7 +1403,7 @@ void Servent::CMD_applyflags(const char* cmd, HTTP& http, String& jumpStr)
     });
 
     peercastInst->saveSettings();
-    peercast::notifyMessage(ServMgr::NT_PEERCAST, "設定を保存しました。");
+    peercast::notifyMessage(ServMgr::NT_PEERCAST, "フラグ設定を保存しました。");
     peercastApp->updateSettings();
 
     jumpStr.sprintf("/%s/flags.html", servMgr->htmlPath);
