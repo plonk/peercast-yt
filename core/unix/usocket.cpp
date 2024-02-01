@@ -446,8 +446,9 @@ char UClientSocket::peekChar()
 {
     char c;
 
-    if (recv(sockNum, &c, 1, MSG_PEEK) != 1) {
-        throw StreamException("peekChar failed");
+    ssize_t ret;
+    if ((ret = recv(sockNum, &c, 1, MSG_PEEK)) != 1) {
+        throw StreamException(str::STR("recv MSG_PEEK failed. ret = ", ret));
     }
     return c;
 }
