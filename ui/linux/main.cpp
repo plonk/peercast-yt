@@ -35,6 +35,7 @@
 #include <limits.h> // PATH_MAX
 #include <libgen.h> // dirname
 #include "gnutella.h"
+#include "notif.h"
 
 // ----------------------------------
 String iniFileName;
@@ -112,6 +113,18 @@ public:
             fprintf(out, "[%s] ", LogBuffer::getTypeStr(t));
         fprintf(out, "%s\n", str);
     }
+
+    void APICALL notifyMessage(ServMgr::NOTIFY_TYPE type, const char*  message) override
+    {
+        auto summary = str::escapeshellarg_unix(Notification::getTypeStr(type));
+        auto body = str::escapeshellarg_unix(message);
+        auto icon = str::escapeshellarg_unix(str::STR(getPath(), "assets/images/small-logo.png"));
+        auto cmdline = str::format("notify-send -i %s -- %s %s", icon.c_str(), summary.c_str(), body.c_str());
+        int ret;
+        ret = system( cmdline.c_str() );
+        LOG_DEBUG("notifyMessage: system(%s) = %d", str::inspect(cmdline).c_str(), ret);
+    }
+
 };
 
 // ----------------------------------
