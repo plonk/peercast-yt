@@ -672,46 +672,6 @@ void Servent::handshakeSOURCE(char * in, bool isHTTP)
     sock = NULL;    // socket is taken over by channel, so don`t close it
 }
 
-#include "defer.h"
-// -----------------------------------
-static void shell(std::shared_ptr<Stream> term)
-{
-    while (true)
-    {
-
-        term->writeString("% ");
-        auto cmdline = term->readLine(256);
-        if (cmdline == "exit")
-        {
-            break;
-        }else if (cmdline == "sv")
-        {
-            term->writeLine(amf0::format(servMgr->getState()));
-        }else if (cmdline == "log")
-        {
-            try {
-                auto id = sys->logBuf->addListener([&](unsigned int time, LogBuffer::TYPE type, const char* msg) -> void
-                                                   {
-                                                       term->writeLineF("[%s] %s",
-                                                                        LogBuffer::getTypeStr(type),
-                                                                        msg);
-                                                   });
-                Defer defer([=]() { sys->logBuf->removeListener(id); });
-                term->readLine(256);
-            } catch(GeneralException& e) {
-                term->writeLineF("Error: %s\n", e.what());
-            }
-        }else
-        {
-            Template temp("");
-            RootObjectScope globals;
-            temp.prependScope(globals);
-
-            term->writeLine(amf0::format(temp.evalExpression(cmdline)));
-        }
-    }
-}
-
 // -----------------------------------
 void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 {
@@ -739,23 +699,6 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
         // Icecast 放送
 
         handshakeSOURCE(http.cmdLine, isHTTP);
-    }else if (http.isRequest("LOGIN"))
-    {
-        while (true)
-        {
-            sock->writeString("Password: ");
-            auto line = sock->readLine(256);
-            if (line == servMgr->password)
-                break;
-            else
-            {
-                sys->sleep(3000);
-                sock->writeLine("\nLogin incorrect");
-            }
-        }
-        sock->setReadTimeout(0);
-        shell(sock);
-        sock->close();
     }else if (servMgr->password[0] != '\0' && http.isRequest(servMgr->password))
     {
         // ShoutCast broadcast
