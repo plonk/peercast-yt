@@ -123,7 +123,7 @@ std::vector<std::string> USys::getIPAddresses(const std::string& name)
 
     int err = getaddrinfo(name.c_str(), NULL, &hints, &result);
     if (err) {
-        throw GeneralException("getaddrinfo", err);
+        throw GeneralException(str::format("getaddrinfo err = %d", err), err);
     }
 
     for (auto p = result; p; p = p->ai_next) {
