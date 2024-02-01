@@ -114,6 +114,11 @@ std::string USys::getHostname()
 // --------------------------------------------------
 std::vector<std::string> USys::getIPAddresses(const std::string& name)
 {
+#ifndef NO_SERIALIZE_GETADDRINFO
+    static std::mutex getaddrinfo_lock;
+    std::lock_guard<std::mutex> cs(getaddrinfo_lock);
+#endif
+
     std::vector<std::string> addrs;
     struct addrinfo hints = {}, *result;
 
