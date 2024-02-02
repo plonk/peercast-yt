@@ -90,6 +90,7 @@ s_commands = {
               { "notify", Commands::notify },
               { "help", Commands::help },
               { "pid", Commands::pid },
+              { "expr", Commands::expr },
 };
 
 void Commands::system(Stream& stream, const std::string& _cmdline, std::function<bool()> cancel)
@@ -112,6 +113,27 @@ void Commands::system(Stream& stream, const std::string& _cmdline, std::function
     } catch (GeneralException& e) {
         stream.writeLineF("Error: %s", e.what());
     }
+}
+
+#include "template.h"
+void Commands::expr(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, {"--help"});
+
+    if (positionals.size() == 0 || options.count("--help")) {
+        stream.writeLine("Usage: expr EXPRESSION...");
+        stream.writeLine("Evaluate expression.");
+        return;
+    }
+
+    Template temp("");
+    RootObjectScope globals;
+    temp.prependScope(globals);
+
+    auto expression = str::join(" ", positionals);
+    stream.writeLine(amf0::format(temp.evalExpression(expression)));
 }
 
 #ifdef WIN32
@@ -297,7 +319,7 @@ void Commands::filter(Stream& stream, const std::vector<std::string>& argv, std:
             if (filter->flags & ServFilter::F_PRIVATE) {
                 labels.push_back("private");
             }
-        
+
             stream.writeLineF("%-20s %s",
                               filter->getPattern().c_str(),
                               str::join(" ", labels).c_str());
