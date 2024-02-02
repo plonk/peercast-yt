@@ -51,6 +51,7 @@ std::recursive_mutex loglock;
 static std::string s_tokenListFilename;
 static std::string s_stateDirPath;
 static std::string s_cacheDirPath;
+static bool s_enableNotifySend = false;
 
 // ---------------------------------
 class MyPeercastInst : public PeercastInstance
@@ -114,15 +115,22 @@ public:
         fprintf(out, "%s\n", str);
     }
 
-    void APICALL notifyMessage(ServMgr::NOTIFY_TYPE type, const char*  message) override
+    void APICALL notifyMessage(ServMgr::NOTIFY_TYPE type, const char* message) override
     {
-        auto summary = str::escapeshellarg_unix(Notification::getTypeStr(type));
-        auto body = str::escapeshellarg_unix(message);
-        auto icon = str::escapeshellarg_unix(str::STR(getPath(), "assets/images/small-logo.png"));
-        auto cmdline = str::format("notify-send -i %s -- %s %s", icon.c_str(), summary.c_str(), body.c_str());
-        int ret;
-        ret = system( cmdline.c_str() );
-        LOG_DEBUG("notifyMessage: system(%s) = %d", str::inspect(cmdline).c_str(), ret);
+        if (s_enableNotifySend) {
+            auto summary = str::escapeshellarg_unix(Notification::getTypeStr(type));
+            auto body = str::escapeshellarg_unix(message);
+            auto icon = str::escapeshellarg_unix(str::STR(getPath(), "assets/images/small-logo.png"));
+
+            // "&"について。通知デーモンが起動できない環境の場合、数十
+            // 秒間に渡ってコマンドが終了しないので、バックグラウンド
+            // で実行する。
+            auto cmdline = str::format("notify-send -i %s -- %s %s &", icon.c_str(), summary.c_str(), body.c_str());
+
+            int ret;
+            ret = system( cmdline.c_str() );
+            LOG_DEBUG("notifyMessage: system(%s) = %d", str::inspect(cmdline).c_str(), ret);
+        }
     }
 
 };
@@ -354,6 +362,7 @@ int main(int argc, char* argv[])
             printf("-P, --path <path>            set path to html files\n");
             printf("-d, --daemon                 fork in background\n");
             printf("-p, --pidfile <pidfile>      specify pid file\n");
+            printf("--enable-notify-send         enable notification through notify-send command\n");
             printf("-h, --help                   show this help\n");
             return 0;
         } else if (!strcmp(argv[i], "--daemon") || !strcmp(argv[i], "-d")) {
@@ -363,6 +372,8 @@ int main(int argc, char* argv[])
                 setPidFile = true;
                 pidFileName.setFromString(argv[i]);
             }
+        } else if (!strcmp(argv[i], "--enable-notify-send")) {
+            s_enableNotifySend = true;
         } else {
             printf("Invalid argument %s\n", argv[i]);
             return 1;
