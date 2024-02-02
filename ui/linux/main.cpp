@@ -117,6 +117,8 @@ public:
 
     void APICALL notifyMessage(ServMgr::NOTIFY_TYPE type, const char* message) override
     {
+        LOG_INFO("Notification: %s", message);
+
         if (s_enableNotifySend) {
             auto summary = str::escapeshellarg_unix(Notification::getTypeStr(type));
             auto body = str::escapeshellarg_unix(message);
