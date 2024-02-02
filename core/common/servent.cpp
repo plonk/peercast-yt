@@ -2082,6 +2082,7 @@ amf0::Value    Servent::getState()
             {"bitrateAvg", str::format("%.1f", BYTES_TO_KBPS(sock ? sock->stat.bytesInPerSecAvg() + sock->stat.bytesOutPerSecAvg() : 0))},
             {"uptime", (lastConnect) ? String().setFromStopwatch(sys->getTime() - lastConnect).c_str() : "-"},
             {"chanID", chanID.str()},
+            {"remoteID", remoteID.str()},
             {"isPrivate", std::to_string(isPrivate())},
             {"ssl", ssl},
         });
