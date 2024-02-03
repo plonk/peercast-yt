@@ -29,6 +29,9 @@
 #include "ini.h"
 #include "flag.h"
 
+#include <list>
+#include "ip.h"
+
 // ----------------------------------
 
 static const int DEFAULT_PORT   = 7144;
@@ -155,8 +158,6 @@ public:
     Servent             *findConnection(Servent::TYPE, const GnuID &);
 
     static THREAD_PROC  serverProc(ThreadInfo *);
-    static THREAD_PROC  clientProc(ThreadInfo *);
-    static THREAD_PROC  trackerProc(ThreadInfo *);
     static THREAD_PROC  idleProc(ThreadInfo *);
 
     XML::Node           *createServentXML();
@@ -239,7 +240,7 @@ public:
 
     unsigned int    totalOutput(bool);
 
-    bool updateIPAddress(const IP& newIP);
+    void updateIPAddress(const IP& newIP);
 
     static const char* getFirewallStateString(FW_STATE);
 
@@ -270,10 +271,13 @@ public:
     Host                serverHostIPv6;
     String              rootHost;
 
+    IP                  serverLocalIP;
+    IP                  serverLocalIPv6;
+    std::list<IP>       serverIPAddresses;
+
     char                downloadURL[128];
     String              rootMsg;
     String              forceIP;
-    char                connectHost[128];
     GnuID               networkID;
     unsigned int        firewallTimeout;
     std::atomic<int>    m_logLevel;

@@ -302,45 +302,19 @@ std::string USys::joinPath(const std::vector<std::string>& vec)
 }
 
 #ifndef __APPLE__
-
-// ---------------------------------
-void USys::getURL(const char *url)
-{
-}
+// Defining callLocalURL, executeFile, exit, getURL and openURL for non-Apple systems.
 
 // ---------------------------------
 void USys::callLocalURL(const char *str, int port)
 {
-    char* disp = getenv("DISPLAY");
-
     auto localURL = str::format("http://localhost:%d/%s", port, str);
-
-    if (disp == nullptr || disp[0] == '\0')
-    {
-        LOG_WARN("Ignoring openLocalURL request (no DISPLAY environment variable): %s", localURL.c_str());
-        return;
-    }
-
-    int retval;
-    std::string cmdLine = str::format("xdg-open %s", str::escapeshellarg_unix(localURL).c_str());
-    LOG_DEBUG("Calling system(%s)", str::inspect(cmdLine).c_str());
-    retval = system(cmdLine.c_str());
-    if (retval == -1)
-    {
-        LOG_ERROR("USys::callLocalURL: system(3) returned -1");;
-    }else if (!WIFEXITED(retval))
-    {
-        LOG_ERROR("Usys::callLocalURL: Shell terminated abnormally");
-    }else if (WEXITSTATUS(retval) != 0)
-    {
-        LOG_ERROR("Usys::callLocalURL: Shell exited with error status (%d)", WEXITSTATUS(retval));
-    }else
-        ; // Shell exited normally.
+    openURL(localURL.c_str());
 }
 
 // ---------------------------------
 void USys::executeFile( const char *file )
 {
+    openURL(file);
 }
 
 // ---------------------------------
@@ -349,24 +323,41 @@ void USys::exit()
     ::exit(0);
 }
 
-#else
+// ---------------------------------
+void USys::getURL(const char *url)
+{
+}
 
 // ---------------------------------
 void USys::openURL( const char* url )
 {
-    CFStringRef urlString = CFStringCreateWithFormat( NULL, NULL, CFSTR("%s"), url );
+    char* disp = getenv("DISPLAY");
 
-    if ( urlString )
+    if (disp == nullptr || disp[0] == '\0')
     {
-        CFURLRef pathRef = CFURLCreateWithString( NULL, urlString, NULL );
-        if ( pathRef )
-        {
-            OSStatus err = LSOpenCFURLRef( pathRef, NULL );
-            CFRelease(pathRef);
-        }
-        CFRelease( urlString );
+        LOG_WARN("%s: Ignoring request (no DISPLAY environment variable): %s", __func__, url);
+        return;
     }
+
+    int retval;
+    std::string cmdLine = str::format("xdg-open %s", str::escapeshellarg_unix(url).c_str());
+    LOG_DEBUG("%s: Calling system(%s)", __func__, str::inspect(cmdLine).c_str());
+    retval = system(cmdLine.c_str());
+    if (retval == -1)
+    {
+        LOG_ERROR("%s: system(3) returned -1", __func__);
+    }else if (!WIFEXITED(retval))
+    {
+        LOG_ERROR("%s: Shell terminated abnormally", __func__);
+    }else if (WEXITSTATUS(retval) != 0)
+    {
+        LOG_ERROR("%s: Shell exited with error status (%d)", __func__, WEXITSTATUS(retval));
+    }else
+        ; // Shell exited normally.
 }
+
+#else
+// Defining callLocalURL, executeFile, exit, getURL and openURL for Apple systems.
 
 // ---------------------------------
 void USys::callLocalURL(const char *str, int port)
@@ -374,15 +365,6 @@ void USys::callLocalURL(const char *str, int port)
     char cmd[512];
     snprintf(cmd, sizeof(cmd), "http://localhost:%d/%s", port, str);
     openURL( cmd );
-}
-
-// ---------------------------------
-void USys::getURL(const char *url)
-{
-    if (Sys::strnicmp(url, "http://", 7) || Sys::strnicmp(url, "mailto:", 7)) // XXX: ==0 が抜けてる？
-    {
-        openURL( url );
-    }
 }
 
 // ---------------------------------
@@ -412,6 +394,34 @@ void USys::exit()
 #else
     ::exit(0);
 #endif
+}
+
+// ---------------------------------
+void USys::getURL(const char *url)
+{
+    if (Sys::strnicmp(url, "http://", 7) == 0 ||
+        Sys::strnicmp(url, "https://", 8) == 0 ||
+        Sys::strnicmp(url, "mailto:", 7) == 0)
+    {
+        openURL( url );
+    }
+}
+
+// ---------------------------------
+void USys::openURL( const char* url )
+{
+    CFStringRef urlString = CFStringCreateWithFormat( NULL, NULL, CFSTR("%s"), url );
+
+    if ( urlString )
+    {
+        CFURLRef pathRef = CFURLCreateWithString( NULL, urlString, NULL );
+        if ( pathRef )
+        {
+            OSStatus err = LSOpenCFURLRef( pathRef, NULL );
+            CFRelease(pathRef);
+        }
+        CFRelease( urlString );
+    }
 }
 
 #endif

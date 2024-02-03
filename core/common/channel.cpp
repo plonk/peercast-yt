@@ -633,7 +633,7 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
 
                 if (ent && !ent->tip.empty())
                     {
-                    peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルフィードで "+chName(ch->info)+" のトラッカーが見付かりました。");
+                    //peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネルフィードで "+chName(ch->info)+" のトラッカーが見付かりました。");
                     LOG_DEBUG("%s", ("チャンネルフィードで " + chName(ch->info) + " のトラッカーが見付かりました。").c_str());
 
                     Host host = Host::fromString(ent->tip, DEFAULT_PORT);
@@ -687,7 +687,7 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
         {
             numYPTries++;
             LOG_INFO("Channel contacting YP, try %d", numYPTries);
-            peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネル "+chName(ch->info)+" をYPに問い合わせています...");
+            //peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネル "+chName(ch->info)+" をYPに問い合わせています...");
         }else
         {
             LOG_INFO("Channel found hit");
@@ -698,8 +698,9 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
         {
             //bool isTrusted = ch->sourceHost.tracker | ch->sourceHost.yp;
 
-            if (ch->sourceHost.tracker)
-                peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネル "+chName(ch->info)+" をトラッカーに問い合わせています...");
+            if (ch->sourceHost.tracker) {
+                //peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネル "+chName(ch->info)+" をトラッカーに問い合わせています...");
+            }
 
             char ipstr[64];
             strcpy(ipstr, ch->sourceHost.host.str().c_str());
@@ -1218,14 +1219,14 @@ int Channel::readStream(Stream &in, std::shared_ptr<ChannelStream> source)
             if (checkIdle())
             {
                 LOG_DEBUG("Channel idle");
-                peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネル "+chName(info)+" がアイドル状態になりました。");
+                //peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネル "+chName(info)+" がアイドル状態になりました。");
                 break;
             }
 
             if (checkBump())
             {
                 LOG_DEBUG("Channel bumped");
-                peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネル "+chName(info)+" をバンプしました。");
+                //peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネル "+chName(info)+" をバンプしました。");
                 error = -1;
                 break;
             }

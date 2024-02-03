@@ -68,9 +68,31 @@ size_t LogBuffer::copy_utf8(char* dest, const char* src, size_t buflen)
 }
 
 // -----------------------------------
+unsigned int LogBuffer::addListener(std::function<void(unsigned int, TYPE, const char*)> listener)
+{
+    std::lock_guard<std::recursive_mutex> cs(lock);
+    unsigned int id = listenerID++;
+    listeners[id] = listener;
+    return id;
+}
+
+// -----------------------------------
+void LogBuffer::removeListener(unsigned int id)
+{
+    std::lock_guard<std::recursive_mutex> cs(lock);
+    listeners.erase(id);
+}
+
+// -----------------------------------
 void LogBuffer::write(const char *str, TYPE t)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
+
+    const auto now = sys->getTime();
+
+    for (auto pair : listeners) {
+        pair.second(now, t, str);
+    }
 
     size_t len = strlen(str);
     int cnt=0;
@@ -88,7 +110,7 @@ void LogBuffer::write(const char *str, TYPE t)
         buf[bp+rlen] = 0;
         if (cnt==0)
         {
-            times[i] = sys->getTime();
+            times[i] = now;
             types[i] = t;
         }else
         {
@@ -177,4 +199,25 @@ void    LogBuffer::clear()
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
     currLine = 0;
+}
+
+// ---------------------------
+#include "sstream.h"
+amf0::Value LogBuffer::getState()
+{
+    std::lock_guard<std::recursive_mutex> cs(lock);
+
+    StringStream s;
+    this->dumpHTML(s);
+
+    std::vector<amf0::Value> ids;
+    for (auto pair : this->listeners) {
+        ids.push_back(pair.first);
+    }
+
+    return amf0::Value::object(
+        {
+            {"dumpHTML", s.str()},
+            {"logListeners", ids},
+        });
 }

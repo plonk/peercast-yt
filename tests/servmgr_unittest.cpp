@@ -45,8 +45,6 @@ TEST_F(ServMgrFixture, initialState)
     ASSERT_STREQ("", m.rootMsg.cstr());
     // String              forceIP;
     ASSERT_STREQ("", m.forceIP.cstr());
-    // char                connectHost[128];
-    ASSERT_STREQ("connect1.peercast.org", m.connectHost);
     // GnuID               networkID;
     ASSERT_STREQ("00000000000000000000000000000000", m.networkID.str().c_str());
     // unsigned int        firewallTimeout;

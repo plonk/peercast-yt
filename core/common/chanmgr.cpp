@@ -631,6 +631,8 @@ void ChanMgr::addHit(Host &h, const GnuID &id, bool tracker)
     hit.host = h;
     hit.rhost[0] = h;
     hit.rhost[1].init();
+    if (!h.ip.isIPv4Mapped())
+        hit.rhost[1].ip = IP::parse("::");
     hit.tracker = tracker;
     hit.recv = true;
     hit.chanID = id;
@@ -711,10 +713,8 @@ void ChanMgr::findAndPlayChannel(ChanInfo &info, bool keep)
 // -----------------------------------
 void ChanMgr::playChannel(ChanInfo &info)
 {
-    char str[128], fname[256];
-
-    sprintf(str, "http://localhost:%d", servMgr->serverHost.port);
-
+    std::string str = str::format("http://localhost:%d", servMgr->serverHost.port);
+    std::string fname;
     PlayList::TYPE type;
 
     if ((info.contentType == ChanInfo::T_WMA) || (info.contentType == ChanInfo::T_WMV))
@@ -722,18 +722,18 @@ void ChanMgr::playChannel(ChanInfo &info)
         type = PlayList::T_ASX;
         // WMP seems to have a bug where it doesn`t re-read asx files if they have the same name
         // so we prepend the channel id to make it unique - NOTE: should be deleted afterwards.
-        snprintf(fname, sizeof(fname), "%s/%s.asx", peercastApp->getPath(), info.id.str().c_str());
+        fname = str::format("%s/%s.asx", peercastApp->getCacheDirPath(), info.id.str().c_str());
     }else if (info.contentType == ChanInfo::T_OGM)
     {
         type = PlayList::T_RAM;
-        snprintf(fname, sizeof(fname), "%s/play.ram", peercastApp->getPath());
+        fname = str::format("%s/play.ram", peercastApp->getCacheDirPath());
     }else
     {
         type = PlayList::T_SCPLS;
-        snprintf(fname, sizeof(fname), "%s/play.pls", peercastApp->getPath());
+        fname = str::format("%s/play.pls", peercastApp->getCacheDirPath());
     }
 
-    PlayList *pls = new PlayList(type, 1);
+    auto pls = std::make_shared<PlayList>(type, 1);
     pls->addChannel(str, info);
 
     LOG_DEBUG("Writing %s", sys->fromFilenameEncoding(fname).c_str());
@@ -744,7 +744,6 @@ void ChanMgr::playChannel(ChanInfo &info)
 
     LOG_DEBUG("Executing: %s", sys->fromFilenameEncoding(fname).c_str());
     sys->executeFile(fname);
-    delete pls;
 }
 
 // -----------------------------------

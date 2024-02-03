@@ -19,39 +19,12 @@
 
 using json = nlohmann::json;
 
-const HostGraph::ID HostGraph::kNullID = { Host(), Host() };
-
-HostGraph::HostGraph(std::shared_ptr<Channel> ch, ChanHitList *hitList, int ipVersion)
+HostGraph::HostGraph(const ChanHit& self, ChanHitList *hitList)
 {
-    if (ch == nullptr)
-        throw std::invalid_argument("ch");
-
     if (hitList == nullptr)
         throw std::invalid_argument("hitList");
 
-    // 自分を追加する。
-    {
-        Host uphost;
-        ChanHit self;
-        bool isTracker = ch->isBroadcasting();
-
-        if (!isTracker)
-            uphost = ch->sourceHost.host;
-
-        self.initLocal(ch->localListeners(),
-                       ch->localRelays(),
-                       ch->info.numSkips,
-                       ch->info.getUptime(),
-                       ch->isPlaying(),
-                       ch->rawData.getOldestPos(),
-                       ch->rawData.getLatestPos(),
-                       ch->canAddRelay(),
-                       uphost,
-                       (ipVersion == 6));
-        self.tracker = isTracker;
-
-        m_hit[id(self)] = self;
-    }
+    m_hit[id(self)] = self;
 
     for (auto p = hitList->hit;
          p;
@@ -70,7 +43,7 @@ HostGraph::HostGraph(std::shared_ptr<Channel> ch, ChanHitList *hitList, int ipVe
 
         // tracker
         if (hit.uphost == Host()) {
-            m_children[kNullID].push_back(id0);
+            m_roots.push_back(id0);
             found = true;
         }
 
@@ -112,12 +85,12 @@ HostGraph::HostGraph(std::shared_ptr<Channel> ch, ChanHitList *hitList, int ipVe
         }
 
         if (!found) {
-            m_children[kNullID].push_back(id0);
+            m_roots.push_back(id0);
         }
     }
 }
 
-std::pair<Host, Host> HostGraph::id(ChanHit& hit)
+std::pair<Host, Host> HostGraph::id(const ChanHit& hit)
 {
     return { hit.rhost[0], hit.rhost[1] };
 }
@@ -163,7 +136,7 @@ json::array_t HostGraph::getRelayTree()
 {
     json::array_t result;
 
-    for (ID& root : m_children[kNullID])
+    for (ID& root : m_roots)
     {
         result.push_back(toRelayTree(root, {root}));
     }

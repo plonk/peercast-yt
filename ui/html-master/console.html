@@ -1,0 +1,103 @@
+{^define LAYOUT layout.html}
+{^define TITLE}{#Console} - {#PeerCast on} {^SERVER_NAME}{^end}
+{^define HEAD}
+<style>
+#screen { background-color: #8cabd8; padding: 15px }
+.input-row { text-align: right; background-image: url(/assets/images/peak-right.png); background-repeat: no-repeat; background-position-x: right; padding-right: 5px }
+.output-row { text-align: left; background-image: url(/assets/images/peak-left.png); background-repeat: no-repeat; background-position-x: left; padding-left: 5px }
+.input { color: #111; overflow-x: scroll; display: inline-block; border-radius: calc(8px + .5em); padding: 8px calc(8px + .5em); max-width: 75%; background-color: #79e278 }
+.output { color: #111; overflow-x: scroll; display: inline-block; border-radius: calc(8px + .5em); padding: 8px calc(8px + .5em); background-color: white; max-width: 75% }
+pre { margin:0 }
+.ellipsis { font-family: monospace }
+@keyframes cursor-blink {
+    0% { opacity: 1; }
+    75% { opacity: 1; }
+    100% { opacity: 0; }
+}
+.ellipsis { color: magenta; animation: cursor-blink 1.5s steps(10) infinite; }
+</style>
+{^end}
+
+<script src="/assets/js/render_helpers.js"></script>
+
+<div id="screen" style="text-align:left">
+</div>
+<div style="width:100%; margin-top: 0.3em">
+  <span class="prompt">&raquo;</span>
+  <input type="text" id="commandLine" style="width:calc(100% - 1em)">
+</div>
+
+<script>
+function scrollToBottom()
+{
+    $(window).scrollTop($(document).height() - $(window).height())
+    //const top = $(document).height() - $(window).height()
+    //$("html, body").animate({ scrollTop: top }, 600)
+}
+
+
+let nextIndex = 0
+$(function(){
+      $('#commandLine').on('keydown', function(e){
+          if (e.which != 13) // Enter
+              return
+
+          if (this.value === "") // input is empty
+              return
+
+          const q = this.value
+          this.value = ""
+
+          const url = "/cmd?q=" + encodeURIComponent(q)
+          const index = nextIndex++
+          const decoder = new TextDecoder()
+          const headers = { 'X-Requested-With': 'XMLHttpRequest' }
+          fetch(url, { headers })
+              .then(response => {
+                  if (response.status !== 200) {
+                      location.reload(true)
+                  }
+                  return response.body.getReader()
+              })
+              .then(reader => {
+                  function readChunk({done, value}) {
+                      if (done) {
+                          $(`#ellipsis-${index}`).hide()
+                          scrollToBottom()
+                      } else {
+                          const str = $(`#output-${index}`).text()
+                          $(`#output-${index}`).text(str + decoder.decode(value))
+                          //
+                          scrollToBottom()
+                          reader.read().then(readChunk)
+                      }
+                  }
+                  reader.read().then(readChunk)
+              })
+          $('#screen').append(
+              who(['div', {class:'input-row'},
+                   ['pre', {class:'input', id:`input-${index}`}, q]])
+          )
+          $('#screen').append(
+              who(['div', {class:'output-row'},
+                   ['div', {class:'output'},
+                    ['pre', {id:`output-${index}`}],
+                    ['span', {class:'ellipsis', id:`ellipsis-${index}`}, '\u{2588}']]
+              ])
+          )
+          scrollToBottom()
+      })
+
+      const firstMessage = "{#Type 'help' to get the list of available commands.}"
+      $('#screen').append(
+          who(['div', {class:'output-row'},
+               ['div', {class:'output'},
+                ['pre', {}, firstMessage],
+               ]
+              ])
+      )
+
+      $('#commandLine').focus()
+})
+</script>
+

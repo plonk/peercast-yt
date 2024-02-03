@@ -729,7 +729,7 @@ json JrpcApi::getStatus(json::array_t)
 {
     std::string globalIP = servMgr->serverHost.IPtoStr();
     auto port            = servMgr->serverHost.port;
-    std::string localIP  = Host(sys->getInterfaceIPv4Address(), port).IPtoStr();
+    std::string localIP  = servMgr->serverLocalIP.str();
 
     json j = {
         { "uptime", servMgr->getUptime() },
@@ -833,15 +833,34 @@ json JrpcApi::getChannelRelayTree(json::array_t args)
 {
     GnuID id = args[0].get<std::string>();
 
-    auto channel = chanMgr->findChannelByID(id);
-    if (!channel)
+    auto ch = chanMgr->findChannelByID(id);
+    if (!ch)
         throw application_error(kChannelNotFound, "Channel not found");
 
     auto hitList = chanMgr->findHitListByID(id);
     if (!hitList)
         throw application_error(kUnknownError, "Hit list not found");
 
-    HostGraph graph(channel, hitList.get(), channel->ipVersion);
+    ChanHit self;
+    Host uphost;
+    bool isTracker = ch->isBroadcasting();
+
+    if (!isTracker)
+        uphost = ch->sourceHost.host;
+
+    self.initLocal(ch->localListeners(),
+                   ch->localRelays(),
+                   ch->info.numSkips,
+                   ch->info.getUptime(),
+                   ch->isPlaying(),
+                   ch->rawData.getOldestPos(),
+                   ch->rawData.getLatestPos(),
+                   ch->canAddRelay(),
+                   uphost,
+                   (ch->ipVersion == 6));
+    self.tracker = isTracker;
+
+    HostGraph graph(self, hitList.get());
 
     return graph.getRelayTree();
 }
@@ -858,6 +877,17 @@ json JrpcApi::bumpChannel(json::array_t args)
         throw application_error(kChannelNotFound, "Channel not found");
 
     channel->bump = true;
+
+    return nullptr;
+}
+
+json JrpcApi::playChannel(json::array_t args)
+{
+    std::string id = args[0].get<std::string>();
+
+    ChanInfo info;
+    info.id.fromStr(id.c_str());
+    chanMgr->findAndPlayChannel(info, /*keep=*/ false);
 
     return nullptr;
 }

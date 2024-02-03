@@ -173,19 +173,24 @@
          ])
 }
 
-<div class="modal" id="column_modal">
+<div class="modal" id="prefs_modal">
   <div class="modal-contents default-bg">
-    <h3 style="margin:0">{#Display Columns}</h3>
+    <h3 style="margin:0">{#Channel List Preferences}</h3>
     <div class="modal-body" align="left">
+
+      <h4 style="margin:0">{#Display Columns}</h3>
       {@foreach COLUMNS}
         {@let key = nth(0,this), header = nth(1,this), order = nth(2,this)}
           <label style="display:block"><input type="checkbox" onchange='columnVisibility["{$key}"] = this.checked; savePreferences(); updateView()' data-key="{$key}" {$if(key == 'name', 'disabled')}> {$header}</label>
         {@end}
       {@end}
+
+      <h4 style="margin:0">{#Playback}</h3>
+          <label style="display:block"><input id="use_serverside_player_checkbox" type="checkbox" onchange='useServersidePlayer = this.checked; savePreferences(); updateView()'}> {#Use server-side player}</label>
     </div>
     <div class="modal-footer" style="margin-top:15px; text-align:right">
       <!-- <input type="submit" value="{#Save}"> -->
-      <button onclick="$('#column_modal').hide()">{#Close}</button>
+      <button onclick="$('#prefs_modal').hide()">{#Close}</button>
     </div>
   </div>
 </div>
@@ -194,7 +199,7 @@
 <div style="max-width: 640px">
   <div align=right>
     <button class="customize-button" title="{#Filters}" onclick="window.location = 'chanfilters.html'">&#x1F308;<!-- rainbow --></button>
-    <button class="customize-button" onclick="$('#column_modal').show()" title="{#Display Columns}">&#x2699;&#xFE0F;<!-- gear --></button>
+    <button class="customize-button" onclick="$('#prefs_modal').show()" title="{#Channel List Preferences}">&#x2699;&#xFE0F;<!-- gear --></button>
   </div>
   <a href="/admin?cmd=fetch_feeds" class="update-link" title="{#Auto-updates every 5 minutes. Manual updates have a cooldown of 30 seconds.}">{#Update}</a>
   <table class="channel-list">
@@ -206,23 +211,28 @@
   var sortColumn = null
   var sortOrder = null
   var selectedGroup = localStorage['selectedGroup']
+  let useServersidePlayer = false
 
-  // localStorageからコラムの表示に関するユーザー設定を取得して上のパラメータにセットする。
+  function parseOrDefault(string, defaultValue)
+  {
+      try {
+          return JSON.parse(string);
+      } catch (e) {
+          console.log(e)
+          return defaultValue;
+      }
+  }
+
+  // localStorageからユーザー設定を取得して上のパラメータにセットする。
   function loadPreferences()
   {
-      if (localStorage["columnVisibility"])
-      {
-          columnVisibility = JSON.parse(localStorage["columnVisibility"])
-          // チャンネル名は常に表示する。
-          Object.assign(columnVisibility, { "name": true })
-      }else
-      {
-          // デフォルト設定。
-          columnVisibility = { name:true, numDirects:true, uptime:true, bitrate:false, contentTypeStr:false }
-      }
-
+      columnVisibility = parseOrDefault(localStorage["columnVisibility"], { name:true, numDirects:true, uptime:true, bitrate:false, contentTypeStr:false })
+      // チャンネル名は常に表示する。
+      Object.assign(columnVisibility, { "name": true })
       sortColumn = localStorage["sortColumn"]
       sortOrder = localStorage["sortOrder"]
+
+      useServersidePlayer = parseOrDefault(localStorage["useServersidePlayer"], false)
   }
 
 
@@ -232,19 +242,23 @@
       localStorage["columnVisibility"] = JSON.stringify(columnVisibility)
       localStorage["sortColumn"] = sortColumn
       localStorage["sortOrder"] = sortOrder
+
+      localStorage["useServersidePlayer"] = useServersidePlayer
   }
 
   $(function(){
       loadPreferences()
 
-      // カラム表示モーダルのチェックボックスの状態を設定する。
-      for (const checkbox of $('#column_modal .modal-body input[type=checkbox]'))
+      // ユーザー設定モーダルのチェックボックスの状態を設定する。
+      for (const checkbox of $('#prefs_modal .modal-body input[type=checkbox]'))
       {
           if (columnVisibility[checkbox.dataset.key])
               checkbox.checked = true
           else
               checkbox.checked = false
       }
+
+      $('#use_serverside_player_checkbox')[0].checked = useServersidePlayer
   })
 
 function onColumnClicked(key, defaultOrder)
@@ -337,7 +351,9 @@ function renderChannelRow(channel)
           columnVisibility['name'] ?
           ['td', { class: "channel-description" },
            ['button', { style:"float:right", onclick:`showModal(${channel.serialNumber})`}, unescapeHtml('&#x2139;&#xfe0f;' /* info mark */)],
-           ['a', { href: channel.id != "00000000000000000000000000000000" ? `play.html?id=${channel.id}` : null }, 
+           ['a', { href: channel.id != "00000000000000000000000000000000" ? `play.html?id=${channel.id}` : null,
+                   onclick: useServersidePlayer ? `peercast('playChannel', '${channel.id}'); event.preventDefault()` : null,
+                 }, 
             // name, genre, desc はエスケープ済みなので一度アンエスケープする。
             ['div', { class:"channel-name" }, unescapeHtml(channel.name)],
             ['div', { class:"detail text-muted"}, (channel.genre ? `${unescapeHtml(channel.genre)} - ` : ''), unescapeHtml(channel.desc)],

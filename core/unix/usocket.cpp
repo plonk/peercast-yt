@@ -392,7 +392,7 @@ Host UClientSocket::getLocalHost()
 // --------------------------------------------------
 void UClientSocket::close()
 {
-    if (sockNum)
+    if (sockNum != -1)
     {
         // signal shutdown
         shutdown(sockNum, SHUT_WR);
@@ -411,7 +411,7 @@ void UClientSocket::close()
         // close handle
         ::close(sockNum);
 
-        sockNum = 0;
+        sockNum = -1;
     }
 }
 
@@ -439,4 +439,16 @@ int UClientSocket::numPending()
         throw StreamException("numPending");
 
     return (int)len;
+}
+
+// --------------------------------------------------
+char UClientSocket::peekChar()
+{
+    char c;
+
+    ssize_t ret;
+    if ((ret = recv(sockNum, &c, 1, MSG_PEEK)) != 1) {
+        throw StreamException(str::STR("recv MSG_PEEK failed. ret = ", ret));
+    }
+    return c;
 }
