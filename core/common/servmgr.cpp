@@ -824,6 +824,7 @@ void ServMgr::checkFirewall()
 
         AtomStream atom(*sock);
 
+        // IPv4 なのでプロトコルバージョンは 1 。
         atom.writeInt(PCP_CONNECT, 1);
 
         GnuID remoteID;
@@ -912,7 +913,8 @@ void ServMgr::checkFirewallIPv6()
 
         AtomStream atom(*sock);
 
-        atom.writeInt(PCP_CONNECT, 1);
+        // IPv6 なのでプロトコルバージョンは 100 。
+        atom.writeInt(PCP_CONNECT, 100);
 
         GnuID remoteID;
         String agent;

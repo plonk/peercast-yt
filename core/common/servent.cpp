@@ -490,7 +490,11 @@ bool    Servent::pingHost(Host &rhost, const GnuID &rsid)
 
             AtomStream atom(*s);
 
-            atom.writeInt(PCP_CONNECT, 1);
+            if (rhost.ip.isIPv4Mapped()) {
+                atom.writeInt(PCP_CONNECT, 1);
+            } else {
+                atom.writeInt(PCP_CONNECT, 100);
+            }
             atom.writeParent(PCP_HELO, 1);
                 atom.writeBytes(PCP_HELO_SESSIONID, servMgr->sessionID.id, 16);
 
