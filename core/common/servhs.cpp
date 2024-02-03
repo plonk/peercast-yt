@@ -492,24 +492,39 @@ void Servent::handshakeGET(HTTP &http)
                 this->type = T_COMMAND;
 
                 http.readHeaders();
-                http.writeLine(HTTP_SC_OK);
-                http.writeLine("Content-Type: text/plain; charset=utf-8");
-                http.writeLine("Transfer-Encoding: chunked");
-                http.writeLine("");
+#if 1
+                // Use HTTP/1.0 without Content-Length.
+                http.writeResponseStatus("HTTP/1.0", 200);
+                http.writeResponseHeaders
+                    ({
+                        {"Content-Type", "text/plain; charset=utf-8"},
+                        {"Connection", "close"},
+                    });
+                auto& stdout = http;
+#else
+                // Use HTTP/1.1 with chunked encoding.
+                http.writeResponseStatus("HTTP/1.1" /* important */, 200);
+                http.writeResponseHeaders
+                    ({
+                        {"Transfer-Encoding", "chunked"},
+                        {"Content-Type", "text/plain; charset=utf-8"},
+                        {"Connection", "close"},
+                    });
 
-                Chunker chunker(http);
+                Chunker stdout(http);
                 Defer defer([&]() {
                                 try {
                                     // Finalize the stream by sending the end-of-stream marker.
-                                    chunker.close();
+                                    stdout.close();
                                 } catch (GeneralException&) {
                                     // We don't want to throw here if the underlying socket is closed.
                                 }
                             });
+#endif
 
                 try {
                     auto cancellationRequested = [&]() -> bool { return !(thread.active() && sock->active()); };
-                    Commands::system(chunker, q, cancellationRequested);
+                    Commands::system(stdout, q, cancellationRequested);
                 } catch (GeneralException& e)
                 {
                     LOG_ERROR("Error: cmd '%s': %s", query.get("q").c_str(), e.msg);
