@@ -485,7 +485,13 @@ void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::f
                      });
         AtomStream atom(cs);
 
-        atom.writeInt(PCP_CONNECT, 1);
+        if (host.ip.isIPv4Mapped()) {
+            atom.writeInt(PCP_CONNECT, 1);
+            LOG_DEBUG("PCP_CONNECT 1");
+        } else {
+            atom.writeInt(PCP_CONNECT, 100);
+            LOG_DEBUG("PCP_CONNECT 100");
+        }
 
         GnuID remoteID;
         String agent;
