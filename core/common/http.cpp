@@ -209,10 +209,10 @@ void HTTP::writeResponseHeaders(const HTTPHeaders& additionalHeaders)
     };
 
     for (const auto& pair : additionalHeaders)
-        headers[pair.first] = pair.second;
+        headers[str::capitalize(pair.first)] = pair.second;
 
     for (const auto& pair : headers)
-        writeLineF("%s: %s", str::capitalize(pair.first).c_str(), pair.second.c_str());
+        writeLineF("%s: %s", pair.first.c_str(), pair.second.c_str());
 
     writeLine("");
 }
@@ -304,10 +304,10 @@ void HTTP::send(const HTTPResponse& response)
     }
 
     for (const auto& pair : response.headers)
-        headers[pair.first] = pair.second;
+        headers[str::capitalize(pair.first)] = pair.second;
 
     for (const auto& pair : headers)
-        writeLineF("%s: %s", str::capitalize(pair.first).c_str(), pair.second.c_str());
+        writeLineF("%s: %s", pair.first.c_str(), pair.second.c_str());
 
     writeLine("");
 
