@@ -30,6 +30,8 @@
 #include "defer.h"
 #include "dechunker.h"
 
+static const char* statusMessage(int statusCode);
+
 //-----------------------------------------
 bool HTTP::checkResponse(int r)
 {
@@ -198,6 +200,34 @@ void HTTP::parseAuthorizationHeader(const std::string& arg, std::string& sUser, 
 }
 
 // -----------------------------------
+void HTTP::writeResponseHeaders(const HTTPHeaders& additionalHeaders)
+{
+    std::map<std::string,std::string> headers = {
+        {"Server", PCX_AGENT},
+        {"Connection", "close"},
+        {"Date", cgi::rfc1123Time(sys->getTime())}
+    };
+
+    for (const auto& pair : additionalHeaders)
+        headers[pair.first] = pair.second;
+
+    for (const auto& pair : headers)
+        writeLineF("%s: %s", str::capitalize(pair.first).c_str(), pair.second.c_str());
+
+    writeLine("");
+}
+
+// -----------------------------------
+void HTTP::writeResponseStatus(const char* protocolVersion, int code)
+{
+    if (strcmp(protocolVersion, "HTTP/1.0") != 0 &&
+        strcmp(protocolVersion, "HTTP/1.1") != 0) {
+        throw ArgumentException(str::format("Unknown protocol version string \"%s\"", protocolVersion));
+    }
+    writeLineF("%s %d %s", protocolVersion, code, statusMessage(code));
+}
+
+// -----------------------------------
 static const char* statusMessage(int statusCode)
 {
     switch (statusCode)
@@ -258,7 +288,7 @@ void HTTP::send(const HTTPResponse& response)
 
     writeCRLF = true;
 
-    writeLineF("HTTP/1.0 %d %s", response.statusCode, statusMessage(response.statusCode));
+    writeResponseStatus("HTTP/1.0", response.statusCode);
 
     std::map<std::string,std::string> headers = {
         {"Server", PCX_AGENT},
