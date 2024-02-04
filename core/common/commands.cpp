@@ -92,6 +92,7 @@ s_commands = {
               { "pid", Commands::pid },
               { "expr", Commands::expr },
               { "shutdown", Commands::shutdown },
+              { "date", Commands::date },
 };
 
 void Commands::system(Stream& stream, const std::string& _cmdline, std::function<bool()> cancel)
@@ -114,6 +115,24 @@ void Commands::system(Stream& stream, const std::string& _cmdline, std::function
     } catch (GeneralException& e) {
         stream.writeLineF("Error: %s", e.what());
     }
+}
+
+void Commands::date(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, {"--help"});
+
+    if (positionals.size() != 0 || options.count("--help")) {
+        stream.writeLine("Usage: date");
+        stream.writeLine("Show date and time.");
+        return;
+    }
+
+    String str;
+    str.setFromTime(sys->getTime());
+
+    stream.writeString(str.c_str()); // str already ends with line feed.
 }
 
 #include "servmgr.h"

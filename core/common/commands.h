@@ -22,6 +22,8 @@ public:
     static void pid(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
     static void expr(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
     static void shutdown(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
+    static void date(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
+
     // typedef termination_point std::function<bool()>
     // stdin
     // stdout
