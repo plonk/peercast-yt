@@ -531,8 +531,6 @@ void Servent::handshakeGET(HTTP &http)
 // -----------------------------------
 void Servent::handshakePOST(HTTP &http)
 {
-    LOG_DEBUG("cmdLine: %s", http.cmdLine);
-
     auto vec = str::split(http.cmdLine, " ");
     if (vec.size() != 3)
         throw HTTPException(HTTP_SC_BADREQUEST, 400);
@@ -675,6 +673,8 @@ void Servent::handshakeSOURCE(char * in, bool isHTTP)
 // -----------------------------------
 void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 {
+    LOG_DEBUG("%s \"%s\"", sock->host.ip.str().c_str(), http.cmdLine);
+
     if (http.isRequest("GET /"))
     {
         handshakeGET(http);
