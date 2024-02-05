@@ -110,19 +110,19 @@ char *stristr(const char *s1, const char *s2)
 
         s1++;
     }
-    return NULL;
+    return nullptr;
 }
 
 // -----------------------------------
 const char *getCGIarg(const char *str, const char *arg)
 {
     if (!str)
-        return NULL;
+        return nullptr;
 
     const char *s = strstr(str, arg);
 
     if (!s)
-        return NULL;
+        return nullptr;
 
     s += strlen(arg);
 
@@ -270,7 +270,7 @@ bool    Sys::startWaitableThread(ThreadInfo *info)
 // ---------------------------------
 unsigned int Sys::getTime()
 {
-    return time(NULL);
+    return time(nullptr);
 }
 
 // ---------------------------------

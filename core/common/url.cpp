@@ -188,7 +188,7 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
                 LOG_INFO("Fetch HTTP: %s", http.cmdLine);
 
                 ChanInfo tmpInfo = ch->info;
-                Servent::readICYHeader(http, ch->info, NULL, 0);
+                Servent::readICYHeader(http, ch->info, nullptr, 0);
 
                 if (!tmpInfo.name.isEmpty())
                     ch->info.name = tmpInfo.name;
@@ -320,7 +320,7 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
             if (!ch->info.id.isSet())
             {
                 ch->info.id = chanMgr->broadcastID;
-                ch->info.id.encode(NULL, ch->info.name.cstr(), ch->info.genre, ch->info.bitrate);
+                ch->info.id.encode(nullptr, ch->info.name.cstr(), ch->info.genre, ch->info.bitrate);
             }
 
             if (ch->info.contentType == ChanInfo::T_ASX)

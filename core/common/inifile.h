@@ -28,8 +28,8 @@ class IniFileBase
 public:
     IniFileBase(Stream& aStream)
         : stream(aStream)
-        , nameStr(NULL)
-        , valueStr(NULL)
+        , nameStr(nullptr)
+        , valueStr(nullptr)
     {
         currLine[0] = '\0';
     }

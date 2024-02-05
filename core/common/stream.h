@@ -343,7 +343,7 @@ public:
 class FileStream : public Stream
 {
 public:
-    FileStream() { file=NULL; }
+    FileStream() { file=nullptr; }
     ~FileStream() { close(); }
 
     void    openReadOnly(const char *);
@@ -354,7 +354,7 @@ public:
     void    openWriteReplace(int fd);
     void    openWriteAppend(const char *);
     void    openWriteAppend(const std::string& fn) { openWriteAppend(fn.c_str()); }
-    bool    isOpen() { return file!=NULL; }
+    bool    isOpen() { return file!=nullptr; }
     int     length();
     int     pos();
 

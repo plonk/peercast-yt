@@ -88,7 +88,7 @@ const char *Channel::statusMsgs[] =
 // -----------------------------------------------------------------------------
 Channel::Channel()
 {
-    next = NULL;
+    next = nullptr;
     reset();
 }
 
@@ -98,18 +98,18 @@ void Channel::endThread()
     if (pushSock)
     {
         pushSock->close();
-        pushSock = NULL;
+        pushSock = nullptr;
     }
 
     if (sock)
     {
         sock->close();
-        sock = NULL;
+        sock = nullptr;
     }
 
     if (sourceData)
     {
-        sourceData = NULL;
+        sourceData = nullptr;
     }
 
     reset();
@@ -181,7 +181,7 @@ void Channel::reset()
 
     headPack.init();
 
-    sourceStream = NULL;
+    sourceStream = nullptr;
 
     rawData.init();
     rawData.accept = ChanPacket::T_HEAD | ChanPacket::T_DATA;
@@ -190,11 +190,11 @@ void Channel::reset()
     type = T_NONE;
 
     readDelay = false;
-    sock = NULL;
-    pushSock = NULL;
+    sock = nullptr;
+    pushSock = nullptr;
 
     sourceURL.clear();
-    sourceData = NULL;
+    sourceData = nullptr;
 
     lastTrackerUpdate = 0;
     lastMetaUpdate = 0;
@@ -453,7 +453,7 @@ int Channel::handshakeFetch()
         {
             // info の為。ロックする範囲が狭すぎるか。
             std::lock_guard<std::recursive_mutex> cs(lock);
-            Servent::readICYHeader(http, info, NULL, 0);
+            Servent::readICYHeader(http, info, nullptr, 0);
         }
 
         LOG_INFO("Channel fetch: %s", http.cmdLine);
@@ -588,7 +588,7 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
             if (ch->pushSock)
             {
                 ch->sock = ch->pushSock;
-                ch->pushSock = NULL;
+                ch->pushSock = nullptr;
                 ch->sourceHost.host = ch->sock->host;
                 break;
             }
@@ -741,14 +741,14 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
                 }catch (StreamException &)
                 {}
                 auto cs = ch->sourceStream;
-                ch->sourceStream = NULL;
+                ch->sourceStream = nullptr;
                 cs->kill();
             }
 
             if (ch->sock)
             {
                 ch->sock->close();
-                ch->sock = NULL;
+                ch->sock = nullptr;
             }
 
             if (error == 404)
@@ -822,7 +822,7 @@ static char *nextMetaPart(char *str, char delim)
         }
         str++;
     }
-    return NULL;
+    return nullptr;
 }
 
 // -----------------------------------
@@ -916,7 +916,7 @@ XML::Node *Channel::createRelayXML(bool showStat)
     return new XML::Node("relay listeners=\"%d\" relays=\"%d\" hosts=\"%d\" status=\"%s\"",
         localListeners(),
         localRelays(),
-        (chl!=NULL)?chl->numHits():0,
+        (chl!=nullptr)?chl->numHits():0,
         ststr
         );
 }

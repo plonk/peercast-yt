@@ -239,9 +239,9 @@ XML::Node::Node(const char *fmt, ...)
 // ----------------------------------
 void XML::Node::init()
 {
-    parent = sibling = child = NULL;
-    contData = NULL;
-    userPtr = NULL;
+    parent = sibling = child = nullptr;
+    contData = nullptr;
+    userPtr = nullptr;
 }
 
 // ----------------------------------
@@ -270,7 +270,7 @@ char *XML::Node::findAttr(const char *name)
         if (Sys::strnicmp(an, name, nlen)==0)
             return getAttrValue(i);
     }
-    return NULL;
+    return nullptr;
 }
 
 // ----------------------------------
@@ -398,7 +398,7 @@ XML::Node *XML::findNode(const char *n)
     if (root)
         return root->findNode(n);
     else
-        return NULL;
+        return nullptr;
 }
 
 // ----------------------------------
@@ -417,7 +417,7 @@ XML::Node *XML::Node::findNode(const char *name)
         c=c->sibling;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 // ----------------------------------
@@ -426,7 +426,7 @@ void XML::read(Stream &in)
     const int BUFFER_LEN = 100*1024;
     static char buf[BUFFER_LEN];
 
-    Node *currNode=NULL;
+    Node *currNode=nullptr;
     int tp=0;
 
     while (!in.eof())

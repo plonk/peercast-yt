@@ -240,7 +240,7 @@ std::string format(const char* fmt, ...)
 
     va_start(ap, fmt);
     va_copy(aq, ap);
-    int size = vsnprintf(NULL, 0, fmt, ap);
+    int size = vsnprintf(nullptr, 0, fmt, ap);
     char *data = new char[size + 1];
     vsnprintf(data, size + 1, fmt, aq);
     va_end(aq);
@@ -257,7 +257,7 @@ std::string vformat(const char* fmt, va_list ap)
     std::string res;
 
     va_copy(aq, ap);
-    int size = vsnprintf(NULL, 0, fmt, ap);
+    int size = vsnprintf(nullptr, 0, fmt, ap);
     char *data = new char[size + 1];
     vsnprintf(data, size + 1, fmt, aq);
     va_end(aq);

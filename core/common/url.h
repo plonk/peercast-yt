@@ -27,7 +27,7 @@ class URLSource : public ChannelSource
 {
 public:
     URLSource(const char *url)
-    :inputStream(NULL)
+    : inputStream(nullptr)
     {
         baseurl.set(url);
     }

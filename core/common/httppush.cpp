@@ -37,9 +37,9 @@ void HTTPPushSource::stream(std::shared_ptr<Channel> ch)
 
     if (ch->sock)
     {
-        m_sock = NULL;
+        m_sock = nullptr;
         ch->sock->close();
-        ch->sock = NULL;
+        ch->sock = nullptr;
     }
 }
 

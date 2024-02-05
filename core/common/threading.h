@@ -36,10 +36,10 @@ class ThreadInfo
 public:
     ThreadInfo()
         : m_active(false)
-        , channel(NULL)
+        , channel(nullptr)
     {
-        func         = NULL;
-        data         = NULL;
+        func         = nullptr;
+        data         = nullptr;
     }
 
     ~ThreadInfo();

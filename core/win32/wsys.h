@@ -38,7 +38,7 @@ public:
     unsigned int    rnd() override { return rndGen.next(); }
     void            getURL(const char *) override;
     void            exit() override;
-    bool            hasGUI() override { return mainWindow!=NULL; }
+    bool            hasGUI() override { return mainWindow!=nullptr; }
     void            callLocalURL(const char *str, int port) override;
     void            executeFile(const char *) override;
 

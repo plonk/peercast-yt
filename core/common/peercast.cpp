@@ -6,12 +6,12 @@
 // ---------------------------------
 // globals
 
-Sys *sys=NULL;
+Sys *sys = nullptr;
 ChanMgr *chanMgr;
 ServMgr *servMgr;
 
-PeercastInstance *peercastInst=NULL;
-PeercastApplication *peercastApp=NULL;
+PeercastInstance *peercastInst = nullptr;
+PeercastApplication *peercastApp = nullptr;
 
 // ---------------------------------
 void APICALL PeercastInstance::init()
