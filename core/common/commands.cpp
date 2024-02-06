@@ -92,6 +92,7 @@ s_commands = {
               { "pid", Commands::pid },
               { "expr", Commands::expr },
               { "shutdown", Commands::shutdown },
+              { "speedtest", Commands::speedtest },
 };
 
 void Commands::system(Stream& stream, const std::string& _cmdline, std::function<bool()> cancel)
@@ -114,6 +115,114 @@ void Commands::system(Stream& stream, const std::string& _cmdline, std::function
     } catch (GeneralException& e) {
         stream.writeLineF("Error: %s", e.what());
     }
+}
+
+#include "host.h"
+#include "socket.h"
+#include "http.h"
+#include "chunker.h"
+#include "dechunker.h"
+#include "version2.h"
+void Commands::speedtest(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, {"--help"});
+
+    if (positionals.size() != 1 || options.count("--help")) {
+        stream.writeLine("Usage: st HOST:PORT");
+        stream.writeLine("Perform a bandwidth test with a server.");
+        return;
+    }
+
+    Host host;
+    host.fromStrName(positionals[0].c_str(), 7144);
+
+    do { // Download
+        stream.writeLineF("Downloading from http://%s/speedtest ...", host.str(true /*with port*/).c_str());
+
+        auto sock = sys->createSocket();
+        sock->open(host);
+        sock->connect();
+
+        HTTP http(*sock);
+        http.writeLine("GET /speedtest HTTP/1.1");
+        http.writeLine("User-Agent: " PCX_AGENT);
+        http.writeLine("Host: " + positionals[0]);
+        http.writeLine("");
+
+        int status = http.readResponse();
+        if (status != 200) {
+            stream.writeLineF("Error: Status: %d", status);
+            break;
+        }
+        http.readHeaders();
+        if (http.headers.get("Transfer-Encoding") != "chunked") {
+            http.writeLine("Error: Not a chunked stream!");
+            break;
+        }
+
+        Dechunker dechunker(http);
+        size_t received = 0;
+
+        const auto startTime = sys->getDTime();
+        char buffer[1024];
+
+        while (sys->getDTime() - startTime < 15.0) {
+            int r = dechunker.read(buffer, 1024);
+            received += r;
+        }
+
+        const auto endTime = sys->getDTime();
+
+        stream.writeLineF("%d bps", (int) (received*8 / (endTime - startTime)));
+    } while(0);
+
+    stream.writeLine("");
+
+    do { // Uplaod
+        stream.writeLineF("Uploading to http://%s/speedtest ...", host.str(true /*with port*/).c_str());
+
+        auto sock = sys->createSocket();
+        sock->open(host);
+        sock->connect();
+
+        HTTP http(*sock);
+        http.writeLine("POST /speedtest HTTP/1.1");
+        http.writeLine("Content-Type: application/binary");
+        http.writeLine("Transfer-Encoding: chunked");
+        http.writeLine("");
+
+        Chunker chunker(http);
+    
+        auto generateRandomBytes = [](size_t size) -> std::string {
+                                       std::string buf;
+                                       peercast::Random r;
+
+                                       for (size_t i = 0; i < size; ++i)
+                                           buf += (char) (r.next() & 0xff);
+                                       return buf;
+                                   };
+        std::string chunk = generateRandomBytes(1024);
+        size_t sent = 0;
+
+        const auto startTime = sys->getDTime();
+
+        while (sys->getDTime() - startTime < 15.0) {
+            chunker.writeString(chunk);
+            sent += 1024;
+        }
+        chunker.close();
+
+        const auto endTime = sys->getDTime();
+
+        auto res = http.getResponse();
+        if (res.statusCode != 200) {
+            stream.writeLineF("Error: Status: %d", res.statusCode);
+            // Print the body anyway.
+        }
+        stream.writeString(res.body);
+    } while(0);
 }
 
 #include "servmgr.h"
