@@ -92,7 +92,7 @@ $(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS) $(RTMPSERVER)
 
 install:
 	mkdir -p $(bindir)
-	cp -R $(TARGET) $(RTMPSERVER) $(bindir)
+	install -s $(TARGET) $(RTMPSERVER) $(bindir)
 	mkdir -p $(docdir)
 	cp -R ../../licenses ../../core/LICENSE $(docdir)
 	mkdir -p $(sharedir)
