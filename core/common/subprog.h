@@ -16,10 +16,10 @@ public:
     Subprogram(const std::string& name, bool receiveData = true, bool feedData = true);
     ~Subprogram();
 
-    bool    start(std::initializer_list<std::string> arguments, Environment& env);
+    bool    start(const std::vector<std::string>& arguments, Environment& env);
     bool    wait(int* status);
-    Stream& inputStream();
-    Stream& outputStream();
+    std::shared_ptr<Stream> inputStream();
+    std::shared_ptr<Stream> outputStream();
     int     pid();
     bool    isAlive();
     void    terminate();
@@ -28,8 +28,8 @@ public:
     bool m_feedData;
 
     std::string  m_name;
-    FileStream   m_inputStream;
-    FileStream   m_outputStream;
+    std::shared_ptr<FileStream>   m_inputStream;
+    std::shared_ptr<FileStream>   m_outputStream;
     int          m_pid;
 
 #ifdef WIN32
