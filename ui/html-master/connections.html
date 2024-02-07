@@ -4,6 +4,7 @@
 {^end}
 
 {^define SERVENT_TR}
+{@if this.status != "FREE"}
 <tr>
   <td style="text-align: right">{$this.id}</td>
   <TD>{$this.type}</TD>
@@ -23,6 +24,7 @@
   <TD align=right>{$this.bitrateAvg}</TD>
   <td style="text-align: center"><a class="text-danger" href="/admin?cmd=stop_servent&amp;servent_id={$this.id}">&#x23f9;<!-- BLACK SQUARE FOR STOP --></a></td>
 </TR>
+{@end}
 {^end}
 
 {@if channel}
