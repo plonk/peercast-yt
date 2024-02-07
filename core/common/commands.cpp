@@ -127,7 +127,7 @@ void Commands::speedtest(Stream& stream, const std::vector<std::string>& argv, s
 {
     std::map<std::string, bool> options;
     std::vector<std::string> positionals;
-    std::tie(options, positionals) = parse_options(argv, {"--help"});
+    std::tie(options, positionals) = parse_options(argv, {"--help", "--enable-nagle", "--disable-nagle"});
 
     if (positionals.size() != 1 || options.count("--help")) {
         stream.writeLine("Usage: st HOST:PORT");
@@ -144,6 +144,14 @@ void Commands::speedtest(Stream& stream, const std::vector<std::string>& argv, s
         auto sock = sys->createSocket();
         sock->open(host);
         sock->connect();
+
+        if (options.count("--enable-nagle")) {
+            sock->setNagle(true);
+            stream.writeLine("Nagle on");
+        } else if (options.count("--disable-nagle")) {
+            sock->setNagle(false);
+            stream.writeLine("Nagle off");
+        }
 
         HTTP http(*sock);
         http.writeLine("GET /speedtest HTTP/1.1");
@@ -186,6 +194,14 @@ void Commands::speedtest(Stream& stream, const std::vector<std::string>& argv, s
         auto sock = sys->createSocket();
         sock->open(host);
         sock->connect();
+
+        if (options.count("--enable-nagle")) {
+            sock->setNagle(true);
+            stream.writeLine("Nagle on");
+        } else if (options.count("--disable-nagle")) {
+            sock->setNagle(false);
+            stream.writeLine("Nagle off");
+        }
 
         HTTP http(*sock);
         http.writeLine("POST /speedtest HTTP/1.1");
