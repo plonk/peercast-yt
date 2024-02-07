@@ -159,11 +159,11 @@ std::vector<std::string> USys::getAllIPAddresses()
     if (!hostname.start({"-I"}, env)) {
         return {};
     }
-    Stream& pipe = hostname.inputStream();
+    auto pipe = hostname.inputStream();
     std::string buf;
     try {
-        while (!pipe.eof())
-            buf += pipe.readChar();
+        while (!pipe->eof())
+            buf += pipe->readChar();
     } catch (StreamException& e) {
     }
     while (isspace(buf[buf.size()-1]))

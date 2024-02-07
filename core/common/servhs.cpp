@@ -229,7 +229,7 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
         LOG_ERROR("failed to start script `%s`", filePath.c_str());
         throw HTTPException(HTTP_SC_SERVERERROR, 500);
     }
-    Stream& stream = script.inputStream();
+    Stream& stream = *script.inputStream();
 
     HTTPHeaders headers;
     int statusCode = 200;

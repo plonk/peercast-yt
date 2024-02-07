@@ -13,6 +13,8 @@ Subprogram::Subprogram(const std::string& name, bool receiveData, bool feedData)
     , m_receiveData(receiveData)
     , m_feedData(feedData)
     , m_processHandle(INVALID_HANDLE_VALUE)
+    , m_inputStream(std::make_shared<FileStream>())
+    , m_outputStream(std::make_shared<FileStream>())
 {
 }
 
@@ -57,7 +59,7 @@ std::string createCommandLine(std::string prog, std::vector<std::string> args)
 }
 
 // プログラムの実行を開始。
-bool Subprogram::start(std::initializer_list<std::string> arguments, Environment& env)
+bool Subprogram::start(const std::vector<std::string>& arguments, Environment& env)
 {
     SECURITY_ATTRIBUTES sa;
 
@@ -111,7 +113,7 @@ bool Subprogram::start(std::initializer_list<std::string> arguments, Environment
     if (m_receiveData)
     {
         int fd = _open_osfhandle((intptr_t) stdoutRead, _O_RDONLY);
-        m_inputStream.openReadOnly(fd);
+        m_inputStream->openReadOnly(fd);
 
         CloseHandle(stdoutWrite);
     }
