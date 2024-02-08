@@ -27,55 +27,6 @@ parse_options(const std::vector<std::string>& args,
     return { options, positionals };
 }
 
-static std::vector<std::string> command_words(const std::string& cmdline)
-{
-    std::string word;
-    std::vector<std::string> words;
-
-    auto p = cmdline.begin();
-    while (p != cmdline.end()) {
-        if (*p == ' ') {
-            if (word.size()) {
-                words.push_back(word);
-                word = "";
-            }
-            do {
-                p++;
-            } while (*p == ' ');
-            continue;
-        } else if (*p == '"') {
-            p++;
-            while (true) {
-                if (p == cmdline.end()) {
-                    throw FormatException("Premature end of quoted string");
-                } else if (*p == '\\') {
-                    p++;
-                    if (p == cmdline.end()) {
-                        throw FormatException("Premature end of escaped character");
-                    } else {
-                        word += *p;
-                    }
-                } else if (*p == '"') {
-                    words.push_back(word);
-                    word = "";
-                    break;
-                } else {
-                    word += *p;
-                }
-                p++;
-            }
-        } else {
-            word += *p;
-        }
-        p++;
-    }
-    if (word.size()) {
-        words.push_back(word);
-        word = "";
-    }
-    return words;
-}
-
 static std::map<std::string,
                 std::function< void(Stream&,const std::vector<std::string>&,std::function<bool()>) > >
 s_commands = {
@@ -98,7 +49,7 @@ s_commands = {
 void Commands::system(Stream& stream, const std::string& _cmdline, std::function<bool()> cancel)
 {
     try {
-        auto words = command_words(_cmdline);
+        auto words = str::shellwords(_cmdline);
         if (words.size() == 0) {
             stream.writeLine("Error: Empty command line");
             return;
