@@ -290,7 +290,7 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
         {
             LOG_INFO("Channel source is PIPE");
 
-            auto argv = str::split(fileName, " "); // should be shell words instead
+            auto argv = str::shellwords(fileName);
 
             if (argv.size() < 1) {
                 throw FormatException("Empty command line");
