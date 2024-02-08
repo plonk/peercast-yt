@@ -54,6 +54,8 @@
 
 #include "version2.h"
 
+#include "defer.h"
+
 // -----------------------------------
 const char *Channel::srcTypes[] =
 {
@@ -349,6 +351,8 @@ THREAD_PROC Channel::stream(ThreadInfo *thread)
     assert(thread->channel != nullptr);
     thread->channel = nullptr; // make sure to not leave the reference behind
 
+    Defer defer([=](){ ch->endThread(); });
+
     sys->setThreadName("CHANNEL");
 
     while (thread->active() && !peercastInst->isQuitting)
@@ -359,7 +363,13 @@ THREAD_PROC Channel::stream(ThreadInfo *thread)
         if (!chl)
             chanMgr->addHitList(ch->info);
 
-        ch->sourceData->stream(ch);
+        try {
+            ch->sourceData->stream(ch);
+        } catch(GeneralException& e) {
+            LOG_ERROR("GeneralException: %s", e.what());
+        } catch(std::exception& e) {
+            LOG_ERROR("std::exception: %s", e.what());
+        }
 
         LOG_INFO("Channel stopped");
 
@@ -384,8 +394,6 @@ THREAD_PROC Channel::stream(ThreadInfo *thread)
             }
         }
     }
-
-    ch->endThread();
 
     return 0;
 }
