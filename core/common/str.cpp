@@ -6,6 +6,8 @@
 #include <cctype>
 #include <stdexcept>
 
+#include "common.h" // FormatException
+
 namespace str
 {
 
@@ -644,6 +646,80 @@ std::string valid_utf8(const std::string& bytes)
         }
         return escaped;
     }
+}
+
+std::vector<std::string> shellwords(const std::string& str)
+{
+    std::vector<std::string> words;
+    std::string curr;
+    bool allowempty = false; // Allow to push an empty-string word because it's been quoted.
+
+    auto p = str.begin();
+    while (p != str.end()) {
+        if (*p == ' ' || *p == '\t' || *p == '\v') {
+            if (allowempty || curr != "") {
+                allowempty = false;
+                words.push_back(curr);
+                curr = "";
+            }
+            p++;
+            continue;
+        }
+        
+        if (*p == '\'') {
+            p++;
+            while (true) {
+                if (p == str.end()) {
+                    throw FormatException("Unterminated single-quoted string");
+                }
+                if (*p == '\'') {
+                    allowempty = true;
+                    break;
+                } else {
+                    curr += *p;
+                }
+                p++;
+            }
+        } else if (*p == '"') {
+            p++;
+            while (true) {
+                if (p == str.end()) {
+                    throw FormatException("Unterminated double-quoted string");
+                }
+                if (*p == '"') {
+                    allowempty = true;
+                    break;
+                } else if (*p == '\\') {
+                    p++;
+                    if (p == str.end()) {
+                        throw FormatException("Unfinished backlash escape");
+                    }
+                    if (*p != '\"' && *p != '\\') {
+                        curr += '\\';
+                    }
+                    curr += *p;
+                } else {
+                    curr += *p;
+                }
+                p++;
+            }
+        } else if (*p == '\\') {
+            p++;
+            if (p == str.end()) {
+                throw FormatException("Unfinished backlash escape");
+            }
+            curr += *p;
+        } else {
+            curr += *p;
+        }
+        p++;
+    }
+    
+    if (allowempty || curr != "") {
+        allowempty = false;
+        words.push_back(curr); // push last word
+    }
+    return words;
 }
 
 } // namespace str

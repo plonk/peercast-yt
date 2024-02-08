@@ -407,3 +407,61 @@ TEST_F(strFixture, json_inspect)
     ASSERT_EQ( str::json_inspect("\x01"),
                "\"\\u0001\"" ); // ^A
 }
+
+TEST_F(strFixture, shellwords)
+{
+    typedef std::vector<std::string> string_vector;
+
+    ASSERT_EQ(str::shellwords(""), string_vector({}));
+
+    ASSERT_EQ(str::shellwords(" \t "), string_vector({}));
+
+    ASSERT_EQ(str::shellwords("\\ "), string_vector({" "}));
+
+    ASSERT_EQ(str::shellwords("\"\""), string_vector({""}));
+
+    ASSERT_EQ(str::shellwords("\"\"\"\"\"\""), string_vector({""}));
+
+    ASSERT_EQ(str::shellwords("\"\" \"\" \"\""), string_vector({"", "", ""}));
+
+    ASSERT_EQ(str::shellwords("a b"), string_vector({"a", "b"}));
+
+    ASSERT_EQ(str::shellwords(" a  b "), string_vector({"a", "b"}));
+
+    ASSERT_EQ(str::shellwords("\'a b\'"), string_vector({"a b"}));
+
+    ASSERT_EQ(str::shellwords("a\\ b"), string_vector({"a b"}));
+
+    ASSERT_EQ(str::shellwords("'a\\'b'"), string_vector({"a'b"}));
+
+    ASSERT_EQ(str::shellwords("'a''b'"), string_vector({"ab"}));
+
+    ASSERT_EQ(str::shellwords("a\'\'b"), string_vector({"ab"}));
+
+    // an unescaped single quote in double quotes
+    ASSERT_EQ(str::shellwords("\"\'\""), string_vector({"\'"}));
+
+    // an unescaped double quote in single quotes.
+    ASSERT_EQ(str::shellwords("\'\"\'"), string_vector({"\""}));
+
+    ASSERT_EQ(str::shellwords("こんにちは"), string_vector({"こんにちは"}));
+
+    ASSERT_EQ(str::shellwords("やま かわ"), string_vector({"やま", "かわ"}));
+
+    ASSERT_EQ(str::shellwords("\"やま\" \"かわ\""), string_vector({"やま", "かわ"}));
+    ASSERT_EQ(str::shellwords("\"やま かわ\""), string_vector({"やま かわ"}));
+
+    ASSERT_EQ(str::shellwords("\\a"), string_vector({"a"}));
+    ASSERT_EQ(str::shellwords("\"\\a\""), string_vector({"\\a"}));
+    ASSERT_EQ(str::shellwords("\'\\a\'"), string_vector({"\\a"}));
+
+    ASSERT_EQ(str::shellwords("\'\\\'\'"), string_vector({"\'"}));
+    ASSERT_EQ(str::shellwords("\'\\\"\'"), string_vector({"\\\""}));
+
+    ASSERT_EQ(str::shellwords("\"\\\"\""), string_vector({"\""}));
+    ASSERT_EQ(str::shellwords("\"\\\'\""), string_vector({"\\\'"}));
+
+    ASSERT_EQ(str::shellwords("\"\\\\\""), string_vector({"\\"}));
+    ASSERT_EQ(str::shellwords("\'\\\\\'"), string_vector({"\\\\"}));
+    ASSERT_EQ(str::shellwords("\\\\"), string_vector({"\\"}));
+}

@@ -40,6 +40,8 @@ namespace str
     std::string strip(const std::string&);
     std::string escapeshellarg_unix(const std::string& str);
 
+    std::vector<std::string> shellwords(const std::string& str);
+
     std::vector<std::string> to_lines(const std::string& text);
     std::string indent_tab(const std::string& text, int n = 1);
 
