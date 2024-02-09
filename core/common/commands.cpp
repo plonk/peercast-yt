@@ -360,8 +360,9 @@ void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::f
     std::vector<std::string> positionals;
     std::tie(options, positionals) = parse_options(argv, { "--help" });
 
-    if (options.count("--help")) {
-        stream.writeLine("Usage: chan");
+    if (positionals.size() < 1 || options.count("--help")) {
+    ShowUsageAndReturn:
+        stream.writeLine("Usage: chan ls");
         stream.writeLine("       chan hit");
         return;
     }
@@ -373,13 +374,15 @@ void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::f
             int size = hitlist->numHits();
             stream.writeLineF("%s %d", chid.str().c_str(), size);
         }
-    } else {
+    } else if (positionals.size() >= 1 && positionals[0] == "ls") {
         for (auto it = chanMgr->channel; it; it = it->next) {
             stream.writeLineF("%s %s %s",
                               it->getName(),
                               it->getID().str().c_str(),
                               it->getStatusStr());
         }
+    } else {
+        goto ShowUsageAndReturn;
     }
 }
 
