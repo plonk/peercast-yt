@@ -39,7 +39,7 @@ public:
 
     void deleteChannel(std::shared_ptr<Channel>);
 
-    std::shared_ptr<Channel> createChannel(ChanInfo &, const char *);
+    std::shared_ptr<Channel> createChannel(ChanInfo &, const char *mount = nullptr);
     std::shared_ptr<Channel> findChannelByName(const char *);
     std::shared_ptr<Channel> findChannelByIndex(int);
     std::shared_ptr<Channel> findChannelByMount(const char *);

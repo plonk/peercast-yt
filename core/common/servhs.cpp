@@ -1382,7 +1382,7 @@ void Servent::CMD_fetch(const char* cmd, HTTP& http, String& jumpStr)
         info.id.encode(nullptr, info.name, info.genre, info.bitrate);
     }
 
-    auto c = chanMgr->createChannel(info, nullptr);
+    auto c = chanMgr->createChannel(info);
     if (c) {
         if (query.get("ipv") == "6") {
             c->ipVersion = Channel::IP_V6;
@@ -2336,7 +2336,7 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
     info.comment = chanMgr->broadcastMsg;
     info.bcID    = chanMgr->broadcastID;
 
-    c = chanMgr->createChannel(info, nullptr);
+    c = chanMgr->createChannel(info);
     if (!c)
         throw HTTPException(HTTP_SC_SERVERERROR, 500);
 
@@ -2401,7 +2401,7 @@ void Servent::handshakeHTTPPush(const std::string& args)
     }
     // ここでシャットダウン待たなくていいの？
 
-    c = chanMgr->createChannel(info, nullptr);
+    c = chanMgr->createChannel(info);
     if (!c)
         throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
