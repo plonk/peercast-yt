@@ -354,6 +354,7 @@ void Commands::echo(Stream& stream, const std::vector<std::string>& argv, std::f
 }
 
 #include "chanmgr.h"
+#include "url.h"
 void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
     std::map<std::string, bool> options;
@@ -364,6 +365,7 @@ void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::f
     ShowUsageAndReturn:
         stream.writeLine("Usage: chan ls");
         stream.writeLine("       chan hit");
+        stream.writeLine("       chan set-url ID URL");
         return;
     }
 
@@ -373,6 +375,32 @@ void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::f
             auto chid = hitlist->info.id;
             int size = hitlist->numHits();
             stream.writeLineF("%s %d", chid.str().c_str(), size);
+        }
+    } else if (positionals.size() >= 3 && positionals[0] == "set-url") {
+        for (auto it = chanMgr->channel; it; it = it->next) {
+            if (str::has_prefix(it->getID().str(), positionals[1])) {
+                std::lock_guard<std::recursive_mutex>(it->lock);
+
+                if (it->srcType != Channel::SRC_URL) {
+                    stream.writeLineF("Error: The source type of %s is not URL.", it->getID().str().c_str());
+                    continue;
+                }
+                auto newUrl = positionals[2];
+
+                auto info = it->info;
+
+                stream.writeLine("Stopping channel.");
+                it->thread.shutdown();
+                sys->waitThread(&it->thread);
+                stream.writeLine("Channel stopped.");
+
+                sys->sleep(5000);
+                stream.writeLine("Creating new channel.");
+                auto ch = chanMgr->createChannel(info);
+                ch->startURL(newUrl.c_str());
+                stream.writeLine("Started.");
+                break;
+            }
         }
     } else if (positionals.size() >= 1 && positionals[0] == "ls") {
         for (auto it = chanMgr->channel; it; it = it->next) {
