@@ -44,6 +44,7 @@ s_commands = {
               { "expr", Commands::expr },
               { "shutdown", Commands::shutdown },
               { "speedtest", Commands::speedtest },
+              { "sleep", Commands::sleep },
 };
 
 void Commands::system(Stream& stream, const std::string& _cmdline, std::function<bool()> cancel)
@@ -66,6 +67,22 @@ void Commands::system(Stream& stream, const std::string& _cmdline, std::function
     } catch (GeneralException& e) {
         stream.writeLineF("Error: %s", e.what());
     }
+}
+
+#include <cstdlib>
+void Commands::sleep(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, {"--help"});
+
+    if (positionals.size() != 1 || options.count("--help")) {
+        stream.writeLine("Usage: sleep NUMBER");
+        stream.writeLine("Pause for NUMBER seconds.");
+        return;
+    }
+    double seconds = std::atof(positionals[0].c_str());
+    sys->sleep(seconds * 1000);
 }
 
 #include "host.h"
