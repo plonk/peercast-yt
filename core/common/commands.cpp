@@ -116,7 +116,7 @@ void Commands::speedtest(Stream& stream, const std::vector<std::string>& argv, s
     std::tie(options, positionals) = parse_options(argv, {"--help", "--enable-nagle", "--disable-nagle"});
 
     if (positionals.size() != 1 || options.count("--help")) {
-        stream.writeLine("Usage: st HOST:PORT");
+        stream.writeLine("Usage: speedtest HOST:PORT");
         stream.writeLine("Perform a bandwidth test with a server.");
         return;
     }
