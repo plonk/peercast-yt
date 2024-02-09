@@ -38,7 +38,7 @@ function scrollToBottom()
 
 let nextIndex = 0
 $(function(){
-      $('#commandLine').on('keydown', function(e){
+      $('#commandLine').on('keydown', async function(e){
           if (e.which != 13) // Enter
               return
 
@@ -52,28 +52,7 @@ $(function(){
           const index = nextIndex++
           const decoder = new TextDecoder()
           const headers = { 'X-Requested-With': 'XMLHttpRequest' }
-          fetch(url, { headers })
-              .then(response => {
-                  if (response.status !== 200) {
-                      location.reload(true)
-                  }
-                  return response.body.getReader()
-              })
-              .then(reader => {
-                  function readChunk({done, value}) {
-                      if (done) {
-                          $(`#ellipsis-${index}`).hide()
-                          scrollToBottom()
-                      } else {
-                          const str = $(`#output-${index}`).text()
-                          $(`#output-${index}`).text(str + decoder.decode(value))
-                          //
-                          scrollToBottom()
-                          reader.read().then(readChunk)
-                      }
-                  }
-                  reader.read().then(readChunk)
-              })
+
           $('#screen').append(
               who(['div', {class:'input-row'},
                    ['pre', {class:'input', id:`input-${index}`}, q]])
@@ -86,9 +65,42 @@ $(function(){
               ])
           )
           scrollToBottom()
+
+          let response
+          try {
+              response = await fetch(url, { headers })
+          } catch (error) {
+              $(`#output-${index}`).html(who(['i', {}, error.message]));
+
+              $(`#ellipsis-${index}`).hide()
+              scrollToBottom()
+              return
+          }
+          if (response.status !== 200) {
+              location.reload(true)
+              return
+          }
+          const reader = await response.body.getReader()
+
+          function readChunk({done, value}) {
+              if (done) {
+                  if ($(`#output-${index}`).text() === "") {
+                      $(`#output-${index}`).html(who(['i', {}, "コマンドは終了しました。"]));
+                  }
+                  $(`#ellipsis-${index}`).hide()
+                  scrollToBottom()
+              } else {
+                  const str = $(`#output-${index}`).text()
+                  $(`#output-${index}`).text(str + decoder.decode(value))
+                  //
+                  scrollToBottom()
+                  reader.read().then(readChunk)
+              }
+          }
+          reader.read().then(readChunk)
       })
 
-      const firstMessage = "{#Type 'help' to get the list of available commands.}"
+      const firstMessage = ['i', {}, "{#Type 'help' to get the list of available commands.}"]
       $('#screen').append(
           who(['div', {class:'output-row'},
                ['div', {class:'output'},
