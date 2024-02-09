@@ -89,6 +89,11 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
         fileName += 7;
         return ChanInfo::SP_RTMP;
     }
+    else if (Sys::strnicmp(fileName, "pipe:", 5)==0)
+    {
+        fileName += 5;
+        return ChanInfo::SP_PIPE;
+    }
     else
     {
         return ChanInfo::SP_FILE;
@@ -262,7 +267,7 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
         {
             LOG_INFO("Channel source is FILE");
 
-            std::shared_ptr<FileStream> fs(new FileStream());
+            auto fs = std::make_shared<FileStream>();
             fs->openReadOnly(fileName);
             inputStream = fs;
 
@@ -281,6 +286,24 @@ ChanInfo::PROTOCOL URLSource::getSourceProtocol(char*& fileName)
                 pls = std::make_shared<PlayList>(PlayList::T_ASX, 1000);
             else
                 ch->info.setContentType(fileType);
+        }else if (ch->info.srcProtocol == ChanInfo::SP_PIPE)
+        {
+            LOG_INFO("Channel source is PIPE");
+
+            auto argv = str::shellwords(fileName);
+
+            if (argv.size() < 1) {
+                throw FormatException("Empty command line");
+            }
+
+            auto file = argv[0];
+            std::vector<std::string> rest(argv.begin()+1, argv.end());
+
+            m_subprogram = std::make_shared<Subprogram>(file, true /*receive*/, false /*feed*/);
+            Environment env;
+            env.copyFromCurrentProcess();
+            m_subprogram->start(rest, env);
+            inputStream = m_subprogram->inputStream();
         }else
         {
             throw StreamException("Unsupported URL");

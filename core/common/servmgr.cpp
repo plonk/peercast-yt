@@ -1582,7 +1582,7 @@ void ServMgr::loadSettings(const char *fn)
                 }else
                 {
                     info.bcID = chanMgr->broadcastID;
-                    auto c = chanMgr->createChannel(info, nullptr);
+                    auto c = chanMgr->createChannel(info);
                     c->ipVersion = ipv;
                     if (c)
                         c->startURL(sourceURL.cstr());

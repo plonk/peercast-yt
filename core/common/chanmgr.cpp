@@ -212,7 +212,7 @@ int ChanMgr::findChannelsByStatus(std::shared_ptr<Channel> *chlist, int max, Cha
 // -----------------------------------
 std::shared_ptr<Channel> ChanMgr::createRelay(ChanInfo &info, bool stayConnected)
 {
-    auto c = chanMgr->createChannel(info, nullptr);
+    auto c = chanMgr->createChannel(info);
     if (c)
     {
         c->stayConnected = stayConnected;
@@ -241,7 +241,7 @@ std::shared_ptr<Channel> ChanMgr::findAndRelay(ChanInfo &info)
 
     if (!c)
     {
-        c = chanMgr->createChannel(info, nullptr);
+        c = chanMgr->createChannel(info);
         if (c)
         {
             c->setStatus(Channel::S_SEARCHING);

@@ -27,55 +27,6 @@ parse_options(const std::vector<std::string>& args,
     return { options, positionals };
 }
 
-static std::vector<std::string> command_words(const std::string& cmdline)
-{
-    std::string word;
-    std::vector<std::string> words;
-
-    auto p = cmdline.begin();
-    while (p != cmdline.end()) {
-        if (*p == ' ') {
-            if (word.size()) {
-                words.push_back(word);
-                word = "";
-            }
-            do {
-                p++;
-            } while (*p == ' ');
-            continue;
-        } else if (*p == '"') {
-            p++;
-            while (true) {
-                if (p == cmdline.end()) {
-                    throw FormatException("Premature end of quoted string");
-                } else if (*p == '\\') {
-                    p++;
-                    if (p == cmdline.end()) {
-                        throw FormatException("Premature end of escaped character");
-                    } else {
-                        word += *p;
-                    }
-                } else if (*p == '"') {
-                    words.push_back(word);
-                    word = "";
-                    break;
-                } else {
-                    word += *p;
-                }
-                p++;
-            }
-        } else {
-            word += *p;
-        }
-        p++;
-    }
-    if (word.size()) {
-        words.push_back(word);
-        word = "";
-    }
-    return words;
-}
-
 static std::map<std::string,
                 std::function< void(Stream&,const std::vector<std::string>&,std::function<bool()>) > >
 s_commands = {
@@ -92,12 +43,13 @@ s_commands = {
               { "pid", Commands::pid },
               { "expr", Commands::expr },
               { "shutdown", Commands::shutdown },
+              { "sleep", Commands::sleep },
 };
 
 void Commands::system(Stream& stream, const std::string& _cmdline, std::function<bool()> cancel)
 {
     try {
-        auto words = command_words(_cmdline);
+        auto words = str::shellwords(_cmdline);
         if (words.size() == 0) {
             stream.writeLine("Error: Empty command line");
             return;
@@ -114,6 +66,22 @@ void Commands::system(Stream& stream, const std::string& _cmdline, std::function
     } catch (GeneralException& e) {
         stream.writeLineF("Error: %s", e.what());
     }
+}
+
+#include <cstdlib>
+void Commands::sleep(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, {"--help"});
+
+    if (positionals.size() != 1 || options.count("--help")) {
+        stream.writeLine("Usage: sleep NUMBER");
+        stream.writeLine("Pause for NUMBER seconds.");
+        return;
+    }
+    double seconds = std::atof(positionals[0].c_str());
+    sys->sleep(seconds * 1000);
 }
 
 #include "servmgr.h"
