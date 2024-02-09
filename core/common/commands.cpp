@@ -44,6 +44,7 @@ s_commands = {
               { "expr", Commands::expr },
               { "shutdown", Commands::shutdown },
               { "sleep", Commands::sleep },
+              { "date", Commands::date },
 };
 
 void Commands::system(Stream& stream, const std::string& _cmdline, std::function<bool()> cancel)
@@ -68,7 +69,24 @@ void Commands::system(Stream& stream, const std::string& _cmdline, std::function
     }
 }
 
-#include <cstdlib>
+void Commands::date(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, {"--help"});
+
+    if (positionals.size() != 0 || options.count("--help")) {
+        stream.writeLine("Usage: date");
+        stream.writeLine("Display the current time.");
+        return;
+    }
+
+    String s;
+    s.setFromTime(sys->getTime());
+    stream.writeString(s); // s is already terminated with \n since it's in the asctime format.
+}
+
+#include <cstdlib> // for std::atof
 void Commands::sleep(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
     std::map<std::string, bool> options;
