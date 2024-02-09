@@ -84,7 +84,7 @@ s_commands = {
               { "helo", Commands::helo },
               //{ "filter", Commands::filter },
               { "get", Commands::get },
-              //{ "chan", Commands::chan },
+              { "chan", Commands::chan },
               { "echo", Commands::echo },
               //{ "bbs", Commands::bbs },
               { "notify", Commands::notify },
@@ -270,14 +270,24 @@ void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::f
 
     if (options.count("--help")) {
         stream.writeLine("Usage: chan");
+        stream.writeLine("       chan hit");
         return;
     }
 
-    for (auto it = chanMgr->channel; it; it = it->next) {
-        stream.writeLineF("%s %s %s",
-                          it->getName(),
-                          it->getID().str().c_str(),
-                          it->getStatusStr());
+
+    if (positionals.size() >= 1 && positionals[0] == "hit") {
+        for (auto hitlist = chanMgr->hitlist; hitlist != nullptr; hitlist = hitlist->next) {
+            auto chid = hitlist->info.id;
+            int size = hitlist->numHits();
+            stream.writeLineF("%s %d", chid.str().c_str(), size);
+        }
+    } else {
+        for (auto it = chanMgr->channel; it; it = it->next) {
+            stream.writeLineF("%s %s %s",
+                              it->getName(),
+                              it->getID().str().c_str(),
+                              it->getStatusStr());
+        }
     }
 }
 

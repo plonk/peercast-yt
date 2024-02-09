@@ -4,14 +4,14 @@
 #include <cassert>
 
 Environment::Environment()
-    : m_env(NULL)
+    : m_env(nullptr)
 {
 }
 
 Environment::Environment(char *src[])
     : Environment()
 {
-    for (int i = 0; src[i] != NULL; i++)
+    for (int i = 0; src[i] != nullptr; i++)
         m_vars.push_back(src[i]);
 }
 
@@ -26,7 +26,7 @@ void Environment::copyFromCurrentProcess()
     extern char** environ;
 
     m_vars.clear();
-    for (int i = 0; environ[i] != NULL; i++)
+    for (int i = 0; environ[i] != nullptr; i++)
         m_vars.push_back(environ[i]);
 }
 
@@ -93,7 +93,7 @@ char const ** Environment::env()
     m_env = (decltype(m_env)) realloc(m_env, (m_vars.size()+1) * sizeof(char *));
     for (size_t i = 0; i < m_vars.size(); i++)
         m_env[i] = m_vars[i].c_str();
-    m_env[m_vars.size()] = NULL;
+    m_env[m_vars.size()] = nullptr;
     return m_env;
 }
 

@@ -63,7 +63,7 @@ bool Subprogram::start(std::initializer_list<std::string> arguments, Environment
 
     sa.nLength = sizeof(SECURITY_ATTRIBUTES);
     sa.bInheritHandle = TRUE;
-    sa.lpSecurityDescriptor = NULL;
+    sa.lpSecurityDescriptor = nullptr;
 
     HANDLE stdoutRead;
     HANDLE stdoutWrite;
@@ -91,14 +91,14 @@ bool Subprogram::start(std::initializer_list<std::string> arguments, Environment
 
     std::string cmdline = createCommandLine(m_name, arguments);
     LOG_DEBUG("cmdline: %s", str::inspect(cmdline).c_str());
-    success = CreateProcessA(NULL,
+    success = CreateProcessA(nullptr,
                             const_cast<char*>( cmdline.c_str() ),
-                            NULL,
-                            NULL,
+                            nullptr,
+                            nullptr,
                             TRUE,
                             CREATE_NO_WINDOW,
                             (PVOID) env.windowsEnvironmentBlock().c_str(),
-                            NULL,
+                            nullptr,
                             &startupInfo,
                             &procInfo);
 

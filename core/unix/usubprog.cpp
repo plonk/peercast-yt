@@ -137,7 +137,7 @@ bool Subprogram::isAlive()
 
     int r;
 
-    r = waitpid(m_pid, NULL, WNOHANG);
+    r = waitpid(m_pid, nullptr, WNOHANG);
 
     if (r == 0)
         return true;
@@ -162,7 +162,7 @@ void Subprogram::terminate()
     if (r == -1)
         LOG_ERROR("Failed in killing %d.", (int) m_pid);
 
-    waitpid(m_pid, NULL, 0);
+    waitpid(m_pid, nullptr, 0);
 
     m_pid = -1;
 }

@@ -95,7 +95,7 @@ void GnuID::fromStr(const char *str)
     {
         buf[0] = str[i*2];
         buf[1] = str[i*2+1];
-        id[i] = (unsigned char)strtoul(buf, NULL, 16);
+        id[i] = (unsigned char)strtoul(buf, nullptr, 16);
     }
 }
 

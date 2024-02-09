@@ -63,7 +63,7 @@ static void termArgs(char *str)
 const char *nextCGIarg(const char *cp, char *cmd, char *arg)
 {
     if (!*cp)
-        return NULL;
+        return nullptr;
 
     int cnt=0;
 
@@ -531,8 +531,6 @@ void Servent::handshakeGET(HTTP &http)
 // -----------------------------------
 void Servent::handshakePOST(HTTP &http)
 {
-    LOG_DEBUG("cmdLine: %s", http.cmdLine);
-
     auto vec = str::split(http.cmdLine, " ");
     if (vec.size() != 3)
         throw HTTPException(HTTP_SC_BADREQUEST, 400);
@@ -627,14 +625,14 @@ void Servent::handshakeGIV(const char *requestLine)
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
         LOG_DEBUG("Accepted GIV channel %s from: %s", idstr, ipstr);
-        sock = NULL;                  // release this servent but dont close socket.
+        sock = nullptr;                  // release this servent but dont close socket.
     }else
     {
         if (!servMgr->acceptGIV(sock))
             throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
         LOG_DEBUG("Accepted GIV PCP from: %s", ipstr);
-        sock = NULL;                  // release this servent but dont close socket.
+        sock = nullptr;                  // release this servent but dont close socket.
     }
 }
 
@@ -644,7 +642,7 @@ void Servent::handshakeSOURCE(char * in, bool isHTTP)
     if (!isAllowed(ALLOW_BROADCAST))
         throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
-    char *mount = NULL;
+    char *mount = nullptr;
 
     char *ps;
     if ((ps = strstr(in, "ICE/1.0")) != nullptr)
@@ -669,12 +667,14 @@ void Servent::handshakeSOURCE(char * in, bool isHTTP)
         loginMount.set(mount);
 
     handshakeICY(Channel::SRC_ICECAST, isHTTP);
-    sock = NULL;    // socket is taken over by channel, so don`t close it
+    sock = nullptr;    // socket is taken over by channel, so don`t close it
 }
 
 // -----------------------------------
 void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
 {
+    LOG_DEBUG("%s \"%s\"", sock->host.ip.str().c_str(), http.cmdLine);
+
     if (http.isRequest("GET /"))
     {
         handshakeGET(http);
@@ -714,7 +714,7 @@ void Servent::handshakeHTTP(HTTP &http, bool isHTTP)
         LOG_DEBUG("ShoutCast client");
 
         handshakeICY(Channel::SRC_SHOUTCAST, isHTTP);
-        sock = NULL;    // socket is taken over by channel, so don`t close it
+        sock = nullptr;    // socket is taken over by channel, so don`t close it
     }else
     {
         // リクエスト解釈失敗
@@ -748,7 +748,7 @@ void Servent::handshakeIncoming()
         throw HTTPException(HTTP_SC_URITOOLONG, 414);
     }
 
-    bool isHTTP = (stristr(buf, HTTP_PROTO1) != NULL);
+    bool isHTTP = (stristr(buf, HTTP_PROTO1) != nullptr);
 
     if (isHTTP)
         LOG_TRACE("HTTP from %s '%s'", sock->host.str().c_str(), buf);
@@ -1379,10 +1379,10 @@ void Servent::CMD_fetch(const char* cmd, HTTP& http, String& jumpStr)
         info.id = GnuID::random();
     } else {
         info.id = chanMgr->broadcastID;
-        info.id.encode(NULL, info.name, info.genre, info.bitrate);
+        info.id.encode(nullptr, info.name, info.genre, info.bitrate);
     }
 
-    auto c = chanMgr->createChannel(info, NULL);
+    auto c = chanMgr->createChannel(info, nullptr);
     if (c) {
         if (query.get("ipv") == "6") {
             c->ipVersion = Channel::IP_V6;
@@ -1656,7 +1656,7 @@ void Servent::CMD_update_channel_info(const char* cmd, HTTP& http, String& jumpS
 
     GnuID id(query.get("id"));
     auto ch = chanMgr->findChannelByID(id);
-    if (ch == NULL)
+    if (ch == nullptr)
         throw HTTPException(HTTP_SC_SERVERERROR, 500, "No such channel");
 
     // I don't think this operation is safe
@@ -2204,7 +2204,7 @@ void Servent::readICYHeader(HTTP &http, ChanInfo &info, char *pwd, size_t plen)
 
     }else if (http.isHeader("Authorization")) {
         if (pwd)
-            http.getAuthUserPass(NULL, pwd, 0, plen);
+            http.getAuthUserPass(nullptr, pwd, 0, plen);
     }
     else if (http.isHeader(PCX_HS_CHANNELID))
         info.id.fromStr(arg);
@@ -2323,7 +2323,7 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
         info.id = GnuID::random();
     } else {
         info.id = chanMgr->broadcastID;
-        info.id.encode(NULL, info.name.cstr(), info.genre.cstr(), info.bitrate);
+        info.id.encode(nullptr, info.name.cstr(), info.genre.cstr(), info.bitrate);
     }
 
     auto c = chanMgr->findChannelByID(info.id);
@@ -2336,12 +2336,12 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
     info.comment = chanMgr->broadcastMsg;
     info.bcID    = chanMgr->broadcastID;
 
-    c = chanMgr->createChannel(info, NULL);
+    c = chanMgr->createChannel(info, nullptr);
     if (!c)
         throw HTTPException(HTTP_SC_SERVERERROR, 500);
 
     c->startWMHTTPPush(sock);
-    sock = NULL;    // socket is taken over by channel, so don`t close it
+    sock = nullptr;    // socket is taken over by channel, so don`t close it
 }
 
 // -----------------------------------
@@ -2366,7 +2366,7 @@ ChanInfo Servent::createChannelInfo(GnuID broadcastID, const String& broadcastMs
         info.id = GnuID::random();
     } else {
         info.id = broadcastID;
-        info.id.encode(NULL, info.name.cstr(), info.genre.cstr(), info.bitrate);
+        info.id.encode(nullptr, info.name.cstr(), info.genre.cstr(), info.bitrate);
     }
     info.bcID = broadcastID;
 
@@ -2401,7 +2401,7 @@ void Servent::handshakeHTTPPush(const std::string& args)
     }
     // ここでシャットダウン待たなくていいの？
 
-    c = chanMgr->createChannel(info, NULL);
+    c = chanMgr->createChannel(info, nullptr);
     if (!c)
         throw HTTPException(HTTP_SC_UNAVAILABLE, 503);
 
@@ -2414,7 +2414,7 @@ void Servent::handshakeHTTPPush(const std::string& args)
         servMgr->checkFirewallIPv6();
     }
     c->startHTTPPush(sock, chunked);
-    sock = NULL;    // socket is taken over by channel, so don`t close it
+    sock = nullptr;    // socket is taken over by channel, so don`t close it
 }
 
 // -----------------------------------
@@ -2451,7 +2451,7 @@ void Servent::handshakeICY(Channel::SRC_TYPE type, bool isHTTP)
         info.id = GnuID::random();
     } else {
         info.id = chanMgr->broadcastID;
-        info.id.encode(NULL, info.name.cstr(), loginMount.cstr(), info.bitrate);
+        info.id.encode(nullptr, info.name.cstr(), loginMount.cstr(), info.bitrate);
     }
 
     LOG_DEBUG("Incoming source: %s : %s", info.name.cstr(), info.getTypeStr());
