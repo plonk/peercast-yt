@@ -246,7 +246,7 @@ json JrpcApi::fetch(json::array_t params)
         info.id = chanMgr->broadcastID;
         info.id.encode(nullptr, info.name, info.genre, info.bitrate);
 
-        auto c = chanMgr->createChannel(info, nullptr); // info, mount
+        auto c = chanMgr->createChannel(info);
         if (!c)
         {
             throw application_error(kUnknownError, "failed to create channel");
