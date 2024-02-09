@@ -206,7 +206,6 @@ void Commands::notify(Stream& stream, const std::vector<std::string>& argv, std:
         return;
     }
     peercast::notifyMessage(ServMgr::NT_PEERCAST, positionals[0]);
-    stream.writeLine("OK");
 }
 
 #include "bbs.h"
@@ -492,9 +491,6 @@ void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::f
         atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT);
 
         sock->close();
-
-        stdout.writeLine("OK");
-
     } catch(GeneralException& e) {
         stdout.writeLineF("Error: %s", e.what());
     }
