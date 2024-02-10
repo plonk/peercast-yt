@@ -563,13 +563,13 @@ ChanHit PeercastSource::pickFromHitList(std::shared_ptr<Channel> ch, ChanHit &ol
 }
 
 // -----------------------------------
-// static std::string chName(ChanInfo& info)
-// {
-//     if (info.name.str().empty())
-//         return info.id.str().substr(0,7) + "...";
-//     else
-//         return info.name.str();
-// }
+static std::string chName(ChanInfo& info)
+{
+    if (info.name.str().empty())
+        return info.id.str().substr(0,7) + "...";
+    else
+        return info.name.str();
+}
 
 // -----------------------------------
 static std::string feedUrlToRootHost(const std::string& feedUrl)
