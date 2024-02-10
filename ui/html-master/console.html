@@ -29,9 +29,10 @@ pre { margin:0; white-space: pre-wrap; }
 
 <div id="screen" style="text-align:left">
 </div>
-<div style="width:100%; margin-top: 0.3em">
-  <span class="prompt">&raquo;</span>
-  <input type="text" id="commandLine" style="width:calc(100% - 1em); font-family:monospace">
+<div style="width:100%; margin-top: 0.3em; display: flex">
+  <span class="prompt" style="font-size:18px; line-height:1.8">&raquo;&nbsp;</span>
+  <input type="text" id="commandLine" style="width:calc(100% - 2em); font-family:monospace">
+  <button style="font-size:18px; margin-left:6px" onclick="clearScreen()" title="{#Clear Screen}">&#x1f9f9;<!--broom--></button>
 </div>
 
 <script>
@@ -42,12 +43,46 @@ function scrollToBottom()
     //$("html, body").animate({ scrollTop: top }, 600)
 }
 
+function clearScreen()
+{
+    for (let i = 0; i < nextIndex; i++) {
+        if ($(`#ellipsis-${i}`).css('display') == 'none') {
+            $(`#output-row-${i}`).remove()
+            $(`#input-row-${i}`).remove()
+        }
+    }
+}
 
-let nextIndex = 0
+let nextIndex = 1
+let history = []
+let historyIndex = 0
 $(function(){
       $('#commandLine').on('keydown', async function(e){
-          if (e.which != 13) // Enter
+          if (e.which == 38) { // up
+              if (historyIndex > 0 && historyIndex - 1 < history.length) {
+                  historyIndex--
+                  this.value = history[historyIndex]
+                  e.preventDefault()
+              } else {
+                  e.preventDefault()
+              }
               return
+          } else if (e.which == 40) { // down
+              if (historyIndex + 1 < history.length) {
+                  historyIndex++
+                  this.value = history[historyIndex]
+                  e.preventDefault()
+              } else {
+                  historyIndex = history.length
+                  this.value = ""
+                  e.preventDefault()
+              }
+              return
+          }
+
+          if (e.which != 13) { // Enter
+              return
+          }
 
           if (this.value === "") // input is empty
               return
@@ -55,17 +90,22 @@ $(function(){
           const q = this.value
           this.value = ""
 
+          if (history[history.length-1] !== q) {
+              history.push(q)
+          }
+          historyIndex = history.length
+
           const url = "/cmd?q=" + encodeURIComponent(q)
           const index = nextIndex++
           const decoder = new TextDecoder()
           const headers = { 'X-Requested-With': 'XMLHttpRequest' }
 
           $('#screen').append(
-              who(['div', {class:'input-row'},
+              who(['div', {class:'input-row', id:`input-row-${index}`},
                    ['pre', {class:'input', id:`input-${index}`}, q]])
           )
           $('#screen').append(
-              who(['div', {class:'output-row'},
+              who(['div', {class:'output-row', id:`output-row-${index}`},
                    ['div', {class:'output'},
                     ['pre', {id:`output-${index}`}],
                     ['span', {class:'ellipsis', id:`ellipsis-${index}`}, '\u{2588}']]
@@ -109,9 +149,10 @@ $(function(){
 
       const firstMessage = ['i', {}, "{#Type 'help' to get the list of available commands.}"]
       $('#screen').append(
-          who(['div', {class:'output-row'},
+          who(['div', {class:'output-row', id:'output-row-0'},
                ['div', {class:'output'},
                 ['pre', {}, firstMessage],
+                ['span', {class:'ellipsis', id:`ellipsis-0`, style:"display:none"}, '\u{2588}'], // to mark that this is elligible to eligible to be cleared.
                ]
               ])
       )
