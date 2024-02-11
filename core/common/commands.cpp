@@ -44,6 +44,7 @@ s_commands = {
               { "expr", Commands::expr },
               { "shutdown", Commands::shutdown },
               { "sleep", Commands::sleep },
+              { "date", Commands::date },
 };
 
 void Commands::system(Stream& stream, const std::string& _cmdline, std::function<bool()> cancel)
@@ -68,7 +69,24 @@ void Commands::system(Stream& stream, const std::string& _cmdline, std::function
     }
 }
 
-#include <cstdlib>
+void Commands::date(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, {"--help"});
+
+    if (positionals.size() != 0 || options.count("--help")) {
+        stream.writeLine("Usage: date");
+        stream.writeLine("Display the current time.");
+        return;
+    }
+
+    String s;
+    s.setFromTime(sys->getTime());
+    stream.writeString(s); // s is already terminated with \n since it's in the asctime format.
+}
+
+#include <cstdlib> // for std::atof
 void Commands::sleep(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
     std::map<std::string, bool> options;
@@ -154,7 +172,13 @@ void Commands::help(Stream& stream, const std::vector<std::string>& argv, std::f
 {
     std::map<std::string, bool> options;
     std::vector<std::string> positionals;
-    std::tie(options, positionals) = parse_options(argv, {});
+    std::tie(options, positionals) = parse_options(argv, {"--help"});
+
+    if (positionals.size() > 1 || options.count("--help")) {
+        stream.writeLine("Usage: help [COMMAND]");
+        stream.writeLine("List available commands or print the usage of the specified command.");
+        return;
+    }
 
     if (positionals.size() == 0) {
         for (const auto& pair : s_commands) {
@@ -167,9 +191,6 @@ void Commands::help(Stream& stream, const std::vector<std::string>& argv, std::f
         } else {
             stream.writeLineF("Error: No such command '%s'", cmd.c_str());
         }
-    }else {
-        stream.writeLine("Usage: help [COMMAND]");
-        stream.writeLine("List available commands. Or print the help message of a specified command.");
     }
     return;
 }
@@ -188,7 +209,6 @@ void Commands::notify(Stream& stream, const std::vector<std::string>& argv, std:
         return;
     }
     peercast::notifyMessage(ServMgr::NT_PEERCAST, positionals[0]);
-    stream.writeLine("OK");
 }
 
 #include "bbs.h"
@@ -484,9 +504,6 @@ void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::f
         atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT);
 
         sock->close();
-
-        stdout.writeLine("OK");
-
     } catch(GeneralException& e) {
         stdout.writeLineF("Error: %s", e.what());
     }
