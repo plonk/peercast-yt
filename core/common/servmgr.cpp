@@ -1827,6 +1827,9 @@ void ServMgr::procConnectArgs(char *str, ChanInfo &info)
         if (h.port == 0)
         {
             LOG_DEBUG("ポート0のトラッカーIPはホストキャッシュに登録しない。");
+        }else if (h.ip == serverHost.ip || h.ip == serverHostIPv6.ip)
+        {
+            LOG_DEBUG("'tip' parameter is server global IP(%s). Ignored.", h.ip.str().c_str());
         }else
         {
             chanMgr->addHit(h, info.id, true);
