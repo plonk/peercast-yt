@@ -2,6 +2,7 @@
 #define BBS_H
 
 #include <memory>
+#include <string>
 
 namespace bbs {
     using namespace std;
