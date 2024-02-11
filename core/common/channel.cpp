@@ -578,6 +578,8 @@ static std::string feedUrlToRootHost(const std::string& feedUrl)
         return "root.p-at.net";
     else if (feedUrl == "http://yp.pcgw.pgw.jp/index.txt")
         return "pcgw.pgw.jp:7146";
+    else if (feedUrl == "http://bayonet.ddo.jp/sp/index.txt")
+        return "bayonet.ddo.jp:7146";
     else
         return "";
 }
