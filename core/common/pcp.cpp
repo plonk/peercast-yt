@@ -193,7 +193,7 @@ void PCPStream::readPushAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 
     if (bcs.forMe)
     {
-        Servent *s = NULL;
+        Servent *s = nullptr;
 
         if (chanID.isSet())
         {
@@ -448,7 +448,7 @@ void PCPStream::readHostAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 // ------------------------------------------
 void PCPStream::readChanAtoms(AtomStream &atom, int numc, BroadcastState &bcs)
 {
-    std::shared_ptr<Channel> ch = NULL;
+    std::shared_ptr<Channel> ch = nullptr;
     ChanInfo newInfo;
 
     ch = chanMgr->findChannelByID(bcs.chanID);

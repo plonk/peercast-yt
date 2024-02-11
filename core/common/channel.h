@@ -98,7 +98,7 @@ class PeercastSource : public ChannelSource
 {
 public:
 
-    PeercastSource() : m_channel(NULL) {}
+    PeercastSource() : m_channel(nullptr) {}
     void    stream(std::shared_ptr<Channel>) override;
     int     getSourceRate() override;
     int     getSourceRateAvg() override;

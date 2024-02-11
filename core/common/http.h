@@ -218,7 +218,7 @@ public:
     HTTPResponse(int aStatusCode, const HTTPHeaders& aHeaders)
         : statusCode(aStatusCode)
         , headers(aHeaders)
-        , stream(NULL)
+        , stream(nullptr)
     {
     }
 
@@ -276,7 +276,7 @@ class HTTP : public IndirectStream
 {
 public:
     HTTP(Stream &s)
-        : arg(NULL)
+        : arg(nullptr)
         , m_headersRead(false)
     {
         cmdLine[0] = '\0';
@@ -312,7 +312,7 @@ public:
     void reset()
     {
         cmdLine[0] = '\0';
-        arg = NULL;
+        arg = nullptr;
         method = "";
         requestUrl = "";
         protocolVersion = "";

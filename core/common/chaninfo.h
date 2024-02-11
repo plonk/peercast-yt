@@ -84,7 +84,8 @@ public:
         SP_MMS,
         SP_PCP,
         SP_WMHTTP,
-        SP_RTMP
+        SP_RTMP,
+        SP_PIPE,
     };
 
     enum STATUS

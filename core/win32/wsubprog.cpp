@@ -13,6 +13,8 @@ Subprogram::Subprogram(const std::string& name, bool receiveData, bool feedData)
     , m_receiveData(receiveData)
     , m_feedData(feedData)
     , m_processHandle(INVALID_HANDLE_VALUE)
+    , m_inputStream(std::make_shared<FileStream>())
+    , m_outputStream(std::make_shared<FileStream>())
 {
 }
 
@@ -57,13 +59,13 @@ std::string createCommandLine(std::string prog, std::vector<std::string> args)
 }
 
 // プログラムの実行を開始。
-bool Subprogram::start(std::initializer_list<std::string> arguments, Environment& env)
+bool Subprogram::start(const std::vector<std::string>& arguments, Environment& env)
 {
     SECURITY_ATTRIBUTES sa;
 
     sa.nLength = sizeof(SECURITY_ATTRIBUTES);
     sa.bInheritHandle = TRUE;
-    sa.lpSecurityDescriptor = NULL;
+    sa.lpSecurityDescriptor = nullptr;
 
     HANDLE stdoutRead;
     HANDLE stdoutWrite;
@@ -91,14 +93,14 @@ bool Subprogram::start(std::initializer_list<std::string> arguments, Environment
 
     std::string cmdline = createCommandLine(m_name, arguments);
     LOG_DEBUG("cmdline: %s", str::inspect(cmdline).c_str());
-    success = CreateProcessA(NULL,
+    success = CreateProcessA(nullptr,
                             const_cast<char*>( cmdline.c_str() ),
-                            NULL,
-                            NULL,
+                            nullptr,
+                            nullptr,
                             TRUE,
                             CREATE_NO_WINDOW,
                             (PVOID) env.windowsEnvironmentBlock().c_str(),
-                            NULL,
+                            nullptr,
                             &startupInfo,
                             &procInfo);
 
@@ -111,7 +113,7 @@ bool Subprogram::start(std::initializer_list<std::string> arguments, Environment
     if (m_receiveData)
     {
         int fd = _open_osfhandle((intptr_t) stdoutRead, _O_RDONLY);
-        m_inputStream.openReadOnly(fd);
+        m_inputStream->openReadOnly(fd);
 
         CloseHandle(stdoutWrite);
     }

@@ -83,8 +83,8 @@ public:
     bool isEmpty() const { return data[0]==0; }
     bool isSame(::String &s) const { return strcmp(data, s.data)==0; }
     bool isSame(const char *s) const { return strcmp(data, s)==0; }
-    bool contains(const ::String &s) const { return stristr(data, s.data)!=NULL; }
-    bool contains(const char *s) const { return stristr(data, s)!=NULL; }
+    bool contains(const ::String &s) const { return stristr(data, s.data)!=nullptr; }
+    bool contains(const char *s) const { return stristr(data, s)!=nullptr; }
     void append(const char *s);
     void append(char c);
     void prepend(const char *s);

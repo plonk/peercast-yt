@@ -130,7 +130,7 @@ ServMgr::ServMgr()
     numFilters = 0;
     ensureCatchallFilters();
 
-    servents = NULL;
+    servents = nullptr;
 
     chanLog="";
 
@@ -355,7 +355,7 @@ void ServMgr::addHost(Host &h, ServHost::TYPE type, unsigned int time)
     if (!h.isValid())
         return;
 
-    ServHost *sh=NULL;
+    ServHost *sh=nullptr;
 
     for (int i=0; i<MAX_HOSTCACHE; i++)
         if (hostCache[i].type == type)
@@ -434,7 +434,7 @@ int ServMgr::getNewestServents(Host *hl, int max, Host &rh)
     for (int i=0; i<max; i++)
     {
         // find newest host not in list
-        ServHost *sh=NULL;
+        ServHost *sh=nullptr;
         for (int j=0; j<MAX_HOSTCACHE; j++)
         {
             // find newest servent
@@ -474,7 +474,7 @@ int ServMgr::getNewestServents(Host *hl, int max, Host &rh)
 // -----------------------------------
 Servent *ServMgr::findOldestServent(Servent::TYPE type, bool priv)
 {
-    Servent *oldest=NULL;
+    Servent *oldest=nullptr;
 
     Servent *s = servents;
     while (s)
@@ -508,7 +508,7 @@ Servent *ServMgr::findServent(Servent::TYPE type, Host &host, const GnuID &netid
         s = s->next;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 // -----------------------------------
@@ -530,7 +530,7 @@ Servent *ServMgr::findServent(unsigned int ip, unsigned short port, const GnuID 
         s = s->next;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 // -----------------------------------
@@ -545,7 +545,7 @@ Servent *ServMgr::findServent(Servent::TYPE t)
             return s;
         s = s->next;
     }
-    return NULL;
+    return nullptr;
 }
 
 // -----------------------------------
@@ -564,7 +564,7 @@ Servent *ServMgr::findServentByIndex(int id)
         s = s->next;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 // -----------------------------------
@@ -581,7 +581,7 @@ Servent *ServMgr::findServentByID(int id)
         s = s->next;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 // -----------------------------------
@@ -1582,7 +1582,7 @@ void ServMgr::loadSettings(const char *fn)
                 }else
                 {
                     info.bcID = chanMgr->broadcastID;
-                    auto c = chanMgr->createChannel(info, NULL);
+                    auto c = chanMgr->createChannel(info);
                     c->ipVersion = ipv;
                     if (c)
                         c->startURL(sourceURL.cstr());
@@ -1781,7 +1781,7 @@ Servent *ServMgr::findConnection(Servent::TYPE t, const GnuID &sid)
                     return sv;
         sv=sv->next;
     }
-    return NULL;
+    return nullptr;
 }
 
 // --------------------------------------------------

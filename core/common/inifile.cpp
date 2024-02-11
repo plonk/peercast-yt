@@ -78,7 +78,7 @@ bool    IniFileBase::readNext()
         *nend = 0;
         valueStr = trimstr(nend+1);
     }else
-        valueStr = NULL;
+        valueStr = nullptr;
 
     nameStr = trimstr(currLine);
 

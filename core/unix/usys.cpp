@@ -126,7 +126,7 @@ std::vector<std::string> USys::getIPAddresses(const std::string& name)
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;
 
-    int err = getaddrinfo(name.c_str(), NULL, &hints, &result);
+    int err = getaddrinfo(name.c_str(), nullptr, &hints, &result);
     if (err) {
         throw GeneralException(str::format("getaddrinfo err = %d", err), err);
     }
@@ -159,11 +159,11 @@ std::vector<std::string> USys::getAllIPAddresses()
     if (!hostname.start({"-I"}, env)) {
         return {};
     }
-    Stream& pipe = hostname.inputStream();
+    auto pipe = hostname.inputStream();
     std::string buf;
     try {
-        while (!pipe.eof())
-            buf += pipe.readChar();
+        while (!pipe->eof())
+            buf += pipe->readChar();
     } catch (StreamException& e) {
     }
     while (isspace(buf[buf.size()-1]))
@@ -196,7 +196,7 @@ bool USys::getHostnameByAddress(const IP& ip, std::string& out)
                         sizeof(addr),
                         hbuf,
                         sizeof(hbuf),
-                        NULL,
+                        nullptr,
                         0,
                         NI_NAMEREQD)) {
             LOG_TRACE("getnameinfo: %s (%s)", gai_strerror(errcode), ip.str().c_str());
@@ -215,7 +215,7 @@ bool USys::getHostnameByAddress(const IP& ip, std::string& out)
                         sizeof(addr),
                         hbuf,
                         sizeof(hbuf),
-                        NULL,
+                        nullptr,
                         0,
                         NI_NAMEREQD)) {
             LOG_TRACE("getnameinfo: %s (%s)", gai_strerror(errcode), ip.str().c_str());
@@ -370,16 +370,16 @@ void USys::callLocalURL(const char *str, int port)
 // ---------------------------------
 void USys::executeFile( const char *file )
 {
-    CFStringRef fileString = CFStringCreateWithFormat( NULL, NULL, CFSTR("%s"), file );
+    CFStringRef fileString = CFStringCreateWithFormat( nullptr, nullptr, CFSTR("%s"), file );
 
     if ( fileString )
     {
-        CFURLRef pathRef = CFURLCreateWithString( NULL, fileString, NULL );
+        CFURLRef pathRef = CFURLCreateWithString( nullptr, fileString, nullptr );
         if ( pathRef )
         {
             FSRef fsRef;
             CFURLGetFSRef( pathRef, &fsRef );
-            OSStatus err = LSOpenFSRef( &fsRef, NULL );
+            OSStatus err = LSOpenFSRef( &fsRef, nullptr );
             CFRelease(pathRef);
         }
         CFRelease( fileString );
@@ -410,14 +410,14 @@ void USys::getURL(const char *url)
 // ---------------------------------
 void USys::openURL( const char* url )
 {
-    CFStringRef urlString = CFStringCreateWithFormat( NULL, NULL, CFSTR("%s"), url );
+    CFStringRef urlString = CFStringCreateWithFormat( nullptr, nullptr, CFSTR("%s"), url );
 
     if ( urlString )
     {
-        CFURLRef pathRef = CFURLCreateWithString( NULL, urlString, NULL );
+        CFURLRef pathRef = CFURLCreateWithString( nullptr, urlString, nullptr );
         if ( pathRef )
         {
-            OSStatus err = LSOpenCFURLRef( pathRef, NULL );
+            OSStatus err = LSOpenCFURLRef( pathRef, nullptr );
             CFRelease(pathRef);
         }
         CFRelease( urlString );

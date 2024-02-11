@@ -175,7 +175,7 @@ class IP
         } else {
             in6_addr a = serialize();
             char buf[64];
-            if (inet_ntop(AF_INET6, &a, buf, sizeof(buf)) == NULL) {
+            if (inet_ntop(AF_INET6, &a, buf, sizeof(buf)) == nullptr) {
                 throw GeneralException("inet_ntop");
             } else {
                 return buf;

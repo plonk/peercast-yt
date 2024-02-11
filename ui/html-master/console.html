@@ -132,7 +132,7 @@ $(function(){
           function readChunk({done, value}) {
               if (done) {
                   if ($(`#output-${index}`).text() === "") {
-                      $(`#output-${index}`).html(who(['i', {}, "コマンドは終了しました。"]));
+                      $(`#output-${index}`).html(who(['i', {}, "{#The command has finished.}"]));
                   }
                   $(`#ellipsis-${index}`).hide()
                   scrollToBottom()

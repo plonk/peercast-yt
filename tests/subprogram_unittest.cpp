@@ -28,7 +28,7 @@ TEST_F(SubprogramFixture, echo)
     Subprogram prog("/bin/echo");
 
     ASSERT_TRUE( prog.start({"fuga"}, env) );
-    auto& input = prog.inputStream();
+    auto& input = *prog.inputStream();
     std::string buf;
     try {
         while (true)
@@ -50,12 +50,12 @@ TEST_F(SubprogramFixture, cat)
     Subprogram prog("/bin/cat");
 
     ASSERT_TRUE( prog.start({}, env) );
-    prog.outputStream().writeString("hoge");
-    prog.outputStream().close();
+    prog.outputStream()->writeString("hoge");
+    prog.outputStream()->close();
     std::string buf;
-    while (!prog.inputStream().eof())
+    while (!prog.inputStream()->eof())
     {
-        buf += prog.inputStream().readChar();
+        buf += prog.inputStream()->readChar();
     }
     int status;
     ASSERT_TRUE( prog.wait(&status) );

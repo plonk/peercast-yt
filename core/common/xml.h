@@ -90,7 +90,7 @@ public:
 
     XML()
     {
-        root = NULL;
+        root = nullptr;
     }
 
     ~XML();

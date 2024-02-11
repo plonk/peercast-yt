@@ -60,7 +60,7 @@ void ChanMgr::closeIdles()
 void ChanMgr::closeOldestIdle()
 {
     unsigned int idleTime = (unsigned int)-1;
-    std::shared_ptr<Channel> ch = channel, oldest = NULL;
+    std::shared_ptr<Channel> ch = channel, oldest = nullptr;
 
     while (ch)
     {
@@ -104,7 +104,7 @@ std::shared_ptr<Channel>ChanMgr::findChannelByNameID(ChanInfo &info)
                 return ch;
         ch = ch->next;
     }
-    return NULL;
+    return nullptr;
 }
 
 // -----------------------------------
@@ -119,7 +119,7 @@ std::shared_ptr<Channel>ChanMgr::findChannelByName(const char *n)
         ch = ch->next;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 // -----------------------------------
@@ -137,7 +137,7 @@ std::shared_ptr<Channel> ChanMgr::findChannelByIndex(int index)
         }
         ch = ch->next;
     }
-    return NULL;
+    return nullptr;
 }
 
 // -----------------------------------
@@ -153,7 +153,7 @@ std::shared_ptr<Channel> ChanMgr::findChannelByMount(const char *str)
         ch = ch->next;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 // -----------------------------------
@@ -168,7 +168,7 @@ std::shared_ptr<Channel> ChanMgr::findChannelByID(const GnuID &id)
                 return ch;
         ch = ch->next;
     }
-    return NULL;
+    return nullptr;
 }
 
 // -----------------------------------
@@ -212,14 +212,14 @@ int ChanMgr::findChannelsByStatus(std::shared_ptr<Channel> *chlist, int max, Cha
 // -----------------------------------
 std::shared_ptr<Channel> ChanMgr::createRelay(ChanInfo &info, bool stayConnected)
 {
-    auto c = chanMgr->createChannel(info, NULL);
+    auto c = chanMgr->createChannel(info);
     if (c)
     {
         c->stayConnected = stayConnected;
         c->startGet();
         return c;
     }
-    return NULL;
+    return nullptr;
 }
 
 // -----------------------------------
@@ -241,7 +241,7 @@ std::shared_ptr<Channel> ChanMgr::findAndRelay(ChanInfo &info)
 
     if (!c)
     {
-        c = chanMgr->createChannel(info, NULL);
+        c = chanMgr->createChannel(info);
         if (c)
         {
             c->setStatus(Channel::S_SEARCHING);
@@ -256,7 +256,7 @@ std::shared_ptr<Channel> ChanMgr::findAndRelay(ChanInfo &info)
         if (!c)
         {
             peercast::notifyMessage(ServMgr::NT_PEERCAST, "チャンネル "+chName(info)+" は見付かりませんでした。");
-            return NULL;
+            return nullptr;
         }
 
         // if (c->isPlaying() && (c->info.contentType != ChanInfo::T_UNKNOWN))
@@ -273,9 +273,9 @@ std::shared_ptr<Channel> ChanMgr::findAndRelay(ChanInfo &info)
 // -----------------------------------
 ChanMgr::ChanMgr()
 {
-    channel = NULL;
+    channel = nullptr;
 
-    hitlist = NULL;
+    hitlist = nullptr;
 
     currFindAndPlayChannel.clear();
 
@@ -406,7 +406,7 @@ void ChanMgr::deleteChannel(std::shared_ptr<Channel> delchan)
 {
     std::lock_guard<std::recursive_mutex> cs(lock);
 
-    std::shared_ptr<Channel> ch = channel, prev = NULL;
+    std::shared_ptr<Channel> ch = channel, prev = nullptr;
 
     while (ch)
     {
@@ -480,7 +480,7 @@ std::shared_ptr<ChanHitList> ChanMgr::findHitList(ChanInfo &info)
 
         chl = chl->next;
     }
-    return NULL;
+    return nullptr;
 }
 
 // -----------------------------------
@@ -495,7 +495,7 @@ std::shared_ptr<ChanHitList> ChanMgr::findHitListByID(const GnuID &id)
                 return chl;
         chl = chl->next;
     }
-    return NULL;
+    return nullptr;
 }
 
 // -----------------------------------
@@ -657,7 +657,7 @@ std::shared_ptr<ChanHit> ChanMgr::addHit(ChanHit &h)
     {
         return hl->addHit(h);
     }else
-        return NULL;
+        return nullptr;
 }
 
 // -----------------------------------

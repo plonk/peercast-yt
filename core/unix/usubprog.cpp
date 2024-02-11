@@ -14,6 +14,8 @@ Subprogram::Subprogram(const std::string& name, bool receiveData, bool feedData)
     , m_feedData(feedData)
     , m_name(name)
     , m_pid(-1)
+    , m_inputStream(std::make_shared<FileStream>())
+    , m_outputStream(std::make_shared<FileStream>())
 {
 }
 
@@ -24,7 +26,7 @@ Subprogram::~Subprogram()
 }
 
 // プログラムの実行を開始。
-bool Subprogram::start(std::initializer_list<std::string> arguments, Environment& env)
+bool Subprogram::start(const std::vector<std::string>& arguments, Environment& env)
 {
     int stdoutPipe[2];
     int stdinPipe[2];
@@ -100,12 +102,12 @@ bool Subprogram::start(std::initializer_list<std::string> arguments, Environment
         close(stdinPipe[0]);
 
         if (m_receiveData)
-            m_inputStream.openReadOnly(stdoutPipe[0]);
+            m_inputStream->openReadOnly(stdoutPipe[0]);
         else
             close(stdoutPipe[0]);
 
         if (m_feedData)
-            m_outputStream.openWriteReplace(stdinPipe[1]);
+            m_outputStream->openWriteReplace(stdinPipe[1]);
         else
             close(stdinPipe[1]);
     }
@@ -137,7 +139,7 @@ bool Subprogram::isAlive()
 
     int r;
 
-    r = waitpid(m_pid, NULL, WNOHANG);
+    r = waitpid(m_pid, nullptr, WNOHANG);
 
     if (r == 0)
         return true;
@@ -162,7 +164,7 @@ void Subprogram::terminate()
     if (r == -1)
         LOG_ERROR("Failed in killing %d.", (int) m_pid);
 
-    waitpid(m_pid, NULL, 0);
+    waitpid(m_pid, nullptr, 0);
 
     m_pid = -1;
 }

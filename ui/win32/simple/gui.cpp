@@ -562,7 +562,7 @@ LRESULT CALLBACK GUIProc (HWND hwnd, UINT message,
 						{
 							if (!chanMgr->findChannelByID(chl->info.id))
 							{
-								Channel *c = chanMgr->createChannel(chl->info,NULL);
+								Channel *c = chanMgr->createChannel(chl->info);
 								if (c)
 									c->startGet();
 							}
