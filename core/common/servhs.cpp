@@ -1524,7 +1524,11 @@ void Servent::CMD_stop_servent(const char* cmd, HTTP& http, String& jumpStr)
     if (s)
     {
         s->abort();
-        jumpStr.sprintf("/%s/connections.html", servMgr->htmlPath);
+
+        if (!http.headers.get("Referer").empty())
+            jumpStr.sprintf("%s", http.headers.get("Referer").c_str());
+        else
+            jumpStr.sprintf("/%s/connections.html", servMgr->htmlPath);
         return;
     }else
     {
