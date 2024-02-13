@@ -32,20 +32,20 @@
 
 <div class="reloader hscroll" data-url="relays.html?fragment=relays" data-interval="{$servMgr.refreshHTML}">
   {@fragment relays}
-  <TABLE class="relay-list table-panel" align=center border=0>
-    <TBODY>
-      <TR align=middle bgColor=#cccccc>
+  <table class="relay-list table-panel" align=center border=0>
+    <tbody>
+      <tr align=middle bgcolor=#cccccc>
         <th colspan=2>{#Relays}</th>
-      </TR>
+      </tr>
       {@foreach chanMgr.channels}
       <tr>
-        <TD width="1" align="left">
+        <td width="1" align="left">
           <form action="play.html">
             <input type="hidden" name="id" value="{$this.id}">
             <input type="submit" value="Play" style="color:#f00; font-weight:bold" onclick="if (localStorage['useServersidePlayer'] == 'true') { peercast('playChannel', '{$this.id}'); event.preventDefault() }">
           </form>
-        </TD>
-        <TD align="left">
+        </td>
+        <td align="left">
           <div class="channel-name">
             {$this.name}
             <form style="float:right" action="/admin">
@@ -80,11 +80,11 @@
             - <b><a href="/pls/{$this.id}{$this.plsExt}?auth={$this.authToken}">{#Playlist}</a></b>
             - <b><a href="/admin?cmd=bump&amp;id={$this.id}">{#Bump}</a></b>
           </div>
-        </TD>
-      </TR>
+        </td>
+      </tr>
       {@end}
-    </TBODY>
-  </TABLE>
+    </tbody>
+  </table>
   {@end}
 </div>
 <div align="center" style="margin-top: 1.5em; margin-bottom: 1.5em">
