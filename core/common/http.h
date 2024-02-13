@@ -305,6 +305,10 @@ public:
         while(nextHeader());
     }
 
+    void writeResponseHeaders(const HTTPHeaders&);
+
+    void writeResponseStatus(const char* protocolVersion, int code);
+
     void reset()
     {
         cmdLine[0] = '\0';

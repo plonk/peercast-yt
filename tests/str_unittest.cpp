@@ -432,7 +432,7 @@ TEST_F(strFixture, shellwords)
 
     ASSERT_EQ(str::shellwords("a\\ b"), string_vector({"a b"}));
 
-    ASSERT_EQ(str::shellwords("'a\\'b'"), string_vector({"a'b"}));
+    ASSERT_ANY_THROW(str::shellwords("'a\\'b'"));
 
     ASSERT_EQ(str::shellwords("'a''b'"), string_vector({"ab"}));
 
@@ -455,7 +455,7 @@ TEST_F(strFixture, shellwords)
     ASSERT_EQ(str::shellwords("\"\\a\""), string_vector({"\\a"}));
     ASSERT_EQ(str::shellwords("\'\\a\'"), string_vector({"\\a"}));
 
-    ASSERT_EQ(str::shellwords("\'\\\'\'"), string_vector({"\'"}));
+    ASSERT_ANY_THROW(str::shellwords("\'\\\'\'"));
     ASSERT_EQ(str::shellwords("\'\\\"\'"), string_vector({"\\\""}));
 
     ASSERT_EQ(str::shellwords("\"\\\"\""), string_vector({"\""}));

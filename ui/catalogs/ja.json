@@ -383,6 +383,8 @@
 
     // console.html
     "Type 'help' to get the list of available commands." : "コマンド一覧を表示するには「help」と打ってください。",
+    "The command has finished." : "コマンドは終了しました。",
+    "Clear Screen" : "画面クリア",
 
     "":""
 }

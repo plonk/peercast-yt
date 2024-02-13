@@ -297,7 +297,13 @@ void Commands::help(Stream& stream, const std::vector<std::string>& argv, std::f
 {
     std::map<std::string, bool> options;
     std::vector<std::string> positionals;
-    std::tie(options, positionals) = parse_options(argv, {});
+    std::tie(options, positionals) = parse_options(argv, {"--help"});
+
+    if (positionals.size() > 1 || options.count("--help")) {
+        stream.writeLine("Usage: help [COMMAND]");
+        stream.writeLine("List available commands or print the usage of the specified command.");
+        return;
+    }
 
     if (positionals.size() == 0) {
         for (const auto& pair : s_commands) {
@@ -310,9 +316,6 @@ void Commands::help(Stream& stream, const std::vector<std::string>& argv, std::f
         } else {
             stream.writeLineF("Error: No such command '%s'", cmd.c_str());
         }
-    }else {
-        stream.writeLine("Usage: help [COMMAND]");
-        stream.writeLine("List available commands. Or print the help message of a specified command.");
     }
     return;
 }
