@@ -23,8 +23,8 @@ public:
     static void expr(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
     static void shutdown(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
     static void speedtest(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
-    static void sleep(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
     static void date(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
+    static void sleep(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
 
     // typedef termination_point std::function<bool()>
     // stdin
