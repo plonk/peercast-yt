@@ -265,7 +265,7 @@ public:
 
     bool                isDisabled;
     std::atomic_bool    isRoot;
-    int                 totalStreams;
+    std::atomic<int>    totalStreams;
 
     Host                serverHost;
     Host                serverHostIPv6;
