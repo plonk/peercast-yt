@@ -8,80 +8,80 @@
 </div>
 {@end}
 
-<DIV align=center class="reloader flex-container" data-url="index.html?fragment=content" data-interval="{$servMgr.refreshHTML}">
+<div align="center" class="reloader flex-container" data-url="index.html?fragment=content" data-interval="{$servMgr.refreshHTML}">
   {@fragment content}
   <div class="column">
-  <TABLE class="table-panel" align=center border=0>
-    <TR align=middle>
-      <TD colSpan=2><B>{#Information}</B></TD>
-    </TR>
-    <TR align=left>
+  <table class="table-panel" align="center" border="0">
+    <tr align="middle">
+      <td colspan="2"><b>{#Information}</b></td>
+    </tr>
+    <tr align="left">
       <th class="left-heading">{#Server IP} (v4)</th>
-      <TD>{$servMgr.serverIP}</TD>
-    </TR>
-    <TR align=left>
+      <td>{$servMgr.serverIP}</td>
+    </tr>
+    <tr align="left">
       <th class="left-heading">{#Server Local IP} (v4)</th>
-      <TD>{$servMgr.serverLocalIP}</TD>
-    </TR>
-    <TR align=left>
+      <td>{$servMgr.serverLocalIP}</td>
+    </tr>
+    <tr align="left">
       <th class="left-heading">{#Server IP} (v6)</th>
-      <TD style="word-break: break-word">{$servMgr.serverIPv6}</TD>
-    </TR>
-    <TR align=left>
+      <td style="word-break: break-word">{$servMgr.serverIPv6}</td>
+    </tr>
+    <tr align="left">
       <th class="left-heading">{#Server Local IP} (v6)</th>
-      <TD style="word-break: break-word">{$servMgr.serverLocalIPv6}</TD>
-    </TR>
-    <TR align=left>
+      <td style="word-break: break-word">{$servMgr.serverLocalIPv6}</td>
+    </tr>
+    <tr align="left">
       <th class="left-heading">{#Uptime}</th>
-      <TD>{$servMgr.uptime}</TD>
-    </TR>
-    <TR align=left>
+      <td>{$servMgr.uptime}</td>
+    </tr>
+    <tr align="left">
       <th class="left-heading">{#Channel cache}</th>
-      <TD>{$chanMgr.numHitLists} - <a href="/admin?cmd=clear&amp;hitlists=1">{#Clear}</a> - <a href="/admin?cmd=dump_hitlists">{#Dump}</a></TD>
-    </TR>
-    <TR align=left>
+      <td>{$chanMgr.numHitLists} - <a href="/admin?cmd=clear&amp;hitlists=1">{#Clear}</a> - <a href="/admin?cmd=dump_hitlists">{#Dump}</a></td>
+    </tr>
+    <tr align="left">
       <th class="left-heading">{#Firewalled} (v4)</th>
-      <TD>{@if servMgr.firewallKnown} {@if servMgr.isFirewalled}
+      <td>{@if servMgr.firewallKnown} {@if servMgr.isFirewalled}
         {#Yes} {@else} {#No} {@end} {@else} {#Unknown} {@end}
         {@if servMgr.flags.forceFirewalled.currentValue} <b title="{#The forceFirewalled flag is on.}">{#(forced)}</b> {@end}
-        - <a class="alert-link" href="/admin?cmd=portcheck4">{#Check}</a></TD>
-    </TR>
-    <TR align=left>
+        - <a class="alert-link" href="/admin?cmd=portcheck4">{#Check}</a></td>
+    </tr>
+    <tr align="left">
       <th class="left-heading">{#Firewalled} (v6)</th>
-      <TD>{@if servMgr.firewallKnownIPv6} {@if servMgr.isFirewalledIPv6}
+      <td>{@if servMgr.firewallKnownIPv6} {@if servMgr.isFirewalledIPv6}
         {#Yes} {@else} {#No} {@end} {@else} {#Unknown} {@end}
         {@if servMgr.flags.forceFirewalled.currentValue} <b title="{#The forceFirewalled flag is on.}">{#(forced)}</b> {@end}
-        - <a class="alert-link" href="/admin?cmd=portcheck6">{#Check}</a></TD>
-    </TR>
-    <TR align=left>
+        - <a class="alert-link" href="/admin?cmd=portcheck6">{#Check}</a></td>
+    </tr>
+    <tr align="left">
       <th class="left-heading">{#XML stats}</th>
-      <TD><A href="/admin?cmd=viewxml">{#View}</A></TD>
-    </TR>
-    <tr align=left>
+      <td><a href="/admin?cmd=viewxml">{#View}</a></td>
+    </tr>
+    <tr align="left">
       <th class="left-heading">{#YP Address}</th>
       <td>{$servMgr.ypAddress}</td>
     </tr>
-    <tr align=left>
+    <tr align="left">
       <th class="left-heading" title="{#Message from the root server}">{#YP message}</th>
       <td>{$servMgr.rootMsg}</td>
     </tr>
-    <TR align=left>
+    <tr align="left">
       <th class="left-heading">{#Host options}</th>
-      <TD>{@if servMgr.isRoot}{#Root}{@end} {@if servMgr.isPrivate}{#Licensed}{@end} {@if servMgr.forceYP}{#ForceYP}{@end}</TD>
-    </TR>
-    <tr align=left>
+      <td>{@if servMgr.isRoot}{#Root}{@end} {@if servMgr.isPrivate}{#Licensed}{@end} {@if servMgr.forceYP}{#ForceYP}{@end}</td>
+    </tr>
+    <tr align="left">
       <th class="left-heading">{#Installation directory}</th>
       <td>{$servMgr.installationDirectory}</td>
     </tr>
-    <tr align=left>
+    <tr align="left">
       <th class="left-heading">{#Configuration file}</th>
       <td>{$servMgr.configurationFile}</td>
     </tr>
-    <tr align=left>
+    <tr align="left">
       <th class="left-heading">{#Build date and time}</th>
       <td>{$servMgr.buildDateTime}</td>
     </tr>
-  </TABLE>
+  </table>
 
   <table class="table-panel">
     <tr>
@@ -99,26 +99,26 @@
   </div>
 
   <div class="column">
-  <TABLE class="table-panel" align=center border=0>
-    <TR align=middle>
-      <TD colSpan=3><B>{#Bandwidth}</B></TD>
-    </TR>
-    <TR align=left>
+  <table class="table-panel" align="center" border="0">
+    <tr align="middle">
+      <td colspan="3"><b>{#Bandwidth}</b></td>
+    </tr>
+    <tr align="left">
       <th class="left-heading"></th>
-      <TH>{#In}</TH>
-      <TH>{#Out}</TH>
-    </TR>
-    <TR align=left>
+      <th>{#In}</th>
+      <th>{#Out}</th>
+    </tr>
+    <tr align="left">
       <th class="left-heading">{#Internet (Kbit/s)}</th>
-      <TD class="bandwidth-cell">{$stats.wanInPerSec}</TD>
-      <TD class="bandwidth-cell">{$stats.wanOutPerSec}</TD>
-    </TR>
-    <TR align=left>
+      <td class="bandwidth-cell">{$stats.wanInPerSec}</td>
+      <td class="bandwidth-cell">{$stats.wanOutPerSec}</td>
+    </tr>
+    <tr align="left">
       <th class="left-heading">{#Total (Kbit/s)}</th>
-      <TD class="bandwidth-cell">{$stats.totalInPerSec}</TD>
-      <TD class="bandwidth-cell">{$stats.totalOutPerSec}</TD>
-    </TR>
-  </TABLE>
+      <td class="bandwidth-cell">{$stats.totalInPerSec}</td>
+      <td class="bandwidth-cell">{$stats.totalOutPerSec}</td>
+    </tr>
+  </table>
 
   <table class="table-panel" border="0">
     <tr>
@@ -161,4 +161,4 @@
   });
   </script>
   {@end}
-</DIV>
+</div>

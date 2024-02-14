@@ -531,6 +531,38 @@ void Servent::handshakeGET(HTTP &http)
                 }
             }
         }
+    }else if (strcmp("/speedtest", fn) == 0)
+    {
+        //getSpeedTest();
+        
+        http.readHeaders();
+        http.writeLine("HTTP/1.1 200 OK");
+        http.writeLine("Content-Type: application/binary");
+        http.writeLine("Server: " PCX_AGENT);
+        http.writeLine("Connection: close");
+        http.writeLine("Transfer-Encoding: chunked");
+        http.writeLine("");
+
+        auto generateRandomBytes = [](size_t size) -> std::string {
+                                       std::string buf;
+                                       peercast::Random r;
+
+                                       for (size_t i = 0; i < size; ++i)
+                                           buf += (char) (r.next() & 0xff);
+                                       return buf;
+                                   };
+        auto block = generateRandomBytes(1024);
+        const auto startTime = sys->getDTime();
+        size_t sent = 0;
+        Chunker stream(http);
+
+        while (sys->getDTime() - startTime < 15.0) {
+            stream.write(block.data(), block.size());
+            sent += 1024;
+        }
+        auto t = sys->getDTime();
+        stream.close();
+        LOG_INFO("[Speedtest] client %s downloaded at %.0f bps", sock->host.ip.str().c_str(), (sent * 8) / (t - startTime));
     }else
     {
         // GET マッチなし
@@ -543,6 +575,8 @@ void Servent::handshakeGET(HTTP &http)
 }
 
 // -----------------------------------
+#include "dechunker.h"
+#include <limits>
 void Servent::handshakePOST(HTTP &http)
 {
     auto vec = str::split(http.cmdLine, " ");
@@ -586,6 +620,58 @@ void Servent::handshakePOST(HTTP &http)
         auto req = http.getRequest();
         LOG_DEBUG("Admin (POST)");
         handshakeCMD(http, req.body);
+    }else if (path == "/speedtest")
+    {
+        // postSpeedtest();
+        http.readHeaders();
+
+        std::shared_ptr<Stream> stream;
+        if (http.headers.get("Transfer-Encoding") == "chunked") {
+            stream = std::make_shared<Dechunker>(http);
+        } else {
+            auto tmp = std::make_shared<IndirectStream>();
+            tmp->init(&http);
+            stream = tmp;
+        }
+
+        int remaining = std::numeric_limits<int>::max();
+        bool bounded = false;
+        if (http.headers.get("Content-Length") != "") {
+            remaining = std::atoi(http.headers.get("Content-Length").c_str());
+            bounded = true;
+        }
+
+        const auto startTime = sys->getDTime();
+        size_t received = 0;
+        char buffer[1024];
+
+        while (sys->getDTime() - startTime <= 20.0 && remaining > 0) {
+            int r;
+            try {
+                r = stream->read(buffer, std::min(1024, remaining));
+            } catch (StreamException& e) {
+                break;
+            }
+            received += r;
+            if (bounded)
+                remaining -= r;
+        }
+        auto t = sys->getDTime();
+
+        if ((t - startTime) < 15.0) {
+            auto res = HTTPResponse::badRequest("Time less than 15 seconds. Need more data.");
+            http.send(res);
+        } else {
+            double bps = (received * 8) / (t - startTime);
+            LOG_INFO("[Speedtest] client %s uploaded %d bytes in %.3f seconds (%.0f bps)",
+                     sock->host.ip.str().c_str(),
+                     (int) received,
+                     t - startTime,
+                     (received * 8) / (t - startTime));
+
+            auto res = HTTPResponse::ok({{"Content-Type", "text/plain"}}, str::format("%.0f bps", bps));
+            http.send(res);
+        }
     }else
     {
         http.readHeaders();
@@ -1434,7 +1520,11 @@ void Servent::CMD_stop_servent(const char* cmd, HTTP& http, String& jumpStr)
     if (s)
     {
         s->abort();
-        jumpStr.sprintf("/%s/connections.html", servMgr->htmlPath);
+
+        if (!http.headers.get("Referer").empty())
+            jumpStr.sprintf("%s", http.headers.get("Referer").c_str());
+        else
+            jumpStr.sprintf("/%s/connections.html", servMgr->htmlPath);
         return;
     }else
     {

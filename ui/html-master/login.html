@@ -2,9 +2,9 @@
 
 <div style="position: fixed; left:8px; top:8px; z-index: 1"><a href="/public/index.html">{#Public Directory}</a></div>
 
-<div align=center style="margin-top: 80px">
-  <form action="/admin?" method=POST>
-    <input type=hidden value=login name=cmd>
+<div align="center" style="margin-top: 80px">
+  <form action="/admin?" method="POST">
+    <input type="hidden" value="login" name="cmd">
     <input type="hidden"  name="requested_path" value="{$request.path}{$request.search}">
     <div style="position: fixed;
                 left: 0;
@@ -16,17 +16,17 @@
                 align-items:center;
                 z-index: 0">
       <table class="table-panel" style="">
-        <tr align=middle>
+        <tr align="middle">
           <td colspan="2"><strong>PeerCast</strong></td>
         </tr>
         <tr>
           <td>{#_Password_login}</TD>
-          <td><input type=password size=10 name=pass style="width: 200px"></td>
+          <td><input type="password" size="10" name="pass" style="width: 200px"></td>
         </tr>
         <tr>
           <td colspan="2">
             <div align="center">
-              <input id=submit type=submit value="{#Login}" name=submit>
+              <input id="submit" type="submit" value="{#Login}" name="submit">
             </div>
           </td>
         </tr>

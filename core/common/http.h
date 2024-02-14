@@ -324,6 +324,7 @@ public:
 
     void send(const HTTPResponse& response);
     HTTPResponse send(const HTTPRequest& request);
+    HTTPResponse getResponse();
 
     char    cmdLine[8192], *arg;
 

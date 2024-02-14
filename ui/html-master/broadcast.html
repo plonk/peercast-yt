@@ -12,170 +12,170 @@
   </style>
 {^end}
 
-<DIV style="margin-left: auto; margin-right: auto; text-align: left; display: inline-block; margin-bottom: 1em;">
+<div style="margin-left: auto; margin-right: auto; text-align: left; display: inline-block; margin-bottom: 1em;">
   <ul>
     <li><a href="#external">{#External Source}</a></li>
     <li><a href="#httppush">{#HTTP Push Stream}</a></li>
     <li><a href="#wmhttp">{#Windows Media HTTP Push Stream}</a></li>
   </ul>
-</DIV>
+</div>
 
 <br>
 <a name="external"></a>
-<FORM action=/admin method=get>
-  <INPUT type=hidden value=fetch name=cmd>
-  <TABLE class="table-panel" align=center border=0>
-    <TBODY>
-      <TR align=middle>
-        <TD colSpan=2><B>{#External Source}</B></TD></TR>
-      <TR align=left>
-        <TD>{#URL (Required)}</TD>
-        <TD><INPUT name=url></TD></TR>
-      <TR align=left>
-        <TD>{#Name}</TD>
-        <TD><INPUT name=name></TD></TR>
-      <TR align=left>
-        <TD>{#Genre}</TD>
-        <TD><INPUT name=genre></TD></TR>
-      <TR align=left>
-        <TD>{#Description}</TD>
-        <TD><INPUT name=desc></TD></TR>
-      <TR align=left>
-        <TD>{#Contact}</TD>
-        <TD><INPUT name=contact type="url"></TD></TR>
-      <TR align=left>
-        <TD>{#Bitrate (kb/s)}</TD>
-        <TD><INPUT name=bitrate></TD></TR>
-      <TR align=left>
-        <TD>{#Type}</TD>
-        <TD>
-          <SELECT name=type>
-            <OPTION value=UNKNOWN selected>{#Unknown}</OPTION>
-            <OPTION value=FLV>FLV</OPTION>
-            <OPTION value=MKV>MKV</OPTION>
-            <OPTION value=MP3>MP3</OPTION>
-            <OPTION value=NSV>NSV</OPTION>
-            <OPTION value=OGG>OGG</OPTION>
-            <OPTION value=RAW>RAW</OPTION>
-            <OPTION value=WMA>WMA</OPTION>
-            <OPTION value=WMV>WMV</OPTION>
-            <OPTION value=WEBM>WEBM</OPTION>
-            <OPTION value=MP4>MP4</OPTION>
-          </SELECT>
-        </TD>
-      </TR>
-      <TR align=left>
-        <TD>{#IP Version}</TD>
-        <TD>
-          <SELECT name=ipv>
-            <OPTION value=4>IPv4</OPTION>
-            <OPTION value=6>IPv6</OPTION>
-          </SELECT>
-        </TD>
-      </TR>
-      <TR align=left>
-        <TD colSpan=2 align=middle><INPUT type=submit value="{#Create Relay}" name=stream></TD>
-      </TR>
-    </TBODY>
-  </TABLE>
-</FORM>
+<form action="/admin" method="get">
+  <input type="hidden" value="fetch" name="cmd">
+  <table class="table-panel" align="center" border="0">
+    <tbody>
+      <tr align="middle">
+        <td colspan="2"><b>{#External Source}</b></td></tr>
+      <tr align="left">
+        <td>{#URL (Required)}</td>
+        <td><input name="url"></td></tr>
+      <tr align="left">
+        <td>{#Name}</td>
+        <td><input name="name"></td></tr>
+      <tr align="left">
+        <td>{#Genre}</td>
+        <td><input name="genre"></td></tr>
+      <tr align="left">
+        <td>{#Description}</td>
+        <td><input name="desc"></td></tr>
+      <tr align="left">
+        <td>{#Contact}</td>
+        <td><input name="contact" type="url"></td></tr>
+      <tr align="left">
+        <td>{#Bitrate (kb/s)}</td>
+        <td><input name="bitrate"></td></tr>
+      <tr align="left">
+        <td>{#Type}</td>
+        <td>
+          <select name="type">
+            <option value="UNKNOWN" selected>{#Unknown}</option>
+            <option value="FLV">FLV</option>
+            <option value="MKV">MKV</option>
+            <option value="MP3">MP3</option>
+            <option value="NSV">NSV</option>
+            <option value="OGG">OGG</option>
+            <option value="RAW">RAW</option>
+            <option value="WMA">WMA</option>
+            <option value="WMV">WMV</option>
+            <option value="WEBM">WEBM</option>
+            <option value="MP4">MP4</option>
+          </select>
+        </td>
+      </tr>
+      <tr align="left">
+        <td>{#IP Version}</td>
+        <td>
+          <select name="ipv">
+            <option value="4">IPv4</option>
+            <option value="6">IPv6</option>
+          </select>
+        </td>
+      </tr>
+      <tr align="left">
+        <td colspan="2" align="middle"><input type="submit" value="{#Create Relay}" name="stream"></td>
+      </tr>
+    </tbody>
+  </table>
+</form>
 
 <br>
 <a name="httppush"></a>
-<TABLE class="table-panel" align=center border=0>
-  <TBODY>
-    <TR align=middle>
-      <TD colSpan=2><B>{#HTTP Push Stream}</B></TD></TR>
-    <TR align=left>
-      <TD>{#Name}</TD>
-      <TD><INPUT id=name></TD></TR>
-    <TR align=left>
-      <TD>{#Genre}</TD>
-      <TD><INPUT id=genre></TD></TR>
-    <TR align=left>
-      <TD>{#Description}</TD>
-      <TD><INPUT id=desc></TD></TR>
-    <TR align=left>
-      <TD>{#Contact}</TD>
-      <TD><INPUT id=url type="url"></TD></TR>
-    <TR align=left>
-      <TD>{#Type}</TD>
-      <TD>
-        <SELECT id=type>
-          <OPTION value=UNKNOWN selected>{#Unknown}</OPTION>
-          <OPTION value=FLV>FLV</OPTION>
-          <OPTION value=MKV>MKV</OPTION>
-          <OPTION value=MP3>MP3</OPTION>
-          <OPTION value=NSV>NSV</OPTION>
-          <OPTION value=OGG>OGG</OPTION>
-          <OPTION value=RAW>RAW</OPTION>
-          <OPTION value=WMA>WMA</OPTION>
-          <OPTION value=WMV>WMV</OPTION>
-          <OPTION value=WEBM>WEBM</OPTION>
-          <OPTION value=MP4>MP4</OPTION>
-        </SELECT>
-      </TD>
-    </TR>
-    <TR align=left>
-      <TD>{#IP Version}</TD>
-      <TD>
-        <SELECT id=ipv>
-          <OPTION value=4>IPv4</OPTION>
-          <OPTION value=6>IPv6</OPTION>
-        </SELECT>
-      </TD>
-    </TR>
-    <TR align=middle>
-      <TD colSpan=2><B>{#Output URL for ffmpeg}</B></TD></TR>
-    <TR align=left>
-      <TD colSpan=2 align=middle>
+<table class="table-panel" align="center" border="0">
+  <tbody>
+    <tr align="middle">
+      <td colspan="2"><b>{#HTTP Push Stream}</b></td></tr>
+    <tr align="left">
+      <td>{#Name}</td>
+      <td><input id="name"></td></tr>
+    <tr align="left">
+      <td>{#Genre}</td>
+      <td><input id="genre"></td></tr>
+    <tr align="left">
+      <td>{#Description}</td>
+      <td><input id="desc"></td></tr>
+    <tr align="left">
+      <td>{#Contact}</td>
+      <td><input id="url" type="url"></td></tr>
+    <tr align="left">
+      <td>{#Type}</td>
+      <td>
+        <select id="type">
+          <option value="UNKNOWN" selected>{#Unknown}</option>
+          <option value="FLV">FLV</option>
+          <option value="MKV">MKV</option>
+          <option value="MP3">MP3</option>
+          <option value="NSV">NSV</option>
+          <option value="OGG">OGG</option>
+          <option value="RAW">RAW</option>
+          <option value="WMA">WMA</option>
+          <option value="WMV">WMV</option>
+          <option value="WEBM">WEBM</option>
+          <option value="MP4">MP4</option>
+        </select>
+      </td>
+    </tr>
+    <tr align="left">
+      <td>{#IP Version}</td>
+      <td>
+        <select id="ipv">
+          <option value="4">IPv4</option>
+          <option value="6">IPv6</option>
+        </select>
+      </td>
+    </tr>
+    <tr align="middle">
+      <td colspan="2"><b>{#Output URL for ffmpeg}</b></td></tr>
+    <tr align="left">
+      <td colspan="2" align="middle">
         <textarea id="output" style="width: 100%; min-height: 4em; font-family: monospace">
         </textarea>
-      </TD>
-    </TR>
-  </TBODY>
-</TABLE>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 <br>
 <a name="wmhttp"></a>
 <div style="min-height: 95vh">
-<TABLE class="table-panel" align=center border=0>
-  <TBODY>
-    <TR align=middle>
-      <TD colSpan=2><B>{#Windows Media HTTP Push Stream}</B></TD></TR>
-    <TR align=left>
-      <TD>{#Name}</TD>
-      <TD><INPUT id=wm_name></TD></TR>
-    <TR align=left>
-      <TD>{#Genre}</TD>
-      <TD><INPUT id=wm_genre></TD></TR>
-    <TR align=left>
-      <TD>{#Description}</TD>
-      <TD><INPUT id=wm_desc></TD></TR>
-    <TR align=left>
-      <TD>{#Contact}</TD>
-      <TD><INPUT id=wm_url type="url"></TD>
-    </TR>
-    <TR align=middle>
-      <TD colSpan=2><B>{#Encoder Settings}</B></TD></TR>
-    <TR align=left>
-      <TD>{#Server Name}</TD>
-      <TD><INPUT id=wm_output_server_name type="text"></TD>
-    </TR>
-    <TR align=left>
-      <TD>{#Publishing Point}</TD>
-      <TD>
-        <textarea id="wm_output_publishing_point" style="width: 100%; min-height: 4em; font-family: monospace">
-        </textarea>
-      </TD>
-    </TR>
-    <TR align=left>
-      <TD>{#URL}</TD>
-      <TD>
-        <textarea id="wm_output_url" style="width: 100%; min-height: 4em; font-family: monospace">
-        </textarea>
-      </TD>
-    </TR>
-  </TBODY>
-</TABLE>
+  <table class="table-panel" align="center" border="0">
+    <tbody>
+      <tr align="middle">
+        <td colspan="2"><b>{#Windows Media HTTP Push Stream}</b></td></tr>
+      <tr align="left">
+        <td>{#Name}</td>
+        <td><input id="wm_name"></td></tr>
+      <tr align="left">
+        <td>{#Genre}</td>
+        <td><input id="wm_genre"></td></tr>
+      <tr align="left">
+        <td>{#Description}</td>
+        <td><input id="wm_desc"></td></tr>
+      <tr align="left">
+        <td>{#Contact}</td>
+        <td><input id="wm_url" type="url"></td>
+      </tr>
+      <tr align="middle">
+        <td colspan="2"><b>{#Encoder Settings}</b></td></tr>
+      <tr align="left">
+        <td>{#Server Name}</td>
+        <td><input id="wm_output_server_name" type="text"></td>
+      </tr>
+      <tr align="left">
+        <td>{#Publishing Point}</td>
+        <td>
+          <textarea id="wm_output_publishing_point" style="width: 100%; min-height: 4em; font-family: monospace">
+          </textarea>
+        </td>
+      </tr>
+      <tr align="left">
+        <td>{#URL}</td>
+        <td>
+          <textarea id="wm_output_url" style="width: 100%; min-height: 4em; font-family: monospace">
+          </textarea>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>

@@ -355,6 +355,11 @@ HTTPResponse HTTP::send(const HTTPRequest& request)
         stream->writeString(request.body);
     }
 
+    return getResponse();
+}
+
+HTTPResponse HTTP::getResponse()
+{
     // receive response
     int status = readResponse();
     readHeaders();

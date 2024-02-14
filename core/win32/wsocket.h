@@ -52,9 +52,9 @@ public:
     bool    readReady(int timeoutMilliseconds) override;
     Host    getLocalHost() override;
     void    setBlocking(bool) override;
-    void    setReuse(bool);
-    void    setNagle(bool);
-    void    setLinger(int);
+    void    setReuse(bool) override;
+    void    setNagle(bool) override;
+    void    setLinger(int) override;
 
     static  HOSTENT     *resolveHost(const char *);
 

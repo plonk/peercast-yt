@@ -43,6 +43,7 @@ s_commands = {
               { "pid", Commands::pid },
               { "expr", Commands::expr },
               { "shutdown", Commands::shutdown },
+              { "speedtest", Commands::speedtest },
               { "sleep", Commands::sleep },
               { "date", Commands::date },
 };
@@ -100,6 +101,130 @@ void Commands::sleep(Stream& stream, const std::vector<std::string>& argv, std::
     }
     double seconds = std::atof(positionals[0].c_str());
     sys->sleep(seconds * 1000);
+}
+
+#include "host.h"
+#include "socket.h"
+#include "http.h"
+#include "chunker.h"
+#include "dechunker.h"
+#include "version2.h"
+void Commands::speedtest(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, {"--help", "--enable-nagle", "--disable-nagle"});
+
+    if (positionals.size() != 1 || options.count("--help")) {
+        stream.writeLine("Usage: speedtest HOST:PORT");
+        stream.writeLine("Perform a bandwidth test with a server.");
+        return;
+    }
+
+    Host host;
+    host.fromStrName(positionals[0].c_str(), 7144);
+
+    do { // Download
+        stream.writeLineF("Downloading from http://%s/speedtest ...", host.str(true /*with port*/).c_str());
+
+        auto sock = sys->createSocket();
+        sock->open(host);
+        sock->connect();
+
+        if (options.count("--enable-nagle")) {
+            sock->setNagle(true);
+            stream.writeLine("Nagle on");
+        } else if (options.count("--disable-nagle")) {
+            sock->setNagle(false);
+            stream.writeLine("Nagle off");
+        }
+
+        HTTP http(*sock);
+        http.writeLine("GET /speedtest HTTP/1.1");
+        http.writeLine("User-Agent: " PCX_AGENT);
+        http.writeLine("Host: " + positionals[0]);
+        http.writeLine("");
+
+        int status = http.readResponse();
+        if (status != 200) {
+            stream.writeLineF("Error: Status: %d", status);
+            break;
+        }
+        http.readHeaders();
+        if (http.headers.get("Transfer-Encoding") != "chunked") {
+            http.writeLine("Error: Not a chunked stream!");
+            break;
+        }
+
+        Dechunker dechunker(http);
+        size_t received = 0;
+
+        const auto startTime = sys->getDTime();
+        char buffer[1024];
+
+        while (sys->getDTime() - startTime < 15.0) {
+            int r = dechunker.read(buffer, 1024);
+            received += r;
+        }
+
+        const auto endTime = sys->getDTime();
+
+        stream.writeLineF("%d bps", (int) (received*8 / (endTime - startTime)));
+    } while(0);
+
+    stream.writeLine("");
+
+    do { // Uplaod
+        stream.writeLineF("Uploading to http://%s/speedtest ...", host.str(true /*with port*/).c_str());
+
+        auto sock = sys->createSocket();
+        sock->open(host);
+        sock->connect();
+
+        if (options.count("--enable-nagle")) {
+            sock->setNagle(true);
+            stream.writeLine("Nagle on");
+        } else if (options.count("--disable-nagle")) {
+            sock->setNagle(false);
+            stream.writeLine("Nagle off");
+        }
+
+        HTTP http(*sock);
+        http.writeLine("POST /speedtest HTTP/1.1");
+        http.writeLine("Content-Type: application/binary");
+        http.writeLine("Transfer-Encoding: chunked");
+        http.writeLine("");
+
+        Chunker chunker(http);
+    
+        auto generateRandomBytes = [](size_t size) -> std::string {
+                                       std::string buf;
+                                       peercast::Random r;
+
+                                       for (size_t i = 0; i < size; ++i)
+                                           buf += (char) (r.next() & 0xff);
+                                       return buf;
+                                   };
+        std::string chunk = generateRandomBytes(1024);
+        size_t sent = 0;
+
+        const auto startTime = sys->getDTime();
+
+        while (sys->getDTime() - startTime < 15.0) {
+            chunker.writeString(chunk);
+            sent += 1024;
+        }
+        chunker.close();
+
+        const auto endTime = sys->getDTime();
+
+        auto res = http.getResponse();
+        if (res.statusCode != 200) {
+            stream.writeLineF("Error: Status: %d", res.statusCode);
+            // Print the body anyway.
+        }
+        stream.writeString(res.body);
+    } while(0);
 }
 
 #include "servmgr.h"
@@ -250,15 +375,18 @@ void Commands::echo(Stream& stream, const std::vector<std::string>& argv, std::f
 }
 
 #include "chanmgr.h"
+#include "url.h"
 void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
     std::map<std::string, bool> options;
     std::vector<std::string> positionals;
     std::tie(options, positionals) = parse_options(argv, { "--help" });
 
-    if (options.count("--help")) {
-        stream.writeLine("Usage: chan");
+    if (positionals.size() < 1 || options.count("--help")) {
+    ShowUsageAndReturn:
+        stream.writeLine("Usage: chan ls");
         stream.writeLine("       chan hit");
+        stream.writeLine("       chan set-url ID URL");
         return;
     }
 
@@ -269,13 +397,45 @@ void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::f
             int size = hitlist->numHits();
             stream.writeLineF("%s %d", chid.str().c_str(), size);
         }
-    } else {
+    } else if (positionals.size() >= 3 && positionals[0] == "set-url") {
+        for (auto it = chanMgr->channel; it; it = it->next) {
+            if (str::has_prefix(it->getID().str(), positionals[1])) {
+                std::lock_guard<std::recursive_mutex>(it->lock);
+
+                if (it->type != Channel::T_BROADCAST) {
+                    stream.writeLineF("Error: %s is not a broadcasting channel.", it->getID().str().c_str());
+                    continue;
+                }
+                if (it->srcType != Channel::SRC_URL) {
+                    stream.writeLineF("Error: The source type of %s is not URL.", it->getID().str().c_str());
+                    continue;
+                }
+                auto newUrl = positionals[2];
+
+                auto info = it->info;
+
+                stream.writeLine("Stopping channel.");
+                it->thread.shutdown();
+                sys->waitThread(&it->thread);
+                stream.writeLine("Channel stopped.");
+
+                sys->sleep(5000);
+                stream.writeLine("Creating new channel.");
+                auto ch = chanMgr->createChannel(info);
+                ch->startURL(newUrl.c_str());
+                stream.writeLine("Started.");
+                break;
+            }
+        }
+    } else if (positionals.size() >= 1 && positionals[0] == "ls") {
         for (auto it = chanMgr->channel; it; it = it->next) {
             stream.writeLineF("%s %s %s",
                               it->getName(),
                               it->getID().str().c_str(),
                               it->getStatusStr());
         }
+    } else {
+        goto ShowUsageAndReturn;
     }
 }
 

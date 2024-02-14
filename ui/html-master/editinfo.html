@@ -27,60 +27,60 @@
     <input type="hidden" name="cmd" value="update_channel_info">
     <input type="hidden" name="id" value="{$channel.id}">
 
-    <table class="table-panel" style="margin-bottom: 0" align=center border=0>
-      <tr align=middle>
-        <td colSpan=2><B>{#Channel Information}</B></td>
+    <table class="table-panel" style="margin-bottom: 0" align="center" border="0">
+      <tr align="middle">
+        <td colSpan="2"><B>{#Channel Information}</B></td>
       </tr>
-      <tr align=left>
+      <tr align="left">
         <td style="min-width: 90px">{#Name}</td>
         <td style="min-width: 200px">
           <input type="text" name="name" value="{$channel.name}">
         </td>
       </tr>
-      <tr align=left>
+      <tr align="left">
         <td>{#Genre}</td>
         <td><input type="text" name="genre" value="{$channel.genre}"></td>
       </tr>
-      <tr align=left>
+      <tr align="left">
         <td>{#Desc.}</td>
         <td><input type="text" name="desc" value="{$channel.desc}"></td>
       </tr>
-      <tr align=left>
+      <tr align="left">
         <td>{#URL}</td>
         <td><input type="text" name="contactURL" value="{$channel.contactURL}"></td>
       </tr>
-      <tr align=left>
+      <tr align="left">
         <td>{#Comment}</td>
         <td><input type="text" name="comment" value="{$channel.comment}"></td>
       </tr>
     </table>
 
     <table class="table-panel" id="track">
-      <tr align=left>
-        <td colSpan=2 align=middle>
+      <tr align="left">
+        <td colSpan="2" align="middle">
           <B>{#Current Track}</B>
           <button type="button" id="widget" style="float: right" onclick="toggleTrack()"></button>
         </td>
       </tr>
-      <tr align=left>
+      <tr align="left">
         <td style="min-width: 90px">{#Artist}</td>
         <td style="min-width: 200px">
           <input type="text" name="track.artist" value="{$channel.track.artist}">
         </td>
       </tr>
-      <tr align=left>
+      <tr align="left">
         <td>{#Title}</td>
         <td><input type="text" name="track.title" value="{$channel.track.title}"></td>
       </tr>
-      <tr align=left>
+      <tr align="left">
         <td>{#Album}</td>
         <td><input type="text" name="track.album" value="{$channel.track.album}"></td>
       </tr>
-      <tr align=left>
+      <tr align="left">
         <td>{#Genre}</td>
         <td><input type="text" name="track.genre" value="{$channel.track.genre}"></td>
       </tr>
-      <tr align=left>
+      <tr align="left">
         <td>{#Contact}</td>
         <td><input type="text" name="track.contactURL" value="{$channel.track.contactURL}"></td>
       </tr>
