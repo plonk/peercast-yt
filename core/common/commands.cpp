@@ -402,6 +402,10 @@ void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::f
             if (str::has_prefix(it->getID().str(), positionals[1])) {
                 std::lock_guard<std::recursive_mutex>(it->lock);
 
+                if (it->type != Channel::T_BROADCAST) {
+                    stream.writeLineF("Error: %s is not a broadcasting channel.", it->getID().str().c_str());
+                    continue;
+                }
                 if (it->srcType != Channel::SRC_URL) {
                     stream.writeLineF("Error: The source type of %s is not URL.", it->getID().str().c_str());
                     continue;
