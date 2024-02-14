@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <string>
-#include <sstream> // to implement str
+#include <sstream> // to implement str::STR
 #include <vector>
 #include <stdarg.h>
 

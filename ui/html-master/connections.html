@@ -7,10 +7,10 @@
 {@if this.status != "FREE"}
 <tr>
   <td style="text-align: right">{$this.id}</td>
-  <TD>{$this.type}</TD>
-  <TD>{$this.status}</TD>
-  <TD>{$this.uptime}</TD>
-  <TD>{$this.endpoint}</TD>
+  <td>{$this.type}</td>
+  <td>{$this.status}</td>
+  <td>{$this.uptime}</td>
+  <td>{$this.endpoint}</td>
   <td>
     {@if this.type != "SERVER"}
       {@if this.isPrivate}{#Private}{@end}
@@ -19,11 +19,11 @@
       {#SSL}
     {@end}
   </td>
-  <TD>{$this.agent}</TD>
-  <TD align=right>{$this.bitrate}</TD>
-  <TD align=right>{$this.bitrateAvg}</TD>
+  <td>{$this.agent}</td>
+  <td align="right">{$this.bitrate}</td>
+  <td align="right">{$this.bitrateAvg}</td>
   <td style="text-align: center"><a class="text-danger" href="/admin?cmd=stop_servent&amp;servent_id={$this.id}">&#x23f9;<!-- BLACK SQUARE FOR STOP --></a></td>
-</TR>
+</tr>
 {@end}
 {^end}
 
@@ -36,23 +36,23 @@
   </h3>
 {@end}
 
-<DIV class="reloader hscroll" data-url="connections.html?fragment=content&amp;id={$page.id}" data-interval="{$servMgr.refreshHTML}">
+<div class="reloader hscroll" data-url="connections.html?fragment=content&amp;id={$page.id}" data-interval="{$servMgr.refreshHTML}">
   {@fragment content}
-  <FORM action=/admin method=get>
-    <TABLE width="95%" align=center border=0 class="table-panel">
-      <TBODY>
-        <TR align=middle bgColor="#cccccc" style="white-space: nowrap">
-          <TD style="width: 1.2em"><B>{#ID}</B></TD>
-          <TD><B>{#_Type_connection}</B></TD>
-          <TD><B>{#Status}</B></TD>
-          <TD><B>{#Time}</B></TD>
-          <TD style="width: 11.5em"><B>{#IP:Port}</B></TD>
+  <form action="/admin" method="get">
+    <table width="95%" align="center" border="0" class="table-panel">
+      <tbody>
+        <tr align="middle" bgcolor="#cccccc" style="white-space: nowrap">
+          <td style="width: 1.2em"><b>{#ID}</b></td>
+          <td><b>{#_Type_connection}</b></td>
+          <td><b>{#Status}</b></td>
+          <td><b>{#Time}</b></td>
+          <td style="width: 11.5em"><b>{#IP:Port}</b></td>
           <td style="width: 6em"><b>{#Category}</b></td>
-          <TD><B>{#Agent}</B></TD>
-          <TD><B>{#Kbits/s}</B></TD>
-          <TD><B>{#Avg.}</B></TD>
+          <td><b>{#Agent}</b></td>
+          <td><b>{#Kbits/s}</b></td>
+          <td><b>{#Avg.}</b></td>
           <td><b>{#Stop}</b></td>
-        </TR>
+        </tr>
         {@foreach servMgr.servents}
           {@if page.id}
             {@if page.id != loop.servent.chanID }
@@ -62,8 +62,8 @@
             {^SERVENT_TR}
           {@end}
         {@end}
-      </TBODY>
-    </TABLE>
-  </FORM>
+      </tbody>
+    </table>
+  </form>
   {@end}
-</DIV>
+</div>

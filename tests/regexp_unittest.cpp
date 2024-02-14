@@ -133,3 +133,18 @@ TEST_F(RegexpFixture, copy)
     ASSERT_FALSE(r2.matches("\n"));
 }
 
+TEST_F(RegexpFixture, escape)
+{
+    ASSERT_EQ(Regexp::escape(""), "");
+    ASSERT_EQ(Regexp::escape(R"===([\^$.|?*+())==="),
+                             R"===(\[\\\^\$\.\|\?\*\+\(\))===");
+    ASSERT_EQ(Regexp::escape("]"), "\\]");
+    ASSERT_EQ(Regexp::escape("abc"), "abc");
+    ASSERT_EQ(Regexp::escape("青梗菜"), "青梗菜");
+}
+
+TEST_F(RegexpFixture, grep)
+{
+    ASSERT_EQ(Regexp::grep(Regexp("a"), { "a", "ab", "bc" }),
+              std::vector<std::string>({"a", "ab"}));
+}
