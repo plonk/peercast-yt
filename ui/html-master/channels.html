@@ -351,8 +351,8 @@ function renderChannelRow(channel)
           columnVisibility['name'] ?
           ['td', { class: "channel-description" },
            ['button', { style:"float:right", onclick:`showModal(${channel.serialNumber})`}, unescapeHtml('&#x2139;&#xfe0f;' /* info mark */)],
-           ['a', { href: channel.id != "00000000000000000000000000000000" ? `play.html?id=${channel.id}` : null,
-                   onclick: useServersidePlayer ? `peercast('playChannel', '${channel.id}'); event.preventDefault()` : null,
+           ['a', { href: (channel.id != "00000000000000000000000000000000") ? `play.html?id=${channel.id}` : null,
+                   onclick: (channel.id != "00000000000000000000000000000000" && useServersidePlayer) ? `peercast('playChannel', '${channel.id}'); event.preventDefault()` : null,
                  }, 
             // name, genre, desc はエスケープ済みなので一度アンエスケープする。
             ['div', { class:"channel-name" }, unescapeHtml(channel.name)],
