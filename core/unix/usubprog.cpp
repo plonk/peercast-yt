@@ -21,8 +21,9 @@ Subprogram::Subprogram(const std::string& name, bool receiveData, bool feedData)
 
 Subprogram::~Subprogram()
 {
-    if (m_pid != -1)
-        kill(m_pid, 9);
+    if (m_pid != -1) {
+        Subprogram::terminate();
+    }
 }
 
 // プログラムの実行を開始。
