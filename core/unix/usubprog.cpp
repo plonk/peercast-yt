@@ -13,9 +13,9 @@ Subprogram::Subprogram(const std::string& name, bool receiveData, bool feedData)
     : m_receiveData(receiveData)
     , m_feedData(feedData)
     , m_name(name)
-    , m_pid(-1)
     , m_inputStream(std::make_shared<FileStream>())
     , m_outputStream(std::make_shared<FileStream>())
+    , m_pid(-1)
 {
 }
 
