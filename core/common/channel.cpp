@@ -595,6 +595,24 @@ static std::string feedUrlToRootHost(const std::string& feedUrl)
 // -----------------------------------
 void PeercastSource::stream(std::shared_ptr<Channel> ch)
 {
+    auto isOwnGlobalIP = [](const IP& ip) {
+                             if (servMgr->serverHost.ip.isGlobal() && servMgr->serverHost.ip == ip)
+                                 return true;
+
+                             // IPv6 は関係ない気がする。
+                             //if (servMgr->serverHostIPv6.ip.isGlobal() && serverHostIPv6.ip == ip)
+                             //    return true;
+
+                             return false;
+                         };
+    if (!servMgr->serverHost.ip.isGlobal()) {
+        LOG_INFO("Checking own global IP ...");
+        servMgr->checkFirewall();
+        if (!servMgr->serverHost.ip.isGlobal()) {
+            LOG_ERROR("Could not determine own global IP. LAN relaying may not work.");
+        }
+    }
+
     m_channel = ch;
 
     int numYPTries = 0;
@@ -650,6 +668,13 @@ void PeercastSource::stream(std::shared_ptr<Channel> ch)
                     if (host.port == 0)
                     {
                         LOG_DEBUG("ポート0のトラッカーIPはホストキャッシュに登録しない。(チャンネルフィードから)");
+                        goto Abort;
+                    }
+                    if (isOwnGlobalIP(host.ip))
+                    {
+                        LOG_DEBUG("%s: Tracker has the same global IP %s as local host. Not connecting.",
+                                  chName(ch->info).c_str(),
+                                  host.ip.str().c_str());
                         goto Abort;
                     }
 
