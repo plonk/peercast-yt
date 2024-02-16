@@ -1379,6 +1379,8 @@ RootObjectScope::RootObjectScope()
                  {"chanMgr" , chanMgr->getState()},
                  {"stats"   , stats.getState()},
                  {"notificationBuffer" , g_notificationBuffer.getState()},
-                 {"sys"     , sys->getState()}})
+                 {"sys"     , sys->getState()},
+                 {"app"     , peercastApp->getState()},
+        })
 {
 }

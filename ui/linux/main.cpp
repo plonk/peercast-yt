@@ -36,6 +36,7 @@
 #include <libgen.h> // dirname
 #include "gnutella.h"
 #include "notif.h"
+#include <string.h> // strdup
 
 // ----------------------------------
 String iniFileName;
@@ -51,6 +52,7 @@ std::recursive_mutex loglock;
 static std::string s_tokenListFilename;
 static std::string s_stateDirPath;
 static std::string s_cacheDirPath;
+static std::string s_settingsDirPath;
 static bool s_enableNotifySend = false;
 
 // ---------------------------------
@@ -69,6 +71,11 @@ public:
     const char * APICALL getIniFilename() override
     {
         return iniFileName;
+    }
+
+    const char * APICALL getSettingsDirPath() override
+    {
+        return s_settingsDirPath.c_str();
     }
 
     const char * APICALL getTokenListFilename() override
@@ -397,6 +404,12 @@ int main(int argc, char* argv[])
             fprintf(pidfileopened, "%i\n", (int) getpid());
             fclose(pidfileopened);
         }
+    }
+
+    {
+        char *tmp = strdup(iniFileName);
+        s_settingsDirPath = dirname(tmp);
+        free(tmp);
     }
 
     peercastInst = new MyPeercastInst();

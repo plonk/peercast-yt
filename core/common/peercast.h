@@ -53,12 +53,13 @@ public:
 
 // ------------------------------------------------------------
 // This is the interface from the core to the application.
-class PeercastApplication
+class PeercastApplication : public VariableWriter
 {
 public:
 
     virtual const char * APICALL getPath() { return "./"; }
     virtual const char * APICALL getIniFilename() { return "peercast.ini"; }
+    virtual const char * APICALL getSettingsDirPath() { return "./"; } // The directory peercast.ini is located in.
     virtual const char * APICALL getTokenListFilename() { return "tokens.json"; }
     virtual const char * APICALL getCacheDirPath() { return "./"; }
     virtual const char * APICALL getStateDirPath() { return "./"; }
@@ -74,6 +75,8 @@ public:
     virtual void    APICALL channelStart(ChanInfo *) {}
     virtual void    APICALL channelStop(ChanInfo *) {}
     virtual void    APICALL channelUpdate(ChanInfo *) {}
+
+    amf0::Value getState() override;
 };
 
 // ----------------------------------
