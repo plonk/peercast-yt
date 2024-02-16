@@ -445,3 +445,15 @@ void USys::rename(const std::string& oldpath, const std::string& newpath)
         throw GeneralException( str::format("rename: %s", str::strerror(errno).c_str()).c_str() );
     }
 }
+
+// ---------------------------------
+#include <unistd.h>
+std::string USys::getCurrentWorkingDirectory()
+{
+    char buf[PATH_MAX + 1];
+
+    if (getcwd(buf, PATH_MAX + 1) == 0) {
+        throw GeneralException("getcwd failed");
+    }
+    return buf;
+}

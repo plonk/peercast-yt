@@ -261,3 +261,16 @@ std::string WSys::fromFilenameEncoding(const std::string& path)
 
     return buf;
 }
+
+// ---------------------------------
+#include <direct.h>
+std::string WSys::getCurrentWorkingDirectory()
+{
+#define NTFS_PATH_MAX 32768
+    char buf[NTFS_PATH_MAX + 1] = "";
+
+    if (_getcwd(buf, NTFS_PATH_MAX + 1) == NULL) {
+        throw GeneralException("_getcwd failed");
+    }
+    return buf;
+}

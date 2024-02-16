@@ -46,6 +46,7 @@ s_commands = {
               { "speedtest", Commands::speedtest },
               { "sleep", Commands::sleep },
               { "date", Commands::date },
+              { "pwd", Commands::pwd },
 };
 
 void Commands::system(Stream& stream, const std::string& _cmdline, std::function<bool()> cancel)
@@ -68,6 +69,21 @@ void Commands::system(Stream& stream, const std::string& _cmdline, std::function
     } catch (GeneralException& e) {
         stream.writeLineF("Error: %s", e.what());
     }
+}
+
+void Commands::pwd(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, {"--help"});
+
+    if (positionals.size() != 0 || options.count("--help")) {
+        stream.writeLine("Usage: pwd");
+        stream.writeLine("Print the name of the current working directory.");
+        return;
+    }
+
+    stream.writeLine(sys->getCurrentWorkingDirectory());
 }
 
 void Commands::date(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
