@@ -374,6 +374,25 @@ void Commands::echo(Stream& stream, const std::vector<std::string>& argv, std::f
     }
 }
 
+
+static std::vector<std::shared_ptr<Channel>> pickChannels(const std::string& prefix)
+{
+    if (prefix.empty()) {
+        throw ArgumentException("Empty channel designator");
+    }
+    
+    std::vector<std::shared_ptr<Channel>> result;
+
+    const auto prefix1 = str::upcase(prefix);
+    
+    for (auto ch = chanMgr->channel; ch; ch = ch->next) {
+        if (str::has_prefix(str::upcase(ch->getID().str()), prefix1)) {
+            result.push_back(ch);
+        }
+    }
+    return result;
+}
+
 #include "chanmgr.h"
 #include "url.h"
 void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
@@ -385,11 +404,11 @@ void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::f
     if (positionals.size() < 1 || options.count("--help")) {
     ShowUsageAndReturn:
         stream.writeLine("Usage: chan ls");
+        stream.writeLine("       chan show CHANNEL");
         stream.writeLine("       chan hit");
-        stream.writeLine("       chan set-url ID URL");
+        stream.writeLine("       chan set-url CHANNEL URL");
         return;
     }
-
 
     if (positionals.size() >= 1 && positionals[0] == "hit") {
         for (auto hitlist = chanMgr->hitlist; hitlist != nullptr; hitlist = hitlist->next) {
@@ -398,41 +417,62 @@ void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::f
             stream.writeLineF("%s %d", chid.str().c_str(), size);
         }
     } else if (positionals.size() >= 3 && positionals[0] == "set-url") {
-        for (auto it = chanMgr->channel; it; it = it->next) {
-            if (str::has_prefix(it->getID().str(), positionals[1])) {
-                std::lock_guard<std::recursive_mutex>(it->lock);
+        const auto designator = positionals[1];
+        const auto newUrl = positionals[2];
 
-                if (it->type != Channel::T_BROADCAST) {
-                    stream.writeLineF("Error: %s is not a broadcasting channel.", it->getID().str().c_str());
-                    continue;
-                }
-                if (it->srcType != Channel::SRC_URL) {
-                    stream.writeLineF("Error: The source type of %s is not URL.", it->getID().str().c_str());
-                    continue;
-                }
-                auto newUrl = positionals[2];
+        auto channels = pickChannels(designator);
 
-                auto info = it->info;
-
-                stream.writeLine("Stopping channel.");
-                it->thread.shutdown();
-                sys->waitThread(&it->thread);
-                stream.writeLine("Channel stopped.");
-
-                sys->sleep(5000);
-                stream.writeLine("Creating new channel.");
-                auto ch = chanMgr->createChannel(info);
-                ch->startURL(newUrl.c_str());
-                stream.writeLine("Started.");
-                break;
+        if (channels.size() == 0) {
+            stream.writeLineF("Error: Channel not found: %s", designator.c_str());
+        } else if (channels.size() > 1) {
+            stream.writeLineF("'%s' is ambiguous between the following:", designator.c_str());
+            for (auto ch : channels) {
+                stream.writeLineF("%s %s", ch->getID().str().c_str(), ch->getName());
             }
+        } else {
+            auto it = channels[0];
+            std::lock_guard<std::recursive_mutex>(it->lock);
+
+            if (it->type != Channel::T_BROADCAST) {
+                stream.writeLineF("Error: %s is not a broadcasting channel.", it->getID().str().c_str());
+                return;
+            }
+            if (it->srcType != Channel::SRC_URL) {
+                stream.writeLineF("Error: The source type of %s is not URL.", it->getID().str().c_str());
+                return;
+            }
+            auto info = it->info;
+
+            stream.writeLineF("Stopping channel %s ...", it->getID().str().c_str());
+            it->thread.shutdown();
+            sys->waitThread(&it->thread);
+            stream.writeLine("Channel stopped.");
+
+            sys->sleep(5000);
+            stream.writeLine("Restarting channel ...");
+            auto ch = chanMgr->createChannel(info);
+            ch->startURL(newUrl.c_str());
+            stream.writeLine("Started.");
         }
     } else if (positionals.size() >= 1 && positionals[0] == "ls") {
         for (auto it = chanMgr->channel; it; it = it->next) {
             stream.writeLineF("%s %s %s",
-                              it->getName(),
                               it->getID().str().c_str(),
+                              it->getName(),
                               it->getStatusStr());
+        }
+    } else if (positionals.size() == 2 && positionals[0] == "show") {
+        const auto designator = positionals[1];
+        auto channels = pickChannels(designator);
+        if (channels.size() == 0) {
+            stream.writeLineF("Error: Channel not found: %s", designator.c_str());
+        } else if (channels.size() > 1) {
+            stream.writeLineF("'%s' is ambiguous between the following:", designator.c_str());
+            for (auto ch : channels) {
+                stream.writeLineF("%s %s", ch->getID().str().c_str(), ch->getName());
+            }
+        } else {
+            stream.writeLine(amf0::format(channels[0]->getState()));
         }
     } else {
         goto ShowUsageAndReturn;
