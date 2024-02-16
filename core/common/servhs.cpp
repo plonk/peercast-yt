@@ -829,9 +829,6 @@ void Servent::handshakeIncoming()
 {
     setStatus(S_HANDSHAKE);
 
-#if 0
-    // SSL ハンドシェイクを検出したらSSL通信を行う。
-    // ※ サーバー証明書を設定する機能を作るまで無効にする。
     if (sock->readReady(sock->readTimeout)) {
         char c = sock->peekChar();
         LOG_TRACE("peekChar -> %d", (unsigned char) c);
@@ -839,7 +836,6 @@ void Servent::handshakeIncoming()
             sock = SslClientSocket::upgrade(sock);
         }
     }
-#endif
 
     char buf[8192];
 
