@@ -43,6 +43,8 @@ public:
     static std::shared_ptr<SslClientSocket> upgrade(std::shared_ptr<ClientSocket>);
     void setTimeoutOptions();
 
+    static void configureServer(const std::string& certificate, const std::string& privatekey);
+
     struct sockaddr_in6 m_remoteAddr;
     int m_socket;
     SSL_CTX* m_ctx;

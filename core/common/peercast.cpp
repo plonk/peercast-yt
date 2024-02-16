@@ -2,6 +2,8 @@
 #include "peercast.h"
 #include "channel.h"
 #include "servmgr.h"
+#include "str.h"
+#include "sslclientsocket.h"
 
 // ---------------------------------
 // globals
@@ -22,6 +24,9 @@ void APICALL PeercastInstance::init()
 
     if (peercastApp->getIniFilename())
         servMgr->loadSettings(peercastApp->getIniFilename());
+
+    SslClientSocket::configureServer(str::STR(peercastApp->getSettingsDirPath(), "/server.crt"),
+                                     str::STR(peercastApp->getSettingsDirPath(), "/server.key"));
 
     servMgr->loadTokenList();
 
