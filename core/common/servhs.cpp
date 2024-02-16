@@ -829,11 +829,13 @@ void Servent::handshakeIncoming()
 {
     setStatus(S_HANDSHAKE);
 
-    if (sock->readReady(sock->readTimeout)) {
-        char c = sock->peekChar();
-        LOG_TRACE("peekChar -> %d", (unsigned char) c);
-        if (c == 22) {
-            sock = SslClientSocket::upgrade(sock);
+    if (servMgr->flags.get("enableSSLServer")) {
+        if (sock->readReady(sock->readTimeout)) {
+            char c = sock->peekChar();
+            LOG_TRACE("peekChar -> %d", (unsigned char) c);
+            if (c == 22) { // SSL handshake detected.
+                sock = SslClientSocket::upgrade(sock);
+            }
         }
     }
 
