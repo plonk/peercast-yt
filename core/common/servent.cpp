@@ -953,6 +953,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 
                     if (s->type == Servent::T_RELAY &&
                         s->chanID.isSame(chanInfo.id) &&
+                        !s->isPrivate() &&
                         hit &&
                         Servent::isTerminationCandidate(hit.get()))
                     {
