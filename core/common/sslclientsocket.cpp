@@ -259,6 +259,11 @@ void SslClientSocket::configureServer(const std::string& certificate, const std:
     s_serverKeyPath = privatekey;
 }
 
+std::pair<std::string,std::string> SslClientSocket::getServerConfiguration()
+{
+    return { s_serverCrtPath, s_serverKeyPath };
+}
+
 std::shared_ptr<SslClientSocket> SslClientSocket::upgrade(std::shared_ptr<ClientSocket> rawsock)
 {
     SSL_CTX* ctx = SSL_CTX_new(SSLv23_server_method());

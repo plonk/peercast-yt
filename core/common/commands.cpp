@@ -4,6 +4,8 @@
 #include "defer.h"
 
 #include <algorithm>
+#include <tuple> // std::tie
+
 static std::pair< std::map<std::string, bool>,
                   std::vector<std::string> >
 parse_options(const std::vector<std::string>& args,
@@ -47,6 +49,7 @@ s_commands = {
               { "sleep", Commands::sleep },
               { "date", Commands::date },
               { "pwd", Commands::pwd },
+              { "ssl", Commands::ssl },
 };
 
 void Commands::system(Stream& stream, const std::string& _cmdline, std::function<bool()> cancel)
@@ -683,4 +686,47 @@ void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::f
     } catch(GeneralException& e) {
         stdout.writeLineF("Error: %s", e.what());
     }
+}
+
+#include "sslclientsocket.h"
+void Commands::ssl(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, { "--help" });
+
+    if (positionals.size() != 0 || options.count("--help"))
+    {
+        stream.writeLine("Usage: ssl");
+        stream.writeLine("Display the SSL server configuration.");
+        return;
+    }
+
+    std::string crt, key;
+    std::tie(crt, key) = SslClientSocket::getServerConfiguration();
+
+    auto isReadable =
+        [](const std::string path){
+            FileStream fs;
+            try {
+                fs.openReadOnly(path);
+                return true;
+            } catch (StreamException &e) {
+                return false;
+            }
+        };
+
+    auto showInfo =
+        [&](const std::string path) {
+            stream.writeLineF("         Path: %s", path.c_str());
+            stream.writeLineF("    Full path: %s", sys->realPath(path).c_str());
+            stream.writeLineF("       Status: %s", isReadable(sys->realPath(path)) ? "OK, Readable" : "Cannot open!");
+        };
+
+    stream.writeLineF("SSL server: %s", (servMgr->flags.get("enableSSLServer")) ? "Enabled" : "Disabled");
+
+    stream.writeLine("\nCertificate File");
+    showInfo(crt);
+    stream.writeLine("\nPrivate Key File");
+    showInfo(key);
 }
