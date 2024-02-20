@@ -178,15 +178,15 @@
     <h3 style="margin:0">{#Channel List Preferences}</h3>
     <div class="modal-body" align="left">
 
-      <h4 style="margin:0">{#Display Columns}</h3>
+      <h4 style="margin:0">{#Display Columns}</h4>
       {@foreach COLUMNS}
         {@let key = nth(0,this), header = nth(1,this), order = nth(2,this)}
           <label style="display:block"><input type="checkbox" onchange='columnVisibility["{$key}"] = this.checked; savePreferences(); updateView()' data-key="{$key}" {$if(key == 'name', 'disabled')}> {$header}</label>
         {@end}
       {@end}
 
-      <h4 style="margin:0">{#Playback}</h3>
-          <label style="display:block"><input id="use_serverside_player_checkbox" type="checkbox" onchange='useServersidePlayer = this.checked; savePreferences(); updateView()'}> {#Use server-side player}</label>
+      <h4 style="margin:0">{#Playback}</h4>
+          <label style="display:block"><input id="use_serverside_player_checkbox" type="checkbox" onchange='useServersidePlayer = this.checked; savePreferences(); updateView()'> {#Use server-side player}</label>
     </div>
     <div class="modal-footer" style="margin-top:15px; text-align:right">
       <!-- <input type="submit" value="{#Save}"> -->
@@ -351,8 +351,8 @@ function renderChannelRow(channel)
           columnVisibility['name'] ?
           ['td', { class: "channel-description" },
            ['button', { style:"float:right", onclick:`showModal(${channel.serialNumber})`}, unescapeHtml('&#x2139;&#xfe0f;' /* info mark */)],
-           ['a', { href: channel.id != "00000000000000000000000000000000" ? `play.html?id=${channel.id}` : null,
-                   onclick: useServersidePlayer ? `peercast('playChannel', '${channel.id}'); event.preventDefault()` : null,
+           ['a', { href: (channel.id != "00000000000000000000000000000000") ? `play.html?id=${channel.id}` : null,
+                   onclick: (channel.id != "00000000000000000000000000000000" && useServersidePlayer) ? `peercast('playChannel', '${channel.id}'); event.preventDefault()` : null,
                  }, 
             // name, genre, desc はエスケープ済みなので一度アンエスケープする。
             ['div', { class:"channel-name" }, unescapeHtml(channel.name)],

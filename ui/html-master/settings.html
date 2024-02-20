@@ -8,8 +8,8 @@
 </style>
 {^end}
 
-<form action=/admin method=POST>
-  <input type=hidden value=apply name=cmd>
+<form action="/admin" method="POST">
+  <input type="hidden" value="apply" name="cmd">
   <table class="table-panel" width="50%" border="0">
     <tr >
       <td colspan="2"><div align="center"><strong>{#Basic Settings}</strong></div></td>
@@ -17,20 +17,20 @@
     <tr>
       <th class="left-heading">{#Password}</th>
       <td>
-        <input name=passnew type=password size="10" maxlength="32" value="{$servMgr.password}" style="width: 100%">
+        <input name="passnew" type="password" size="10" maxlength="32" value="{$servMgr.password}" style="width: 100%">
       </td>
     </tr>
     <tr>
       <th class="left-heading" style="width: 8.5em">{#Port}</th>
-      <td><input size=10 value="{$servMgr.serverPort1}" name=port></td>
+      <td><input size="10" value="{$servMgr.serverPort1}" name="port"></td>
     </tr>
     <tr>
       <th class="left-heading">{#Max. Relays}</th>
-      <td><input size=5 value="{$servMgr.maxRelays}" name=maxrelays></td>
+      <td><input size="5" value="{$servMgr.maxRelays}" name="maxrelays"></td>
     </tr>
     <tr>
       <th class="left-heading">{#Max. Direct streams}</th>
-      <td><input size=5 value="{$servMgr.maxDirect}" name=maxdirect></td>
+      <td><input size="5" value="{$servMgr.maxDirect}" name="maxdirect"></td>
     </tr>
     <tr>
       <th class="left-heading">{#Language}</th>
@@ -45,56 +45,56 @@
     </tr>
   </table>
   <div align="center" style="margin-bottom: 1em">
-    <input type=submit value="{#Save Settings}" name=submit>
+    <input type="submit" value="{#Save Settings}" name="submit">
   </div>
 
   <div class="flex-container">
     <div class="column">
-      <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle>
-          <td colspan=2><b>{#Server}</b></td>
+      <table class="table-panel" width="100%" align="center" border="0">
+        <tr align="middle">
+          <td colspan="2"><b>{#Server}</b></td>
         </tr>
         <tr>
           <th class="left-heading" width="35%">{#Server Name}</th>
           <td>
-            <input class="fill-parent" value="{$servMgr.serverName}" name=servername placeholder="{#Nickname for this server}">
+            <input class="fill-parent" value="{$servMgr.serverName}" name="servername" placeholder="{#Nickname for this server}">
           </td>
         </tr>
         <tr>
           <th class="left-heading">{#DJ Message}</th>
-          <td><input class="fill-parent" value="{$chanMgr.djMessage}" name=djmsg>
+          <td><input class="fill-parent" value="{$chanMgr.djMessage}" name="djmsg">
           </td>
         </tr>
         <tr>
           <th class="left-heading">{#ICY MetaInterval}</th>
-          <td><input size=5 value="{$chanMgr.icyMetaInterval}" name=icymeta>
+          <td><input size="5" value="{$chanMgr.icyMetaInterval}" name="icymeta">
           </td>
         </tr>
         <tr>
           <th class="left-heading">{#Mode}</th>
           <td>
-            <label><input type=radio {@if !servMgr.isRoot}checked{@end} value=0 name=root>
+            <label><input type="radio" {@if !servMgr.isRoot}checked{@end} value="0" name="root">
               <i>{#Normal}</i></label><br>
-            <label><input name=root type=radio value=1 {@if servMgr.isRoot}checked{@end}>
+            <label><input name="root" type="radio" value="1" {@if servMgr.isRoot}checked{@end}>
               <i>{#Root}</i></label></td>
         </tr>
         <tr>
           <th class="left-heading">{#Randomize broadcasting channel ID}</th>
           <td>
-            <input type="checkbox" name=randomizechid value=1 {@if servMgr.randomizeBroadcastingChannelID}checked{@end}>
+            <input type="checkbox" name="randomizechid" value="1" {@if servMgr.randomizeBroadcastingChannelID}checked{@end}>
           </td>
         </tr>
         <tr>
           <th class="left-heading">{#Public Directory}</th>
           <td>
-            <input type="checkbox" name="public_directory" value=1 {@if servMgr.publicDirectoryEnabled}checked{@end}>
+            <input type="checkbox" name="public_directory" value="1" {@if servMgr.publicDirectoryEnabled}checked{@end}>
           </td>
         </tr>
       </table>
 
-      <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle>
-          <td colspan=5><b>{#Filters}</b></td>
+      <table class="table-panel" width="100%" align="center" border="0">
+        <tr align="middle">
+          <td colspan="5"><b>{#Filters}</b></td>
         </tr>
         <tr>
           <th style="font-weight: normal; padding: 3px 0">{#IP Mask}</th>
@@ -104,38 +104,38 @@
           </th>
         </tr>
         {@foreach servMgr.filters}
-        <tr align=middle>
+        <tr align="middle">
           <td>
-            <input class="fill-parent" size=30 value="{$this.ip}" name=filt_ip>
+            <input class="fill-parent" size="30" value="{$this.ip}" name="filt_ip">
           </td>
           <td nowrap>
-            <input title="{#Network}" type=checkbox {@if this.network}checked{@end} value=1 name="filt_nw{$loop.index}">
-            <input title="{#Direct}" type=checkbox {@if this.direct}checked{@end} value=1 name="filt_di{$loop.index}">
-            <input title="{#Private}" type=checkbox {@if this.private}checked{@end} value=1 name="filt_pr{$loop.index}">
-            <input title="{#Ban}" type=checkbox {@if this.banned}checked{@end} value=1 name="filt_bn{$loop.index}">
+            <input title="{#Network}" type="checkbox" {@if this.network}checked{@end} value="1" name="filt_nw{$loop.index}">
+            <input title="{#Direct}" type="checkbox" {@if this.direct}checked{@end} value="1" name="filt_di{$loop.index}">
+            <input title="{#Private}" type="checkbox" {@if this.private}checked{@end} value="1" name="filt_pr{$loop.index}">
+            <input title="{#Ban}" type="checkbox" {@if this.banned}checked{@end} value="1" name="filt_bn{$loop.index}">
           </td>
         </tr>
         {@end}
-        <tr align=middle>
+        <tr align="middle">
           <td>
-            <input class="fill-parent" size=30 value="0.0.0.0" name=filt_ip>
+            <input class="fill-parent" size="30" value="0.0.0.0" name="filt_ip">
           </td>
           <td nowrap>
-            <input title="{#Network}" type=checkbox value=1 name="filt_nw{$length(servMgr.filters)}">
-            <input title="{#Direct}" type=checkbox value=1 name="filt_di{$length(servMgr.filters)}">
-            <input title="{#Private}" type=checkbox value=1 name="filt_pr{$length(servMgr.filters)}">
-            <input title="{#Ban}" type=checkbox value=1 name="filt_bn{$length(servMgr.filters)}">
+            <input title="{#Network}" type="checkbox" value="1" name="filt_nw{$length(servMgr.filters)}">
+            <input title="{#Direct}" type="checkbox" value="1" name="filt_di{$length(servMgr.filters)}">
+            <input title="{#Private}" type="checkbox" value="1" name="filt_pr{$length(servMgr.filters)}">
+            <input title="{#Ban}" type="checkbox" value="1" name="filt_bn{$length(servMgr.filters)}">
           </td>
         </tr>
       </table>
 
-      <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle>
-          <td colspan=5><b>{#UI}</b></td>
+      <table class="table-panel" width="100%" align="center" border="0">
+        <tr align="middle">
+          <td colspan="5"><b>{#UI}</b></td>
         </tr>
         <tr>
           <th class="left-heading">{#Refresh HTML (sec)}</th>
-          <td><input size=10 value="{$servMgr.refreshHTML}" name=refresh></td>
+          <td><input size="10" value="{$servMgr.refreshHTML}" name="refresh"></td>
         </tr>
         <tr>
           <th class="left-heading">{#Chat}</th>
@@ -178,31 +178,31 @@
         </tr>
       </table>
 
-      <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle>
-          <td colspan=2><b>{#Authentication}</b></td>
+      <table class="table-panel" width="100%" align="center" border="0">
+        <tr align="middle">
+          <td colspan="2"><b>{#Authentication}</b></td>
         </tr>
         <tr>
           <th class="left-heading" width="35%">{#HTML Authentication}</th>
           <td>
-            <label><input type=radio {@if servMgr.auth.useCookies}checked{@end} value=cookie name=auth>
+            <label><input type="radio" {@if servMgr.auth.useCookies}checked{@end} value="cookie" name="auth">
               <i>{#Cookies}</i></label><br>
-            <label><input type=radio {@if servMgr.auth.useHTTP}checked{@end} value=http name=auth>
+            <label><input type="radio" {@if servMgr.auth.useHTTP}checked{@end} value="http" name="auth">
               <i>{#Basic HTTP}</i></label></td>
         </tr>
         <tr>
           <th class="left-heading">{#Cookies Expire}</th>
           <td>
-            <label><input type=radio {@if servMgr.auth.useSessionCookies}checked{@end} value=session name=expire>
+            <label><input type="radio" {@if servMgr.auth.useSessionCookies}checked{@end} value="session" name="expire">
               <i>{#End of session}</i></label><br>
-            <label><input type=radio {@if !servMgr.auth.useSessionCookies}checked{@end} value=never name=expire>
+            <label><input type="radio" {@if !servMgr.auth.useSessionCookies}checked{@end} value="never" name="expire">
               <i>{#Never}</i></label></td>
         </tr>
       </table>
 
-      <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle>
-          <td colspan=2><b>{#Playlist}</b></td>
+      <table class="table-panel" width="100%" align="center" border="0">
+        <tr align="middle">
+          <td colspan="2"><b>{#Playlist}</b></td>
         </tr>
         <tr>
           <th class="left-heading" width="35%">{#WMV Protocol}</th>
@@ -218,25 +218,25 @@
         </tr>
       </table>
       {@if servMgr.isRoot}
-      <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle>
-          <td colspan=2><b>{#Root Mode}</b></td>
+      <table class="table-panel" width="100%" align="center" border="0">
+        <tr align="middle">
+          <td colspan="2"><b>{#Root Mode}</b></td>
         </tr>
         <tr>
           <th class="left-heading">{#Host Update (sec)}</th>
-          <td><input size=5 {@if chanMgr.hostUpdateInterval}value="{$chanMgr.hostUpdateInterval}"{@end} name=huint></td>
+          <td><input size="5" {@if chanMgr.hostUpdateInterval}value="{$chanMgr.hostUpdateInterval}"{@end} name="huint"></td>
         </tr>
         <tr>
           <th class="left-heading">{#Message}</th>
-          <td><input type=text value="{$servMgr.rootMsg}" name=pcmsg></td>
+          <td><input type="text" value="{$servMgr.rootMsg}" name="pcmsg"></td>
         </tr>
         <tr>
           <th class="left-heading" width="50%">{#Get Update}</th>
-          <td><input type=checkbox value=1 name=getupd></td>
+          <td><input type="checkbox" value="1" name="getupd"></td>
         </tr>
         <tr>
           <th class="left-heading" width="50%">{#Send}</th>
-          <td><input type=checkbox value=1 name=brroot></td>
+          <td><input type="checkbox" value="1" name="brroot"></td>
         </tr>
         <tr>
           <th class="left-heading">{#Broadcast IDs}</th>
@@ -247,9 +247,9 @@
     </div>
 
     <div class="column">
-      <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle>
-          <td colspan=2><b>{#Network}</b></td>
+      <table class="table-panel" width="100%" align="center" border="0">
+        <tr align="middle">
+          <td colspan="2"><b>{#Network}</b></td>
         </tr>
         <tr>
           <th class="left-heading">{#YP Address}</th>
@@ -263,56 +263,56 @@
               <option data-addr="root.p-at.net" value="P@">P@</option>
               <option data-addr="ypv6.pecastation.org" value="YPv6">YPv6</option>
             </select>
-            <input id="yp" class="fill-parent" value="{$servMgr.ypAddress}" name=yp>
+            <input id="yp" class="fill-parent" value="{$servMgr.ypAddress}" name="yp">
           </td>
         </tr>
         <tr>
           <th class="left-heading">{#Max. Output (Kbits/s)}</th>
-          <td><input size=5 value="{$servMgr.maxBitrateOut}" name=maxup></td>
+          <td><input size="5" value="{$servMgr.maxBitrateOut}" name="maxup"></td>
         </tr>
         <tr>
           <th class="left-heading" width="50%">{#Max. Relays Per Channel}</th>
-          <td><input size=5 value="{$chanMgr.maxRelaysPerChannel}" name=maxrelaypc></td>
+          <td><input size="5" value="{$chanMgr.maxRelaysPerChannel}" name="maxrelaypc"></td>
         </tr>
         <tr>
           <th class="left-heading" width="50%">{#Max. Controls In}</th>
-          <td><input size=5 value="{$servMgr.maxControlsIn}" name=maxcin></td>
+          <td><input size="5" value="{$servMgr.maxControlsIn}" name="maxcin"></td>
         </tr>
         <tr>
           <th class="left-heading">{#Max. Connections In} </th>
-          <td><input name=maxsin id="maxsin" value="{$servMgr.maxServIn}" size=5></td>
+          <td><input name="maxsin" id="maxsin" value="{$servMgr.maxServIn}" size="5"></td>
         </tr>
       </table>
 
-      <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle>
-          <td colspan=2><b>{#Security}</b></td>
+      <table class="table-panel" width="100%" align="center" border="0">
+        <tr align="middle">
+          <td colspan="2"><b>{#Security}</b></td>
         </tr>
         <tr>
           <th width="40%" class="left-heading">HTML</th>
-          <td class="checkbox-cell"><input type=checkbox {@if servMgr.allow.HTML1}checked{@end} value=1 name=allowHTML1>
+          <td class="checkbox-cell"><input type="checkbox" {@if servMgr.allow.HTML1}checked{@end} value="1" name="allowHTML1">
           </td>
         </tr>
         <tr>
           <th class="left-heading">{#Broadcasting}</th>
-          <td class="checkbox-cell"><input type=checkbox {@if servMgr.allow.broadcasting1}checked{@end} value=1 name=allowBroadcast1>
+          <td class="checkbox-cell"><input type="checkbox" {@if servMgr.allow.broadcasting1}checked{@end} value="1" name="allowBroadcast1">
           </td>
         </tr>
         <tr>
           <th class="left-heading">{#Network}</th>
-          <td class="checkbox-cell"><input type=checkbox {@if servMgr.allow.network1}checked{@end} value=1 name=allowNetwork1>
+          <td class="checkbox-cell"><input type="checkbox" {@if servMgr.allow.network1}checked{@end} value="1" name="allowNetwork1">
           </td>
         </tr>
         <tr>
           <th class="left-heading">{#Direct}</th>
-          <td class="checkbox-cell"><input type=checkbox {@if servMgr.allow.direct1}checked{@end} value=1 name=allowDirect1>
+          <td class="checkbox-cell"><input type="checkbox" {@if servMgr.allow.direct1}checked{@end} value="1" name="allowDirect1">
           </td>
         </tr>
       </table>
       
-      <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle>
-          <td colspan=2><b>{#Log}</b></td>
+      <table class="table-panel" width="100%" align="center" border="0">
+        <tr align="middle">
+          <td colspan="2"><b>{#Log}</b></td>
         </tr>
         <tr>
           <th class="left-heading" width="30%">{#Level}</th>
@@ -330,13 +330,13 @@
         </tr>
       </table>
 
-      <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle>
-          <td colspan=2><b>{#Channel Feeds}</b></td>
+      <table class="table-panel" width="100%" align="center" border="0">
+        <tr align="middle">
+          <td colspan="2"><b>{#Channel Feeds}</b></td>
         </tr>
         {@foreach servMgr.channelDirectory.feeds}
         <tr>
-          <td width=110>
+          <td width="110">
             <select class="channel-feed-select fill-parent" data-index="{$loop.index}">
               <option value="None">{#None}</option>
               <option value="Custom">{#Custom...}</option>
@@ -350,13 +350,13 @@
           </td>
           <td>
             <input class="channel-feed-url" data-index="{$loop.index}"
-                size=15 value="{$this.url}" name="channel_feed_url" style="width: 100%" placeholder="{#URL of index.txt}">
+                size="15" value="{$this.url}" name="channel_feed_url" style="width: 100%" placeholder="{#URL of index.txt}">
           </td>
         </tr>
         {@end}
         <!-- 新しい項目入力用 -->
         <tr>
-          <td width=110>
+          <td width="110">
             <select class="channel-feed-select fill-parent" data-index="-1">
               <option value="None">{#None}</option>
               <option value="Custom">{#Custom...}</option>
@@ -370,13 +370,13 @@
           </td>
           <td>
             <input class="channel-feed-url" data-index="-1"
-                size=15 value="" name="channel_feed_url" style="width: 100%" placeholder="{#URL of index.txt}">
+                size="15" value="" name="channel_feed_url" style="width: 100%" placeholder="{#URL of index.txt}">
           </td>
         </tr>
       </table>
-      <table class="table-panel" width="100%" align=center border=0>
-        <tr align=middle>
-          <td colspan=2><b>{#Transcoding}</b></td>
+      <table class="table-panel" width="100%" align="center" border="0">
+        <tr align="middle">
+          <td colspan="2"><b>{#Transcoding}</b></td>
         </tr>
 
         <tr>

@@ -911,6 +911,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                     // ンネルをリレー・視聴している servent であると設
                     // 定する。
                     chanID = chanInfo.id;
+                    setStatus(S_CONNECTED);
                 }
             }
             LOG_DEBUG("chanReady = %d; reason = %s", chanReady, denialReasonToName(reason));
@@ -1615,6 +1616,7 @@ void Servent::processStream(ChanInfo &chanInfo)
         return;
 
     ASSERT(chanID.isSet());
+    ASSERT(this->status == S_CONNECTED);
 
     if (chanInfo.id.isSet())
     {
@@ -1686,8 +1688,6 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
         auto ch = chanMgr->findChannelByID(chanID);
         if (!ch)
             throw StreamException("Channel not found");
-
-        setStatus(S_CONNECTED);
 
         LOG_DEBUG("Starting Raw stream of %s at %d", ch->info.name.cstr(), streamPos);
 
@@ -1774,8 +1774,6 @@ void Servent::sendRawMetaChannel(int interval)
             throw StreamException("Channel not found");
 
         sock->setWriteTimeout(DIRECT_WRITE_TIMEOUT*1000);
-
-        setStatus(S_CONNECTED);
 
         LOG_DEBUG("Starting Raw Meta stream of %s (metaint: %d) at %d", ch->info.name.cstr(), interval, streamPos);
 
@@ -1900,8 +1898,6 @@ void Servent::sendPCPChannel()
     try
     {
         LOG_DEBUG("Starting PCP stream of channel at %d", streamPos);
-
-        setStatus(S_CONNECTED);
 
         atom.writeParent(PCP_CHAN, 3 + ((sendHeader)?1:0));
             atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);
