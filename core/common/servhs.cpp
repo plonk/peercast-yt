@@ -531,6 +531,7 @@ void Servent::handshakeGET(HTTP &http)
                 }
             }
         }
+#if 0
     }else if (strcmp("/speedtest", fn) == 0)
     {
         //getSpeedTest();
@@ -563,6 +564,7 @@ void Servent::handshakeGET(HTTP &http)
         auto t = sys->getDTime();
         stream.close();
         LOG_INFO("[Speedtest] client %s downloaded at %.0f bps", sock->host.ip.str().c_str(), (sent * 8) / (t - startTime));
+#endif
     }else
     {
         // GET マッチなし
@@ -620,6 +622,7 @@ void Servent::handshakePOST(HTTP &http)
         auto req = http.getRequest();
         LOG_DEBUG("Admin (POST)");
         handshakeCMD(http, req.body);
+#if 0
     }else if (path == "/speedtest")
     {
         // postSpeedtest();
@@ -672,6 +675,7 @@ void Servent::handshakePOST(HTTP &http)
             auto res = HTTPResponse::ok({{"Content-Type", "text/plain"}}, str::format("%.0f bps", bps));
             http.send(res);
         }
+#endif
     }else
     {
         http.readHeaders();

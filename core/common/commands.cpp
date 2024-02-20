@@ -43,7 +43,7 @@ s_commands = {
               { "pid", Commands::pid },
               { "expr", Commands::expr },
               { "shutdown", Commands::shutdown },
-              { "speedtest", Commands::speedtest },
+              //{ "speedtest", Commands::speedtest },
               { "sleep", Commands::sleep },
               { "date", Commands::date },
               { "flag", Commands::flag },
