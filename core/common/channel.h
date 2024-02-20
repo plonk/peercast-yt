@@ -237,8 +237,8 @@ public:
 
     void         newPacket(ChanPacket &);
 
-    int          localListeners();
-    int          localRelays();
+    int          localListeners(bool includePrivate = true);
+    int          localRelays(bool includePrivate = true);
 
     int          totalListeners();
     int          totalRelays();

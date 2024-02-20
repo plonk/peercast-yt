@@ -2,6 +2,7 @@
 #include "peercast.h"
 #include "channel.h"
 #include "servmgr.h"
+#include "yplist.h"
 
 // ---------------------------------
 // globals
@@ -19,6 +20,7 @@ void APICALL PeercastInstance::init()
     sys = createSys();
     servMgr = new ServMgr();
     chanMgr = new ChanMgr();
+    g_ypList = new YPList();
 
     if (peercastApp->getIniFilename())
         servMgr->loadSettings(peercastApp->getIniFilename());

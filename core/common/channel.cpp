@@ -231,7 +231,7 @@ bool    Channel::checkIdle()
 // チャンネルごとのリレー数制限に達しているか。
 bool    Channel::isFull()
 {
-    return chanMgr->maxRelaysPerChannel ? localRelays() >= chanMgr->maxRelaysPerChannel : false;
+    return chanMgr->maxRelaysPerChannel ? localRelays(/*includePrivate*/ false) >= chanMgr->maxRelaysPerChannel : false;
 }
 
 // -----------------------------------
@@ -249,15 +249,15 @@ bool    Channel::canAddRelay()
 
 
 // -----------------------------------
-int Channel::localRelays()
+int Channel::localRelays(bool includePrivate)
 {
-    return servMgr->numStreams(info.id, Servent::T_RELAY, true);
+    return servMgr->numStreams(info.id, Servent::T_RELAY, includePrivate);
 }
 
 // -----------------------------------
-int Channel::localListeners()
+int Channel::localListeners(bool includePrivate)
 {
-    return servMgr->numStreams(info.id, Servent::T_DIRECT, true);
+    return servMgr->numStreams(info.id, Servent::T_DIRECT, includePrivate);
 }
 
 // -----------------------------------
