@@ -30,6 +30,7 @@
 #include "jrpc.h"
 #include "regexp.h"
 #include "uptest.h"
+#include "yplist.h"
 
 #include <assert.h>
 
@@ -1375,10 +1376,14 @@ bool GenericScope::writeVariable(amf0::Value& out, const String& varName)
 }
 
 RootObjectScope::RootObjectScope()
-    : m_objects({{"servMgr" , servMgr->getState()},
-                 {"chanMgr" , chanMgr->getState()},
-                 {"stats"   , stats.getState()},
-                 {"notificationBuffer" , g_notificationBuffer.getState()},
-                 {"sys"     , sys->getState()}})
+    : m_objects(
+        {
+            {"servMgr" , servMgr->getState()},
+            {"chanMgr" , chanMgr->getState()},
+            {"stats"   , stats.getState()},
+            {"notificationBuffer" , g_notificationBuffer.getState()},
+            {"sys"     , sys->getState()},
+            {"ypList"  , g_ypList->getState()},
+        })
 {
 }

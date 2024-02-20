@@ -745,6 +745,7 @@ json JrpcApi::getStatus(json::array_t)
 
 #include "stats.h"
 #include "notif.h"
+#include "yplist.h"
 
 json JrpcApi::getState(json::array_t args)
 {
@@ -763,6 +764,8 @@ json JrpcApi::getState(json::array_t args)
             json[name] = json::parse(g_notificationBuffer.getState().inspect());
         else if (name == "sys")
             json[name] = json::parse(sys->getState().inspect());
+        else if (name == "ypList")
+            json[name] = json::parse(g_ypList->getState().inspect());
         else
             throw invalid_params("Unknown object name: " + name);
     }
