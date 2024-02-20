@@ -27,6 +27,7 @@ public:
     static void speedtest(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
     static void pwd(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
     static void ssl(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
+    static void flag(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel);
 
     // typedef termination_point std::function<bool()>
     // stdin
