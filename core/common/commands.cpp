@@ -46,6 +46,7 @@ s_commands = {
               { "speedtest", Commands::speedtest },
               { "sleep", Commands::sleep },
               { "date", Commands::date },
+              { "flag", Commands::flag },
 };
 
 void Commands::system(Stream& stream, const std::string& _cmdline, std::function<bool()> cancel)
@@ -706,5 +707,59 @@ void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::f
         sock->close();
     } catch(GeneralException& e) {
         stdout.writeLineF("Error: %s", e.what());
+    }
+}
+
+void Commands::flag(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
+{
+    std::map<std::string, bool> options;
+    std::vector<std::string> positionals;
+    std::tie(options, positionals) = parse_options(argv, { "--help" });
+
+    if (options.count("--help"))
+    {
+    ShowUsageAndReturn:
+        stream.writeLine("Usage: flag ls");
+        stream.writeLine("       flag set FLAG <true|false|default>");
+        stream.writeLine("Manipulate flags.");
+        return;
+    }
+
+    if (positionals.size() == 1 && positionals[0] == "ls") {
+        servMgr->flags.forEachFlag([&](Flag& f)
+                                   {
+                                       stream.writeLineF("%-31s %s%s",
+                                                         f.name.c_str(),
+                                                         (f.currentValue) ? "true" : "false",
+                                                         (f.currentValue == f.defaultValue) ? " (default)" : "");
+                                   });
+    } else if (positionals.size() == 3 && positionals[0] == "set") {
+        const auto flagName = positionals[1];
+        const auto newValue = positionals[2];
+
+        try {
+            Flag& f = servMgr->flags.get(flagName); // may throw std::out_of_range
+
+            if (newValue == "true") {
+                f.currentValue = true;
+            } else if (newValue == "false") {
+                f.currentValue = false;
+            } else if (newValue == "default") {
+                f.currentValue = f.defaultValue;
+            } else {
+                stream.writeLineF("Invalid value: %s", newValue.c_str());
+                return;
+            }
+            stream.writeLineF("%-31s %s%s",
+                              f.name.c_str(),
+                              (f.currentValue) ? "true" : "false",
+                              (f.currentValue == f.defaultValue) ? " (default)" : "");
+
+        } catch (std::out_of_range &e) {
+            stream.writeLineF("Flag not found: %s", flagName.c_str());
+            return;
+        }
+    } else {
+        goto ShowUsageAndReturn;
     }
 }
