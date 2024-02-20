@@ -1383,6 +1383,7 @@ RootObjectScope::RootObjectScope()
             {"stats"   , stats.getState()},
             {"notificationBuffer" , g_notificationBuffer.getState()},
             {"sys"     , sys->getState()},
+            {"app"     , peercastApp->getState()},
             {"ypList"  , g_ypList->getState()},
         })
 {

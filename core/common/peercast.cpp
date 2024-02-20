@@ -2,6 +2,8 @@
 #include "peercast.h"
 #include "channel.h"
 #include "servmgr.h"
+#include "str.h"
+#include "sslclientsocket.h"
 #include "yplist.h"
 
 // ---------------------------------
@@ -24,6 +26,9 @@ void APICALL PeercastInstance::init()
 
     if (peercastApp->getIniFilename())
         servMgr->loadSettings(peercastApp->getIniFilename());
+
+    SslClientSocket::configureServer(str::STR(peercastApp->getSettingsDirPath(), "/server.crt"),
+                                     str::STR(peercastApp->getSettingsDirPath(), "/server.key"));
 
     servMgr->loadTokenList();
 
@@ -306,3 +311,15 @@ void notifyMessage(ServMgr::NOTIFY_TYPE type, const std::string& message)
 
 } // namespace peercast
 
+// --------------------------------------------------
+amf0::Value PeercastApplication::getState()
+{
+    return amf0::Value::object({
+            { "path", getPath() },
+            { "settingsDirPath", getSettingsDirPath() },
+            { "iniFilename", getIniFilename() },
+            { "tokenListFilename", getTokenListFilename() },
+            { "cacheDirPath", getCacheDirPath() },
+            { "stateDirPath", getStateDirPath() },
+        });
+}

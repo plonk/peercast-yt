@@ -250,6 +250,20 @@ void SslClientSocket::write(const void *p, int l)
     }
 }
 
+static std::string s_serverCrtPath = "server.crt";
+static std::string s_serverKeyPath = "server.key";
+
+void SslClientSocket::configureServer(const std::string& certificate, const std::string& privatekey)
+{
+    s_serverCrtPath = certificate;
+    s_serverKeyPath = privatekey;
+}
+
+std::pair<std::string,std::string> SslClientSocket::getServerConfiguration()
+{
+    return { s_serverCrtPath, s_serverKeyPath };
+}
+
 std::shared_ptr<SslClientSocket> SslClientSocket::upgrade(std::shared_ptr<ClientSocket> rawsock)
 {
     SSL_CTX* ctx = SSL_CTX_new(SSLv23_server_method());
@@ -257,11 +271,11 @@ std::shared_ptr<SslClientSocket> SslClientSocket::upgrade(std::shared_ptr<Client
 
     SSL_CTX_set_ecdh_auto(ctx, 1);
 
-    if (SSL_CTX_use_certificate_file(ctx, "server.crt", SSL_FILETYPE_PEM) <= 0) {
+    if (SSL_CTX_use_certificate_file(ctx, s_serverCrtPath.c_str(), SSL_FILETYPE_PEM) <= 0) {
         throw GeneralException("Certificate file");
     }
 
-    if (SSL_CTX_use_PrivateKey_file(ctx, "server.key", SSL_FILETYPE_PEM) <= 0) {
+    if (SSL_CTX_use_PrivateKey_file(ctx, s_serverKeyPath.c_str(), SSL_FILETYPE_PEM) <= 0) {
         throw GeneralException("Private key file");
     }
 
