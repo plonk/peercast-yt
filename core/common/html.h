@@ -41,10 +41,10 @@ public:
     HTML(const char *, Stream &);
 
     // HTML ヘルパー
-    void    startNode(const char *, const char * = NULL);
+    void    startNode(const char *, const char * = nullptr);
     void    addLink(const char *, const char *, bool = false);
-    void    startTag(const char *, const char * = NULL, ...) __attribute__ ((format (printf, 3, 4)));
-    void    startTagEnd(const char *, const char * = NULL, ...) __attribute__ ((format (printf, 3, 4)));
+    void    startTag(const char *, const char * = nullptr, ...) __attribute__ ((format (printf, 3, 4)));
+    void    startTagEnd(const char *, const char * = nullptr, ...) __attribute__ ((format (printf, 3, 4)));
     void    startSingleTagEnd(const char *, ...) __attribute__ ((format (printf, 2, 3)));
     void    startTableRow(int);
     void    end();

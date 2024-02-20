@@ -100,7 +100,7 @@ bool    Servent::isFiltered(int f)
 // 更されない。
 bool Servent::canStream(std::shared_ptr<Channel> ch, Servent::StreamRequestDenialReason *reason)
 {
-    if (ch==NULL)
+    if (ch==nullptr)
     {
         *reason = StreamRequestDenialReason::Other;
         return false;
@@ -156,8 +156,8 @@ bool Servent::canStream(std::shared_ptr<Channel> ch, Servent::StreamRequestDenia
 // -----------------------------------
 Servent::Servent(int index)
     : serventIndex(index)
-    , sock(NULL)
-    , next(NULL)
+    , sock(nullptr)
+    , next(nullptr)
 {
     reset();
 }
@@ -179,7 +179,7 @@ void    Servent::kill()
     if (pcpStream)
     {
         PCPStream *pcp = pcpStream;
-        pcpStream = NULL;
+        pcpStream = nullptr;
         pcp->kill();
         delete pcp;
     }
@@ -187,13 +187,13 @@ void    Servent::kill()
     if (sock)
     {
         sock->close();
-        sock = NULL;
+        sock = nullptr;
     }
 
     if (pushSock)
     {
         pushSock->close();
-        pushSock = NULL;
+        pushSock = nullptr;
     }
 
     if (type != T_SERVER)
@@ -223,7 +223,7 @@ void Servent::reset()
 
     servPort = 0;
 
-    pcpStream = NULL;
+    pcpStream = nullptr;
 
     networkID.clear();
 
@@ -232,7 +232,7 @@ void Servent::reset()
     outputProtocol = ChanInfo::SP_UNKNOWN;
 
     agent.clear();
-    sock = NULL;
+    sock = nullptr;
     allow = ALLOW_ALL;
     syncPos = 0;
     addMetadata = false;
@@ -243,7 +243,7 @@ void Servent::reset()
     loginMount.clear();
 
     priorityConnect = false;
-    pushSock = NULL;
+    pushSock = nullptr;
     sendHeader = true;
 
     status = S_NONE;
@@ -263,7 +263,7 @@ bool Servent::sendPacket(ChanPacket &pack, const GnuID &cid, const GnuID &sid, c
             && (isConnected())
             && (!cid.isSet() || chanID.isSame(cid))
             && (!sid.isSet() || !sid.isSame(remoteID))
-            && (pcpStream != NULL)
+            && (pcpStream != nullptr)
         )
     {
         return pcpStream->sendPacket(pack, did);
@@ -911,6 +911,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
                     // ンネルをリレー・視聴している servent であると設
                     // 定する。
                     chanID = chanInfo.id;
+                    setStatus(S_CONNECTED);
                 }
             }
             LOG_DEBUG("chanReady = %d; reason = %s", chanReady, denialReasonToName(reason));
@@ -944,7 +945,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 
                 // リレー自動管理。
                 std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
-                for (Servent* s = servMgr->servents; s != NULL; s = s->next)
+                for (Servent* s = servMgr->servents; s != nullptr; s = s->next)
                 {
                     if (s == this) continue;
 
@@ -952,6 +953,7 @@ bool Servent::handshakeStream(ChanInfo &chanInfo)
 
                     if (s->type == Servent::T_RELAY &&
                         s->chanID.isSame(chanInfo.id) &&
+                        !s->isPrivate() &&
                         hit &&
                         Servent::isTerminationCandidate(hit.get()))
                     {
@@ -1261,8 +1263,8 @@ void Servent::processIncomingPCP(bool suggestOthers)
 
     handshakeIncomingPCP(atom, rhost, remoteID, agent);
 
-    bool alreadyConnected = (servMgr->findConnection(Servent::T_COUT, remoteID)!=NULL) ||
-                            (servMgr->findConnection(Servent::T_CIN,  remoteID)!=NULL);
+    bool alreadyConnected = (servMgr->findConnection(Servent::T_COUT, remoteID)!=nullptr) ||
+                            (servMgr->findConnection(Servent::T_CIN,  remoteID)!=nullptr);
     bool unavailable      = servMgr->controlInFull();
     bool offair           = !servMgr->isRoot && !chanMgr->isBroadcasting();
 
@@ -1433,7 +1435,7 @@ int Servent::outgoingProc(ThreadInfo *thread)
                 if (sv->pushSock)
                 {
                     sv->sock = sv->pushSock;
-                    sv->pushSock = NULL;
+                    sv->pushSock = nullptr;
                     bestHit.host = sv->sock->host;
                     break;
                 }
@@ -1552,7 +1554,7 @@ int Servent::outgoingProc(ThreadInfo *thread)
                 if (sv->sock)
                 {
                     sv->sock->close();
-                    sv->sock = NULL;
+                    sv->sock = nullptr;
                 }
             }catch (StreamException &) {}
 
@@ -1615,6 +1617,7 @@ void Servent::processStream(ChanInfo &chanInfo)
         return;
 
     ASSERT(chanID.isSet());
+    ASSERT(this->status == S_CONNECTED);
 
     if (chanInfo.id.isSet())
     {
@@ -1686,8 +1689,6 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
         auto ch = chanMgr->findChannelByID(chanID);
         if (!ch)
             throw StreamException("Channel not found");
-
-        setStatus(S_CONNECTED);
 
         LOG_DEBUG("Starting Raw stream of %s at %d", ch->info.name.cstr(), streamPos);
 
@@ -1774,8 +1775,6 @@ void Servent::sendRawMetaChannel(int interval)
             throw StreamException("Channel not found");
 
         sock->setWriteTimeout(DIRECT_WRITE_TIMEOUT*1000);
-
-        setStatus(S_CONNECTED);
 
         LOG_DEBUG("Starting Raw Meta stream of %s (metaint: %d) at %d", ch->info.name.cstr(), interval, streamPos);
 
@@ -1900,8 +1899,6 @@ void Servent::sendPCPChannel()
     try
     {
         LOG_DEBUG("Starting PCP stream of channel at %d", streamPos);
-
-        setStatus(S_CONNECTED);
 
         atom.writeParent(PCP_CHAN, 3 + ((sendHeader)?1:0));
             atom.writeBytes(PCP_CHAN_ID, chanID.id, 16);

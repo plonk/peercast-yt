@@ -141,6 +141,7 @@ public:
     {
         return path;
     }
+    virtual std::string getCurrentWorkingDirectory() = 0;
 
     unsigned int idleSleepTime;
 

@@ -254,7 +254,7 @@ void HTML::startTag(const char *tag, const char *fmt, ...)
 
         va_end(ap);
     }else{
-        startNode(tag, NULL);
+        startNode(tag, nullptr);
     }
 }
 
@@ -272,7 +272,7 @@ void HTML::startTagEnd(const char *tag, const char *fmt, ...)
 
         va_end(ap);
     }else{
-        startNode(tag, NULL);
+        startNode(tag, nullptr);
     }
     end();
 }

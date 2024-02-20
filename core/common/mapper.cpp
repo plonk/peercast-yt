@@ -66,7 +66,7 @@ string FileSystemMapper::realPath(const string& path)
 {
     char resolvedPath[4096];
     char* ret = _fullpath(resolvedPath, path.c_str(), 4096);
-    if (ret == NULL)
+    if (ret == nullptr)
     {
         LOG_ERROR("_fullpath: Failed to resolve `%s`", path.c_str());
         return "";

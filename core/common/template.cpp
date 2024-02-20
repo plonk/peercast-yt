@@ -30,6 +30,7 @@
 #include "jrpc.h"
 #include "regexp.h"
 #include "uptest.h"
+#include "yplist.h"
 
 #include <assert.h>
 
@@ -957,7 +958,7 @@ void    Template::readIf(Stream &in, Stream *outp)
     {
         if (cmd == TMPL_ELSE)
         {
-            cmd = readTemplate(in, hadActive ? NULL : outp);
+            cmd = readTemplate(in, hadActive ? nullptr : outp);
         }else if (cmd == TMPL_IF || cmd == TMPL_ELSIF)
         {
             std::string cond = readCondition(in).c_str();
@@ -967,7 +968,7 @@ void    Template::readIf(Stream &in, Stream *outp)
                 cmd = readTemplate(in, outp);
             }else
             {
-                cmd = readTemplate(in, NULL);
+                cmd = readTemplate(in, nullptr);
             }
         }
     }
@@ -1017,7 +1018,7 @@ void    Template::readLoop(Stream &in, Stream *outp)
         }
     }else
     {
-        readTemplate(in, NULL);
+        readTemplate(in, nullptr);
     }
 }
 
@@ -1037,7 +1038,7 @@ void    Template::readForeach(Stream &in, Stream *outp)
 
     if (coll.size() == 0)
     {
-        readTemplate(in, NULL);
+        readTemplate(in, nullptr);
     }else
     {
         GenericScope loopScope;
@@ -1233,13 +1234,13 @@ void    Template::readVariableRaw(Stream &in, Stream *outp)
 
 // --------------------------------------
 // ストリーム in の現在の位置から 1 ブロック分のテンプレートを処理し、
-// outp がNULL でなければ *outp に出力する。EOF あるいは{@end} に当たっ
+// outp がnullptr でなければ *outp に出力する。EOF あるいは{@end} に当たっ
 // た場合は TMPL_END を返し、{@else} に当たった場合は TMPL_ELSE、
 // {@elsif ...} に当たった場合は TMPL_ELSIF を返す(条件式を読み込む前
 // に停止する)。
 int Template::readTemplate(Stream &in, Stream *outp)
 {
-    Stream *p = inSelectedFragment() ? outp : NULL;
+    Stream *p = inSelectedFragment() ? outp : nullptr;
 
     while (!in.eof())
     {
@@ -1375,10 +1376,15 @@ bool GenericScope::writeVariable(amf0::Value& out, const String& varName)
 }
 
 RootObjectScope::RootObjectScope()
-    : m_objects({{"servMgr" , servMgr->getState()},
-                 {"chanMgr" , chanMgr->getState()},
-                 {"stats"   , stats.getState()},
-                 {"notificationBuffer" , g_notificationBuffer.getState()},
-                 {"sys"     , sys->getState()}})
+    : m_objects(
+        {
+            {"servMgr" , servMgr->getState()},
+            {"chanMgr" , chanMgr->getState()},
+            {"stats"   , stats.getState()},
+            {"notificationBuffer" , g_notificationBuffer.getState()},
+            {"sys"     , sys->getState()},
+            {"app"     , peercastApp->getState()},
+            {"ypList"  , g_ypList->getState()},
+        })
 {
 }

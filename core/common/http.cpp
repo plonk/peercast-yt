@@ -119,7 +119,7 @@ bool    HTTP::nextHeader()
         return true;
     }else
     {
-        arg = NULL;
+        arg = nullptr;
         m_headersRead = true;
         return false;
     }
@@ -128,7 +128,7 @@ bool    HTTP::nextHeader()
 //-----------------------------------------
 bool    HTTP::isHeader(const char *hs)
 {
-    return stristr(cmdLine, hs) != NULL;
+    return stristr(cmdLine, hs) != nullptr;
 }
 
 //-----------------------------------------
@@ -355,6 +355,11 @@ HTTPResponse HTTP::send(const HTTPRequest& request)
         stream->writeString(request.body);
     }
 
+    return getResponse();
+}
+
+HTTPResponse HTTP::getResponse()
+{
     // receive response
     int status = readResponse();
     readHeaders();

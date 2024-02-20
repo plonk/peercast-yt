@@ -21,13 +21,14 @@
 
 #include "channel.h"
 #include <memory>
+#include "subprog.h"
 
 // ------------------------------------------------
 class URLSource : public ChannelSource
 {
 public:
     URLSource(const char *url)
-    :inputStream(NULL)
+    : inputStream(nullptr)
     {
         baseurl.set(url);
     }
@@ -38,6 +39,8 @@ public:
     int             getSourceRateAvg() override;
 
     static ChanInfo::PROTOCOL getSourceProtocol(char*& fileName);
+
+    std::shared_ptr<Subprogram> m_subprogram;
 
     std::shared_ptr<Stream> inputStream;
     ::String        baseurl;

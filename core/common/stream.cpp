@@ -109,7 +109,7 @@ void FileStream::close()
     if (file)
     {
         fclose(file);
-        file = NULL;
+        file = nullptr;
     }
 }
 

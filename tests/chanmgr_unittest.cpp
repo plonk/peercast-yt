@@ -66,7 +66,7 @@ TEST_F(ChanMgrFixture, createChannel)
 
     ASSERT_EQ(nullptr, x->channel);
 
-    auto c = x->createChannel(info, NULL);
+    auto c = x->createChannel(info);
 
     ASSERT_TRUE(c != nullptr); // ASSERT_TRUE(c) と書くとエラーになるコンパイラがある。
     ASSERT_EQ(c, x->channel);

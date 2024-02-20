@@ -98,7 +98,7 @@ class PeercastSource : public ChannelSource
 {
 public:
 
-    PeercastSource() : m_channel(NULL) {}
+    PeercastSource() : m_channel(nullptr) {}
     void    stream(std::shared_ptr<Channel>) override;
     int     getSourceRate() override;
     int     getSourceRateAvg() override;
@@ -237,8 +237,8 @@ public:
 
     void         newPacket(ChanPacket &);
 
-    int          localListeners();
-    int          localRelays();
+    int          localListeners(bool includePrivate = true);
+    int          localRelays(bool includePrivate = true);
 
     int          totalListeners();
     int          totalRelays();
@@ -289,6 +289,8 @@ public:
     double              startTime;
 
     IP_VERSION          ipVersion;
+
+    std::string         rootHost;
 
     mutable std::recursive_mutex lock;
 

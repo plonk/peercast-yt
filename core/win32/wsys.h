@@ -38,7 +38,7 @@ public:
     unsigned int    rnd() override { return rndGen.next(); }
     void            getURL(const char *) override;
     void            exit() override;
-    bool            hasGUI() override { return mainWindow!=NULL; }
+    bool            hasGUI() override { return mainWindow!=nullptr; }
     void            callLocalURL(const char *str, int port) override;
     void            executeFile(const char *) override;
 
@@ -56,6 +56,7 @@ public:
     void rename(const std::string& oldpath, const std::string& newpath) override;
 
     std::string fromFilenameEncoding(const std::string& path) override;
+    std::string getCurrentWorkingDirectory() override;
 
     HWND    mainWindow;
     peercast::Random rndGen;

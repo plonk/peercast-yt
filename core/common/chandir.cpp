@@ -396,6 +396,16 @@ std::string ChannelDirectory::findTracker(const GnuID& id) const
     return "";
 }
 
+std::shared_ptr<ChannelEntry> ChannelDirectory::findEntry(const GnuID& id) const
+{
+    for (const ChannelEntry& entry : m_channels)
+    {
+        if (entry.id.isSame(id))
+            return std::make_shared<ChannelEntry>(entry);
+    }
+    return nullptr;
+}
+
 std::string ChannelFeed::statusToString(ChannelFeed::Status s)
 {
     switch (s) {

@@ -1,5 +1,5 @@
-#ifndef BBS_H
-#define BBS_H
+#ifndef _BBS_H
+#define _BBS_H
 
 #include <memory>
 #include <string>

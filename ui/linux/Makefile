@@ -92,11 +92,15 @@ $(DISTARCHIVE): $(TARGET) $(HTML) $(PUBLIC) $(ASSETS) $(RTMPSERVER)
 
 install:
 	mkdir -p $(bindir)
-	cp -R $(TARGET) $(RTMPSERVER) $(bindir)
+	install -s $(TARGET) $(RTMPSERVER) $(bindir)
 	mkdir -p $(docdir)
 	cp -R ../../licenses ../../core/LICENSE $(docdir)
 	mkdir -p $(sharedir)
 	cp -R $(HTML) $(PUBLIC) $(ASSETS) $(CGIBIN) $(sharedir)
+	mkdir -p $(PREFIX)/share/applications/
+	cp peercast.desktop $(PREFIX)/share/applications/
+	mkdir -p $(PREFIX)/share/pixmaps/
+	cp peercast.png $(PREFIX)/share/pixmaps/
 
 $(APPIMAGE): $(APPIMAGETOOL) $(LINUXDEPLOY) $(TARGET) $(RTMPSERVER) peercast.desktop peercast.png
 	rm -rf AppDir/

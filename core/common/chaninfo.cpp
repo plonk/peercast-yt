@@ -99,6 +99,7 @@ const char *ChanInfo::getProtocolStr(PROTOCOL t)
         case SP_PCP: return "PCP";
         case SP_WMHTTP: return "WMHTTP";
         case SP_RTMP: return "RTMP";
+        case SP_PIPE: return "PIPE";
         default: return "UNKNOWN";
     }
 }

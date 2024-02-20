@@ -127,6 +127,7 @@ public:
     std::vector<ChannelEntry> channels() const;
 
     std::string findTracker(const GnuID& id) const;
+    std::shared_ptr<ChannelEntry> findEntry(const GnuID& id) const;
 
     amf0::Value getState() override;
 

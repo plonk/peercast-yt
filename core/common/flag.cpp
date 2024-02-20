@@ -47,8 +47,8 @@ Flag& FlagRegistory::get(const std::string& name)
 
 void FlagRegistory::forEachFlag(std::function<void(Flag&)> func)
 {
-    for (auto& flag : m_flags) {
-        func(flag);
+    for (auto pair : m_indices) {
+        func(m_flags[pair.second]);
     }
 }
 

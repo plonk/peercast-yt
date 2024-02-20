@@ -60,7 +60,7 @@ void WSys::callLocalURL(const char *str,int port)
 {
     char cmd[512];
     snprintf(cmd, sizeof(cmd), "http://localhost:%d/%s", port, str);
-    ShellExecuteA(mainWindow, NULL, cmd, NULL, NULL, SW_SHOWNORMAL);
+    ShellExecuteA(mainWindow, nullptr, cmd, nullptr, nullptr, SW_SHOWNORMAL);
 }
 
 // ---------------------------------
@@ -68,7 +68,7 @@ void WSys::getURL(const char *url)
 {
     if (mainWindow)
         if (Sys::strnicmp(url,"http://",7) || Sys::strnicmp(url,"mailto:",7)) // XXX: ==0 が抜けてる？
-            ShellExecuteA(mainWindow, NULL, url, NULL, NULL, SW_SHOWNORMAL);
+            ShellExecuteA(mainWindow, nullptr, url, nullptr, nullptr, SW_SHOWNORMAL);
 }
 
 // ---------------------------------
@@ -83,7 +83,7 @@ void WSys::exit()
 // --------------------------------------------------
 void WSys::executeFile(const char *file)
 {
-    ShellExecuteA(NULL,"open",file,NULL,NULL,SW_SHOWNORMAL);
+    ShellExecuteA(nullptr, "open", file, nullptr, nullptr, SW_SHOWNORMAL);
 }
 
 // --------------------------------------------------
@@ -108,7 +108,7 @@ std::vector<std::string> WSys::getIPAddresses(const std::string& name)
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;
 
-    int err = getaddrinfo(name.c_str(), NULL, &hints, &result);
+    int err = getaddrinfo(name.c_str(), nullptr, &hints, &result);
     if (err) {
         throw GeneralException("getaddrinfo", err);
     }
@@ -153,7 +153,7 @@ bool WSys::getHostnameByAddress(const IP& ip, std::string& out)
                         sizeof(addr),
                         hbuf,
                         sizeof(hbuf),
-                        NULL,
+                        nullptr,
                         0,
                         NI_NAMEREQD)) {
             LOG_TRACE("getnameinfo: error code = %d (%s)", errcode, ip.str().c_str());
@@ -172,7 +172,7 @@ bool WSys::getHostnameByAddress(const IP& ip, std::string& out)
                         sizeof(addr),
                         hbuf,
                         sizeof(hbuf),
-                        NULL,
+                        nullptr,
                         0,
                         NI_NAMEREQD)) {
             LOG_TRACE("getnameinfo: error code = %d (%s)", errcode, ip.str().c_str());
@@ -190,7 +190,7 @@ bool WSys::getHostnameByAddress(const IP& ip, std::string& out)
 std::string WSys::getExecutablePath()
 {
     char path[1024];
-    if (GetModuleFileNameA(NULL, path, sizeof(path)) == 0) {
+    if (GetModuleFileNameA(nullptr, path, sizeof(path)) == 0) {
         throw GeneralException(str::format("%s: %lu", __func__, GetLastError()).c_str());
     }
     return path;
@@ -202,7 +202,7 @@ std::string WSys::realPath(const std::string& path)
 {
     char resolvedPath[4096];
     char* ret = _fullpath(resolvedPath, path.c_str(), 4096);
-    if (ret == NULL)
+    if (ret == nullptr)
     {
         throw GeneralException(str::format("_fullpath: Failed to resolve `%s`", path.c_str()).c_str());
     }
@@ -239,7 +239,7 @@ void WSys::rename(const std::string& oldpath, const std::string& newpath)
 
 std::string WSys::fromFilenameEncoding(const std::string& path)
 {
-    int count = MultiByteToWideChar(CP_ACP, 0, path.c_str(), -1, NULL, 0);
+    int count = MultiByteToWideChar(CP_ACP, 0, path.c_str(), -1, nullptr, 0);
     if (count == 0)
         new GeneralException("fromFilenameEncoding: MultiByteToWideChar pass 1");
 
@@ -249,15 +249,28 @@ std::string WSys::fromFilenameEncoding(const std::string& path)
     if (count == 0)
         new GeneralException("fromFilenameEncoding: MultiByteToWideChar pass 2");
 
-    count = WideCharToMultiByte(CP_UTF8, 0, wbuf, -1, NULL, 0, NULL, NULL);
+    count = WideCharToMultiByte(CP_UTF8, 0, wbuf, -1, nullptr, 0, nullptr, nullptr);
     if (count == 0)
         new GeneralException("fromFilenameEncoding: WideCharToMultiByte pass 1");
 
     char *buf = new char[count];
     Defer cb2([=](){ delete[] buf; });
-    count = WideCharToMultiByte(CP_UTF8, 0, wbuf, -1, buf, count, NULL, NULL);
+    count = WideCharToMultiByte(CP_UTF8, 0, wbuf, -1, buf, count, nullptr, nullptr);
     if (count == 0)
         new GeneralException("fromFilenameEncoding: WideCharToMultiByte pass 2");
 
+    return buf;
+}
+
+// ---------------------------------
+#include <direct.h>
+std::string WSys::getCurrentWorkingDirectory()
+{
+#define NTFS_PATH_MAX 32768
+    char buf[NTFS_PATH_MAX + 1] = "";
+
+    if (_getcwd(buf, NTFS_PATH_MAX + 1) == NULL) {
+        throw GeneralException("_getcwd failed");
+    }
     return buf;
 }

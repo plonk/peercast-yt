@@ -60,7 +60,7 @@ void ChanHit::init()
     rhost[0].init();
     rhost[1].init();
 
-    next = NULL;
+    next = nullptr;
 
     numListeners = 0;
     numRelays = 0;
@@ -349,7 +349,7 @@ std::shared_ptr<ChanHit> ChanHitList::addHit(ChanHit &h)
 
     // dont add our own hits
     if (servMgr->sessionID.isSame(h.sessionID))
-        return NULL;
+        return nullptr;
 
     lastHitTime = sys->getTime();
     h.time = lastHitTime;
@@ -399,7 +399,7 @@ std::shared_ptr<ChanHit> ChanHitList::addHit(ChanHit &h)
         return ch;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 // -----------------------------------

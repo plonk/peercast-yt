@@ -54,6 +54,8 @@ public:
 
     void rename(const std::string& oldpath, const std::string& newpath) override;
 
+    std::string getCurrentWorkingDirectory() override;
+
     peercast::Random rndGen;
 private:
 

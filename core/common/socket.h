@@ -49,6 +49,10 @@ public:
     virtual std::shared_ptr<ClientSocket> accept()          = 0;
     virtual Host            getLocalHost()     = 0;
 
+    virtual void setReuse(bool) { throw NotImplementedException(__func__); }
+    virtual void setNagle(bool) { throw NotImplementedException(__func__); }
+    virtual void setLinger(int) { throw NotImplementedException(__func__); }
+
     void    setReadTimeout(unsigned int t) override
     {
         readTimeout = t;

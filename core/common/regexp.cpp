@@ -38,3 +38,43 @@ bool Regexp::matches(const std::string& str) const
     std::smatch m;
     return std::regex_search(str, m, m_reg);
 }
+
+std::string Regexp::escape(const std::string& str)
+{
+    std::string result;
+    for (const auto c : str) {
+        switch (c) {
+        case '[':
+        case ']':
+        case '\\':
+        case '^':
+        case '$':
+        case '.':
+        case '|':
+        case '?':
+        case '*':
+        case '+':
+        case '(':
+        case ')':
+            result += '\\';
+            result += c;
+            break;
+        default:
+            result += c;
+            break;
+        }
+    }
+    return result;
+}
+
+std::vector<std::string> Regexp::grep(const Regexp& reg, const std::vector<std::string>& ss)
+{
+    std::vector<std::string> result;
+
+    for (const auto& s : ss) {
+        if (reg.matches(s)) {
+            result.push_back(s);
+        }
+    }
+    return result;
+}

@@ -41,7 +41,7 @@ GeneralException::GeneralException(const std::string& m, int e)
 
     for (int i = 0; i < addressCount; i++) {
         char* a = strchr(strings[i], '(');
-        char* b = NULL;
+        char* b = nullptr;
         if (a)
             b = strchr(a, '+');
         if (a && b) {
@@ -49,7 +49,7 @@ GeneralException::GeneralException(const std::string& m, int e)
             if (!fname.empty()) {
                 int status;
                 char *demangled;
-                demangled = abi::__cxa_demangle(fname.c_str(), NULL, NULL, &status);
+                demangled = abi::__cxa_demangle(fname.c_str(), nullptr, nullptr, &status);
                 if (status == 0) {
                     backtrace.push_back(std::string(strings[i], a + 1)
                                         + demangled

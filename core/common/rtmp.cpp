@@ -11,7 +11,7 @@ void RTMPClientStream::open(const std::string& url)
     if (RTMP_SetupURL(&m_rtmp, (char*)url.c_str()) == false)
         throw StreamException("RTMP_SetupURL");
 
-    if (RTMP_Connect(&m_rtmp, NULL) == false)
+    if (RTMP_Connect(&m_rtmp, nullptr) == false)
         throw StreamException("RTMP_Connect");
 }
 

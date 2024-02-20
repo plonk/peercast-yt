@@ -244,9 +244,9 @@ json JrpcApi::fetch(json::array_t params)
         // ソースに接続できなかった場合もチャンネルを同定したいの
         // で、事前にチャンネルIDを設定する。
         info.id = chanMgr->broadcastID;
-        info.id.encode(NULL, info.name, info.genre, info.bitrate);
+        info.id.encode(nullptr, info.name, info.genre, info.bitrate);
 
-        auto c = chanMgr->createChannel(info, NULL); // info, mount
+        auto c = chanMgr->createChannel(info);
         if (!c)
         {
             throw application_error(kUnknownError, "failed to create channel");
@@ -397,7 +397,7 @@ json JrpcApi::stopChannelConnection(json::array_t params)
     bool success = false;
 
     std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
-    for (Servent* s = servMgr->servents; s != NULL; s = s->next)
+    for (Servent* s = servMgr->servents; s != nullptr; s = s->next)
     {
          if (s->serventIndex == connectionId &&
              s->chanID.isSame(id) &&
@@ -480,7 +480,7 @@ json JrpcApi::getChannelConnections(json::array_t params)
     result.push_back(toSourceConnection(c));
 
     std::lock_guard<std::recursive_mutex> cs(servMgr->lock);
-    for (Servent* s = servMgr->servents; s != NULL; s = s->next)
+    for (Servent* s = servMgr->servents; s != nullptr; s = s->next)
     {
         if (!s->chanID.isSame(id))
             continue;
@@ -525,7 +525,7 @@ json JrpcApi::getChannels(json::array_t)
     json result = json::array();
 
     std::lock_guard<std::recursive_mutex> cs(chanMgr->lock);
-    for (auto c = chanMgr->channel; c != NULL; c = c->next)
+    for (auto c = chanMgr->channel; c != nullptr; c = c->next)
     {
         result.push_back(to_json(c));
     }
@@ -628,7 +628,7 @@ json::array_t JrpcApi::announcingChannels()
     json::array_t result;
 
     std::lock_guard<std::recursive_mutex> cs(chanMgr->lock);
-    for (auto c = chanMgr->channel; c != NULL; c = c->next)
+    for (auto c = chanMgr->channel; c != nullptr; c = c->next)
     {
         if (!c->isBroadcasting())
             continue;
@@ -745,6 +745,7 @@ json JrpcApi::getStatus(json::array_t)
 
 #include "stats.h"
 #include "notif.h"
+#include "yplist.h"
 
 json JrpcApi::getState(json::array_t args)
 {
@@ -763,6 +764,8 @@ json JrpcApi::getState(json::array_t args)
             json[name] = json::parse(g_notificationBuffer.getState().inspect());
         else if (name == "sys")
             json[name] = json::parse(sys->getState().inspect());
+        else if (name == "ypList")
+            json[name] = json::parse(g_ypList->getState().inspect());
         else
             throw invalid_params("Unknown object name: " + name);
     }
