@@ -16,7 +16,11 @@ async function peercast(method, ... args)
     }
     const data = await response.json()
     if (data.error) {
-        throw new Error(data.error.message)
+        let msg = data.error.message
+        if (data.error.data) {
+            msg += ": " + JSON.stringify(data.error.data)
+        }
+        throw new Error(msg)
     }
 
     return data.result
