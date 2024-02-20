@@ -406,18 +406,18 @@ void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::f
     ShowUsageAndReturn:
         stream.writeLine("Usage: chan ls");
         stream.writeLine("       chan show CHANNEL");
-        stream.writeLine("       chan hit");
+        // stream.writeLine("       chan hit");
         stream.writeLine("       chan set-url CHANNEL URL");
         return;
     }
 
-    if (positionals.size() >= 1 && positionals[0] == "hit") {
+    /*if (positionals.size() >= 1 && positionals[0] == "hit") {
         for (auto hitlist = chanMgr->hitlist; hitlist != nullptr; hitlist = hitlist->next) {
             auto chid = hitlist->info.id;
             int size = hitlist->numHits();
             stream.writeLineF("%s %d", chid.str().c_str(), size);
         }
-    } else if (positionals.size() >= 3 && positionals[0] == "set-url") {
+    } else*/ if (positionals.size() >= 3 && positionals[0] == "set-url") {
         const auto designator = positionals[1];
         const auto newUrl = positionals[2];
 
