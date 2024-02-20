@@ -817,6 +817,11 @@ void Commands::flag(Stream& stream, const std::vector<std::string>& argv, std::f
                               (f.currentValue) ? "true" : "false",
                               (f.currentValue == f.defaultValue) ? " (default)" : "");
 
+            // Servent::CMD_applyflags() からのコピペ。
+            peercastInst->saveSettings();
+            peercast::notifyMessage(ServMgr::NT_PEERCAST, "フラグ設定を保存しました。");
+            peercastApp->updateSettings();
+
         } catch (std::out_of_range &e) {
             stream.writeLineF("Flag not found: %s", flagName.c_str());
             return;
