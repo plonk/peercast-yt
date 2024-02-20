@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "varwriter.h"
 #include "amf0.h"
@@ -26,8 +27,13 @@ public:
 
     amf0::Value getState() override;
 
+    std::shared_ptr<const std::vector<YP>> getList() const
+    {
+        return m_list;
+    }
+
 private:
-    std::vector<YP> m_list;
+    std::shared_ptr<const std::vector<YP>> m_list;
 };
 
 extern YPList* g_ypList;

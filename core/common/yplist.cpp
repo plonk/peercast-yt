@@ -35,23 +35,31 @@ amf0::Value YP::getState()
 
 YPList::YPList()
     : m_list(
-        {
-            // { name, feedUrl, rootHost }
-            { "SP", "http://bayonet.ddo.jp/sp/index.txt", "bayonet.ddo.jp:7146" },
-            { "Heisei", "http://yp.pcgw.pgw.jp/index.txt", "yp.pcgw.pgw.jp:7146" },
-            { "P@", "https://p-at.net/index.txt", "root.p-at.net" },
-            { "YPv6", "http://ypv6.pecastation.org/index.txt", "ypv6.pecastation.org" },
-            { "Event YP", "http://eventyp.xrea.jp/index.txt", "" },
-        })
+        std::make_shared<const std::vector<YP>>(
+            std::vector<YP>(
+                {
+                    // { name, feedUrl, rootHost }
+                    { "SP", "http://bayonet.ddo.jp/sp/index.txt", "bayonet.ddo.jp:7146" },
+                    { "Heisei", "http://yp.pcgw.pgw.jp/index.txt", "yp.pcgw.pgw.jp:7146" },
+                    { "P@", "https://p-at.net/index.txt", "root.p-at.net" },
+                    { "YPv6", "http://ypv6.pecastation.org/index.txt", "ypv6.pecastation.org" },
+                    { "Event YP", "http://eventyp.xrea.jp/index.txt", "" },
+                })
+            )
+        )
 {
 }
 
 amf0::Value YPList::getState()
 {
-    std::function<amf0::Value(YP&)> stateOf = [](YP& yp) { return yp.getState(); };
+    std::vector<amf0::Value> list;
+    for (auto it = m_list->cbegin(); it != m_list->cend(); ++it) {
+        // getState() に const が付いてないからキャストする。
+        list.push_back(const_cast<YP&>(*it).getState());
+    }
 
     return amf0::Value::object(
         {
-            { "list", map(m_list, stateOf) } 
+            { "list", list } 
         });
 }

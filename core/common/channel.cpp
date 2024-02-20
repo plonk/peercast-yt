@@ -56,6 +56,8 @@
 
 #include "defer.h"
 
+#include "yplist.h"
+
 // -----------------------------------
 const char *Channel::srcTypes[] =
 {
@@ -582,14 +584,15 @@ static std::string chName(ChanInfo& info)
 // -----------------------------------
 static std::string feedUrlToRootHost(const std::string& feedUrl)
 {
-    if (feedUrl == "https://p-at.net/index.txt")
-        return "root.p-at.net";
-    else if (feedUrl == "http://yp.pcgw.pgw.jp/index.txt")
-        return "pcgw.pgw.jp:7146";
-    else if (feedUrl == "http://bayonet.ddo.jp/sp/index.txt")
-        return "bayonet.ddo.jp:7146";
-    else
-        return "";
+    std::shared_ptr<const std::vector<YP>> list = g_ypList->getList();
+
+    for (auto it = list->cbegin(); it != list->cend(); ++it) {
+        if (feedUrl == it->feedUrl) {
+            return it->rootHost;
+        }
+    }
+    LOG_WARN("%s: Entry not found for '%s'", __func__, feedUrl.c_str());
+    return "";
 }
 
 // -----------------------------------
