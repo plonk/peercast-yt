@@ -1467,9 +1467,7 @@ void Servent::CMD_fetch(const char* cmd, HTTP& http, String& jumpStr)
     info.url   = str::truncate_utf8(str::valid_utf8(query.get("contact")), 255);
     info.bitrate = atoi(query.get("bitrate").c_str());
     auto type = query.get("type");
-    info.contentType = type;
-    info.MIMEType = ChanInfo::getMIMEType(type.c_str());
-    info.streamExt = ChanInfo::getTypeExt(type.c_str());
+    info.setContentType(type.c_str());
     info.bcID = chanMgr->broadcastID;
 
     // id がセットされていないチャンネルがあるといろいろまずいので、事

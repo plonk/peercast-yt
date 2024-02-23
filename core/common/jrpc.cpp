@@ -232,13 +232,7 @@ json JrpcApi::fetch(json::array_t params)
         info.genre   = str::truncate_utf8(str::valid_utf8(genre), 255);
         info.url     = str::truncate_utf8(str::valid_utf8(contact), 255);
         info.bitrate = bitrate;
-        {
-            auto type = ChanInfo::getTypeFromStr(typeStr.c_str());
-
-            info.contentType    = type;
-            info.MIMEType       = ChanInfo::getMIMEType(type);
-            info.streamExt      = ChanInfo::getTypeExt(type);
-        }
+        info.setContentType(typeStr.c_str());
         info.bcID = chanMgr->broadcastID;
 
         // ソースに接続できなかった場合もチャンネルを同定したいの
