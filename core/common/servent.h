@@ -257,6 +257,7 @@ public:
     static bool isTerminationCandidate(ChanHit* hit);
 
     static void writeHeloAtom(AtomStream &atom, bool sendPort, bool sendPing, bool sendBCID, const GnuID& sessionID, uint16_t port, const GnuID& broadcastID);
+    static void setBroadcastIdChannelId(ChanInfo& info, const GnuID& broadcastID);
 
     TYPE                type;
     std::atomic<STATUS> status;

@@ -1468,16 +1468,10 @@ void Servent::CMD_fetch(const char* cmd, HTTP& http, String& jumpStr)
     info.bitrate = atoi(query.get("bitrate").c_str());
     auto type = query.get("type");
     info.setContentType(type.c_str());
-    info.bcID = chanMgr->broadcastID;
 
     // id がセットされていないチャンネルがあるといろいろまずいので、事
     // 前に設定してから登録する。
-    if (servMgr->flags.get("randomizeBroadcastingChannelID")) {
-        info.id = GnuID::random();
-    } else {
-        info.id = chanMgr->broadcastID;
-        info.id.encode(nullptr, info.name, info.genre, info.bitrate);
-    }
+    setBroadcastIdChannelId(info, chanMgr->broadcastID);
 
     auto c = chanMgr->createChannel(info);
     if (c) {
@@ -2420,12 +2414,7 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
     if (vec.size() > 2) info.desc  = vec[2];
     if (vec.size() > 3) info.url   = vec[3];
 
-    if (servMgr->flags.get("randomizeBroadcastingChannelID")) {
-        info.id = GnuID::random();
-    } else {
-        info.id = chanMgr->broadcastID;
-        info.id.encode(nullptr, info.name.cstr(), info.genre.cstr(), info.bitrate);
-    }
+    setBroadcastIdChannelId(info, chanMgr->broadcastID);
 
     auto c = chanMgr->findChannelByID(info.id);
     if (c)
@@ -2435,7 +2424,6 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
     }
 
     info.comment = chanMgr->broadcastMsg;
-    info.bcID    = chanMgr->broadcastID;
 
     c = chanMgr->createChannel(info);
     if (!c)
@@ -2443,6 +2431,24 @@ void Servent::handshakeWMHTTPPush(HTTP& http, const std::string& path)
 
     c->startWMHTTPPush(sock);
     sock = nullptr;    // socket is taken over by channel, so don`t close it
+}
+
+// -----------------------------------
+void Servent::setBroadcastIdChannelId(ChanInfo& info, const GnuID& broadcastID)
+{
+    // ブロードキャストIDをセットし、info にセットされたチャンネル名、
+    // ジャンル、ビットレートからチャンネルIDを設定する。ただし、チャ
+    // ンネルIDランダム化フラグがセットされていた場合はランダムなチャ
+    // ンネルIDをセットする。
+
+    info.bcID = broadcastID;
+
+    if (servMgr->flags.get("randomizeBroadcastingChannelID")) {
+        info.id = GnuID::random();
+    } else {
+        info.id = broadcastID;
+        info.id.encode(nullptr, info.name, info.genre, info.bitrate);
+    }
 }
 
 // -----------------------------------
@@ -2463,13 +2469,7 @@ ChanInfo Servent::createChannelInfo(GnuID broadcastID, const String& broadcastMs
     info.bitrate = atoi(query.get("bitrate").c_str());
     info.comment = query.get("comment").empty() ? broadcastMsg : query.get("comment");
 
-    if (servMgr->flags.get("randomizeBroadcastingChannelID")) {
-        info.id = GnuID::random();
-    } else {
-        info.id = broadcastID;
-        info.id.encode(nullptr, info.name.cstr(), info.genre.cstr(), info.bitrate);
-    }
-    info.bcID = broadcastID;
+    setBroadcastIdChannelId(info, broadcastID);
 
     return info;
 }
