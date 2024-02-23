@@ -637,7 +637,7 @@ void ChanInfo::init(const char *fn)
 // -----------------------------------
 void ChanInfo::setContentType(TYPE type)
 {
-    this->contentType    = type;
+    this->contentType    = getTypeFromStr(type.cstr());
     this->MIMEType       = getMIMEType(type);
     this->streamExt      = getTypeExt(type);
 }
