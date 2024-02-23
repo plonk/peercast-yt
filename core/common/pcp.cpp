@@ -16,6 +16,9 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
+#include <string>
+#include <cstdint> // std::int64_t
+
 #include "atom.h"
 #include "pcp.h"
 #include "peercast.h"
@@ -330,9 +333,15 @@ void PCPStream::readPktAtoms(std::shared_ptr<Channel> ch, AtomStream &atom, int 
     {
         std::lock_guard<std::recursive_mutex> cs(ch->lock);
 
-        int diff = pack.pos - ch->streamPos;
-        if (diff)
-            LOG_DEBUG("PCP skipping %s%d (%u -> %u)", (diff>0)?"+":"", diff, ch->streamPos, pack.pos);
+        // stream positions (= byte offsets) are unsigned ints
+        std::int64_t diff = (std::int64_t) pack.pos - ch->streamPos;
+        if (diff) {
+            std::string sdiff = std::to_string(diff);
+            if (sdiff[0] != '-') {
+                sdiff = "+" + sdiff;
+            }
+            LOG_DEBUG("PCP skipping %s (%u -> %u)", sdiff.c_str(), ch->streamPos, pack.pos);
+        }
 
         if (pack.type == ChanPacket::T_HEAD)
         {
