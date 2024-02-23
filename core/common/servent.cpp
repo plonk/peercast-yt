@@ -1721,7 +1721,7 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
                 {
                     streamIndex = ch->streamIndex;
                     streamPos = ch->headPack.pos;
-                    LOG_DEBUG("sendRaw got new stream index");
+                    LOG_DEBUG("sendRaw got new stream index %u", streamIndex);
                 }
 
                 ChanPacket rawPack;
@@ -1931,7 +1931,7 @@ void Servent::sendPCPChannel()
             {
                 streamIndex = ch->streamIndex;
                 streamPos = ch->headPack.pos;
-                LOG_DEBUG("sendPCPStream got new stream index");
+                LOG_DEBUG("sendPCPStream got new stream index %u", streamIndex);
             }
 
             ChanPacket rawPack;
