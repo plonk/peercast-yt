@@ -203,10 +203,14 @@ std::string log_escape(const std::string& str)
 thread_local std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>* AUX_LOG_FUNC_VECTOR = nullptr;
 void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)
 {
+    // ガード。
     if (!servMgr) return;
     if (servMgr->pauseLog) return;
     if (!sys) return;
 
+    // 1024バイトに切り詰める。[バグ]std::stringクラスを使っているので、
+    // シグナルハンドラーからのログ出力に使われるとメモリアロケーター
+    // を危険に使用する。
     const int MAX_LINELEN = 1024;
     std::string tmp = str::vformat(fmt, ap);
 
