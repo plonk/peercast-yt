@@ -410,18 +410,31 @@ void Commands::echo(Stream& stream, const std::vector<std::string>& argv, std::f
 }
 
 
-static std::vector<std::shared_ptr<Channel>> pickChannels(const std::string& prefix)
+static std::vector<std::shared_ptr<Channel>> pickChannels(const std::string& desig)
 {
-    if (prefix.empty()) {
-        throw ArgumentException("Empty channel designator");
-    }
-    
     std::vector<std::shared_ptr<Channel>> result;
 
-    const auto prefix1 = str::upcase(prefix);
+    // チャンネル名が完全一致するチャンネルを返す。
+    for (auto ch = chanMgr->channel; ch; ch = ch->next) {
+        if (ch->info.name.isSame(desig.c_str())) {
+            result.push_back(ch);
+        }
+    }
+
+    if (result.size() > 0) {
+        return result;
+    }
+
+    // さもなくば、チャンネルIDかそのプレフィックスと解釈して実行する。
+
+    const auto prefix = str::upcase(desig);
+    
+    if (prefix.empty()) {
+        throw ArgumentException("Empty channel ID prefix");
+    }
     
     for (auto ch = chanMgr->channel; ch; ch = ch->next) {
-        if (str::has_prefix(str::upcase(ch->getID().str()), prefix1)) {
+        if (str::has_prefix(str::upcase(ch->getID().str()), prefix)) {
             result.push_back(ch);
         }
     }
