@@ -574,7 +574,7 @@ void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::f
         } else {
             auto it = channels[0];
 
-            stream.writeStringF("Stoppoing channel %s ... ", it->getID().str().c_str());
+            stream.writeStringF("Stopping channel %s ... ", it->getID().str().c_str());
             it->thread.shutdown();
             sys->waitThread(&it->thread);
             stream.writeLine("done.");
