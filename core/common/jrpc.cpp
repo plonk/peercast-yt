@@ -233,12 +233,10 @@ json JrpcApi::fetch(json::array_t params)
         info.url     = str::truncate_utf8(str::valid_utf8(contact), 255);
         info.bitrate = bitrate;
         info.setContentType(typeStr.c_str());
-        info.bcID = chanMgr->broadcastID;
 
         // ソースに接続できなかった場合もチャンネルを同定したいの
         // で、事前にチャンネルIDを設定する。
-        info.id = chanMgr->broadcastID;
-        info.id.encode(nullptr, info.name, info.genre, info.bitrate);
+        Servent::setBroadcastIdChannelId(info, chanMgr->broadcastID);
 
         auto c = chanMgr->createChannel(info);
         if (!c)
