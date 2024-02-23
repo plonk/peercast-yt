@@ -6,12 +6,12 @@
 #include <algorithm>
 #include <tuple> // std::tie
 
-static std::pair< std::map<std::string, bool>,
+static std::pair< std::map<std::string, std::string>,
                   std::vector<std::string> >
 parse_options(const std::vector<std::string>& args,
               const std::vector<std::string>& option_names)
 {
-    std::map<std::string, bool> options;
+    std::map<std::string, std::string> options;
     std::vector<std::string> positionals;
 
     for (size_t i = 0; i < args.size(); i++) {
@@ -20,8 +20,23 @@ parse_options(const std::vector<std::string>& args,
                 positionals.push_back(args[j]);
             }
             break;
-        } else if (std::find(option_names.begin(), option_names.end(), args[i]) != option_names.end()) {
-            options[args[i]] = true;
+        } else if (args[i][0] == '-') {
+            if (args[i][1] == '-') { // long option
+                auto vec = str::split(args[i], "=", 2);
+                if (std::find(option_names.begin(), option_names.end(), vec[0]) == option_names.end()) {
+                    throw FormatException(str::format("Unknown long option: %s", vec[0].c_str()));
+                } else if (vec.size() == 2) { // assignment
+                    options[vec[0]] = vec[1];
+                } else {
+                    options[vec[0]] = "";
+                }
+            } else { // short option
+                if (std::find(option_names.begin(), option_names.end(), args[i]) == option_names.end()) {
+                    throw FormatException(str::format("Unknown short option: %s", args[i].c_str()));
+                } else {
+                    options[args[i]] = "";
+                }
+            }
         } else {
             positionals.push_back(args[i]);
         }
@@ -77,7 +92,7 @@ void Commands::system(Stream& stream, const std::string& _cmdline, std::function
 
 void Commands::pwd(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    std::map<std::string, bool> options;
+    std::map<std::string, std::string> options;
     std::vector<std::string> positionals;
     std::tie(options, positionals) = parse_options(argv, {"--help"});
 
@@ -92,7 +107,7 @@ void Commands::pwd(Stream& stream, const std::vector<std::string>& argv, std::fu
 
 void Commands::date(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    std::map<std::string, bool> options;
+    std::map<std::string, std::string> options;
     std::vector<std::string> positionals;
     std::tie(options, positionals) = parse_options(argv, {"--help"});
 
@@ -110,7 +125,7 @@ void Commands::date(Stream& stream, const std::vector<std::string>& argv, std::f
 #include <cstdlib> // for std::atof
 void Commands::sleep(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    std::map<std::string, bool> options;
+    std::map<std::string, std::string> options;
     std::vector<std::string> positionals;
     std::tie(options, positionals) = parse_options(argv, {"--help"});
 
@@ -131,7 +146,7 @@ void Commands::sleep(Stream& stream, const std::vector<std::string>& argv, std::
 #include "version2.h"
 void Commands::speedtest(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    std::map<std::string, bool> options;
+    std::map<std::string, std::string> options;
     std::vector<std::string> positionals;
     std::tie(options, positionals) = parse_options(argv, {"--help", "--enable-nagle", "--disable-nagle"});
 
@@ -250,7 +265,7 @@ void Commands::speedtest(Stream& stream, const std::vector<std::string>& argv, s
 #include "servmgr.h"
 void Commands::shutdown(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    std::map<std::string, bool> options;
+    std::map<std::string, std::string> options;
     std::vector<std::string> positionals;
     std::tie(options, positionals) = parse_options(argv, {"--help"});
 
@@ -268,7 +283,7 @@ void Commands::shutdown(Stream& stream, const std::vector<std::string>& argv, st
 #include "template.h"
 void Commands::expr(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    std::map<std::string, bool> options;
+    std::map<std::string, std::string> options;
     std::vector<std::string> positionals;
     std::tie(options, positionals) = parse_options(argv, {"--help"});
 
@@ -294,7 +309,7 @@ void Commands::expr(Stream& stream, const std::vector<std::string>& argv, std::f
 #endif
 void Commands::pid(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    std::map<std::string, bool> options;
+    std::map<std::string, std::string> options;
     std::vector<std::string> positionals;
     std::tie(options, positionals) = parse_options(argv, {"--help"});
 
@@ -315,7 +330,7 @@ void Commands::pid(Stream& stream, const std::vector<std::string>& argv, std::fu
 
 void Commands::help(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    std::map<std::string, bool> options;
+    std::map<std::string, std::string> options;
     std::vector<std::string> positionals;
     std::tie(options, positionals) = parse_options(argv, {"--help"});
 
@@ -344,7 +359,7 @@ void Commands::help(Stream& stream, const std::vector<std::string>& argv, std::f
 #include "peercast.h"
 void Commands::notify(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    std::map<std::string, bool> options;
+    std::map<std::string, std::string> options;
     std::vector<std::string> positionals;
     std::tie(options, positionals) = parse_options(argv, {"--help"});
 
@@ -359,7 +374,7 @@ void Commands::notify(Stream& stream, const std::vector<std::string>& argv, std:
 #include "bbs.h"
 void Commands::bbs(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    std::map<std::string, bool> options;
+    std::map<std::string, std::string> options;
     std::vector<std::string> positionals;
     std::tie(options, positionals) = parse_options(argv, {"--help"});
 
@@ -374,7 +389,7 @@ void Commands::bbs(Stream& stream, const std::vector<std::string>& argv, std::fu
 
 void Commands::echo(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    std::map<std::string, bool> options;
+    std::map<std::string, std::string> options;
     std::vector<std::string> positionals;
     std::tie(options, positionals) = parse_options(argv, { "-v", "--help" });
 
@@ -417,9 +432,10 @@ static std::vector<std::shared_ptr<Channel>> pickChannels(const std::string& pre
 #include "url.h"
 void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    std::map<std::string, bool> options;
+    std::map<std::string, std::string> options;
     std::vector<std::string> positionals;
-    std::tie(options, positionals) = parse_options(argv, { "--help" });
+    std::tie(options, positionals) = parse_options(argv, {"--help",
+                                                          "--name", "--genre", "--url", "--bitrate", "--type", "--ipv" /*for fetch*/ });
 
     if (positionals.size() < 1 || options.count("--help")) {
     ShowUsageAndReturn:
@@ -427,6 +443,7 @@ void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::f
         stream.writeLine("       chan show CHANNEL");
         // stream.writeLine("       chan hit");
         stream.writeLine("       chan set-url CHANNEL URL");
+        stream.writeLine("       chan fetch SOURCE_URL [--name=NAME] [--genre==GENRE] [--bitrate=KBPS] [--type=TYPE] --ipv=<4|6>");
         return;
     }
 
@@ -494,6 +511,74 @@ void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::f
         } else {
             stream.writeLine(amf0::format(channels[0]->getState()));
         }
+    } else if (positionals.size() >= 1 && positionals[0] == "fetch") {
+        // chan fetch "pipe:ffmpeg ... -f flv -" --name="NAME" --genre=="GENRE"\
+        //      --bitrate --type=FLV --ipv=4|6
+
+        if (positionals.size() != 2) {
+            stream.writeLine("Error: chan-fetch only needs one argument.");
+            return;
+        }
+        auto curl = positionals[1]; // URL to fetch
+        auto GET =
+            [&](const std::string& key) -> const char* {
+                if (options.count(key)) {
+                    return options.at(key).c_str();
+                } else {
+                    return "";
+                }
+            };
+        ChanInfo info;
+        info.name    = str::truncate_utf8(str::valid_utf8(GET("--name")), 255);
+        info.desc    = str::truncate_utf8(str::valid_utf8(GET("--desc")), 255);
+        info.genre   = str::truncate_utf8(str::valid_utf8(GET("--genre")), 255);
+        info.url     = str::truncate_utf8(str::valid_utf8(GET("--contact")), 255);
+        info.bitrate = std::atoi(GET("--bitrate"));
+        info.setContentType(GET("--type"));
+
+        // ソースに接続できなかった場合もチャンネルを同定したいの
+        // で、事前にチャンネルIDを設定する。
+        Servent::setBroadcastIdChannelId(info, chanMgr->broadcastID);
+
+        auto c = chanMgr->createChannel(info);
+        if (c) {
+            if (std::string(GET("--ipv")) == "6") {
+                c->ipVersion = Channel::IP_V6;
+                LOG_INFO("Channel IP version set to 6");
+
+                // YPv6ではIPv6のポートチェックができないのでがんばる。
+                servMgr->checkFirewallIPv6();
+            }
+            c->startURL(curl.c_str());
+            stream.writeLine(info.id.str());
+        } else {
+            stream.writeLine("Error: failed to create channel");
+            return;
+        }
+    } else if (positionals.size() >= 1 && positionals[0] == "stop") {
+        if (positionals.size() != 2) {
+            stream.writeLine("chan-stop only needs one argument.");
+            return;
+        }
+
+        auto designator = positionals[1];
+        auto channels = pickChannels(designator);
+
+        if (channels.size() == 0) {
+            stream.writeLineF("Error: Channel not found: %s", designator.c_str());
+        } else if (channels.size() > 1) {
+            stream.writeLineF("'%s' is ambiguous between the following:", designator.c_str());
+            for (auto ch : channels) {
+                stream.writeLineF("%s %s", ch->getID().str().c_str(), ch->getName());
+            }
+        } else {
+            auto it = channels[0];
+
+            stream.writeStringF("Stoppoing channel %s ... ", it->getID().str().c_str());
+            it->thread.shutdown();
+            sys->waitThread(&it->thread);
+            stream.writeLine("done.");
+        }
     } else {
         goto ShowUsageAndReturn;
     }
@@ -503,7 +588,7 @@ void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::f
 
 void Commands::get(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    std::map<std::string, bool> options;
+    std::map<std::string, std::string> options;
     std::vector<std::string> positionals;
     std::tie(options, positionals) = parse_options(argv, { "--help" });
 
@@ -527,7 +612,7 @@ void Commands::get(Stream& stream, const std::vector<std::string>& argv, std::fu
 #include "servmgr.h"
 void Commands::filter(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    std::map<std::string, bool> options;
+    std::map<std::string, std::string> options;
     std::vector<std::string> positionals;
     std::tie(options, positionals) = parse_options(argv, { "--help" });
 
@@ -570,7 +655,7 @@ void Commands::filter(Stream& stream, const std::vector<std::string>& argv, std:
 
 void Commands::log(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    std::map<std::string, bool> options;
+    std::map<std::string, std::string> options;
     std::vector<std::string> positionals;
     std::tie(options, positionals) = parse_options(argv, { "--help" });
 
@@ -608,7 +693,7 @@ void Commands::log(Stream& stream, const std::vector<std::string>& argv, std::fu
 
 void Commands::nslookup(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    std::map<std::string, bool> options;
+    std::map<std::string, std::string> options;
     std::vector<std::string> positionals;
     std::tie(options, positionals) = parse_options(argv, { "--help" });
 
@@ -653,7 +738,7 @@ void Commands::nslookup(Stream& stream, const std::vector<std::string>& argv, st
 #include "servmgr.h" //DEFAULT_PORT
 void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    std::map<std::string, bool> options;
+    std::map<std::string, std::string> options;
     std::vector<std::string> positionals;
     std::tie(options, positionals) = parse_options(argv, { "-v", "--help" });
 
@@ -732,7 +817,7 @@ void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::f
 #include "sslclientsocket.h"
 void Commands::ssl(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    std::map<std::string, bool> options;
+    std::map<std::string, std::string> options;
     std::vector<std::string> positionals;
     std::tie(options, positionals) = parse_options(argv, { "--help" });
 
@@ -774,7 +859,7 @@ void Commands::ssl(Stream& stream, const std::vector<std::string>& argv, std::fu
 
 void Commands::flag(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
-    std::map<std::string, bool> options;
+    std::map<std::string, std::string> options;
     std::vector<std::string> positionals;
     std::tie(options, positionals) = parse_options(argv, { "--help" });
 
