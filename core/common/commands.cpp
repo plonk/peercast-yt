@@ -443,7 +443,7 @@ void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::f
         stream.writeLine("       chan show CHANNEL");
         // stream.writeLine("       chan hit");
         stream.writeLine("       chan set-url CHANNEL URL");
-        stream.writeLine("       chan fetch SOURCE_URL [--name=NAME] [--genre==GENRE] [--bitrate=KBPS] [--type=TYPE] --ipv=<4|6>");
+        stream.writeLine("       chan fetch SOURCE_URL [--name=NAME] [--genre==GENRE] [--bitrate=KBPS] [--type=TYPE] [--ipv=<4|6>]");
         return;
     }
 
