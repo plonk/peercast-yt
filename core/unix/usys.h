@@ -39,7 +39,9 @@ public:
     bool            hasGUI() override;
     void            callLocalURL(const char *, int) override;
     void            executeFile(const char *) override;
+
     void            setThreadName(const char* name) override;
+    std::string     getThreadName() override;
 
     std::string     getHostname() override;
     std::vector<std::string> getIPAddresses(const std::string& name) override;

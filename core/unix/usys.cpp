@@ -89,7 +89,27 @@ void    USys::setThreadName(const char* name)
 #ifdef _GNU_SOURCE
     char buf[16];
     snprintf(buf, 16, "%s", name);
-    pthread_setname_np(pthread_self(), buf);
+    int err = pthread_setname_np(pthread_self(), buf);
+    if (err != 0) {
+        LOG_WARN("pthread_setname_np: err = %d", err);
+    }
+#endif
+}
+
+// ---------------------------------
+std::string USys::getThreadName()
+{
+#ifdef _GNU_SOURCE
+    char buf[16];
+    int err = pthread_getname_np(pthread_self(), buf, 16);
+    if (err != 0) {
+        LOG_WARN("pthread_getname_np: err = %d", err);
+        return "";
+    } else {
+        return buf;
+    }
+#else
+    return "";
 #endif
 }
 

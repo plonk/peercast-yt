@@ -27,6 +27,7 @@
 #include "socket.h"
 #include "defer.h"
 #include <chrono>
+#include <sstream>
 
 // ------------------------------------------
 Sys::Sys()
@@ -290,6 +291,15 @@ void Sys::waitThread(ThreadInfo* info)
     {
         LOG_WARN("waitThread called on non-joinable thread");
     }
+}
+
+// ---------------------------------
+std::string Sys::getThreadIdString()
+{
+    // return std::string(std::this_thread::get_id());
+    std::stringstream ss;
+    ss << std::this_thread::get_id();
+    return ss.str();
 }
 
 // ---------------------------------
