@@ -19,6 +19,8 @@
 // GNU General Public License for more details.
 // ------------------------------------------------
 
+#include <string>
+
 #include "gnuid.h"
 #include "sys.h"
 #include "xml.h"
