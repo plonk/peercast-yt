@@ -122,6 +122,8 @@ bool Subprogram::wait(int* status)
     int r;
 
     waitpid(m_pid, &r, 0);
+    m_pid = -1;
+
     if (WIFEXITED(r))
     {
         *status = WEXITSTATUS(r);
@@ -163,7 +165,7 @@ void Subprogram::terminate()
     r = kill(m_pid, 9); // send SIGKILL
 
     if (r == -1)
-        LOG_ERROR("Failed in killing %d.", (int) m_pid);
+        LOG_ERROR("Failed in killing %d. %s", (int) m_pid, str::strerror(errno).c_str());
 
     waitpid(m_pid, nullptr, 0);
 
