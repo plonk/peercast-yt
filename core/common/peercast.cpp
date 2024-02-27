@@ -201,7 +201,7 @@ std::string log_escape(const std::string& str)
 
 // --------------------------------------------------
 thread_local std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>* AUX_LOG_FUNC_VECTOR = nullptr;
-void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)
+static void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)
 {
     // ガード。
     if (!servMgr) return;
@@ -252,66 +252,22 @@ void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)
 }
 
 // --------------------------------------------------
-void LOG(const char *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    ADDLOG(fmt, ap, LogBuffer::T_DEBUG);
-    va_end(ap);
-}
+#include "regexp.h"
+namespace peercast {
+    void addlog(LogBuffer::TYPE type, const char* file, int line, const char* func, const char* fmt, ...)
+    {
+        static Regexp basename("[^\\/]*$");
+        auto matches = basename.exec(file);
 
-// --------------------------------------------------
-void LOG_TRACE(const char *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    ADDLOG(fmt, ap, LogBuffer::T_TRACE);
-    va_end(ap);
-}
+        std::string srcloc = str::format("%s:%d", matches[0].c_str(), line);
+        std::string where = str::format("%-20s %s", srcloc.c_str(), func);
+        std::string fmt2 = str::format("[%-40s] %s", where.c_str(), fmt);
 
-// --------------------------------------------------
-void LOG_DEBUG(const char *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    ADDLOG(fmt, ap, LogBuffer::T_DEBUG);
-    va_end(ap);
-}
-
-// --------------------------------------------------
-void LOG_INFO(const char *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    ADDLOG(fmt, ap, LogBuffer::T_INFO);
-    va_end(ap);
-}
-
-// --------------------------------------------------
-void LOG_WARN(const char *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    ADDLOG(fmt, ap, LogBuffer::T_WARN);
-    va_end(ap);
-}
-
-// --------------------------------------------------
-void LOG_ERROR(const char *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    ADDLOG(fmt, ap, LogBuffer::T_ERROR);
-    va_end(ap);
-}
-
-// --------------------------------------------------
-void LOG_FATAL(const char *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    ADDLOG(fmt, ap, LogBuffer::T_FATAL);
-    va_end(ap);
+        va_list ap;
+        va_start(ap, fmt);
+        ADDLOG(fmt2.c_str(), ap, type);
+        va_end(ap);
+    }
 }
 
 // --------------------------------------------------

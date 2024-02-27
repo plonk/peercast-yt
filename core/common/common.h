@@ -127,14 +127,19 @@ public:
 const char  *getCGIarg(const char *str, const char *arg);
 bool        hasCGIarg(const char *str, const char *arg);
 
-// ----------------------------------
-extern void LOG(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
-extern void LOG_TRACE(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
-extern void LOG_DEBUG(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
-extern void LOG_INFO(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
-extern void LOG_WARN(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
-extern void LOG_ERROR(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
-extern void LOG_FATAL(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
+// --------------------------------------------------
+#include "logbuf.h"
+namespace peercast {
+    void addlog(LogBuffer::TYPE type, const char* file, int line, const char* func, const char* fmt, ...)  __attribute__ ((format (printf, 5, 6)));
+}
+#define LOG(...)        peercast::addlog(LogBuffer::T_DEBUG, __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define LOG_TRACE(...)  peercast::addlog(LogBuffer::T_TRACE, __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define LOG_DEBUG(...)  peercast::addlog(LogBuffer::T_DEBUG, __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define LOG_INFO(...)   peercast::addlog(LogBuffer::T_INFO,  __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define LOG_WARN(...)   peercast::addlog(LogBuffer::T_WARN,  __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define LOG_ERROR(...)  peercast::addlog(LogBuffer::T_ERROR, __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define LOG_WARN(...)   peercast::addlog(LogBuffer::T_WARN,  __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define LOG_FATAL(...)  peercast::addlog(LogBuffer::T_FATAL, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 // ----------------------------------
 #define ASSERT(expr) do{if(!(expr))LOG_WARN("Assertion failed: " #expr " at " __FILE__ ":%d", __LINE__);}while(0)
