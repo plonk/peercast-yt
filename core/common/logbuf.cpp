@@ -141,7 +141,7 @@ std::string LogBuffer::lineRendererHTML(unsigned int time, TYPE type, const char
         buf += "]</b> ";
     }
 
-    buf += cgi::escape_html(line).c_str();
+    buf += cgi::escape_html(line);
     buf += "<br>";
 
     return buf;
