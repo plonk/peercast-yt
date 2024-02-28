@@ -70,7 +70,7 @@ String& String::setFromTime(unsigned int t)
                  tm.tm_year + 1900);
     }else
     {
-        sprintf(data, sizeof(data), "-");
+        snprintf(data, sizeof(data), "-");
     }
 
     type = T_ASCII;
