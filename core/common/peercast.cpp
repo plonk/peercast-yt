@@ -214,6 +214,7 @@ void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)
     const int MAX_LINELEN = 1024;
     std::string tmp = str::vformat(fmt, ap);
 
+#if 0
     // スレッドIDを前置。
     std::string tname = sys->getThreadName();
     if (tname.empty()) {
@@ -226,6 +227,7 @@ void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)
                           sys->getThreadIdString().c_str(),
                           tmp.c_str());
     }
+#endif
 
     if (str::validate_utf8(tmp)) {
         tmp = str::truncate_utf8(tmp, MAX_LINELEN);
