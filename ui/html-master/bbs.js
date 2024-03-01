@@ -269,6 +269,30 @@ async function mainAsync(url) {
     }
 }
 
+async function tryOpenCurrentThreadAsync(url)
+{
+    const info = getBoardInfo(url)
+    if (info) {
+        try {
+            board = await $.getJSON(boardCgi(info))
+        } catch {
+            console.error("エラー: /cgi-bin/board.cgiの実行に失敗しました。")
+            return await mainAsync(url)
+        }
+        console.log(board);
+
+        for (let i = 0; i < board.threads.length; i++) {
+            const t = board.threads[i];
+            if (t.last < 1000) {
+                const thread_url = info.protocol+"://"+info.fqdn+"/"+(info.shitaraba ? "bbs" : "test")+"/read.cgi/"+info.category+(info.shitaraba ? "/"+info.board_num+"/" : "/")+t.id+"/l50";
+                console.log(`Opening ${thread_url} ...`);
+                return await mainAsync(thread_url)
+            }
+        }
+    }
+    return await mainAsync(url)
+}
+
 function handleSubmit() {
     var value = $('#message-input').prop('value');
     postMessage(value);
@@ -291,5 +315,5 @@ $(function(){
         }
     });
 
-    mainAsync(CONTACT_URL);
+    tryOpenCurrentThreadAsync(CONTACT_URL);
 });
