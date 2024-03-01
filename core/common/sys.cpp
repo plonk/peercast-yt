@@ -33,7 +33,7 @@
 Sys::Sys()
 {
     idleSleepTime = 10;
-    logBuf = new LogBuffer(1000, 100);
+    logBuf = new LogBuffer(1000, 512);
 }
 
 // ------------------------------------------

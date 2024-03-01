@@ -215,8 +215,17 @@ amf0::Value LogBuffer::getState()
         ids.push_back(pair.first);
     }
 
+    std::vector<amf0::Value> lines;
+    eachLine([&](unsigned int time, TYPE type, const char* line)
+             {
+                 std::string timeString = String().setFromTime(sys->getTime()).data;
+                 timeString = str::replace_suffix(timeString, "\n", ""); // chomp!
+                 lines.push_back(amf0::Value::object({ {"time",time}, {"timeString",timeString}, {"type",getTypeStr(type)}, {"message",line} }));
+             });
+
     return amf0::Value::object(
         {
+            {"lines", lines},
             {"dumpHTML", s.str()},
             {"logListeners", ids},
         });

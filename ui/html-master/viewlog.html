@@ -10,7 +10,8 @@
   <br>
   <br>
   <div class="hscroll">
-    <div class="tiny" style="white-space: nowrap">{!sys.log.dumpHTML}</div>
+    <pre class="tiny">{@foreach sys.log.lines}{@if this.type == ""}{@else}{$this.timeString} <b>[{$this.type}]</b> {@end}{$this.message}
+{@end}</pre>
   </div>
   <a href="#top"><br>
     <span>{#View top}</span>
