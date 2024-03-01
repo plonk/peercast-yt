@@ -78,3 +78,19 @@ std::vector<std::string> Regexp::grep(const Regexp& reg, const std::vector<std::
     }
     return result;
 }
+
+std::string Regexp::replaceAll(const std::string& orig, std::function<std::string(const std::string&)> func) const
+{
+    std::string result;
+    std::string s = orig;
+
+    std::smatch m;
+    while (std::regex_search(s, m, m_reg)) {
+        result += s.substr(0, m.position(0));
+        result += func(m[0].str());
+        s = s.substr(m.position(0) + m.length(0));
+    }
+    result += s;
+
+    return result;
+}

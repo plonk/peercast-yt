@@ -201,72 +201,85 @@ std::string log_escape(const std::string& str)
 
 // --------------------------------------------------
 thread_local std::vector<std::function<void(LogBuffer::TYPE type, const char*)>>* AUX_LOG_FUNC_VECTOR = nullptr;
-static void ADDLOG(const char *fmt, va_list ap, LogBuffer::TYPE type)
+
+// --------------------------------------------------
+static std::string truncate(const std::string& str, int maxLineLen)
 {
-    // ガード。
-    if (!servMgr) return;
-    if (servMgr->pauseLog) return;
-    if (!sys) return;
-
-    // 1024バイトに切り詰める。[バグ]std::stringクラスを使っているので、
-    // シグナルハンドラーからのログ出力に使われるとメモリアロケーター
-    // を危険に使用する。
-    const int MAX_LINELEN = 1024;
-    std::string tmp = str::vformat(fmt, ap);
-
-    // スレッドIDを前置。
-    std::string tname = sys->getThreadName();
-    if (tname.empty()) {
-        tmp = str::format("[%s] %s",
-                          sys->getThreadIdString().c_str(),
-                          tmp.c_str());
+    if (str::validate_utf8(str)) {
+        return str::truncate_utf8(str, maxLineLen);
     } else {
-        tmp = str::format("[%-15s(%s)] %s",
-                          tname.c_str(),
-                          sys->getThreadIdString().c_str(),
-                          tmp.c_str());
+        return str::truncate_utf8(peercast::log_escape(str), maxLineLen);
     }
-
-    if (str::validate_utf8(tmp)) {
-        tmp = str::truncate_utf8(tmp, MAX_LINELEN);
-    } else {
-        tmp = peercast::log_escape(tmp);
-        tmp = str::truncate_utf8(tmp, MAX_LINELEN);
-    }
-
-    const char* str = tmp.c_str();
-
-    // ログレベルに関わらず出力する。
-    if (AUX_LOG_FUNC_VECTOR) {
-        for (auto func : *AUX_LOG_FUNC_VECTOR) {
-            func(type, str);
-        }
-    }
-
-    if (servMgr->logLevel() > type) return;
-
-    if (type != LogBuffer::T_NONE)
-        sys->logBuf->write(str, type);
-
-    peercastApp->printLog(type, str);
 }
 
 // --------------------------------------------------
 #include "regexp.h"
+#include "formatter.h"
 namespace peercast {
     void addlog(LogBuffer::TYPE type, const char* file, int line, const char* func, const char* fmt, ...)
     {
-        static Regexp basename("[^\\/]*$");
-        auto matches = basename.exec(file);
+        // ガード。
+        if (!servMgr) return;
+        if (servMgr->pauseLog) return;
+        if (!sys) return;
 
-        std::string srcloc = str::format("%s:%d", matches[0].c_str(), line);
-        std::string where = str::format("%-20s %s", srcloc.c_str(), func);
-        std::string fmt2 = str::format("[%-40s] %s", where.c_str(), fmt);
-
+        // 1024バイトに切り詰める。[バグ]std::stringクラスを使っているので、
+        // シグナルハンドラーからのログ出力に使われるとメモリアロケーター
+        // を危険に使用する。
         va_list ap;
         va_start(ap, fmt);
-        ADDLOG(fmt2.c_str(), ap, type);
+        const int MAX_LINELEN = 1024;
+        auto message = str::vformat(fmt, ap);
         va_end(ap);
+
+        // ログレベルに関わらず出力する。
+        if (AUX_LOG_FUNC_VECTOR) {
+            for (auto func : *AUX_LOG_FUNC_VECTOR) {
+                func(type, message.c_str());
+            }
+        }
+
+        auto chardef = [&](char c) -> std::string
+                       {
+                           switch (c) {
+                           case 'l': // source location
+                               {
+                                   static Regexp basename("[^\\/]*$");
+                                   auto matches = basename.exec(file);
+                                   return str::format("%s:%d", matches[0].c_str(), line);
+                               }
+                           case 'f': // function name
+                               {
+                                   return func;
+                               }
+                           case 't': // thread name/id
+                               {
+                                   std::string tname = sys->getThreadName();
+                                   if (tname.empty()) {
+                                       return str::format("%s", sys->getThreadIdString().c_str());
+                                   } else {
+                                       return str::format("%-15s(%s)", tname.c_str(), sys->getThreadIdString().c_str());
+                                   }
+                               }
+                           case 'm': // message
+                               {
+                                   return message;
+                               }
+                           default:
+                               {
+                                   return "?";
+                               }
+                           }
+                       };
+
+        auto longLine = formatter::logFormat("[%20t] [%-20l %-20f] %m", chardef);
+
+        if (servMgr->logLevel() > type) return;
+
+        if (type != LogBuffer::T_NONE)
+            sys->logBuf->write(truncate(longLine, MAX_LINELEN).c_str(), type);
+
+        peercastApp->printLog(type, truncate(message, MAX_LINELEN).c_str());
     }
 }
 

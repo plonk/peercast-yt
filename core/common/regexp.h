@@ -18,6 +18,8 @@ public:
     std::vector<std::string> exec(const std::string& str) const;
     bool matches(const std::string& str) const;
 
+    std::string replaceAll(const std::string& orig, std::function<std::string(const std::string&)> func) const;
+
     std::regex m_reg;
     const std::string m_exp;
 };
