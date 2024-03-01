@@ -222,9 +222,12 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
     Subprogram script(filePath);
 
     bool success = script.start({}, env);
+    int pid = -1;
     if (success)
-        LOG_DEBUG("script started (pid = %d)", script.pid());
-    else
+    {
+        pid = script.pid(); // wait した後は script.pid() がリセットされるので値を取っておく。
+        LOG_DEBUG("script started (pid = %d)", pid);
+    }else
     {
         LOG_ERROR("failed to start script `%s`", filePath.c_str());
         throw HTTPException(HTTP_SC_SERVERERROR, 500);
@@ -269,10 +272,10 @@ void Servent::invokeCGIScript(HTTP &http, const char* fn)
 
     if (!normal)
     {
-        LOG_ERROR("child process (PID %d) terminated abnormally", script.pid());
+        LOG_ERROR("child process (PID %d) terminated abnormally", pid);
     }else
     {
-        LOG_DEBUG("child process (PID %d) exited normally (status %d)", script.pid(), status);
+        LOG_DEBUG("child process (PID %d) exited normally (status %d)", pid, status);
     }
 }
 
