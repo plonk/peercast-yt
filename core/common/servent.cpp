@@ -1740,7 +1740,7 @@ void Servent::sendRawChannel(bool sendHead, bool sendData)
                             lastWriteTime = sys->getTime();
                         }else
                         {
-                            LOG_DEBUG("raw: skip continuation %s packet pos=%d",
+                            LOG_DEBUG("raw: skip continuation %s packet pos=%u",
                                       (rawPack.type == ChanPacket::T_DATA) ? "DATA" : "HEAD",
                                       rawPack.pos);
                         }
