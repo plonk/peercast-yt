@@ -107,6 +107,13 @@ public:
         Other,
     };
 
+    enum class SupportStatus
+    {
+        Supported,
+        Unsupported,
+        Unknown,
+    };
+
     static const char* denialReasonToName(StreamRequestDenialReason r)
         {
             switch (r)
@@ -258,6 +265,7 @@ public:
 
     static void writeHeloAtom(AtomStream &atom, bool sendPort, bool sendPing, bool sendBCID, const GnuID& sessionID, uint16_t port, const GnuID& broadcastID);
     static void setBroadcastIdChannelId(ChanInfo& info, const GnuID& broadcastID);
+    static SupportStatus continuationPacketSupportStatus(const std::string&);
 
     TYPE                type;
     std::atomic<STATUS> status;
