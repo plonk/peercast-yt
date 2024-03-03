@@ -136,6 +136,11 @@ public:
     {
     }
 
+    std::string getCurrentWorkingDirectory() override
+    {
+        return "/dummy";
+    }
+
     unsigned int time;
     double dtime;
 };
