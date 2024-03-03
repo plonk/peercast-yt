@@ -35,6 +35,7 @@
 #include "defer.h"
 #include "gnutella.h"
 #include "chanmgr.h"
+#include "regexp.h"
 
 const int DIRECT_WRITE_TIMEOUT = 60;
 
@@ -1144,6 +1145,83 @@ void Servent::handshakeOutgoingPCP(AtomStream &atom, const Host &rhost, /*out*/ 
 }
 
 // -------------------------------------------------------------------
+Servent::SupportStatus Servent::continuationPacketSupportStatus(const std::string& agent)
+{
+    // PeerCastStation
+    {
+        static std::vector<int> minimumVersion({ 2, 8, 0 });
+        static Regexp reg("^PeerCastStation/([0-9.]+)$");
+        auto m = reg.exec(agent);
+
+        if (m.size() > 0)
+        {
+            auto strvec = str::split(m.at(1), ".");
+            std::vector<int> ver;
+            for (auto& str : strvec)
+                ver.push_back(std::atoi(str.c_str()));
+
+            if (ver >= minimumVersion)
+                return SupportStatus::Supported;
+            else
+                return SupportStatus::Unsupported;
+        }
+    }
+
+    // YT
+    {
+        static Regexp reg("^PeerCast/0.1218 \\(YT(\\d+)\\)$");
+        auto m = reg.exec(agent);
+        if (m.size() > 0)
+        {
+            if (std::atoi(m.at(1).c_str()) < 15)
+                return SupportStatus::Unsupported;
+            else
+                return SupportStatus::Supported;
+        }
+    }
+
+    // IM
+    {
+        static Regexp reg("^PeerCast/0.1218\\(IM(\\d+)\\)$"); // "PeerCast/0.1218(IM0051)" etc.
+
+        auto m = reg.exec(agent);
+        if (m.size() > 0)
+        {
+            if (std::atoi(m.at(1).c_str()) <= 51)
+                return SupportStatus::Unsupported;
+            else
+                return SupportStatus::Unknown;
+        }
+    }
+
+    // VP
+    {
+        static Regexp reg("^PeerCast/0.1218\\(VP(\\d+)\\)$"); // "PeerCast/0.1218(VP0027)" etc.
+
+        auto m = reg.exec(agent);
+        if (m.size() > 0)
+        {
+            if (std::atoi(m.at(1).c_str()) <= 27)
+                return SupportStatus::Unsupported;
+            else
+                return SupportStatus::Unknown;
+        }
+    }
+
+    // PP?
+    {
+        if (agent == "PeerCast/0.1218-J")
+            return SupportStatus::Unsupported;
+    }
+
+    // 無印(!)
+    if (agent == "PeerCast/0.1218")
+        return SupportStatus::Unsupported;
+
+    return SupportStatus::Unknown;
+}
+
+// -------------------------------------------------------------------
 // PCPハンドシェイク。HELO, OLEH。グローバルIP、ファイアウォールチェッ
 // ク。
 void Servent::handshakeIncomingPCP(AtomStream &atom, Host &rhost, GnuID &rid, String &agent)
@@ -1234,6 +1312,23 @@ void Servent::handshakeIncomingPCP(AtomStream &atom, Host &rhost, GnuID &rid, St
         {
             atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT+PCP_ERROR_BADAGENT);
             throw StreamException("Agent is not valid");
+        }
+    }
+
+    if (servMgr->flags.get("requireContinuationPacketSupportFromPeer"))
+    {
+        SupportStatus status = continuationPacketSupportStatus(agent);
+        if (status == SupportStatus::Unsupported)
+        {
+            LOG_DEBUG("requireContinuationPacketSupportFromPeer: Denied %s %s", agent.cstr(), rhost.str().c_str());
+            atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT+PCP_ERROR_BADAGENT);
+            throw StreamException("Agent is not valid (continuation packets unsupported)");
+        }else if (status == SupportStatus::Unknown)
+        {
+            LOG_WARN("requireContinuationPacketSupportFromPeer: Allowing agent of unknown status %s", str::inspect(agent).c_str());
+        }else if (status == SupportStatus::Supported)
+        {
+            LOG_DEBUG("requireContinuationPacketSupportFromPeer: Allowed %s %s", agent.cstr(), rhost.str().c_str());
         }
     }
 

@@ -58,6 +58,7 @@ ServMgr::ServMgr()
             {"banTrackersWhileBroadcasting", "配信中他の配信者による視聴をBANする。", false},
             {"persistTokenList", "アクセストークンリストを永続化する。", false},
             {"enableSSLServer", "SSL接続の受け付けを有効にする。", false},
+            {"requireContinuationPacketSupportFromPeer", "継続パケットをサポートしないバージョンのクライアントとリレーしない。", false},
         })
     , preferredTheme("system")
     , accentColor("blue")

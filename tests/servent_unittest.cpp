@@ -944,3 +944,24 @@ TEST_F(ServentFixture, getLocalURL)
     ASSERT_EQ("http://127.0.0.1:7144", s.getLocalURL(""));
     // TODO: IPv6 [::1] もテストしたい。
 }
+
+TEST_F(ServentFixture, continuationPacketSupportStatus)
+{
+    ASSERT_EQ(Servent::continuationPacketSupportStatus(""), Servent::SupportStatus::Unknown);
+    ASSERT_EQ(Servent::continuationPacketSupportStatus("hoge"), Servent::SupportStatus::Unknown);
+    ASSERT_EQ(Servent::continuationPacketSupportStatus("PeerCast/0.1218"), Servent::SupportStatus::Unsupported);
+    ASSERT_EQ(Servent::continuationPacketSupportStatus("PeerCast/0.1218(IM0051)"), Servent::SupportStatus::Unsupported);
+    ASSERT_EQ(Servent::continuationPacketSupportStatus("PeerCast/0.1218(IM0052)"), Servent::SupportStatus::Unknown);
+    ASSERT_EQ(Servent::continuationPacketSupportStatus("PeerCast/0.1218(VP0027)"), Servent::SupportStatus::Unsupported);
+    ASSERT_EQ(Servent::continuationPacketSupportStatus("PeerCast/0.1218(VP0028)"), Servent::SupportStatus::Unknown);
+    ASSERT_EQ(Servent::continuationPacketSupportStatus("PeerCast/0.1218-J"), Servent::SupportStatus::Unsupported);
+    ASSERT_EQ(Servent::continuationPacketSupportStatus("PeerCastStation/2.2.0.0"), Servent::SupportStatus::Unsupported);
+    ASSERT_EQ(Servent::continuationPacketSupportStatus("PeerCastStation/2.7.0.0"), Servent::SupportStatus::Unsupported);
+    ASSERT_EQ(Servent::continuationPacketSupportStatus("PeerCastStation/2.8.0.0"), Servent::SupportStatus::Supported);
+    ASSERT_EQ(Servent::continuationPacketSupportStatus("PeerCastStation/2.9.0.0"), Servent::SupportStatus::Supported);
+    ASSERT_EQ(Servent::continuationPacketSupportStatus("PeerCastStation/5.1.0.0"), Servent::SupportStatus::Supported);
+    ASSERT_EQ(Servent::continuationPacketSupportStatus("PeerCast/0.1218 (YT14)"), Servent::SupportStatus::Unsupported);
+    ASSERT_EQ(Servent::continuationPacketSupportStatus("PeerCast/0.1218 (YT15)"), Servent::SupportStatus::Supported);
+    ASSERT_EQ(Servent::continuationPacketSupportStatus("PeerCast/0.1218 (YT16)"), Servent::SupportStatus::Supported);
+}
+
