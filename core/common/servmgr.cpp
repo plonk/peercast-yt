@@ -1671,7 +1671,10 @@ void ServMgr::loadTokenList()
             cookies.push_back(cookie);
         }
 
+        // This shouldn't be needed ...
+        auto neverExpire = this->cookieList.neverExpire;
         this->cookieList.init();
+        this->cookieList.neverExpire = neverExpire;
         for (auto& cookie : cookies)
         {
             this->cookieList.add(cookie);
