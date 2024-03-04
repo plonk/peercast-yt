@@ -525,8 +525,8 @@ void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::f
             stream.writeLine(amf0::format(channels[0]->getState()));
         }
     } else if (positionals.size() >= 1 && positionals[0] == "fetch") {
-        // chan fetch "pipe:ffmpeg ... -f flv -" --name="NAME" --genre=="GENRE"\
-        //      --bitrate --type=FLV --ipv=4|6
+        // chan fetch "pipe:ffmpeg ... -f flv -" --name="NAME"
+        //            --genre=="GENRE" --bitrate --type=FLV --ipv=4|6
 
         if (positionals.size() != 2) {
             stream.writeLine("Error: chan-fetch only needs one argument.");
