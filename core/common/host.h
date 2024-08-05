@@ -22,6 +22,7 @@
 #include "common.h"
 #include "ip.h"
 #include <string>
+#include <cstdint>
 
 class String;
 
@@ -35,7 +36,7 @@ public:
     {
         port = p;
     }
-    Host(const std::string& hostname, uint16_t port)
+    Host(const std::string& hostname, std::uint16_t port)
     {
         fromStrName(hostname.c_str(), port);
     }
@@ -132,7 +133,7 @@ public:
     // should go to IP
     bool    isLocalhost();
 
-    static Host fromString(const std::string& str, uint16_t defaultPort = 0);
+    static Host fromString(const std::string& str, std::uint16_t defaultPort = 0);
     IP              ip;
     unsigned short  port;
 };
