@@ -749,7 +749,7 @@ void Commands::nslookup(Stream& stream, const std::vector<std::string>& argv, st
 #include "atom.h"
 #include "pcp.h"
 #include "servmgr.h" //DEFAULT_PORT
-void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::function<bool()> cancel)
+void Commands::helo(Stream& stream, const std::vector<std::string>& argv, std::function<bool()> cancel)
 {
     std::map<std::string, std::string> options;
     std::vector<std::string> positionals;
@@ -757,8 +757,8 @@ void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::f
 
     if (positionals.size() != 1 || options.count("--help"))
     {
-        stdout.writeLine("Usage: helo [-v] HOST");
-        stdout.writeLine("Perform a PCP handshake with HOST.");
+        stream.writeLine("Usage: helo [-v] HOST");
+        stream.writeLine("Perform a PCP handshake with HOST.");
         return;
     }
     const auto target = positionals[0];
@@ -768,16 +768,16 @@ void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::f
         AUX_LOG_FUNC_VECTOR->push_back([&](LogBuffer::TYPE type, const char* msg) -> void
                                       {
                                           if (type == LogBuffer::T_ERROR)
-                                              stdout.writeString("Error: ");
+                                              stream.writeString("Error: ");
                                           else if (type == LogBuffer::T_WARN)
-                                              stdout.writeString("Warning: ");
-                                          stdout.writeLine(msg);
+                                              stream.writeString("Warning: ");
+                                          stream.writeLine(msg);
                                       });
         Defer defer([]() { AUX_LOG_FUNC_VECTOR->pop_back(); });
 
         Host host = Host::fromString(target, DEFAULT_PORT);
 
-        stdout.writeLineF("HELO %s", host.str().c_str());
+        stream.writeLineF("HELO %s", host.str().c_str());
 
         auto sock = sys->createSocket();
         sock->setReadTimeout(30000);
@@ -787,15 +787,15 @@ void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::f
         CopyingStream cs(sock.get());
         Defer defer2([&]() {
                          if (options.count("-v")) {
-                             stdout.writeLineF("--- %d bytes written", (int)cs.dataWritten.size());
+                             stream.writeLineF("--- %d bytes written", (int)cs.dataWritten.size());
                              if (cs.dataWritten.size()) {
-                                 stdout.writeLine(str::ascii_dump(cs.dataWritten));
-                                 stdout.writeLine(str::hexdump(cs.dataWritten));
+                                 stream.writeLine(str::ascii_dump(cs.dataWritten));
+                                 stream.writeLine(str::hexdump(cs.dataWritten));
                              }
-                             stdout.writeLineF("--- %d bytes read", (int)cs.dataRead.size());
+                             stream.writeLineF("--- %d bytes read", (int)cs.dataRead.size());
                              if (cs.dataRead.size()) {
-                                 stdout.writeLine(str::ascii_dump(cs.dataRead));
-                                 stdout.writeLine(str::hexdump(cs.dataRead));
+                                 stream.writeLine(str::ascii_dump(cs.dataRead));
+                                 stream.writeLine(str::hexdump(cs.dataRead));
                              }
                          }
                      });
@@ -816,14 +816,14 @@ void Commands::helo(Stream& stdout, const std::vector<std::string>& argv, std::f
                                       remoteID,
                                       agent,
                                       false /* isTrusted */);
-        stdout.writeLineF("Remote ID: %s", remoteID.str().c_str());
-        stdout.writeLineF("Remote agent: %s", agent.c_str());
+        stream.writeLineF("Remote ID: %s", remoteID.str().c_str());
+        stream.writeLineF("Remote agent: %s", agent.c_str());
 
         atom.writeInt(PCP_QUIT, PCP_ERROR_QUIT);
 
         sock->close();
     } catch(GeneralException& e) {
-        stdout.writeLineF("Error: %s", e.what());
+        stream.writeLineF("Error: %s", e.what());
     }
 }
 
