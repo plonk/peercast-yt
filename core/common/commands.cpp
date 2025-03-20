@@ -481,7 +481,7 @@ void Commands::chan(Stream& stream, const std::vector<std::string>& argv, std::f
             }
         } else {
             auto it = channels[0];
-            std::lock_guard<std::recursive_mutex>(it->lock);
+            auto _lock = std::lock_guard<std::recursive_mutex>(it->lock);
 
             if (it->type != Channel::T_BROADCAST) {
                 stream.writeLineF("Error: %s is not a broadcasting channel.", it->getID().str().c_str());
