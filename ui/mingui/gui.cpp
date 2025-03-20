@@ -362,8 +362,6 @@ LRESULT CALLBACK GUIProc (HWND hwnd, UINT message,
         case IDC_CHECK2:		// start outgoing
 
             if (getButtonState(IDC_CHECK2)) {
-
-                SendDlgItemMessage(hwnd, IDC_COMBO1, WM_GETTEXT, 128, (LPARAM)servMgr->connectHost);
                 servMgr->autoConnect = true;
                 //SendDlgItemMessage(hwnd, IDC_CHECK2, WM_SETTEXT, 0, (LPARAM)"Disconnect");
                 enableControl(IDC_COMBO1, false);
