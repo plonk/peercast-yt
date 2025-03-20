@@ -186,7 +186,7 @@ endif() # if(NOT WIN32)
 # Project: peercast(win32)
 ################################################################################
 if(WIN32)
-  add_executable(win-bin ui/mingui/Simple.cpp ui/mingui/gui.cpp)
+  add_executable(win-bin WIN32 ui/mingui/Simple.cpp ui/mingui/gui.cpp)
   SET_TARGET_PROPERTIES(win-bin PROPERTIES OUTPUT_NAME peercast)
   target_link_libraries(win-bin core)
 
