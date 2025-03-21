@@ -21,6 +21,15 @@ cmake_minimum_required(VERSION 3.18)
 project(peercast-yt CXX)
 set(CMAKE_CXX_STANDARD, 11) # 標準の言語仕様をC++11にする
 
+# package化する際のバージョンを設定
+set(CPACK_PACKAGE_VERSION_MAJOR "50")
+set(CPACK_PACKAGE_VERSION_MINOR "")
+set(CPACK_PACKAGE_VERSION_PATCH "")
+
+# Debianパッケージを作成する際に利用される
+set(CPACK_PACKAGE_CONTACT "yoteichi@example.com")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Yoteichi")
+
 if(NOT WIN32)
   # install()で利用する
   include(GNUInstallDirs)
@@ -186,13 +195,47 @@ endif() # if(NOT WIN32)
 # Project: peercast(win32)
 ################################################################################
 if(WIN32)
-  add_executable(win-bin ui/mingui/Simple.cpp ui/mingui/gui.cpp)
+  add_executable(win-bin WIN32 ui/mingui/Simple.cpp ui/mingui/gui.cpp)
   SET_TARGET_PROPERTIES(win-bin PROPERTIES OUTPUT_NAME peercast)
   target_link_libraries(win-bin core)
 
   target_sources(win-bin PRIVATE
     ui/mingui/Simple.rc
   )
+
+################################################################################
+# Windows(MSYS64)用 Install
+################################################################################
+  install(TARGETS win-bin rtmp-server
+           DESTINATION /
+  )
+  install(DIRECTORY
+            "${PROJECT_SOURCE_DIR}/ui/assets"
+            "${PROJECT_SOURCE_DIR}/ui/html"
+            "${PROJECT_SOURCE_DIR}/ui/public"
+         # NOTE: ${CMAKE_INSTALL_PREFIX}/share/peercast以下に保存される
+          DESTINATION /
+  )
+  install(DIRECTORY
+            "${PROJECT_SOURCE_DIR}/ui/cgi-bin"
+          DESTINATION /
+          PATTERN "*.cgi"
+          PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+                      GROUP_EXECUTE             GROUP_READ
+                                                WORLD_READ
+  )
+  # REVIEW: cgi-bin/bbs_reader.pyは実行属性は必要ないか？
+  install(DIRECTORY
+            "${PROJECT_SOURCE_DIR}/licenses"
+          DESTINATION /
+  )
+
+################################################################################
+# Windows(MSYS64)用 Packaging
+# peercast-yt[PEERCAST_YT_VERSION]-[CMAKE_CXX_PLATFORM_ID]-win64.zip
+################################################################################
+  set(CPACK_GENERATOR "ZIP")
+  include(CPack) # Install定義からArchiveを自動で作る
 endif() # if(NOT WIN32)
 
 
