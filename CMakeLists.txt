@@ -21,6 +21,15 @@ cmake_minimum_required(VERSION 3.18)
 project(peercast-yt CXX)
 set(CMAKE_CXX_STANDARD, 11) # 標準の言語仕様をC++11にする
 
+# package化する際のバージョンを設定
+set(CPACK_PACKAGE_VERSION_MAJOR "50")
+set(CPACK_PACKAGE_VERSION_MINOR "")
+set(CPACK_PACKAGE_VERSION_PATCH "")
+
+# Debianパッケージを作成する際に利用される
+set(CPACK_PACKAGE_CONTACT "yoteichi@example.com")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Yoteichi")
+
 if(NOT WIN32)
   # install()で利用する
   include(GNUInstallDirs)
