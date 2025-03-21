@@ -503,7 +503,7 @@ void Servent::handshakeGET(HTTP &http)
                         {"Content-Type", "text/plain; charset=utf-8"},
                         {"Connection", "close"},
                     });
-                auto& stdout = http;
+                auto& stdoutVar = http;
 #else
                 // Use HTTP/1.1 with chunked encoding.
                 http.writeResponseStatus("HTTP/1.1" /* important */, 200);
@@ -514,11 +514,11 @@ void Servent::handshakeGET(HTTP &http)
                         {"Connection", "close"},
                     });
 
-                Chunker stdout(http);
+                Chunker stdoutVar(http);
                 Defer defer([&]() {
                                 try {
                                     // Finalize the stream by sending the end-of-stream marker.
-                                    stdout.close();
+                                    stdoutVar.close();
                                 } catch (GeneralException&) {
                                     // We don't want to throw here if the underlying socket is closed.
                                 }
@@ -527,7 +527,7 @@ void Servent::handshakeGET(HTTP &http)
 
                 try {
                     auto cancellationRequested = [&]() -> bool { return !(thread.active() && sock->active()); };
-                    Commands::system(stdout, q, cancellationRequested);
+                    Commands::system(stdoutVar, q, cancellationRequested);
                 } catch (GeneralException& e)
                 {
                     LOG_ERROR("Error: cmd '%s': %s", query.get("q").c_str(), e.msg);
